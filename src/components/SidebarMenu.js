@@ -10,6 +10,9 @@ import GroupIcon from "@mui/icons-material/Group";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
+import SecurityIcon from '@mui/icons-material/Security';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Collapse from "@mui/material/Collapse";
 
 export default function SwipeableTemporaryDrawer() {
@@ -66,7 +69,7 @@ export default function SwipeableTemporaryDrawer() {
             <ListItem disablePadding>
               <ListItemButton component={Link} to={"/nueva-consulta"}>
                 <ListItemIcon>
-                  <PersonSearchIcon className="mr-2" />
+                  <ContentPasteSearchIcon className="mr-2" />
                   Nueva Consulta
                 </ListItemIcon>
                 <ListItemText />
@@ -77,7 +80,7 @@ export default function SwipeableTemporaryDrawer() {
             <ListItem disablePadding>
               <ListItemButton component={Link} to={"/proteccion-datos"}>
                 <ListItemIcon>
-                  <PersonSearchIcon className="mr-2" />
+                  <SecurityIcon className="mr-2" />
                   Protección de Datos
                 </ListItemIcon>
                 <ListItemText />
@@ -95,15 +98,13 @@ export default function SwipeableTemporaryDrawer() {
             </ListItem>
             <Collapse in={openGestor} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
-                <ListItemButton component={Link} to={"/gestor"}>
-                  <ListItemText inset primary="Opción 1" />
-                </ListItemButton>
-                <ListItemButton component={Link} to={"/gestor/option2"}>
-                  <ListItemText inset primary="Opción 2" />
-                </ListItemButton>
-                <ListItemButton component={Link} to={"/gestor/option3"}>
-                  <ListItemText inset primary="Opción 3" />
-                </ListItemButton>
+                <ListItemButton component={Link} to={"/gestor"}> 
+                  <ListItemIcon>
+                    <ManageAccountsIcon className="mr-2" /> 
+                  </ListItemIcon>              
+                  <ListItemText inset primary="Gestor"
+                  />
+                </ListItemButton>                             
               </List>
             </Collapse>
           </List>
