@@ -1,0 +1,37 @@
+  
+  .menuBar {
+    width: 250px; /* Ancho del menú lateral */
+    background: #333;
+    color: white;
+    transition: transform 0.3s ease;
+  }
+  
+  .menuBar.open {
+    transform: translateX(0);
+  }
+  
+  .menuBar.closed {
+    transform: translateX(-100%);
+  }
+  
+  .toggleButton {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 1000; /* Asegúrate de que el botón esté encima del contenido */
+  }
+  
+  .mainWithMenu {
+    margin-left: 250px; /* Ajusta el margen izquierdo para el menú */
+    transition: margin-left 0.3s ease;
+  }
+  
+  .mainWithoutMenu {
+    margin-left: 0;
+  }
+  

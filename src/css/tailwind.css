@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .select-style {
+    @apply uppercase bg-white border border-gray-300 focus:outline-none focus:border-gray-500 
+    rounded-md py-2 px-4 w-full sm:py-1 sm:px-2 text-gray-500 font-semibold text-xs hover:border-gray-500 ;
+  }
+  .label-style {
+    @apply block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2 ;
+  }
+  body {
+    @apply bg-gray-100;
+  }
+  .inputCode {
+    @apply uppercase text-center font-semibold w-10 h-10 rounded border border-gray-300 shadow-sm focus:outline-none focus:border-morado;
+    ;
+  }
+}
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}

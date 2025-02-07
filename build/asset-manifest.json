@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/static/css/main.01e87f62.css",
+    "main.js": "/static/js/main.91d78fe8.js",
+    "static/js/453.f7380716.chunk.js": "/static/js/453.f7380716.chunk.js",
+    "static/media/notFound.png": "/static/media/notFound.056408d37323a30af33e.png",
+    "static/media/manoRegistro.png": "/static/media/manoRegistro.21e000eee2b05eadb3a7.png",
+    "index.html": "/index.html",
+    "main.01e87f62.css.map": "/static/css/main.01e87f62.css.map",
+    "main.91d78fe8.js.map": "/static/js/main.91d78fe8.js.map",
+    "453.f7380716.chunk.js.map": "/static/js/453.f7380716.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.01e87f62.css",
+    "static/js/main.91d78fe8.js"
+  ]
+}
