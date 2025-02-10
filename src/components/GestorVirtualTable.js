@@ -3,12 +3,15 @@ import axios from 'axios';
 import { APIURL } from '../configApi/apiConfig';  // Suponiendo que tienes tu configuración para la API
 import IconCard from './IconCard';
 import { GestorTelefonico } from './GestorVirtual';  // Suponiendo que tienes un componente GestorTelefonico
+
+import LogoutIcon from '@mui/icons-material/Logout';
 const GestorVirtualTable = () => {
   const [search, setSearch] = useState('');  // Estado de búsqueda
   const [comboBox1, setComboBox1] = useState('');  // Estado para ComboBox 1 (Estrategia)
   const [comboBox2, setComboBox2] = useState('');  // Estado para ComboBox 2 (Gestor)
   const [gestoresEstrategias, setGestoresEstrategias] = useState([]);  // Datos de la primera API (estrategias)
   const [gestores, setGestores] = useState([]);  // Datos de la segunda API (gestores)
+  const [bodega, setBodega] = useState([]);  // Datos de la tercera API (bodega)
   const [cboGestorCobranzas, setCboGestorCobranzas] = useState([]);  // Datos de la API para llenar la tabla
   const [loading, setLoading] = useState(false);  // Estado de carga
   const [showModal, setShowModal] = useState(false);  // Estado para mostrar el modal
@@ -56,6 +59,25 @@ const GestorVirtualTable = () => {
     }
   };
 
+  const fetchBodega = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(APIURL.BodegaGet(), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      console.log("bodega", response.data.data);
+      setBodega(response.data.data);
+    } catch (error) {
+      console.error("Error fetching gestores:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const openModal = (item) => {
     setSelectedItem(item);
     setShowModal(true);
@@ -70,7 +92,7 @@ const GestorVirtualTable = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const url = `http://192.168.2.167:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&idCbo_Gestores_Estrategia=${comboBox1}&page=${page}&limit=${limit}`;
+      const url = `http://192.168.2.167:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -90,6 +112,7 @@ const GestorVirtualTable = () => {
   useEffect(() => {
     fetchGestoresEstrategias();
     fetchGestores();
+    fetchBodega();
     fetchGestorCobranzas(currentPage, itemsPerPage);
   }, []); // Se llama una vez al montar el componente
 
@@ -107,7 +130,7 @@ const GestorVirtualTable = () => {
   const filteredData = cboGestorCobranzas.filter(item => {
     return (
       (item.Cliente.toLowerCase().includes(search.toLowerCase()) || item.Cedula.toLowerCase().includes(search.toLowerCase())) &&
-      (comboBox1 ? item.idCbo_Gestores_Estrategia === parseInt(comboBox1) : true) &&
+      (comboBox1 ? item.Bodega === parseInt(comboBox1) : true) &&
       (comboBox2 ? item.idCbo_Gestores === parseInt(comboBox2) : true)
     );
   });
@@ -148,10 +171,10 @@ const GestorVirtualTable = () => {
           className="px-4 py-2 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={loading}
         >
-          <option value="">Seleccionar Estrategia</option>
-          {gestoresEstrategias.map((item) => (
-            <option key={item.idCbo_Gestores_Estrategia} value={item.idCbo_Gestores_Estrategia}>
-              {item.Estrategia}
+          <option value="">Seleccionar Bodega</option>
+          {bodega.map((item) => (
+            <option key={item.Bodega} value={item.Bodega}>
+              {item.Nombre}
             </option>
           ))}
         </select>
@@ -183,7 +206,7 @@ const GestorVirtualTable = () => {
                 <th className="px-4 py-3 border-b text-left hidden">idCbo_Gestor_Cobranzas</th>
                 <th className="px-4 py-3 border-b text-left hidden">idCompra</th>
                 <th className="px-4 py-3 border-b text-left">Agente</th>
-                <th className="px-4 py-3 border-b text-left">Estrategia</th>
+                <th className="px-4 py-3 border-b text-left">Bodega</th>
                 <th className="px-4 py-3 border-b text-left hidden">idGestor</th>
                 <th className="px-4 py-3 border-b text-left">Cedula</th>
                 <th className="px-4 py-3 border-b text-left">Cliente</th>
@@ -212,14 +235,14 @@ const GestorVirtualTable = () => {
                 >
                   {/* Ocultamos las dos primeras celdas */}
                   <td className="px-4 py-3 ">
-                    <button onClick={()=>openModal(item)} className="w-[100px] bg-black h-[30px] my-3 flex items-center justify-center rounded-xl cursor-pointer relative overflow-hidden transition-all duration-500 ease-in-out shadow-md hover:scale-105 hover:shadow-lg before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-[#009b49] before:to-[rgb(105,184,141)] before:transition-all before:duration-500 before:ease-in-out before:z-[-1] before:rounded-xl hover:before:left-0 text-[#fff]">
+                    <button onClick={() => openModal(item)} className="w-[100px] bg-black h-[30px] my-3 flex items-center justify-center rounded-xl cursor-pointer relative overflow-hidden transition-all duration-500 ease-in-out shadow-md hover:scale-105 hover:shadow-lg before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-[#009b49] before:to-[rgb(105,184,141)] before:transition-all before:duration-500 before:ease-in-out before:z-[-1] before:rounded-xl hover:before:left-0 text-[#fff]">
                       IR
                     </button>
                   </td>
                   <td className="px-4 py-3 hidden">{item.idCbo_Gestor_Cobranzas}</td>
                   <td className="px-4 py-3 hidden">{item.idCompra}</td>
                   <td className="px-4 py-3">{gestores.find(gestor => gestor.idCbo_Gestores === item.idCbo_Gestores)?.Gestor || 'Sin Gestor'}</td>
-                  <td className="px-4 py-3">{gestoresEstrategias.find(estrategia => estrategia.idCbo_Gestores_Estrategia === item.idCbo_Gestores_Estrategia)?.Estrategia || 'Sin Estrategia'}</td>
+                  <td className="px-4 py-3">{bodega.find(bodega => bodega.Bodega === item.Bodega)?.Nombre || 'Sin Estrategia'}</td>
                   <td className="px-4 py-3 hidden">{item.idGestor}</td>
                   <td className="px-4 py-3">{item.Cedula}</td>
                   <td className="px-4 py-3">{item.Cliente}</td>
@@ -280,14 +303,14 @@ const GestorVirtualTable = () => {
         </select>
       </div>
       {showModal && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-lg shadow-lg">
-            <GestorTelefonico item={selectedItem} onClose={closeModal} />
-          </div>
-        </div>
+         <GestorTelefonico selectedItem={selectedItem} closeModal={closeModal} />
       )}
     </div>
   );
 };
 
 export default GestorVirtualTable;
+
+/* From Uiverse.io by Jules-gitclerc */
+
+

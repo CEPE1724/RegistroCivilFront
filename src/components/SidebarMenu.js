@@ -14,7 +14,6 @@ import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import SecurityIcon from '@mui/icons-material/Security';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Collapse from "@mui/material/Collapse";
-
 export default function SwipeableTemporaryDrawer() {
   const [open, setOpen] = React.useState(false);
   const [openGestor, setOpenGestor] = React.useState(false); // Controlar submenú Gestor

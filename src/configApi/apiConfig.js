@@ -9,5 +9,6 @@ export const APIURL = {
     cbo_gestores_estrategias : () =>`${API_BASE_URL}cbo-gestores-estrategia`,
     Cbo_Gestores : () =>`${API_BASE_URL}Cbo_Gestores`,
     Cbo_gestor_cobranzas : () =>`${API_BASE_URL}cbo-gestor-cobranzas`,
+    BodegaGet : () =>`${API_BASE_URL}bodega`,
    
 };
