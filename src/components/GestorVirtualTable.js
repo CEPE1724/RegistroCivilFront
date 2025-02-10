@@ -92,7 +92,7 @@ const GestorVirtualTable = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const url = `http://192.168.2.167:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
+      const url = `http://192.168.2.246:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
