@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import SaveIcon from '@mui/icons-material/Save';
 import { useSnackbar } from "notistack";
@@ -6,74 +6,93 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import HomeIcon from '@mui/icons-material/Home';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import WalletIcon from '@mui/icons-material/Wallet';
+import axios from 'axios';
+import { APIURL } from '../../../configApi/apiConfig';
+const FIELD_NAMES = {
+    dato: 'Dato',
+    tipoContacto: 'Tipo Contacto',
+    descripcion: 'Descripción',
+    fechaPago: 'Fecha Pago',
+    valor: 'Valor',
+};
 
 export function GestorTelefonico({ selectedItem, closeModal }) {
-
     const [showFields, setShowFields] = useState(false);
-    const [errorFields, setErrorFields] = useState({ dato: false, tipoContacto: false, descripcion: false, fechaPago: false, valor: false });
+    const [errorFields, setErrorFields] = useState({});
     const { enqueueSnackbar } = useSnackbar();
+    const [loading, setLoading] = useState(false);  // Estado de carga
+    const [dato, setDato] = useState([]); // Estado de datos
+    const [tipoContacto, setTipoContacto] = useState([]); // Estado de datos
+    const [selectedDatos, setSelectedDatos] = useState(null); // Estado de datos
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
 
-    const cantCaracteres = (e) => {
-        e.preventDefault();
+    useEffect(() => {
+        fetchDato();
+    }, []); // Se llama una vez al montar el componente
 
-        const dato = document.getElementById('dato') ? document.getElementById('dato').value : '';
-        const tipoContacto = document.getElementById('tipoContacto') ? document.getElementById('tipoContacto').value : '';
-        const descripcion = document.getElementById('descripcion') ? document.getElementById('descripcion').value : '';
-        const fechaPago = document.getElementById('fechapago') ? document.getElementById('fechapago').value : '';
-        const valor = document.getElementById('valor') ? document.getElementById('valor').value : '';
-
-        // Verificar si algún campo no está seleccionado
-        let errorFound = false;
-        let newErrorFields = { dato: false, tipoContacto: false, descripcion: false, fechaPago: false, valor: false };
-
-        if (!dato) {
-            newErrorFields.dato = true;
-            errorFound = true;
+    const fetchDato = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(APIURL.SelectDato(), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            setDato(response.data.data);
+        } catch (error) {
+            console.error("Error fetching gestores:", error);
+        } finally {
+            setLoading(false);
         }
-        if (!tipoContacto) {
-            newErrorFields.tipoContacto = true;
-            errorFound = true;
-        }
-        if (!descripcion) {
-            newErrorFields.descripcion = true;
-            errorFound = true;
-        }
-
-        //verificar Fecha Pago y Valor
-        if (descripcion === "opcion 9") {
-            if (!fechaPago) {
-                newErrorFields.fechaPago = true;
-                errorFound = true;
-            }
-            if (!valor) {
-                newErrorFields.valor = true;
-                errorFound = true;
-            }
-        }
-
-        setErrorFields(newErrorFields);
-
-        //mensaje de error
-        if (errorFound) {
-            let missingField = '';
-            if (newErrorFields.dato) missingField = 'Dato';
-            if (newErrorFields.tipoContacto) missingField = 'Tipo Contacto';
-            if (newErrorFields.descripcion) missingField = 'Descripcion';
-            if (newErrorFields.fechaPago) missingField = 'Fecha Pago';
-            if (newErrorFields.valor) missingField = 'Valor';
-
-            enqueueSnackbar(`Seleccione una opción en ${missingField}`, { variant: "error" });
-            return;
-        }
-
-        enqueueSnackbar("Datos Validados", { variant: "success" });
     };
 
-    const handleDescripcion = (e) => {
-        if (e.target.value === "opcion 9") {
-            setShowFields(true);  // Mostrar si se selecciona opcion 9
+    const fetchTipoContacto = async (id) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(APIURL.SelectTipoContacto(), {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                params: {
+                    idCbo_EstadoGestion: id
+                }
+            });
+            console.log(response.data.data);
+            const tipoContactoData = Array.isArray(response.data.data)
+            ? response.data.data
+            : response.data.data ? [response.data.data] : [];  // Convertir a array si es un objeto
+    
+            setTipoContacto(tipoContactoData);
+        } catch (error) {
+            console.error("Error fetching gestores:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Manejar el cambio de selección en el primer combo
+    const handleDatoChange = (e) => {
+        const selectedValue = e.target.value;
+        setSelectedDatos(selectedValue);
+        if (selectedValue) {
+            console.log(selectedValue);
+            fetchTipoContacto(selectedValue); // Llamar a la API para llenar el segundo combo cuando se selecciona una opción
         } else {
-            setShowFields(false);  //Ocultar campos
+            setTipoContacto([]); // Limpiar el segundo combo si no se ha seleccionado nada en el primero
+        }
+    };
+    const handleInputChange = (e) => {
+        if (e.target.value === "opcion 9") {
+            setShowFields(true);
+        } else {
+            setShowFields(false);
         }
     };
 
@@ -81,101 +100,181 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
         const fechaPago = document.getElementById('fechapago').value;
         if (fechaPago && fechaPago < minDate) {
             enqueueSnackbar("No se puede seleccionar esta fecha", { variant: "error" });
-            document.getElementById('fechapago').value = ''; 
+            document.getElementById('fechapago').value = '';
         }
     };
 
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const minDate = tomorrow.toISOString().split('T')[0];
+    const validateFields = () => {
+        const fields = {
+            dato: document.getElementById('dato')?.value,
+            tipoContacto: document.getElementById('tipoContacto')?.value,
+            descripcion: document.getElementById('descripcion')?.value,
+            fechaPago: document.getElementById('fechapago')?.value,
+            valor: document.getElementById('valor')?.value,
+        };
+
+        let errors = {};
+        let isErrorFound = false;
+
+        Object.keys(fields).forEach((field) => {
+            if (!fields[field] && field !== "fechaPago" && field !== "valor") {
+                errors[field] = true;
+                isErrorFound = true;
+            }
+        });
+
+        if (fields.descripcion === "opcion 9" && (!fields.fechaPago || !fields.valor)) {
+            if (!fields.fechaPago) errors.fechaPago = true;
+            if (!fields.valor) errors.valor = true;
+            isErrorFound = true;
+        }
+
+        setErrorFields(errors);
+
+        if (isErrorFound) {
+            const missingField = Object.keys(errors)[0];
+            enqueueSnackbar(`Seleccione una opción en ${FIELD_NAMES[missingField]}`, { variant: "error" });
+        }
+
+        return !isErrorFound;
+    };
+
+    const handleSubmit = (e) => {
+        const observacion = document.getElementById('observacion').value;
+
+        if (observacion.length < 10) {
+            enqueueSnackbar("Su observación debe tener al menos 10 caracteres", { variant: "error" });
+            return;
+        }
+
+        if (validateFields()) {
+            enqueueSnackbar("Datos Validados", { variant: "success" });
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-1/2">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
                 <h2 className="text-xl font-semibold">Detalles del Gestor</h2>
-                <div className="mt-4 text-blue-950 grid grid-cols-2 gap-4 text-sm">
+                <div className="mt-2 text-blue-950 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 text-sm">
                     <p><strong><AccountCircleIcon /> Cliente:</strong> {selectedItem.Cliente}</p>
-                    <p><strong><HomeIcon /> Direccion:</strong> {selectedItem.Direccion}</p>
-                    <p><strong><FingerprintIcon /> Cedula:</strong> {selectedItem.Cedula}</p>
+                    <p><strong><HomeIcon /> Dirección:</strong> {selectedItem.Direccion}</p>
+                    <p><strong><FingerprintIcon /> Cédula:</strong> {selectedItem.Cedula}</p>
                     <p><strong><WalletIcon /> Cartera:</strong> {selectedItem.Cartera}</p>
-
-                    <div>
-                        <label htmlFor="dato" className={`block font-semibold ${errorFields.dato ? 'text-red-500' : ''}`}>
-                            Dato {errorFields.dato && <span className="text-red-500">*</span>}
+                    <div className="sm:col-span-2">
+                        <label htmlFor="dato" className="block font-semibold">
+                            Dato
                         </label>
-                        <select id="dato" name="dato" className="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <select
+                            id="dato"
+                            name="dato"
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            onChange={handleDatoChange}
+                            value={selectedDatos}
+                        >
                             <option value="">Seleccione una opción</option>
-                            <option value="opcion1">Opción 1</option>
-                            <option value="opcion2">Opción 2</option>
-                            <option value="opcion3">Opción 3</option>
+                            {loading ? (
+                                <option value="">Cargando...</option> // Muestra un mensaje mientras carga
+                            ) : (
+                                dato.map((item) => (
+                                    <option key={item.idCbo_EstadoGestion} value={item.idCbo_EstadoGestion}>
+                                        {item.Estado}
+                                    </option>
+                                ))
+                            )}
+                        </select>
+
+                        {/* Segundo Combo (Tipo Contacto) */}
+                        <label htmlFor="tipoContacto" className="block font-semibold mt-4">
+                            Tipo de Contacto
+                        </label>
+                        <select
+                            id="tipoContacto"
+                            name="tipoContacto"
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="">Seleccione una opción</option>
+                            {loading ? (
+                                <option value="">Cargando...</option> // Muestra un mensaje mientras carga
+                            ) : (
+                                tipoContacto.map((item) => (
+                                    <option key={item.idCbo_EstadosTipocontacto} value={item.idCbo_EstadosTipocontacto}>
+                                        {item.Estado}
+                                    </option>
+                                ))
+                            )}
                         </select>
                     </div>
 
-                    <div>
-                        <label htmlFor="tipoContacto" className={`block font-semibold ${errorFields.tipoContacto ? 'text-red-500' : ''}`}>
-                            Tipo Contacto {errorFields.tipoContacto && <span className="text-red-500">*</span>}
-                        </label>
-                        <select id="tipoContacto" name="tipoContacto" className="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                            <option value="">Seleccione una opción</option>
-                            <option value="opcion 4">opcion 4</option>
-                            <option value="opcion 5">opcion 5</option>
-                            <option value="opcion 6">opcion 6</option>
-                        </select>
-                    </div>
+                    {/* Reusable Input Select */}
+                    {['dato', 'tipoContacto', 'descripcion'].map((field) => (
+                        <div key={field} className="sm:col-span-2">
+                            <label htmlFor={field} className={`block font-semibold ${errorFields[field] ? 'text-red-500' : ''}`}>
+                                {FIELD_NAMES[field]} {errorFields[field] && <span className="text-red-500">*</span>}
+                            </label>
+                            <select
+                                id={field}
+                                name={field}
+                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                                onChange={field === 'descripcion' ? handleInputChange : null}
+                            >
+                                <option value="">Seleccione una opción</option>
+                                {/* Add relevant options for each field */}
+                                <option value="opcion1">Opción 1</option>
+                                <option value="opcion2">Opción 2</option>
+                                <option value="opcion3">Opción 3</option>
+                            </select>
+                        </div>
+                    ))}
 
-                    <div>
-                        <label htmlFor="descripcion" className={`block font-semibold ${errorFields.descripcion ? 'text-red-500' : ''}`}>
-                            Descripcion {errorFields.descripcion && <span className="text-red-500">*</span>}
-                        </label>
-                        <select id="descripcion" name="descripcion" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" onChange={handleDescripcion}>
-                            <option value="">Seleccione una opción</option>
-                            <option value="opcion 7">opcion 7</option>
-                            <option value="opcion 8">opcion 8</option>
-                            <option value="opcion 9">opcion 9</option>
-                        </select>
-                    </div>
-
-                    {/* Mostrar estos campos si showFields es verdadero */}
+                    {/* Conditional Fields */}
                     {showFields && (
                         <>
-                            <div>
+                            <div className="sm:col-span-2">
                                 <label htmlFor="fechaPago" className={`block font-semibold ${errorFields.fechaPago ? 'text-red-500' : ''}`}>
                                     Fecha Pago {errorFields.fechaPago && <span className="text-red-500">*</span>}
                                 </label>
                                 <input type="date" id="fechapago" name="fechapago" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" min={minDate} onBlur={handleFechaPago} />
                             </div>
-                            <div>
+
+                            <div className="sm:col-span-2">
                                 <label htmlFor="valor" className={`block font-semibold ${errorFields.valor ? 'text-red-500' : ''}`}>
                                     Valor {errorFields.valor && <span className="text-red-500">*</span>}
                                 </label>
-                                <input type="number" id="valor" name="valor" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" min="1" onBlur={(e) => {
-                                    if (e.target.value < 1) {
-                                        enqueueSnackbar("El valor no puede ser menor a 1", { variant: "error" });
-                                        e.target.value = 1;
-                                    }
-                                }} />
+                                <input
+                                    type="number"
+                                    id="valor"
+                                    name="valor"
+                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                                    min="1"
+                                    onBlur={(e) => {
+                                        if (e.target.value < 1) {
+                                            enqueueSnackbar("El valor no puede ser menor a 1", { variant: "error" });
+                                            e.target.value = 1;
+                                        }
+                                    }}
+                                />
                             </div>
                         </>
                     )}
 
-                    <div className="col-span-2">
+                    <div className="sm:col-span-2">
                         <label htmlFor="observacion" className="block font-semibold">Observación</label>
-                        <textarea id="observacion" name="observacion" rows="4" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder='Ingresa mínimo 10 caracteres'></textarea>
+                        <textarea
+                            id="observacion"
+                            name="observacion"
+                            rows="4"
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            placeholder="Ingresa mínimo 10 caracteres"
+                        ></textarea>
                     </div>
                 </div>
 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex justify-end flex-wrap gap-2">
+                    {/* Save Button */}
                     <button
-                        onClick={(e) => {
-                            const observacion = document.getElementById('observacion').value;
-                            if (observacion.length < 10) {
-                                enqueueSnackbar("Su observación debe tener al menos 10 caracteres", { variant: "error" });
-                                return;
-                            }
-                            cantCaracteres(e);
-                        }}
-                        className="mr-4 group flex items-center justify-start w-11 h-11 bg-green-600 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-32 hover:rounded-lg active:translate-x-1 active:translate-y-1"
+                        onClick={handleSubmit}
+                        className="group flex items-center justify-start w-11 h-11 bg-green-600 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-32 hover:rounded-lg active:translate-x-1 active:translate-y-1"
                     >
                         <div className="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:px-3">
                             <SaveIcon className="text-white" />
@@ -184,6 +283,8 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                             Guardar
                         </div>
                     </button>
+
+                    {/* Close Button */}
                     <button
                         onClick={closeModal}
                         className="group flex items-center justify-start w-11 h-11 bg-red-600 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-32 hover:rounded-lg active:translate-x-1 active:translate-y-1"
@@ -200,3 +301,5 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
         </div>
     );
 }
+
+

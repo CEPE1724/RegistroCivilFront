@@ -92,7 +92,7 @@ const GestorVirtualTable = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const url = `http://192.168.2.246:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
+      const url = `http://192.168.2.167:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -154,21 +154,21 @@ const GestorVirtualTable = () => {
       <div className="mb-6 flex space-x-4">
         <IconCard />
       </div>
-      <div className="mb-6 flex space-x-4">
+      <div className="mb-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
         {/* Campo de búsqueda */}
         <input
           type="text"
           placeholder="Buscar..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         {/* ComboBox 1 - Llenado dinámico desde la API (Estrategia) */}
         <select
           value={comboBox1}
           onChange={(e) => setComboBox1(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={loading}
         >
           <option value="">Seleccionar Bodega</option>
@@ -183,7 +183,7 @@ const GestorVirtualTable = () => {
         <select
           value={comboBox2}
           onChange={(e) => setComboBox2(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-4 py-2 border border-gray-300 rounded-lg shadow-md w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={loading}
         >
           <option value="">Seleccionar Gestor</option>
@@ -194,6 +194,7 @@ const GestorVirtualTable = () => {
           ))}
         </select>
       </div>
+
 
       <div className="overflow-x-auto">
         <div className="overflow-y-auto max-h-[500px] rounded-lg shadow-lg bg-white">
@@ -271,7 +272,7 @@ const GestorVirtualTable = () => {
       </div>
 
       {/* Paginación */}
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 space-y-4 sm:space-y-0 sm:space-x-4">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -279,9 +280,11 @@ const GestorVirtualTable = () => {
         >
           Anterior
         </button>
+
         <span>
           Página {currentPage} de {totalPages}
         </span>
+
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
@@ -302,8 +305,9 @@ const GestorVirtualTable = () => {
           ))}
         </select>
       </div>
+
       {showModal && (
-         <GestorTelefonico selectedItem={selectedItem} closeModal={closeModal} />
+        <GestorTelefonico selectedItem={selectedItem} closeModal={closeModal} />
       )}
     </div>
   );
