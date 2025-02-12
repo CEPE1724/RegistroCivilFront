@@ -8,6 +8,8 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import WalletIcon from '@mui/icons-material/Wallet';
 import axios from 'axios';
 import { APIURL } from '../../../configApi/apiConfig';
+
+
 const FIELD_NAMES = {
     dato: 'Dato',
     tipoContacto: 'Tipo Contacto',
@@ -20,11 +22,13 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
     const [showFields, setShowFields] = useState(false);
     const [errorFields, setErrorFields] = useState({});
     const { enqueueSnackbar } = useSnackbar();
-    const [loading, setLoading] = useState(false);  // Estado de carga
-    const [dato, setDato] = useState([]); // Estado de datos
-    const [tipoContacto, setTipoContacto] = useState([]); // Estado de datos
-    const [selectedDatos, setSelectedDatos] = useState(null); // Estado de datos
-    const [SelectResultado, setSelectResultado] = useState([]); // Estado de datos
+    const [loading, setLoading] = useState(false);
+    const [dato, setDato] = useState([]);
+    const [tipoContacto, setTipoContacto] = useState([]);
+    const [selectResultado, setSelectResultado] = useState([]);
+    const [selectedDato, setSelectedDato] = useState(""); // Estado para el primer combo
+    const [selectedTipoContacto, setSelectedTipoContacto] = useState(""); // Estado para el segundo combo
+    const [selectedDescripcion, setSelectedDescripcion] = useState(""); // Estado para el tercer combo
 
     const today = new Date();
     const tomorrow = new Date(today);
@@ -33,7 +37,7 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
 
     useEffect(() => {
         fetchDato();
-    }, []); // Se llama una vez al montar el componente
+    }, []);
 
     const fetchDato = async () => {
         setLoading(true);
@@ -47,7 +51,7 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
             });
             setDato(response.data.data);
         } catch (error) {
-            console.error("Error fetching gestores:", error);
+            console.error("Error fetching Dato:", error);
         } finally {
             setLoading(false);
         }
@@ -66,124 +70,74 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                     idCbo_EstadoGestion: id
                 }
             });
-            console.log(response.data.data);
             const tipoContactoData = Array.isArray(response.data.data)
-            ? response.data.data
-            : response.data.data ? [response.data.data] : [];  // Convertir a array si es un objeto
-    
+                ? response.data.data
+                : response.data.data ? [response.data.data] : [];
             setTipoContacto(tipoContactoData);
         } catch (error) {
-            console.error("Error fetching gestores:", error);
+            console.error("Error fetching Tipo Contacto:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchSelectResultado = async () => {
+    const fetchSelectResultado = async (id) => {
         setLoading(true);
-        alert("")
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(APIURL.SelectTipoResultado(), {
                 headers: {
                     'Content-Type': 'application/json',
-                }, params: {
-                    idCbo_EstadosTipocontacto: selectedDatos
+                },
+                params: {
+                    idCbo_EstadosTipocontacto: id
                 }
             });
-            console.log(response.data.data);
-            //setSelectResultado(response.data.data);
+            const selectResultadoData = Array.isArray(response.data.data)
+                ? response.data.data
+                : response.data.data ? [response.data.data] : [];
+            setSelectResultado(selectResultadoData);
         } catch (error) {
-            console.error("Error fetching gestores:", error);
+            console.error("Error fetching Select Resultado:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    // Manejar el cambio de selección en el primer combo
     const handleDatoChange = (e) => {
         const selectedValue = e.target.value;
-        setSelectedDatos(selectedValue);
+        setSelectedDato(selectedValue); // Actualiza el valor del primer combo
+        setSelectedTipoContacto(""); // Limpiar el segundo combo al cambiar el primer combo
+        setSelectResultado([]); // Limpiar el tercer combo
         if (selectedValue) {
-            console.log(selectedValue);
-            fetchTipoContacto(selectedValue); // Llamar a la API para llenar el segundo combo cuando se selecciona una opción
+            fetchTipoContacto(selectedValue); // Llamar a la API para llenar el segundo combo
         } else {
-            setTipoContacto([]); // Limpiar el segundo combo si no se ha seleccionado nada en el primero
+            setTipoContacto([]); // Limpiar el segundo combo si no hay selección
         }
     };
+
     const handleTipoContactoChange = (e) => {
         const selectedValue = e.target.value;
-        setSelectResultado(selectedValue);
+        setSelectedTipoContacto(selectedValue); // Actualiza el valor del segundo combo
+        setSelectedDescripcion(""); // Limpiar el tercer combo al cambiar el segundo
+        setSelectResultado([]); // Limpiar el tercer combo
         if (selectedValue) {
-            console.log(selectedValue);
-            fetchSelectResultado(selectedValue); // Llamar a la API para llenar el segundo combo cuando se selecciona una opción
+            fetchSelectResultado(selectedValue); // Llamar a la API para llenar el tercer combo
         } else {
-            setSelectResultado([]); // Limpiar el segundo combo si no se ha seleccionado nada en el primero
-        }
-    };
-    const handleInputChange = (e) => {
-        if (e.target.value === "opcion 9") {
-            setShowFields(true);
-        } else {
-            setShowFields(false);
+            setSelectResultado([]); // Limpiar el tercer combo si no hay selección
         }
     };
 
-    const handleFechaPago = () => {
-        const fechaPago = document.getElementById('fechapago').value;
-        if (fechaPago && fechaPago < minDate) {
-            enqueueSnackbar("No se puede seleccionar esta fecha", { variant: "error" });
-            document.getElementById('fechapago').value = '';
-        }
-    };
-
-    const validateFields = () => {
-        const fields = {
-            dato: document.getElementById('dato')?.value,
-            tipoContacto: document.getElementById('tipoContacto')?.value,
-            descripcion: document.getElementById('descripcion')?.value,
-            fechaPago: document.getElementById('fechapago')?.value,
-            valor: document.getElementById('valor')?.value,
-        };
-
-        let errors = {};
-        let isErrorFound = false;
-
-        Object.keys(fields).forEach((field) => {
-            if (!fields[field] && field !== "fechaPago" && field !== "valor") {
-                errors[field] = true;
-                isErrorFound = true;
-            }
-        });
-
-        if (fields.descripcion === "opcion 9" && (!fields.fechaPago || !fields.valor)) {
-            if (!fields.fechaPago) errors.fechaPago = true;
-            if (!fields.valor) errors.valor = true;
-            isErrorFound = true;
-        }
-
-        setErrorFields(errors);
-
-        if (isErrorFound) {
-            const missingField = Object.keys(errors)[0];
-            enqueueSnackbar(`Seleccione una opción en ${FIELD_NAMES[missingField]}`, { variant: "error" });
-        }
-
-        return !isErrorFound;
+    const handleDescripcionChange = (e) => {
+        setSelectedDescripcion(e.target.value); // Actualiza el valor del tercer combo
     };
 
     const handleSubmit = (e) => {
-        const observacion = document.getElementById('observacion').value;
-
-        if (observacion.length < 10) {
-            enqueueSnackbar("Su observación debe tener al menos 10 caracteres", { variant: "error" });
-            return;
-        }
-
-        if (validateFields()) {
-            enqueueSnackbar("Datos Validados", { variant: "success" });
-        }
+        e.preventDefault();
+        enqueueSnackbar("Datos Validados", { variant: "success" });
     };
+
+  
 
     return (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -194,20 +148,19 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                     <p><strong><HomeIcon /> Dirección:</strong> {selectedItem.Direccion}</p>
                     <p><strong><FingerprintIcon /> Cédula:</strong> {selectedItem.Cedula}</p>
                     <p><strong><WalletIcon /> Cartera:</strong> {selectedItem.Cartera}</p>
+
                     <div className="sm:col-span-2">
-                        <label htmlFor="dato" className="block font-semibold">
-                            Dato
-                        </label>
+                        <label htmlFor="dato" className="block font-semibold">Dato</label>
                         <select
                             id="dato"
                             name="dato"
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                             onChange={handleDatoChange}
-                            value={selectedDatos}
+                            value={selectedDato} // Usar el estado adecuado para el primer combo
                         >
                             <option value="">Seleccione una opción</option>
                             {loading ? (
-                                <option value="">Cargando...</option> // Muestra un mensaje mientras carga
+                                <option value="">Cargando...</option>
                             ) : (
                                 dato.map((item) => (
                                     <option key={item.idCbo_EstadoGestion} value={item.idCbo_EstadoGestion}>
@@ -217,20 +170,18 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                             )}
                         </select>
 
-                        {/* Segundo Combo (Tipo Contacto) */}
-                        <label htmlFor="tipoContacto" className="block font-semibold mt-4">
-                            Tipo de Contacto
-                        </label>
+                        {/* Segundo Combo: Tipo de Contacto */}
+                        <label htmlFor="tipoContacto" className="block font-semibold mt-4">Tipo de Contacto</label>
                         <select
                             id="tipoContacto"
                             name="tipoContacto"
-                            onChange={handleTipoContactoChange}
-                            value={SelectResultado}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            onChange={handleTipoContactoChange}
+                            value={selectedTipoContacto} // Usar el estado adecuado para el segundo combo
                         >
                             <option value="">Seleccione una opción</option>
                             {loading ? (
-                                <option value="">Cargando...</option> // Muestra un mensaje mientras carga
+                                <option value="">Cargando...</option>
                             ) : (
                                 tipoContacto.map((item) => (
                                     <option key={item.idCbo_EstadosTipocontacto} value={item.idCbo_EstadosTipocontacto}>
@@ -239,20 +190,21 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                                 ))
                             )}
                         </select>
-                        {/* tercer Combo (Tipo Contacto) */}
-                        <label htmlFor="tipoContacto" className="block font-semibold mt-4">
-                            Descripcion
-                        </label>
+
+                        {/* Tercer Combo: Descripción */}
+                        <label htmlFor="tipoResultados" className="block font-semibold mt-4">Descripción</label>
                         <select
                             id="tipoResultados"
                             name="tipoResultados"
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                            value={selectedDescripcion} // Usar el estado adecuado para el tercer combo
+                            onChange={handleDescripcionChange}
                         >
                             <option value="">Seleccione una opción</option>
                             {loading ? (
-                                <option value="">Cargando...</option> // Muestra un mensaje mientras carga
+                                <option value="">Cargando...</option>
                             ) : (
-                                SelectResultado.map((item) => (
+                                selectResultado.map((item) => (
                                     <option key={item.idCbo_ResultadoGestion} value={item.idCbo_ResultadoGestion}>
                                         {item.Resultado}
                                     </option>
@@ -261,27 +213,6 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                         </select>
                     </div>
 
-                    {/* Reusable Input Select */}
-                    {['dato', 'tipoContacto', 'descripcion'].map((field) => (
-                        <div key={field} className="sm:col-span-2">
-                            <label htmlFor={field} className={`block font-semibold ${errorFields[field] ? 'text-red-500' : ''}`}>
-                                {FIELD_NAMES[field]} {errorFields[field] && <span className="text-red-500">*</span>}
-                            </label>
-                            <select
-                                id={field}
-                                name={field}
-                                className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-                                onChange={field === 'descripcion' ? handleInputChange : null}
-                            >
-                                <option value="">Seleccione una opción</option>
-                                {/* Add relevant options for each field */}
-                                <option value="opcion1">Opción 1</option>
-                                <option value="opcion2">Opción 2</option>
-                                <option value="opcion3">Opción 3</option>
-                            </select>
-                        </div>
-                    ))}
-
                     {/* Conditional Fields */}
                     {showFields && (
                         <>
@@ -289,7 +220,7 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                                 <label htmlFor="fechaPago" className={`block font-semibold ${errorFields.fechaPago ? 'text-red-500' : ''}`}>
                                     Fecha Pago {errorFields.fechaPago && <span className="text-red-500">*</span>}
                                 </label>
-                                <input type="date" id="fechapago" name="fechapago" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" min={minDate} onBlur={handleFechaPago} />
+                                <input type="date" id="fechapago" name="fechapago" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" min={minDate} />
                             </div>
 
                             <div className="sm:col-span-2">
@@ -302,12 +233,6 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                                     name="valor"
                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                                     min="1"
-                                    onBlur={(e) => {
-                                        if (e.target.value < 1) {
-                                            enqueueSnackbar("El valor no puede ser menor a 1", { variant: "error" });
-                                            e.target.value = 1;
-                                        }
-                                    }}
                                 />
                             </div>
                         </>
@@ -326,7 +251,6 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                 </div>
 
                 <div className="mt-6 flex justify-end flex-wrap gap-2">
-                    {/* Save Button */}
                     <button
                         onClick={handleSubmit}
                         className="group flex items-center justify-start w-11 h-11 bg-green-600 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-32 hover:rounded-lg active:translate-x-1 active:translate-y-1"
@@ -339,7 +263,6 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                         </div>
                     </button>
 
-                    {/* Close Button */}
                     <button
                         onClick={closeModal}
                         className="group flex items-center justify-start w-11 h-11 bg-red-600 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-32 hover:rounded-lg active:translate-x-1 active:translate-y-1"
@@ -356,5 +279,3 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
         </div>
     );
 }
-
-
