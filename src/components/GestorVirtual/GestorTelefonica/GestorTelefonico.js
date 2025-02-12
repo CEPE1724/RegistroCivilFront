@@ -24,6 +24,8 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
     const [dato, setDato] = useState([]); // Estado de datos
     const [tipoContacto, setTipoContacto] = useState([]); // Estado de datos
     const [selectedDatos, setSelectedDatos] = useState(null); // Estado de datos
+    const [SelectResultado, setSelectResultado] = useState([]); // Estado de datos
+
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -77,6 +79,27 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
         }
     };
 
+    const fetchSelectResultado = async () => {
+        setLoading(true);
+        alert("")
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(APIURL.SelectTipoResultado(), {
+                headers: {
+                    'Content-Type': 'application/json',
+                }, params: {
+                    idCbo_EstadosTipocontacto: selectedDatos
+                }
+            });
+            console.log(response.data.data);
+            //setSelectResultado(response.data.data);
+        } catch (error) {
+            console.error("Error fetching gestores:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Manejar el cambio de selección en el primer combo
     const handleDatoChange = (e) => {
         const selectedValue = e.target.value;
@@ -86,6 +109,16 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
             fetchTipoContacto(selectedValue); // Llamar a la API para llenar el segundo combo cuando se selecciona una opción
         } else {
             setTipoContacto([]); // Limpiar el segundo combo si no se ha seleccionado nada en el primero
+        }
+    };
+    const handleTipoContactoChange = (e) => {
+        const selectedValue = e.target.value;
+        setSelectResultado(selectedValue);
+        if (selectedValue) {
+            console.log(selectedValue);
+            fetchSelectResultado(selectedValue); // Llamar a la API para llenar el segundo combo cuando se selecciona una opción
+        } else {
+            setSelectResultado([]); // Limpiar el segundo combo si no se ha seleccionado nada en el primero
         }
     };
     const handleInputChange = (e) => {
@@ -191,6 +224,8 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                         <select
                             id="tipoContacto"
                             name="tipoContacto"
+                            onChange={handleTipoContactoChange}
+                            value={SelectResultado}
                             className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                         >
                             <option value="">Seleccione una opción</option>
@@ -200,6 +235,26 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                                 tipoContacto.map((item) => (
                                     <option key={item.idCbo_EstadosTipocontacto} value={item.idCbo_EstadosTipocontacto}>
                                         {item.Estado}
+                                    </option>
+                                ))
+                            )}
+                        </select>
+                        {/* tercer Combo (Tipo Contacto) */}
+                        <label htmlFor="tipoContacto" className="block font-semibold mt-4">
+                            Descripcion
+                        </label>
+                        <select
+                            id="tipoResultados"
+                            name="tipoResultados"
+                            className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                        >
+                            <option value="">Seleccione una opción</option>
+                            {loading ? (
+                                <option value="">Cargando...</option> // Muestra un mensaje mientras carga
+                            ) : (
+                                SelectResultado.map((item) => (
+                                    <option key={item.idCbo_ResultadoGestion} value={item.idCbo_ResultadoGestion}>
+                                        {item.Resultado}
                                     </option>
                                 ))
                             )}
