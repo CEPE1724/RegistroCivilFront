@@ -20,7 +20,7 @@ const FIELD_NAMES = {
 
 export function GestorTelefonico({ selectedItem, closeModal }) {
     const [showFields, setShowFields] = useState(false);
-    const [errorFields, setErrorFields] = useState({});
+    const [errorFields, setErrorFields] = useState({ dato: false, tipoContacto: false, tipoResultados: false, fechaPago: false, valor: false});
     const { enqueueSnackbar } = useSnackbar();
     const [loading, setLoading] = useState(false);
     const [dato, setDato] = useState([]);
@@ -30,6 +30,13 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
     const [selectedTipoContacto, setSelectedTipoContacto] = useState(""); // Estado para el segundo combo
     const [selectedDescripcion, setSelectedDescripcion] = useState(""); // Estado para el tercer combo
 
+    const handleFechaPago = () => {
+        const fechaPago = document.getElementById('fechapago').value;
+        if (fechaPago && fechaPago < minDate) {
+            enqueueSnackbar("Fecha de Pago no valida", { variant: "error" });
+            document.getElementById('fechapago').value = ''; 
+        }}
+
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -37,7 +44,7 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
 
     useEffect(() => {
         fetchDato();
-    }, []);
+        }, []);
 
     const fetchDato = async () => {
         setLoading(true);
@@ -130,14 +137,56 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
 
     const handleDescripcionChange = (e) => {
         setSelectedDescripcion(e.target.value); // Actualiza el valor del tercer combo
+        if (e.target.value == 39 || e.target.value == 54 || e.target.value == 69) {
+            setShowFields(true); // Mostrar los campos condicionales si el valor es 1
+        } else {
+            setShowFields(false); // Ocultar los campos condicionales si el valor no es 1
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        enqueueSnackbar("Datos Validados", { variant: "success" });
-    };
 
-  
+        const dato = document.getElementById('dato') ? document.getElementById('dato').value : '';
+        const tipoContacto = document.getElementById('tipoContacto') ? document.getElementById('tipoContacto').value : '';
+        const descripcion = document.getElementById('tipoResultados') ? document.getElementById('tipoResultados').value : '';
+        const valor = document.getElementById('valor') ? document.getElementById('valor').value : '';
+        const observacion = document.getElementById('observacion').value;
+        const fechaPago = document.getElementById('fechapago') ? document.getElementById('fechapago').value : '';
+
+        //alertas modal
+        if(!dato) {
+            enqueueSnackbar("Seleccione los Datos ", { variant: "error" });
+            return;
+        }
+        if(!tipoContacto) {
+            enqueueSnackbar("Seleccione el Tipo Contacto", { variant: "error" });
+            return
+        }
+        if(!descripcion) {
+            enqueueSnackbar("Seleccione la Descripción", { variant: "error" });
+            return;
+        } 
+        if (observacion.length < 10) {
+            enqueueSnackbar("Ingresa mínimo 10 caracteres", { variant: "error" });
+            return;
+        }
+          
+        if (showFields){
+            if(!fechaPago) {
+                enqueueSnackbar("Seleccione la Fecha Pago", { variant: "error" });
+                return;
+            }
+            if(!valor) {
+                enqueueSnackbar("Seleccione el Valor Pago", { variant: "error" });
+                return;
+            }
+        }
+
+        // Si todas las validaciones estan bien
+        enqueueSnackbar("Formulario guardado exitosamente", { variant: "success" });  
+        closeModal();
+    };
 
     return (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
@@ -208,9 +257,11 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                                     <option key={item.idCbo_ResultadoGestion} value={item.idCbo_ResultadoGestion}>
                                         {item.Resultado}
                                     </option>
-                                ))
-                            )}
-                        </select>
+                                    
+                                )
+                           )
+                            )}                          
+                        </select>                        
                     </div>
 
                     {/* Conditional Fields */}
@@ -218,21 +269,25 @@ export function GestorTelefonico({ selectedItem, closeModal }) {
                         <>
                             <div className="sm:col-span-2">
                                 <label htmlFor="fechaPago" className={`block font-semibold ${errorFields.fechaPago ? 'text-red-500' : ''}`}>
-                                    Fecha Pago {errorFields.fechaPago && <span className="text-red-500">*</span>}
-                                </label>
-                                <input type="date" id="fechapago" name="fechapago" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" min={minDate} />
+                                    Fecha Pago</label>
+                                <input type="date" id="fechapago" name="fechapago" className="mt-1 block w-full p-2 border border-gray-300 rounded-md" min={minDate} onBlur={handleFechaPago} />
                             </div>
 
                             <div className="sm:col-span-2">
                                 <label htmlFor="valor" className={`block font-semibold ${errorFields.valor ? 'text-red-500' : ''}`}>
-                                    Valor {errorFields.valor && <span className="text-red-500">*</span>}
-                                </label>
+                                    Valor</label>
                                 <input
                                     type="number"
                                     id="valor"
                                     name="valor"
                                     className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
                                     min="1"
+                                    onBlur={(e) => {
+                                        if (e.target.value < 1) {
+                                            enqueueSnackbar("El valor no puede ser menor a 1", { variant: "error" });
+                                            e.target.value = 1;
+                                        }
+                                    }}
                                 />
                             </div>
                         </>
