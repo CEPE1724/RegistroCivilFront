@@ -11,6 +11,7 @@ import Ciudadanos from "./pages/Ciudadanos";
 import TimerOffIcon from "@mui/icons-material/TimerOff";
 import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
+import Documento1 from "./pages/Documento1";
 /* Angel crea la ruta aqui*/
 /* Daniel crea la ruta aqui*/
 /* Kevin crea la ruta aqui*/
@@ -137,8 +138,8 @@ function App() {
           path="/documental"
           element={
             <PrivateRoute>
-              <TitleUpdater title="Solicictud - POINT" />
-              <GestorVirtual />
+              <TitleUpdater title="Documentos " />
+              <Documento1/>
             </PrivateRoute>
           }
         />
