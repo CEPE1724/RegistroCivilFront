@@ -103,10 +103,11 @@ const CiudadanosTable = () => {
   // Validar nombres (solo letras A-Z, mayúsculas y minúsculas, y espacios)
   const handleNombresChange = (e) => {
     const value = e.target.value;
-    if (/^[a-zA-Z\s]*$/.test(value)) {
+    if (/^[a-zA-ZñÑ\s]*$/.test(value)) {
       setSearchNombres(value);
     }
   };
+  
 
   const handleOpen = (ciudadano) => {
     setSelectedCiudadano(ciudadano);

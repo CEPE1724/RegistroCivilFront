@@ -11,6 +11,7 @@ import Ciudadanos from "./pages/Ciudadanos";
 import TimerOffIcon from "@mui/icons-material/TimerOff";
 import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
+import SolicitudCredito from "./pages/SolicitudCredito";
 function App() {
   const navigate = useNavigate(); // Coloca el hook fuera del return
   const [isSessionExpired, setIsSessionExpired] = useState(false); // Estado para manejar el modal
@@ -115,6 +116,35 @@ function App() {
           element={
             <PrivateRoute>
               <TitleUpdater title="Gestor Virtual - POINT" />
+              <GestorVirtual />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/solicitud"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="Solicictud - POINT" />
+              <SolicitudCredito />
+            </PrivateRoute>
+          }
+        />
+   {/* ruta Kevin */}     
+        <Route
+          path="/documental"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="Solicictud - POINT" />
+              <GestorVirtual />
+            </PrivateRoute>
+          }
+        />
+    {/* ruta Daniel */}
+        <Route
+          path="/telefonica"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="Solicictud - POINT" />
               <GestorVirtual />
             </PrivateRoute>
           }

@@ -13,5 +13,6 @@ export const APIURL = {
     SelectDato : () =>`${API_BASE_URL}api/v1/Cbo_EstadosGestion`,
     SelectTipoContacto : () =>`${API_BASE_URL}api/v1/Cbo_EstadosTipoContacto`,
     SelectTipoResultado : () =>`${API_BASE_URL}api/v1/Cbo_ResultadoGestion`,
-   
+    postinst : () => `${API_BASE_URL}/Protecion-datos`,
+    postImg : () => `${API_BASE_URL}/subir-img`,
 };
