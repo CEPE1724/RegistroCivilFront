@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import SecurityIcon from '@mui/icons-material/Security';
+import PersonIcon from '@mui/icons-material/Person';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Collapse from "@mui/material/Collapse";
 export default function SwipeableTemporaryDrawer() {
@@ -82,6 +83,17 @@ export default function SwipeableTemporaryDrawer() {
                 <ListItemIcon>
                   <SecurityIcon className="mr-2" />
                   Protección de Datos
+                </ListItemIcon>
+                <ListItemText />
+              </ListItemButton>
+            </ListItem>
+
+            {/* Proteccion de Datos */}
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to={"/solicitud"}>
+                <ListItemIcon>
+                  <PersonIcon className="mr-2" />
+                  Solicitud de crédito
                 </ListItemIcon>
                 <ListItemText />
               </ListItemButton>

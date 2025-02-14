@@ -11,6 +11,7 @@ import Ciudadanos from "./pages/Ciudadanos";
 import TimerOffIcon from "@mui/icons-material/TimerOff";
 import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
+import SolicitudCredito from "./pages/SolicitudCredito";
 import Documento1 from "./pages/Documento1";
 /* Angel crea la ruta aqui*/
 import VerificacionTelefonica from "./pages/VerificacionTelefonica";
@@ -123,13 +124,16 @@ function App() {
             </PrivateRoute>
           }
         />
+
   {/* ruta Angel */}
         <Route
           path="/solicitud"
           element={
             <PrivateRoute>
               <TitleUpdater title="Solicictud - POINT" />
-              <GestorVirtual />
+
+              <SolicitudCredito />
+
             </PrivateRoute>
           }
         />
@@ -138,6 +142,7 @@ function App() {
           path="/documental"
           element={
             <PrivateRoute>
+
               <TitleUpdater title="Documentos " />
               <Documento1/>
             </PrivateRoute>
@@ -149,6 +154,7 @@ function App() {
           element={
             <PrivateRoute>
               <TitleUpdater title="Solicictud - POINT" />
+
               <VerificacionTelefonica />
             </PrivateRoute>
           }
