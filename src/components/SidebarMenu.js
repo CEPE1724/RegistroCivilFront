@@ -20,7 +20,8 @@ export default function SwipeableTemporaryDrawer() {
   const [openGestor, setOpenGestor] = React.useState(false); // Controlar submenú Gestor
   const LogoIco = "/img/logo.webp"; // Ruta relativa desde la carpeta public
 
-  const handleGestorClick = () => {
+  const handleGestorClick = (event) => {
+    event.stopPropagation();  // Evitar que se cierre el menú
     setOpenGestor(!openGestor);
   };
 

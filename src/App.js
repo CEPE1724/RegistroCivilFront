@@ -12,6 +12,10 @@ import TimerOffIcon from "@mui/icons-material/TimerOff";
 import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
 import SolicitudCredito from "./pages/SolicitudCredito";
+import Documento1 from "./pages/Documento1";
+/* Angel crea la ruta aqui*/
+import VerificacionTelefonica from "./pages/VerificacionTelefonica";
+/* Kevin crea la ruta aqui*/
 function App() {
   const navigate = useNavigate(); // Coloca el hook fuera del return
   const [isSessionExpired, setIsSessionExpired] = useState(false); // Estado para manejar el modal
@@ -120,12 +124,16 @@ function App() {
             </PrivateRoute>
           }
         />
+
+  {/* ruta Angel */}
         <Route
           path="/solicitud"
           element={
             <PrivateRoute>
               <TitleUpdater title="Solicictud - POINT" />
+
               <SolicitudCredito />
+
             </PrivateRoute>
           }
         />
@@ -134,8 +142,9 @@ function App() {
           path="/documental"
           element={
             <PrivateRoute>
-              <TitleUpdater title="Solicictud - POINT" />
-              <GestorVirtual />
+
+              <TitleUpdater title="Documentos " />
+              <Documento1/>
             </PrivateRoute>
           }
         />
@@ -145,7 +154,8 @@ function App() {
           element={
             <PrivateRoute>
               <TitleUpdater title="Solicictud - POINT" />
-              <GestorVirtual />
+
+              <VerificacionTelefonica />
             </PrivateRoute>
           }
         />

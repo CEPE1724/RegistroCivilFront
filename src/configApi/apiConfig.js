@@ -1,7 +1,7 @@
 
  
-const API_BASE_URL = "http://192.168.2.167:3008/";
-const SOCKET_BASE_URL = "http://192.168.2.167:3008"; 
+const API_BASE_URL = "http://192.168.2.246:3008/";
+const SOCKET_BASE_URL = "http://192.168.2.246:3008"; 
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {
