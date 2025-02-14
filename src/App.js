@@ -13,7 +13,7 @@ import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
 import Documento1 from "./pages/Documento1";
 /* Angel crea la ruta aqui*/
-/* Daniel crea la ruta aqui*/
+import VerificacionTelefonica from "./pages/VerificacionTelefonica";
 /* Kevin crea la ruta aqui*/
 function App() {
   const navigate = useNavigate(); // Coloca el hook fuera del return
@@ -149,7 +149,7 @@ function App() {
           element={
             <PrivateRoute>
               <TitleUpdater title="Solicictud - POINT" />
-              <GestorVirtual />
+              <VerificacionTelefonica />
             </PrivateRoute>
           }
         />
