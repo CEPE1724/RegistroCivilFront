@@ -56,7 +56,16 @@ export default function CreditoForm() {
       label: "Tipo de Consulta",
       name: "tipoConsulta",
       type: "select",
-      options: ["consulta", "consulta", "consulta"],
+	  options: [
+		{
+		  value: "credito",
+		  label: "Credito",
+		},
+		{
+		  value: "prestamo",
+		  label: "Prestamo",
+		},
+	  ]
     },
     { label: "Identificación", name: "identificacion", type: "text" },
     { label: "Codigo Dactilar", name: "codigoDactilar", type: "text" },
@@ -72,11 +81,13 @@ export default function CreditoForm() {
       options: actividadLaboral,
       onchange: (e) => handleActividadLaboralSelect(e),
     },
-	{ label: "Estabilidad Laboral",
+	{
+		label: "Estabilidad Laboral",
 		name: "estabilidadLaboral",
-		type: "text",
-		options: ["1", "2", "3"]
-	},
+		type: "select",
+		options: actividadLaboral,
+		onchange: (e) => handleActividadLaboralSelect(e),
+	  },
 	{ label: "Afiliado", name: "afiliado", type: "switch" },
     { label: "Tiene RUC?", name: "tieneRUC", type: "switch" },
 	{ label: "Estado", name: "estado", type: "int" },
@@ -87,6 +98,7 @@ export default function CreditoForm() {
 	},
 	{ label: "Codigo", name: "codigo", type: "text" },
 	{ label: "Validacion", name: "validacion", type: "text" },
+	{ label: "Foto", name: "foto", type: "file" },
   ];
 
   const validationSchema = Yup.object().shape({
