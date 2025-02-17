@@ -93,6 +93,7 @@ export function Documental() {
 
   return (
     <div className="flex min-h-screen">
+        
       {/* Sidebar */}
       <div className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? 'block' : 'hidden'} md:block`}>
         <div className="p-5">
@@ -171,7 +172,11 @@ export function Documental() {
         </div>
       </div>
 
+      
+      
+      
       {/* Mobile Menu Button */}
+        
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className="fixed top-6 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
@@ -222,7 +227,7 @@ export function Documental() {
               onClick={handleSubmit}
               className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
             >
-              Subir
+              Subir archivos al sistema
             </button>
           </div>
         </div>
