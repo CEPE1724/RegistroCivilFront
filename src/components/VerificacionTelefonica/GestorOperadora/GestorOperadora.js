@@ -1,171 +1,828 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import { Paper } from '@mui/material'; // Utilizamos Paper para el fondo
+import React, { useState } from "react";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Box from "@mui/material/Box";
+import { useSnackbar } from "notistack";
+import {
+  Grid,
+  Paper,
+  TextField,
+  Grow,
+  Button,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  InputLabel,
+} from "@mui/material";
 
-function CustomTabPanel(props) {
-    const { children, value, index, ...other } = props;
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
-            {...other}
-        >
-            {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-        </div>
-    );
-}
-
-CustomTabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.number.isRequired,
-    value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
+// Contenido de cada pestaña
+const TabContent = ({ children }) => (
+  <Grow in={true} timeout={300}>
+    <Paper
+      elevation={3}
+      sx={{
+        width: "100%",
+        maxWidth: { xs: 350, sm: 900 },
+        padding: 3,
+        margin: "0 auto",
+      }}
+    >
+      <Grid container spacing={1}>
+        {children}
+      </Grid>
+    </Paper>
+  </Grow>
+);
 
 export function GestorOperadora() {
-    const [value, setValue] = React.useState(0);
+  // Estado para controlar la pestaña activa
+  const { enqueueSnackbar } = useSnackbar();
 
-    const handleChange = (event, newValue) => {
-        setValue(newValue);
-    };
+  // Validaciones
+  const validateForm = () => {
+    const {
+      tipoReferencia,
+      apellidoPaterno,
+      apellidoMaterno,
+      nombres,
+      parentezco,
+      telefonoDomicilio,
+      telefonoCelular,
+    } = formData;
+    if (!tipoReferencia) {
+      enqueueSnackbar("Seleccione el tipo de referencia.", {
+        variant: "error",
+      });
+      return false;
+    }
+    if (apellidoPaterno.length < 5) {
+      enqueueSnackbar("El apellido paterno debe tener al menos 5 caracteres.", {
+        variant: "error",
+      });
+      return false;
+    }
+    if (apellidoMaterno.length < 5) {
+      enqueueSnackbar("El apellido materno debe tener al menos 5 caracteres.", {
+        variant: "error",
+      });
+      return false;
+    }
+    if (nombres.length < 5) {
+      enqueueSnackbar("Los nombres deben tener al menos 5 caracteres.", {
+        variant: "error",
+      });
+      return false;
+    }
+    if (!parentezco) {
+      enqueueSnackbar("Seleccione el parentezco.", { variant: "error" });
+      return false;
+    }
+    if (!/^[0-9]{10,}$/.test(telefonoDomicilio)) {
+      enqueueSnackbar(
+        "El teléfono de domicilio debe tener al menos 10 dígitos.",
+        { variant: "error" }
+      );
+      return false;
+    }
+    if (!/^[0-9]{10,}$/.test(telefonoCelular)) {
+      enqueueSnackbar("El teléfono celular debe tener al menos 10 dígitos.", {
+        variant: "error",
+      });
+      return false;
+    }
+    if (!formData.respuestaVT) {
+      enqueueSnackbar("Seleccione una opción para la respuesta VT.", {
+        variant: "error",
+      });
+      return false;
+    }
 
-    return (
-        <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
-                Verificación Telefónica
-            </h1>
+    return true;
+  };
 
-            <Box sx={{ width: '100%' }}>
-                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                        <Tab label="Datos Basicos del Cliente" {...a11yProps(0)} />
-                        <Tab label="Datos Domiciliarios del Cliente" {...a11yProps(1)} />
-                        <Tab label="Datos Laborales del CLiente" {...a11yProps(2)} />
-                        <Tab label="Referencias del Cliente" {...a11yProps(3)} />
-                        <Tab label="Revision Documental" {...a11yProps(4)} />
-                    </Tabs>
-                </Box>
+  const handleSubmit = () => {
+    if (validateForm()) {
+      handleGuardar();
+    }
+  };
 
-                {/* Datos Basicos del Cliente */}
-                <CustomTabPanel value={value} index={0}>
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                        <Paper sx={{ p: 4, width: '80%' }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                {/* Columna 1 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Nombres del Cliente" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Fecha de Nacimiento" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Tipo de Cliente" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Solicitud" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Cédula" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Hora de Ingreso" readOnly style={inputStyle} />
-                                </Box>
+  const [value, setValue] = React.useState(0);
 
-                                {/* Columna 2 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Nombres del padre" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Nombre de la madre" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Estado civil del Cliente" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Promocion Adicional" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Producto" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Hora fin del proceso" readOnly style={inputStyle} />
-                                </Box>
+  // Función para manejar el cambio de pestaña
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
-                                {/* Columna 3 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Agencia" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Usuario Ingresa" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="USuario Gestiona" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Verificador Fisico" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Formalidad" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Tiempo Promesa" readOnly style={inputStyle} />
-                                </Box>
-                            </Box>
-                        </Paper>
-                    </Box>
-                </CustomTabPanel>
+  // Estado para los campos de la pestaña "Referencias del Cliente"
+  const [formData, setFormData] = useState({
+    tipoReferencia: "",
+    apellidoPaterno: "",
+    apellidoMaterno: "",
+    nombres: "",
+    parentezco: "",
+    telefonoDomicilio: "",
+    telefonoCelular: "",
+    respuestaVT: "", // Campo adicional para la tabla
+  });
 
-                {/* datos domiciliario cliente */}
-                <CustomTabPanel value={value} index={1}>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
-                        <Paper sx={{ p: 4, width: '80%' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                {/* Columna 1 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Calle Principal" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Referencia" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Respuesta VT" readOnly style={inputStyle} />                                    
-                                </Box>
+  // Estado para almacenar los datos guardados en la tabla
+  const [dataList, setDataList] = useState([]);
 
-                                {/* Columna 2 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Numero" readOnly style={inputStyle} />
-                                </Box>
+  // Manejar cambios en los campos
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  };
 
-                                {/* Columna 3 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Calle Transversal" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Telefono Domicilio" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Telefono Celular" readOnly style={inputStyle} />                                
-                                </Box>
-                            </Box>                            
-                        </Paper>
-                    </Box>
-                </CustomTabPanel>
+  // Guardar datos en la tabla
+  const handleGuardar = () => {
+    setDataList((prevData) => [...prevData, formData]);
+    setFormData({
+      tipoReferencia: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
+      nombres: "",
+      parentezco: "",
+      telefonoDomicilio: "",
+      telefonoCelular: "",
+      respuestaVT: "", // Campo adicional para la tabla
+    });
+  };
 
-                <CustomTabPanel value={value} index={2}>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
-                        <Paper sx={{ p: 4, width: '80%' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                {/* Columna 1 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Nombre o razon de la empresa" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Calle Principal" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Referencia" readOnly style={inputStyle} /> 
-                                    <input type="text" placeholder="Respuesta VT" readOnly style={inputStyle} />                                   
-                                </Box>
+  // Limpiar los campos para agregar nuevos datos
+  const handleAgregar = () => {
+    setFormData({
+      tipoReferencia: "",
+      apellidoPaterno: "",
+      apellidoMaterno: "",
+      nombres: "",
+      parentezco: "",
+      telefonoDomicilio: "",
+      telefonoCelular: "",
+      respuestaVT: "", // Campo adicional para la tabla
+    });
+  };
 
-                                {/* Columna 2 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Actividad Economica" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Numero" readOnly style={inputStyle} />
-                                </Box>
+  return (
+    <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
+      {/* Título */}
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
+        Verificación Telefónica
+      </h1>
 
-                                {/* Columna 3 */}
-                                <Box sx={{ width: '30%', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <input type="text" placeholder="Calle Transversal" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Telefono Domicilio" readOnly style={inputStyle} />
-                                    <input type="text" placeholder="Telefono Celular" readOnly style={inputStyle} />                                
-                                </Box>
-                            </Box>
-                        </Paper>
-                    </Box>
-                </CustomTabPanel>
-                
-                
+      {/* Pestañas */}
+      <Box
+        sx={{
+          maxWidth: { xs: 320, sm: 700 },
+          bgcolor: "background.paper",
+          margin: "0 auto",
+        }}
+      >
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons={true}
+          aria-label="scrollable prevent tabs example"
+          centered
+        >
+          <Tab label="Datos Básicos del Cliente" />
+          <Tab label="Datos Domiciliarios del Cliente" />
+          <Tab label="Datos Laborales del Cliente" />
+          <Tab label="Referencias del Cliente" />
+        </Tabs>
+      </Box>
 
+      {/* Contenido pestañas */}
+      <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+        {/* Datos Básicos del Cliente */}
+        {value === 0 && (
+          <TabContent>
+            {/* Columna 1 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Nombres del Cliente"
+                placeholder="Nombres del Cliente"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Fecha de Nacimiento"
+                placeholder="Fecha de Nacimiento"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Tipo de Cliente"
+                placeholder="Tipo de Cliente"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Solicitud"
+                placeholder="Solicitud"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Cédula"
+                placeholder="Cédula"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Hora de Ingreso"
+                placeholder="Hora de Ingreso"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
 
+            {/* Columna 2 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Nombre Padre del Cliente"
+                placeholder="Nombre Padre del Cliente"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Nombre Madre del Cliente"
+                placeholder="Nombre Madre del Cliente"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Estado Civil"
+                placeholder="Estado Civil"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Promoción Adicional"
+                placeholder="Promoción Adicional"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Producto"
+                placeholder="Producto"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Hora Fin de Proceso"
+                placeholder="Hora Fin de Proceso"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
+
+            {/* Columna 3 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Agencia"
+                placeholder="Agencia"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Usuario Ingresa"
+                placeholder="Usuario Ingresa"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Usuario Gestiona"
+                placeholder="Usuario Gestiona"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Verificador Físico"
+                placeholder="Verificador Físico"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Formalidad"
+                placeholder="Formalidad"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Tiempo Promesa"
+                placeholder="Tiempo Promesa"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
+          </TabContent>
+        )}
+
+        {/* Datos Domiciliarios del Cliente */}
+        {value === 1 && (
+          <TabContent>
+            {/* Columna 1 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Calle Principal"
+                placeholder="Calle Principal"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Referencia"
+                placeholder="Referencia"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <Box
+                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
+              >
+                <TextField
+                  label="Respuesta VT"
+                  placeholder="Respuesta VT"
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  InputLabelProps={{ shrink: true }}
+                  select
+                  sx={{ marginRight: 1, width: "60%" }} // Ajustar el tamaño del campo
+                >
+                  <MenuItem value="" disabled>
+                    Selecciona una opción
+                  </MenuItem>
+                  <MenuItem value="Opción 1">Opción 1</MenuItem>
+                  <MenuItem value="Opción 2">Opción 2</MenuItem>
+                  <MenuItem value="Opción 3">Opción 3</MenuItem>
+                </TextField>
+
+                {/* Botón alineado a la derecha */}
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  style={{ marginTop: "4px" }} // Alineación vertical
+                >
+                  Enviar
+                </button>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Numero:"
+                placeholder="Numero"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
+
+            {/* Columna 3 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Calle Transversal"
+                placeholder="Calle Transversal"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Teléfono Domicilio"
+                placeholder="Teléfono Domicilio"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Teléfono Celular"
+                placeholder="Teléfono Celular"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
+          </TabContent>
+        )}
+
+        {/* Datos Laborales del Cliente */}
+        {value === 2 && (
+          <TabContent>
+            {/* Columna 1 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Nombre o Razón Social de la Empresa"
+                placeholder="Nombre o Razón Social de la Empresa"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Calle Principal"
+                placeholder="Calle Principal"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Referencia"
+                placeholder="Referencia"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <Box
+                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
+              >
+                <TextField
+                  label="Respuesta VT"
+                  placeholder="Respuesta VT"
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  InputLabelProps={{ shrink: true }}
+                  select
+                  sx={{ marginRight: 1, width: "60%" }} // Ajustar el tamaño del campo
+                >
+                  <MenuItem value="" disabled>
+                    Selecciona una opción
+                  </MenuItem>
+                  <MenuItem value="Opción 1">Opción 1</MenuItem>
+                  <MenuItem value="Opción 2">Opción 2</MenuItem>
+                  <MenuItem value="Opción 3">Opción 3</MenuItem>
+                </TextField>
+
+                {/* Botón alineado a la derecha */}
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  style={{ marginTop: "4px" }} // Alineación vertical
+                >
+                  Enviar
+                </button>
+              </Box>
+            </Grid>
+
+            {/* Columna 2 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Actividad Económica"
+                placeholder="Actividad Económica"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Numero"
+                placeholder="Numero"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
+
+            {/* Columna 3 */}
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Calle Transversal"
+                placeholder="Calle Transversal"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Teléfono Domicilio"
+                placeholder="Teléfono Domicilio"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+              <TextField
+                label="Teléfono Celular"
+                placeholder="Teléfono Celular"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true }}
+                sx={{ marginBottom: 1 }}
+              />
+            </Grid>
+          </TabContent>
+        )}
+
+        {/* Referencias del Cliente */}
+        {value === 3 && (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            {/* Columnas con campos */}
+            <TabContent>
+              <Grid container spacing={2}>
+                {/* Tipo de Referencia */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="tipoReferencia"
+                    label="Tipo de Referencia"
+                    value={formData.tipoReferencia}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    select
+                    sx={{ marginBottom: 1 }}
+                  >
+                    <MenuItem value="" disabled>
+                      Selecciona una opción
+                    </MenuItem>
+                    <MenuItem value="Familiar">Familiar</MenuItem>
+                    <MenuItem value="Amistad">Amistad</MenuItem>
+                  </TextField>
+                </Grid>
+
+                {/* Apellido Paterno */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="apellidoPaterno"
+                    label="Apellido Paterno"
+                    value={formData.apellidoPaterno}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ marginBottom: 1 }}
+                  />
+                </Grid>
+
+                {/* Apellido Materno */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="apellidoMaterno"
+                    label="Apellido Materno"
+                    value={formData.apellidoMaterno}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ marginBottom: 1 }}
+                  />
+                </Grid>
+
+                {/* Nombres */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="nombres"
+                    label="Nombres"
+                    value={formData.nombres}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ marginBottom: 1 }}
+                  />
+                </Grid>
+
+                {/* Parentezco */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="parentezco"
+                    label="Parentezco"
+                    value={formData.parentezco}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    displayEmpty
+                    InputLabelProps={{ shrink: true }}
+                    select
+                    sx={{ marginBottom: 1 }}
+                  >
+                    <MenuItem value="" disabled>
+                      Selecciona una opción
+                    </MenuItem>
+                    <MenuItem value="Padre/Madre">Padre/Madre</MenuItem>
+                    <MenuItem value="Hermano/Hermana">Hermano/Hermana</MenuItem>
+                    <MenuItem value="Tío/Tía">Tío/Tía</MenuItem>
+                    <MenuItem value="Primo/Prima">Primo/Prima</MenuItem>
+                    <MenuItem value="Abuela/Abuelo">Abuela/Abuelo</MenuItem>
+                    <MenuItem value="Hija/Hijo">Hija/Hijo</MenuItem>
+                    <MenuItem value="Amiga/Amigo">Amiga/Amigo</MenuItem>
+                  </TextField>
+                </Grid>
+
+                {/* Teléfono Domicilio */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="telefonoDomicilio"
+                    label="Teléfono Domicilio"
+                    value={formData.telefonoDomicilio}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ marginBottom: 1 }}
+                  />
+                </Grid>
+
+                {/* Teléfono Celular */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="telefonoCelular"
+                    label="Teléfono Celular"
+                    value={formData.telefonoCelular}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ marginBottom: 1 }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: 1,
+                    }}
+                  >
+                    <TextField
+                      name="respuestaVT"
+                      label="Respuesta VT"
+                      value={formData.respuestaVT}
+                      onChange={handleInputChange}
+                      fullWidth
+                      size="small"
+                      margin="dense"
+                      InputLabelProps={{ shrink: true }}
+                      select
+                      sx={{ marginRight: 1, width: "335px" }}
+                    >
+                      <MenuItem value="" disabled>
+                        Selecciona una opción
+                      </MenuItem>
+                      <MenuItem value="Opción 1">Opción 1</MenuItem>
+                      <MenuItem value="Opción 2">Opción 2</MenuItem>
+                      <MenuItem value="Opción 3">Opción 3</MenuItem>
+                    </TextField>
+
+                    {/* Botón alineado a la derecha */}
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      style={{ marginTop: "4px" }}
+                    >
+                      Enviar
+                    </button>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {/* Campo adicional para Respuesta VT */}
+            </TabContent>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 2,
+                justifyContent: "center",
+              }}
+            >
+              <Button variant="contained" onClick={handleSubmit}>
+                Guardar
+              </Button>
+              <Button variant="outlined" onClick={handleAgregar}>
+                Agregar
+              </Button>
             </Box>
-        </div>
-    );
-}
 
-// Estilo para los inputs
-const inputStyle = {
-    width: '100%',
-    padding: '8px',
-    boxSizing: 'border-box',
-    textAlign: 'center',
-};
+            {/* Tabla de datos guardados */}
+            <TableContainer
+              component={Paper}
+              sx={{ marginTop: 3, width: "100%" }}
+            >
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Tipo de Referencia</TableCell>
+                    <TableCell>Apellido Paterno</TableCell>
+                    <TableCell>Apellido Materno</TableCell>
+                    <TableCell>Nombres</TableCell>
+                    <TableCell>Parentezco</TableCell>
+                    <TableCell>Teléfono Domicilio</TableCell>
+                    <TableCell>Teléfono Celular</TableCell>
+                    <TableCell>Respuesta VT</TableCell>{" "}
+                    {/* Campo adicional en la tabla */}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dataList.map((data, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{data.tipoReferencia}</TableCell>
+                      <TableCell>{data.apellidoPaterno}</TableCell>
+                      <TableCell>{data.apellidoMaterno}</TableCell>
+                      <TableCell>{data.nombres}</TableCell>
+                      <TableCell>{data.parentezco}</TableCell>
+                      <TableCell>{data.telefonoDomicilio}</TableCell>
+                      <TableCell>{data.telefonoCelular}</TableCell>
+                      <TableCell>{data.respuestaVT}</TableCell>{" "}
+                      {/* Mostrar Respuesta VT */}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        )}
+      </Box>
+    </div>
+  );
+}
