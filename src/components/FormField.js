@@ -130,9 +130,22 @@ const ReusableForm = ({
   const formik = useFormik({ initialValues, validationSchema, onSubmit });
 
   return (
+    // <form
+    //   onSubmit={formik.handleSubmit}
+    //   className={`w-full bg-white p-4 rounded-lg ${columns === 2 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "flex flex-col"}`}
+    // >
     <form
-      onSubmit={formik.handleSubmit}
-      className={`w-full bg-white p-4 rounded-lg ${columns === 2 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "flex flex-col"}`}
+      className={`w-full bg-white p-4 rounded-lg ${
+        columns === 2
+          ? "grid grid-cols-1 md:grid-cols-2 gap-4"
+          : "flex flex-col"
+      }`}
+      onSubmit={(e) => {
+        e.preventDefault();
+        console.log("Formik errors:", formik.errors);
+        console.log("Formik values:", formik.values);
+        formik.handleSubmit(e);
+      }}
     >
       {formConfig.map((field) => (
         <FormField key={field.name} {...field} formik={formik} />
@@ -140,7 +153,7 @@ const ReusableForm = ({
 
       {includeTermsAndConditions && (
         <div className="py-2 w-full flex flex-col md:col-span-2">
-          <label className="text-xs">
+          <label className="text-lightGrey text-xs">
             <input
               type="checkbox"
               name="acceptance"
@@ -148,10 +161,32 @@ const ReusableForm = ({
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               checked={formik.values.acceptance}
-              className="mr-2"
-            />
-            Acepto los términos y condiciones
+              className="text-fontRed accent-fontRed rounded"
+            />{" "}
+            Acepto los{" "}
+            <a
+              href="/terminos-y-condiciones"
+              className="underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              términos y condiciones
+            </a>{" "}
+            y las{" "}
+            <a
+              href="/politicas-de-privacidad"
+              className="underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              políticas de privacidad
+            </a>
           </label>
+          {formik.errors.acceptance && formik.touched.acceptance && (
+            <p className="text-red-500 text-xs mt-1">
+              {formik.errors.acceptance}
+            </p>
+          )}
         </div>
       )}
 
