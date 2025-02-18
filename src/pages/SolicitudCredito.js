@@ -4,11 +4,10 @@ import CreditoForm from "../components/SolicitudCredito/SolicitudCreditoForm/Cre
 import Layout from "../components/Layout";
 
 const SolicitudCredito = () => {
-
   return (
     <>
       <Layout />
-      <div className="max-w-3xl mx-auto flex justify-center bg-[#ffffff] p-8 flex-col items-center">
+      <div className="w-full h-screen flex justify-center bg-[#ffffff] p-8 flex-col items-center">
         <h2 className="pb-2 col-span-1 text-primaryBlue text-center text-2xl lg:col-span-2 font-semibold">
           Solicitud de Crédito
         </h2>
@@ -17,6 +16,5 @@ const SolicitudCredito = () => {
     </>
   );
 };
-
 
 export default SolicitudCredito;

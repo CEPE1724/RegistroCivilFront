@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 const Ciudadanos = () => {
   return (
     <>
-      <Layout/>
+      <Layout />
       <div>
         <CiudadanosTable />
       </div>

@@ -35,7 +35,6 @@ export const SolicitudCreditoCrear = () => {
             console.error("Error al obtener la IP:", error);
         }
     };
-
     useEffect(() => {
         fetchUserIP(); // Obtener la IP del usuario al cargar el componente
     }, []);

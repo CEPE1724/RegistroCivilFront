@@ -135,11 +135,10 @@ const ReusableForm = ({
     //   className={`w-full bg-white p-4 rounded-lg ${columns === 2 ? "grid grid-cols-1 md:grid-cols-2 gap-4" : "flex flex-col"}`}
     // >
     <form
-      className={`w-full bg-white p-4 rounded-lg ${
-        columns === 2
-          ? "grid grid-cols-1 md:grid-cols-2 gap-4"
-          : "flex flex-col"
-      }`}
+      className={`w-full bg-white p-4 rounded-lg ${columns === 2
+        ? "grid grid-cols-1 md:grid-cols-3 gap-4"  // Modificado para 3 columnas
+        : "flex flex-col"
+        }`}
       onSubmit={(e) => {
         e.preventDefault();
         console.log("Formik errors:", formik.errors);
@@ -152,7 +151,7 @@ const ReusableForm = ({
       ))}
 
       {includeTermsAndConditions && (
-        <div className="py-2 w-full flex flex-col md:col-span-2">
+        <div className="py-2 w-full flex flex-col md:col-span-3">  {/* Asegura que ocupe toda la fila en pantallas grandes */}
           <label className="text-lightGrey text-xs">
             <input
               type="checkbox"
@@ -191,7 +190,7 @@ const ReusableForm = ({
       )}
 
       {includeButtons && (
-        <div className="py-2 flex flex-col md:flex-row justify-normal gap-2 md:col-span-2">
+        <div className="py-2 flex flex-col md:flex-row justify-normal gap-2 md:col-span-3">
           <button
             type="submit"
             className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
@@ -209,6 +208,7 @@ const ReusableForm = ({
         </div>
       )}
     </form>
+
   );
 };
 
