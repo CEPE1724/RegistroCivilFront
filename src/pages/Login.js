@@ -9,6 +9,7 @@ import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoEcommerce from "../img/manoRegistro.png";
+import Ponty from "../img/ponty.png";
 import axios from "../configApi/axiosConfig";
 import { useSnackbar } from "notistack";
 import PersonIcon from "@mui/icons-material/Person";
@@ -94,19 +95,24 @@ const Login = () => {
 
   return (
     <>
-      <section className="gradient-form flex items-center justify-center min-h-screen">
+      <section className=" flex items-center justify-center min-h-screen bg-red-600" style={{ background: "linear-gradient(to bottom, #1965F2, #D9E6FF)" }} >
         <div className="container max-w-4xl p-4 sm:p-6 md:p-10">
           <div className="flex flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
             <div className="w-full">
               <div className="block rounded-lg bg-white shadow-lg dark:bg-neutral-800">
                 <div className="flex flex-col lg:flex-row">
                   {/* Formulario de inicio de sesión */}
-                  <div className="w-full lg:w-6/12 px-4 py-8 md:px-6">
-                    <div className="md:mx-6 md:p-8">
+                  <div className="w-full lg:w-6/12 px-4 py-8 md:px-6 bg-gradient-to-r from-[#5592F3] to-[#ffffff]">
+                    <img
+                      className="mx-auto w-[80px] sm:w-[100px] md:w-[120px] lg:w-2/3"
+                      src={Logo}
+                      alt="logo"
+                    />
+                    <div className="md:mx-6 p-8 bg-slate-50 rounded-2xl">
                       <div className="text-center">
-                        <h4 className="text-2xl font-semibold mb-6">
+                        {/* <h4 className="text-2xl font-semibold mb-6">
                           Registro Ciudadanos
-                        </h4>
+                        </h4> */}
                         <h5 className="pt-4 pb-6 text-xl font-semibold">
                           Iniciar Sesión
                         </h5>
@@ -214,19 +220,19 @@ const Login = () => {
                   >
                     <div className="px-4 py-6 text-white md:mx-6 md:p-12">
                       <div className="mt-8 text-center">
-                        <img
+                        {/* <img
                           className="mx-auto w-[80px] sm:w-[100px] md:w-[120px] lg:w-2/3"
                           src={Logo}
                           alt="logo"
-                        />
+                        /> */}
                         <img
                           className="mx-auto mt-4 w-[80px] sm:w-[100px] md:w-[120px] lg:w-1/3"
-                          src={LogoEcommerce}
+                          src={Ponty}
                           alt="logo"
                         />
-                        <p className="text-white">
+                        {/* <p className="text-white">
                           BDD de ciudadanos o nueva consulta al Registro Civil.
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                   </div>
