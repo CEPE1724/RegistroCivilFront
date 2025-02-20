@@ -52,7 +52,7 @@ export function GestorOperadora() {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        "http://192.168.5.248:3008/api/cre-verificacion-telefonica",
+        "http://192.168.5.248:3008/api/v1/cre-verificacion-telefonica",
         {
           headers: {
             "Content-Type": "application/json",
@@ -751,7 +751,7 @@ export function GestorOperadora() {
                       </MenuItem>
                     ))}
                 </TextField>
-
+              </Box>
 
             </Grid>
 
