@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ReusableForm from "../../FormField";
-// import WEB_ActividadLaboral from "./services";
+import cre_tiempo from "./services";
 import * as Yup from "yup";
 
 export default function CreditoForm() {
@@ -17,29 +17,10 @@ export default function CreditoForm() {
   };
 
   const fectchActividadLaboral = async () => {
-    // const result = await WEB_ActividadLaboral();
-    const result = [
-      {
-        idSituacionLaboral: 1,
-        Descripcion: "DEPENDIENTE",
-      },
-      {
-        idSituacionLaboral: 2,
-        Descripcion: "INDEPENDIENTE INFORMAL",
-      },
-      {
-        idSituacionLaboral: 5,
-        Descripcion: "INDEPENDIENTE FORMAL",
-      },
-    ];
-
+    const result = await cre_tiempo();
     if (!result) {
       console.error("Error al obtener la actividad laboral");
     }
-    // const actividadL = result.map((option) => ({
-    //   value: option.idSituacionLaboral,
-    //   label: option.Descripcion,
-    // }));
 
     setActividadLaboral(
       result.map((option) => ({
@@ -80,6 +61,7 @@ export default function CreditoForm() {
     { label: "Apellidos", name: "apellidos", type: "text" },
     { label: "Celular", name: "celular", type: "text" },
     { label: "Email", name: "email", type: "email" },
+	{ label: "", name: "foto", type: "file" },
     {
       label: "Actividad Laboral",
       name: "actividadLaboral",
@@ -94,13 +76,12 @@ export default function CreditoForm() {
       options: actividadLaboral,
       onchange: (e) => handleActividadLaboralSelect(e),
     },
-    { label: "Afiliado", name: "afiliado", type: "switch" },
-    { label: "Tiene RUC?", name: "tieneRUC", type: "switch" },
     { label: "Estado", name: "estado", type: "text" },
     { label: "Producto", name: "producto", type: "text" },
     { label: "Código", name: "codigo", type: "text" },
     { label: "Validación", name: "validacion", type: "text" },
-    { label: "Foto", name: "foto", type: "file" },
+	{ label: "Afiliado", name: "afiliado", type: "switch" },
+    { label: "Tiene RUC?", name: "tieneRUC", type: "switch" },
   ];
 
   const validationSchema = Yup.object().shape({
@@ -144,6 +125,7 @@ export default function CreditoForm() {
     codigo: "",
     validacion: "",
     foto: "",
+	acceptance: false,
   };
 
   const handleCancel = () => {
@@ -169,7 +151,7 @@ export default function CreditoForm() {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         includeButtons={true}
-        columns={2}
+        columns={3}
         includeTermsAndConditions={true}
       />
     </div>

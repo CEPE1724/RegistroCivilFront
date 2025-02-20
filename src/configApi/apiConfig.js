@@ -18,5 +18,6 @@ export const APIURL = {
     SelectTipoResultado : () =>`${API_BASE_URL}Cbo_ResultadoGestion`,
     postinst : () => `${API_BASE_URL}Protecion-datos`,
     postImg : () => `${API_BASE_URL}subir-img`,
+    getCreVerificacionTelefonica : () => `${API_BASE_URL}cre-verificacion-telefonica`,
     
 };
