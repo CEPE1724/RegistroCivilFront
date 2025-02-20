@@ -19,7 +19,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  InputLabel,
 } from "@mui/material";
 
 // Contenido de cada pestaña
@@ -217,7 +216,15 @@ export function GestorOperadora() {
           variant="scrollable"
           scrollButtons={true}
           aria-label="scrollable prevent tabs example"
-          centered
+          sx={{
+            '& .Mui-selected': {
+              backgroundColor: '#2D3689', // Color fondo de pestaña seleccionada
+              color: 'white !important', // Color letras de pestaña seleccionada
+            },
+            '& .MuiTabs-indicator': {
+              display: 'none', // Oculta línea debajo de la pestaña seleccionada
+            },
+          }}
         >
           <Tab label="Datos Básicos del Cliente" />
           <Tab label="Datos Domiciliarios del Cliente" />
@@ -239,8 +246,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black', // Cambia el color del borde cuando no está enfocado
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Fecha de Nacimiento"
@@ -248,8 +261,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Tipo de Cliente"
@@ -257,8 +276,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Solicitud"
@@ -266,8 +291,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Cédula"
@@ -275,8 +306,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Hora de Ingreso"
@@ -284,8 +321,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
             </Grid>
 
@@ -297,8 +340,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Nombre Madre del Cliente"
@@ -306,8 +355,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Estado Civil"
@@ -315,8 +370,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Promoción Adicional"
@@ -324,8 +385,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Producto"
@@ -333,8 +400,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Hora Fin de Proceso"
@@ -342,8 +415,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
             </Grid>
 
@@ -355,8 +434,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Usuario Ingresa"
@@ -364,8 +449,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Usuario Gestiona"
@@ -373,8 +464,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Verificador Físico"
@@ -382,8 +479,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Formalidad"
@@ -391,8 +494,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Tiempo Promesa"
@@ -400,8 +509,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
             </Grid>
           </TabContent>
@@ -418,8 +533,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Referencia"
@@ -427,9 +548,16 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
+
               <Box
                 sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
               >
@@ -441,9 +569,17 @@ export function GestorOperadora() {
                   fullWidth
                   size="small"
                   margin="dense"
-                  InputLabelProps={{ shrink: true }}
+                  InputLabelProps={{ shrink: true, style: { color: 'black' } }}
                   select
-                  sx={{ marginRight: 1, width: "335px" }}
+
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: 'black',
+                      },
+                    }, marginBottom: 1
+                  }} // Ajustar el tamaño del campo
+
                 >
                   <MenuItem value="" disabled>
                     Selecciona una opción
@@ -458,17 +594,15 @@ export function GestorOperadora() {
                       </MenuItem>
                     ))}
                 </TextField>
-
-                {/* Botón alineado a la derecha */}
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  style={{ marginTop: "4px" }} // Alineación vertical
-                >
-                  Enviar
-                </button>
               </Box>
+              <button
+                className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
+                style={{ marginTop: "4px" }} // Alineación vertical
+              >
+                Enviar
+              </button>
             </Grid>
-
+            {/* Columna 2 */}
             <Grid item xs={12} sm={4}>
               <TextField
                 label="Numero:"
@@ -476,8 +610,29 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
+              />
+              <TextField
+                label="Teléfono Celular"
+                placeholder="Teléfono Celular"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
             </Grid>
 
@@ -489,8 +644,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Teléfono Domicilio"
@@ -498,17 +659,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
-              />
-              <TextField
-                label="Teléfono Celular"
-                placeholder="Teléfono Celular"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
             </Grid>
           </TabContent>
@@ -525,8 +683,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Calle Principal"
@@ -534,18 +698,31 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
-                label="Referencia"
-                placeholder="Referencia"
+                label="Teléfono Celular"
+                placeholder="Teléfono Celular"
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
+
               <Box
                 sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
               >
@@ -575,14 +752,7 @@ export function GestorOperadora() {
                     ))}
                 </TextField>
 
-                {/* Botón alineado a la derecha */}
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  style={{ marginTop: "4px" }} // Alineación vertical
-                >
-                  Enviar
-                </button>
-              </Box>
+
             </Grid>
 
             {/* Columna 2 */}
@@ -593,8 +763,14 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
                 label="Numero"
@@ -602,8 +778,29 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
+              />
+              <TextField
+                label="Teléfono Domicilio"
+                placeholder="Teléfono Domicilio"
+                fullWidth
+                size="small"
+                margin="dense"
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
             </Grid>
 
@@ -615,28 +812,62 @@ export function GestorOperadora() {
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
               <TextField
-                label="Teléfono Domicilio"
-                placeholder="Teléfono Domicilio"
+                label="Referencia"
+                placeholder="Referencia"
                 fullWidth
                 size="small"
                 margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
+                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'black',
+                    },
+                  }, marginBottom: 1
+                }}
               />
-              <TextField
-                label="Teléfono Celular"
-                placeholder="Teléfono Celular"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-                sx={{ marginBottom: 1 }}
-              />
+              <Box
+                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
+              >
+                <TextField
+                  label="Respuesta VT"
+                  placeholder="Respuesta VT"
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                  select
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: 'black',
+                      },
+                    }, marginBottom: 1
+                  }}
+                >
+                  <MenuItem value="" disabled>
+                    Selecciona una opción
+                  </MenuItem>
+                  <MenuItem value="Opción 1">Opción 1</MenuItem>
+                  <MenuItem value="Opción 2">Opción 2</MenuItem>
+                  <MenuItem value="Opción 3">Opción 3</MenuItem>
+                </TextField>
+              </Box>
             </Grid>
+            <button
+              className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
+              style={{ marginTop: "4px" }} // Alineación vertical
+            >Enviar</button>
           </TabContent>
         )}
 
@@ -656,9 +887,15 @@ export function GestorOperadora() {
                     fullWidth
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
                     select
-                    sx={{ marginBottom: 1 }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
                   >
                     <MenuItem value="" disabled>
                       Selecciona una opción
@@ -678,8 +915,14 @@ export function GestorOperadora() {
                     fullWidth
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ marginBottom: 1 }}
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
                   />
                 </Grid>
 
@@ -693,8 +936,14 @@ export function GestorOperadora() {
                     fullWidth
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ marginBottom: 1 }}
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
                   />
                 </Grid>
 
@@ -708,8 +957,14 @@ export function GestorOperadora() {
                     fullWidth
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ marginBottom: 1 }}
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
                   />
                 </Grid>
 
@@ -723,9 +978,15 @@ export function GestorOperadora() {
                     fullWidth
                     size="small"
                     displayEmpty
-                    InputLabelProps={{ shrink: true }}
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
                     select
-                    sx={{ marginBottom: 1 }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
                   >
                     <MenuItem value="" disabled>
                       Selecciona una opción
@@ -739,22 +1000,6 @@ export function GestorOperadora() {
                     <MenuItem value="Amiga/Amigo">Amiga/Amigo</MenuItem>
                   </TextField>
                 </Grid>
-
-                {/* Teléfono Domicilio */}
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    name="telefonoDomicilio"
-                    label="Teléfono Domicilio"
-                    value={formData.telefonoDomicilio}
-                    onChange={handleInputChange}
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ marginBottom: 1 }}
-                  />
-                </Grid>
-
                 {/* Teléfono Celular */}
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -765,11 +1010,40 @@ export function GestorOperadora() {
                     fullWidth
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ marginBottom: 1 }}
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
+                    inputProps={{
+                      inputMode: 'numeric', // Activa el teclado numérico en dispositivos móviles
+                      pattern: '[0-9]*', // Acepta solo números
+                    }}
                   />
                 </Grid>
-
+                {/* Teléfono Domicilio */}
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="telefonoDomicilio"
+                    label="Teléfono Domicilio"
+                    value={formData.telefonoDomicilio}
+                    onChange={handleInputChange}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true, style: { color: 'black' } }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '& fieldset': {
+                          borderColor: 'black',
+                        },
+                      }, marginBottom: 1
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12} sm={6}>
                   <Box
                     sx={{
@@ -786,9 +1060,15 @@ export function GestorOperadora() {
                       fullWidth
                       size="small"
                       margin="dense"
-                      InputLabelProps={{ shrink: true }}
+                      InputLabelProps={{ shrink: true, style: { color: 'black' } }}
                       select
-                      sx={{ marginRight: 1, width: "335px" }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': {
+                            borderColor: 'black',
+                          },
+                        }, marginBottom: 1
+                      }}
                     >
                       <MenuItem value="" disabled>
                         Selecciona una opción
@@ -803,19 +1083,9 @@ export function GestorOperadora() {
                           </MenuItem>
                         ))}
                     </TextField>
-
-                    {/* Botón alineado a la derecha */}
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                      style={{ marginTop: "4px" }}
-                    >
-                      Enviar
-                    </button>
                   </Box>
                 </Grid>
               </Grid>
-
-              {/* Campo adicional para Respuesta VT */}
             </TabContent>
 
             <Box
@@ -826,12 +1096,25 @@ export function GestorOperadora() {
                 justifyContent: "center",
               }}
             >
-              <Button variant="contained" onClick={handleSubmit}>
+              <button
+                onClick={handleSubmit}
+                className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
+                style={{ marginTop: "4px" }}>
                 Guardar
-              </Button>
-              <Button variant="outlined" onClick={handleAgregar}>
+              </button>
+
+              <button
+                onClick={handleAgregar}
+                className="rounded-full bg-gray-400 text-white px-6 py-2.5 hover:bg-gray-500 transition"
+                style={{ marginTop: "4px" }}>
                 Agregar
-              </Button>
+              </button>
+
+              <button
+                className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
+                style={{ marginTop: "4px" }}>
+                Enviar
+              </button>
             </Box>
 
             {/* Tabla de datos guardados */}
@@ -847,10 +1130,9 @@ export function GestorOperadora() {
                     <TableCell>Apellido Materno</TableCell>
                     <TableCell>Nombres</TableCell>
                     <TableCell>Parentezco</TableCell>
-                    <TableCell>Teléfono Domicilio</TableCell>
                     <TableCell>Teléfono Celular</TableCell>
+                    <TableCell>Teléfono Domicilio</TableCell>
                     <TableCell>Respuesta VT</TableCell>{" "}
-                    {/* Campo adicional en la tabla */}
                   </TableRow>
                 </TableHead>
                 <TableBody>
