@@ -16,6 +16,8 @@ import Documento1 from "./pages/Documento1";
 /* Angel crea la ruta aqui*/
 import VerificacionTelefonica from "./pages/VerificacionTelefonica";
 /* Kevin crea la ruta aqui*/
+import Tabla from "./pages/ListaSolicitud";
+import ListaSolicitud from "./pages/ListaSolicitud";
 function App() {
   const navigate = useNavigate(); // Coloca el hook fuera del return
   const [isSessionExpired, setIsSessionExpired] = useState(false); // Estado para manejar el modal
@@ -62,7 +64,6 @@ function App() {
       }}
       autoHideDuration={3500}
     >
-
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/login" />} />
@@ -125,7 +126,7 @@ function App() {
           }
         />
 
-  {/* ruta Angel */}
+        {/* ruta Angel */}
         <Route
           path="/solicitud"
           element={
@@ -133,22 +134,20 @@ function App() {
               <TitleUpdater title="Solicictud - POINT" />
 
               <SolicitudCredito />
-
             </PrivateRoute>
           }
         />
-   {/* ruta Kevin */}     
+        {/* ruta Kevin */}
         <Route
           path="/documental"
           element={
             <PrivateRoute>
-
               <TitleUpdater title="Documentos " />
-              <Documento1/>
+              <Documento1 />
             </PrivateRoute>
           }
         />
-    {/* ruta Daniel */}
+        {/* ruta Daniel */}
         <Route
           path="/telefonica"
           element={
@@ -159,10 +158,20 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route
+          path="/ListadoSolicitud"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="Tabla - POINT" />
+              <ListaSolicitud/>
+            </PrivateRoute>
+          }
+        />
       </Routes>
 
       {/* Modal de sesión expirada */}
-      <Modal open={isSessionExpired} onClose={() => { }}>
+      <Modal open={isSessionExpired} onClose={() => {}}>
         <Box
           sx={{
             position: "absolute",
