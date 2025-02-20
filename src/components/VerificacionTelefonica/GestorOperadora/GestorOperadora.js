@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { useSnackbar } from "notistack";
+import axios from "axios";
+import { useHistory } from "react-router-dom";
 import {
   Grid,
   Paper,
@@ -41,6 +43,32 @@ const TabContent = ({ children }) => (
 export function GestorOperadora() {
   // Estado para controlar la pestaña activa
   const { enqueueSnackbar } = useSnackbar();
+  const [dato, setDato] = useState([]);
+  useEffect(() => {
+    fetchDato();
+  }, []);
+
+  const fetchDato = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        "http://192.168.5.248:3008/api/cre-verificacion-telefonica",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setDato(response.data);
+    } catch (error) {
+      enqueueSnackbar("Error fetching Dato: " + error.message, {
+        variant: "error",
+      });
+    }
+  };
+
+  // Llamar a la API cuando el componente se monte
 
   // Validaciones
   const validateForm = () => {
@@ -534,13 +562,16 @@ export function GestorOperadora() {
                 sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
               >
                 <TextField
+                  name="respuestaVT"
                   label="Respuesta VT"
-                  placeholder="Respuesta VT"
+                  value={formData.respuestaVT}
+                  onChange={handleInputChange}
                   fullWidth
                   size="small"
                   margin="dense"
                   InputLabelProps={{ shrink: true, style: { color: 'black' } }}
                   select
+
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       '& fieldset': {
@@ -548,13 +579,20 @@ export function GestorOperadora() {
                       },
                     }, marginBottom: 1
                   }} // Ajustar el tamaño del campo
+
                 >
                   <MenuItem value="" disabled>
                     Selecciona una opción
                   </MenuItem>
-                  <MenuItem value="Opción 1">Opción 1</MenuItem>
-                  <MenuItem value="Opción 2">Opción 2</MenuItem>
-                  <MenuItem value="Opción 3">Opción 3</MenuItem>
+                  {dato.length > 0 &&
+                    dato.map((index) => (
+                      <MenuItem
+                        key={index.idCre_VerificacionTelefonicaWeb}
+                        value={index.idCre_VerificacionTelefonicaWeb}
+                      >
+                        {index.Respuesta}
+                      </MenuItem>
+                    ))}
                 </TextField>
               </Box>
               <button
@@ -684,6 +722,36 @@ export function GestorOperadora() {
                   }, marginBottom: 1
                 }}
               />
+
+              <Box
+                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
+              >
+                <TextField
+                  name="respuestaVT"
+                  label="Respuesta VT"
+                  value={formData.respuestaVT}
+                  onChange={handleInputChange}
+                  fullWidth
+                  size="small"
+                  margin="dense"
+                  InputLabelProps={{ shrink: true }}
+                  select
+                  sx={{ marginRight: 1, width: "335px" }}
+                >
+                  <MenuItem value="" disabled>
+                    Selecciona una opción
+                  </MenuItem>
+                  {dato.length > 0 &&
+                    dato.map((index) => (
+                      <MenuItem
+                        key={index.idCre_VerificacionTelefonicaWeb}
+                        value={index.idCre_VerificacionTelefonicaWeb}
+                      >
+                        {index.Respuesta}
+                      </MenuItem>
+                    ))}
+                </TextField>
+
 
             </Grid>
 
@@ -1005,9 +1073,15 @@ export function GestorOperadora() {
                       <MenuItem value="" disabled>
                         Selecciona una opción
                       </MenuItem>
-                      <MenuItem value="Opción 1">Opción 1</MenuItem>
-                      <MenuItem value="Opción 2">Opción 2</MenuItem>
-                      <MenuItem value="Opción 3">Opción 3</MenuItem>
+                      {dato.length > 0 &&
+                        dato.map((index) => (
+                          <MenuItem
+                            key={index.idCre_VerificacionTelefonicaWeb}
+                            value={index.idCre_VerificacionTelefonicaWeb}
+                          >
+                            {index.Respuesta}
+                          </MenuItem>
+                        ))}
                     </TextField>
                   </Box>
                 </Grid>
