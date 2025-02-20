@@ -19,5 +19,6 @@ export const APIURL = {
     postinst : () => `${API_BASE_URL}Protecion-datos`,
     postImg : () => `${API_BASE_URL}subir-img`,
 	getEstabilidadLaboral : () => `${API_BASE_URL}cre-tiempo/1`,
+    getCreVerificacionTelefonica : () => `${API_BASE_URL}cre-verificacion-telefonica`,
     getActividadEconomina : () => `${API_BASE_URL}cre-actividadeconomina/2`
 };
