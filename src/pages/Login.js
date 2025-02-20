@@ -125,6 +125,7 @@ const Login = () => {
                                   rgba(0, 0, 0, 0) 100%
                                   )`,
                         mixBlendMode: "overlay",
+                        pointerEvents: "none",
                         borderTopLeftRadius: "20px",
                         borderBottomLeftRadius: "20px",
                         
@@ -173,6 +174,7 @@ const Login = () => {
                             value={userName}
                             variant="outlined"
                             sx={{
+                              /////zIndex: 20,
                               backgroundColor: "white",
                               borderRadius: "4px",
                               "& .MuiOutlinedInput-root": {
@@ -227,6 +229,7 @@ const Login = () => {
                             value={password}
                             variant="outlined"
                             sx={{
+                              //zIndex: 20,
                               backgroundColor: "white",
                               borderRadius: "4px",
                               "& .MuiOutlinedInput-root": {
