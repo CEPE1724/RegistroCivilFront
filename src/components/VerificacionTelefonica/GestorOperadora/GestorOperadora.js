@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
@@ -19,16 +19,16 @@ import {
   TableRow,
 } from "@mui/material";
 
-// Contenido de cada pestaña
+// Contenido de cada pestaña 
 const TabContent = ({ children }) => (
   <Grow in={true} timeout={300}>
     <Paper
       elevation={3}
       sx={{
         width: "100%",
-        maxWidth: { xs: 350, sm: 900 },
-        padding: 3,
-        margin: "0 auto",
+        maxWidth: { xs: 350, sm: 1100 },
+        padding: 2,
+        margin: "0",
       }}
     >
       <Grid container spacing={1}>
@@ -40,7 +40,54 @@ const TabContent = ({ children }) => (
 
 export function GestorOperadora() {
   // Estado para controlar la pestaña activa
+  const [value, setValue] = React.useState(0);
   const { enqueueSnackbar } = useSnackbar();
+
+  // Estado para los datos laborales
+  const [laborDataList, setLaborDataList] = useState([]);
+  const [opcionesRespuestaVT, setOpcionesRespuestaVT] = useState([]);
+  const [respuestasVT, setRespuestasVT] = useState([]);
+
+  // Cargar datos desde JSONPlaceholder
+  useEffect(() => {
+    // Datos para la tabla
+    fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => response.json())
+      .then((data) => {
+        const formattedData = data.map((user) => ({
+          nombreEmpresa: user.name,
+          actividadEconomica: user.company?.bs || "Desconocida",
+          numero: user.id,
+          callePrincipal: user.address?.street || "Sin dirección",
+          calleTransversal: user.address?.suite || "Sin transversal",
+          referencia: user.address?.city || "Sin referencia",
+          telefonoDomicilio: user.phone,
+          telefonoCelular: user.phone,
+        }));
+        setDataList(formattedData);
+        setRespuestasVT(Array(data.length).fill(""));
+      })
+      .catch((error) => console.error("Error al cargar datos:", error));
+
+    // Opciones para el ComboBox
+    fetch("https://jsonplaceholder.typicode.com/comments")
+      .then((response) => response.json())
+      .then((data) => {
+        const formattedOptions = data.slice(0, 3).map((comment) => ({
+          value: comment.id.toString(),
+          label: comment.name,
+        }));
+        setOpcionesRespuestaVT(formattedOptions);
+      })
+      .catch((error) => console.error("Error al cargar opciones:", error));
+  }, []);
+
+  // Manejar cambios en el ComboBox
+  const handleRespuestaVTChange = (e, index) => {
+    const newRespuestasVT = [...respuestasVT];
+    newRespuestasVT[index] = e.target.value;
+    setRespuestasVT(newRespuestasVT);
+  };
 
   // Validaciones
   const validateForm = () => {
@@ -109,8 +156,6 @@ export function GestorOperadora() {
       handleGuardar();
     }
   };
-
-  const [value, setValue] = React.useState(0);
 
   // Función para manejar el cambio de pestaña
   const handleChange = (event, newValue) => {
@@ -636,171 +681,55 @@ export function GestorOperadora() {
 
         {/* Datos Laborales del Cliente */}
         {value === 2 && (
-          <TabContent>
-            {/* Columna 1 */}
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Nombre o Razón Social de la Empresa"
-                placeholder="Nombre o Razón Social de la Empresa"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Calle Principal"
-                placeholder="Calle Principal"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Teléfono Celular"
-                placeholder="Teléfono Celular"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-
-            </Grid>
-
-            {/* Columna 2 */}
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Actividad Económica"
-                placeholder="Actividad Económica"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Numero"
-                placeholder="Numero"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Teléfono Domicilio"
-                placeholder="Teléfono Domicilio"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-            </Grid>
-
-            {/* Columna 3 */}
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Calle Transversal"
-                placeholder="Calle Transversal"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Referencia"
-                placeholder="Referencia"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <Box
-                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
-              >
-                <TextField
-                  label="Respuesta VT"
-                  placeholder="Respuesta VT"
-                  fullWidth
-                  size="small"
-                  margin="dense"
-                  InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                  select
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        borderColor: 'black',
-                      },
-                    }, marginBottom: 1
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Selecciona una opción
-                  </MenuItem>
-                  <MenuItem value="Opción 1">Opción 1</MenuItem>
-                  <MenuItem value="Opción 2">Opción 2</MenuItem>
-                  <MenuItem value="Opción 3">Opción 3</MenuItem>
-                </TextField>
-              </Box>
-            </Grid>
-            <button
-              className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
-              style={{ marginTop: "4px" }} // Alineación vertical
-            >Enviar</button>
-          </TabContent>
+          <Box sx={{display: "flex", marginTop: 3}}>
+            {/* Tabla de datos laborales */}
+            <TableContainer component={Paper} sx={{ height: "100%", width: "100%", padding: "0", overflowX: "auto" }}>
+              <Table sx={{ width: "100%" }}>
+                <TableHead>
+                  <TableRow sx={{ height: "auto" }}>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Nombre o Razón Social Empresa</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Actividad Económica</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Número</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Calle Principal</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Calle Transversal</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Referencia</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Teléfono Domicilio</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Teléfono Celular</TableCell>
+                    <TableCell sx={{ padding: "4px 8px", width: "auto" }}>Respuesta VT</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dataList.map((data, index) => (
+                    <TableRow key={index}>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.nombreEmpresa}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.actividadEconomica}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.numero}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.callePrincipal}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.calleTransversal}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.referencia}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.telefonoDomicilio}</TableCell>
+                      <TableCell sx={{ padding: "4px 8px", width: "auto" }}>{data.telefonoCelular}</TableCell>
+                      <TableCell>
+                        <Select
+                          value={respuestasVT[index] || ""}
+                          onChange={(e) => handleRespuestaVTChange(e, index)}
+                          fullWidth
+                          size="small"
+                        >
+                          {opcionesRespuestaVT.map((opcion) => (
+                            <MenuItem key={opcion.value} value={opcion.value}>
+                              {opcion.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            
+          </Box>
         )}
 
         {/* Referencias del Cliente */}
@@ -949,10 +878,6 @@ export function GestorOperadora() {
                           borderColor: 'black',
                         },
                       }, marginBottom: 1
-                    }}
-                    inputProps={{
-                      inputMode: 'numeric', // Activa el teclado numérico en dispositivos móviles
-                      pattern: '[0-9]*', // Acepta solo números
                     }}
                   />
                 </Grid>
