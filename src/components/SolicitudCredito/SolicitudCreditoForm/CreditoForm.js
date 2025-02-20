@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import ReusableForm from "../../FormField";
-import cre_tiempo from "./services";
 import * as Yup from "yup";
+import { APIURL } from "../../../configApi/apiConfig";
+import axios from 'axios';
 
 export default function CreditoForm() {
   const [actividadLaboral, setActividadLaboral] = useState([]);
@@ -16,27 +17,43 @@ export default function CreditoForm() {
 	console.log(selectedValue);
   };
 
-  const fectchActividadLaboral = async () => {
-    const result = await cre_tiempo();
-    if (!result) {
-      console.error("Error al obtener la actividad laboral");
+  const handleProcudctoSelect = async (e) => {
+	const selectedValue = e;
+	console.log(selectedValue);
+  };
+
+  const fetchEstabilidadLaboral = async () => {
+    try {
+      const response = await axios.get(APIURL.getEstabilidadLaboral(), {
+        headers: { method: "GET", cache: "no-store" },
+      });
+	  console.log(response.data);
+      setEstabilidadLaboral(
+        response.data.map((item) => ({ value: item.idCre_Tiempo, label: item.Descripcion }))
+      );
+    } catch (error) {
+      console.error("Error al obtener estabilidad laboral", error);
+      setEstabilidadLaboral([]);
     }
+  };
 
-    setActividadLaboral(
-      result.map((option) => ({
-        value: option.idSituacionLaboral,
-        label: option.Descripcion,
-      }))
-    );
-
-	setEstabilidadLaboral(result.map((option) => ({
-		value: option.idSituacionLaboral,
-		label: option.Descripcion,
-	})));
+  const fetchActividadLaboral = async () => {
+    try {
+      const response = await axios.get(APIURL.getActividadEconomina(), {
+        headers: { method: "GET", cache: "no-store" },
+      });
+      setActividadLaboral(
+        response.data.map((item) => ({ value: item.idActEconomica, label: item.Nombre }))
+      );
+    } catch (error) {
+      console.error("Error al obtener actividad laboral", error);
+      setActividadLaboral([]);
+    }
   };
 
   useEffect(() => {
-    fectchActividadLaboral();
+    fetchEstabilidadLaboral();
+    fetchActividadLaboral();
   }, []);
 
   if (!actividadLaboral || actividadLaboral.length === 0) {
@@ -73,11 +90,20 @@ export default function CreditoForm() {
       label: "Estabilidad Laboral",
       name: "estabilidadLaboral",
       type: "select",
-      options: actividadLaboral,
+      options: estabilidadLaboral,
       onchange: (e) => handleActividadLaboralSelect(e),
     },
     { label: "Estado", name: "estado", type: "text" },
-    { label: "Producto", name: "producto", type: "text" },
+    {
+		label: "Producto",
+		name: "producto",
+		type: "select",
+		options: [
+		  { value: "celular", label: "Celular" },
+		  { value: "otro", label: "Otro" }
+		],
+		onchange: (e) => handleProcudctoSelect(e)
+	  },
     { label: "Código", name: "codigo", type: "text" },
     { label: "Validación", name: "validacion", type: "text" },
 	{ label: "Afiliado", name: "afiliado", type: "switch" },
