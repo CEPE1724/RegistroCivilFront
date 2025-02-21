@@ -20,6 +20,7 @@ const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [messageError, setMessageError] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const [isLoading, setIsLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +50,7 @@ const Login = () => {
           localStorage.setItem("token", data.token);
           localStorage.setItem("tokenExpiration", expirationTime); // Guarda la expiración
           enqueueSnackbar("Acceso correcto!", { variant: "success" });
+          setIsLoggedIn(true);
           setTimeout(() => {
             navigate("/ciudadanos", { replace: true });
           }, 2000);
@@ -162,6 +164,8 @@ const Login = () => {
                               fontSize: "0.95rem",
                               color: "#000",
                               mb: 0.5,
+                              letterSpacing: "0.1em", 
+
                             }}
                           >
                             Usuario POINT 
@@ -190,7 +194,7 @@ const Login = () => {
                               },
                               "& input": {
                                 padding: "12px 14px",
-                                paddingLeft: "0px",  // Ajusta el padding interno
+                                paddingLeft: "0px", 
                               },
                             }}
                             onChange={(e) =>
@@ -218,6 +222,7 @@ const Login = () => {
                               fontSize: "0.95rem",
                               color: "#000",
                               mb: 0.5,
+                              letterSpacing: "0.1em", 
                             }}
                           >
                             Contraseña
@@ -291,8 +296,9 @@ const Login = () => {
                           </Box>
 
                           <button
-                            className="mb-2 w-full text-white py-2 px-4 rounded-md hover:bg-moradoHover flex items-center justify-center" style={{backgroundColor: "#1965F2"}}
+                            className="mb-2 w-full text-white py-2 px-4 rounded-md hover:bg-red flex items-center justify-center" style={{backgroundColor: "#1965F2" , pointerEvents: isLoading ? "none" : "auto",}}
                             type="submit"
+                            disabled={isLoading || isLoggedIn} 
                           >
                             {isLoading ? (
                             <CircularProgress size={24} color="inherit" />
@@ -308,7 +314,7 @@ const Login = () => {
 
                         {/* Sección de imágenes y texto informativo */}
                   <div className="w-full lg:w-6/12 flex items-center justify-start">
-                    <img className="" src={Ponty} alt="logo" />
+                    <img className="hidden md:block" src={Ponty} alt="logo" />
                     <div className="px-4 py-6 text-white md:mx-6 md:p-12">
                       <div className="mt-8 text-center">
                         {/* <img
