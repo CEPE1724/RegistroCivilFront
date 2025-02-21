@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import { useSnackbar } from "notistack";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import { APIURL } from "../../../configApi/apiConfig";
 import {
   Grid,
   Paper,
@@ -51,8 +52,8 @@ export function GestorOperadora() {
   const fetchDato = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "http://192.168.5.248:3008/api/v1/cre-verificacion-telefonica",
+      const url = APIURL.getCreVerificacionTelefonica();
+      const response = await axios.get(url,
         {
           headers: {
             "Content-Type": "application/json",
