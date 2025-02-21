@@ -4,14 +4,12 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { useSnackbar } from "notistack";
 import axios from "axios";
-import { useHistory } from "react-router-dom";
+import { APIURL } from "../../../configApi/apiConfig";
 import {
   Grid,
   Paper,
   TextField,
   Grow,
-  Button,
-  Select,
   MenuItem,
   Table,
   TableBody,
@@ -28,9 +26,9 @@ const TabContent = ({ children }) => (
       elevation={3}
       sx={{
         width: "100%",
-        maxWidth: { xs: 350, sm: 900 },
+        maxWidth: { xs: 350, sm: 1000 },
         padding: 3,
-        margin: "0 auto",
+        margin: "0",
       }}
     >
       <Grid container spacing={1}>
@@ -44,6 +42,19 @@ export function GestorOperadora() {
   // Estado para controlar la pestaña activa
   const { enqueueSnackbar } = useSnackbar();
   const [dato, setDato] = useState([]);
+  const [laboralData, setLaboralData] = useState([]); //estado datos laborales
+  // Estado para manejar las respuestas VT de cada fila
+  const [respuestaVTState, setRespuestaVTState] = useState({});
+
+  // Función para manejar cambios en el campo Respuesta VT
+  const handleRespuestaVTChange = (id, value) => {
+    setRespuestaVTState((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
+  };
+
+
   useEffect(() => {
     fetchDato();
   }, []);
@@ -51,8 +62,8 @@ export function GestorOperadora() {
   const fetchDato = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get(
-        "http://192.168.5.248:3008/api/v1/cre-verificacion-telefonica",
+      const url = APIURL.getCreVerificacionTelefonica();
+      const response = await axios.get(url,
         {
           headers: {
             "Content-Type": "application/json",
@@ -68,7 +79,21 @@ export function GestorOperadora() {
     }
   };
 
-  // Llamar a la API cuando el componente se monte
+  useEffect(() => {
+    fetchLaboralData();
+  }, []);
+
+  const fetchLaboralData = async () => {
+    try {
+      const response = await axios.get("https://jsonplaceholder.typicode.com/users");
+      setLaboralData(response.data);
+    } catch (error) {
+      enqueueSnackbar("Error fetching Laboral Data: " + error.message, {
+        variant: "error",
+      });
+    }
+  };
+
 
   // Validaciones
   const validateForm = () => {
@@ -168,7 +193,7 @@ export function GestorOperadora() {
 
   // Guardar datos en la tabla
   const handleGuardar = () => {
-    setDataList((prevData) => [...prevData, formData]);
+    setDataList((prevData) => [...prevData, { ...formData, respuestaVT: "" },]);
     setFormData({
       tipoReferencia: "",
       apellidoPaterno: "",
@@ -674,201 +699,67 @@ export function GestorOperadora() {
 
         {/* Datos Laborales del Cliente */}
         {value === 2 && (
-          <TabContent>
-            {/* Columna 1 */}
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Nombre o Razón Social de la Empresa"
-                placeholder="Nombre o Razón Social de la Empresa"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Calle Principal"
-                placeholder="Calle Principal"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Teléfono Celular"
-                placeholder="Teléfono Celular"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-
-              <Box
-                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
-              >
-                <TextField
-                  name="respuestaVT"
-                  label="Respuesta VT"
-                  value={formData.respuestaVT}
-                  onChange={handleInputChange}
-                  fullWidth
-                  size="small"
-                  margin="dense"
-                  InputLabelProps={{ shrink: true }}
-                  select
-                  sx={{ marginRight: 1, width: "335px" }}
-                >
-                  <MenuItem value="" disabled>
-                    Selecciona una opción
-                  </MenuItem>
-                  {dato.length > 0 &&
-                    dato.map((index) => (
-                      <MenuItem
-                        key={index.idCre_VerificacionTelefonicaWeb}
-                        value={index.idCre_VerificacionTelefonicaWeb}
-                      >
-                        {index.Respuesta}
-                      </MenuItem>
-                    ))}
-                </TextField>
-              </Box>
-
-            </Grid>
-
-            {/* Columna 2 */}
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Actividad Económica"
-                placeholder="Actividad Económica"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Numero"
-                placeholder="Numero"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Teléfono Domicilio"
-                placeholder="Teléfono Domicilio"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-            </Grid>
-
-            {/* Columna 3 */}
-            <Grid item xs={12} sm={4}>
-              <TextField
-                label="Calle Transversal"
-                placeholder="Calle Transversal"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <TextField
-                label="Referencia"
-                placeholder="Referencia"
-                fullWidth
-                size="small"
-                margin="dense"
-                InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '& fieldset': {
-                      borderColor: 'black',
-                    },
-                  }, marginBottom: 1
-                }}
-              />
-              <Box
-                sx={{ display: "flex", alignItems: "center", marginBottom: 1 }}
-              >
-                <TextField
-                  label="Respuesta VT"
-                  placeholder="Respuesta VT"
-                  fullWidth
-                  size="small"
-                  margin="dense"
-                  InputLabelProps={{ shrink: true, style: { color: 'black' } }}
-                  select
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '& fieldset': {
-                        borderColor: 'black',
-                      },
-                    }, marginBottom: 1
-                  }}
-                >
-                  <MenuItem value="" disabled>
-                    Selecciona una opción
-                  </MenuItem>
-                  <MenuItem value="Opción 1">Opción 1</MenuItem>
-                  <MenuItem value="Opción 2">Opción 2</MenuItem>
-                  <MenuItem value="Opción 3">Opción 3</MenuItem>
-                </TextField>
-              </Box>
-            </Grid>
-            <button
-              className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
-              style={{ marginTop: "4px" }} // Alineación vertical
-            >Enviar</button>
-          </TabContent>
+          <Box>
+            {/* Tabla de datos laborales */}
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Nombre o Razón Social de la Empresa</TableCell>
+                    <TableCell>Actividad Económica</TableCell>
+                    <TableCell>Número</TableCell>
+                    <TableCell>Calle Principal</TableCell>
+                    <TableCell>Calle Transversal</TableCell>
+                    <TableCell>Referencia</TableCell>
+                    <TableCell>Teléfono Domicilio</TableCell>
+                    <TableCell>Teléfono Celular</TableCell>
+                    <TableCell>Respuesta VT</TableCell>
+                    <TableCell> </TableCell> 
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {laboralData.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.company.name}</TableCell>
+                      <TableCell>{item.company.bs}</TableCell>
+                      <TableCell>{item.address.suite}</TableCell>
+                      <TableCell>{item.address.street}</TableCell>
+                      <TableCell>{item.address.zipcode}</TableCell>
+                      <TableCell>{item.address.city}</TableCell>
+                      <TableCell>{item.phone}</TableCell>
+                      <TableCell>{item.phone}</TableCell>
+                      <TableCell>
+                        {/* Campo Respuesta VT */}
+                        <TextField
+                          select
+                          name={`respuestaVT-${item.id}`}
+                          value={respuestaVTState[item.id] || ""}
+                          onChange={(e) => handleRespuestaVTChange(item.id, e.target.value)}
+                          fullWidth
+                        >
+                          {dato.length > 0 &&
+                            dato.map((index) => (
+                              <MenuItem key={index.Respuesta} value={index.Respuesta}>
+                                {index.Respuesta}
+                              </MenuItem>
+                            ))}
+                        </TextField>
+                      </TableCell>
+                      <TableCell>
+                        {/* Botón Enviar */}
+                        <button
+                          className="rounded-full bg-blue-600 text-white px-6 py-2.5 hover:bg-blue-700 transition"
+                          style={{ marginTop: "4px" }}                          
+                        >
+                          Enviar
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
         )}
 
         {/* Referencias del Cliente */}
