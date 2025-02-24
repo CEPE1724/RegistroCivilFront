@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 
-const FormField = ({
-  label,
-  name,
-  type = "text",
-  formik,
-  component: Component,
-  options = [],
-  onchange,
-  ...props
+const FormField = ({ label,
+  name, type = "text", formik, component: Component, options = [], onchange, hidden, ...props
 }) => {
   const [preview, setPreview] = useState(null);
+  
+  if (hidden) {
+	return null;
+  }
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -33,7 +30,7 @@ const FormField = ({
             htmlFor={name}
             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center w-full"
           >
-            Seleccionar archivo
+            Seleccionar Foto
             <input
               id={name}
               name={name}
@@ -154,8 +151,21 @@ const ReusableForm = ({
   onCancel,
   columns = 1,
 }) => {
-  const formik = useFormik({ initialValues, validationSchema, onSubmit });
-
+	const formik = useFormik({
+		initialValues: {
+		  ...initialValues,
+		  bTerminosYCondiciones: false,
+		  bPoliticas: false,
+		  ...Object.fromEntries(
+			formConfig
+			  .filter(field => field.type === "select")
+			  .map(field => [field.name, ""])
+		  ),
+		},
+		validationSchema,
+		onSubmit,
+	  });
+	  
   const fileField = formConfig.find((field) => field.type === "file");
   const otherFields = formConfig.filter((field) => field.type !== "file");
 
@@ -199,39 +209,60 @@ const ReusableForm = ({
 
       {/* Términos y condiciones */}
       {includeTermsAndConditions && (
-        <div className="py-2 w-full flex flex-col items-center">
-          <label className="text-lightGrey text-xs text-center">
+        <div className="flex justify-center gap-4 mt-4 mb-4">
+          <div className="flex items-center gap-2">
             <input
               type="checkbox"
-              name="acceptance"
-              id="acceptance"
+              name="bTerminosYCondiciones"
+              id="bTerminosYCondiciones"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              checked={formik.values.acceptance}
+              checked={formik.values.bTerminosYCondiciones}
               className="text-fontRed accent-fontRed rounded"
-            />{" "}
-            Acepto los{" "}
-            <a
-              href="/terminos-y-condiciones"
-              className="underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              términos y condiciones
-            </a>{" "}
-            y las{" "}
-            <a
-              href="/politicas-de-privacidad"
-              className="underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              políticas de privacidad
-            </a>
-          </label>
-          {formik.errors.acceptance && formik.touched.acceptance && (
+            />
+            <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
+              Acepto los{" "}
+              <a
+                href="/terminos-y-condiciones"
+                className="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                términos y condiciones
+              </a>
+            </label>
+          </div>
+          {formik.errors.bTerminosYCondiciones && formik.touched.bTerminosYCondiciones && (
             <p className="text-red-500 text-xs mt-1 text-center">
-              {formik.errors.acceptance}
+              {formik.errors.bTerminosYCondiciones}
+            </p>
+          )}
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="bPoliticas"
+              id="bPoliticas"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              checked={formik.values.bPoliticas}
+              className="text-fontRed accent-fontRed rounded"
+            />
+            <label htmlFor="bPoliticas" className="text-lightGrey text-xs">
+              Acepto las{" "}
+              <a
+                href="/politicas-de-privacidad"
+                className="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                políticas de privacidad
+              </a>
+            </label>
+          </div>
+          {formik.errors.bPoliticas && formik.touched.bPoliticas && (
+            <p className="text-red-500 text-xs mt-1 text-center">
+              {formik.errors.bPoliticas}
             </p>
           )}
         </div>
@@ -239,24 +270,23 @@ const ReusableForm = ({
 
       {/* Botones */}
       {includeButtons && (
-  <div className="py-2 flex flex-col md:flex-row justify-center gap-2">
-    <button
-      type="submit"
-      className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
-      disabled={loading}
-    >
-      {loading ? "Enviando..." : submitButtonText}
-    </button>
-    <button
-      type="button"
-      className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 transition-colors text-xs px-6 py-2.5"
-      onClick={onCancel}
-    >
-      {cancelButtonText}
-    </button>
-  </div>
-)}
-
+        <div className="py-2 flex flex-col md:flex-row justify-center gap-2">
+          <button
+            type="submit"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
+            disabled={loading}
+          >
+            {loading ? "Enviando..." : submitButtonText}
+          </button>
+          <button
+            type="button"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 transition-colors text-xs px-6 py-2.5"
+            onClick={onCancel}
+          >
+            {cancelButtonText}
+          </button>
+        </div>
+      )}
     </form>
   );
 };
