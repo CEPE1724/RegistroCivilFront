@@ -20,5 +20,6 @@ export const APIURL = {
 	  getEstabilidadLaboral : () => `${API_BASE_URL}cre-tiempo/1`,
     getCreVerificacionTelefonica : () => `${API_BASE_URL}cre-verificacion-telefonica`,
     getCreSolicitudCredito : () => `${API_BASE_URL}cre-solicitud-web`,
-    getActividadEconomina : () => `${API_BASE_URL}cre-actividadeconomina/2`
+    getActividadEconomina : () => `${API_BASE_URL}cre-actividadeconomina/2`,
+    getTipoConsulta : () => `${API_BASE_URL}compraencuesta/1`
 };

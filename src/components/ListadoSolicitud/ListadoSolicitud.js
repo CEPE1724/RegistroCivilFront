@@ -25,18 +25,19 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import { APIURL } from "../../configApi/apiConfig";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import SkipNextIcon from "@mui/icons-material/SkipNext";  
-import PersonIcon from '@mui/icons-material/Person';
-import BadgeIcon from '@mui/icons-material/Badge';
-import StoreIcon from '@mui/icons-material/Store';
-import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
-import InfoIcon from '@mui/icons-material/Info';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import EventIcon from '@mui/icons-material/Event';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BusinessIcon from '@mui/icons-material/Business';
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import PersonIcon from "@mui/icons-material/Person";
+import BadgeIcon from "@mui/icons-material/Badge";
+import StoreIcon from "@mui/icons-material/Store";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
+import InfoIcon from "@mui/icons-material/Info";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import EventIcon from "@mui/icons-material/Event";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BusinessIcon from "@mui/icons-material/Business";
+import { useNavigate } from "react-router-dom"
 
 export function ListadoSolicitud() {
   const [search, setSearch] = useState("");
@@ -45,13 +46,48 @@ export function ListadoSolicitud() {
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [totalPages, setTotalPages] = useState(1);  // Total de páginas
-  const [total, setTotal] = useState(0);  // Total de registros
-  const itemsPerPage = 5  ;
+  const [totalPages, setTotalPages] = useState(1); // Total de páginas
+  const [total, setTotal] = useState(0); // Total de registros
+  const itemsPerPage = 5;
+  const [tipoConsulta, setTipoConsulta] = useState([]);
+  const [searchDateFrom, setSearchDateFrom] = useState(''); // Fecha de inicio
+  const [searchDateTo, setSearchDateTo] = useState(''); 
+  const navigate = useNavigate();
+  
 
   useEffect(() => {
-    fetchSolicitudes();
-  }, [currentPage]);  // Agregar `currentPage` como dependencia
+    fetchTipoConsulta();
+    if (tipoConsulta.length > 0) {
+      fetchSolicitudes();
+    }
+  }, [tipoConsulta, currentPage]); // Agrega tipoConsulta como dependencia
+  
+
+  const fetchTipoConsulta = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(APIURL.getTipoConsulta(), {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.status === 200) {
+        const tipoConsulta = response.data.map((item) => ({
+          id: item.idCompraEncuesta,
+          descripcion: item.Descripcion,
+        }));
+        setTipoConsulta(tipoConsulta)
+        console.log("Tipo de Consulta:", tipoConsulta);
+        // Aquí puedes establecer el estado con los datos obtenidos si es necesario
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching tipo de consulta:", error);
+    }
+  };
 
   const fetchSolicitudes = async () => {
     try {
@@ -64,51 +100,61 @@ export function ListadoSolicitud() {
         },
         params: {
           limit: itemsPerPage,
-          offset : offset,
+          offset: offset,
         },
       });
   
       if (response.status === 200) {
-        // Contar el total de registros (tamaño del array recibido)
-        const totalRecords = response.data.total; // Si la API devuelve un campo 'total' con el número total de registros
-
- // Mostrar el total de registros
-        // Calcular el total de páginas (redondeando hacia arriba)
+        const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
   
-        // Establecer los datos y el total de páginas
-      
-          const datos = response.data.data.map((item) => ({
-          id: item.idCre_SolicitudWeb,
-          nombre: `${item.Nombres} ${item.Apellidos}`,
-          cedula: item.Cedula,
-          almacen: item.Bodega,
-          vendedor: item.idVendedor,
-          consulta: item.idCompraEncuesta,
-          estado: item.Estado === 1 ? "activo" : "pendiente",
-          imagen: item.Foto,
-          celular: item.Celular,
-          email: item.Email,
-          fecha: item.Fecha,
-          afiliado: item.bAfiliado ? "Sí" : "No",
-          tieneRuc: item.bTieneRuc ? "Sí" : "No",
-        }));
-      
-        console.log("imprime aqui "+ datos);
+        const datos = response.data.data.map((item) => {
+          // Buscar la descripción del tipo de consulta correspondiente al ID
+           console.log("efasd"+ tipoConsulta)
+           const consulta = tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido";
+           console.log("asdasdasdasdasd" + consulta)
+          return {
+            id: item.idCre_SolicitudWeb,
+            nombre: `${item.Nombres} ${item.Apellidos}`,
+            cedula: item.Cedula,
+            almacen: item.Bodega === 1 ? "Quicentro" : "Desconocido",
+            vendedor: item.idVendedor === 123 ? "Kevin Alexander Lema Naranjo" : "nonde",
+            consulta: consulta, // Usar la descripción de la consulta
+            estado: item.Estado === 0 ? "pendiente" : item.Estado === 1 ? "aprobado" : item.Estado === 2 ? "anulado" : item.Estado === 3 ? "rechazado" : "desconocido",
+            imagen: item.Foto,
+            celular: item.Celular,
+            email: item.Email,
+            fecha: item.Fecha,
+            afiliado: item.bAfiliado ? "Sí" : "No",
+            tieneRuc: item.bTieneRuc ? "Sí" : "No",
+          };
+        });
+  
         setDatos(datos);
-      
-        // Establecer el total de páginas y total de registros
         setTotal(totalRecords);
         setTotalPages(totalPages);
       } else {
-        // Maneja el caso en que la respuesta es exitosa pero con un código de estado distinto
-        // setError(`Error: ${response.status} - ${response.statusText}`);
+        console.error(`Error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
   
+
+  const handledocumentos = (registro) => {
+    navigate('/documental', {
+      state: {
+        id: registro.id,
+        nombre: registro.nombre,
+        cedula: registro.cedula,
+        fecha: registro.fecha,
+        almacen: registro.almacen,
+        foto: registro.imagen
+      }
+    });
+  };
+    
 
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
@@ -119,17 +165,19 @@ export function ListadoSolicitud() {
     setView(false);
     setSelectedRow(null);
   };
-
   const filteredData = datos.filter(
     (item) =>
       item.nombre.toLowerCase().includes(search.toLowerCase()) &&
-      (estado ? item.estado === estado : true)
+      (estado ? item.estado === estado : true) &&
+      (searchDateFrom
+        ? new Date(item.fecha) >= new Date(searchDateFrom)
+        : true) &&
+      (searchDateTo ? new Date(item.fecha) <= new Date(searchDateTo) : true)
   );
 
   // Función para cambiar de página
   const changePage = (page) => {
     setCurrentPage(page);
-    
   };
 
   return (
@@ -139,6 +187,30 @@ export function ListadoSolicitud() {
       </h1>
 
       <div className="flex gap-6 mb-4">
+      <TextField
+          label="Fecha Desde"
+          type="date"
+          variant="outlined"
+          value={searchDateFrom}
+          onChange={(e) => setSearchDateFrom(e.target.value)}
+          fullWidth
+          size="small"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+        <TextField
+          label="Fecha Hasta"
+          type="date"
+          variant="outlined"
+          value={searchDateTo}
+          onChange={(e) => setSearchDateTo(e.target.value)}
+          fullWidth
+          size="small"
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
         <TextField
           label="Buscar por nombre"
           variant="outlined"
@@ -154,6 +226,7 @@ export function ListadoSolicitud() {
             onChange={(e) => setEstado(e.target.value)}
             label="Estado"
           >
+    
             <MenuItem value="">
               <em>Seleccionar</em>
             </MenuItem>
@@ -179,6 +252,9 @@ export function ListadoSolicitud() {
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   CEDULA
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  FECHA
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Almacen
@@ -207,11 +283,12 @@ export function ListadoSolicitud() {
                     <img
                       className="rounded-md object-cover w-1/3 h-full mx-auto"
                       src={data.imagen}
-                    alt="Imagen"
+                      alt="Imagen"
                     />
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
+                  <TableCell align="center">{data.fecha.substring(0,10)}</TableCell>
                   <TableCell align="center">{data.almacen}</TableCell>
                   <TableCell align="center">{data.vendedor}</TableCell>
                   <TableCell align="center">{data.consulta}</TableCell>
@@ -225,17 +302,13 @@ export function ListadoSolicitud() {
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-center gap-2">
-                      <Button
-                        class="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
-                      >
-                        Documentos
-                      </Button>
-                      <Button
-                        class="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
-                      >
-                        Telefonica 
-                      </Button>
+                    <button onClick={() => handledocumentos(data)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:ring-0 focus:shadow-none">
+  Documentos
+</button>
 
+                      <button className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:shadow-none">
+                        Telefonica
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -247,113 +320,116 @@ export function ListadoSolicitud() {
 
       {/* Cuadro de diálogo para ver detalles */}
       <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-  <DialogTitle className="text-xl font-bold">Detalles de la Solicitud</DialogTitle>
-  <DialogContent dividers>
-    {selectedRow && (
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Columna izquierda: Imagen */}
-        <div className="flex justify-center items-center md:w-1/3">
-          <img
-            src={selectedRow.imagen}
-            alt="Imagen"
-            className="w-64 h-64 object-cover rounded-md"
-          />
-        </div>
-        {/* Columna derecha: Datos en dos columnas */}
-        <div className="md:w-2/3">
-          <div className="grid grid-cols-2 gap-x-8  text-base">
-            <div className="flex items-center gap-2 mb-8">
-              <PersonIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Nombre:</p>
-                <p>{selectedRow.nombre}</p>
+        <DialogTitle className="text-xl font-bold">
+          Detalles de la Solicitud
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedRow && (
+            <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
+              {/* Imagen */}
+              <div className="flex justify-center items-center md:w-1/3">
+                <img
+                  src={selectedRow.imagen}
+                  alt="Imagen"
+                  className="w-64 h-64 object-cover rounded-md"
+                />
               </div>
-            </div>
-            <div className="flex items-center gap-2 ">
-              <BadgeIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Cédula:</p>
-                <p>{selectedRow.cedula}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 pt-4">
-              <StoreIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Almacén:</p>
-                <p>{selectedRow.almacen}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <SupervisorAccountIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Vendedor:</p>
-                <p>{selectedRow.vendedor}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 pt-4">
-              <InfoIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Tipo de Consulta:</p>
-                <p>{selectedRow.consulta}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <VerifiedIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Estado:</p>
-                <p>{selectedRow.estado}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <PhoneIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Celular:</p>
-                <p>{selectedRow.celular}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <EmailIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Email:</p>
-                <p>{selectedRow.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <EventIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Fecha:</p>
-                <p>{selectedRow.fecha}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircleIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Afiliado:</p>
-                <p>{selectedRow.afiliado}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <BusinessIcon className="text-blue-500" fontSize="medium" />
-              <div>
-                <p className="font-semibold">Tiene RUC:</p>
-                <p>{selectedRow.tieneRuc}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleCloseDialog} color="primary" className="text-base font-semibold">
-      Cerrar
-    </Button>
-  </DialogActions>
-</Dialog>
 
+              {/* Datos */}
+              <div className="md:w-2/3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
+                  <div className="flex items-center gap-2">
+                    <PersonIcon className="text-blue-500" fontSize="medium" />
+                    <p>{selectedRow.nombre}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BadgeIcon className="text-blue-500" fontSize="medium" />
+                    <p className="font-semibold">Cédula:</p>
+                    <p>{selectedRow.cedula}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StoreIcon className="text-blue-500" fontSize="medium" />
+                    <p className="font-semibold">Almacén:</p>
+                    <p>{selectedRow.almacen}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <SupervisorAccountIcon
+                      className="text-blue-500"
+                      fontSize="medium"
+                    />
+                    <p className="font-semibold">Vendedor:</p>
+                    <p>{selectedRow.vendedor}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <InfoIcon className="text-blue-500" fontSize="medium" />
+                    <p className="font-semibold">Tipo de Consulta:</p>
+                    <p>{selectedRow.consulta}</p>
+                  </div>
+                  {/* Estado con color dinámico en el texto */}
+                  <div className="flex items-center">
+                    <InfoIcon className="mr-2 text-blue-500" />
+                    <span
+                      className={`ml-2 font-semibold ${
+                        selectedRow.estado === "activo"
+                          ? "text-green-500"
+                          : selectedRow.estado === "pendiente"
+                          ? "text-yellow-500"
+                          : selectedRow.estado === "anulado"
+                          ? "text-gray-500"
+                          : selectedRow.estado === "aprobado"
+                          ? "text-blue-500"
+                          : selectedRow.estado === "rechazado"
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {selectedRow.estado}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PhoneIcon className="text-blue-500" fontSize="medium" />
+                    <p>{selectedRow.celular}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <EmailIcon className="text-blue-500" fontSize="medium" />
+                    <p>{selectedRow.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <EventIcon className="text-blue-500" fontSize="medium" />
+                    <p className="font-semibold">Fecha:</p>
+                    <p>{selectedRow.fecha.substring(0, 10)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircleIcon
+                      className="text-blue-500"
+                      fontSize="medium"
+                    />
+                    <p className="font-semibold">Afiliado:</p>
+                    <p>{selectedRow.afiliado}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BusinessIcon className="text-blue-500" fontSize="medium" />
+                    <p className="font-semibold">Tiene RUC:</p>
+                    <p>{selectedRow.tieneRuc}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseDialog}
+            color="primary"
+            className="text-base font-semibold"
+          >
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Paginación */}
-      { totalPages > 1 &&(
+      {totalPages > 1 && (
         <div className="mt-6 flex justify-center items-center gap-4">
           <button
             onClick={() => changePage(Math.max(currentPage - 1, 1))}
