@@ -1,23 +1,51 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
+import { useSnackbar } from "notistack";
 
-const FormField = ({ label,
-  name, type = "text", formik, component: Component, options = [], onchange, hidden, previewUrl, setPreviewUrl, ...props
-}) => {
-  
+const FormField = ({
+  label,
+  name,
+  type = "text",
+  formik,
+  component: Component,
+  options = [],
+  onchange,
+  hidden,
+  previewUrl,
+  setPreviewUrl,
+  ...props
+}) => {  
+
+	const { enqueueSnackbar } = useSnackbar();
+
   if (hidden) {
-	return null;
+    return null;
   }
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-	const stringPhoto = file.name;
+
+	const SUPPORTED_FORMATS = [
+		"image/jpg", 
+		"image/jpeg", 
+		"image/png",
+	  ];
+
+	  const file = event.target.files ? event.target.files[0] : null;
+
+	  if (file) {
+		if (!SUPPORTED_FORMATS.includes(file.type)) {
+			formik.setFieldError(name, "El archivo debe ser una imagen (JPG, PNG, GIF o WebP)");
+			enqueueSnackbar("El archivo debe ser una imagen (JPG, PNG, GIF o WebP)", { variant: "error" });
+			return;
+		  }
+	  }
+    const stringPhoto = file ? file.name : "";
     formik.setFieldValue(name, stringPhoto);
     if (file) {
-		setPreviewUrl(URL.createObjectURL(file));
-	} else {
-		setPreviewUrl(null);
-	}
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
   };
 
   // Si es un campo de tipo archivo, renderizamos una estructura diferente
@@ -28,7 +56,7 @@ const FormField = ({ label,
           {label}
         </label>
         <div className="flex flex-col h-full">
-          <label 
+          <label
             htmlFor={name}
             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center w-full"
           >
@@ -44,12 +72,12 @@ const FormField = ({ label,
               {...props}
             />
           </label>
-          {previewUrl  && (
+          {previewUrl && (
             <div className="mt-4 flex justify-center">
               <div className="w-40 h-45">
-                <img 
-                  src={previewUrl} 
-                  alt="Preview" 
+                <img
+                  src={previewUrl}
+                  alt="Preview"
                   className="w-full h-full object-cover rounded-md border"
                 />
               </div>
@@ -70,7 +98,10 @@ const FormField = ({ label,
       </label>
 
       {Component ? (
-        <Component {...props} onLocationSelect={(location) => formik.setFieldValue(name, location)} />
+        <Component
+          {...props}
+          onLocationSelect={(location) => formik.setFieldValue(name, location)}
+        />
       ) : type === "select" ? (
         <select
           id={name}
@@ -106,20 +137,20 @@ const FormField = ({ label,
         />
       ) : type === "switch" ? (
         <div className="flex items-center gap-2">
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input
-        id={name}
-        name={name}
-        type="checkbox"
-        className="sr-only peer"
-        onChange={(e) => formik.setFieldValue(name, e.target.checked)}
-        onBlur={formik.handleBlur}
-        checked={formik.values[name]}
-        {...props}
-      />
-      <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-    </label>
-  </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              id={name}
+              name={name}
+              type="checkbox"
+              className="sr-only peer"
+              onChange={(e) => formik.setFieldValue(name, e.target.checked)}
+              onBlur={formik.handleBlur}
+              checked={formik.values[name]}
+              {...props}
+            />
+            <div className="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
       ) : (
         <input
           id={name}
@@ -154,46 +185,75 @@ const ReusableForm = ({
   columns = 1,
   formStatus,
 }) => {
-	
-	const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
+  const notifiedErrors = useRef(new Set());
 
-	const formik = useFormik({
-		initialValues: {
-		  ...initialValues,
-		  bTerminosYCondiciones: false,
-		  bPoliticas: false,
-		  ...Object.fromEntries(
-			formConfig
-			  .filter(field => field.type === "select")
-			  .map(field => [field.name, ""])
-		  ),
-		},
-		validationSchema,
-		onSubmit: async (values, { resetForm }) => {
-			setIsSubmitting(true);
-			await onSubmit(values);
-			setIsSubmitting(false);
-		  },
-	  });
+  const formik = useFormik({
+    initialValues: {
+      ...initialValues,
+      bTerminosYCondiciones: false,
+      bPoliticas: false,
+      ...Object.fromEntries(
+        formConfig
+          .filter((field) => field.type === "select")
+          .map((field) => [field.name, ""])
+      ),
+    },
+    validationSchema,
+    onSubmit: async (values, { resetForm }) => {
+      setIsSubmitting(true);
+      await onSubmit(values);
+      setIsSubmitting(false);
+    },
+  });
 
-	  useEffect(() => {
-		if (formStatus === "success") {
-		  setTimeout(() => {
-			formik.resetForm();
-			setPreviewUrl(null);
-		  }, 2000);
-		}
-	  }, [formStatus]);
+  useEffect(() => {
+    const errorKeys = Object.keys(formik.errors);
+    
+    if (errorKeys.length > 0) {
+      // Buscar el primer error en un campo tocado que no haya sido notificado previamente
+      const firstErrorKey = errorKeys.find(
+        (key) => formik.touched[key] && !notifiedErrors.current.has(key)
+      );
+      
+      if (firstErrorKey) {
+        enqueueSnackbar(formik.errors[firstErrorKey], { variant: "error", preventDuplicate: true });
+        notifiedErrors.current.add(firstErrorKey);
+      }
+    }
+  }, [formik.errors, formik.touched, enqueueSnackbar]);
+  
+  // Efecto para limpiar errores resueltos
+  useEffect(() => {
+    const currentErrorKeys = new Set(Object.keys(formik.errors));
+    
+    // Eliminar de notifiedErrors aquellos campos que ya no tienen errores
+    notifiedErrors.current.forEach((field) => {
+      if (!currentErrorKeys.has(field)) {
+        notifiedErrors.current.delete(field);
+      }
+    });
+  }, [formik.errors]);
 
-	  const handleCancel = () => {
-		setIsCanceling(true);
-		formik.resetForm();
-		setPreviewUrl(null);
-		setTimeout(() => setIsCanceling(false), 3000);
-	  };
-	  
+  useEffect(() => {
+    if (formStatus === "success") {
+      setTimeout(() => {
+        formik.resetForm();
+        setPreviewUrl(null);
+      }, 2000);
+    }
+  }, [formStatus]);
+
+  const handleCancel = () => {
+    setIsCanceling(true);
+    formik.resetForm();
+    setPreviewUrl(null);
+    setTimeout(() => setIsCanceling(false), 3000);
+  };
+
   const fileField = formConfig.find((field) => field.type === "file");
   const otherFields = formConfig.filter((field) => field.type !== "file");
 
@@ -203,20 +263,27 @@ const ReusableForm = ({
       onSubmit={(e) => {
         e.preventDefault();
         console.log("Formik errors:", formik.errors);
-        console.log("Formik values:", formik.values);
+        // console.log("Formik values:", formik.values);
+
+		if (Object.keys(formik.errors).length > 0) {
+			enqueueSnackbar(`Por favor revisa que todos los campos sean correctos`, { 
+				variant: "error" ,
+				preventDuplicate: true
+			  });
+		}
 		formik.handleSubmit(e);
-    }}
+      }}
     >
       <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
         {fileField && (
           <div className="md:col-span-1 order-2 md:order-1">
             <div className="w-30">
-			<FormField 
-                key={fileField.name} 
-                {...fileField} 
-                formik={formik} 
-                previewUrl={previewUrl} 
-                setPreviewUrl={setPreviewUrl} 
+              <FormField
+                key={fileField.name}
+                {...fileField}
+                formik={formik}
+                previewUrl={previewUrl}
+                setPreviewUrl={setPreviewUrl}
               />
             </div>
           </div>
@@ -254,7 +321,10 @@ const ReusableForm = ({
               checked={formik.values.bTerminosYCondiciones}
               className="text-fontRed accent-fontRed rounded"
             />
-            <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
+            <label
+              htmlFor="bTerminosYCondiciones"
+              className="text-lightGrey text-xs"
+            >
               Acepto los{" "}
               <a
                 href="/terminos-y-condiciones"
@@ -266,11 +336,12 @@ const ReusableForm = ({
               </a>
             </label>
           </div>
-          {formik.errors.bTerminosYCondiciones && formik.touched.bTerminosYCondiciones && (
-            <p className="text-red-500 text-xs mt-1 text-center">
-              {formik.errors.bTerminosYCondiciones}
-            </p>
-          )}
+          {formik.errors.bTerminosYCondiciones &&
+            formik.touched.bTerminosYCondiciones && (
+              <p className="text-red-500 text-xs mt-1 text-center">
+                {formik.errors.bTerminosYCondiciones}
+              </p>
+            )}
 
           <div className="flex items-center gap-2">
             <input
@@ -301,7 +372,6 @@ const ReusableForm = ({
           )}
         </div>
       )}
-	  
 
       {/* Botones */}
       {/* {includeButtons && (
@@ -322,11 +392,11 @@ const ReusableForm = ({
           </button>
         </div>
       )} */}
-	  {includeButtons && (
+      {includeButtons && (
         <div className="py-2 flex justify-center gap-2">
           <button
             type="submit"
-             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Enviando..." : submitButtonText}

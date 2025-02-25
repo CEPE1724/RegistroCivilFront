@@ -28,7 +28,7 @@ export default function CreditoForm() {
       );
     } catch (error) {
       console.error("Error al obtener estabilidad laboral", error);
-	  enqueueSnackbar("Error al cargar estabilidad laboral", { variant: "error" });
+	  enqueueSnackbar("Error al cargar estabilidad laboral", { variant: "error", preventDuplicate: true });
       setEstabilidadLaboral([]);
     }
   };
@@ -79,11 +79,7 @@ export default function CreditoForm() {
 
   const initialValues = {
     Fecha:
-      new Date(
-        new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })
-      )
-        .toISOString()
-        .split("T")[0] + "T00:00:00Z",
+    new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
     NumeroSolicitud: "12345",
     Bodega: 1,
     idVendedor: 123,
@@ -98,7 +94,7 @@ export default function CreditoForm() {
     idCre_Tiempo: null,
     bAfiliado: false,
     bTieneRuc: false,
-    Foto: "fotoUrl.jpg",
+    Foto: "",
     bTerminosYCondiciones: false,
     bPoliticas: false,
     idProductos: null,
@@ -225,14 +221,11 @@ export default function CreditoForm() {
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-      Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres"),
-      //   .required("Campo requerido"),
+      Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres").required("Campo requerido"),
 
-      bTerminosYCondiciones: Yup.boolean().oneOf(
-        [true],
-        "Debe aceptar los términos y condiciones"
-      ),
-      bPoliticas: Yup.boolean().oneOf([true], "Debe aceptar las políticas"),
+      bTerminosYCondiciones: Yup.boolean().required(),
+    
+      bPoliticas: Yup.boolean().required(),
 
       idProductos: Yup.number()
         .nullable()
@@ -277,6 +270,7 @@ export default function CreditoForm() {
   };
 
   const handleSubmit = async (values) => {
+	
     const formattedValues = {
       ...values,
       idActEconomina: Number(values.idActEconomina),
@@ -305,11 +299,14 @@ export default function CreditoForm() {
           headers: { method: "POST", cache: "no-store" },
         }
       );
-	  enqueueSnackbar("Solicitud guardada con exito", { variant: "success" });
+	  enqueueSnackbar("Solicitud guardada con exito", { variant: "success", preventDuplicate: true });
 	  setFormStatus("success");
     } catch (error) {
       console.error("Error al enviar los datos:", error);
-	  enqueueSnackbar("Error al enviar la solicitud, por favor revisa que tus datos sean correctos", { variant: "error" });
+	  enqueueSnackbar(`Error al enviar los datos. Por favor revisa que todos los campos sean correctos`, { 
+		variant: "error",
+		preventDuplicate: true
+	  });
 	  setFormStatus("error");
     }
   };
