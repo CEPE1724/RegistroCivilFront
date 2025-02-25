@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { APIURL } from "../../../configApi/apiConfig";
 import axios from "axios";
 import { useSnackbar } from "notistack";
+import { set } from "react-hook-form";
 
 export default function CreditoForm() {
   const [actividadLaboral, setActividadLaboral] = useState([]);
@@ -11,6 +12,8 @@ export default function CreditoForm() {
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const [prevErrors, setPrevErrors] = useState({});
+  const [formStatus, setFormStatus] = useState(null);
+
 
   const fetchEstabilidadLaboral = async () => {
     try {
@@ -250,7 +253,6 @@ export default function CreditoForm() {
   };
 
   const showFormErrors = (errors) => {
-    // Si hay cualquier error, mostrar el mensaje específico solicitado
     if (Object.keys(errors).length > 0) {
       enqueueSnackbar('Por favor, revisa el campo nombre y todos los demás campos para que puedan funcionar correctamente.', { 
         variant: "error",
@@ -259,9 +261,7 @@ export default function CreditoForm() {
       });
     }
     
-    // Mostrar cada error individual también
     Object.keys(errors).forEach(fieldName => {
-      // Solo mostrar notificación si este error es nuevo o ha cambiado
       if (!prevErrors[fieldName] || prevErrors[fieldName] !== errors[fieldName]) {
         const fieldConfig = formConfig.find(f => f.name === fieldName);
         const fieldLabel = fieldConfig ? fieldConfig.label : fieldName;
@@ -273,8 +273,6 @@ export default function CreditoForm() {
         });
       }
     });
-    
-    // Actualizar el estado de errores previos
     setPrevErrors(errors);
   };
 
@@ -307,12 +305,12 @@ export default function CreditoForm() {
           headers: { method: "POST", cache: "no-store" },
         }
       );
-
-      console.log(response_cogno.data);
-      console.log("Respuesta del servidor:", response.data);
+	  enqueueSnackbar("Solicitud guardada con exito", { variant: "success" });
+	  setFormStatus("success");
     } catch (error) {
       console.error("Error al enviar los datos:", error);
 	  enqueueSnackbar("Error al enviar la solicitud, por favor revisa que tus datos sean correctos", { variant: "error" });
+	  setFormStatus("error");
     }
   };
 
@@ -327,6 +325,7 @@ export default function CreditoForm() {
         includeButtons={true}
         columns={3}
         includeTermsAndConditions={true}
+		formStatus={formStatus}
       />
     </div>
   );

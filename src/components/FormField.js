@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 
 const FormField = ({ label,
-  name, type = "text", formik, component: Component, options = [], onchange, hidden, ...props
+  name, type = "text", formik, component: Component, options = [], onchange, hidden, previewUrl, setPreviewUrl, ...props
 }) => {
-  const [preview, setPreview] = useState(null);
   
   if (hidden) {
 	return null;
@@ -12,10 +11,13 @@ const FormField = ({ label,
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    formik.setFieldValue(name, file);
+	const stringPhoto = file.name;
+    formik.setFieldValue(name, stringPhoto);
     if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
+		setPreviewUrl(URL.createObjectURL(file));
+	} else {
+		setPreviewUrl(null);
+	}
   };
 
   // Si es un campo de tipo archivo, renderizamos una estructura diferente
@@ -42,11 +44,11 @@ const FormField = ({ label,
               {...props}
             />
           </label>
-          {preview && (
+          {previewUrl  && (
             <div className="mt-4 flex justify-center">
               <div className="w-40 h-45">
                 <img 
-                  src={preview} 
+                  src={previewUrl} 
                   alt="Preview" 
                   className="w-full h-full object-cover rounded-md border"
                 />
@@ -150,7 +152,13 @@ const ReusableForm = ({
   loading = false,
   onCancel,
   columns = 1,
+  formStatus,
 }) => {
+	
+	const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
 	const formik = useFormik({
 		initialValues: {
 		  ...initialValues,
@@ -163,8 +171,28 @@ const ReusableForm = ({
 		  ),
 		},
 		validationSchema,
-		onSubmit,
+		onSubmit: async (values, { resetForm }) => {
+			setIsSubmitting(true);
+			await onSubmit(values);
+			setIsSubmitting(false);
+		  },
 	  });
+
+	  useEffect(() => {
+		if (formStatus === "success") {
+		  setTimeout(() => {
+			formik.resetForm();
+			setPreviewUrl(null);
+		  }, 2000);
+		}
+	  }, [formStatus]);
+
+	  const handleCancel = () => {
+		setIsCanceling(true);
+		formik.resetForm();
+		setPreviewUrl(null);
+		setTimeout(() => setIsCanceling(false), 3000);
+	  };
 	  
   const fileField = formConfig.find((field) => field.type === "file");
   const otherFields = formConfig.filter((field) => field.type !== "file");
@@ -176,14 +204,20 @@ const ReusableForm = ({
         e.preventDefault();
         console.log("Formik errors:", formik.errors);
         console.log("Formik values:", formik.values);
-        formik.handleSubmit(e);
-      }}
+		formik.handleSubmit(e);
+    }}
     >
       <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
         {fileField && (
           <div className="md:col-span-1 order-2 md:order-1">
             <div className="w-30">
-              <FormField key={fileField.name} {...fileField} formik={formik} />
+			<FormField 
+                key={fileField.name} 
+                {...fileField} 
+                formik={formik} 
+                previewUrl={previewUrl} 
+                setPreviewUrl={setPreviewUrl} 
+              />
             </div>
           </div>
         )}
@@ -267,9 +301,10 @@ const ReusableForm = ({
           )}
         </div>
       )}
+	  
 
       {/* Botones */}
-      {includeButtons && (
+      {/* {includeButtons && (
         <div className="py-2 flex flex-col md:flex-row justify-center gap-2">
           <button
             type="submit"
@@ -281,9 +316,28 @@ const ReusableForm = ({
           <button
             type="button"
             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 transition-colors text-xs px-6 py-2.5"
-            onClick={onCancel}
+            onClick={handleCancel}
           >
             {cancelButtonText}
+          </button>
+        </div>
+      )} */}
+	  {includeButtons && (
+        <div className="py-2 flex justify-center gap-2">
+          <button
+            type="submit"
+             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Enviando..." : submitButtonText}
+          </button>
+          <button
+            type="button"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 transition-colors text-xs px-6 py-2.5"
+            onClick={handleCancel}
+            disabled={isCanceling}
+          >
+            {isCanceling ? "Cancelando..." : cancelButtonText}
           </button>
         </div>
       )}
