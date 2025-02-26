@@ -52,9 +52,17 @@ export default function CreditoForm() {
 
   const fetchTipoConsulta = async () => {
     try {
-      const response = await axios.get(APIURL.get_TipoConsulta(), {
-        headers: { method: "GET", cache: "no-store" },
-      });
+    //   const response = await axios.get(APIURL.get_TipoConsulta(), {
+    //     headers: { method: "GET", cache: "no-store" },
+    //   });
+	const token = '';
+	const response = await axios.get(APIURL.get_TipoConsulta(), {
+		headers: {
+		  "Authorization": `Bearer ${token}`,
+		  "Content-Type": "application/json",
+		  "Cache": "no-store",
+		},
+	  });
       setTipoConsulta(
         response.data.map((item) => ({
           value: item.idCompraEncuesta,
@@ -153,7 +161,7 @@ export default function CreditoForm() {
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
 
-    { label: "Foto", name: "Foto", type: "file" },
+    { label: "Subir foto", name: "Foto", type: "file" },
 
     {
       label: "Producto",
@@ -179,66 +187,67 @@ export default function CreditoForm() {
         .nullable()
         .positive()
         .integer()
-        .required("Campo requerido"),
+        .required("Debes seleccionar un Tipo de Consulta."),
 
       Cedula: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
-        .required("Campo requerido"),
-      CodDactilar: Yup.string()
-        .matches(
-          /^[A-Z]\d{4}[A-Z]\d{4}$/,
-          "El primer y sexto carácter deben ser letras"
-        )
+        .required("Ingresa 10 digitos de la cedula"),
+		CodDactilar: Yup.string()
+		.transform((value) => value.toUpperCase())
+		.matches(
+		  /^[A-Z]\d{4}[A-Z]\d{4}$/,
+		  "El primer y sexto carácter deben ser letras"
+		)
         .min(8, "Debe tener al menos 8 caracteres")
-        .required("Campo requerido"),
+        .required("Revisa y coloca correctamente el código dactilar"), 
 		Apellidos: Yup.string()
 		.trim()
 		.min(2, "Debe tener al menos 2 caracteres")
 		.matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
 		.test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-		.required("Campo requerido"),
+		.required("Revisa el apellido debe tener al menos 2 caracteres"),
 	  Nombres: Yup.string()
 		.trim()
 		.min(2, "Debe tener al menos 2 caracteres")
 		.matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
 		.test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-		.required("Campo requerido"),
+		.required("Revisa el nombre debe tener al menos 2 caracteres"),
       Celular: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
-        .required("Campo requerido")
+        .required("El celular debe tener 10 dígitos")
         .trim(),
-      Email: Yup.string().email("Correo inválido").required("Campo requerido"),
+      Email: Yup.string().email("Correo inválido").required("Ingresa un correo válido"),
 
       idActEconomina: Yup.number()
         .nullable()
-        .positive("Debe ser un número positivo")
-        .integer("Debe ser un número entero")
-        .required("Campo requerido"),
+        .positive()
+        .integer()
+        .required("Selecciona por favor la actividad economica"),
       idCre_Tiempo: Yup.number()
         .positive("Debe ser un número positivo")
         .integer("Debe ser un número entero")
-        .required("Campo requerido"),
+        .required("Debes seleccionar una opción en Estabilidad Laboral."),
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-      Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres").required("Campo requerido"),
+	  Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres").required("Por favor sube una foto"),
 
-      bTerminosYCondiciones: Yup.boolean().required(),
+      bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
     
-      bPoliticas: Yup.boolean().required(),
+      bPoliticas: Yup.boolean().oneOf([true], "Debes aceptar las políticas.").required(),
 
       idProductos: Yup.number()
         .nullable()
         .positive("Debe ser un número positivo")
         .integer()
-        .required("Campo requerido"),
+        .required("Por favor selecciona un producto"),
     })
     .test(
       "at-least-one-switch",
       "Debe seleccionar al menos una opción (Afiliado o Tiene RUC)",
       function (values) {
         return values.bAfiliado || values.bTieneRuc;
-      }
+      },
     );
 
   const handleCancel = () => {
@@ -303,7 +312,7 @@ export default function CreditoForm() {
 	  setFormStatus("success");
     } catch (error) {
       console.error("Error al enviar los datos:", error);
-	  enqueueSnackbar(`Error al enviar los datos. Por favor revisa que todos los campos sean correctos`, { 
+	  enqueueSnackbar(`Error al enviar los datos. Por favor intenta de nuevo mas tarde`, { 
 		variant: "error",
 		preventDuplicate: true
 	  });
