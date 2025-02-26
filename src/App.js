@@ -18,6 +18,8 @@ import VerificacionTelefonica from "./pages/VerificacionTelefonica";
 /* Kevin crea la ruta aqui*/
 import Tabla from "./pages/ListaSolicitud";
 import ListaSolicitud from "./pages/ListaSolicitud";
+import VerificacionTerrena from "./pages/VerificacionTerrena";
+import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
 function App() {
   const navigate = useNavigate(); // Coloca el hook fuera del return
   const [isSessionExpired, setIsSessionExpired] = useState(false); // Estado para manejar el modal
@@ -152,26 +154,50 @@ function App() {
           path="/telefonica"
           element={
             <PrivateRoute>
-              <TitleUpdater title="Solicictud - POINT" />
+              <TitleUpdater title="Telefonica - POINT" />
 
               <VerificacionTelefonica />
             </PrivateRoute>
           }
         />
 
+        {/* ruta Daniel Terrena */}
+        <Route
+          path="/terrena"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="Terrena - POINT" />
+
+              <VerificacionTerrena />
+            </PrivateRoute>
+          }
+        />
+
+        {/* ruta georeferencia */}
+        <Route
+          path="/georeferencia"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="Georeferencia - POINT" />
+
+              <VerificacionGeoreferencia />
+            </PrivateRoute>
+          }
+          />
+
         <Route
           path="/ListadoSolicitud"
           element={
             <PrivateRoute>
               <TitleUpdater title="Tabla - POINT" />
-              <ListaSolicitud/>
+              <ListaSolicitud />
             </PrivateRoute>
           }
         />
       </Routes>
 
       {/* Modal de sesión expirada */}
-      <Modal open={isSessionExpired} onClose={() => {}}>
+      <Modal open={isSessionExpired} onClose={() => { }}>
         <Box
           sx={{
             position: "absolute",
