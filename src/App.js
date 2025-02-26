@@ -20,6 +20,7 @@ import Tabla from "./pages/ListaSolicitud";
 import ListaSolicitud from "./pages/ListaSolicitud";
 import VerificacionTerrena from "./pages/VerificacionTerrena";
 import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
+import SolicitudGrande from "./pages/SolicitudGrande";
 function App() {
   const navigate = useNavigate(); // Coloca el hook fuera del return
   const [isSessionExpired, setIsSessionExpired] = useState(false); // Estado para manejar el modal
@@ -183,7 +184,19 @@ function App() {
               <VerificacionGeoreferencia />
             </PrivateRoute>
           }
-          />
+        />
+
+        {/* ruta solicitudgrande */}
+
+        <Route
+          path="/solicitudgrande"
+          element={
+            <PrivateRoute>
+              <TitleUpdater title="SolicitudGrande - POINT" />
+              <SolicitudGrande />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/ListadoSolicitud"
