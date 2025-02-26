@@ -59,7 +59,7 @@ export function GestorGeoreferencia() {
     const [tipo, setTipo] = useState("");  // Estado para el campo de tipo
     const [datos, setDatos] = useState([]);
 
-    // Estado para controlar la pestaña activa
+    // Estado para controlar la pestaña activa 
     const { enqueueSnackbar } = useSnackbar();
 
     const handleCedulaChange = () => {
@@ -80,14 +80,12 @@ export function GestorGeoreferencia() {
             });
 
             if (response.status === 200) { 
-                const item = response.data.find(d => d.cedula === cedula);  // Buscar el item con la cédula correspondiente
-                if (item) {
-                    setEstado(item.iEstado);  // Establecer el estado
-                    setTipo(item.Tipo);  // Establecer el tipo
+                const filteredData = response.data.filter(d => d.cedula === cedula);  // Filtrar los datos para la cédula correspondiente
+                if (filteredData.length > 0) {
+                    setDatos(filteredData);  // Establecer los datos en el estado
                 } else {
                     enqueueSnackbar("No se encontraron datos para esta cédula", { variant: "warning" });
-                    setEstado("");  // Limpiar el estado
-                    setTipo("");  // Limpiar el tipo
+                    setDatos([]);  // Limpiar los datos si no se encuentran
                 }
             } else {
                 enqueueSnackbar("Error al obtener los datos", { variant: "error" });
@@ -242,20 +240,28 @@ export function GestorGeoreferencia() {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Cedula</TableCell>
-                                    <TableCell>Direccion</TableCell>
+                                    <TableCell>Latitud</TableCell>
+                                    <TableCell>Longitud</TableCell>
                                     <TableCell>Estado</TableCell>
-                                    <TableCell>Fecha</TableCell>
                                     <TableCell>Tipo</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                </TableRow>
+                                {datos.length > 0 ? (
+                                    datos.map((item) => (
+                                        <TableRow key={item.idCoordenadasPrefactura}>
+                                            <TableCell>{item.cedula}</TableCell>
+                                            <TableCell>{item.latitud}</TableCell>
+                                            <TableCell>{item.longitud}</TableCell>
+                                            <TableCell>{item.iEstado }</TableCell>
+                                            <TableCell>{item.Tipo }</TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} align="center">No se encontraron datos</TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>
