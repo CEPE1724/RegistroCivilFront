@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton } from "@mui/material";
 
 export function Documental() {
   const [files, setFiles] = useState({});
@@ -9,6 +11,7 @@ export function Documental() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
+  const [view , setView] = useState(false);
   const [observacion, setObservacion] = useState({});
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -81,6 +84,11 @@ export function Documental() {
       return updatedFiles;
     });
   };
+
+  const toggleView = () => {
+    setView(!view);
+};
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -291,14 +299,22 @@ export function Documental() {
                   <span className="text-sm font-medium text-gray-700">
                     {files[activeTab][index]?.name}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFile(activeTab, index)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    ❌
-                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <IconButton onClick={toggleView}>
+                      <VisibilityIcon />
+                    </IconButton>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFile(activeTab, index)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      ❌
+                    </button>
+                  </div>
                 </div>
+
                 <div className="mt-4">
                   {files[activeTab][index]?.type === "application/pdf" ? (
                     <object
@@ -410,6 +426,21 @@ export function Documental() {
           </div>
         )}
       </div>
+      {view && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+    <div className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative">
+      <button onClick={toggleView} className="absolute top-2 right-2 text-lg">
+        ✖
+      </button>
+      <iframe 
+        src={filePreviews[activeTab] && filePreviews[activeTab][0]} 
+        className="w-full h-full" 
+        title="Vista previa del archivo"
+      ></iframe>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
