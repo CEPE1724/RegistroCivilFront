@@ -15,37 +15,54 @@ const FormField = ({
   setPreviewUrl,
   ...props
 }) => {  
-
-	const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
 
   if (hidden) {
     return null;
   }
 
   const handleFileChange = (event) => {
+    const SUPPORTED_FORMATS = [
+      "image/jpg", 
+      "image/jpeg", 
+      "image/png",
+    ];
 
-	const SUPPORTED_FORMATS = [
-		"image/jpg", 
-		"image/jpeg", 
-		"image/png",
-	  ];
+    const file = event.target.files ? event.target.files[0] : null;
 
-	  const file = event.target.files ? event.target.files[0] : null;
-
-	  if (file) {
-		if (!SUPPORTED_FORMATS.includes(file.type)) {
-			formik.setFieldError(name, "El archivo debe ser una imagen (JPG, PNG, GIF o WebP)");
-			enqueueSnackbar("El archivo debe ser una imagen (JPG, PNG, GIF o WebP)", { variant: "error" });
-			return;
-		  }
-	  }
-    const stringPhoto = file ? file.name : "";
-    formik.setFieldValue(name, stringPhoto);
     if (file) {
+      if (!SUPPORTED_FORMATS.includes(file.type)) {
+        formik.setFieldError(name, "El archivo debe ser una imagen (JPG, PNG)");
+        enqueueSnackbar("El archivo debe ser una imagen (JPG, PNG)", { variant: "error" });
+        return;
+      }
+      const stringPhoto = file.name;
+      formik.setFieldValue(name, stringPhoto);
       setPreviewUrl(URL.createObjectURL(file));
     } else {
+      formik.setFieldValue(name, "");
       setPreviewUrl(null);
     }
+  };
+
+  const handleInputChange = (e) => {
+    let { name, value } = e.target;
+  
+    if (name === "Cedula" || name === "Celular") {
+      value = value.replace(/\D/g, "");
+	  value = value.slice(0, 10);
+    }
+  
+    if (name === "Nombres" || name === "Apellidos") {
+      value = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "").toUpperCase();
+    }
+
+    if (name === "CodDactilar") {
+      value = value.toUpperCase();
+	  value = value.slice(0, 10);
+    }
+
+    formik.setFieldValue(name, value);
   };
 
   // Si es un campo de tipo archivo, renderizamos una estructura diferente
@@ -60,7 +77,7 @@ const FormField = ({
             htmlFor={name}
             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center w-full"
           >
-            Seleccionar Foto
+            Seleccionar foto
             <input
               id={name}
               name={name}
@@ -156,7 +173,7 @@ const FormField = ({
           id={name}
           name={name}
           type={type}
-          onChange={formik.handleChange}
+          onChange={handleInputChange}
           onBlur={formik.handleBlur}
           value={formik.values[name]}
           className="block bg-[#F9FAFB] w-64 max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
@@ -189,55 +206,54 @@ const ReusableForm = ({
   const [isCanceling, setIsCanceling] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
-  const notifiedErrors = useRef(new Set());
+
+  // Inicializar valores por defecto para campos select
+  const selectDefaults = Object.fromEntries(
+    formConfig
+      .filter((field) => field.type === "select")
+      .map((field) => [field.name, ""])
+  );
 
   const formik = useFormik({
     initialValues: {
       ...initialValues,
       bTerminosYCondiciones: false,
       bPoliticas: false,
-      ...Object.fromEntries(
-        formConfig
-          .filter((field) => field.type === "select")
-          .map((field) => [field.name, ""])
-      ),
+      ...selectDefaults,
     },
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
       setIsSubmitting(true);
-      await onSubmit(values);
-      setIsSubmitting(false);
+      try {
+        await onSubmit(values);
+      } catch (error) {
+        enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
+        console.error("Error en envío:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
 
-  useEffect(() => {
+  // Sistema unificado para mostrar el primer error en el submit
+  const showFirstError = () => {
     const errorKeys = Object.keys(formik.errors);
     
     if (errorKeys.length > 0) {
-      // Buscar el primer error en un campo tocado que no haya sido notificado previamente
-      const firstErrorKey = errorKeys.find(
-        (key) => formik.touched[key] && !notifiedErrors.current.has(key)
-      );
+      const firstErrorKey = errorKeys[0];
+      const errorMessage = formik.errors[firstErrorKey];
       
-      if (firstErrorKey) {
-        enqueueSnackbar(formik.errors[firstErrorKey], { variant: "error", preventDuplicate: true });
-        notifiedErrors.current.add(firstErrorKey);
-      }
+      enqueueSnackbar(errorMessage, { 
+        variant: "error",
+        preventDuplicate: true
+      });
+      
+      // Marcar como tocado para que se muestre visualmente
+      formik.setFieldTouched(firstErrorKey, true);
     }
-  }, [formik.errors, formik.touched, enqueueSnackbar]);
-  
-  // Efecto para limpiar errores resueltos
-  useEffect(() => {
-    const currentErrorKeys = new Set(Object.keys(formik.errors));
-    
-    // Eliminar de notifiedErrors aquellos campos que ya no tienen errores
-    notifiedErrors.current.forEach((field) => {
-      if (!currentErrorKeys.has(field)) {
-        notifiedErrors.current.delete(field);
-      }
-    });
-  }, [formik.errors]);
+  };
 
+  // Reset del formulario cuando status es success
   useEffect(() => {
     if (formStatus === "success") {
       setTimeout(() => {
@@ -251,9 +267,11 @@ const ReusableForm = ({
     setIsCanceling(true);
     formik.resetForm();
     setPreviewUrl(null);
-    setTimeout(() => setIsCanceling(false), 3000);
+    if (onCancel) onCancel();
+    setTimeout(() => setIsCanceling(false), 1000);
   };
 
+  // Separar el campo de archivo y otros campos
   const fileField = formConfig.find((field) => field.type === "file");
   const otherFields = formConfig.filter((field) => field.type !== "file");
 
@@ -262,16 +280,15 @@ const ReusableForm = ({
       className="w-full bg-white p-4 rounded-lg grid"
       onSubmit={(e) => {
         e.preventDefault();
-        console.log("Formik errors:", formik.errors);
-        // console.log("Formik values:", formik.values);
-
-		if (Object.keys(formik.errors).length > 0) {
-			enqueueSnackbar(`Por favor revisa que todos los campos sean correctos`, { 
-				variant: "error" ,
-				preventDuplicate: true
-			  });
-		}
-		formik.handleSubmit(e);
+        
+        // Validar y mostrar el primer error si hay alguno
+        formik.validateForm().then(errors => {
+          if (Object.keys(errors).length > 0) {
+            showFirstError();
+          } else {
+            formik.handleSubmit(e);
+          }
+        });
       }}
     >
       <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
@@ -373,37 +390,18 @@ const ReusableForm = ({
         </div>
       )}
 
-      {/* Botones */}
-      {/* {includeButtons && (
-        <div className="py-2 flex flex-col md:flex-row justify-center gap-2">
-          <button
-            type="submit"
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
-            disabled={loading}
-          >
-            {loading ? "Enviando..." : submitButtonText}
-          </button>
-          <button
-            type="button"
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 transition-colors text-xs px-6 py-2.5"
-            onClick={handleCancel}
-          >
-            {cancelButtonText}
-          </button>
-        </div>
-      )} */}
       {includeButtons && (
         <div className="py-2 flex justify-center gap-2">
           <button
             type="submit"
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Enviando..." : submitButtonText}
           </button>
           <button
             type="button"
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 transition-colors text-xs px-6 py-2.5"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
             onClick={handleCancel}
             disabled={isCanceling}
           >
