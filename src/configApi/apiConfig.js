@@ -22,4 +22,7 @@ export const APIURL = {
     getCreSolicitudCredito : () => `${API_BASE_URL}cre-solicitud-web`,
     getActividadEconomina : () => `${API_BASE_URL}cre-actividadeconomina/2`,
     getTipoConsulta : () => `${API_BASE_URL}compraencuesta/1`
+	post_cre_solicitud_web : () => `${API_BASE_URL}cre-solicitud-web`,
+	get_TipoConsulta : () => `${API_BASE_URL}compraencuesta/1`,
+	post_cogno_Token : (ci) => `${API_BASE_URL}auth/cogno/token/${ci}`,
 };
