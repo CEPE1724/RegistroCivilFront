@@ -878,6 +878,10 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
 .ml-1 {
   margin-left: 0.25rem;
 }
@@ -1070,9 +1074,6 @@ body {
   height: 100vh;
 }
 
-.h-3\/4 {
-  height: 75%;
-}
 
 .max-h-24 {
   max-height: 6rem;
@@ -1206,9 +1207,6 @@ body {
   width: 100vw;
 }
 
-.w-3\/4 {
-  width: 75%;
-}
 
 .min-w-0 {
   min-width: 0px;
@@ -1493,9 +1491,6 @@ body {
   column-gap: 2rem;
 }
 
-.gap-y-6 {
-  row-gap: 1.5rem;
-}
 
 .space-x-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
