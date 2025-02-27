@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Button,
-} from "@mui/material";
+import { Paginacion } from "../../Utils";
 import { TablaConDocumentos } from "../TablaConDocumentos";
+import { GoogleGeoreferencia } from "../GoogleGeoreferencia";
 import { APIURL } from "../../../configApi/apiConfig";
 
 export function GestorGeoreferencia() {
@@ -19,8 +11,15 @@ export function GestorGeoreferencia() {
     const [estado, setEstado] = useState("");
     const [tipo, setTipo] = useState("");
     const [datos, setDatos] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [fileToView, setFileToView] = useState("");
+    const [isModalGoogleOpen, setIsModalGoogleOpen] = useState(false);
+    const [latitude, setLatitude] = useState(null);
+    const [longitude, setLongitude] = useState(null);
+
     const optEstado = [
         { value: 0, label: "PENDIENTE" },
         { value: 1, label: "APROBADO" },
@@ -34,27 +33,61 @@ export function GestorGeoreferencia() {
 
     useEffect(() => {
         fecthData();
-    }, []);
+    }, [fechaInicio, fechaFin, cedula, estado, tipo, currentPage]);
 
     const fecthData = async () => {
         try {
-            const response = await fetch(APIURL.getCoordenadasprefactura());
+            const fechaHoy = new Date().toISOString().split("T")[0];
+            const fechaInicioFinal = fechaInicio || fechaHoy;
+            const fechaFinFinal = fechaFin || fechaHoy;
+            const estadoFinal = estado || 0;
+            const tipoFinal = tipo || 0;
+            const itemsPerPage = 5;
+            const offset = (currentPage - 1) * itemsPerPage;
+
+            const queryParams = new URLSearchParams({
+                FechaInicio: fechaInicioFinal,
+                FechaFin: fechaFinFinal,
+                Estado: estadoFinal,
+                Tipo: tipoFinal,
+                Cedula: cedula,
+                limit: itemsPerPage,
+                offset: offset,
+            }).toString();
+
+            const response = await fetch(`${APIURL.getCoordenadasprefactura()}?${queryParams}`);
             const data = await response.json();
-            setDatos(data);
+            setDatos(data.data);
+            setTotalRecords(data.total);
+            setTotalPages(Math.ceil(data.total / itemsPerPage));
         } catch (error) {
             console.log(error);
         }
     };
+
+    const changePage = (page) => {
+        setCurrentPage(page);
+    };
+
     const openModal = (fileUrl) => {
         setFileToView(fileUrl);
-        setIsModalOpen(true); // Abrir el modal
+        setIsModalOpen(true);
     };
 
     const closeModal = () => {
-        setIsModalOpen(false); // Cerrar el modal
+        setIsModalOpen(false);
     };
 
-    let numresgiter = 1;
+    const openModalGoogle = (lat, lng) => {
+        setLatitude(lat);
+        setLongitude(lng);
+        setIsModalGoogleOpen(true);
+    };
+
+    const closeModalGoogle = () => {
+        setIsModalGoogleOpen(false);
+    };
+
     return (
         <>
             <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -110,22 +143,20 @@ export function GestorGeoreferencia() {
                             ))}
                         </select>
                     </div>
+                    <div className="flex flex-col">
+                        <label className="text-lightGrey text-xs mb-2">Cedula</label>
+                        <input
+                            type="text"
+                            value={cedula}
+                            onChange={(e) => setCedula(e.target.value)}
+                            placeholder="Cédula"
+                            className="p-2 border rounded"
+                        />
+                    </div>
                 </div>
 
-                <div className="flex flex-col">
-                    <input
-                        type="text"
-                        value={cedula}
-                        onChange={(e) => setCedula(e.target.value)}
-                        placeholder="Cédula"
-                        className="p-2 border rounded"
-                    />
-                </div>
-                <div className="flex justify-center mb-4">
-                    <button className="p-2 bg-blue-500 text-white rounded">
-                        Buscar
-                    </button>
-                </div>
+
+
 
                 <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
                     <div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
@@ -138,7 +169,7 @@ export function GestorGeoreferencia() {
                                     <th className="px-4 py-2 text-center font-bold">Dirección</th>
                                     <th className="px-4 py-2 text-center font-bold">Estado</th>
                                     <th className="px-4 py-2 text-center font-bold">Tipo</th>
-                                    <th className="px-4 py-2 text-center font-bold">Aprobar</th>
+                                    <th className="px-4 py-2 text-center font-bold hidden">Aprobar</th>
                                     <th className="px-4 py-2 text-center font-bold">Documentos</th>
                                     <th className="px-4 py-2 text-center font-bold">Ubicación</th>
                                 </tr>
@@ -159,12 +190,10 @@ export function GestorGeoreferencia() {
                                             <td className="px-4 py-2 text-center">{data.direccion}</td>
                                             <td className="px-4 py-2 text-center">{estadoLabel}</td>
                                             <td className="px-4 py-2 text-center">{tipoLabel}</td>
-                                            <td className="px-4 py-2 text-center">
+                                            <td className="px-4 py-2 text-center hidden">
                                                 <input
                                                     type="checkbox"
                                                     className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                                // Si deseas manejar el estado del checkbox, puedes agregar un estado aquí
-                                                // onChange={(e) => handleCheckboxChange(e, data.idCoordenadasPrefactura)}
                                                 />
                                             </td>
                                             <td className="px-4 py-2 text-center">
@@ -175,7 +204,9 @@ export function GestorGeoreferencia() {
                                                 </button>
                                             </td>
                                             <td className="px-4 py-2 text-center">
-                                                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
+                                                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                                                    onClick={() => openModalGoogle(data.latitud, data.longitud)}
+                                                >
                                                     Ver
                                                 </button>
                                             </td>
@@ -184,21 +215,28 @@ export function GestorGeoreferencia() {
                                 })}
                             </tbody>
                         </table>
+
                     </div>
+                    <Paginacion
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={changePage}
+                    />
                     <TablaConDocumentos
                         isOpen={isModalOpen}
                         closeModal={closeModal}
                         urls={fileToView}
                     />
-                </div>
 
+                    <GoogleGeoreferencia
+                        isOpen={isModalGoogleOpen}
+                        closeModal={closeModalGoogle}
+                        latitude={latitude}
+                        longitude={longitude}
+                    />
+                </div>
             </div>
 
         </>
     );
 }
-
-
-
-
-
