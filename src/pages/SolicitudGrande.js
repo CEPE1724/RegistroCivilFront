@@ -11,22 +11,6 @@ const SolicitudGrande = () => {
         <>
             <Layout />
             <Cabecera />
-            Kevin genera una copia del encabezado y hace un tab menu con los siguienets datos*/
-            Datos Conyuge - 
-            Sección A Negocio  -  
-            <h1>SolicitudGrande</h1>
-			-Datos cliente -
-			<DatosCliente />
-			<h1>Seccion B</h1>
-			<SeccionB />
-            {/*<DatosCliente />
-          
-            <h1>SolicitudGrande</h1>*/}
-
-            <DatosConyuge />
-            ""
-            <Referencias />
-
         </>
     )
 }
