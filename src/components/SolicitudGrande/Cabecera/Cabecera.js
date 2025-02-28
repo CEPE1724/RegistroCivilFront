@@ -53,6 +53,22 @@ export function Cabecera() {
               className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
             />
           </div>
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1">Local</label>
+            <select className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"></select>
+          </div>
+          <div className="flex items-center mt-2 justify-center space-x-6">
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" className="w-4 h-4" id="garante" />
+              <label htmlFor="garante" className="text-sm font-semibold">
+                Garante
+              </label>
+            </div>
+
+            <button className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none">
+              Garante
+            </button>
+          </div>
 
           <div className="flex flex-col">
             <label className="text-sm font-semibold mb-1">
@@ -91,27 +107,24 @@ export function Cabecera() {
               className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
             />
           </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Local</label>
-            <select className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"></select>
-          </div>
-          <div className="flex items-center mt-2 translate-y-1 justify-center space-x-6">
-            {/* Ajuste de margen superior */}
-            <div>
-              <input
-                type="checkbox"
-                className="w-4 h-4 translate-y-1 "
-                id="garante"
-              />
-              <label htmlFor="garante" className="text-sm font-semibold ml-2">
-                Garante
-              </label>
-            </div>
 
-            <button className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none">
-              Garante
-            </button>
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1"> Email</label>
+            <input
+              type="text"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+            />
           </div>
+
+          <div className="flex flex-col">
+            <label className="text-sm font-semibold mb-1"> Celular</label>
+            <input
+              type="text"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+            />
+          </div>
+
+          
         </div>
       </div>
       <div className="mt-6 border-b">
@@ -139,28 +152,23 @@ export function Cabecera() {
         <SeccionA />
       </div>
 
-      {/* Botón de guardar */}
-      <div className="flex justify-start mt-6 space-x-4">
-        <button className="flex items-center space-x-2 bg-primaryBlue text-white px-4 py-2 rounded-lg hover:shadow-md transition duration-300 ease-in-out">
-          <SaveIcon />
-          <span>Guardar</span>
-        </button>
+      <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
+  {[
+    { Icon: SaveIcon, text: "Guardar" },
+    { Icon: PrintIcon, text: "Imprimir" },
+    { Icon: ManageSearchIcon, text: "Buscar" },
+    { Icon: LogoutIcon, text: "Salir" },
+  ].map(({ Icon, text }, index) => (
+    <button
+      key={index}
+      className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+    >
+      <Icon className="w-5 h-5 transition-colors group-hover:text-primaryBlue" />
+      <span>{text}</span>
+    </button>
+  ))}
+</div>
 
-        <button className="flex items-center space-x-2 bg-primaryBlue text-white px-4 py-2 rounded-lg hover:shadow-md transition duration-300 ease-in-out">
-          <PrintIcon />
-          <span>Imprimir</span>
-        </button>
-
-        <button className="flex items-center space-x-2 bg-primaryBlue text-white px-4 py-2 rounded-lg hover:shadow-md transition duration-300 ease-in-out">
-          <ManageSearchIcon />
-          <span>Buscar</span>
-        </button>
-
-        <button className="flex items-center space-x-2 bg-primaryBlue text-white px-4 py-2 rounded-lg hover:shadow-md transition duration-300 ease-in-out">
-          <LogoutIcon />
-          <span>Salir</span>
-        </button>
-      </div>
     </div>
   );
 }

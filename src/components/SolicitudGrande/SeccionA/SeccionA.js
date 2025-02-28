@@ -31,6 +31,11 @@ export function SeccionA() {
 
                     {/* Segunda fila: Cantón, Parroquia, Barrio */}
                     <div className="flex flex-col">
+                        <label className="text-sm font-semibold mb-1">Provincia</label>
+                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
+                    </div>
+
+                    <div className="flex flex-col">
                         <label className="text-sm font-semibold mb-1">Cantón</label>
                         <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
                     </div>
@@ -46,7 +51,7 @@ export function SeccionA() {
                     </div>
 
                         
-                    <div className="lg:col-span-2"></div>
+                    <div className="lg:col-span-1"></div>
 
                    
 
@@ -57,14 +62,19 @@ export function SeccionA() {
                         <label className="text-sm font-semibold mb-1">Calle Principal</label>
                         <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
                     </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Calle Secundaria</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
+
+
                     <div className="flex flex-col">
                         <label className="text-sm font-semibold mb-1">Número Casa</label>
                         <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
                     </div>
+
+
+                    <div className="flex flex-col">
+                        <label className="text-sm font-semibold mb-1">Calle Secundaria</label>
+                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
+                    </div>
+                   
                     
                     <div className="flex flex-col lg:col-span-2">
                         <label className="text-sm font-semibold mb-1">Referencia Ubicación</label>
