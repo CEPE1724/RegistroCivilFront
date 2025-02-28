@@ -65,6 +65,22 @@ const FormField = ({
     formik.setFieldValue(name, value);
   };
 
+  if (type === "button") {
+	return (
+	  <div className="w-full place-items-center mt-8">
+		<button
+		  type="button"
+		  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
+		  onClick={props.onClick}
+		>
+		  {label}
+		</button>
+	  </div>
+	);
+  }
+  
+  
+
   // Si es un campo de tipo archivo, renderizamos una estructura diferente
   if (type === "file") {
     return (
