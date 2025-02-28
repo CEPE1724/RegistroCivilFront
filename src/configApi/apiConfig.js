@@ -25,5 +25,6 @@ export const APIURL = {
 	post_cre_solicitud_web : () => `${API_BASE_URL}cre-solicitud-web`,
 	get_TipoConsulta : () => `${API_BASE_URL}compraencuesta/1`,
 	post_cogno_Token : (ci) => `${API_BASE_URL}auth/cogno/token/${ci}`,
+    getCoordenadasprefactura : () => `${API_BASE_URL}coordenadasprefactura/all`,
 
 };

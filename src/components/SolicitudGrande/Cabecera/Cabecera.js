@@ -3,7 +3,11 @@ import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { SeccionA } from "../SeccionA/SeccionA";
+import { DatosCliente } from "../DatosCliente";
+import { DatosConyuge } from "../DatosConyuge";
+import { Referencias } from "../Referencia";
+import { SeccionB } from "../SeccionB";
+import { SeccionA } from "../SeccionA";
 
 export function Cabecera() {
   const [activeTab, setActiveTab] = useState("Datos Cliente");
@@ -23,9 +27,15 @@ export function Cabecera() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "Datos Cliente":
-      //   return <DatosCliente />;
+       return <DatosCliente />;
       case "Datos Conyuge":
-      ///   return <DatosConyuge />;
+       return <DatosConyuge />;
+      case "Referencias":
+       return <Referencias />;
+      case "Sección A- Negocio":
+        return <SeccionA />;
+      case "Sección B- Dependiente":
+        return <SeccionB />;
       // Agrega más casos para las otras pestañas aquí
       default:
         return <div>Contenido no disponible</div>;
@@ -147,9 +157,8 @@ export function Cabecera() {
 
       {/* Aquí se renderiza el contenido según la pestaña activa */}
       <div className="mt-6">
-        {/*renderTabContent()*/}
-        <p>aqui deberia ir el componente al que voy a llamar </p>
-        <SeccionA />
+        {renderTabContent()}
+    
       </div>
 
       <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">

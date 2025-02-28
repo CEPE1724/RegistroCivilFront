@@ -1,266 +1,242 @@
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import { useSnackbar } from "notistack";
-import axios from "axios";
-import {
-    Grid,
-    Paper,
-    TextField,
-    Grow,
-    MenuItem,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    IconButton,
-} from "@mui/material";
-import SearchIcon from '@mui/icons-material/Search';
+import { Paginacion } from "../../Utils";
+import { TablaConDocumentos } from "../TablaConDocumentos";
+import { GoogleGeoreferencia } from "../GoogleGeoreferencia";
 import { APIURL } from "../../../configApi/apiConfig";
 
-// Contenido de cada pestaña
-const TabContent = ({ children }) => (
-    <Grow in={true} timeout={300}>
-        <Paper
-            elevation={3}
-            sx={{
-                width: "100%",
-                maxWidth: { xs: 350, sm: 1000 },
-                padding: 3,
-                margin: "0",
-            }}
-        >
-            <Grid container spacing={1}>
-                {children}
-            </Grid>
-        </Paper>
-    </Grow>
-);
-
-const estiloTextField = {
-    fullWidth: true,
-    size: "small",
-    margin: "dense",
-    InputLabelProps: { shrink: true, style: { color: 'black' } },
-    sx: {
-        '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-                borderColor: 'black',
-            },
-        },
-        marginBottom: 1
-    }
-};
 export function GestorGeoreferencia() {
-
-    const [cedula, setCedula] = useState("");  // Estado para manejar el texto de la cédula
-    const [estado, setEstado] = useState("");  // Estado para el campo de estado
-    const [tipo, setTipo] = useState("");  // Estado para el campo de tipo
+    const [fechaInicio, setFechaInicio] = useState("");
+    const [fechaFin, setFechaFin] = useState("");
+    const [cedula, setCedula] = useState("");
+    const [estado, setEstado] = useState("");
+    const [tipo, setTipo] = useState("");
     const [datos, setDatos] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [fileToView, setFileToView] = useState("");
+    const [isModalGoogleOpen, setIsModalGoogleOpen] = useState(false);
+    const [latitude, setLatitude] = useState(null);
+    const [longitude, setLongitude] = useState(null);
 
-    // Estado para controlar la pestaña activa
-    const { enqueueSnackbar } = useSnackbar();
+    const optEstado = [
+        { value: 0, label: "PENDIENTE" },
+        { value: 1, label: "APROBADO" },
+        { value: 2, label: "RECHAZADO" }
+    ];
 
-    const handleCedulaChange = () => {
-        // Llamar a la API solo cuando se haga clic en el ícono
-        if (!cedula) {
-            enqueueSnackbar("Por favor ingrese una cédula", { variant: "warning" });
-            return;
-        }
-        console.log('Cédula ingresada:', cedula);  // Ver el valor de la cédula ingresada
-        fetchCedula(cedula);  // Llamar a la función para hacer la solicitud a la API con la cédula
-    };
+    const optTipo = [
+        { value: 1, label: "DOMICILIO" },
+        { value: 2, label: "LABORAL" },
+    ];
 
-    const fetchCedula = async (cedula) => {
-        if (!cedula) return; // Evitar la llamada a la API si la cédula está vacía
+    useEffect(() => {
+        fecthData();
+    }, [fechaInicio, fechaFin, cedula, estado, tipo, currentPage]);
+
+    const fecthData = async () => {
         try {
-            const response = await axios.get(APIURL.getCoordenadasprefactura(), {
-                params: { cedula }  // Pasar la cédula como parámetro de la solicitud
-            });
+            const fechaHoy = new Date().toISOString().split("T")[0];
+            const fechaInicioFinal = fechaInicio || fechaHoy;
+            const fechaFinFinal = fechaFin || fechaHoy;
+            const estadoFinal = estado || 0;
+            const tipoFinal = tipo || 0;
+            const itemsPerPage = 5;
+            const offset = (currentPage - 1) * itemsPerPage;
 
-            if (response.status === 200) { 
-                const item = response.data.find(d => d.cedula === cedula);  // Buscar el item con la cédula correspondiente
-                if (item) {
-                    setEstado(item.iEstado);  // Establecer el estado
-                    setTipo(item.Tipo);  // Establecer el tipo
-                } else {
-                    enqueueSnackbar("No se encontraron datos para esta cédula", { variant: "warning" });
-                    setEstado("");  // Limpiar el estado
-                    setTipo("");  // Limpiar el tipo
-                }
-            } else {
-                enqueueSnackbar("Error al obtener los datos", { variant: "error" });
-            }
+            const queryParams = new URLSearchParams({
+                FechaInicio: fechaInicioFinal,
+                FechaFin: fechaFinFinal,
+                Estado: estadoFinal,
+                Tipo: tipoFinal,
+                Cedula: cedula,
+                limit: itemsPerPage,
+                offset: offset,
+            }).toString();
+
+            const response = await fetch(`${APIURL.getCoordenadasprefactura()}?${queryParams}`);
+            const data = await response.json();
+            setDatos(data.data);
+            setTotalRecords(data.total);
+            setTotalPages(Math.ceil(data.total / itemsPerPage));
         } catch (error) {
-            console.error(error);
-            enqueueSnackbar("Hubo un error al hacer la solicitud", { variant: "error" });
+            console.log(error);
         }
     };
 
+    const changePage = (page) => {
+        setCurrentPage(page);
+    };
 
+    const openModal = (fileUrl) => {
+        setFileToView(fileUrl);
+        setIsModalOpen(true);
+    };
 
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const openModalGoogle = (lat, lng) => {
+        setLatitude(lat);
+        setLongitude(lng);
+        setIsModalGoogleOpen(true);
+    };
+
+    const closeModalGoogle = () => {
+        setIsModalGoogleOpen(false);
+    };
 
     return (
-        <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
-            {/* Título */}
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
-                GeoReferencia
-            </h1>
+        <>
+            <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="flex flex-col">
+                        <label className="text-lightGrey text-xs mb-2">Desde</label>
+                        <input
+                            type="date"
+                            value={fechaInicio}
+                            onChange={(e) => setFechaInicio(e.target.value)}
+                            className="p-2 border rounded"
+                        />
+                    </div>
 
-            {/* Contenido */}
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    {/* Columnas */}
-                    <TabContent>
-                        <Grid container spacing={2}>
-                            {/* Cedula */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="Cedula"
-                                    label="Cedula"
-                                    placeholder="Cedula"
-                                    onChange={(e) => setCedula(e.target.value)}
-                                    {...estiloTextField}
-                                    InputProps={{
-                                        endAdornment: (
-                                            <IconButton onClick={handleCedulaChange}
-                                                aria-label="search"
-                                                edge="end"
-                                                size="small"
-                                            >
-                                                <SearchIcon fontSize="small" />
-                                            </IconButton>
-                                        ),
-                                    }}
-                                />
-                            </Grid>
-                            {/* Fecha Inicio */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="Fecha Inicio"
-                                    type="date"
-                                    label="Fecha Inicio"
-                                    {...estiloTextField}
-                                />
-                            </Grid>
-                            {/* Fecha Fin */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="Fecha Fin"
-                                    label="Fecha Fin"
-                                    type="date"
-                                    {...estiloTextField}
-                                />
-                            </Grid>
-                            {/* Estado */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="estado"
-                                    label="Estado"
-                                    placeholder="Estado"
-                                    value={estado}
-                                    {...estiloTextField}
+                    <div className="flex flex-col">
+                        <label className="text-lightGrey text-xs mb-2">Hasta</label>
+                        <input
+                            type="date"
+                            value={fechaFin}
+                            onChange={(e) => setFechaFin(e.target.value)}
+                            className="p-2 border rounded"
+                        />
+                    </div>
 
-                                />
-                            </Grid>
-                            {/* Tipo */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="tipo"
-                                    label="Tipo"
-                                    placeholder="Tipo"
-                                    value={tipo}
-                                    {...estiloTextField}
-                                />
-                            </Grid>
-                            {/* Botón Visualizar */}
-                            <Grid item xs={12} sm={4} container alignItems="center">
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        height: "100%",
-                                    }}
-                                >
-                                    <button
-                                        className="rounded-full bg-blue-600 text-white px-4 py-1 hover:bg-blue-700 transition"
-                                        style={{
-                                            height: "42px",
-                                            alignSelf: "center",
-                                        }}
-                                    >
-                                        Visualizar
-                                    </button>
-                                </Box>
-                            </Grid>
-                            {/* Latitud */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="latitud"
-                                    label="Latitud"
-                                    placeholder="Latitud"
-                                    {...estiloTextField}
-                                />
-                            </Grid>
-                            {/* Longitud */}
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    name="longitud"
-                                    label="Longitud"
-                                    placeholder="Longitud"
-                                    {...estiloTextField}
-                                />
-                            </Grid>
-                            {/* Ubicación */}
-                            <Grid item xs={12} sm={4} container alignItems="center">
-                                <Box sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    height: "100%",
-                                }}
-                                >
-                                    <button
-                                        className="rounded-full bg-blue-600 text-white px-4 py-1 hover:bg-blue-700 transition"
-                                        style={{
-                                            height: "42px",
-                                            alignSelf: "center",
-                                        }}
-                                    >
-                                        Ubicación
-                                    </button>
-                                </Box>
-                            </Grid>
-                        </Grid>
+                    <div className="flex flex-col">
+                        <label className="text-lightGrey text-xs mb-2">Estado</label>
+                        <select
+                            value={estado}
+                            onChange={(e) => setEstado(e.target.value)}
+                            className="p-2 border rounded"
+                        >
+                            <option value="">Seleccione una opción</option>
+                            {optEstado.map((opcion) => (
+                                <option key={opcion.value} value={opcion.value}>
+                                    {opcion.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                    </TabContent>
-                    {/* Tabla de datos */}
-                    <TableContainer
-                        component={Paper}
-                        sx={{ marginTop: 3, width: "100%" }}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Cedula</TableCell>
-                                    <TableCell>Direccion</TableCell>
-                                    <TableCell>Estado</TableCell>
-                                    <TableCell>Fecha</TableCell>
-                                    <TableCell>Tipo</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                    <TableCell>ejemplo</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
-            </Box>
-        </div>
+                    <div className="flex flex-col">
+                        <label className="text-lightGrey text-xs mb-2">Tipo</label>
+                        <select
+                            value={tipo}
+                            onChange={(e) => setTipo(e.target.value)}
+                            className="p-2 border rounded"
+                        >
+                            <option value="">Seleccione una opción</option>
+                            {optTipo.map((opcion) => (
+                                <option key={opcion.value} value={opcion.value}>
+                                    {opcion.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex flex-col">
+                        <label className="text-lightGrey text-xs mb-2">Cedula</label>
+                        <input
+                            type="text"
+                            value={cedula}
+                            onChange={(e) => setCedula(e.target.value)}
+                            placeholder="Cédula"
+                            className="p-2 border rounded"
+                        />
+                    </div>
+                </div>
+
+
+
+
+                <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
+                    <div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
+                        <table className="min-w-full table-auto">
+                            <thead className="bg-gray-200">
+                                <tr>
+                                    <th className="px-4 py-2 text-center font-bold">#</th>
+                                    <th className="px-4 py-2 text-center font-bold">Fecha</th>
+                                    <th className="px-4 py-2 text-center font-bold">Cédula</th>
+                                    <th className="px-4 py-2 text-center font-bold">Dirección</th>
+                                    <th className="px-4 py-2 text-center font-bold">Estado</th>
+                                    <th className="px-4 py-2 text-center font-bold">Tipo</th>
+                                    <th className="px-4 py-2 text-center font-bold hidden">Aprobar</th>
+                                    <th className="px-4 py-2 text-center font-bold">Documentos</th>
+                                    <th className="px-4 py-2 text-center font-bold">Ubicación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {datos.map((data, index) => {
+                                    const estado = optEstado.find(option => option.value === data.iEstado);
+                                    const estadoLabel = estado ? estado.label : 'Desconocido';
+
+                                    const tipo = optTipo.find(option => option.value === data.Tipo);
+                                    const tipoLabel = tipo ? tipo.label : 'Desconocido';
+                                    const formatFecha = new Date(data.FechaSistema).toLocaleDateString();
+                                    return (
+                                        <tr key={data.idCoordenadasPrefactura}>
+                                            <td className="px-4 py-2 text-center">{index + 1}</td>
+                                            <td className="px-4 py-2 text-center">{formatFecha}</td>
+                                            <td className="px-4 py-2 text-center">{data.cedula}</td>
+                                            <td className="px-4 py-2 text-center">{data.direccion}</td>
+                                            <td className="px-4 py-2 text-center">{estadoLabel}</td>
+                                            <td className="px-4 py-2 text-center">{tipoLabel}</td>
+                                            <td className="px-4 py-2 text-center hidden">
+                                                <input
+                                                    type="checkbox"
+                                                    className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-2 text-center">
+                                                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                                                    onClick={() => openModal(data.UrlImagen)}
+                                                >
+                                                    Ver
+                                                </button>
+                                            </td>
+                                            <td className="px-4 py-2 text-center">
+                                                <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+                                                    onClick={() => openModalGoogle(data.latitud, data.longitud)}
+                                                >
+                                                    Ver
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <Paginacion
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={changePage}
+                    />
+                    <TablaConDocumentos
+                        isOpen={isModalOpen}
+                        closeModal={closeModal}
+                        urls={fileToView}
+                    />
+
+                    <GoogleGeoreferencia
+                        isOpen={isModalGoogleOpen}
+                        closeModal={closeModalGoogle}
+                        latitude={latitude}
+                        longitude={longitude}
+                    />
+                </div>
+            </div>
+
+        </>
     );
 }
