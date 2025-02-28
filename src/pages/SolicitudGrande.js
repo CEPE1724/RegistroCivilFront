@@ -3,7 +3,7 @@
 import React, { Component } from 'react';
 import Layout from "../components/Layout";
 
-import { Cabecera, DatosCliente, DatosConyuge } from '../components'
+import { Cabecera, DatosCliente, DatosConyuge, Referencias } from '../components'
 const SolicitudGrande = () => {
 
     return (
@@ -15,6 +15,8 @@ const SolicitudGrande = () => {
             <h1>SolicitudGrande</h1>*/}
 
             <DatosConyuge />
+            ""
+            <Referencias />
 
         </>
     )
