@@ -92,7 +92,8 @@ const GestorVirtualTable = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const url = `http://192.168.2.246:3008/cbo-gestor-cobranzas?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
+      const UrlGestor = APIURL.Cbo_gestor_cobranzas();
+      const url = `${UrlGestor}?idCbo_Gestores=${comboBox2}&Bodega=${comboBox1}&page=${page}&limit=${limit}`;
       const response = await axios.get(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +128,7 @@ const GestorVirtualTable = () => {
 
 
   // Filtrar los datos de la tabla según el texto de búsqueda y los combos
-  const filteredData = cboGestorCobranzas.filter(item => {
+  const filteredData = (cboGestorCobranzas || []).filter(item => {
     return (
       (item.Cliente.toLowerCase().includes(search.toLowerCase()) || item.Cedula.toLowerCase().includes(search.toLowerCase())) &&
       (comboBox1 ? item.Bodega === parseInt(comboBox1) : true) &&
