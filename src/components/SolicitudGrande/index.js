@@ -1,5 +1,8 @@
 export * from './Cabecera';
 export * from './DatosCliente';
+export * from './DatosConyuge';
+export * from './Referencia';
+export * from './InformacionCredito';
 export * from './SeccionA';
 export * from './DatosConyuge';
 
