@@ -13,6 +13,7 @@ import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import ContentPasteSearchIcon from '@mui/icons-material/ContentPasteSearch';
 import SecurityIcon from '@mui/icons-material/Security';
 import PersonIcon from '@mui/icons-material/Person';
+import GpsFixed from '@mui/icons-material/GpsFixed';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import Collapse from "@mui/material/Collapse";
 export default function SwipeableTemporaryDrawer() {
@@ -94,6 +95,17 @@ export default function SwipeableTemporaryDrawer() {
                 <ListItemIcon>
                   <PersonIcon className="mr-2" />
                   Solicitud de crédito
+                </ListItemIcon>
+                <ListItemText />
+              </ListItemButton>
+            </ListItem>
+
+            {/* Proteccion de Datos */}
+            <ListItem disablePadding>
+              <ListItemButton component={Link} to={"/georeferencia"}>
+                <ListItemIcon>
+                  <GpsFixed className="mr-2" />
+                  Georeferencia Cliente
                 </ListItemIcon>
                 <ListItemText />
               </ListItemButton>

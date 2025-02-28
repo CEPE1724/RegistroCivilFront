@@ -3,7 +3,8 @@
 import React, { Component } from 'react';
 import Layout from "../components/Layout";
 
-import { Cabecera, DatosCliente, SeccionB } from '../components'
+
+import { Cabecera, DatosCliente, DatosConyuge, Referencias, SeccionB } from '../components'
 const SolicitudGrande = () => {
 
     return (
@@ -18,6 +19,13 @@ const SolicitudGrande = () => {
 			<DatosCliente />
 			<h1>Seccion B</h1>
 			<SeccionB />
+            {/*<DatosCliente />
+          
+            <h1>SolicitudGrande</h1>*/}
+
+            <DatosConyuge />
+            ""
+            <Referencias />
 
         </>
     )
