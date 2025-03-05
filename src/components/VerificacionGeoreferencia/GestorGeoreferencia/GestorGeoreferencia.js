@@ -38,8 +38,9 @@ export function GestorGeoreferencia() {
     const fecthData = async () => {
         try {
             const fechaHoy = new Date().toISOString().split("T")[0];
+            const fechahoymasuno = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
             const fechaInicioFinal = fechaInicio || fechaHoy;
-            const fechaFinFinal = fechaFin || fechaHoy;
+            const fechaFinFinal = fechaFin || fechahoymasuno;
             const estadoFinal = estado || 0;
             const tipoFinal = tipo || 0;
             const itemsPerPage = 5;
