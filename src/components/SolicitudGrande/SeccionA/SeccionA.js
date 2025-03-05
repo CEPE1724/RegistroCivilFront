@@ -1,96 +1,129 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useSnackbar } from 'notistack';
+import { useImperativeHandle, forwardRef } from 'react';
 
-export function SeccionA() {
+export const SeccionA = forwardRef((props, ref) => {
+    const { enqueueSnackbar } = useSnackbar();
+
+    // Estado unificado
+    const [formData, setFormData] = useState({
+        nombreNegocio: '',
+        tiempoNegocio: '',
+        metros: '',
+        ingresos: '',
+        gastos: '',
+        provincia: '',
+        canton: '',
+        parroquia: '',
+        barrio: '',
+        callePrincipal: '',
+        numeroCasa: '',
+        calleSecundaria: '',
+        referenciaUbicacion: '',
+        actividadNegocio: '',
+    });
+
+    // Función para manejar cambios en los inputs
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: name === 'nombreNegocio' || name === 'barrio' || name === 'callePrincipal' || name === 'calleSecundaria' || name === 'referenciaUbicacion' || name === 'actividadNegocio'
+                ? value.toUpperCase()  // Solo aplicamos toUpperCase a campos de texto
+                : value
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e && e.preventDefault();
+
+        const { nombreNegocio, tiempoNegocio, metros, ingresos, gastos, provincia, canton, parroquia, barrio, callePrincipal, numeroCasa, calleSecundaria, referenciaUbicacion, actividadNegocio } = formData;
+
+        // Validaciones
+        if (nombreNegocio.length <= 3) return enqueueSnackbar('El nombre del negocio debe tener más de 3 caracteres', { variant: 'error' });
+        if (tiempoNegocio <= 0 || tiempoNegocio > 1e11) return enqueueSnackbar('El tiempo del negocio debe ser un número mayor a 0', { variant: 'error' });
+        if (metros <= 0 || metros > 1e11) return enqueueSnackbar('Los metros deben ser un número mayor a 0', { variant: 'error' });
+        if (ingresos <= 0 || ingresos > 1e11) return enqueueSnackbar('Los ingresos deben ser un número mayor a 0', { variant: 'error' });
+        if (gastos <= 0 || gastos > 1e11) return enqueueSnackbar('Los gastos deben ser un número mayor a 0', { variant: 'error' });
+        if (gastos > ingresos) return enqueueSnackbar('Los gastos no pueden ser mayores a los ingresos', { variant: 'error' });
+
+        if (!provincia) return enqueueSnackbar('La provincia es obligatoria', { variant: 'error' });
+        if (!canton) return enqueueSnackbar('El cantón es obligatorio', { variant: 'error' });
+        if (!parroquia) return enqueueSnackbar('La parroquia es obligatoria', { variant: 'error' });
+        if (!barrio || barrio.length > 100) return enqueueSnackbar('El barrio es obligatorio y no debe exceder 100 caracteres', { variant: 'error' });
+        if (!callePrincipal || callePrincipal.length > 100) return enqueueSnackbar('La calle principal es obligatoria y no debe exceder 100 caracteres', { variant: 'error' });
+        if (!numeroCasa) return enqueueSnackbar('El número de casa es obligatorio', { variant: 'error' });
+        if (!calleSecundaria || calleSecundaria.length > 100) return enqueueSnackbar('La calle secundaria es obligatoria y no debe exceder 100 caracteres', { variant: 'error' });
+        if (!referenciaUbicacion || referenciaUbicacion.length > 300) return enqueueSnackbar('La referencia de ubicación es obligatoria y no debe exceder 300 caracteres', { variant: 'error' });
+        if (!actividadNegocio || actividadNegocio.length > 300) return enqueueSnackbar('La actividad del negocio es obligatoria y no debe exceder 300 caracteres', { variant: 'error' });
+
+        enqueueSnackbar('Formulario enviado con éxito', { variant: 'success' });
+    };
+
+    useImperativeHandle(ref, () => ({ handleSubmit }));
+
     return (
-        <div className="p-6 bg-gray-100 rounded-lg shadow-md">
-            <h1 className="text-xl font-bold mb-4">Datos del Negocio</h1>
-            <div className="bg-white p-6 rounded-lg shadow">
-                {/* Rejilla adaptable para responsive */}
+        <div className="p-6">
+            <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                    {/* Primera fila: Nombre, Tiempo, Metros, Ingresos y Gastos */}
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Nombre de Negocio</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Tiempo del Negocio</label>
-                        <input type="number" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Metros</label>
-                        <input type="number" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Ingresos</label>
-                        <input type="number" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Gastos</label>
-                        <input type="number" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
+                    {[
+                        { label: 'Nombre de Negocio', name: 'nombreNegocio', type: 'text' },
+                        { label: 'Tiempo del Negocio', name: 'tiempoNegocio', type: 'number' },
+                        { label: 'Metros', name: 'metros', type: 'number' },
+                        { label: 'Ingresos', name: 'ingresos', type: 'number' },
+                        { label: 'Gastos', name: 'gastos', type: 'number' }
+                    ].map(({ label, name, type }) => (
+                        <div key={name} className="flex flex-col">
+                            <label className="text-sm font-semibold mb-1">{label}</label>
+                            <input
+                                type={type}
+                                name={name}
+                                className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+                                value={formData[name]}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    ))}
 
-                    {/* Segunda fila: Cantón, Parroquia, Barrio */}
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Cantón</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Parroquia</label>
-                        <select className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm">
-                            <option>Seleccione</option>
-                        </select>
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Barrio</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
+                    {[
+                        { label: 'Provincia', name: 'provincia' },
+                        { label: 'Cantón', name: 'canton' },
+                        { label: 'Parroquia', name: 'parroquia' }
+                    ].map(({ label, name }) => (
+                        <div key={name} className="flex flex-col">
+                            <label className="text-sm font-semibold mb-1">{label}</label>
+                            <select
+                                name={name}
+                                className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+                                value={formData[name]}
+                                onChange={handleChange}
+                            >
+                                <option>Seleccione</option>
+                            </select>
+                        </div>
+                    ))}
 
-                        
-                    <div className="lg:col-span-2"></div>
-
-                   
-
-                  
-
-                    {/* Tercera fila: Calle Principal, Calle Secundaria, Número de Casa, Referencia de Ubicación */}
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Calle Principal</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Calle Secundaria</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    <div className="flex flex-col">
-                        <label className="text-sm font-semibold mb-1">Número Casa</label>
-                        <input type="text" className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm" />
-                    </div>
-                    
-                    <div className="flex flex-col lg:col-span-2">
-                        <label className="text-sm font-semibold mb-1">Referencia Ubicación</label>
-                        <textarea className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-20"></textarea>
-                    </div>
-
-                    {/* Cuarta fila: Actividad del Negocio y Opciones */}
-                    <div className="flex flex-col lg:col-span-2">
-                        <label className="text-sm font-semibold mb-1">Actividad del Negocio</label>
-                        <textarea className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-20"></textarea>
-                    </div>
-
-                    {/* Opciones */}
-                    <div className="lg:col-span-2 flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-2 lg:space-y-0">
-                        <label className="text-sm font-semibold">Opciones:</label>
-                        <label className="inline-flex items-center">
-                            <input type="checkbox" className="mr-2" />
-                            Afiliado Tributario
-                        </label>
-                        <label className="inline-flex items-center">
-                            <input type="checkbox" className="mr-2" />
-                            Obligado a Llevar Contabilidad
-                        </label>
-                    </div>
+                    {[
+                        { label: 'Barrio', name: 'barrio', type: 'text' },
+                        { label: 'Calle Principal', name: 'callePrincipal', type: 'text' },
+                        { label: 'Número de Casa', name: 'numeroCasa', type: 'text' },
+                        { label: 'Calle Secundaria', name: 'calleSecundaria', type: 'text' },
+                        { label: 'Referencia Ubicación', name: 'referenciaUbicacion', type: 'text' },
+                        { label: 'Actividad del Negocio', name: 'actividadNegocio', type: 'text' }
+                    ].map(({ label, name, type }) => (
+                        <div key={name} className="flex flex-col">
+                            <label className="text-sm font-semibold mb-1">{label}</label>
+                            <input
+                                type={type}
+                                name={name}
+                                className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+                                value={formData[name]}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    ))}
                 </div>
-            </div>
+            </form>
         </div>
     );
-}
+});
