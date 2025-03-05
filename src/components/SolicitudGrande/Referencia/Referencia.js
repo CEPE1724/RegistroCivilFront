@@ -1,13 +1,47 @@
 import React, { useState, useEffect } from "react";
 import CallIcon from '@mui/icons-material/Call';
 import { useSnackbar } from "notistack";
-import {
-    IconButton,
-} from "@mui/material";
+import { IconButton } from "@mui/material";
+import axios from "axios";
+import { APIURL } from "../../../configApi/apiConfig";
 
 export function Referencias() {
 
     const { enqueueSnackbar } = useSnackbar();
+    const [dato, setDato] = useState([]);
+    const [idToTextMap, setIdToTextMap] = useState({});
+
+    //llamada api
+    useEffect(() => {
+        fetchDato();
+    }, []);
+
+    const fetchDato = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getCreVerificacionTelefonica();
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDato(response.data);
+
+            //objeto para mapear IDs a textos
+            const idToTextMap = {};
+            response.data.forEach(item => {
+                idToTextMap[item.idCre_VerificacionTelefonicaWeb] = item.Respuesta;
+            });
+            setIdToTextMap(idToTextMap); // Guardar el objeto en el estado
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    };
 
     //almacenar datos del formulario
     const [formData, setFormData] = useState({
@@ -23,43 +57,18 @@ export function Referencias() {
     //almacenar datos tabla
     const [tablaDatos, setTablaDatos] = useState([]);
 
-    const optParentesco = [
-        { value: 1, label: "Madre" },
-        { value: 2, label: "Padre" },
-    ];
-    const optProvincia = [
-        { value: 0, label: "Pichincha" },
-        { value: 1, label: "provincia 1" },
-        { value: 2, label: "provincia 2" }
-    ];
-    const optCanton = [
-        { value: 0, label: "Quito" },
-        { value: 1, label: "canton 1" },
-        { value: 2, label: "Canton 2" }
-    ];
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // Filtrar las entradas según el campo
         if (name === "apellidoPaterno" || name === "primerNombre" || name === "segundoNombre") {
-            // Solo letras y espacios
+            // Solo letras
             const filteredValue = value.replace(/[^A-Za-z]/g, '');
-            setFormData({
-                ...formData,
-                [name]: filteredValue
-            });
+            setFormData({ ...formData, [name]: filteredValue });
         } else if (name === "celular") {
             // Solo números
             const filteredValue = value.replace(/\D/g, ''); // Eliminar caracteres no numéricos
-            setFormData({
-                ...formData,
-                [name]: filteredValue
-            });
+            setFormData({ ...formData, [name]: filteredValue});
         } else {
-            setFormData({
-                ...formData,
-                [name]: value
-            });
+            setFormData({ ...formData, [name]: value });
         }
     };
 
@@ -81,16 +90,12 @@ export function Referencias() {
             enqueueSnackbar("Parentesco es requerido", { variant: "error" });
             return;
         }
-        if (formData.apellidoPaterno === "") {
+        if (formData.apellidoPaterno.length < 3) {
             enqueueSnackbar("Apellido Paterno es requerido", { variant: "error" });
             return;
         }
-        if (formData.primerNombre === "") {
+        if (formData.primerNombre.length < 3) {
             enqueueSnackbar("Primer Nombre es requerido", { variant: "error" });
-            return;
-        }
-        if (formData.segundoNombre === "") {
-            enqueueSnackbar("Segundo Nombre es requerido", { variant: "error" });
             return;
         }
         if (formData.provincia === "") {
@@ -111,12 +116,6 @@ export function Referencias() {
         handleLimpiar();
     };
 
-    // Funciones para obtener etiquetas de Parentesco, Provincia y Canton
-    const getLabel = (value, array) => {
-        const found = array.find(option => option.value == value);
-        return found ? found.label : "";
-    };
-
     return (
         <div>
             <h1>Referencias</h1>
@@ -132,9 +131,9 @@ export function Referencias() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {optParentesco.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.label}
+                        {dato.map((opcion) => (
+                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
+                                {opcion.Respuesta}
                             </option>
                         ))}
                     </select>
@@ -190,9 +189,9 @@ export function Referencias() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {optProvincia.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.label}
+                        {dato.map((opcion) => (
+                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
+                                {opcion.Respuesta}
                             </option>
                         ))}
                     </select>
@@ -207,9 +206,9 @@ export function Referencias() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {optCanton.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.label}
+                        {dato.map((opcion) => (
+                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
+                                {opcion.Respuesta}
                             </option>
                         ))}
                     </select>
@@ -230,7 +229,7 @@ export function Referencias() {
                 </div>
                 {/* Botones */}
                 <div>
-                    <button onClick={handleAgregar} className="p-2 bg-blue-500 text-white rounded">
+                    <button onClick={handleAgregar} className="p-2 bg-blue-500 text-white rounded mr-2">
                         Agregar
                     </button>
 
@@ -256,14 +255,15 @@ export function Referencias() {
                             </tr>
                         </thead>
                         <tbody>
+                            {/* Tabla Referencias */}
                             {tablaDatos.map((row, index) => (
                                 <tr key={index}>
-                                    <td className="px-4 py-2 text-center">{getLabel(row.parentesco, optParentesco)}</td>
+                                    <td className="px-4 py-2 text-center">{idToTextMap[row.parentesco]}</td>
                                     <td className="px-4 py-2 text-center">{row.apellidoPaterno}</td>
                                     <td className="px-4 py-2 text-center">{row.primerNombre}</td>
                                     <td className="px-4 py-2 text-center">{row.segundoNombre}</td>
-                                    <td className="px-4 py-2 text-center">{getLabel(row.provincia, optProvincia)}</td>
-                                    <td className="px-4 py-2 text-center">{getLabel(row.canton, optCanton)}</td>
+                                    <td className="px-4 py-2 text-center">{idToTextMap[row.provincia]}</td>
+                                    <td className="px-4 py-2 text-center">{idToTextMap[row.canton]}</td>
                                     <td className="px-4 py-2 text-center">{row.celular}</td>
                                     <td className="px-4 py-2 text-center">
                                         <IconButton color="primary" aria-label="call">

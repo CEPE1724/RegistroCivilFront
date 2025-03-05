@@ -45,7 +45,7 @@ export function GoogleGeoreferencia({ isOpen, closeModal, latitude, longitude, o
             const initialMarker = new window.google.maps.Marker({
                 position: { lat: latitude, lng: longitude },
                 map: mapInstance,
-                draggable: true,
+                draggable: false,
                 title: 'Ubicación seleccionada',
             });
 
