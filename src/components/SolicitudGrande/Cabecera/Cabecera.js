@@ -10,6 +10,7 @@ import { SeccionB } from "../SeccionB";
 import { SeccionA } from "../SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
 import { useSnackbar } from 'notistack';
+import { Verificacion } from "../Verificacion/Verificacion";
 
 export function Cabecera() {
   const [activeTab, setActiveTab] = useState("Datos Cliente");
@@ -57,6 +58,8 @@ export function Cabecera() {
         return <SeccionB />;
       case "Factores de Crédito":
         return <FactoresCredito ref={seccionRef}/>;
+	  case "Verificación":
+		return <Verificacion />;
       default:
         return <div>Contenido no disponible</div>;
     }
