@@ -60,7 +60,7 @@ export function ListadoSolicitud() {
     if (tipoConsulta.length > 0) {
       fetchSolicitudes();
     }
-  }, [tipoConsulta, currentPage]); // Agrega tipoConsulta como dependencia
+  }, [currentPage]); // Agrega tipoConsulta como dependencia
   
 
   const fetchTipoConsulta = async () => {
