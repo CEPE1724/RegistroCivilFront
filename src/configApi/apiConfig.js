@@ -1,6 +1,6 @@
 
  
-const API_BASE_URL = "http://192.168.2.246:3008/api/v1/";
+const API_BASE_URL = "http://192.168.137.28:3008/api/v1/";
 
 
 const SOCKET_BASE_URL = "http://192.168.2.246:3008"; 
