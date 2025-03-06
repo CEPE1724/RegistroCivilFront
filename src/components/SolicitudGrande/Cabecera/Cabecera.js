@@ -54,11 +54,11 @@ export function Cabecera() {
       case "Referencias":
         return <Referencias />;
       case "Sección A- Negocio":
-        return <SeccionA />;
+        return <SeccionA ref={seccionRef}/>;
       case "Sección B- Dependiente":
         return <SeccionB />;
       case "Factores de Crédito":
-        return <FactoresCredito />;
+        return <FactoresCredito  ref={seccionRef}/>;
       case "Verificación":
         return <Verificacion />;
       case "Información de Crédito":
