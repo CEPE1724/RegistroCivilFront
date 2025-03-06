@@ -121,7 +121,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
     <div>
       {/* Aquí agregamos el botón de impresión */}
       <div className="flex justify-between items-center mb-4 pt-4">
-        <h2 className="text-xl font-semibold">Formulario de Factores de Crédito</h2>
         <IconButton
           color="primary"
           aria-label="Imprimir"

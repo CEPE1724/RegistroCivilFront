@@ -14,7 +14,7 @@ const FormField = ({
   previewUrl,
   setPreviewUrl,
   ...props
-}) => {  
+}) => {
   const { enqueueSnackbar } = useSnackbar();
 
   if (hidden) {
@@ -23,8 +23,8 @@ const FormField = ({
 
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = [
-      "image/jpg", 
-      "image/jpeg", 
+      "image/jpg",
+      "image/jpeg",
       "image/png",
     ];
 
@@ -47,39 +47,39 @@ const FormField = ({
 
   const handleInputChange = (e) => {
     let { name, value } = e.target;
-  
+
     if (name === "Cedula" || name === "Celular") {
       value = value.replace(/\D/g, "");
-	  value = value.slice(0, 10);
+      value = value.slice(0, 10);
     }
-  
-    if (name === "Nombres" || name === "Apellidos") {
+
+    if (name === "ApellidoMaterno" || name === "ApellidoPaterno" || name === "PrimerNombre" || name === "SegundoNombre") {
       value = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "").toUpperCase();
     }
 
     if (name === "CodDactilar") {
       value = value.toUpperCase();
-	  value = value.slice(0, 10);
+      value = value.slice(0, 10);
     }
 
     formik.setFieldValue(name, value);
   };
 
   if (type === "button") {
-	return (
-	  <div className="w-full place-items-center mt-8">
-		<button
-		  type="button"
-		  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
-		  onClick={props.onClick}
-		>
-		  {label}
-		</button>
-	  </div>
-	);
+    return (
+      <div className="w-full place-items-center mt-8">
+        <button
+          type="button"
+          className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
+          onClick={props.onClick}
+        >
+          {label}
+        </button>
+      </div>
+    );
   }
-  
-  
+
+
 
   // Si es un campo de tipo archivo, renderizamos una estructura diferente
   if (type === "file") {
@@ -254,16 +254,16 @@ const ReusableForm = ({
   // Sistema unificado para mostrar el primer error en el submit
   const showFirstError = () => {
     const errorKeys = Object.keys(formik.errors);
-    
+
     if (errorKeys.length > 0) {
       const firstErrorKey = errorKeys[0];
       const errorMessage = formik.errors[firstErrorKey];
-      
-      enqueueSnackbar(errorMessage, { 
+
+      enqueueSnackbar(errorMessage, {
         variant: "error",
         preventDuplicate: true
       });
-      
+
       // Marcar como tocado para que se muestre visualmente
       formik.setFieldTouched(firstErrorKey, true);
     }
@@ -296,7 +296,7 @@ const ReusableForm = ({
       className="w-full bg-white p-4 rounded-lg grid"
       onSubmit={(e) => {
         e.preventDefault();
-        
+
         // Validar y mostrar el primer error si hay alguno
         formik.validateForm().then(errors => {
           if (Object.keys(errors).length > 0) {
@@ -323,17 +323,15 @@ const ReusableForm = ({
         )}
 
         <div
-          className={`grid gap-4 order-1 md:order-2 ${
-            fileField ? "md:col-span-3" : "md:col-span-4"
-          } ${
-            columns === 2
+          className={`grid gap-4 order-1 md:order-2 ${fileField ? "md:col-span-3" : "md:col-span-4"
+            } ${columns === 2
               ? "grid-cols-1 md:grid-cols-2"
               : columns === 3
-              ? "grid-cols-1 md:grid-cols-3"
-              : columns === 4
-              ? "grid-cols-1 md:grid-cols-4"
-              : "grid-cols-1"
-          }`}
+                ? "grid-cols-1 md:grid-cols-3"
+                : columns === 4
+                  ? "grid-cols-1 md:grid-cols-4"
+                  : "grid-cols-1"
+            }`}
         >
           {otherFields.map((field) => (
             <FormField key={field.name} {...field} formik={formik} />

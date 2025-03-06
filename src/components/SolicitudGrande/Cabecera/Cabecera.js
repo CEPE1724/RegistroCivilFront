@@ -11,7 +11,7 @@ import { SeccionA } from "../SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
 import { useSnackbar } from 'notistack';
 import { Verificacion } from "../Verificacion/Verificacion";
-
+import { InformacionCredito } from "../InformacionCredito";
 export function Cabecera() {
   const [activeTab, setActiveTab] = useState("Datos Cliente");
   const [cedula, setCedula] = useState("");
@@ -42,6 +42,7 @@ export function Cabecera() {
     "Información de Crédito",
     "Factores de Crédito",
     "Verificación",
+
   ];
 
   const renderTabContent = () => {
@@ -53,13 +54,15 @@ export function Cabecera() {
       case "Referencias":
         return <Referencias />;
       case "Sección A- Negocio":
-        return <SeccionA ref={seccionRef}/>;
+        return <SeccionA />;
       case "Sección B- Dependiente":
         return <SeccionB />;
       case "Factores de Crédito":
-        return <FactoresCredito ref={seccionRef}/>;
-	  case "Verificación":
-		return <Verificacion />;
+        return <FactoresCredito />;
+      case "Verificación":
+        return <Verificacion />;
+      case "Información de Crédito":
+        return <InformacionCredito />;
       default:
         return <div>Contenido no disponible</div>;
     }
@@ -117,31 +120,33 @@ export function Cabecera() {
       <div className="bg-white p-6 rounded-lg shadow">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 grid-rows-2 gap-4">
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Fecha</label>
+            <label className="text-xs font-medium mb-1">Fecha</label>
             <input
               type="date"
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
               defaultValue={currentDate}
               readOnly
             />
           </div>
 
+
+
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Cedula</label>
+            <label className="text-xs font-medium mb-1">Cedula</label>
             <input
               type="text"
               value={cedula}
               onChange={handleInputChange(setCedula)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Local</label>
+            <label className="text-xs font-medium mb-1">Local</label>
             <select
               value={local}
               onChange={(e) => setLocal(e.target.value)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             >
               <option value="">Seleccione...</option>
               <option value="Local 1">Local 1</option>
@@ -166,58 +171,58 @@ export function Cabecera() {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Apellido Paterno</label>
+            <label className="text-xs font-medium mb-1">Apellido Paterno</label>
             <input
               type="text"
               value={apellidoPaterno}
               onChange={handleInputChange(setApellidoPaterno)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Apellido Materno</label>
+            <label className="text-xs font-medium mb-1">Apellido Materno</label>
             <input
               type="text"
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Primer Nombre</label>
+            <label className="text-xs font-medium mb-1">Primer Nombre</label>
             <input
               type="text"
               value={primerNombre}
               onChange={handleInputChange(setPrimerNombre)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Segundo Nombre</label>
+            <label className="text-xs font-medium mb-1">Segundo Nombre</label>
             <input
               type="text"
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Email</label>
+            <label className="text-xs font-medium mb-1">Email</label>
             <input
               type="text"
               value={email}
               onChange={handleInputChange(setEmail)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Celular</label>
+            <label className="text-xs font-medium mb-1">Celular</label>
             <input
               type="text"
               value={celular}
               onChange={handleInputChange(setCelular)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-10"
+              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
             />
           </div>
         </div>
@@ -228,11 +233,10 @@ export function Cabecera() {
           {tabs.map((tab) => (
             <li
               key={tab}
-              className={`cursor-pointer p-2 ${
-                activeTab === tab
-                  ? "border-b-2 border-blue-500 font-bold"
-                  : "text-gray-500"
-              }`}
+              className={`cursor-pointer p-2 ${activeTab === tab
+                ? "border-b-2 border-blue-500 font-bold"
+                : "text-gray-500"
+                }`}
               onClick={() => setActiveTab(tab)}
             >
               {tab}

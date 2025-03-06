@@ -87,9 +87,6 @@ export function Verificacion() {
   return (
     <>
       <div className="p-4 sm:p-6 bg-gray-50 overflow-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
-          Tabla de Datos
-        </h1>
 
 		<div className="flex items-center gap-2">
         <button

@@ -28,7 +28,7 @@ export default function CreditoForm() {
       );
     } catch (error) {
       console.error("Error al obtener estabilidad laboral", error);
-	  enqueueSnackbar("Error al cargar estabilidad laboral", { variant: "error", preventDuplicate: true });
+      enqueueSnackbar("Error al cargar estabilidad laboral", { variant: "error", preventDuplicate: true });
       setEstabilidadLaboral([]);
     }
   };
@@ -52,17 +52,17 @@ export default function CreditoForm() {
 
   const fetchTipoConsulta = async () => {
     try {
-    //   const response = await axios.get(APIURL.get_TipoConsulta(), {
-    //     headers: { method: "GET", cache: "no-store" },
-    //   });
-	const token = '';
-	const response = await axios.get(APIURL.get_TipoConsulta(), {
-		headers: {
-		  "Authorization": `Bearer ${token}`,
-		  "Content-Type": "application/json",
-		  "Cache": "no-store",
-		},
-	  });
+      //   const response = await axios.get(APIURL.get_TipoConsulta(), {
+      //     headers: { method: "GET", cache: "no-store" },
+      //   });
+      const token = '';
+      const response = await axios.get(APIURL.get_TipoConsulta(), {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Cache": "no-store",
+        },
+      });
       setTipoConsulta(
         response.data.map((item) => ({
           value: item.idCompraEncuesta,
@@ -87,15 +87,17 @@ export default function CreditoForm() {
 
   const initialValues = {
     Fecha:
-    new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
+      new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
     NumeroSolicitud: "12345",
     Bodega: 1,
     idVendedor: 123,
     idCompraEncuesta: null,
     Cedula: "",
     CodDactilar: "",
-    Apellidos: "",
-    Nombres: "",
+    ApellidoPaterno: "",
+    ApellidoMaterno: "",
+    PrimerNombre: "",
+    SegundoNombre: "",
     Celular: "",
     Email: "",
     idActEconomina: null,
@@ -140,8 +142,10 @@ export default function CreditoForm() {
 
     { label: "Cédula", name: "Cedula", type: "text" },
     { label: "Código Dactilar", name: "CodDactilar", type: "text" },
-    { label: "Apellidos", name: "Apellidos", type: "text" },
-    { label: "Nombres", name: "Nombres", type: "text" },
+    { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
+    { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
+    { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
+    { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
     { label: "Celular", name: "Celular", type: "text" },
     { label: "Email", name: "Email", type: "email" },
 
@@ -157,12 +161,6 @@ export default function CreditoForm() {
       type: "select",
       options: estabilidadLaboral,
     },
-
-    { label: "Afiliado", name: "bAfiliado", type: "switch" },
-    { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
-
-    { label: "Subir foto", name: "Foto", type: "file" },
-
     {
       label: "Producto",
       name: "idProductos",
@@ -172,6 +170,13 @@ export default function CreditoForm() {
         { value: 2, label: "OTRO" },
       ],
     },
+
+    { label: "Afiliado", name: "bAfiliado", type: "switch" },
+    { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
+
+    { label: "Subir foto", name: "Foto", type: "file" },
+
+   
   ];
 
   const validationSchema = Yup.object()
@@ -192,26 +197,38 @@ export default function CreditoForm() {
       Cedula: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
         .required("Ingresa 10 digitos de la cedula"),
-		CodDactilar: Yup.string()
-		.transform((value) => value.toUpperCase())
-		.matches(
-		  /^[A-Z]\d{4}[A-Z]\d{4}$/,
-		  "El primer y sexto carácter deben ser letras"
-		)
+      CodDactilar: Yup.string()
+        .transform((value) => value.toUpperCase())
+        .matches(
+          /^[A-Z]\d{4}[A-Z]\d{4}$/,
+          "El primer y sexto carácter deben ser letras"
+        )
         .min(8, "Debe tener al menos 8 caracteres")
-        .required("Revisa y coloca correctamente el código dactilar"), 
-		Apellidos: Yup.string()
-		.trim()
-		.min(2, "Debe tener al menos 2 caracteres")
-		.matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
-		.test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-		.required("Revisa el apellido debe tener al menos 2 caracteres"),
-	  Nombres: Yup.string()
-		.trim()
-		.min(2, "Debe tener al menos 2 caracteres")
-		.matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
-		.test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-		.required("Revisa el nombre debe tener al menos 2 caracteres"),
+        .required("Revisa y coloca correctamente el código dactilar"),
+      ApellidoPaterno: Yup.string()
+        .trim()
+        .min(3, "Debe tener al menos 3 caracteres")
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
+        .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
+        .required("Revisa el apellido debe tener al menos 2 caracteres"),
+      ApellidoMaterno: Yup.string()
+        .trim()
+        .min(3, "Debe tener al menos 3 caracteres")
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
+        .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
+        .required("Revisa el apellido debe tener al menos 2 caracteres"),
+        PrimerNombre: Yup.string()
+        .trim()
+        .min(3, "Debe tener al menos 3 caracteres")
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
+        .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
+        .required("Revisa el nombre debe tener al menos 2 caracteres"),
+        SegundoNombre: Yup.string()
+        .trim()
+        .min(3, "Debe tener al menos 3 caracteres")
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
+        .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
+        .required("Revisa el nombre debe tener al menos 2 caracteres"),
       Celular: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
         .required("El celular debe tener 10 dígitos")
@@ -230,10 +247,10 @@ export default function CreditoForm() {
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-	  Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres").required("Por favor sube una foto"),
+      Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres").required("Por favor sube una foto"),
 
       bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
-    
+
       bPoliticas: Yup.boolean().oneOf([true], "Debes aceptar las políticas.").required(),
 
       idProductos: Yup.number()
@@ -256,19 +273,19 @@ export default function CreditoForm() {
 
   const showFormErrors = (errors) => {
     if (Object.keys(errors).length > 0) {
-      enqueueSnackbar('Por favor, revisa el campo nombre y todos los demás campos para que puedan funcionar correctamente.', { 
+      enqueueSnackbar('Por favor, revisa el campo nombre y todos los demás campos para que puedan funcionar correctamente.', {
         variant: "error",
         preventDuplicate: true,
         autoHideDuration: 6000
       });
     }
-    
+
     Object.keys(errors).forEach(fieldName => {
       if (!prevErrors[fieldName] || prevErrors[fieldName] !== errors[fieldName]) {
         const fieldConfig = formConfig.find(f => f.name === fieldName);
         const fieldLabel = fieldConfig ? fieldConfig.label : fieldName;
-        
-        enqueueSnackbar(`Error en ${fieldLabel}: ${errors[fieldName]}`, { 
+
+        enqueueSnackbar(`Error en ${fieldLabel}: ${errors[fieldName]}`, {
           variant: "error",
           preventDuplicate: true,
           autoHideDuration: 4000
@@ -279,14 +296,16 @@ export default function CreditoForm() {
   };
 
   const handleSubmit = async (values) => {
-	
+
     const formattedValues = {
       ...values,
       idActEconomina: Number(values.idActEconomina),
       idCre_Tiempo: Number(values.idCre_Tiempo),
       idProductos: Number(values.idProductos),
-      Nombres: values.Nombres?.trim().toUpperCase(),
-      Apellidos: values.Apellidos?.trim().toUpperCase(),
+      ApellidoMaterno: values.ApellidoMaterno?.trim().toUpperCase(),
+      ApellidoPaterno: values.ApellidoPaterno?.trim().toUpperCase(),
+      PrimerNombre: values.PrimerNombre?.trim().toUpperCase(),
+      SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
       CodDactilar: values.CodDactilar?.toUpperCase(),
       idCompraEncuesta: Number(values.idCompraEncuesta),
     };
@@ -301,22 +320,15 @@ export default function CreditoForm() {
         }
       );
 
-      const response_cogno = await axios.post(
-        APIURL.post_cogno_Token(formattedValues.Cedula?.trim()),
-        {},
-        {
-          headers: { method: "POST", cache: "no-store" },
-        }
-      );
-	  enqueueSnackbar("Solicitud guardada con exito", { variant: "success", preventDuplicate: true });
-	  setFormStatus("success");
+      enqueueSnackbar("Solicitud guardada con exito", { variant: "success", preventDuplicate: true });
+      setFormStatus("success");
     } catch (error) {
       console.error("Error al enviar los datos:", error);
-	  enqueueSnackbar(`Error al enviar los datos. Por favor intenta de nuevo mas tarde`, { 
-		variant: "error",
-		preventDuplicate: true
-	  });
-	  setFormStatus("error");
+      enqueueSnackbar(`Error al enviar los datos. Por favor intenta de nuevo mas tarde`, {
+        variant: "error",
+        preventDuplicate: true
+      });
+      setFormStatus("error");
     }
   };
 
@@ -331,7 +343,7 @@ export default function CreditoForm() {
         includeButtons={true}
         columns={3}
         includeTermsAndConditions={true}
-		formStatus={formStatus}
+        formStatus={formStatus}
       />
     </div>
   );

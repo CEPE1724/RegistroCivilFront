@@ -51,17 +51,15 @@ export function ListadoSolicitud() {
   const itemsPerPage = 5;
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [searchDateFrom, setSearchDateFrom] = useState(''); // Fecha de inicio
-  const [searchDateTo, setSearchDateTo] = useState(''); 
+  const [searchDateTo, setSearchDateTo] = useState('');
   const navigate = useNavigate();
-  
+
 
   useEffect(() => {
     fetchTipoConsulta();
-    if (tipoConsulta.length > 0) {
-      fetchSolicitudes();
-    }
+    fetchSolicitudes();
   }, [currentPage]); // Agrega tipoConsulta como dependencia
-  
+
 
   const fetchTipoConsulta = async () => {
     try {
@@ -72,7 +70,7 @@ export function ListadoSolicitud() {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.status === 200) {
         const tipoConsulta = response.data.map((item) => ({
           id: item.idCompraEncuesta,
@@ -103,19 +101,19 @@ export function ListadoSolicitud() {
           offset: offset,
         },
       });
-  
+
       if (response.status === 200) {
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
-  
+
         const datos = response.data.data.map((item) => {
           // Buscar la descripción del tipo de consulta correspondiente al ID
-           console.log("efasd"+ tipoConsulta)
-           const consulta = tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido";
-           console.log("asdasdasdasdasd" + consulta)
+          console.log("efasd" + tipoConsulta)
+          const consulta = tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido";
+          console.log("asdasdasdasdasd" + consulta)
           return {
             id: item.idCre_SolicitudWeb,
-            nombre: `${item.Nombres} ${item.Apellidos}`,
+            nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
             cedula: item.Cedula,
             almacen: item.Bodega === 1 ? "Quicentro" : "Desconocido",
             vendedor: item.idVendedor === 123 ? "Kevin Alexander Lema Naranjo" : "nonde",
@@ -129,7 +127,7 @@ export function ListadoSolicitud() {
             tieneRuc: item.bTieneRuc ? "Sí" : "No",
           };
         });
-  
+
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
@@ -140,7 +138,7 @@ export function ListadoSolicitud() {
       console.error("Error fetching data:", error);
     }
   };
-  
+
 
   const handledocumentos = (registro) => {
     navigate('/documental', {
@@ -154,7 +152,7 @@ export function ListadoSolicitud() {
       }
     });
   };
-    
+
 
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
@@ -175,6 +173,10 @@ export function ListadoSolicitud() {
       (searchDateTo ? new Date(item.fecha) <= new Date(searchDateTo) : true)
   );
 
+  const handleSolictud = () => {
+    navigate('/solicitud',{replace:true});
+  };
+
   // Función para cambiar de página
   const changePage = (page) => {
     setCurrentPage(page);
@@ -182,12 +184,10 @@ export function ListadoSolicitud() {
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">
-        Tabla de Datos
-      </h1>
+
 
       <div className="flex gap-6 mb-4">
-      <TextField
+        <TextField
           label="Fecha Desde"
           type="date"
           variant="outlined"
@@ -226,7 +226,7 @@ export function ListadoSolicitud() {
             onChange={(e) => setEstado(e.target.value)}
             label="Estado"
           >
-    
+
             <MenuItem value="">
               <em>Seleccionar</em>
             </MenuItem>
@@ -237,6 +237,26 @@ export function ListadoSolicitud() {
             <MenuItem value="rechazado">Rechazado</MenuItem>
           </Select>
         </FormControl>
+        <button
+          title="Nueva Solicitud"
+          className="group cursor-pointer outline-none hover:rotate-90 duration-300"
+          onClick={handleSolictud}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="50px"
+            height="50px"
+            viewBox="0 0 24 24"
+            className="stroke-indigo-400 fill-none group-hover:fill-indigo-800 group-active:stroke-indigo-200 group-active:fill-indigo-600 group-active:duration-0 duration-300"
+          >
+            <path
+              d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+              stroke-width="1.5"
+            ></path>
+            <path d="M8 12H16" stroke-width="1.5"></path>
+            <path d="M12 16V8" stroke-width="1.5"></path>
+          </svg>
+        </button>
       </div>
 
       <div className="bg-white shadow-lg rounded-lg border border-gray-300">
@@ -288,7 +308,7 @@ export function ListadoSolicitud() {
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
-                  <TableCell align="center">{data.fecha.substring(0,10)}</TableCell>
+                  <TableCell align="center">{data.fecha.substring(0, 10)}</TableCell>
                   <TableCell align="center">{data.almacen}</TableCell>
                   <TableCell align="center">{data.vendedor}</TableCell>
                   <TableCell align="center">{data.consulta}</TableCell>
@@ -302,9 +322,9 @@ export function ListadoSolicitud() {
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-center gap-2">
-                    <button onClick={() => handledocumentos(data)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:ring-0 focus:shadow-none">
-  Documentos
-</button>
+                      <button onClick={() => handledocumentos(data)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:ring-0 focus:shadow-none">
+                        Documentos
+                      </button>
 
                       <button className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:shadow-none">
                         Telefonica
@@ -340,7 +360,7 @@ export function ListadoSolicitud() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
                   <div className="flex items-center gap-2">
                     <PersonIcon className="text-blue-500" fontSize="medium" />
-                    <p>{selectedRow.nombre}</p>
+                    <p>{selectedRow.PrimerNombre}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <BadgeIcon className="text-blue-500" fontSize="medium" />
@@ -369,19 +389,18 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
+                        ? "text-green-500"
+                        : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-gray-500"
+                            : selectedRow.estado === "aprobado"
+                              ? "text-blue-500"
+                              : selectedRow.estado === "rechazado"
+                                ? "text-red-500"
+                                : "text-gray-700"
+                        }`}
                     >
                       {selectedRow.estado}
                     </span>

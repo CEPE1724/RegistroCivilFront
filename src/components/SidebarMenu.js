@@ -91,10 +91,10 @@ export default function SwipeableTemporaryDrawer() {
 
             {/* Proteccion de Datos */}
             <ListItem disablePadding>
-              <ListItemButton component={Link} to={"/solicitud"}>
+              <ListItemButton component={Link} to={"/ListadoSolicitud"}>
                 <ListItemIcon>
                   <PersonIcon className="mr-2" />
-                  Solicitud de crédito
+                  Solicitudes de crédito
                 </ListItemIcon>
                 <ListItemText />
               </ListItemButton>
