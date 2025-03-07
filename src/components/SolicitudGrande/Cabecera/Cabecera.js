@@ -3,7 +3,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { DatosCliente } from "../DatosCliente";
+import  {DatosCliente}  from "../DatosCliente/DatosCliente";
 import { DatosConyuge } from "../DatosConyuge";
 import { Referencias } from "../Referencia";
 import { SeccionB } from "../SeccionB";
