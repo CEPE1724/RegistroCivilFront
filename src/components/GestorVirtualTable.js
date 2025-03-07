@@ -69,7 +69,6 @@ const GestorVirtualTable = () => {
           'Authorization': `Bearer ${token}`,
         }
       });
-      console.log("bodega", response.data.data);
       setBodega(response.data.data);
     } catch (error) {
       console.error("Error fetching gestores:", error);
@@ -123,7 +122,7 @@ const GestorVirtualTable = () => {
   }, [comboBox1, comboBox2, currentPage, itemsPerPage]);  // Se vuelve a llamar cuando cambia cualquiera de los filtros
 
   // Calcular el total de páginas
-  console.log(totalCount, itemsPerPage);
+
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
 

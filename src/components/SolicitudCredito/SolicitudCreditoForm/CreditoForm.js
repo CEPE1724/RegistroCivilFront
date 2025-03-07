@@ -5,15 +5,33 @@ import { APIURL } from "../../../configApi/apiConfig";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import { set } from "react-hook-form";
-
+import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
+import uploadFile from "../../../hooks/uploadFile";
 export default function CreditoForm() {
+  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
   const [tipoConsulta, setTipoConsulta] = useState([]);
+  const [dataBodega, setDataBodega] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const [prevErrors, setPrevErrors] = useState({});
   const [formStatus, setFormStatus] = useState(null);
 
+  const fetchBodega = async () => {
+    const userId = 1;
+    const idTipoFactura = 2;
+    const fecha = new Date().toISOString();
+    const recibeConsignacion = true;
+
+    try {
+      // Llamada a la función del hook que obtiene los datos
+      await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
+    } catch (err) {
+      console.error("Error al obtener datos de la bodega:", err);
+      enqueueSnackbar("Error al cargar los datos de bodega", { variant: "error", preventDuplicate: true });
+    }
+  };
 
   const fetchEstabilidadLaboral = async () => {
     try {
@@ -52,9 +70,6 @@ export default function CreditoForm() {
 
   const fetchTipoConsulta = async () => {
     try {
-      //   const response = await axios.get(APIURL.get_TipoConsulta(), {
-      //     headers: { method: "GET", cache: "no-store" },
-      //   });
       const token = '';
       const response = await axios.get(APIURL.get_TipoConsulta(), {
         headers: {
@@ -79,11 +94,25 @@ export default function CreditoForm() {
     fetchEstabilidadLaboral();
     fetchActividadLaboral();
     fetchTipoConsulta();
-  }, []);
+    fetchBodega();  
+  }, []);  
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setDataBodega(
+        data.map((item) => ({
+          value: item.b_Bodega,
+          label: item.b_Nombre,
+        }))
+      );
+    }
+  }, [data]); // Este efecto se ejecuta cuando 'data' cambia
+
 
   if (!actividadLaboral || actividadLaboral.length === 0) {
     return <p>No se pudo cargar la actividad laboral...</p>;
   }
+
 
   const initialValues = {
     Fecha:
@@ -104,7 +133,7 @@ export default function CreditoForm() {
     idCre_Tiempo: null,
     bAfiliado: false,
     bTieneRuc: false,
-    Foto: "",
+    Foto: null,
     bTerminosYCondiciones: false,
     bPoliticas: false,
     idProductos: null,
@@ -123,8 +152,9 @@ export default function CreditoForm() {
       label: "Bodega",
       name: "Bodega",
       type: "number",
-      disabled: true,
-      hidden: true,
+      type: "select",
+      options: dataBodega,
+     
     },
     {
       label: "ID Vendedor",
@@ -175,8 +205,9 @@ export default function CreditoForm() {
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
 
     { label: "Subir foto", name: "Foto", type: "file" },
+    
 
-   
+
   ];
 
   const validationSchema = Yup.object()
@@ -217,13 +248,13 @@ export default function CreditoForm() {
         .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
         .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
         .required("Revisa el apellido debe tener al menos 2 caracteres"),
-        PrimerNombre: Yup.string()
+      PrimerNombre: Yup.string()
         .trim()
         .min(3, "Debe tener al menos 3 caracteres")
         .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
         .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
         .required("Revisa el nombre debe tener al menos 2 caracteres"),
-        SegundoNombre: Yup.string()
+      SegundoNombre: Yup.string()
         .trim()
         .min(3, "Debe tener al menos 3 caracteres")
         .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
@@ -299,6 +330,7 @@ export default function CreditoForm() {
 
     const formattedValues = {
       ...values,
+      Bodega: Number(values.Bodega),
       idActEconomina: Number(values.idActEconomina),
       idCre_Tiempo: Number(values.idCre_Tiempo),
       idProductos: Number(values.idProductos),
@@ -309,7 +341,8 @@ export default function CreditoForm() {
       CodDactilar: values.CodDactilar?.toUpperCase(),
       idCompraEncuesta: Number(values.idCompraEncuesta),
     };
-    console.log(formattedValues);
+
+    console.log("Valores enviados al servidor:", formattedValues);
 
     try {
       const response = await axios.post(
@@ -319,6 +352,17 @@ export default function CreditoForm() {
           headers: { method: "POST", cache: "no-store" },
         }
       );
+      console.log("Respuesta del servidor:", response.data);
+
+      if (values.Foto) {
+        const fileUploadResponse = await uploadFile(
+          values.Foto,
+          values.Bodega,
+          values.Cedula,
+          values.NumeroSolicitud
+        );
+        alert("Respuesta de subida de archivo:");
+      }
 
       enqueueSnackbar("Solicitud guardada con exito", { variant: "success", preventDuplicate: true });
       setFormStatus("success");

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
@@ -13,9 +13,11 @@ import TimerOffIcon from "@mui/icons-material/TimerOff";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import { Typography } from "@mui/material";
+import { useAuth } from "../components/AuthContext/AuthContext";
 
 function DropDown() {
   const navigate = useNavigate();
+  const { logout, isLoggedIn } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
@@ -23,12 +25,10 @@ function DropDown() {
 
   const handleLogout = () => {
     setIsLoading(true);
-    localStorage.removeItem("token");
-    localStorage.removeItem("tokenExpiration");
-    handleClose();
+    logout();  // Llamar al logout desde el contexto
     setTimeout(() => {
-      navigate("/login", { replace: true });
       setIsLoading(false);
+      navigate("/login", { replace: true });
     }, 1000);
   };
 
@@ -36,10 +36,8 @@ function DropDown() {
     clearTimeout(logoutTimer); // Limpiar el temporizador anterior
 
     logoutTimer = setTimeout(() => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("tokenExpiration");
-      setIsModalOpen(true); // Mostrar el modal
-    },  300000 ); //  5 minutos
+      setIsModalOpen(true); // Mostrar el modal de sesión expirada
+    }, 300000); // 5 minutos
   };
 
   useEffect(() => {

@@ -1,5 +1,4 @@
 import axios from '../configApi/axiosConfig';
-
 export const fetchPerfil = async () => {
 
     try {
@@ -8,7 +7,6 @@ export const fetchPerfil = async () => {
         if (!token) {
             throw new Error('Token no encontrado. Por favor, inicie sesión.');
         }
-
         const response = await axios.get('auth/profile', {
             headers: {
                 Authorization: `Bearer ${token}`,

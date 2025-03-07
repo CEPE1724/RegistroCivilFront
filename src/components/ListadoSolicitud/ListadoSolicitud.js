@@ -77,7 +77,7 @@ export function ListadoSolicitud() {
           descripcion: item.Descripcion,
         }));
         setTipoConsulta(tipoConsulta)
-        console.log("Tipo de Consulta:", tipoConsulta);
+   
         // Aquí puedes establecer el estado con los datos obtenidos si es necesario
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -108,9 +108,9 @@ export function ListadoSolicitud() {
 
         const datos = response.data.data.map((item) => {
           // Buscar la descripción del tipo de consulta correspondiente al ID
-          console.log("efasd" + tipoConsulta)
+      
           const consulta = tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido";
-          console.log("asdasdasdasdasd" + consulta)
+       
           return {
             id: item.idCre_SolicitudWeb,
             nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,

@@ -18,11 +18,10 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import Collapse from "@mui/material/Collapse";
 import axios from "axios"; // Importando axios
 import { APIURL } from "../configApi/apiConfig";
-export function SwipeableTemporaryDrawer ({userDataToken})  {
+export function SwipeableTemporaryDrawer({ userDataToken }) {
   const [open, setOpen] = useState(false);
   const [openGestor, setOpenGestor] = useState(false);
   const [userData, setUserData] = useState([]);
-  console.log("userDataToken", userDataToken.idUsuario);
   const handleGestorClick = (event) => {
     event.stopPropagation();
     setOpenGestor(!openGestor);
@@ -41,8 +40,28 @@ export function SwipeableTemporaryDrawer ({userDataToken})  {
     };
 
     fetchData();
+    fetchBodegaUsuario();
   }, []);
 
+  const fetchBodegaUsuario = async () => {
+    try {
+      // Definir los parámetros que quieres enviar
+      const params = {
+        userId: 1,  // Ejemplo de ID de usuario
+        idTipoFactura: 2,  // Ejemplo de tipo de factura
+        fecha: '2025-03-06T00:00:00.000Z',  // Fecha en formato ISO 8601
+        recibeConsignacion: true  // Parámetro de consignación
+      };
+
+      // Realizar la solicitud GET pasando los parámetros en la propiedad 'params'
+      const response = await axios.get(APIURL.getUsuarioBodega(), { params });
+
+      // Manejar la respuesta
+    } catch (error) {
+      // Manejo de errores
+      console.error("Error fetching data:", error);
+    }
+  };
   // Filtrar los datos de menú para los elementos principales
   const menuItems = userData.map(item => item.i_parent_id === null ? item : null).filter(Boolean);
 

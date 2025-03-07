@@ -61,10 +61,7 @@ export function AdministrableForm() {
 
   // Guardar los permisos (simulación)
   const savePermissions = () => {
-    console.log('Permisos guardados:', {
-      userId: selectedUser?.id,
-      menuItemIds: selectedPermissions,
-    });
+    
     alert('Permissions saved!');
   };
 

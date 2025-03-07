@@ -47,10 +47,7 @@ const DactilarQuery = () => {
               { cedula: cedula, apiRC: 0 },
               config
             );
-            console.log(
-              "Consulta registrada en el histórico:",
-              historicoResponse.data
-            );
+         
           } catch (historicoError) {
             console.error(
               "Error al registrar la consulta en el histórico:",
@@ -76,10 +73,7 @@ const DactilarQuery = () => {
                 { cedula: cedula, apiRC: 1 },
                 config
               );
-              console.log(
-                "Consulta registrada en el histórico:",
-                historicoResponse.data
-              );
+             
             } catch (historicoError) {
               console.error(
                 "Error al registrar la consulta en el histórico:",

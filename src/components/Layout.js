@@ -1,44 +1,30 @@
 import * as React from 'react';
 import Nav from './Nav';
-import { fetchPerfil } from '../actions/fetchPerfil';
+import { useAuth } from '../components/AuthContext/AuthContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 
 export default function Layout({ children }) {
-  const [userData, setUserData] = React.useState(null);
+  // Usamos el hook `useAuth` para obtener `userData` y otros valores del contexto
+  const { userData, isLoggedIn } = useAuth();
 
-  const getUserData = async () => {
-      try {
-          const userPerfil = await fetchPerfil();
-          setUserData(userPerfil);
-      } catch (error) {
-          console.error('Error al obtener los datos del perfil:', error.message);
-      }
-  };
-
-  React.useEffect(() => {
-      getUserData();
-  }, []);
+ console.log(userData);
 
   return (
-    
     <>
       {userData ? (
         <div>
           <Nav showButton={true} userData={userData} />
           <React.Fragment>
             <CssBaseline />
-              <Container maxWidth="xl">
-                {children}
-              </Container>
+            <Container maxWidth="xl">
+              {children}
+            </Container>
           </React.Fragment>
         </div>
       ) : (
-        <div>Loading...</div> // O cualquier indicador de carga que prefieras
+        <div>Loading...</div> 
       )}
     </>
   );
-  
 }
-
-

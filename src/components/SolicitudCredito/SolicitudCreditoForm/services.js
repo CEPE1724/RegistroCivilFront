@@ -1,7 +1,6 @@
 export default async function cre_tiempo() {
   try {
     const baseUrl = process.env.REACT_APP_BASE_URL;
-	console.log(`${baseUrl}/cre-tiempo/1`);
     const response = await fetch(`${baseUrl}/cre-tiempo/1`, {
       method: "GET",
       cache: "no-store",
