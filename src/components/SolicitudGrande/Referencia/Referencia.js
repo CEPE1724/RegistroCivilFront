@@ -10,7 +10,22 @@ export function Referencias() {
     const { enqueueSnackbar } = useSnackbar();
     const [dato, setDato] = useState([]);
     const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
+    const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
+    const [datoCanton, setDatoCanton] = useState([]);          //estado cantones
     const [idToTextMap, setIdToTextMap] = useState({});   //estado para mapear IDs a textos de api parentesco
+    const [idToTextMapProvincia, setIdToTextMapProvincia] = useState({});   //IDs a textos provincias
+    const [idToTextMapCanton, setIdToTextMapCanton] = useState({});   //IDs a textos cantones
+
+    //almacenar datos del formulario
+    const [formData, setFormData] = useState({
+        parentesco: "",
+        apellidoPaterno: "",
+        primerNombre: "",
+        segundoNombre: "",
+        provincia: "",
+        canton: "",
+        celular: ""
+    });
 
     //api parentesco
     useEffect(() => {
@@ -44,22 +59,88 @@ export function Referencias() {
         }
     };
 
-    //almacenar datos del formulario
-    const [formData, setFormData] = useState({
-        parentesco: "",
-        apellidoPaterno: "",
-        primerNombre: "",
-        segundoNombre: "",
-        provincia: "",
-        canton: "",
-        celular: ""
-    });
+    //api provincias
+    useEffect(() => {
+        fetchDatoProvincia();
+    }, []);
+
+    const fetchDatoProvincia = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getProvincias();
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDatoProvincia(response.data);
+            //objeto para mapear IDs a textos
+            const idToTextMapProvincia = {};
+            response.data.forEach(item => {
+                idToTextMapProvincia[item.idProvincia] = item.Nombre;
+            });
+            setIdToTextMapProvincia(idToTextMapProvincia); // Guardar el objeto en el estado
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    }
+
+    //api cantones
+    useEffect(() => {
+        if (formData.provincia) {
+            fetchDatoCanton(formData.provincia);
+        } else {
+            setDatoCanton([]);  // Limpiar cantones si no hay provincia
+        }
+    }, [formData.provincia]);  // Dependencia
+
+    const fetchDatoCanton = async (id) => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getCantones(id);
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDatoCanton(response.data);
+            //objeto para mapear IDs a textos
+            const idToTextMapCanton = {};
+            response.data.forEach(item => {
+                idToTextMapCanton[item.idCanton] = item.Nombre;
+            });
+            setIdToTextMapCanton(idToTextMapCanton); // Guardar el objeto en el estado
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    }
+
 
     //almacenar datos tabla
     const [tablaDatos, setTablaDatos] = useState([]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+        if (name === "provincia") {
+            setFormData(prev => ({
+                ...prev,
+                provincia: value,
+                canton: ""  // Resetear cantón al cambiar provincia
+            }));
+            return;
+        }
+
         if (name === "apellidoPaterno" || name === "primerNombre" || name === "segundoNombre") {
             // Solo letras
             const filteredValue = value.replace(/[^A-Za-z]/g, '');
@@ -67,7 +148,7 @@ export function Referencias() {
         } else if (name === "celular") {
             // Solo números
             const filteredValue = value.replace(/\D/g, ''); // Eliminar caracteres no numéricos
-            setFormData({ ...formData, [name]: filteredValue});
+            setFormData({ ...formData, [name]: filteredValue });
         } else {
             setFormData({ ...formData, [name]: value });
         }
@@ -112,6 +193,7 @@ export function Referencias() {
             return;
         }
         setTablaDatos([...tablaDatos, formData]);
+        console.log(formData);
         enqueueSnackbar("Datos Guardados", { variant: "success" });
         // Limpiar el formulario después de agregar
         handleLimpiar();
@@ -122,7 +204,7 @@ export function Referencias() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Parentesco */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Parentesco</label>
+                    <label className="text-lightGrey text-xs mb-2">Parentesco(*)</label>
                     <select
                         name="parentesco"
                         className="p-2 border rounded"
@@ -139,7 +221,7 @@ export function Referencias() {
                 </div>
                 {/* Apellido Paterno */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Apellido Paterno</label>
+                    <label className="text-lightGrey text-xs mb-2">Apellido Paterno(*)</label>
                     <input
                         type="text"
                         name="apellidoPaterno"
@@ -154,7 +236,7 @@ export function Referencias() {
                 </div>
                 {/* Primer Nombre */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Primer Nombre</label>
+                    <label className="text-lightGrey text-xs mb-2">Primer Nombre(*)</label>
                     <input
                         type="text"
                         name="primerNombre"
@@ -183,7 +265,7 @@ export function Referencias() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Provincia */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Provincia</label>
+                    <label className="text-lightGrey text-xs mb-2">Provincia(*)</label>
                     <select
                         name="provincia"
                         className="p-2 border rounded"
@@ -191,8 +273,8 @@ export function Referencias() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.idParentesco} value={opcion.idParentesco}>
+                        {datoProvincia.map((opcion) => (
+                            <option key={opcion.idProvincia} value={opcion.idProvincia}>
                                 {opcion.Nombre}
                             </option>
                         ))}
@@ -200,7 +282,7 @@ export function Referencias() {
                 </div>
                 {/* Canton */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Canton</label>
+                    <label className="text-lightGrey text-xs mb-2">Canton(*)</label>
                     <select
                         name="canton"
                         className="p-2 border rounded"
@@ -208,8 +290,8 @@ export function Referencias() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.idParentesco} value={opcion.idParentesco}>
+                        {datoCanton.map((opcion) => (
+                            <option key={opcion.idCanton} value={opcion.idCanton}>
                                 {opcion.Nombre}
                             </option>
                         ))}
@@ -217,7 +299,7 @@ export function Referencias() {
                 </div>
                 {/* Celular */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Celular</label>
+                    <label className="text-lightGrey text-xs mb-2">Celular(*)</label>
                     <input
                         type="text"
                         name="celular"
@@ -265,8 +347,8 @@ export function Referencias() {
                                     <td className="px-4 py-2 text-center">{row.apellidoPaterno}</td>
                                     <td className="px-4 py-2 text-center">{row.primerNombre}</td>
                                     <td className="px-4 py-2 text-center">{row.segundoNombre}</td>
-                                    <td className="px-4 py-2 text-center">{idToTextMap[row.provincia]}</td>
-                                    <td className="px-4 py-2 text-center">{idToTextMap[row.canton]}</td>
+                                    <td className="px-4 py-2 text-center">{idToTextMapProvincia[row.provincia]}</td>
+                                    <td className="px-4 py-2 text-center">{idToTextMapCanton[row.canton]}</td>
                                     <td className="px-4 py-2 text-center">{row.celular}</td>
                                     <td className="px-4 py-2 text-center">
                                         <IconButton color="primary" aria-label="call">
