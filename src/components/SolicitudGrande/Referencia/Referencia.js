@@ -1,20 +1,57 @@
 import React, { useState, useEffect } from "react";
 import CallIcon from '@mui/icons-material/Call';
 import { useSnackbar } from "notistack";
-import { IconButton } from "@mui/material";
+import {
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Tooltip,
+    TextField,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Alert,
+} from "@mui/material";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
+
+import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import PersonIcon from "@mui/icons-material/Person";
+import BadgeIcon from "@mui/icons-material/Badge";
+import StoreIcon from "@mui/icons-material/Store";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
+import InfoIcon from "@mui/icons-material/Info";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import PhoneIcon from "@mui/icons-material/Phone";
+import EmailIcon from "@mui/icons-material/Email";
+import EventIcon from "@mui/icons-material/Event";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BusinessIcon from "@mui/icons-material/Business";
 
 export function Referencias() {
 
     const { enqueueSnackbar } = useSnackbar();
-    const [dato, setDato] = useState([]);
+
     const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
     const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
     const [datoCanton, setDatoCanton] = useState([]);          //estado cantones
     const [idToTextMap, setIdToTextMap] = useState({});   //estado para mapear IDs a textos de api parentesco
     const [idToTextMapProvincia, setIdToTextMapProvincia] = useState({});   //IDs a textos provincias
     const [idToTextMapCanton, setIdToTextMapCanton] = useState({});   //IDs a textos cantones
+    const [view, setView] = useState(false);
+    const [selectedRow, setSelectedRow] = useState(null);
 
     //almacenar datos del formulario
     const [formData, setFormData] = useState({
@@ -199,6 +236,16 @@ export function Referencias() {
         handleLimpiar();
     };
 
+    const handleOpenDialog = (row) => {
+        setSelectedRow(row);
+        setView(true);
+    };
+
+    const handleCloseDialog = () => {
+        setView(false);
+        setSelectedRow(null);
+    };
+
     return (
         <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -321,6 +368,9 @@ export function Referencias() {
                     <button onClick={handleLimpiar} className="p-2 bg-blue-500 text-white rounded">
                         Limpiar
                     </button>
+                    <button onClick={handleOpenDialog} className="p-2 bg-blue-500 text-white rounded">
+                        ver
+                    </button>
                 </div>
             </div>
             {/* Tabla */}
@@ -361,6 +411,25 @@ export function Referencias() {
                     </table>
                 </div>
             </div>
+
+            {/* Dialog */}
+            <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+                <DialogTitle className="text-xl font-bold">
+                    Detalles de la Solicitud
+                </DialogTitle>
+                <DialogContent>
+                    {selectedRow && (
+                        <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
+                            {/* Datos */}
+                            <div className="md:w-2/3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
+
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
