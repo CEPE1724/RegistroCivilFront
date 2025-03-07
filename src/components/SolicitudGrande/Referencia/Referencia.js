@@ -9,9 +9,10 @@ export function Referencias() {
 
     const { enqueueSnackbar } = useSnackbar();
     const [dato, setDato] = useState([]);
-    const [idToTextMap, setIdToTextMap] = useState({});
+    const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
+    const [idToTextMap, setIdToTextMap] = useState({});   //estado para mapear IDs a textos de api parentesco
 
-    //llamada api
+    //api parentesco
     useEffect(() => {
         fetchDato();
     }, []);
@@ -19,7 +20,7 @@ export function Referencias() {
     const fetchDato = async () => {
         try {
             const token = localStorage.getItem("token");
-            const url = APIURL.getCreVerificacionTelefonica();
+            const url = APIURL.getParentesco();
             const response = await axios.get(url,
                 {
                     headers: {
@@ -28,12 +29,12 @@ export function Referencias() {
                     },
                 }
             );
-            setDato(response.data);
+            setDatoParentesco(response.data);
 
             //objeto para mapear IDs a textos
             const idToTextMap = {};
             response.data.forEach(item => {
-                idToTextMap[item.idCre_VerificacionTelefonicaWeb] = item.Respuesta;
+                idToTextMap[item.idParentesco] = item.Nombre;
             });
             setIdToTextMap(idToTextMap); // Guardar el objeto en el estado
         } catch (error) {
@@ -129,9 +130,9 @@ export function Referencias() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
-                                {opcion.Respuesta}
+                        {datoParentesco.map((opcion) => (
+                            <option key={opcion.idParentesco} value={opcion.idParentesco}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -142,12 +143,13 @@ export function Referencias() {
                     <input
                         type="text"
                         name="apellidoPaterno"
+                        autocomplete="off"
                         placeholder="Apellido Paterno"
                         className="p-2 border rounded"
                         value={formData.apellidoPaterno}
                         onChange={handleChange}
                         pattern="[A-Za-z]+"
-                        title="Solo se permiten letras y espacios"
+                        title="Solo se permiten letras"
                     />
                 </div>
                 {/* Primer Nombre */}
@@ -156,6 +158,7 @@ export function Referencias() {
                     <input
                         type="text"
                         name="primerNombre"
+                        autocomplete="off"
                         placeholder="Primer Nombre"
                         className="p-2 border rounded"
                         value={formData.primerNombre}
@@ -168,6 +171,7 @@ export function Referencias() {
                     <input
                         type="text"
                         name="segundoNombre"
+                        autocomplete="off"
                         placeholder="Segundo Nombre"
                         className="p-2 border rounded"
                         value={formData.segundoNombre}
@@ -188,8 +192,8 @@ export function Referencias() {
                     >
                         <option value="">Seleccione una opción</option>
                         {dato.map((opcion) => (
-                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
-                                {opcion.Respuesta}
+                            <option key={opcion.idParentesco} value={opcion.idParentesco}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -205,8 +209,8 @@ export function Referencias() {
                     >
                         <option value="">Seleccione una opción</option>
                         {dato.map((opcion) => (
-                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
-                                {opcion.Respuesta}
+                            <option key={opcion.idParentesco} value={opcion.idParentesco}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -217,6 +221,7 @@ export function Referencias() {
                     <input
                         type="text"
                         name="celular"
+                        autocomplete="off"
                         placeholder="Celular"
                         className="p-2 border rounded"
                         value={formData.celular}
@@ -226,7 +231,7 @@ export function Referencias() {
                     />
                 </div>
                 {/* Botones */}
-                <div>
+                <div className="flex items-center justify-center">
                     <button onClick={handleAgregar} className="p-2 bg-blue-500 text-white rounded mr-2">
                         Agregar
                     </button>
