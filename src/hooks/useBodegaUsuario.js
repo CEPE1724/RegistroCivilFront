@@ -18,7 +18,7 @@ const useBodegaUsuario = () => {
       setData(response.data);
     } catch (err) {
 
-      console.error("Error fetching data:", err);
+
       setError("Hubo un error al obtener los datos.");
     } finally {
       setLoading(false);  

@@ -38,9 +38,12 @@ import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
 import { useNavigate } from "react-router-dom"
-
+import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 export function ListadoSolicitud() {
+  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+
   const [search, setSearch] = useState("");
+  const [dataBodega, setDataBodega] = useState([]);
   const [estado, setEstado] = useState("");
   const [datos, setDatos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,10 +57,24 @@ export function ListadoSolicitud() {
   const [searchDateTo, setSearchDateTo] = useState('');
   const navigate = useNavigate();
 
+  const fetchBodega = async () => {
+    const userId = 1;
+    const idTipoFactura = 43;
+    const fecha = new Date().toISOString();
+    const recibeConsignacion = true;
+
+    try {
+      // Llamada a la función del hook que obtiene los datos
+      await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
+    } catch (err) {
+      console.error("Error al obtener datos de la bodega:", err);
+    }
+  };
 
   useEffect(() => {
     fetchTipoConsulta();
     fetchSolicitudes();
+    fetchBodega();  
   }, [currentPage]); // Agrega tipoConsulta como dependencia
 
 
@@ -110,12 +127,12 @@ export function ListadoSolicitud() {
           // Buscar la descripción del tipo de consulta correspondiente al ID
       
           const consulta = tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido";
-       
+          const nombreBodega = dataBodega.find((bodega) => bodega.value === item.Bodega)?.label || "Desconocido";
           return {
             id: item.idCre_SolicitudWeb,
             nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
             cedula: item.Cedula,
-            almacen: item.Bodega === 1 ? "Quicentro" : "Desconocido",
+            almacen: nombreBodega,
             vendedor: item.idVendedor === 123 ? "Kevin Alexander Lema Naranjo" : "nonde",
             consulta: consulta, // Usar la descripción de la consulta
             estado: item.Estado === 0 ? "pendiente" : item.Estado === 1 ? "aprobado" : item.Estado === 2 ? "anulado" : item.Estado === 3 ? "rechazado" : "desconocido",
@@ -139,6 +156,18 @@ export function ListadoSolicitud() {
     }
   };
 
+
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setDataBodega(
+        data.map((item) => ({
+          value: item.b_Bodega,
+          label: item.b_Nombre,
+        }))
+      );
+    }
+  }, [data]); 
 
   const handledocumentos = (registro) => {
     navigate('/documental', {
