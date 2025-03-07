@@ -15,8 +15,8 @@ export function DatosCliente() {
     },
     { label: "Fecha Nacimiento", name: "FechaNacimiento", type: "date" },
     {
-      label: "Sexo",
-      name: "Sexo",
+      label: "Género",
+      name: "Genero",
       type: "select",
       options: [
         { value: 0, label: "FEMENINO" },

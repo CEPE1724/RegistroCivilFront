@@ -6,9 +6,9 @@ const DomicilioModal = ({ openModal, closeModal }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-7xl p-8 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-semibold mb-6">Trabajo</h2>
+        <h2 className="text-2xl font-semibold mb-6">Domicilio</h2>
         <div className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div>
               <label className="font-semibold">Tipo de Vivienda (Meses)</label>
               <input
@@ -193,7 +193,7 @@ const DomicilioModal = ({ openModal, closeModal }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div>
               <label className="font-semibold">Cobertura de señal</label>
               <div className="flex flex-col mt-2">
@@ -230,7 +230,7 @@ const DomicilioModal = ({ openModal, closeModal }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4">
             <div>
               <label className="font-semibold">Punto de Referencia</label>
               <textarea

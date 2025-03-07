@@ -5,12 +5,12 @@ const TrabajoModal = ({ openModal, closeModal }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-7xl p-8 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl sm:max-w-3xl md:max-w-2xl lg:max-w-7xl p-8 max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-6">Trabajo</h2>
         <div className="grid grid-cols-1 gap-4">
           <div className="col-span-1">
             <label className="font-semibold">Tipo de Vivienda</label>
-            <div className="flex space-x-4 mt-2">
+            <div className="flex flex-wrap sm:flex-row sm:space-x-4 mt-2">
               <label className="flex items-center space-x-2">
                 <input
                   type="radio"
@@ -41,7 +41,7 @@ const TrabajoModal = ({ openModal, closeModal }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="font-semibold">Tiempo de Trabajo (Meses)</label>
               <input
@@ -76,7 +76,7 @@ const TrabajoModal = ({ openModal, closeModal }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="font-semibold">Teléfono Laboral</label>
               <input
@@ -111,7 +111,7 @@ const TrabajoModal = ({ openModal, closeModal }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="font-semibold">
                 Punto de Referencia Laboral
@@ -132,7 +132,7 @@ const TrabajoModal = ({ openModal, closeModal }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="font-semibold">Calle Principal</label>
               <input
