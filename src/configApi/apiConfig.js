@@ -1,7 +1,7 @@
 
  
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+const API_BASE_URL = "http://192.168.2.246:3025/api/v1/";
 
 
 
@@ -28,5 +28,9 @@ export const APIURL = {
 	get_TipoConsulta : () => `${API_BASE_URL}compraencuesta/1`,
 	post_cogno_Token : (ci) => `${API_BASE_URL}auth/cogno/token/${ci}`,
     getCoordenadasprefactura : () => `${API_BASE_URL}coordenadasprefactura/all`,
-
+    getTipodocumento : () => `${API_BASE_URL}cre-tipodocumento/findAll`,
+    getTiposexo : () => `${API_BASE_URL}cre-sexo`,
+    getNiveleducacion : () => `${API_BASE_URL}cre-niveleducacion`,
+    getProfesion : () => `${API_BASE_URL}cre-profesion`,
+    getParentesco : () => `${API_BASE_URL}cre-parentesco`,
 };

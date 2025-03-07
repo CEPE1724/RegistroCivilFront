@@ -6,7 +6,11 @@ import { APIURL } from "../../../configApi/apiConfig";
 export function DatosConyuge() {
 
     const { enqueueSnackbar } = useSnackbar();
-    const [dato, setDato] = useState([]);
+    const [dato, setDato] = useState([]);  //estados de nacionalidad
+    const [datoDocumento, setDatoDocumento] = useState([]);  //estado tipo documento
+    const [datoSexo, setDatoSexo] = useState([]);  //estado sexo
+    const [datoNivelEducacion, setDatoNivelEducacion] = useState([]);  //estado nivel educacion
+    const [datoProfesion, setDatoProfesion] = useState([]);  //estado profesion
     //almacenar datos del formulario
     const [formData, setFormData] = useState({
         tipoDocumento: "",
@@ -21,7 +25,7 @@ export function DatosConyuge() {
         profesion: "",
     });
 
-    //llamada api
+    //llamada api documento
     useEffect(() => {
         fetchDato();
     }, []);
@@ -29,7 +33,7 @@ export function DatosConyuge() {
     const fetchDato = async () => {
         try {
             const token = localStorage.getItem("token");
-            const url = APIURL.getCreVerificacionTelefonica();
+            const url = APIURL.getTipodocumento();
             const response = await axios.get(url,
                 {
                     headers: {
@@ -38,7 +42,82 @@ export function DatosConyuge() {
                     },
                 }
             );
-            setDato(response.data);
+            setDatoDocumento(response.data);
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    };
+
+    // api de sexo
+    useEffect(() => {
+        fetchDatosexo();
+    }, []);
+
+    const fetchDatosexo = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getTiposexo();
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDatoSexo(response.data);
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    };
+
+    //api nivel educacion
+    useEffect(() => {
+        fetchDatoNivelEducacion();
+    }, []);
+
+    const fetchDatoNivelEducacion = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getNiveleducacion();
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDatoNivelEducacion(response.data);
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    };
+
+    //api profesion 
+    useEffect(() => {
+        fetchDatoProfesion();
+    }, []);
+
+    const fetchDatoProfesion = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getProfesion();
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDatoProfesion(response.data);
         } catch (error) {
             enqueueSnackbar("Error fetching Dato: " + error.message, {
                 variant: "error",
@@ -74,11 +153,11 @@ export function DatosConyuge() {
             return;
         }
         if (formData.apellidoPaterno.length < 3) {
-            enqueueSnackbar("El apellido paterno es requerido", { variant: "error" });
+            enqueueSnackbar("El apellido paterno debe tener mínimo 3 caracteres", { variant: "error" });
             return;
         }
         if (formData.primerNombre.length < 3) {
-            enqueueSnackbar("El primer nombre es requerido", { variant: "error" });
+            enqueueSnackbar("El primer nombre debe tener mínimo 3 caracteres", { variant: "error" });
             return;
         }
         if (formData.numeroDocumento.length < 10) {
@@ -122,9 +201,9 @@ export function DatosConyuge() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.idCre_VerificacionTelefonicaWeb} value={opcion.idCre_VerificacionTelefonicaWeb}>
-                                {opcion.Respuesta}
+                        {datoDocumento.map((opcion) => (
+                            <option key={opcion.idTipoDoc} value={opcion.idTipoDoc}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -135,6 +214,7 @@ export function DatosConyuge() {
                     <input
                         name="apellidoPaterno"
                         type="text"
+                        autocomplete="off"
                         placeholder="Apellido Paterno"
                         className="p-2 border rounded"
                         value={formData.apellidoPaterno}
@@ -147,6 +227,7 @@ export function DatosConyuge() {
                     <input
                         name="primerNombre"
                         type="text"
+                        autocomplete="off"
                         placeholder="Primer Nombre"
                         className="p-2 border rounded"
                         value={formData.primerNombre}
@@ -159,6 +240,7 @@ export function DatosConyuge() {
                     <input
                         name="segundoNombre"
                         type="text"
+                        autocomplete="off"
                         placeholder="Segundo Nombre"
                         className="p-2 border rounded"
                         value={formData.segundoNombre}
@@ -174,10 +256,13 @@ export function DatosConyuge() {
                     <input
                         name="numeroDocumento"
                         type="number"
+                        autocomplete="off"
                         placeholder="N. Documento"
                         className="p-2 border rounded"
                         value={formData.numeroDocumento}
                         onChange={handleChange}
+                        maxLength="10"
+                        pattern="\d{10}"
                     />
                 </div>
                 {/* Fecha Nacimiento */}
@@ -202,9 +287,9 @@ export function DatosConyuge() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.Respuesta}
+                        {datoDocumento.map((opcion) => (
+                            <option key={opcion.idTipoDoc} value={opcion.idTipoDoc}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -219,9 +304,9 @@ export function DatosConyuge() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.Respuesta}
+                        {datoSexo.map((opcion) => (
+                            <option key={opcion.idSexo} value={opcion.idSexo}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -239,9 +324,9 @@ export function DatosConyuge() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.Respuesta}
+                        {datoNivelEducacion.map((opcion) => (
+                            <option key={opcion.idNivelEducacion} value={opcion.idNivelEducacion}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>
@@ -256,9 +341,9 @@ export function DatosConyuge() {
                         onChange={handleChange}
                     >
                         <option value="">Seleccione una opción</option>
-                        {dato.map((opcion) => (
-                            <option key={opcion.value} value={opcion.value}>
-                                {opcion.Respuesta}
+                        {datoProfesion.map((opcion) => (
+                            <option key={opcion.idProfesion} value={opcion.idProfesion}>
+                                {opcion.Nombre}
                             </option>
                         ))}
                     </select>

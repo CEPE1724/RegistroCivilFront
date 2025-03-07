@@ -11,6 +11,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="apellidoPaterno"
+                        autocomplete="off"
                         placeholder="Score"
                         className="p-2 border rounded"
                     />
@@ -21,6 +22,7 @@ export function InformacionCredito() {
                     <input
                         type="text"
                         name="rangeIngresos"
+                        autocomplete="off"
                         placeholder="Rango Ingresos"
                         className="p-2 border rounded"
                         pattern="[A-Za-z]+"
@@ -33,6 +35,7 @@ export function InformacionCredito() {
                     <input
                         type="text"
                         name="resultadoEquifax"
+                        autocomplete="off"
                         placeholder="Resultado Equifax"
                         className="p-2 border rounded"
                         pattern="[A-Za-z]+"
@@ -47,6 +50,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="scoreInclusion"
+                        autocomplete="off"
                         placeholder="Score Inclusion"
                         className="p-2 border rounded"
                     />
@@ -57,6 +61,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="capacidadPago"
+                        autocomplete="off"
                         placeholder="Capacidad Pago"
                         className="p-2 border rounded"
                     />
@@ -67,6 +72,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="segmentacionEquifax"
+                        autocomplete="off"
                         placeholder="Segmentación Equifax"
                         className="p-2 border rounded"
                     />
@@ -80,6 +86,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="scoreSobreendeudamiento"
+                        autocomplete="off"
                         placeholder="Score Sobreendeudamiento"
                         className="p-2 border rounded"
                     />
@@ -90,6 +97,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="totalVencido"
+                        autocomplete="off"
                         placeholder="Total Vencido"
                         className="p-2 border rounded"
                     />
@@ -104,6 +112,7 @@ export function InformacionCredito() {
                     <input
                         type="number"
                         name="cartetaCastigada"
+                        autocomplete="off"
                         placeholder="Cartera Castigada"
                         className="p-2 border rounded"
                     />
