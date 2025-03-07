@@ -388,13 +388,10 @@ const handleSubmit = async (values) => {
       headers: { method: "POST", cache: "no-store" },
     });
 
-    console.log("Solicitud creada con éxito. ID de la solicitud:", createResponse.data.idCre_SolicitudWeb);
-
     // 2. Consultar la solicitud recién creada
     if (createResponse.data.idCre_SolicitudWeb) {
       const solicitudData = await fetchConsultaSolicitud(createResponse.data.idCre_SolicitudWeb);
-      console.log("Datos de la solicitud después de la consulta:", solicitudData);
-
+   
       // 3. Subir archivo si existe una foto
       if (fotourl && solicitudData) {
         const file = fotourl;  // El archivo completo, no solo el nombre
@@ -406,7 +403,6 @@ const handleSubmit = async (values) => {
           values.Cedula,
           solicitudData.NumeroSolicitud
         );
-        console.log("Respuesta de la subida de archivo:", fileUploadResponse);
 
         // 5. Si la subida fue exitosa, almacenar la URL de la foto
         if (fileUploadResponse) {
@@ -416,9 +412,7 @@ const handleSubmit = async (values) => {
           const updatedData = {
             Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
           };
-
           const updatedSolicitud = await fetchActualizaSolicitud(solicitudData.idCre_SolicitudWeb, updatedData);
-          console.log("Solicitud actualizada con la foto:", updatedSolicitud);
         }
       }
     }

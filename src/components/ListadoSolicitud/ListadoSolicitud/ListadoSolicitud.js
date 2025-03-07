@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
-import { APIURL } from "../../configApi/apiConfig";
+import { APIURL } from "../../../configApi/apiConfig";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import PersonIcon from "@mui/icons-material/Person";
@@ -40,7 +40,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
 import FolderIcon from "@mui/icons-material/Folder";
 import { useNavigate } from "react-router-dom";
-import useBodegaUsuario from "../../hooks/useBodegaUsuario";
+import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 
 export function ListadoSolicitud() {
@@ -142,6 +142,7 @@ export function ListadoSolicitud() {
             "Desconocido";
           return {
             id: item.idCre_SolicitudWeb,
+            NumeroSolicitud: item.NumeroSolicitud,
             nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
             cedula: item.Cedula,
             almacen: nombreBodega,
@@ -154,11 +155,13 @@ export function ListadoSolicitud() {
               item.Estado === 0
                 ? "pendiente"
                 : item.Estado === 1
-                ? "aprobado"
+                ? "PENDIENTE"
                 : item.Estado === 2
-                ? "anulado"
+                ? "APROBADO"
                 : item.Estado === 3
-                ? "rechazado"
+                ? "ANULADO"
+                : item.Estado === 4
+                ? "RECHAZADO"
                 : "desconocido",
             imagen: item.Foto,
             celular: item.Celular,
@@ -195,6 +198,7 @@ export function ListadoSolicitud() {
     navigate("/documental", {
       state: {
         id: registro.id,
+        NumeroSolicitud: registro.NumeroSolicitud,
         nombre: registro.nombre,
         cedula: registro.cedula,
         fecha: registro.fecha,
@@ -361,7 +365,7 @@ export function ListadoSolicitud() {
                       src={data.imagen}
                       alt="Imagen"
                     />*/}
-                    {data.id}
+                    {data.NumeroSolicitud}
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
