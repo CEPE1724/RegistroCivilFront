@@ -2253,6 +2253,14 @@ body {
   padding-top: 0.36rem;
 }
 
+.pl-8 {
+  padding-left: 2rem;
+}
+
+.pt-6 {
+  padding-top: 1.5rem;
+}
+
 .text-left {
   text-align: left;
 }

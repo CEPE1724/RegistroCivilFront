@@ -22,26 +22,21 @@ const FormField = ({
   }
 
   const handleFileChange = (event) => {
-    const SUPPORTED_FORMATS = [
-      "image/jpg",
-      "image/jpeg",
-      "image/png",
-    ];
+    try {
+      const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
+      const file = event.target.files ? event.target.files[0] : null;
 
-    const file = event.target.files ? event.target.files[0] : null;
+      if (!file) return;
 
-    if (file) {
       if (!SUPPORTED_FORMATS.includes(file.type)) {
-        formik.setFieldError(name, "El archivo debe ser una imagen (JPG, PNG)");
-        enqueueSnackbar("El archivo debe ser una imagen (JPG, PNG)", { variant: "error" });
-        return;
+        throw new Error("El archivo debe ser una imagen (JPG, PNG)");
       }
-      const stringPhoto = file.name;
-      formik.setFieldValue(name, stringPhoto);
+
+      formik.setFieldValue(name, file);
       setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      formik.setFieldValue(name, "");
-      setPreviewUrl(null);
+    } catch (error) {
+      formik.setFieldError(name, error.message);
+      enqueueSnackbar(error.message, { variant: "error" });
     }
   };
 

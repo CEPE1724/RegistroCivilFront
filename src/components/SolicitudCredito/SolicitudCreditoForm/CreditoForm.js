@@ -204,7 +204,7 @@ export default function CreditoForm() {
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
 
-    { label: "Subir foto", name: "Foto", type: "file" },
+    { label: "Subir foto", name: "Foto", type: "file" , required: true},
     
 
 
@@ -327,9 +327,10 @@ export default function CreditoForm() {
   };
 
   const handleSubmit = async (values) => {
-
+     const fotourl = values.Foto;
     const formattedValues = {
       ...values,
+      Foto: 'prueba',
       Bodega: Number(values.Bodega),
       idActEconomina: Number(values.idActEconomina),
       idCre_Tiempo: Number(values.idCre_Tiempo),
@@ -352,16 +353,16 @@ export default function CreditoForm() {
           headers: { method: "POST", cache: "no-store" },
         }
       );
-      console.log("Respuesta del servidor:", response.data);
-
+   
       if (values.Foto) {
+        const file = fotourl; // El archivo completo, no solo el nombre
         const fileUploadResponse = await uploadFile(
-          values.Foto,
+          file,
           values.Bodega,
           values.Cedula,
           values.NumeroSolicitud
         );
-        alert("Respuesta de subida de archivo:");
+        console.log("Respuesta de subida de archivo:", fileUploadResponse);
       }
 
       enqueueSnackbar("Solicitud guardada con exito", { variant: "success", preventDuplicate: true });
