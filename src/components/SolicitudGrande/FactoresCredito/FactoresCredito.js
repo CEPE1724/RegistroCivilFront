@@ -7,28 +7,32 @@ import { enqueueSnackbar } from 'notistack';
 
 // Definir el componente con forwardRef correctamente
 export const FactoresCredito = forwardRef((props, ref) => {
-  const [actividadLaboral, setActividadLaboral] = useState([]);
+  const [tipoCliente, setTipoCliente] = useState([]);
 
   useEffect(() => {
-    fetchActividadLaboral();
+      fetchTipoCliente();
   }, []);
 
-  const fetchActividadLaboral = async () => {
+  const fetchTipoCliente = async () => {
     try {
-      const response = await axios.get(APIURL.getActividadEconomina(), {
-        headers: { method: "GET", cache: "no-store" },
-      });
-      setActividadLaboral(
-        response.data.map((item) => ({
-          value: item.idActEconomica,
-          label: item.Nombre,
-        }))
-      );
+      const response = await axios.get(APIURL.getTipoCliente());
+      if (response.status === 200) {
+        setTipoCliente(
+          response.data.map((item) => ({
+            value: item.idTipoCliente,
+            label: item.Nombre,
+          }))
+        );
+      } else {
+        throw new Error("Error en la respuesta del servidor");
+      }
     } catch (error) {
-      console.error("Error al obtener actividad laboral", error);
-      setActividadLaboral([]);
+      console.error("Error al obtener el tipo de cliente:", error);
+      enqueueSnackbar("No se pudo cargar los tipos de clientes", { variant: "error" });
+      setTipoCliente([]);
     }
   };
+
 
   const [formData, setFormData] = useState({
     tipo: "",
@@ -137,11 +141,11 @@ export const FactoresCredito = forwardRef((props, ref) => {
           <select
             name="tipo"
             className="p-2 border rounded "
-            value={formData.tipo}
+            value={tipoCliente}
             onChange={handleChange}
           >
             <option value="">Seleccione una opción</option>
-            {actividadLaboral.map((item) => (
+            {tipoCliente.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
               </option>
@@ -155,12 +159,15 @@ export const FactoresCredito = forwardRef((props, ref) => {
           <select
             name="tipoCliente"
             className="p-2 border rounded"
-            value={formData.tipoCliente}
+            value={tipoCliente}
             onChange={handleChange}
           >
             <option value="">Seleccione una opción</option>
-            <option value="FORMAL">FORMAL</option>
-            <option value="INFORMAL">INFORMAL</option>
+            {tipoCliente.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
           </select>
         </div>
 
