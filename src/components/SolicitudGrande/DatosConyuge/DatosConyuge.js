@@ -193,7 +193,7 @@ export function DatosConyuge() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Tipo Documento */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Tipo Documento</label>
+                    <label className="text-lightGrey text-xs mb-2">Tipo Documento(*)</label>
                     <select
                         name="tipoDocumento"
                         className="p-2 border rounded"
@@ -210,7 +210,7 @@ export function DatosConyuge() {
                 </div>
                 {/* Apellido Paterno */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Apellido Paterno</label>
+                    <label className="text-lightGrey text-xs mb-2">Apellido Paterno(*)</label>
                     <input
                         name="apellidoPaterno"
                         type="text"
@@ -223,7 +223,7 @@ export function DatosConyuge() {
                 </div>
                 {/* Primer Nombre */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Primer Nombre</label>
+                    <label className="text-lightGrey text-xs mb-2">Primer Nombre(*)</label>
                     <input
                         name="primerNombre"
                         type="text"
@@ -252,7 +252,7 @@ export function DatosConyuge() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Numero Documento */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">N. Documento</label>
+                    <label className="text-lightGrey text-xs mb-2">N. Documento(*)</label>
                     <input
                         name="numeroDocumento"
                         type="number"
@@ -267,7 +267,7 @@ export function DatosConyuge() {
                 </div>
                 {/* Fecha Nacimiento */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">F. Nacimiento</label>
+                    <label className="text-lightGrey text-xs mb-2">F. Nacimiento(*)</label>
                     <input
                         name="fechaNacimiento"
                         type="date"
@@ -279,7 +279,7 @@ export function DatosConyuge() {
                 </div>
                 {/* Nacionalidad */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Nacionalidad</label>
+                    <label className="text-lightGrey text-xs mb-2">Nacionalidad(*)</label>
                     <select
                         name="nacionalidad"
                         className="p-2 border rounded"
@@ -296,7 +296,7 @@ export function DatosConyuge() {
                 </div>
                 {/* Sexo */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Sexo</label>
+                    <label className="text-lightGrey text-xs mb-2">Sexo(*)</label>
                     <select
                         name="sexo"
                         className="p-2 border rounded"
@@ -316,7 +316,7 @@ export function DatosConyuge() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Nivel Educacion */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Nivel Educacion</label>
+                    <label className="text-lightGrey text-xs mb-2">Nivel Educacion(*)</label>
                     <select
                         name="nivelEducacion"
                         className="p-2 border rounded"
@@ -333,7 +333,7 @@ export function DatosConyuge() {
                 </div>
                 {/* Profesion */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Profesión</label>
+                    <label className="text-lightGrey text-xs mb-2">Profesión(*)</label>
                     <select
                         name="profesion"
                         className="p-2 border rounded"
