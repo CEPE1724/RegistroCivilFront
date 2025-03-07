@@ -2,8 +2,8 @@ import { get } from "react-hook-form";
 
  
 
+//const API_BASE_URL = "http://192.168.137.28:3025/api/v1/"; 
 const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
-
 
 
 const SOCKET_BASE_URL = "http://192.168.2.167:3008"; 
@@ -35,5 +35,10 @@ export const APIURL = {
     getBarrios : (id) => `${API_BASE_URL}cre-barrio/${id}`,
     getTipoCliente  : () => `${API_BASE_URL}tipo-cliente`,
     getMenu : (idUsuario) => `${API_BASE_URL}menu-item-role/${idUsuario}/menu`,
+    getDetalleTipoCliente : () => `${API_BASE_URL}detalle-tipo-cliente`,
+    getTipoTrabajo : () => `${API_BASE_URL}tipo-trabajo`,
+    getCalificacion : () => `${API_BASE_URL}cre-tipocalificacion`,
+    getEstado : () => `${API_BASE_URL}cre-estado`,
+    getEstadoSolicitud : (id) => `${API_BASE_URL}estado-solicitud/${id}`,
 
 };

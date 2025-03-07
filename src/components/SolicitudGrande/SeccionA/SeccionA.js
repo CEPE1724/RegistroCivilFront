@@ -30,36 +30,30 @@ export const SeccionA = forwardRef((props, ref) => {
 
 
   useEffect(() => {
-    if (!idProvincia || idProvincia) {
-      // Si no hay provincia seleccionada, resetear todos los valores
-      setCantones([]);
-      setParroquias([]);
-      setBarrios([]);
-      setIdCanton(""); // Limpiar canton
-      setIdParroquia(""); // Limpiar parroquia
-      setCanton(""); // Limpiar texto de canton
-      setParroquia(""); // Limpiar texto de parroquia
-      setBarrio(""); // Limpiar texto de barrio
-    }
+    // Cada vez que idProvincia cambie (ya sea que se seleccione o se deseleccione), resetear todos los valores
+    setCantones([]);
+    setParroquias([]);
+    setBarrios([]);
+    setIdCanton(""); // Limpiar canton
+    setIdParroquia(""); // Limpiar parroquia
+    setCanton(""); // Limpiar texto de canton
+    setParroquia(""); // Limpiar texto de parroquia
+    setBarrio(""); // Limpiar texto de barrio
   }, [idProvincia]);
   
   useEffect(() => {
-    if (!idCanton || idCanton) {
-      // Si no hay cantón seleccionado, resetear parroquias y barrios
-      setParroquias([]);
-      setBarrios([]);
-      setIdParroquia(""); // Limpiar parroquia
-      setParroquia(""); // Limpiar texto de parroquia
-      setBarrio(""); // Limpiar texto de barrio
-    }
+    // Cada vez que idCanton cambie, resetear parroquias y barrios
+    setParroquias([]);
+    setBarrios([]);
+    setIdParroquia(""); // Limpiar parroquia
+    setParroquia(""); // Limpiar texto de parroquia
+    setBarrio(""); // Limpiar texto de barrio
   }, [idCanton]);
   
   useEffect(() => {
-    if (!idParroquia || idParroquia) {
-      // Si no hay parroquia seleccionada, resetear barrios
-      setBarrios([]);
-      setBarrio(""); // Limpiar texto de barrio
-    }
+    // Cada vez que idParroquia cambie, resetear barrios
+    setBarrios([]);
+    setBarrio(""); // Limpiar texto de barrio
   }, [idParroquia]);
   
   useEffect(() => {
@@ -87,6 +81,7 @@ export const SeccionA = forwardRef((props, ref) => {
       fetchBarrios(idParroquia);
     }
   }, [idParroquia]);
+  
 
   const fetchBarrios = async (idParroquia) => {
     try {
