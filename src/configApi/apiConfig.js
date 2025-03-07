@@ -2,7 +2,7 @@ import { get } from "react-hook-form";
 
  
 
-const API_BASE_URL = "http://192.168.2.246:3025/api/v1/";
+const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
 
 
 
@@ -42,5 +42,8 @@ export const APIURL = {
     getBarrios : (id) => `${API_BASE_URL}cre-barrio/${id}`,
     getTipoCliente  : () => `${API_BASE_URL}tipo-cliente`,
     getMenu : (idUsuario) => `${API_BASE_URL}menu-item-role/${idUsuario}/menu`,
+
+	get_cre_niveleducacion : () => `${API_BASE_URL}cre-niveleducacion`,
+	get_cre_profesion : () => `${API_BASE_URL}cre-profesion`,
 
 };
