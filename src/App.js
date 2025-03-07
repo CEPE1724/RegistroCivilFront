@@ -13,17 +13,16 @@ import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
 import SolicitudCredito from "./pages/SolicitudCredito";
 import Documento1 from "./pages/Documento1";
-/* Angel crea la ruta aqui*/
 import VerificacionTelefonica from "./pages/VerificacionTelefonica";
-/* Kevin crea la ruta aqui*/
-import Tabla from "./pages/ListaSolicitud";
 import ListaSolicitud from "./pages/ListaSolicitud";
 import VerificacionTerrena from "./pages/VerificacionTerrena";
 import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
 import SolicitudGrande from "./pages/SolicitudGrande";
+import Seguridad from "./pages/Seguridad";
+
 function App() {
-  const navigate = useNavigate(); // Coloca el hook fuera del return
-  const [isSessionExpired, setIsSessionExpired] = useState(false); // Estado para manejar el modal
+  const navigate = useNavigate();
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -32,219 +31,66 @@ function App() {
       const currentTime = new Date().getTime();
 
       if (token && expirationTime && currentTime > expirationTime) {
-        // Si el token ha expirado, mostramos el modal
         localStorage.removeItem("token");
         localStorage.removeItem("tokenExpiration");
         setIsSessionExpired(true);
       }
     };
 
-    // Comprobación al montar el componente (cuando recargas la página)
     checkTokenExpiration();
+    const interval = setInterval(checkTokenExpiration, 60000);
 
-    // Intervalo para comprobar cada minuto
-    const interval = setInterval(() => {
-      checkTokenExpiration();
-    }, 60000); // Verifica cada minuto
-
-    return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
-    // Eliminar los datos del localStorage y redirigir a login
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
-    setIsSessionExpired(false); // Cierra el modal
-    navigate("/login", { replace: true }); // Redirige a la página de login
+    setIsSessionExpired(false);
+    navigate("/login", { replace: true });
   };
 
+  const PrivateRouteWrapper = ({ title, element }) => (
+    <PrivateRoute>
+      <TitleUpdater title={`${title} - POINT`} />
+      {element}
+    </PrivateRoute>
+  );
+
   return (
-    <SnackbarProvider
-      maxSnack={3}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      autoHideDuration={3500}
-    >
+    <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route
-          path="/login"
-          element={
-            <>
-              <TitleUpdater title="Login - POINT" />
-              <Login />
-            </>
-          }
-        />
-        <Route
-          path="/*"
-          element={
-            <>
-              <TitleUpdater title="Página no encontrada - POINT" />
-              <PaginaNotFound />
-            </>
-          }
-        />
+        <Route path="/login" element={<><TitleUpdater title="Login - POINT" /><Login /></>} />
+        <Route path="/*" element={<><TitleUpdater title="Página no encontrada - POINT" /><PaginaNotFound /></>} />
 
-        {/* Rutas protegidas */}
-        <Route
-          path="/nueva-consulta"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Nueva Consulta - POINT" />
-              <Home />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/ciudadanos"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Ciudadanos Almacenados - POINT" />
-              <Ciudadanos />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/proteccion-datos"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Protección de Datos - POINT" />
-              <DataProtection />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/gestor"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Gestor Virtual - POINT" />
-              <GestorVirtual />
-            </PrivateRoute>
-          }
-        />
-
-        {/* ruta Angel */}
-        <Route
-          path="/solicitud"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Solicictud - POINT" />
-
-              <SolicitudCredito />
-            </PrivateRoute>
-          }
-        />
-        {/* ruta Kevin */}
-        <Route
-          path="/documental"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Documentos " />
-              <Documento1 />
-            </PrivateRoute>
-          }
-        />
-        {/* ruta Daniel */}
-        <Route
-          path="/telefonica"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Telefonica - POINT" />
-
-              <VerificacionTelefonica />
-            </PrivateRoute>
-          }
-        />
-
-        {/* ruta Daniel Terrena */}
-        <Route
-          path="/terrena"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Terrena - POINT" />
-
-              <VerificacionTerrena />
-            </PrivateRoute>
-          }
-        />
-
-        {/* ruta georeferencia */}
-        <Route
-          path="/georeferencia"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Georeferencia - POINT" />
-
-              <VerificacionGeoreferencia />
-            </PrivateRoute>
-          }
-        />
-
-        {/* ruta solicitudgrande */}
-
-        <Route
-          path="/solicitudgrande"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="SolicitudGrande - POINT" />
-              <SolicitudGrande />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/ListadoSolicitud"
-          element={
-            <PrivateRoute>
-              <TitleUpdater title="Tabla - POINT" />
-              <ListaSolicitud />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/nueva-consulta" element={<PrivateRouteWrapper title="Nueva Consulta" element={<Home />} />} />
+        <Route path="/ciudadanos" element={<PrivateRouteWrapper title="Ciudadanos Almacenados" element={<Ciudadanos />} />} />
+        <Route path="/proteccion-datos" element={<PrivateRouteWrapper title="Protección de Datos" element={<DataProtection />} />} />
+        <Route path="/gestor" element={<PrivateRouteWrapper title="Gestor Virtual" element={<GestorVirtual />} />} />
+        <Route path="/solicitud" element={<PrivateRouteWrapper title="Solicitud" element={<SolicitudCredito />} />} />
+        <Route path="/documental" element={<PrivateRouteWrapper title="Documentos" element={<Documento1 />} />} />
+        <Route path="/telefonica" element={<PrivateRouteWrapper title="Telefonica" element={<VerificacionTelefonica />} />} />
+        <Route path="/terrena" element={<PrivateRouteWrapper title="Terrena" element={<VerificacionTerrena />} />} />
+        <Route path="/georeferencia" element={<PrivateRouteWrapper title="Georeferencia" element={<VerificacionGeoreferencia />} />} />
+        <Route path="/solicitudgrande" element={<PrivateRouteWrapper title="SolicitudGrande" element={<SolicitudGrande />} />} />
+        <Route path="/ListadoSolicitud" element={<PrivateRouteWrapper title="Tabla" element={<ListaSolicitud />} />} />
+        <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
       </Routes>
 
-      {/* Modal de sesión expirada */}
       <Modal open={isSessionExpired} onClose={() => { }}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            borderRadius: "8px",
-            boxShadow: 24,
-            p: 4,
-            textAlign: "center",
-          }}
-        >
-          <Typography variant="h6" component="h2">
-            Sesión terminada <TimerOffIcon />
-          </Typography>
+        <Box sx={{
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+          width: 400, bgcolor: "background.paper", borderRadius: "8px", boxShadow: 24, p: 4, textAlign: "center"
+        }}>
+          <Typography variant="h6" component="h2">Sesión terminada <TimerOffIcon /></Typography>
           <Typography sx={{ mt: 2 }}>
-            Tu sesión ha expirado. Haz clic en "Aceptar" para volver a iniciar
-            sesión.
+            Tu sesión ha expirado. Haz clic en "Aceptar" para volver a iniciar sesión.
           </Typography>
-          <Button
-            onClick={handleLogout}
-            variant="contained"
-            sx={{
-              mt: 3,
-              backgroundColor: "#2d3689", // Color de fondo morado
-              color: "#ffffff", // Color del texto
-              "&:hover": {
-                backgroundColor: "#212863", // Color de fondo al pasar el mouse
-                color: "#ffffff", // Color del texto
-              },
-            }}
-          >
+          <Button onClick={handleLogout} variant="contained" sx={{
+            mt: 3, backgroundColor: "#2d3689", color: "#ffffff", "&:hover": { backgroundColor: "#212863", color: "#ffffff" }
+          }}>
             Aceptar
           </Button>
         </Box>
