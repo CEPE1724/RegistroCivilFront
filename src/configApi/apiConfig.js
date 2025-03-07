@@ -1,3 +1,4 @@
+import { get } from "react-hook-form";
 
  
 
@@ -28,5 +29,11 @@ export const APIURL = {
 	get_TipoConsulta : () => `${API_BASE_URL}compraencuesta/1`,
 	post_cogno_Token : (ci) => `${API_BASE_URL}auth/cogno/token/${ci}`,
     getCoordenadasprefactura : () => `${API_BASE_URL}coordenadasprefactura/all`,
+    getProvincias : () => `${API_BASE_URL}cre-provincia`,
+    getCantones : (id) => `${API_BASE_URL}cre-canton/${id}`,
+    getParroquias : (id) => `${API_BASE_URL}cre-parroquia/${id}`,
+    getBarrios : (id) => `${API_BASE_URL}cre-barrio/${id}`,
+    getTipoCliente  : () => `${API_BASE_URL}tipo-cliente`,
+    getMenu : (idUsuario) => `${API_BASE_URL}menu-item-role/${idUsuario}/menu`,
 
 };
