@@ -53,5 +53,6 @@ export const APIURL = {
     postFileupload : () => `${API_BASE_URL}file-upload/upload`,
     putUpdatesolicitud : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
     getConsultaCre_solicitud_web : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
-
+    get_cre_niveleducacion : () =>  `${API_BASE_URL}cre-niveleducacion `,
+    get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion `
 };
