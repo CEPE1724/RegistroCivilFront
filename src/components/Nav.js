@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import SidebarMenu from "../components/SidebarMenu";
+import { SwipeableTemporaryDrawer} from "../components/SidebarMenu";
 import DropDown from "./DropDows";
 
 const Nav = ({ showButton, userData }) => {
@@ -9,7 +9,7 @@ const Nav = ({ showButton, userData }) => {
   return (
     <nav className="lg:px-12 w-full h-20 bg-morado px-4 py-3 text-white flex items-center justify-between static">
       <div className="flex items-center">
-        {userData && <SidebarMenu className="flex-shrink-0 w-full md:w-auto" />}
+        {userData && <SwipeableTemporaryDrawer userDataToken ={userData} className="flex-shrink-0 w-full md:w-auto" />}
         <Link to="/ciudadanos" className="ml-4">
           <img
             className="w-24 lg:w-36 cursor-pointer"
