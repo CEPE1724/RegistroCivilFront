@@ -51,5 +51,7 @@ export const APIURL = {
     getUsuarioBodega : () => `${API_BASE_URL}usuario-bodega/usuario/bodegas`,
 
     postFileupload : () => `${API_BASE_URL}file-upload/upload`,
+    putUpdatesolicitud : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
+    getConsultaCre_solicitud_web : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
 
 };

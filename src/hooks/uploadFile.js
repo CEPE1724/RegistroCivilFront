@@ -1,10 +1,6 @@
 import axios from "axios";
 import { APIURL } from "../configApi/apiConfig";
 const uploadFile = async (file, almacen, cedula, numeroSolicitud) => {
-    alert("file",file);
-    alert("almacen",almacen);
-    alert("cedula",cedula);
-    alert("numeroSolicitud",numeroSolicitud);
   const formData = new FormData();
   formData.append("file", file);
   formData.append("almacen", almacen);

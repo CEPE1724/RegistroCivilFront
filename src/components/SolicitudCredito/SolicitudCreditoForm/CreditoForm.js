@@ -17,7 +17,8 @@ export default function CreditoForm() {
   const { enqueueSnackbar } = useSnackbar();
   const [prevErrors, setPrevErrors] = useState({});
   const [formStatus, setFormStatus] = useState(null);
-
+  const [ urlCloudstorage, setUrlCloudstorage] = useState(null);
+  const [dataRecibir, setDataRecibir] = useState(null);
   const fetchBodega = async () => {
     const userId = 1;
     const idTipoFactura = 2;
@@ -326,56 +327,117 @@ export default function CreditoForm() {
     setPrevErrors(errors);
   };
 
-  const handleSubmit = async (values) => {
-     const fotourl = values.Foto;
-    const formattedValues = {
-      ...values,
-      Foto: 'prueba',
-      Bodega: Number(values.Bodega),
-      idActEconomina: Number(values.idActEconomina),
-      idCre_Tiempo: Number(values.idCre_Tiempo),
-      idProductos: Number(values.idProductos),
-      ApellidoMaterno: values.ApellidoMaterno?.trim().toUpperCase(),
-      ApellidoPaterno: values.ApellidoPaterno?.trim().toUpperCase(),
-      PrimerNombre: values.PrimerNombre?.trim().toUpperCase(),
-      SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
-      CodDactilar: values.CodDactilar?.toUpperCase(),
-      idCompraEncuesta: Number(values.idCompraEncuesta),
-    };
+  const fetchActualizaSolicitud = async (idSolicitud, data) => {
+  try {
+    console.log("Actualizando solicitud con ID:", idSolicitud, "con los datos:", data);
+    const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
+    const response = await axios.put(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log("Solicitud actualizada con éxito:", response.data);
+    return response.data;  // Retornar datos actualizados si es necesario
+  } catch (error) {
+    console.error("Error al actualizar la solicitud:", error.message);
+    throw error;  // Re-lanzar error para manejarlo más tarde
+  }
+};
 
-    console.log("Valores enviados al servidor:", formattedValues);
+const fetchConsultaSolicitud = async (idSolicitud) => {
+  try {
+    const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
+    const response = await axios.get(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log("Solicitud consultada con éxito:", response.data);
+    setDataRecibir(response.data);  // Almacenar los datos de la solicitud
+    return response.data;  // Devolver los datos consultados
+  } catch (error) {
+    console.error("Error al consultar la solicitud:", error.message);
+    throw error;  // Re-lanzar error para manejarlo más tarde
+  }
+};
 
-    try {
-      const response = await axios.post(
-        APIURL.post_cre_solicitud_web(),
-        formattedValues,
-        {
-          headers: { method: "POST", cache: "no-store" },
-        }
-      );
-   
-      if (values.Foto) {
-        const file = fotourl; // El archivo completo, no solo el nombre
+const handleSubmit = async (values) => {
+  const fotourl = values.Foto; // URL de la foto que deseas cargar
+
+  // Formatear los valores para la API, con conversiones necesarias
+  const formattedValues = {
+    ...values,
+    Foto: 'prueba',  // Valor temporal de la foto mientras se maneja la carga
+    Bodega: Number(values.Bodega),
+    idActEconomina: Number(values.idActEconomina),
+    idCre_Tiempo: Number(values.idCre_Tiempo),
+    idProductos: Number(values.idProductos),
+    ApellidoMaterno: values.ApellidoMaterno?.trim().toUpperCase(),
+    ApellidoPaterno: values.ApellidoPaterno?.trim().toUpperCase(),
+    PrimerNombre: values.PrimerNombre?.trim().toUpperCase(),
+    SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
+    CodDactilar: values.CodDactilar?.toUpperCase(),
+    idCompraEncuesta: Number(values.idCompraEncuesta),
+  };
+
+  console.log("Valores enviados al servidor:", formattedValues);
+
+  try {
+    // 1. Crear la solicitud
+    const createResponse = await axios.post(APIURL.post_cre_solicitud_web(), formattedValues, {
+      headers: { method: "POST", cache: "no-store" },
+    });
+
+    console.log("Solicitud creada con éxito. ID de la solicitud:", createResponse.data.idCre_SolicitudWeb);
+
+    // 2. Consultar la solicitud recién creada
+    if (createResponse.data.idCre_SolicitudWeb) {
+      const solicitudData = await fetchConsultaSolicitud(createResponse.data.idCre_SolicitudWeb);
+      console.log("Datos de la solicitud después de la consulta:", solicitudData);
+
+      // 3. Subir archivo si existe una foto
+      if (fotourl && solicitudData) {
+        const file = fotourl;  // El archivo completo, no solo el nombre
+
+        // 4. Subir la foto
         const fileUploadResponse = await uploadFile(
           file,
           values.Bodega,
           values.Cedula,
-          values.NumeroSolicitud
+          solicitudData.NumeroSolicitud
         );
-        console.log("Respuesta de subida de archivo:", fileUploadResponse);
-      }
+        console.log("Respuesta de la subida de archivo:", fileUploadResponse);
 
-      enqueueSnackbar("Solicitud guardada con exito", { variant: "success", preventDuplicate: true });
-      setFormStatus("success");
-    } catch (error) {
-      console.error("Error al enviar los datos:", error);
-      enqueueSnackbar(`Error al enviar los datos. Por favor intenta de nuevo mas tarde`, {
-        variant: "error",
-        preventDuplicate: true
-      });
-      setFormStatus("error");
+        // 5. Si la subida fue exitosa, almacenar la URL de la foto
+        if (fileUploadResponse) {
+          setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
+
+          // 6. Actualizar la solicitud con la URL de la foto
+          const updatedData = {
+            Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
+          };
+
+          const updatedSolicitud = await fetchActualizaSolicitud(solicitudData.idCre_SolicitudWeb, updatedData);
+          console.log("Solicitud actualizada con la foto:", updatedSolicitud);
+        }
+      }
     }
-  };
+
+    // Mensaje de éxito y cambio de estado del formulario
+    enqueueSnackbar("Solicitud guardada con éxito", { variant: "success", preventDuplicate: true });
+    setFormStatus("success");
+
+  } catch (error) {
+    // Manejo de errores
+    console.error("Error al enviar los datos:", error);
+    enqueueSnackbar("Error al enviar los datos. Por favor, intenta de nuevo más tarde", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setFormStatus("error");
+  }
+};
+
 
   return (
     <div>
