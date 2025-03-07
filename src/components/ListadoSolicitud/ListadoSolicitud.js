@@ -20,6 +20,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Icon,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
@@ -37,10 +38,16 @@ import EmailIcon from "@mui/icons-material/Email";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
-import { useNavigate } from "react-router-dom"
+import FolderIcon from "@mui/icons-material/Folder";
+import { useNavigate } from "react-router-dom";
+import useBodegaUsuario from "../../hooks/useBodegaUsuario";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 
 export function ListadoSolicitud() {
+  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+
   const [search, setSearch] = useState("");
+  const [dataBodega, setDataBodega] = useState([]);
   const [estado, setEstado] = useState("");
   const [datos, setDatos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,16 +57,34 @@ export function ListadoSolicitud() {
   const [total, setTotal] = useState(0); // Total de registros
   const itemsPerPage = 5;
   const [tipoConsulta, setTipoConsulta] = useState([]);
-  const [searchDateFrom, setSearchDateFrom] = useState(''); // Fecha de inicio
-  const [searchDateTo, setSearchDateTo] = useState('');
+  const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
+  const [searchDateTo, setSearchDateTo] = useState("");
   const navigate = useNavigate();
 
+  const fetchBodega = async () => {
+    const userId = 1;
+    const idTipoFactura = 43;
+    const fecha = new Date().toISOString();
+    const recibeConsignacion = true;
+
+    try {
+      // Llamada a la función del hook que obtiene los datos
+      await fetchBodegaUsuario(
+        userId,
+        idTipoFactura,
+        fecha,
+        recibeConsignacion
+      );
+    } catch (err) {
+      console.error("Error al obtener datos de la bodega:", err);
+    }
+  };
 
   useEffect(() => {
     fetchTipoConsulta();
     fetchSolicitudes();
+    fetchBodega();
   }, [currentPage]); // Agrega tipoConsulta como dependencia
-
 
   const fetchTipoConsulta = async () => {
     try {
@@ -76,8 +101,8 @@ export function ListadoSolicitud() {
           id: item.idCompraEncuesta,
           descripcion: item.Descripcion,
         }));
-        setTipoConsulta(tipoConsulta)
-        console.log("Tipo de Consulta:", tipoConsulta);
+        setTipoConsulta(tipoConsulta);
+
         // Aquí puedes establecer el estado con los datos obtenidos si es necesario
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -108,17 +133,33 @@ export function ListadoSolicitud() {
 
         const datos = response.data.data.map((item) => {
           // Buscar la descripción del tipo de consulta correspondiente al ID
-          console.log("efasd" + tipoConsulta)
-          const consulta = tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido";
-          console.log("asdasdasdasdasd" + consulta)
+
+          const consulta =
+            tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)
+              ?.descripcion || "Desconocido";
+          const nombreBodega =
+            dataBodega.find((bodega) => bodega.value === item.Bodega)?.label ||
+            "Desconocido";
           return {
             id: item.idCre_SolicitudWeb,
             nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
             cedula: item.Cedula,
-            almacen: item.Bodega === 1 ? "Quicentro" : "Desconocido",
-            vendedor: item.idVendedor === 123 ? "Kevin Alexander Lema Naranjo" : "nonde",
+            almacen: nombreBodega,
+            vendedor:
+              item.idVendedor === 123
+                ? "Kevin Alexander Lema Naranjo"
+                : "nonde",
             consulta: consulta, // Usar la descripción de la consulta
-            estado: item.Estado === 0 ? "pendiente" : item.Estado === 1 ? "aprobado" : item.Estado === 2 ? "anulado" : item.Estado === 3 ? "rechazado" : "desconocido",
+            estado:
+              item.Estado === 0
+                ? "pendiente"
+                : item.Estado === 1
+                ? "aprobado"
+                : item.Estado === 2
+                ? "anulado"
+                : item.Estado === 3
+                ? "rechazado"
+                : "desconocido",
             imagen: item.Foto,
             celular: item.Celular,
             email: item.Email,
@@ -139,20 +180,29 @@ export function ListadoSolicitud() {
     }
   };
 
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setDataBodega(
+        data.map((item) => ({
+          value: item.b_Bodega,
+          label: item.b_Nombre,
+        }))
+      );
+    }
+  }, [data]);
 
   const handledocumentos = (registro) => {
-    navigate('/documental', {
+    navigate("/documental", {
       state: {
         id: registro.id,
         nombre: registro.nombre,
         cedula: registro.cedula,
         fecha: registro.fecha,
         almacen: registro.almacen,
-        foto: registro.imagen
-      }
+        foto: registro.imagen,
+      },
     });
   };
-
 
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
@@ -174,7 +224,7 @@ export function ListadoSolicitud() {
   );
 
   const handleSolictud = () => {
-    navigate('/solicitud',{replace:true});
+    navigate("/solicitud", { replace: true });
   };
 
   // Función para cambiar de página
@@ -184,8 +234,6 @@ export function ListadoSolicitud() {
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
-
-
       <div className="flex gap-6 mb-4">
         <TextField
           label="Fecha Desde"
@@ -226,7 +274,6 @@ export function ListadoSolicitud() {
             onChange={(e) => setEstado(e.target.value)}
             label="Estado"
           >
-
             <MenuItem value="">
               <em>Seleccionar</em>
             </MenuItem>
@@ -265,19 +312,19 @@ export function ListadoSolicitud() {
             <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
               <TableRow>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  IMAGEN
+                  Numero solicitud
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Nombres
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  CEDULA
+                  Cedula
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  FECHA
+                  Fecha
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Almacen
+                  Almacén
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Vendedor
@@ -289,10 +336,19 @@ export function ListadoSolicitud() {
                   Estado
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  OPCIONES
+                  Opciones
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Verificaciones
+                  Solicitud
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Documental
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Telefonica
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Terrena
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -300,15 +356,18 @@ export function ListadoSolicitud() {
               {filteredData.map((data) => (
                 <TableRow key={data.id}>
                   <TableCell align="center">
-                    <img
+                    {/*<img
                       className="rounded-md object-cover w-1/3 h-full mx-auto"
                       src={data.imagen}
                       alt="Imagen"
-                    />
+                    />*/}
+                    {data.id}
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
-                  <TableCell align="center">{data.fecha.substring(0, 10)}</TableCell>
+                  <TableCell align="center">
+                    {data.fecha.substring(0, 10)}
+                  </TableCell>
                   <TableCell align="center">{data.almacen}</TableCell>
                   <TableCell align="center">{data.vendedor}</TableCell>
                   <TableCell align="center">{data.consulta}</TableCell>
@@ -321,6 +380,10 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
+                      <PendingActionsIcon/>
+                     
+
+                    {/*
                     <div className="flex justify-center gap-2">
                       <button onClick={() => handledocumentos(data)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:ring-0 focus:shadow-none">
                         Documentos
@@ -329,7 +392,26 @@ export function ListadoSolicitud() {
                       <button className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:shadow-none">
                         Telefonica
                       </button>
+                    
                     </div>
+                    */}
+                  </TableCell>
+                  <TableCell align="center">
+                  
+
+                    <IconButton onClick={() => handledocumentos(data)}>
+                        <FolderIcon />
+                      </IconButton>
+
+                    
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <FolderIcon/>
+                  </TableCell>
+
+                  <TableCell align="center">
+                    <FolderIcon className="w-5 h-5 text-primaryBlue" />
                   </TableCell>
                 </TableRow>
               ))}
@@ -360,7 +442,7 @@ export function ListadoSolicitud() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
                   <div className="flex items-center gap-2">
                     <PersonIcon className="text-blue-500" fontSize="medium" />
-                    <p>{selectedRow.PrimerNombre}</p>
+                    <p>{selectedRow.nombre}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <BadgeIcon className="text-blue-500" fontSize="medium" />
@@ -389,18 +471,19 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
-                        ? "text-green-500"
-                        : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${
+                        selectedRow.estado === "activo"
+                          ? "text-green-500"
+                          : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                            ? "text-gray-500"
-                            : selectedRow.estado === "aprobado"
-                              ? "text-blue-500"
-                              : selectedRow.estado === "rechazado"
-                                ? "text-red-500"
-                                : "text-gray-700"
-                        }`}
+                          ? "text-gray-500"
+                          : selectedRow.estado === "aprobado"
+                          ? "text-blue-500"
+                          : selectedRow.estado === "rechazado"
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
                     >
                       {selectedRow.estado}
                     </span>

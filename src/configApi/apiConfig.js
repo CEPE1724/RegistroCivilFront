@@ -2,8 +2,8 @@ import { get } from "react-hook-form";
 
  
 
-const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
-
+//const API_BASE_URL = "http://192.168.137.28:3025/api/v1/"; 
+const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
 
 
 const SOCKET_BASE_URL = "http://192.168.2.167:3008"; 
@@ -42,8 +42,16 @@ export const APIURL = {
     getBarrios : (id) => `${API_BASE_URL}cre-barrio/${id}`,
     getTipoCliente  : () => `${API_BASE_URL}tipo-cliente`,
     getMenu : (idUsuario) => `${API_BASE_URL}menu-item-role/${idUsuario}/menu`,
+    getDetalleTipoCliente : () => `${API_BASE_URL}detalle-tipo-cliente`,
+    getTipoTrabajo : () => `${API_BASE_URL}tipo-trabajo`,
+    getCalificacion : () => `${API_BASE_URL}cre-tipocalificacion`,
+    getEstado : () => `${API_BASE_URL}cre-estado`,
+    getEstadoSolicitud : (id) => `${API_BASE_URL}estado-solicitud/${id}`,
 
-	get_cre_niveleducacion : () => `${API_BASE_URL}cre-niveleducacion`,
-	get_cre_profesion : () => `${API_BASE_URL}cre-profesion`,
+    getUsuarioBodega : () => `${API_BASE_URL}usuario-bodega/usuario/bodegas`,
+
+    postFileupload : () => `${API_BASE_URL}file-upload/upload`,
+    putUpdatesolicitud : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
+    getConsultaCre_solicitud_web : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
 
 };

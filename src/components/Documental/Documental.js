@@ -106,7 +106,6 @@ export function Documental() {
       );
     } else {
       // Si los datos son válidos
-      console.log("Archivos y observación enviados:", files, observacion);
       enqueueSnackbar("Archivo y observación subidos correctamente.", {
         variant: "success",
       });
@@ -124,7 +123,7 @@ export function Documental() {
         variant: "error",
       });
     } else {
-      console.log("Archivo enviado:", files);
+  
       enqueueSnackbar("Archivo subido correctamente.", { variant: "success" });
       setShowFileInput(false);
     }

@@ -19,36 +19,19 @@ import VerificacionTerrena from "./pages/VerificacionTerrena";
 import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
 import SolicitudGrande from "./pages/SolicitudGrande";
 import Seguridad from "./pages/Seguridad";
+import { useAuth } from "./components/AuthContext/AuthContext";
 
 function App() {
+
+  const { isSessionExpired, logout, token } = useAuth();
   const navigate = useNavigate();
-  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   useEffect(() => {
-    const checkTokenExpiration = () => {
-      const token = localStorage.getItem("token");
-      const expirationTime = localStorage.getItem("tokenExpiration");
-      const currentTime = new Date().getTime();
-
-      if (token && expirationTime && currentTime > expirationTime) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("tokenExpiration");
-        setIsSessionExpired(true);
-      }
-    };
-
-    checkTokenExpiration();
-    const interval = setInterval(checkTokenExpiration, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("tokenExpiration");
-    setIsSessionExpired(false);
-    navigate("/login", { replace: true });
-  };
+    // Si no hay token, redirige al login automáticamente
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
 
   const PrivateRouteWrapper = ({ title, element }) => (
     <PrivateRoute>
@@ -58,12 +41,13 @@ function App() {
   );
 
   return (
+
     <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<><TitleUpdater title="Login - POINT" /><Login /></>} />
         <Route path="/*" element={<><TitleUpdater title="Página no encontrada - POINT" /><PaginaNotFound /></>} />
+
 
         <Route path="/nueva-consulta" element={<PrivateRouteWrapper title="Nueva Consulta" element={<Home />} />} />
         <Route path="/ciudadanos" element={<PrivateRouteWrapper title="Ciudadanos Almacenados" element={<Ciudadanos />} />} />
@@ -79,23 +63,26 @@ function App() {
         <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
       </Routes>
 
-      <Modal open={isSessionExpired} onClose={() => { }}>
-        <Box sx={{
-          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-          width: 400, bgcolor: "background.paper", borderRadius: "8px", boxShadow: 24, p: 4, textAlign: "center"
-        }}>
-          <Typography variant="h6" component="h2">Sesión terminada <TimerOffIcon /></Typography>
-          <Typography sx={{ mt: 2 }}>
-            Tu sesión ha expirado. Haz clic en "Aceptar" para volver a iniciar sesión.
-          </Typography>
-          <Button onClick={handleLogout} variant="contained" sx={{
-            mt: 3, backgroundColor: "#2d3689", color: "#ffffff", "&:hover": { backgroundColor: "#212863", color: "#ffffff" }
+      {isSessionExpired && (
+        <Modal open={isSessionExpired} onClose={() => { }}>
+          <Box sx={{
+            position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+            width: 400, bgcolor: "background.paper", borderRadius: "8px", boxShadow: 24, p: 4, textAlign: "center"
           }}>
-            Aceptar
-          </Button>
-        </Box>
-      </Modal>
+            <Typography variant="h6" component="h2">Sesión terminada <TimerOffIcon /></Typography>
+            <Typography sx={{ mt: 2 }}>
+              Tu sesión ha expirado. Haz clic en "Aceptar" para volver a iniciar sesión.
+            </Typography>
+            <Button onClick={logout} variant="contained" sx={{
+              mt: 3, backgroundColor: "#2d3689", color: "#ffffff", "&:hover": { backgroundColor: "#212863", color: "#ffffff" }
+            }}>
+              Aceptar
+            </Button>
+          </Box>
+        </Modal>
+      )}
     </SnackbarProvider>
+
   );
 }
 
