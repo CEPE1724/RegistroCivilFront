@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPModal';
-
+import { APIURL } from "../configApi/apiConfig";
+import axios from "axios";
 const FormField = ({
   label,
   name,
@@ -244,11 +245,31 @@ const ReusableForm = ({
         }
       } else {
         // Si el OTP no es verificado, muestra el modal
-        setIsOtpModalOpen(true);
+
+       requestOtp();
+        //setIsOtpModalOpen(true);
       }
     },
   });
 
+  
+  const requestOtp = async () => {
+    try {
+      const url = APIURL.generateOTP();
+      const response = await axios.post(url, {
+        phoneNumber: formik.values.Celular,
+      });
+
+      if (response.data.success) {
+        setIsOtpModalOpen(true);
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Hubo un error al generar el OTP');
+    }
+  };
 
   // Sistema unificado para mostrar el primer error en el submit
   const showFirstError = () => {
@@ -431,6 +452,7 @@ const ReusableForm = ({
         isOpen={isOtpModalOpen}
         onClose={() => setIsOtpModalOpen(false)}
         onVerifyOtp={handleOtpVerification}
+        phoneNumberOTP = {formik.values.Celular}
       />
     </form>
   );
