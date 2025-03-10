@@ -45,10 +45,11 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
 
   const fetchBodegaUsuario = async () => {
     try {
+      console.log("Fetching data...", userData);
       // Definir los parámetros que quieres enviar
       const params = {
-        userId: 1,  // Ejemplo de ID de usuario
-        idTipoFactura: 2,  // Ejemplo de tipo de factura
+        userId: userDataToken.idUsuario,  // Ejemplo de ID de usuario
+        idTipoFactura: 43,  // Ejemplo de tipo de factura
         fecha: '2025-03-06T00:00:00.000Z',  // Fecha en formato ISO 8601
         recibeConsignacion: true  // Parámetro de consignación
       };
