@@ -20,14 +20,30 @@ export function Documental() {
     fecha: "",
     almacen: "",
     foto: "",
+    NumeroSolicitud: "",
+    vendedor: "",
+    consulta: "",
+    
   });
   const [filePreviews, setFilePreviews] = useState({});
+
+
+  useEffect(() => {
+    if (location.state) {
+      // Si hay datos en `location.state`, los guardamos en localStorage
+      localStorage.setItem("clientInfo", JSON.stringify(location.state));
+      setClientInfo(location.state);
+    } else {
+      // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+      const savedClientInfo = localStorage.getItem("clientInfo");
+      if (savedClientInfo) {
+        setClientInfo(JSON.parse(savedClientInfo));
+      }
+    }
+  }, [location.state]);
   useEffect(() => {
     // Actualiza la información del cliente cuando cambie location.state
-    if (location.state) {
-      const { id, nombre, cedula, fecha, almacen, foto } = location.state;
-      setClientInfo({ id, nombre, cedula, fecha, almacen, foto });
-    }
+    
 
     // Optimiza la vista previa de los archivos seleccionados
     const updatedFilePreviews = {};
@@ -69,21 +85,43 @@ export function Documental() {
 
   const handleFileChange = (e, field) => {
     const selectedFiles = Array.from(e.target.files);
+    
+    // Verifica si ya hay un archivo cargado en el campo activo
+    if (files[field] && files[field].length > 0) {
+      // Si ya hay un archivo, muestra un mensaje de error
+      enqueueSnackbar(
+        `Ya tienes un archivo cargado en el campo "${field}". Primero debes eliminarlo antes de cargar uno nuevo.`,
+        { variant: "error" }
+      );
+      return; // No permite cargar más archivos si ya existe uno
+    }
+    
+    // Si no hay archivo, se puede agregar el nuevo archivo
     setFiles((prevFiles) => ({
       ...prevFiles,
       [field]: [...(prevFiles[field] || []), ...selectedFiles],
     }));
     setShowFileInput(false);
   };
+  
 
   const handleRemoveFile = (field, index) => {
     setFiles((prevFiles) => {
+      if (!prevFiles[field] || prevFiles[field].length === 0) return prevFiles;
+  
       const updatedFiles = { ...prevFiles };
-      updatedFiles[field].splice(index, 1);
-      if (updatedFiles[field].length === 0) delete updatedFiles[field];
+      updatedFiles[field] = updatedFiles[field].filter((_, i) => i !== index);
+  
+      if (updatedFiles[field].length === 0) {
+        delete updatedFiles[field]; // Elimina la clave si ya no hay archivos
+      }
+  
       return updatedFiles;
     });
   };
+  
+  
+  
 
   const toggleView = () => {
     setView(!view);
@@ -255,34 +293,59 @@ export function Documental() {
 
       <div className="flex-1 bg-gray-100 p-6 relative">
         <div className="w-full bg-white p-6 rounded-lg shadow-lg">
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">
-              Información del Cliente
-            </h2>
-            <div className="flex justify-center items-center gap-6">
-              {clientInfo.foto && (
-                <img
-                  src={clientInfo.foto}
-                  alt="Foto del cliente"
-                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
-                />
-              )}
-              <div className="flex flex-col">
-                <p className="text-lg font-medium text-gray-700">
-                  Nombre: {clientInfo.nombre}
-                </p>
-                <p className="text-lg font-medium text-gray-700">
-                  Cédula: {clientInfo.cedula}
-                </p>
-                <p className="text-lg font-medium text-gray-700">
-                  Fecha: {clientInfo.fecha}
-                </p>
-                <p className="text-lg font-medium text-gray-700">
-                  Almacén: {clientInfo.almacen}
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="mb-6">
+  <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">
+    Información del Cliente
+  </h2>
+  <div className="flex flex-col md:flex-row md:gap-6">
+    {clientInfo.foto && (
+      <div className="flex justify-center items-center md:w-1/4">
+        <img
+          src={clientInfo.foto}
+          alt="Foto del cliente"
+          className="w-80 h-80 md:w-64 md:h-64 object-cover border-2 border-gray-300"
+        />
+      </div>
+    )}
+
+    {/* Información del cliente */}
+    <div className="md:w-3/4 mt-2 pl-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base leading-relaxed pl-10">
+        
+      <div className="flex items-center gap-2">
+          <p className="font-semibold">Numero de Solicitud:</p>
+          <p>{clientInfo.NumeroSolicitud}</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <p className="font-semibold">Nombre:</p>
+          <p>{clientInfo.nombre}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="font-semibold">Cédula:</p>
+          <p>{clientInfo.cedula}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="font-semibold">Fecha:</p>
+          <p>{clientInfo.fecha}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="font-semibold">Vendedor:</p>
+          <p>{clientInfo.vendedor}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="font-semibold">tipo de consulta:</p>
+          <p>{clientInfo.consulta}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="font-semibold">Almacén:</p>
+          <p>{clientInfo.almacen}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
           <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
             Documentos Subidos
@@ -374,55 +437,69 @@ export function Documental() {
         </div>
 
         <button
+          title="Nueva Solicitud"
+          className="group cursor-pointer outline-none hover:rotate-90 duration-300"
           onClick={() => setShowFileInput(true)}
-          className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
         >
-          ➕
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="50px"
+            height="50px"
+            viewBox="0 0 24 24"
+            className=" stroke-indigo-400 fill-none group-hover:fill-indigo-800 group-active:stroke-indigo-200 group-active:fill-indigo-600 group-active:duration-0 duration-300"
+          >
+            <path
+              d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+              stroke-width="1.5"
+            ></path>
+            <path d="M8 12H16" stroke-width="1.5"></path>
+            <path d="M12 16V8" stroke-width="1.5"></path>
+          </svg>
         </button>
+
+       
 
         {showFileInput && (
           <div className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-              <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-                Subir Nuevo Documento
-              </h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="flex flex-col">
-                  <label className="text-lg font-medium text-gray-700">
-                    {activeTab}
-                  </label>
-                  <label className="mt-2 p-3 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:border-blue-500 transition">
-                    <span className="text-gray-500 mr-2">📁</span>
-                    <span className="text-gray-600">Subir archivo</span>
-                    <input
-                      type="file"
-                      multiple
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => handleFileChange(e, activeTab)}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
-
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleSubmitUpFile}
-                    type="submit"
-                    className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
-                  >
-                    Enviar
-                  </button>
-                </div>
-              </form>
-
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-800">Subir Nuevo Documento</h2>
               <button
                 onClick={() => setShowFileInput(false)}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700"
               >
                 ❌
               </button>
             </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex flex-col">
+                <label className="text-lg font-medium text-gray-700">{activeTab}</label>
+                <label className="mt-2 p-3 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:border-blue-500 transition">
+                  <span className="text-gray-500 mr-2">📁</span>
+                  <span className="text-gray-600">Subir archivo</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf"
+                    onChange={(e) => handleFileChange(e, activeTab)}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              
+              <div className="flex justify-center">
+                <button
+                  onClick={handleSubmitUpFile}
+                  type="submit"
+                  className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Enviar
+                </button>
+              </div>
+            </form>
           </div>
+        </div>
         )}
       </div>
       {view && (

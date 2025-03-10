@@ -90,7 +90,6 @@ export function ListadoSolicitud() {
   
     try {
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
-      enqueueSnackbar("Datos de la bodega obtenidos correctamente", { variant: "success" });
     } catch (err) {
       console.error("Error al obtener datos de la bodega:", err);
     }
@@ -113,7 +112,6 @@ export function ListadoSolicitud() {
             descripcion: item.Descripcion,
           }))
         );
-        enqueueSnackbar("Tipos de consulta obtenidos correctamente", { variant: "success" });
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -140,37 +138,43 @@ export function ListadoSolicitud() {
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
   
-        const datos = response.data.data.map((item) => ({
-          id: item.NumeroSolicitud,
-          nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
-          cedula: item.Cedula,
-          almacen:
-            dataBodega.find((bodega) => bodega.value === item.Bodega)?.label || "Desconocido",
-          vendedor: item.idVendedor === 123 ? "Kevin Alexander Lema Naranjo" : "nonde",
-          consulta:
-            tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
-          estado:
-            item.Estado === 0
-              ? "pendiente"
-              : item.Estado === 1
-              ? "aprobado"
-              : item.Estado === 2
-              ? "anulado"
-              : item.Estado === 3
-              ? "rechazado"
-              : "desconocido",
-          imagen: item.Foto,
-          celular: item.Celular,
-          email: item.Email,
-          fecha: item.Fecha,
-          afiliado: item.bAfiliado ? "Sí" : "No",
-          tieneRuc: item.bTieneRuc ? "Sí" : "No",
-        }));
+        // Mapea los datos y realiza la llamada a fetchVendedor para obtener el nombre del vendedor
+        const datos = await Promise.all(
+          response.data.data.map(async (item) => {
+            const vendedorNombre = await fetchVendedor(item.idVendedor); // Obtiene el nombre del vendedor
+  
+            return {
+              id: item.NumeroSolicitud,
+              nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
+              cedula: item.Cedula,
+              almacen:
+                dataBodega.find((bodega) => bodega.value === item.Bodega)?.label || "Desconocido",
+              vendedor: vendedorNombre, // Aquí asignamos el nombre del vendedor
+              consulta:
+                tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
+              estado:
+                item.Estado === 0
+                  ? "pendiente"
+                  : item.Estado === 1
+                  ? "aprobado"
+                  : item.Estado === 2
+                  ? "anulado"
+                  : item.Estado === 3
+                  ? "rechazado"
+                  : "desconocido",
+              imagen: item.Foto,
+              celular: item.Celular,
+              email: item.Email,
+              fecha: item.Fecha,
+              afiliado: item.bAfiliado ? "Sí" : "No",
+              tieneRuc: item.bTieneRuc ? "Sí" : "No",
+            };
+          })
+        );
   
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
-        enqueueSnackbar("Solicitudes obtenidas correctamente", { variant: "success" });
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -178,6 +182,47 @@ export function ListadoSolicitud() {
       console.error("Error fetching data:", error);
     }
   };
+
+/*
+  const fetchparroquias = async (idCanton) => {
+    try {
+      const response = await axios.get(APIURL.getParroquias(idCanton), {
+        headers: { method: "GET", cache: "no-store" },
+      });
+      setParroquias(
+        response.data.map((item) => ({
+          idParroquia: item.idParroquia,
+          label: item.Nombre,
+        }))
+      );
+    } catch (error) {
+      console.error("Error al obtener parroquias", error);
+      setParroquias([]);
+    }
+  };
+*/
+  const fetchVendedor = async (idVendedor) => {
+    try {
+      const response = await axios.get(APIURL.getVendedor(idVendedor), {
+      
+          headers: { method: "GET", cache: "no-store" },
+        
+      });
+      console.error(response)
+      if (response.status === 200) {
+        // Retorna el nombre completo del vendedor
+        const vendedor = response.data;
+        const vendedorNombre = `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""} ${vendedor.ApellidoMaterno || ""}`.trim();
+  
+        // Si no tiene nombre, devolvemos "No disponible"
+        return vendedorNombre || "No disponible";
+      }
+    } catch (error) {
+      console.error("Error fetching vendedor data:", error);
+      return "No disponible"; // Si hay un error, se puede devolver un valor predeterminado
+    }
+  };
+
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -194,11 +239,14 @@ export function ListadoSolicitud() {
     navigate("/documental", {
       state: {
         id: registro.id,
+        NumeroSolicitud: registro.NumeroSolicitud,
         nombre: registro.nombre,
         cedula: registro.cedula,
         fecha: registro.fecha,
         almacen: registro.almacen,
         foto: registro.imagen,
+        vendedor: registro.vendedor,
+        consulta: registro.consulta,
       },
     });
   };
