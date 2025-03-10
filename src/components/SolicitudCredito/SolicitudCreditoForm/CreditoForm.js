@@ -4,14 +4,17 @@ import * as Yup from "yup";
 import { APIURL } from "../../../configApi/apiConfig";
 import axios from "axios";
 import { useSnackbar } from "notistack";
-import { set } from "react-hook-form";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
+import { useAuth } from "../../AuthContext/AuthContext";
 export default function CreditoForm() {
+  const { userData } = useAuth(); 
+  console.log("Usuario:", userData);
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
 
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
+  const [tiempoVivienda, setTiempoVivienda] = useState([]);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [dataBodega, setDataBodega] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
@@ -20,8 +23,8 @@ export default function CreditoForm() {
   const [ urlCloudstorage, setUrlCloudstorage] = useState(null);
   const [dataRecibir, setDataRecibir] = useState(null);
   const fetchBodega = async () => {
-    const userId = 1;
-    const idTipoFactura = 2;
+    const userId = userData.idUsuario;
+    const idTipoFactura = 43;
     const fecha = new Date().toISOString();
     const recibeConsignacion = true;
 
@@ -45,10 +48,17 @@ export default function CreditoForm() {
           label: item.Descripcion,
         }))
       );
+      setTiempoVivienda(
+        response.data.map((item) => ({
+          value: item.idCre_Tiempo,
+          label: item.Descripcion,
+        }))
+      );
     } catch (error) {
       console.error("Error al obtener estabilidad laboral", error);
       enqueueSnackbar("Error al cargar estabilidad laboral", { variant: "error", preventDuplicate: true });
       setEstabilidadLaboral([]);
+      setTiempoVivienda([]);
     }
   };
 
@@ -138,6 +148,7 @@ export default function CreditoForm() {
     bTerminosYCondiciones: false,
     bPoliticas: false,
     idProductos: null,
+    idCre_TiempoVivienda : null,
   };
 
   const formConfig = [
@@ -191,6 +202,13 @@ export default function CreditoForm() {
       name: "idCre_Tiempo",
       type: "select",
       options: estabilidadLaboral,
+    },
+    {
+      label: "Tiempo de Vivienda",
+      name: "idCre_TiempoVivienda",
+      type: "select",
+      options: tiempoVivienda,
+
     },
     {
       label: "Producto",
@@ -276,6 +294,10 @@ export default function CreditoForm() {
         .positive("Debe ser un número positivo")
         .integer("Debe ser un número entero")
         .required("Debes seleccionar una opción en Estabilidad Laboral."),
+      idCre_TiempoVivienda: Yup.number()
+        .positive("Debe ser un número positivo")
+        .integer("Debe ser un número entero")
+        .required("Debes seleccionar una opción en Tiempo de Vivienda."),
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
@@ -378,13 +400,15 @@ const handleSubmit = async (values) => {
     SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
     CodDactilar: values.CodDactilar?.toUpperCase(),
     idCompraEncuesta: Number(values.idCompraEncuesta),
+    idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
   };
 
-  console.log("Valores enviados al servidor:", formattedValues);
+
 
   try {
     // 1. Crear la solicitud
-    const createResponse = await axios.post(APIURL.post_cre_solicitud_web(), formattedValues, {
+    const url = APIURL.post_cre_solicitud_web();
+    const createResponse = await axios.post(url, formattedValues, {
       headers: { method: "POST", cache: "no-store" },
     });
 

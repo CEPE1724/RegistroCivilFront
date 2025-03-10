@@ -1,7 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchPerfil } from "../../actions/fetchPerfil"; // Make sure this is properly exported
+import { fetchPerfil } from "../../actions/fetchPerfil"; // Asegúrate de que esta función esté correctamente exportada
 import { APIURL } from "../../configApi/apiConfig";
+
 // Crear el contexto
 const AuthContext = createContext();
 
@@ -11,9 +12,10 @@ export const AuthProvider = ({ children }) => {
   const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null); // Para almacenar los datos del usuario
+  const [userUsuario, setUserUsuario] = useState(null); // Para almacenar los datos de la API 'get_nomina'
   const navigate = useNavigate();
 
-  // Effect to check token expiration
+  // Effect para revisar la expiración del token
   useEffect(() => {
     const checkTokenExpiration = () => {
       const expirationTime = localStorage.getItem("tokenExpiration");
@@ -30,22 +32,21 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    // Only check expiration if there's a token
     if (token) {
       checkTokenExpiration();
-      const interval = setInterval(checkTokenExpiration, 60000); // Check every minute
-      return () => clearInterval(interval); // Cleanup on unmount
+      const interval = setInterval(checkTokenExpiration, 60000); // Revisar cada minuto
+      return () => clearInterval(interval); // Limpieza al desmontar
     } else {
-      setIsLoggedIn(false); // If no token, user is not logged in
+      setIsLoggedIn(false); // Si no hay token, el usuario no está logueado
     }
   }, [token, navigate]);
 
-  // Effect to fetch user data once the token is available
+  // Effect para obtener datos del perfil una vez que el token está disponible
   useEffect(() => {
     const getUserData = async () => {
       if (token) {
         try {
-          const userPerfil = await fetchPerfil(token); // Make sure this function is defined and correctly returns data
+          const userPerfil = await fetchPerfil(token); // Asegúrate de que esta función esté correctamente definida
           setUserData(userPerfil);
         } catch (error) {
           console.error("Error al obtener los datos del perfil:", error.message);
@@ -55,9 +56,34 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       getUserData();
     }
-  }, [token]); // Runs only when the token changes
+  }, [token]); // Ejecuta solo cuando cambia el token
 
-  // Login function
+  // Effect para consultar la API 'get_nomina' cuando 'userData' cambia
+  useEffect(() => {
+    const getUserDataUsuario = async () => {
+      if (token && userData) {
+        try {
+          const url = APIURL.get_nomina(userData.Nombre); // Usamos 'Nombre' de userData
+          const response = await fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          setUserUsuario(data); // Almacenamos los datos obtenidos
+        } catch (error) {
+          console.error("Error al obtener los datos del usuario:", error.message);
+        }
+      }
+    };
+    if (userData) {
+      getUserDataUsuario();
+    }
+  }, [userData, token]); // Se ejecuta cada vez que 'userData' cambia
+
+  // Función de login
   const login = (newToken, expirationTime) => {
     setToken(newToken);
     localStorage.setItem("token", newToken);
@@ -66,25 +92,37 @@ export const AuthProvider = ({ children }) => {
     setIsSessionExpired(false);
   };
 
-  // Logout function
+  // Función de logout
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
     setToken(null);
     setIsSessionExpired(false);
     setIsLoggedIn(false);
-    setUserData(null); // Clear user data on logout
+    setUserData(null); // Limpiar los datos del usuario
+    setUserUsuario(null); // Limpiar los datos de 'get_nomina'
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ token, setToken, isSessionExpired, isLoggedIn, userData, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        setToken,
+        isSessionExpired,
+        isLoggedIn,
+        userData,
+        userUsuario, // Datos obtenidos de 'get_nomina'
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook to access the context
+// Hook para acceder al contexto
 export const useAuth = () => {
   return useContext(AuthContext);
 };

@@ -310,7 +310,7 @@ export const SeccionA = forwardRef((props, ref) => {
             </label>
             <input
               type="text"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={nombreNegocio}
               onChange={(e) => setNombreNegocio(e.target.value.toUpperCase())}
             />
@@ -321,7 +321,7 @@ export const SeccionA = forwardRef((props, ref) => {
             </label>
             <input
               type="number"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={tiempoNegocio}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
@@ -335,7 +335,7 @@ export const SeccionA = forwardRef((props, ref) => {
             <label className="text-sm font-semibold mb-1">Metros</label>
             <input
               type="number"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={metros}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
@@ -350,7 +350,7 @@ export const SeccionA = forwardRef((props, ref) => {
             <input
               type="number"
               required
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={ingresos}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
@@ -364,7 +364,7 @@ export const SeccionA = forwardRef((props, ref) => {
             <label className="text-sm font-semibold mb-1">Gastos</label>
             <input
               type="number"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={gastos}
               onChange={(e) => {
                 const value = parseFloat(e.target.value);
@@ -379,7 +379,7 @@ export const SeccionA = forwardRef((props, ref) => {
           <div className="flex flex-col">
             <label className="text-sm font-semibold mb-1">Provincia</label>
             <select
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={idProvincia} // Usamos idProvincia en el value
               onChange={(e) => {
                 const idSeleccionada = e.target.value;
@@ -401,7 +401,7 @@ export const SeccionA = forwardRef((props, ref) => {
           <div className="flex flex-col">
             <label className="text-sm font-semibold mb-1">Cantón</label>
             <select
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={idCanton}
               onChange={(e) => {
                 const idSeleccionada = e.target.value;
@@ -422,7 +422,7 @@ export const SeccionA = forwardRef((props, ref) => {
           <div className="flex flex-col">
             <label className="text-sm font-semibold mb-1">Parroquia</label>
             <select
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={idParroquia}
               onChange={(e) => {
                 const idSeleccionada = e.target.value;
@@ -443,7 +443,7 @@ export const SeccionA = forwardRef((props, ref) => {
             <div className="flex flex-col">
                 <label className="text-sm font-semibold mb-1">Barrio</label>
                 <select
-                    className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+                    className="solcitudgrande-style"
                     value={barrio}
                     onChange={(e) => setBarrio(e.target.value.toUpperCase())}
                 >
@@ -466,7 +466,7 @@ export const SeccionA = forwardRef((props, ref) => {
             </label>
             <input
               type="text"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={callePrincipal}
               onChange={(e) => setCallePrincipal(e.target.value.toUpperCase())}
             />
@@ -476,7 +476,7 @@ export const SeccionA = forwardRef((props, ref) => {
             <label className="text-sm font-semibold mb-1">Número Casa</label>
             <input
               type="text"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={numeroCasa}
               onChange={(e) => setNumeroCasa(e.target.value.toUpperCase())}
             />
@@ -488,7 +488,7 @@ export const SeccionA = forwardRef((props, ref) => {
             </label>
             <input
               type="text"
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+              className="solcitudgrande-style"
               value={calleSecundaria}
               onChange={(e) => setCalleSecundaria(e.target.value.toUpperCase())}
             />
@@ -499,7 +499,7 @@ export const SeccionA = forwardRef((props, ref) => {
               Referencia Ubicación
             </label>
             <textarea
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-20"
+              className="solcitudgrande-style h-20"
               value={referenciaUbicacion}
               onChange={(e) =>
                 setReferenciaUbicacion(e.target.value.toUpperCase())
@@ -513,7 +513,7 @@ export const SeccionA = forwardRef((props, ref) => {
               Actividad del Negocio
             </label>
             <textarea
-              className="bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm h-20"
+              className="solcitudgrande-style h-20"
               value={actividadNegocio}
               onChange={(e) =>
                 setActividadNegocio(e.target.value.toUpperCase())

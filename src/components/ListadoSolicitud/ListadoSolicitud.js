@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
-import { APIURL } from "../../../configApi/apiConfig";
+import { APIURL } from "../../configApi/apiConfig";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import PersonIcon from "@mui/icons-material/Person";
@@ -33,15 +33,18 @@ import StoreIcon from "@mui/icons-material/Store";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import PhoneIcon from "@mui/icons-material/Phone";
 import EmailIcon from "@mui/icons-material/Email";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
 import FolderIcon from "@mui/icons-material/Folder";
+import PhoneIcon from '@mui/icons-material/Phone';
 import { useNavigate } from "react-router-dom";
-import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
+import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import HouseIcon from '@mui/icons-material/House';
+import { red } from "@mui/material/colors";
+import { enqueueSnackbar } from "notistack";
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -61,31 +64,38 @@ export function ListadoSolicitud() {
   const [searchDateTo, setSearchDateTo] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await Promise.all([fetchTipoConsulta(), fetchBodega()]);
+      } catch (error) {
+        console.error("Error al cargar los datos iniciales:", error);
+      }
+    };
+  
+    fetchData();
+  }, []); // Solo se ejecuta una vez al montar el componente
+  
+  useEffect(() => {
+    if (tipoConsulta.length > 0 && dataBodega.length > 0) {
+      fetchSolicitudes();
+    }
+  }, [currentPage, tipoConsulta, dataBodega]); // Se ejecuta cuando `tipoConsulta` o `dataBodega` se actualizan
+  
   const fetchBodega = async () => {
     const userId = 1;
     const idTipoFactura = 43;
     const fecha = new Date().toISOString();
     const recibeConsignacion = true;
-
+  
     try {
-      // Llamada a la función del hook que obtiene los datos
-      await fetchBodegaUsuario(
-        userId,
-        idTipoFactura,
-        fecha,
-        recibeConsignacion
-      );
+      await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
+      enqueueSnackbar("Datos de la bodega obtenidos correctamente", { variant: "success" });
     } catch (err) {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
-
-  useEffect(() => {
-    fetchTipoConsulta();
-    fetchSolicitudes();
-    fetchBodega();
-  }, [currentPage]); // Agrega tipoConsulta como dependencia
-
+  
   const fetchTipoConsulta = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -95,15 +105,15 @@ export function ListadoSolicitud() {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (response.status === 200) {
-        const tipoConsulta = response.data.map((item) => ({
-          id: item.idCompraEncuesta,
-          descripcion: item.Descripcion,
-        }));
-        setTipoConsulta(tipoConsulta);
-
-        // Aquí puedes establecer el estado con los datos obtenidos si es necesario
+        setTipoConsulta(
+          response.data.map((item) => ({
+            id: item.idCompraEncuesta,
+            descripcion: item.Descripcion,
+          }))
+        );
+        enqueueSnackbar("Tipos de consulta obtenidos correctamente", { variant: "success" });
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -111,8 +121,10 @@ export function ListadoSolicitud() {
       console.error("Error fetching tipo de consulta:", error);
     }
   };
-
+  
   const fetchSolicitudes = async () => {
+    if (tipoConsulta.length === 0 || dataBodega.length === 0) return;
+  
     try {
       const token = localStorage.getItem("token");
       const offset = (currentPage - 1) * itemsPerPage;
@@ -121,60 +133,44 @@ export function ListadoSolicitud() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        params: {
-          limit: itemsPerPage,
-          offset: offset,
-        },
+        params: { limit: itemsPerPage, offset: offset },
       });
-
+  
       if (response.status === 200) {
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
-
-        const datos = response.data.data.map((item) => {
-          // Buscar la descripción del tipo de consulta correspondiente al ID
-
-          const consulta =
-            tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)
-              ?.descripcion || "Desconocido";
-          const nombreBodega =
-            dataBodega.find((bodega) => bodega.value === item.Bodega)?.label ||
-            "Desconocido";
-          return {
-            id: item.idCre_SolicitudWeb,
-            NumeroSolicitud: item.NumeroSolicitud,
-            nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
-            cedula: item.Cedula,
-            almacen: nombreBodega,
-            vendedor:
-              item.idVendedor === 123
-                ? "Kevin Alexander Lema Naranjo"
-                : "nonde",
-            consulta: consulta, // Usar la descripción de la consulta
-            estado:
-              item.Estado === 0
-                ? "pendiente"
-                : item.Estado === 1
-                ? "PENDIENTE"
-                : item.Estado === 2
-                ? "APROBADO"
-                : item.Estado === 3
-                ? "ANULADO"
-                : item.Estado === 4
-                ? "RECHAZADO"
-                : "desconocido",
-            imagen: item.Foto,
-            celular: item.Celular,
-            email: item.Email,
-            fecha: item.Fecha,
-            afiliado: item.bAfiliado ? "Sí" : "No",
-            tieneRuc: item.bTieneRuc ? "Sí" : "No",
-          };
-        });
-
+  
+        const datos = response.data.data.map((item) => ({
+          id: item.NumeroSolicitud,
+          nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
+          cedula: item.Cedula,
+          almacen:
+            dataBodega.find((bodega) => bodega.value === item.Bodega)?.label || "Desconocido",
+          vendedor: item.idVendedor === 123 ? "Kevin Alexander Lema Naranjo" : "nonde",
+          consulta:
+            tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
+          estado:
+            item.Estado === 0
+              ? "pendiente"
+              : item.Estado === 1
+              ? "aprobado"
+              : item.Estado === 2
+              ? "anulado"
+              : item.Estado === 3
+              ? "rechazado"
+              : "desconocido",
+          imagen: item.Foto,
+          celular: item.Celular,
+          email: item.Email,
+          fecha: item.Fecha,
+          afiliado: item.bAfiliado ? "Sí" : "No",
+          tieneRuc: item.bTieneRuc ? "Sí" : "No",
+        }));
+  
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
+        enqueueSnackbar("Solicitudes obtenidas correctamente", { variant: "success" });
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -198,7 +194,6 @@ export function ListadoSolicitud() {
     navigate("/documental", {
       state: {
         id: registro.id,
-        NumeroSolicitud: registro.NumeroSolicitud,
         nombre: registro.nombre,
         cedula: registro.cedula,
         fecha: registro.fecha,
@@ -365,7 +360,7 @@ export function ListadoSolicitud() {
                       src={data.imagen}
                       alt="Imagen"
                     />*/}
-                    {data.NumeroSolicitud}
+                    {data.id}
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
@@ -379,13 +374,12 @@ export function ListadoSolicitud() {
                   <TableCell align="center">
                     <Tooltip title="Ver más" arrow placement="top">
                       <IconButton onClick={() => handleOpenDialog(data)}>
-                        <VisibilityIcon />
+                        <VisibilityIcon sx={{ color: "gray" }} />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
-                  <TableCell>
-                      <PendingActionsIcon/>
-                     
+                  <TableCell align="center">
+                    <PendingActionsIcon sx={{ color: 'gray' }} />
 
                     {/*
                     <div className="flex justify-center gap-2">
@@ -401,21 +395,17 @@ export function ListadoSolicitud() {
                     */}
                   </TableCell>
                   <TableCell align="center">
-                  
-
                     <IconButton onClick={() => handledocumentos(data)}>
-                        <FolderIcon />
-                      </IconButton>
-
-                    
+                      <FolderIcon sx={{ color: 'gray' }} />
+                    </IconButton>
                   </TableCell>
 
                   <TableCell align="center">
-                    <FolderIcon/>
+                  <PhoneIcon sx={{ color: 'gray' }}/>
                   </TableCell>
 
                   <TableCell align="center">
-                    <FolderIcon className="w-5 h-5 text-primaryBlue" />
+                    <HouseIcon sx={{ color: 'gray' }} />
                   </TableCell>
                 </TableRow>
               ))}

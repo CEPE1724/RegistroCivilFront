@@ -3,9 +3,8 @@
 @tailwind utilities;
 
 @layer components {
-  .select-style {
-    @apply uppercase bg-white border border-gray-300 focus:outline-none focus:border-gray-500 
-    rounded-md py-2 px-4 w-full sm:py-1 sm:px-2 text-gray-500 font-semibold text-xs hover:border-gray-500 ;
+  .solcitudgrande-style {
+    @apply block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs ;
   }
   .label-style {
     @apply block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2 ;

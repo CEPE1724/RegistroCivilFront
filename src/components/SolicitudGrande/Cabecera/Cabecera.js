@@ -3,7 +3,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
-import  {DatosCliente}  from "../DatosCliente/DatosCliente";
+import { DatosCliente } from "../DatosCliente/DatosCliente";
 import { DatosConyuge } from "../DatosConyuge";
 import { Referencias } from "../Referencia";
 import { SeccionB } from "../SeccionB";
@@ -54,11 +54,11 @@ export function Cabecera() {
       case "Referencias":
         return <Referencias />;
       case "Sección A- Negocio":
-        return <SeccionA ref={seccionRef}/>;
+        return <SeccionA ref={seccionRef} />;
       case "Sección B- Dependiente":
         return <SeccionB />;
       case "Factores de Crédito":
-        return <FactoresCredito  ref={seccionRef}/>;
+        return <FactoresCredito ref={seccionRef} />;
       case "Verificación":
         return <Verificacion />;
       case "Información de Crédito":
@@ -123,21 +123,18 @@ export function Cabecera() {
             <label className="text-xs font-medium mb-1">Fecha</label>
             <input
               type="date"
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
               defaultValue={currentDate}
               readOnly
             />
           </div>
-
-
-
           <div className="flex flex-col">
             <label className="text-xs font-medium mb-1">Cedula</label>
             <input
               type="text"
               value={cedula}
               onChange={handleInputChange(setCedula)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
 
@@ -146,7 +143,7 @@ export function Cabecera() {
             <select
               value={local}
               onChange={(e) => setLocal(e.target.value)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             >
               <option value="">Seleccione...</option>
               <option value="Local 1">Local 1</option>
@@ -176,7 +173,7 @@ export function Cabecera() {
               type="text"
               value={apellidoPaterno}
               onChange={handleInputChange(setApellidoPaterno)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
 
@@ -184,7 +181,7 @@ export function Cabecera() {
             <label className="text-xs font-medium mb-1">Apellido Materno</label>
             <input
               type="text"
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
 
@@ -194,7 +191,7 @@ export function Cabecera() {
               type="text"
               value={primerNombre}
               onChange={handleInputChange(setPrimerNombre)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
 
@@ -202,7 +199,7 @@ export function Cabecera() {
             <label className="text-xs font-medium mb-1">Segundo Nombre</label>
             <input
               type="text"
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
 
@@ -212,7 +209,7 @@ export function Cabecera() {
               type="text"
               value={email}
               onChange={handleInputChange(setEmail)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
 
@@ -222,7 +219,7 @@ export function Cabecera() {
               type="text"
               value={celular}
               onChange={handleInputChange(setCelular)}
-              className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs"
+              className="solcitudgrande-style"
             />
           </div>
         </div>
