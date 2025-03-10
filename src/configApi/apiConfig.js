@@ -3,7 +3,9 @@ import { get } from "react-hook-form";
  
 
 //const API_BASE_URL = "http://192.168.137.28:3025/api/v1/"; 
+
 const API_BASE_URL = "http://192.168.2.246:3025/api/v1/";
+
 
 
 const SOCKET_BASE_URL = "http://192.168.2.167:3008"; 
@@ -54,6 +56,10 @@ export const APIURL = {
     putUpdatesolicitud : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
     getConsultaCre_solicitud_web : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
     get_cre_niveleducacion : () =>  `${API_BASE_URL}cre-niveleducacion `,
+
+    get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion`,
+    getVendedor : (id) => `${API_BASE_URL}nomina/Vendedor/${id}`
+
     get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion `,
 
     getEstadoReferencia : () => `${API_BASE_URL}crectaedogestion`,
@@ -69,6 +75,7 @@ export const APIURL = {
 	get_cre_CiudadInmueble : () => `${API_BASE_URL}cre-ciudadinmueble`,
 	get_cre_tipoVivienda : () => `${API_BASE_URL}cre-tipovivienda`,
 	get_cre_tiempoVivienda : () => `${API_BASE_URL}cre-tiempovivienda`,
+
 
 
 
