@@ -21,6 +21,7 @@ import {
   DialogActions,
   Alert,
   Icon,
+  CircularProgress,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
@@ -42,6 +43,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import { useNavigate } from "react-router-dom";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import SolicitudDialog from "../SolicitudDialog/SolicitudDialog";
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -81,9 +83,20 @@ export function ListadoSolicitud() {
   };
 
   useEffect(() => {
+    if (data && data.length > 0) {
+      setDataBodega(
+        data.map((item) => ({
+          value: item.b_Bodega,
+          label: item.b_Nombre,
+        }))
+      );
+    }
+  }, [data]);
+  useEffect(() => {
+    fetchBodega();
     fetchTipoConsulta();
     fetchSolicitudes();
-    fetchBodega();
+
   }, [currentPage]); // Agrega tipoConsulta como dependencia
 
   const fetchTipoConsulta = async () => {
@@ -155,14 +168,12 @@ export function ListadoSolicitud() {
               item.Estado === 0
                 ? "pendiente"
                 : item.Estado === 1
-                ? "PENDIENTE"
-                : item.Estado === 2
-                ? "APROBADO"
-                : item.Estado === 3
-                ? "ANULADO"
-                : item.Estado === 4
-                ? "RECHAZADO"
-                : "desconocido",
+                  ? "aprobado"
+                  : item.Estado === 2
+                    ? "anulado"
+                    : item.Estado === 3
+                      ? "rechazado"
+                      : "desconocido",
             imagen: item.Foto,
             celular: item.Celular,
             email: item.Email,
@@ -183,16 +194,7 @@ export function ListadoSolicitud() {
     }
   };
 
-  useEffect(() => {
-    if (data && data.length > 0) {
-      setDataBodega(
-        data.map((item) => ({
-          value: item.b_Bodega,
-          label: item.b_Nombre,
-        }))
-      );
-    }
-  }, [data]);
+
 
   const handledocumentos = (registro) => {
     navigate("/documental", {
@@ -217,6 +219,7 @@ export function ListadoSolicitud() {
     setView(false);
     setSelectedRow(null);
   };
+
   const filteredData = datos.filter(
     (item) =>
       item.nombre.toLowerCase().includes(search.toLowerCase()) &&
@@ -231,6 +234,15 @@ export function ListadoSolicitud() {
     navigate("/solicitud", { replace: true });
   };
 
+  const handleViewDialogOpen = (row) => {
+    setSelectedRow(row);
+    setView(true);
+  };
+
+  const handleDialogClose = () => {
+    setView(false);
+    setSelectedRow(null);
+  };
   // Función para cambiar de página
   const changePage = (page) => {
     setCurrentPage(page);
@@ -310,229 +322,112 @@ export function ListadoSolicitud() {
         </button>
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg border border-gray-300">
-        <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
-          <Table>
-            <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
-              <TableRow>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Numero solicitud
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Nombres
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Cedula
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Fecha
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Almacén
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Vendedor
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Tipo de Consulta
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Estado
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Opciones
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Solicitud
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Documental
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Telefonica
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Terrena
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredData.map((data) => (
-                <TableRow key={data.id}>
-                  <TableCell align="center">
-                    {/*<img
-                      className="rounded-md object-cover w-1/3 h-full mx-auto"
-                      src={data.imagen}
-                      alt="Imagen"
-                    />*/}
-                    {data.NumeroSolicitud}
-                  </TableCell>
-                  <TableCell align="center">{data.nombre}</TableCell>
-                  <TableCell align="center">{data.cedula}</TableCell>
-                  <TableCell align="center">
-                    {data.fecha.substring(0, 10)}
-                  </TableCell>
-                  <TableCell align="center">{data.almacen}</TableCell>
-                  <TableCell align="center">{data.vendedor}</TableCell>
-                  <TableCell align="center">{data.consulta}</TableCell>
-                  <TableCell align="center">{data.estado}</TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Ver más" arrow placement="top">
-                      <IconButton onClick={() => handleOpenDialog(data)}>
-                        <VisibilityIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>
-                      <PendingActionsIcon/>
-                     
-
-                    {/*
-                    <div className="flex justify-center gap-2">
-                      <button onClick={() => handledocumentos(data)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:ring-0 focus:shadow-none">
-                        Documentos
-                      </button>
-
-                      <button className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:shadow-none">
-                        Telefonica
-                      </button>
-                    
-                    </div>
-                    */}
-                  </TableCell>
-                  <TableCell align="center">
-                  
-
-                    <IconButton onClick={() => handledocumentos(data)}>
-                        <FolderIcon />
-                      </IconButton>
-
-                    
+      <div className="bg-white shadow-lg rounded-lg border border-gray-300 overflow-x-auto">
+        {loading ? (
+          <div style={{ textAlign: "center", marginTop: "50px" }}>
+            <CircularProgress /> {/* Spinner de carga */}
+          </div>
+        ) : (
+          <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
+            <Table className="min-w-full">
+              <TableHead className="bg-gray-100">
+                <TableRow>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Número solicitud
                   </TableCell>
 
-                  <TableCell align="center">
-                    <FolderIcon/>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Nombres
                   </TableCell>
-
-                  <TableCell align="center">
-                    <FolderIcon className="w-5 h-5 text-primaryBlue" />
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Cedula
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Fecha
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Almacén
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Vendedor
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Estado
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Opciones
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Solicitud
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Documental
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Telefonica
+                  </TableCell>
+                  <TableCell align="center" className="font-bold text-xs p-2 text-gray-950">
+                    Terrena
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+
+              <TableBody>
+                {filteredData.map((data) => (
+                  <TableRow key={data.id} className="hover:bg-gray-50 transition duration-200 ease-in-out">
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.NumeroSolicitud}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.nombre}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.cedula}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.fecha.substring(0, 10)}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.almacen}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.vendedor}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      {data.estado}
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      <Tooltip title="Ver más" arrow placement="top">
+                        <IconButton onClick={() => handleOpenDialog(data)}>
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      <FolderIcon />
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      <FolderIcon />
+                    </TableCell>
+                    <TableCell align="center" className="text-xs p-2 text-gray-600 font-sans">
+                      <FolderIcon className="w-5 h-5 text-primaryBlue" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+
+            </Table>
+          </TableContainer>
+        )}
       </div>
 
-      {/* Cuadro de diálogo para ver detalles */}
-      <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle className="text-xl font-bold">
-          Detalles de la Solicitud
-        </DialogTitle>
-        <DialogContent dividers>
-          {selectedRow && (
-            <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-              {/* Imagen */}
-              <div className="flex justify-center items-center md:w-1/3">
-                <img
-                  src={selectedRow.imagen}
-                  alt="Imagen"
-                  className="w-64 h-64 object-cover rounded-md"
-                />
-              </div>
 
-              {/* Datos */}
-              <div className="md:w-2/3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
-                  <div className="flex items-center gap-2">
-                    <PersonIcon className="text-blue-500" fontSize="medium" />
-                    <p>{selectedRow.nombre}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <BadgeIcon className="text-blue-500" fontSize="medium" />
-                    <p className="font-semibold">Cédula:</p>
-                    <p>{selectedRow.cedula}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <StoreIcon className="text-blue-500" fontSize="medium" />
-                    <p className="font-semibold">Almacén:</p>
-                    <p>{selectedRow.almacen}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <SupervisorAccountIcon
-                      className="text-blue-500"
-                      fontSize="medium"
-                    />
-                    <p className="font-semibold">Vendedor:</p>
-                    <p>{selectedRow.vendedor}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <InfoIcon className="text-blue-500" fontSize="medium" />
-                    <p className="font-semibold">Tipo de Consulta:</p>
-                    <p>{selectedRow.consulta}</p>
-                  </div>
-                  {/* Estado con color dinámico en el texto */}
-                  <div className="flex items-center">
-                    <InfoIcon className="mr-2 text-blue-500" />
-                    <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
-                          ? "text-yellow-500"
-                          : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {selectedRow.estado}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <PhoneIcon className="text-blue-500" fontSize="medium" />
-                    <p>{selectedRow.celular}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <EmailIcon className="text-blue-500" fontSize="medium" />
-                    <p>{selectedRow.email}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <EventIcon className="text-blue-500" fontSize="medium" />
-                    <p className="font-semibold">Fecha:</p>
-                    <p>{selectedRow.fecha.substring(0, 10)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircleIcon
-                      className="text-blue-500"
-                      fontSize="medium"
-                    />
-                    <p className="font-semibold">Afiliado:</p>
-                    <p>{selectedRow.afiliado}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <BusinessIcon className="text-blue-500" fontSize="medium" />
-                    <p className="font-semibold">Tiene RUC:</p>
-                    <p>{selectedRow.tieneRuc}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleCloseDialog}
-            color="primary"
-            className="text-base font-semibold"
-          >
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Cuadro de diálogo para ver detalles */}
+      <SolicitudDialog
+        open={view}
+        onClose={handleDialogClose}
+        selectedRow={selectedRow}
+      />
 
       {/* Paginación */}
       {totalPages > 1 && (

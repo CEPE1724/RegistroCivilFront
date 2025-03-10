@@ -54,5 +54,9 @@ export const APIURL = {
     putUpdatesolicitud : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
     getConsultaCre_solicitud_web : (id) => `${API_BASE_URL}cre-solicitud-web/${id}`,
     get_cre_niveleducacion : () =>  `${API_BASE_URL}cre-niveleducacion `,
-    get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion `
+    get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion `,
+    get_nomina : (id) =>  `${API_BASE_URL}nomina/${id}`,
+
+    generateOTP : () => `${API_BASE_URL}otp/generate`,
+    verifyOTP : () => `${API_BASE_URL}otp/verify`,
 };

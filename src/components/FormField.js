@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
+import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPModal';
 
 const FormField = ({
   label,
@@ -216,6 +217,8 @@ const ReusableForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false); // Estado para controlar la apertura del modal de OTP
+  const [isOtpVerified, setIsOtpVerified] = useState(false); // Estado para verificar si el OTP es válido
   const { enqueueSnackbar } = useSnackbar();
 
   // Inicializar valores por defecto para campos select
@@ -226,25 +229,26 @@ const ReusableForm = ({
   );
 
   const formik = useFormik({
-    initialValues: {
-      ...initialValues,
-      bTerminosYCondiciones: false,
-      bPoliticas: false,
-      ...selectDefaults,
-    },
+    initialValues: initialValues,
     validationSchema,
-    onSubmit: async (values, { resetForm }) => {
-      setIsSubmitting(true);
-      try {
-        await onSubmit(values);
-      } catch (error) {
-        enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
-        console.error("Error en envío:", error);
-      } finally {
-        setIsSubmitting(false);
+    onSubmit: async (values) => {
+      if (isOtpVerified) {
+        setIsSubmitting(true);
+        try {
+          await onSubmit(values);
+        } catch (error) {
+          enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
+          console.error("Error en envío:", error);
+        } finally {
+          setIsSubmitting(false);
+        }
+      } else {
+        // Si el OTP no es verificado, muestra el modal
+        setIsOtpModalOpen(true);
       }
     },
   });
+
 
   // Sistema unificado para mostrar el primer error en el submit
   const showFirstError = () => {
@@ -280,6 +284,11 @@ const ReusableForm = ({
     setPreviewUrl(null);
     if (onCancel) onCancel();
     setTimeout(() => setIsCanceling(false), 1000);
+  };
+
+  const handleOtpVerification = (isVerified) => {
+    setIsOtpVerified(isVerified);
+    setIsOtpModalOpen(false); // Cerrar el modal después de la verificación del OTP
   };
 
   // Separar el campo de archivo y otros campos
@@ -418,6 +427,11 @@ const ReusableForm = ({
           </button>
         </div>
       )}
+      <OTPModal
+        isOpen={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        onVerifyOtp={handleOtpVerification}
+      />
     </form>
   );
 };
