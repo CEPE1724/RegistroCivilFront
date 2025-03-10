@@ -39,6 +39,8 @@ export function Referencias() {
     const [view, setView] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
     const [tablaModal, setTablaModal] = useState([]);   //estado datos tabla modal
+    const [datoEstado, setDatoEstado] = useState([]);  //estado para api estado
+    const [idToTextMapEstado, setIdToTextMapEstado] = useState({});   //estado para mapear IDs a textos de api estado
 
     //almacenar datos del formulario
     const [formData, setFormData] = useState({
@@ -152,6 +154,37 @@ export function Referencias() {
         }
     }
 
+    //api estado
+    useEffect(() => {
+        fetchDatoEstado();
+    }, []);
+
+    const fetchDatoEstado = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.getEstadoReferencia();
+            const response = await axios.get(url,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            setDatoEstado(response.data);
+            //objeto para mapear IDs a textos
+            const idToTextMapEstado = {};
+            response.data.forEach(item => {
+                idToTextMapEstado[item.idEstadoGestns] = item.DESCRIPCION;
+            });
+            setIdToTextMapEstado(idToTextMapEstado); // Guardar el objeto en el estado
+        } catch (error) {
+            enqueueSnackbar("Error fetching Dato: " + error.message, {
+                variant: "error",
+            });
+        }
+    }
+
 
     //almacenar datos tabla
     const [tablaDatos, setTablaDatos] = useState([]);
@@ -175,6 +208,15 @@ export function Referencias() {
         } else if (name === "celular") {
             // Solo números
             const filteredValue = value.replace(/\D/g, ''); // Eliminar caracteres no numéricos
+            setFormData({ ...formData, [name]: filteredValue });
+        } else if (name === "observaciones") {
+            // Eliminar espacios en blanco al inicio, pero permitirlos hacia la derecha
+            const trimmedValue = value.trimStart();
+            setFormData({ ...formData, [name]: trimmedValue });
+        } else if (name === "contactoEfectivo") {
+            // Eliminar espacios al inicio y permitir solo letras 
+            const trimmedValue = value.trimStart(); // Elimina espacios al inicio
+            const filteredValue = trimmedValue.replace(/[^A-Za-z\s]/g, ""); // Permite letras y espacios
             setFormData({ ...formData, [name]: filteredValue });
         } else {
             setFormData({ ...formData, [name]: value });
@@ -485,18 +527,21 @@ export function Referencias() {
                                 {/*tercera columna */}
                                 <div className="md:w-1/3">
                                     <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
-                                        <div className="flex items-center gap-2">
-                                            <InfoIcon className="text-blue-500" fontSize="medium" />
-                                            <p className="font-semibold">Estado:</p>
+                                        {/* estado */}
+                                        <div className="flex flex-col">
+                                            <label className="text-lightGrey text-xs mb-2">Estado(*)</label>
                                             <select
                                                 name="estado"
-                                                className="p-2 border rounded w-36"
+                                                className="p-2 border rounded"
                                                 value={formData.estado}
                                                 onChange={handleChange}
                                             >
                                                 <option value="">Seleccione una opción</option>
-                                                <option value="Activo">Activo</option>
-                                                <option value="No Activo">No Activo</option>
+                                                {datoEstado.map((opcion) => (
+                                                    <option key={opcion.idEstadoGestns} value={opcion.idEstadoGestns}>
+                                                        {opcion.DESCRIPCION}
+                                                    </option>
+                                                ))}
                                             </select>
                                         </div>
 
@@ -551,7 +596,7 @@ export function Referencias() {
                                                     <TableCell>{registro.fecha}</TableCell>
                                                     <TableCell>{registro.contactoEfectivo}</TableCell>
                                                     <TableCell>{registro.referencia}</TableCell>
-                                                    <TableCell>{registro.estado}</TableCell>
+                                                    <TableCell>{idToTextMapEstado[registro.estado]}</TableCell>
                                                     <TableCell>{registro.observaciones}</TableCell>
                                                     <TableCell></TableCell>
                                                 </TableRow>
