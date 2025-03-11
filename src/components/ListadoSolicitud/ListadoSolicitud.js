@@ -135,6 +135,7 @@ export function ListadoSolicitud() {
       });
   
       if (response.status === 200) {
+        console.log("Datos de la solicitud:", response.data);
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
   
@@ -144,7 +145,8 @@ export function ListadoSolicitud() {
             const vendedorNombre = await fetchVendedor(item.idVendedor); // Obtiene el nombre del vendedor
   
             return {
-              id: item.NumeroSolicitud,
+              id: item.idCre_SolicitudWeb,
+              NumeroSolicitud: item.NumeroSolicitud,
               nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
               cedula: item.Cedula,
               almacen:
@@ -236,7 +238,9 @@ export function ListadoSolicitud() {
   }, [data]);
 
   const handledocumentos = (registro) => {
+ 
     navigate("/documental", {
+      replace: true,
       state: {
         id: registro.id,
         NumeroSolicitud: registro.NumeroSolicitud,
