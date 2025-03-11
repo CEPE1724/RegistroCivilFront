@@ -58,7 +58,7 @@ export const APIURL = {
     get_cre_niveleducacion : () =>  `${API_BASE_URL}cre-niveleducacion `,
 
     get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion`,
-    getVendedor : (id) => `${API_BASE_URL}nomina/Vendedor/${id}`
+    getVendedor : (id) => `${API_BASE_URL}nomina/Vendedor/${id}`,
 
     get_cre_profesion : () =>  `${API_BASE_URL}cre-profesion `,
 
@@ -76,7 +76,6 @@ export const APIURL = {
 	get_cre_tipoVivienda : () => `${API_BASE_URL}cre-tipovivienda`,
 	get_cre_tiempoVivienda : () => `${API_BASE_URL}cre-tiempovivienda`,
 
-
-
+   post_creVerificacionTelefonica : () => `${API_BASE_URL}creverificaciontelefonica`,
 
 };
