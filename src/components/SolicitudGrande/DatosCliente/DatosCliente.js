@@ -23,7 +23,7 @@ export function DatosCliente() {
   const [cantones, setCantones] = useState([]);
   const [parroquias, setParroquias] = useState([]);
   const [barrios, setBarrios] = useState([]);
-  const [Inmueble, setInmueble] = useState([]);
+  const [inmueble, setInmueble] = useState([]);
   const [ciudadInmueble, setCiudadInmueble] = useState([]);
   const [tipoVivienda, setTipoVivienda] = useState([]);
   const [tiempoVivenda, setTiempoVivenda] = useState([]);
@@ -79,7 +79,7 @@ export function DatosCliente() {
 
   const handleFormChange = (e) => {
 	const { name, value } = e.target;
-	const newFormErrors = { ...formErrors };
+	console.log(`Campo: ${name}, Valor: ${value}`);
   
 	// Expresión regular para detectar caracteres no permitidos
 	const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
@@ -152,7 +152,6 @@ export function DatosCliente() {
 	  setFormData((prev) => ({ ...prev, barrio: '' }));
 	}
   };
-  
 
   const handleSubmit = (e) => {
 	e.preventDefault();
@@ -195,10 +194,12 @@ export function DatosCliente() {
 	// Validación de campos obligatorios (todos excepto actividadEconomica)
 	for (const field in formData) {
 		if (field !== 'actividadEconomica' && !formData[field]) {
-		  // Usa el mensaje personalizado si existe, o un mensaje genérico si no
+	
 		  errors[field] = requiredFieldMessages[field] || `Este campo es obligatorio`;
 		  
 		}
+
+		
 	}
 	
 	// Validación de campos numéricos (máximo 10 dígitos y solo números)
@@ -376,6 +377,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   onChange={handleFormChange}
                   name="cantonNacimiento"
+				  disabled={!formData.provinciaNacimiento}
                 >
                   <option value="">Seleccione una opción</option>
                   {cantonNacimiento.map((option, idx) => (
@@ -490,6 +492,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   onChange={handleFormChange}
                   name="situacionLaboral"
+				  value={formData.situacionLaboral}
                 >
                   <option value="">Seleccione una opción</option>
                   {sitacionLaboral.map((option, idx) => (
@@ -514,6 +517,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   onChange={handleFormChange}
                   name="actividadEconomica"
+				  disabled={!formData.situacionLaboral}
                 >
                   <option value="">Seleccione una opción</option>
                   {actividadEconomica.map((option, idx) => (
@@ -586,6 +590,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   onChange={handleFormChange}
                   name="canton"
+				  disabled={!formData.provincia}
                 >
                   <option value="">Seleccione una opción</option>
                   {cantones.map((option, idx) => (
@@ -608,6 +613,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   onChange={handleFormChange}
                   name="parroquia"
+				  disabled={!formData.canton}
                 >
                   <option value="">Seleccione una opción</option>
                   {parroquias.map((option, idx) => (
@@ -630,6 +636,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   onChange={handleFormChange}
                   name="barrios"
+				  disabled={!formData.parroquia}
                 >
                   <option value="">Seleccione una opción</option>
                   {barrios.map((option, idx) => (
@@ -640,7 +647,7 @@ export function DatosCliente() {
                 </select>
                 {formErrors.barrio && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
-                    {formErrors.barrios}
+                    {formErrors.barrio}
                   </p>
                 )}
               </div>
@@ -889,19 +896,20 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="inmueble"
                   onChange={handleFormChange}
+				  value={formData.inmueble}
                 >
                   <option value="">Seleccione una opción</option>
-                  {Inmueble.map((option, idx) => (
+                  {inmueble.map((option, idx) => (
                     <option key={idx} value={option.value}>
                       {option.label}
                     </option>
                   ))}
-				  {formErrors.inmueble && (
+                </select>
+				{formErrors.inmueble && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
                     {formErrors.inmueble}
                   </p>
                 )}
-                </select>
               </div>
 
               {/* Ciudad Inmueble */}
