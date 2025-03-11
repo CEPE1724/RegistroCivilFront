@@ -78,202 +78,85 @@ export function DatosCliente() {
   }, []);
 
   const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-
-	if (name === 'nacionalidad') {
-		console.log('nacionalidad');
-		console.log(value);
-  	};
-
-	if (name === 'fechaNacimiento') {
-		console.log('fechaNacimiento');
-		console.log(value);
-	};
-
-	if (name === 'genero') {
-		console.log('genero');
-		console.log(value);
-	};
-
-	if (name === 'provinciaNacimiento' && value) {
-		fetchCantones(value, enqueueSnackbar, setCantonNacimiento);
-		setCantonNacimiento([]);
-		console.log('provinciaNacimiento');
-		console.log(value);
-
-		setFormData(prev => ({ ...prev, cantonNacimiento }));
+	const { name, value } = e.target;
+	const newFormErrors = { ...formErrors };
+  
+	// Expresión regular para detectar caracteres no permitidos
+	const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
+  
+	if (invalidCharsRegex.test(value)) {
+	  // Si hay caracteres no permitidos, los eliminamos y actualizamos formData y formErrors
+	  const cleanedValue = value.replace(invalidCharsRegex, '');
+	  
+	  setFormData((prevState) => ({
+		...prevState,
+		[name]: cleanedValue,
+	  }));
+  
+	  setFormErrors((prevErrors) => ({
+		...prevErrors,
+		[name]: 'Este campo contiene caracteres no permitidos',
+	  }));
+  
+	  return;
 	}
-
-	if (name === 'cantonNacimiento' && value) {
-		console.log('cantonNacimiento');
-		console.log(value);
-	}
-
-	if (name === 'estadoCivil') {
-		console.log('estadoCivil');
-		console.log(value);
-	}
-
-	if (name === 'dependientes') {
-		console.log('dependientes');
-		console.log(value);
-
-		setFormData(prev => ({ ...prev, dependientes: value }));
-	}
-
-	if (name === 'nivelEducacion') {
-		console.log('nivelEducacion');
-		console.log(value);
-	}
-
-	if (name === 'profesion') {
-		console.log('profesion');
-		console.log(value);
+  
+	// Si el valor es válido, actualizar normalmente
+	setFormData((prevState) => ({
+	  ...prevState,
+	  [name]: value,
+	}));
+  
+	// Limpiar el error si el valor es válido
+	if (formErrors[name]) {
+	  setFormErrors((prevErrors) => {
+		const newErrors = { ...prevErrors };
+		delete newErrors[name];
+		return newErrors;
+	  });
 	}
 
 	if (name === 'situacionLaboral' && value) {
 		fetchActividadEconomina(enqueueSnackbar, value, setActividadEconomica);
 	}
 
-	if (name === 'actividadEconomica') {
-		console.log('actividadEconomica');
-		console.log(value);
+	if (name === 'observacionActividadEconomica' && value) {
+		setFormData((prevState) => ({ ...prevState, [name]: value, }));
 	}
-
-	if (name === 'observacionActividadEconomica') {
-		console.log('observacionActividadEconomica');
-		console.log(value);
+  
+	// Lógica adicional según el campo
+	if (name === 'provinciaNacimiento' && value) {
+	  fetchCantones(value, enqueueSnackbar, setCantonNacimiento);
+	  setCantonNacimiento([]);
+	  setFormData((prev) => ({ ...prev, cantonNacimiento: '' }));
 	}
-	//
-
+  
 	if (name === 'provincia' && value) {
-		fetchCantones(value, enqueueSnackbar, setCantones);
-		setCantones([]);
-		setParroquias([]);
-		setBarrios([]);
-		console.log('provincia');
-		console.log(value);
-
-		setFormData(prev => ({ ...prev, cantones: '', parroquias: '', barrios: '' }));
+	  fetchCantones(value, enqueueSnackbar, setCantones);
+	  setCantones([]);
+	  setParroquias([]);
+	  setBarrios([]);
+	  setFormData((prev) => ({ ...prev, canton: '', parroquia: '', barrio: '' }));
 	}
-
+  
 	if (name === 'canton' && value) {
-		fetchParroquias(value, enqueueSnackbar, setParroquias);
-		setParroquias([]);
-		setBarrios([]);
-		console.log('canton');
-		console.log(value);
-
-
-		setFormData(prev => ({ ...prev, parroquias: '', barrios: '' }));
+	  fetchParroquias(value, enqueueSnackbar, setParroquias);
+	  setParroquias([]);
+	  setBarrios([]);
+	  setFormData((prev) => ({ ...prev, parroquia: '', barrio: '' }));
 	}
-
+  
 	if (name === 'parroquia' && value) {
-		fetchBarrios(value, enqueueSnackbar, setBarrios);
-		setBarrios([]);
-		console.log('parroquia');
-		console.log(value);
-
-		setFormData(prev => ({ ...prev, barrios }));
+	  fetchBarrios(value, enqueueSnackbar, setBarrios);
+	  setBarrios([]);
+	  setFormData((prev) => ({ ...prev, barrio: '' }));
 	}
-
-	if (name === 'barrios') {
-		console.log(value)
-	}
-
-	if (name === 'callePrincipal') {
-		console.log('callePrincipal');
-		console.log(value);
-	}
-
-	if (name === 'numeroCasa') {
-		console.log('numeroCasa');
-		console.log(value);
-	}
-
-	if (name === 'calleSecundaria') {
-		console.log('callePrincipal');
-		console.log(value);
-	}
-
-	if (name === 'ubicacionDomicilio') {
-		console.log('ubicacionDomicilio');
-		console.log(value);
-	}
-
-	if (name === 'referenciaUbicacion') {
-		console.log('referenciaUbicacion');
-		console.log(value);
-	}
-
-	if (name === 'telefonoCasa') {
-		console.log('telefonoCasa');
-		console.log(value);
-	}
-
-	//
-
-	if (name === 'tipoVivienda') {
-		console.log('tipoVivienda');
-		console.log(value);
-	}
-
-	if (name === 'tiempoVivienda') {
-		console.log('tiempoVivienda');
-		console.log(value);
-	}
-
-	//
-
-	if (name === 'tipoVivienda') {
-		console.log('tipoVivienda');
-		console.log(value);
-	}
-
-	if (name === 'tiempoVivienda') {
-		console.log('tiempoVivienda');
-		console.log(value);
-	}
-
-	if (name === 'nombreArrendador') {
-		console.log('nombreArrendador');
-		console.log(value);
-	}
-
-	if (name === 'telfArrendador') {
-		console.log('telfArrendador');
-		console.log(value);
-	}
-
-	if (name === 'celularArrendador') {
-		console.log('celularArrendador');
-		console.log(value);
-	}
-
-	if (name === 'inmueble') {
-		console.log('inmueble');
-		console.log(value);
-	}
-
-	if (name === 'ciudadInmueble') {
-		console.log('ciudadInmueble');
-		console.log(value);
-	}
-
-	if (name === 'valorInmueble') {
-		console.log('valorInmueble');
-		console.log(value);
-	}
-		
   };
+  
 
   const handleSubmit = (e) => {
 	e.preventDefault();
+	setFormErrors({});
 
 	const requiredFieldMessages = {
 		nacionalidad: 'Por favor, selecciona tu nacionalidad',
@@ -290,27 +173,23 @@ export function DatosCliente() {
 		provincia: 'Selecciona la provincia de residencia',
 		canton: 'Selecciona el cantón de residencia',
 		parroquia: 'Selecciona la parroquia de residencia',
-		barrio: 'Selecciona el barrio donde vives',
+		barrios: 'Selecciona el barrio donde vives',
 		callePrincipal: 'Ingresa el nombre de la calle principal de tu domicilio',
 		numeroCasa: 'Ingresa el número de casa o apartamento',
 		calleSecundaria: 'Ingresa la calle secundaria o intersección',
-		ubicacionDomicilio: 'Describe la ubicación de tu domicilio',
+		ubicacionDomicilio: 'Selecciona la ubicación de tu domicilio',
 		referenciaUbicacion: 'Proporciona referencias para ubicar tu domicilio',
 		telefonoCasa: 'Ingresa tu número de teléfono fijo (solo números)',
 		tipoVivienda: 'Selecciona el tipo de vivienda',
 		tiempoVivienda: 'Indica cuánto tiempo llevas viviendo en esta dirección',
 		nombreArrendador: 'Si alquilas, ingresa el nombre del arrendador',
-		telfArrendador: 'Ingresa el teléfono fijo del arrendador (solo números)',
+		telfArrendador: 'Ingresa el teléfono fijo del arrendador (10 números)',
 		celularArrendador: 'Ingresa el celular del arrendador (solo números)',
 		inmueble: 'Selecciona el tipo de inmueble',
 		ciudadInmueble: 'Selecciona la ciudad donde se encuentra el inmueble',
 		valorInmueble: 'Ingresa el valor estimado del inmueble (solo números)'
 	  };
 	
-	// Limpiar errores previos
-	setFormErrors({});
-	
-	// Objeto para almacenar los errores de validación
 	const errors = {};
 	
 	// Validación de campos obligatorios (todos excepto actividadEconomica)
@@ -342,19 +221,23 @@ export function DatosCliente() {
 	  'nacionalidad', 'genero', 'provinciaNacimiento', 'cantonNacimiento', 
 	  'estadoCivil', 'nivelEducacion', 'profesion', 'situacionLaboral',
 	  'observacionActividadEconomica', 'provincia', 'canton', 'parroquia', 
-	  'barrio', 'callePrincipal', 'calleSecundaria', 'ubicacionDomicilio',
+	  'barrios', 'callePrincipal', 'calleSecundaria', 'ubicacionDomicilio',
 	  'referenciaUbicacion', 'tipoVivienda', 'tiempoVivienda', 'nombreArrendador',
 	  'inmueble', 'ciudadInmueble'
 	];
 	
 	textFields.forEach(field => {
-	  if (formData[field]) {
-		// Validar contra caracteres especiales potencialmente peligrosos
-		if (/[<>'"\\;{}()]/g.test(formData[field])) {
-		  errors[field] = 'Este campo contiene caracteres no permitidos';
+		if (formData[field]) {
+		  // Validar contra caracteres especiales potencialmente peligrosos
+		  const invalidChars = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
+	  
+		  if (invalidChars.test(formData[field])) {
+			errors[field] = 'Este campo contiene caracteres no permitidos';
+			formData[field] = formData[field].replace(invalidChars, '');
+		  }
 		}
-	  }
-	});
+	  });
+	  
 	
 	// Validación de fecha
 	if (formData.fechaNacimiento) {
@@ -366,15 +249,13 @@ export function DatosCliente() {
 	
 	// Si hay errores, mostrarlos y detener el envío
 	if (Object.keys(errors).length > 0) {
-	  // Establecer los errores para mostrarlos bajo cada campo
 	  setFormErrors(errors);
 	  
-	  // Mostrar mensaje en snackbar
 	  enqueueSnackbar('Por favor, corrige los errores en el formulario', { 
 		variant: 'error',
 	  });
 	  
-	  // Desplázate al primer campo con error
+	  // Desplazar al primer campo con error
 	  const firstErrorField = Object.keys(errors)[0];
 	  const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
 	  if (errorElement) {
@@ -544,6 +425,8 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="dependientes"
                   onChange={handleFormChange}
+				  min="0"
+				  max="12"
                 />
 				{formErrors.dependientes && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -657,6 +540,7 @@ export function DatosCliente() {
                   placeholder="Ingresa tu observación aquí"
                   name="observacionActividadEconomica"
                   onChange={handleFormChange}
+				  value={formData.observacionActividadEconomica}
                 ></textarea>
 				{formErrors.observacionActividadEconomica && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -756,7 +640,7 @@ export function DatosCliente() {
                 </select>
                 {formErrors.barrio && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
-                    {formErrors.barrio}
+                    {formErrors.barrios}
                   </p>
                 )}
               </div>
@@ -771,6 +655,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="callePrincipal"
                   onChange={handleFormChange}
+				  value={formData.callePrincipal}
                 />
 				{formErrors.callePrincipal && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -843,6 +728,7 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="referenciaUbicacion"
                   onChange={handleFormChange}
+				  value={formData.referenciaUbicacion}
                 />
 				{formErrors.referenciaUbicacion && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -861,6 +747,11 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="telefonoCasa"
                   onChange={handleFormChange}
+				  value={formData.telefonoCasa}
+				  onInput={e => {
+					e.target.value = e.target.value.replace(/[^0-9]/g, '');
+				  }}
+				  maxLength={10}
                 />
 				{formErrors.telefonoCasa && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -935,6 +826,10 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="nombreArrendador"
                   onChange={handleFormChange}
+				  value={formData.nombreArrendador}
+				  onInput={e => {
+					e.target.value = e.target.value.replace(/[^A-Za-zÁáÉéÍíÓóÚúÑñ\s]/g, '');
+				  }}
                 />
 				{formErrors.nombreArrendador && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -953,6 +848,10 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="telfArrendador"
                   onChange={handleFormChange}
+				  onInput={e => {
+					e.target.value = e.target.value.replace(/[^0-9]/g, '');
+				  }}
+				  maxLength={10}
                 />
 				{formErrors.telfArrendador && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -962,6 +861,7 @@ export function DatosCliente() {
               </div>
 
               {/* Celular Arrendador */}
+			  {/* *** */}
               <div className="col-span-1">
                 <label className="block text-sm font-medium">
                   Celular Arrendador
@@ -971,6 +871,9 @@ export function DatosCliente() {
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
                   name="celularArrendador"
                   onChange={handleFormChange}
+				  value={formData.celularArrendador}
+				  maxLength={10}
+				  pattern="[0-9]{10}"
                 />
 				{formErrors.celularArrendador && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -1035,6 +938,10 @@ export function DatosCliente() {
                   name="valorInmueble"
                   onChange={handleFormChange}
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+				  onInput={e => {
+					e.target.value = e.target.value.replace(/[^0-9]/g, '');
+				  }}
+				  maxLength={10}
                 />
 				{formErrors.ciudadInmueble && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
