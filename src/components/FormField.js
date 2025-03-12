@@ -6,7 +6,7 @@ import { useSnackbar } from "notistack";
 import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPModal';
 import { APIURL } from "../configApi/apiConfig";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const FormField = ({
   label,
   name,
@@ -20,6 +20,7 @@ const FormField = ({
   setPreviewUrl,
   ...props
 }) => {
+
   const { enqueueSnackbar } = useSnackbar();
 
   if (hidden) {
@@ -27,7 +28,7 @@ const FormField = ({
   }
 
   const handleFileChange = (event) => {
-	console.log(event.target.files);
+
     try {
       const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
       const file = event.target.files ? event.target.files[0] : null;
@@ -219,6 +220,7 @@ const ReusableForm = ({
   columns = 1,
   formStatus,
 }) => {
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -318,9 +320,10 @@ const handleOtpVerification = async (isVerified) => {
 	  setIsSubmitting(true);
 	  try {
 		await onSubmit(formik.values);
-		console.log("Datos enviados:", formik.values);
-	
+	  
 		formik.resetForm();
+    navigate("/ListadoSolicitud", { replace: true });
+
 		setPreviewUrl(null);
 	  } catch (error) {
 		enqueueSnackbar("Error al enviar el formulario", { variant: "error" });

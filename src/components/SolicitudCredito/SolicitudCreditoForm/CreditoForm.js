@@ -23,7 +23,7 @@ export default function CreditoForm() {
   const [ urlCloudstorage, setUrlCloudstorage] = useState(null);
   const [dataRecibir, setDataRecibir] = useState(null);
   const fetchBodega = async () => {
-    const userId = userData.idUsuario;
+    const userId = userData?.idUsuario;
     const idTipoFactura = 43;
     const fecha = new Date().toISOString();
     const recibeConsignacion = true;
@@ -263,10 +263,10 @@ export default function CreditoForm() {
         .required("Revisa el apellido debe tener al menos 2 caracteres"),
       ApellidoMaterno: Yup.string()
         .trim()
-        .min(3, "Debe tener al menos 3 caracteres")
-        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
-        .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-        .required("Revisa el apellido debe tener al menos 2 caracteres"),
+        .min(3, "Debe tener al menos 3 caracteres o dejar en blanco")
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios"),
+        // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
+        // .required("Revisa el apellido debe tener al menos 2 caracteres"),
       PrimerNombre: Yup.string()
         .trim()
         .min(3, "Debe tener al menos 3 caracteres")
