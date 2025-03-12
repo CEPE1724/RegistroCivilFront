@@ -1,9 +1,10 @@
-import { useState, useEffect ,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
-
+import { APIURL } from '../../configApi/apiConfig'
+import uploadFile from '../../hooks/uploadFile'
 export function Documental({
   id,
   NumeroSolicitud,
@@ -82,7 +83,7 @@ export function Documental({
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         setShowFileInput(false);
         setView(false);
-        
+
       }
     };
 
@@ -171,12 +172,12 @@ export function Documental({
     });
   };
 
- 
+
   const toggleView = () => {
     setView(!view);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validar archivos y observación por cada sección
@@ -197,6 +198,30 @@ export function Documental({
       });
       setShowFileInput(false);
     }
+
+    // Subir archivos a la API
+    console.log("files[activeTab]", files[activeTab]);
+  console.log("files[activeTab][0]", files[activeTab][0]);
+    const response = await uploadFile(
+      files[activeTab][0],
+      clientInfo.almacen,
+      clientInfo.cedula,
+      clientInfo.NumeroSolicitud
+    );
+
+    if (response) {
+      console.log("response", response.url);
+      //abrir la url en el navegador
+      window.open(response.url, "_blank");
+      enqueueSnackbar("Archivo subido correctamente.", {
+        variant: "success",
+      });
+    } else {
+      enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", {
+        variant: "error",
+      });
+    }
+
   };
 
   const handleSubmitUpFile = (e) => {
@@ -238,9 +263,8 @@ export function Documental({
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`w-64 bg-[#2d3689] text-white ${
-          isMenuOpen ? "block" : "hidden"
-        } md:block transition-all duration-300 ease-in-out`}
+        className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"
+          } md:block transition-all duration-300 ease-in-out`}
       >
         <div className="p-6">
           <h2 className="text-2xl font-bold text-gray-100">Menú</h2>
@@ -288,9 +312,8 @@ export function Documental({
                     <a
                       href="#"
                       onClick={() => setActiveTab(item)}
-                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
-                        activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
-                      }`}
+                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
+                        }`}
                     >
                       {item}
                       {fileCount > 0 && (
@@ -319,11 +342,10 @@ export function Documental({
                       <a
                         href="#"
                         onClick={() => setActiveTab(item)}
-                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
-                          activeTab === item
+                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item
                             ? "bg-gray-700"
                             : "hover:bg-gray-600"
-                        }`}
+                          }`}
                       >
                         {item}
                         {fileCount > 0 && (
@@ -467,77 +489,77 @@ export function Documental({
           </div>
 
           <div className="flex justify-center items-center mt-6 w-full">
-  <button
-    onClick={handleSubmit}
-    className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
-  >
-    Enviar archivos
-  </button>
-
- 
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+            >
+              Enviar archivos
+            </button>
 
 
-  <div className="absolute right-11">
 
-<button
-  onClick={() => setShowFileInput(true)}
-  class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
->
-  <svg
-    class="w-7 h-7 fill-white delay-50 duration-200 group-hover/button:-translate-y-12 sm:w-20 sm:h-20"
-    stroke="#000000" 
-    stroke-width="2"
-    viewBox="-3.84 -3.84 31.68 31.68"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    transform="rotate(0)"
-  >
-    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-    <g id="SVGRepo_iconCarrier">
-      <path
-        opacity="0.1"
-        d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
-        fill="#f7f7f7"
-      ></path>
-      <path
-        d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linejoin="round"
-      ></path>
-      <path
-        d="M12 11L12 16"
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      ></path>
-      <path
-        d="M14.5 13.5L9.5 13.5"
-        stroke="#000000" 
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      ></path>
-    </g>
-  </svg>
-</button>
-  </div>
-</div>
+
+            <div className="absolute right-11">
+
+              <button
+                onClick={() => setShowFileInput(true)}
+                class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
+              >
+                <svg
+                  class="w-7 h-7 fill-white delay-50 duration-200 group-hover/button:-translate-y-12 sm:w-20 sm:h-20"
+                  stroke="#000000"
+                  stroke-width="2"
+                  viewBox="-3.84 -3.84 31.68 31.68"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  transform="rotate(0)"
+                >
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <path
+                      opacity="0.1"
+                      d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
+                      fill="#f7f7f7"
+                    ></path>
+                    <path
+                      d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linejoin="round"
+                    ></path>
+                    <path
+                      d="M12 11L12 16"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                    <path
+                      d="M14.5 13.5L9.5 13.5"
+                      stroke="#000000"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    ></path>
+                  </g>
+                </svg>
+              </button>
+            </div>
+          </div>
 
         </div>
 
 
         {/* Modal de subir archivo */}
         {showFileInput && (
-          <div 
-          ref={modalRef}
-          className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
-            <div 
-            className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
-              <div 
-              className="flex justify-between items-center mb-4">
+          <div
+            ref={modalRef}
+            className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
+            <div
+              className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+              <div
+                className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold text-gray-800">
                   Subir Nuevo Documento
                 </h2>
@@ -585,14 +607,14 @@ export function Documental({
       {/* Vista previa */}
       {view && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div 
-          ref={modalRef}
-          className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative">
+          <div
+            ref={modalRef}
+            className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative">
             <button
               onClick={toggleView}
               className="absolute top-2 right-2 text-lg"
             >
-               ❌
+              ❌
             </button>
             <iframe
               src={filePreviews[activeTab] && filePreviews[activeTab][0]}
@@ -600,11 +622,11 @@ export function Documental({
               title="Vista previa del archivo"
             ></iframe>
           </div>
-          
+
         </div>
       )}
 
-      
+
     </div>
   );
 }
