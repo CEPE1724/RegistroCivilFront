@@ -126,9 +126,7 @@ export function Referencias() {
     useEffect(() => {
         if (formData.provincia) {
             fetchDatoCanton(formData.provincia);
-        } else {
-            setDatoCanton([]);  // Limpiar cantones si no hay provincia
-        }
+        } 
     }, [formData.provincia]);  // Dependencia
 
     const fetchDatoCanton = async (id) => {
@@ -145,11 +143,11 @@ export function Referencias() {
             );
             setDatoCanton(response.data);
             //objeto para mapear IDs a textos
-            const idToTextMapCanton = {};
+            const newMapping = { ...idToTextMapCanton };
             response.data.forEach(item => {
-                idToTextMapCanton[item.idCanton] = item.Nombre;
+                newMapping[item.idCanton] = item.Nombre;
             });
-            setIdToTextMapCanton(idToTextMapCanton); // Guardar el objeto en el estado
+            setIdToTextMapCanton(newMapping); // Guardar el objeto en el estado
         } catch (error) {
             enqueueSnackbar("Error fetching Dato: " + error.message, {
                 variant: "error",
@@ -299,7 +297,7 @@ export function Referencias() {
             return;
         }
         if (formData.canton === "") {
-            enqueueSnackbar("Canton es requerido", { variant: "error" });
+            enqueueSnackbar("Cantón es requerido", { variant: "error" });
             return;
         }
         if (formData.celular.length < 10) {
@@ -311,9 +309,26 @@ export function Referencias() {
             enqueueSnackbar("El celular ya existe", { variant: "error" });
             return;
         }
-        setTablaDatos([...tablaDatos, formData]);
+        const newReferencia = { ...formData };
+        setTablaDatos(prevDatos => [...prevDatos, newReferencia]);
+        const currentCantonId = formData.canton;
+        const currentProvinciaId = formData.provincia;
+        setFormData({
+            parentesco: "",
+            apellidoPaterno: "",
+            primerNombre: "",
+            segundoNombre: "",
+            provincia: "",
+            canton: "",
+            celular: "",
+        });
+        if (currentProvinciaId) {
+            fetchDatoCanton(currentProvinciaId);
+        }
+
+        //setTablaDatos([...tablaDatos, formData]);
         enqueueSnackbar("Datos Guardados", { variant: "success" });
-        handleLimpiar(); // Limpia el formulario para agregar otro registro
+        //handleLimpiar();  Limpia el formulario para agregar otro registro
     };
 
     const handleOpenDialog = (index) => {
@@ -482,7 +497,7 @@ export function Referencias() {
                 </div>
                 {/* Canton */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Canton(*)</label>
+                    <label className="text-lightGrey text-xs mb-2">Cantón(*)</label>
                     <select
                         name="canton"
                         className="p-2 border rounded"
@@ -534,7 +549,7 @@ export function Referencias() {
                                 <th className="px-4 py-2 text-center font-bold">Primer Nombre</th>
                                 <th className="px-4 py-2 text-center font-bold">Segundo Nombre</th>
                                 <th className="px-4 py-2 text-center font-bold">Provincia</th>
-                                <th className="px-4 py-2 text-center font-bold">Canton</th>
+                                <th className="px-4 py-2 text-center font-bold">Cantón</th>
                                 <th className="px-4 py-2 text-center font-bold">Celular</th>
                                 <th className="px-4 py-2 text-center font-bold">....</th>
                             </tr>
