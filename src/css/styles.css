@@ -1437,11 +1437,6 @@ body {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-.translate-x-0 {
-  --tw-translate-x: 0px;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
 .\!scale-\[1\.02\] {
   --tw-scale-x: 1.02 !important;
   --tw-scale-y: 1.02 !important;
@@ -2060,11 +2055,6 @@ body {
   background-color: rgb(34 197 94 / var(--tw-bg-opacity));
 }
 
-.bg-\[\#1E2A47\] {
-  --tw-bg-opacity: 1;
-  background-color: rgb(30 42 71 / var(--tw-bg-opacity));
-}
-
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
@@ -2247,11 +2237,6 @@ body {
 .py-\[0\.33rem\] {
   padding-top: 0.33rem;
   padding-bottom: 0.33rem;
-}
-
-.px-5 {
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
 }
 
 .pb-2 {

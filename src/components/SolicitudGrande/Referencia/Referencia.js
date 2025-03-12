@@ -29,7 +29,6 @@ import EventIcon from "@mui/icons-material/Event";
 export function Referencias() {
 
     const { enqueueSnackbar } = useSnackbar();
-
     const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
     const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
     const [datoCanton, setDatoCanton] = useState([]);          //estado cantones
@@ -51,6 +50,10 @@ export function Referencias() {
         provincia: "",
         canton: "",
         celular: "",
+    });
+
+    //almacenar datos modal
+    const [formDataModal, setFormDataModal] = useState({
         contactoEfectivo: "",
         estado: "",
         observaciones: "",
@@ -123,9 +126,7 @@ export function Referencias() {
     useEffect(() => {
         if (formData.provincia) {
             fetchDatoCanton(formData.provincia);
-        } else {
-            setDatoCanton([]);  // Limpiar cantones si no hay provincia
-        }
+        } 
     }, [formData.provincia]);  // Dependencia
 
     const fetchDatoCanton = async (id) => {
@@ -142,11 +143,11 @@ export function Referencias() {
             );
             setDatoCanton(response.data);
             //objeto para mapear IDs a textos
-            const idToTextMapCanton = {};
+            const newMapping = { ...idToTextMapCanton };
             response.data.forEach(item => {
-                idToTextMapCanton[item.idCanton] = item.Nombre;
+                newMapping[item.idCanton] = item.Nombre;
             });
-            setIdToTextMapCanton(idToTextMapCanton); // Guardar el objeto en el estado
+            setIdToTextMapCanton(newMapping); // Guardar el objeto en el estado
         } catch (error) {
             enqueueSnackbar("Error fetching Dato: " + error.message, {
                 variant: "error",
@@ -185,6 +186,31 @@ export function Referencias() {
         }
     }
 
+    //api enviar datos modal
+
+    const enviarDatosModal = async (datos) => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.post_creVerificacionTelefonica(); // URL de la API
+
+            const response = await axios.post(url, datos, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status == 201) {
+                enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
+            } else {
+                enqueueSnackbar("Error al enviar los datos 1", { variant: "error" });
+            }
+        } catch (error) {
+            console.error("Error al enviar los datos 2:", error.response?.data);
+            enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
+        }
+    };
+
 
     //almacenar datos tabla
     const [tablaDatos, setTablaDatos] = useState([]);
@@ -209,17 +235,26 @@ export function Referencias() {
             // Solo números
             const filteredValue = value.replace(/\D/g, ''); // Eliminar caracteres no numéricos
             setFormData({ ...formData, [name]: filteredValue });
-        } else if (name === "observaciones") {
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+
+    const handleChangeModal = (e) => {
+        const { name, value } = e.target;
+
+        if (name === "observaciones") {
             // Eliminar espacios en blanco al inicio, pero permitirlos hacia la derecha
             const trimmedValue = value.trimStart();
-            setFormData({ ...formData, [name]: trimmedValue });
+            setFormDataModal({ ...formDataModal, [name]: trimmedValue });
         } else if (name === "contactoEfectivo") {
             // Eliminar espacios al inicio y permitir solo letras 
             const trimmedValue = value.trimStart(); // Elimina espacios al inicio
             const filteredValue = trimmedValue.replace(/[^A-Za-z\s]/g, ""); // Permite letras y espacios
-            setFormData({ ...formData, [name]: filteredValue });
-        } else {
-            setFormData({ ...formData, [name]: value });
+            setFormDataModal({ ...formDataModal, [name]: filteredValue });
+        }
+        else {
+            setFormDataModal({ ...formDataModal, [name]: value });
         }
     };
 
@@ -232,6 +267,11 @@ export function Referencias() {
             provincia: "",
             canton: "",
             celular: "",
+        });
+    };
+
+    const handleLimpiarModal = () => {
+        setFormDataModal({
             contactoEfectivo: "",
             estado: "",
             observaciones: "",
@@ -257,17 +297,38 @@ export function Referencias() {
             return;
         }
         if (formData.canton === "") {
-            enqueueSnackbar("Canton es requerido", { variant: "error" });
+            enqueueSnackbar("Cantón es requerido", { variant: "error" });
             return;
         }
         if (formData.celular.length < 10) {
             enqueueSnackbar("Celular debe tener 10 dígitos", { variant: "error" });
             return;
         }
-        setTablaDatos([...tablaDatos, formData]);
+        const celularExistente = tablaDatos.some((row) => row.celular === formData.celular);
+        if (celularExistente) {
+            enqueueSnackbar("El celular ya existe", { variant: "error" });
+            return;
+        }
+        const newReferencia = { ...formData };
+        setTablaDatos(prevDatos => [...prevDatos, newReferencia]);
+        const currentCantonId = formData.canton;
+        const currentProvinciaId = formData.provincia;
+        setFormData({
+            parentesco: "",
+            apellidoPaterno: "",
+            primerNombre: "",
+            segundoNombre: "",
+            provincia: "",
+            canton: "",
+            celular: "",
+        });
+        if (currentProvinciaId) {
+            fetchDatoCanton(currentProvinciaId);
+        }
+
+        //setTablaDatos([...tablaDatos, formData]);
         enqueueSnackbar("Datos Guardados", { variant: "success" });
-        // Limpiar el formulario después de agregar
-        handleLimpiar();
+        //handleLimpiar();  Limpia el formulario para agregar otro registro
     };
 
     const handleOpenDialog = (index) => {
@@ -283,34 +344,74 @@ export function Referencias() {
     // Obtener fecha y hora actual
     const getCurrentDateTime = () => {
         const now = new Date();
-        const date = now.toLocaleDateString(); // Fecha en formato local
-        const time = now.toLocaleTimeString(); // Hora en formato local
-        return `${date} ${time}`;
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // Formato YYYY-MM-DD HH:mm:ss
     };
 
     const handleGuardarModal = () => {
-        if (!formData.contactoEfectivo) {
+        if (formDataModal.contactoEfectivo.length < 5) {
             enqueueSnackbar("Contacto Efectivo es requerido", { variant: "error" });
             return;
         }
-        if (!formData.estado) {
+        if (!formDataModal.estado) {
             enqueueSnackbar("Estado es requerido", { variant: "error" });
             return;
         }
-        if (!formData.observaciones) {
-            enqueueSnackbar("Observaciones son requeridas", { variant: "error" });
+        if (formDataModal.observaciones.length < 10) {
+            enqueueSnackbar("Observaciones son requeridas (Mínimo 10 caracteres)", { variant: "error" });
             return;
         }
+        //objeto de datos que se enviará a la API
+        const datosParaEnviar = {
+            Fecha: getCurrentDateTime(), // Fecha 
+            Telefono: selectedRow.celular, // Celular 
+            Contacto: formDataModal.contactoEfectivo, // Contacto efectivo
+            idParentesco: Number(selectedRow.parentesco), // parentesco/referencia
+            idEstadoGestns: Number(formDataModal.estado), // estado
+            Observaciones: formDataModal.observaciones, // Observaciones
+            ClienteGarante: false, // Valor por defecto
+            Origen: 1, // Valor por defecto
+            idCre_Solicitud: 1, // Valor por defecto 
+            Estado: true, // Valor por defecto
+            NotasDelSistema: "Notas del sistema", // Valor por defecto
+            Usuario: "Usuario", // Valor por defecto
+            Indice: 1, // Valor por defecto
+            Web: 1, // Valor por defecto
+        };
+        console.log("Datos a enviar:", datosParaEnviar);
+
+        // Enviar los datos a la API
+        enviarDatosModal(datosParaEnviar);
+
+        // Guardar el registro para mostrar los datos en la tabla del modal
+        const nuevoRegistro = {
+            fecha: datosParaEnviar.Fecha,
+            celularMod: datosParaEnviar.Telefono,
+            contactoEfectivo: datosParaEnviar.Contacto,
+            referencia: idToTextMap[selectedRow.parentesco],
+            estado: datosParaEnviar.idEstadoGestns,
+            observaciones: formDataModal.observaciones,
+        };
+        /*
         const nuevoRegistro = {
             fecha: getCurrentDateTime(),
+            celularMod: selectedRow.celular,
             contactoEfectivo: formData.contactoEfectivo,
             referencia: idToTextMap[selectedRow.parentesco],
+            referenciaId: selectedRow.parentesco,
             estado: formData.estado,
             observaciones: formData.observaciones,
-        };
+        }; */
+        console.log(nuevoRegistro);
         setTablaModal([...tablaModal, nuevoRegistro]);
         enqueueSnackbar("Registro Guardado", { variant: "success" });
-        handleLimpiar();
+        handleLimpiarModal();
     };
 
     return (
@@ -396,7 +497,7 @@ export function Referencias() {
                 </div>
                 {/* Canton */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Canton(*)</label>
+                    <label className="text-lightGrey text-xs mb-2">Cantón(*)</label>
                     <select
                         name="canton"
                         className="p-2 border rounded"
@@ -448,7 +549,7 @@ export function Referencias() {
                                 <th className="px-4 py-2 text-center font-bold">Primer Nombre</th>
                                 <th className="px-4 py-2 text-center font-bold">Segundo Nombre</th>
                                 <th className="px-4 py-2 text-center font-bold">Provincia</th>
-                                <th className="px-4 py-2 text-center font-bold">Canton</th>
+                                <th className="px-4 py-2 text-center font-bold">Cantón</th>
                                 <th className="px-4 py-2 text-center font-bold">Celular</th>
                                 <th className="px-4 py-2 text-center font-bold">....</th>
                             </tr>
@@ -533,8 +634,8 @@ export function Referencias() {
                                             <select
                                                 name="estado"
                                                 className="p-2 border rounded"
-                                                value={formData.estado}
-                                                onChange={handleChange}
+                                                value={formDataModal.estado}
+                                                onChange={handleChangeModal}
                                             >
                                                 <option value="">Seleccione una opción</option>
                                                 {datoEstado.map((opcion) => (
@@ -553,8 +654,8 @@ export function Referencias() {
                                                 autocomplete="off"
                                                 placeholder="Contacto Efectivo"
                                                 className="p-2 border rounded"
-                                                value={formData.contactoEfectivo}
-                                                onChange={handleChange}
+                                                value={formDataModal.contactoEfectivo}
+                                                onChange={handleChangeModal}
                                                 pattern="[A-Za-z]+"
                                                 title="Solo se permiten letras"
                                             />
@@ -570,8 +671,8 @@ export function Referencias() {
                                     rows="3"
                                     placeholder="Ingrese observaciones"
                                     className="w-full p-2 border rounded"
-                                    value={formData.observaciones}
-                                    onChange={handleChange}
+                                    value={formDataModal.observaciones}
+                                    onChange={handleChangeModal}
                                 ></textarea>
                             </div>
 
@@ -583,6 +684,7 @@ export function Referencias() {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell>Fecha</TableCell>
+                                                <TableCell>Celular</TableCell>
                                                 <TableCell>Contacto</TableCell>
                                                 <TableCell>Referencia</TableCell>
                                                 <TableCell>Estado</TableCell>
@@ -594,6 +696,7 @@ export function Referencias() {
                                             {tablaModal.map((registro, index) => (
                                                 <TableRow key={index}>
                                                     <TableCell>{registro.fecha}</TableCell>
+                                                    <TableCell>{registro.celularMod}</TableCell>
                                                     <TableCell>{registro.contactoEfectivo}</TableCell>
                                                     <TableCell>{registro.referencia}</TableCell>
                                                     <TableCell>{idToTextMapEstado[registro.estado]}</TableCell>
