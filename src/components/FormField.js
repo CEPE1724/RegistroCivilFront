@@ -1,9 +1,12 @@
+// fromfield
+
 import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPModal';
 import { APIURL } from "../configApi/apiConfig";
 import axios from "axios";
+
 const FormField = ({
   label,
   name,
@@ -24,6 +27,7 @@ const FormField = ({
   }
 
   const handleFileChange = (event) => {
+	console.log(event.target.files);
     try {
       const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
       const file = event.target.files ? event.target.files[0] : null;
@@ -145,7 +149,7 @@ const FormField = ({
           className="block bg-[#F9FAFB] w-64 max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
           {...props}
         >
-          <option value="" disabled>
+          <option value="">
             Selecciona una opción
           </option>
           {options.map((option) => (
@@ -233,22 +237,24 @@ const ReusableForm = ({
     initialValues: initialValues,
     validationSchema,
     onSubmit: async (values) => {
-      if (isOtpVerified) {
-        setIsSubmitting(true);
-        try {
-          await onSubmit(values);
-        } catch (error) {
-          enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
-          console.error("Error en envío:", error);
-        } finally {
-          setIsSubmitting(false);
-        }
-      } else {
+		console.log(values);
+    //   if (isOtpVerified) {
+        // setIsSubmitting(true);
+        // try {
+        //   await onSubmit(values);
+		//   console.log(values);
+        // } catch (error) {
+        //   enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
+        //   console.error("Error en envío:", error);
+        // } finally {
+        //   setIsSubmitting(false);
+        // }
+    //   } else {
         // Si el OTP no es verificado, muestra el modal
 
        requestOtp();
         //setIsOtpModalOpen(true);
-      }
+    //   }
     },
   });
 
@@ -289,15 +295,10 @@ const ReusableForm = ({
     }
   };
 
-  // Reset del formulario cuando status es success
-  useEffect(() => {
-    if (formStatus === "success") {
-      setTimeout(() => {
-        formik.resetForm();
-        setPreviewUrl(null);
-      }, 2000);
-    }
-  }, [formStatus]);
+//   Reset del formulario cuando status es success
+//   useEffect(() => {
+//     formik.resetForm();
+//   }, [isOtpVerified]);
 
   const handleCancel = () => {
     setIsCanceling(true);
@@ -307,9 +308,29 @@ const ReusableForm = ({
     setTimeout(() => setIsCanceling(false), 1000);
   };
 
-  const handleOtpVerification = (isVerified) => {
-    setIsOtpVerified(isVerified);
-    setIsOtpModalOpen(false); // Cerrar el modal después de la verificación del OTP
+//   const handleOtpVerification = (isVerified) => {
+//     setIsOtpVerified(isVerified);
+//     setIsOtpModalOpen(false); // Cerrar el modal después de la verificación del OTP
+//   };
+
+const handleOtpVerification = async (isVerified) => {
+	if (isVerified) {
+	  setIsSubmitting(true);
+	  try {
+		await onSubmit(formik.values);
+		console.log("Datos enviados:", formik.values);
+	
+		formik.resetForm();
+		setPreviewUrl(null);
+	  } catch (error) {
+		enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
+		console.error("Error en envío:", error);
+	  } finally {
+		setIsSubmitting(false);
+	  }
+	}
+	setIsOtpModalOpen(false);
+	setIsOtpVerified(isVerified);
   };
 
   // Separar el campo de archivo y otros campos
@@ -321,10 +342,13 @@ const ReusableForm = ({
       className="w-full bg-white p-4 rounded-lg grid"
       onSubmit={(e) => {
         e.preventDefault();
-
         // Validar y mostrar el primer error si hay alguno
         formik.validateForm().then(errors => {
           if (Object.keys(errors).length > 0) {
+			formik.setTouched(
+				Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+				false
+			  );
             showFirstError();
           } else {
             formik.handleSubmit(e);
@@ -448,12 +472,12 @@ const ReusableForm = ({
           </button>
         </div>
       )}
-      <OTPModal
+      {<OTPModal
         isOpen={isOtpModalOpen}
         onClose={() => setIsOtpModalOpen(false)}
         onVerifyOtp={handleOtpVerification}
         phoneNumberOTP = {formik.values.Celular}
-      />
+      />}
     </form>
   );
 };

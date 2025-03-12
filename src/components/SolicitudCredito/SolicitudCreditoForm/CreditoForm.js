@@ -144,7 +144,7 @@ export default function CreditoForm() {
     idCre_Tiempo: null,
     bAfiliado: false,
     bTieneRuc: false,
-    Foto: null,
+    Foto: "",
     bTerminosYCondiciones: false,
     bPoliticas: false,
     idProductos: null,
@@ -223,7 +223,7 @@ export default function CreditoForm() {
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
 
-    { label: "Subir foto", name: "Foto", type: "file" , required: true},
+    { label: "Subir foto", name: "Foto", type: "file"},
     
 
 
@@ -275,10 +275,10 @@ export default function CreditoForm() {
         .required("Revisa el nombre debe tener al menos 2 caracteres"),
       SegundoNombre: Yup.string()
         .trim()
-        .min(3, "Debe tener al menos 3 caracteres")
-        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios")
-        .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-        .required("Revisa el nombre debe tener al menos 2 caracteres"),
+        .min(3, "Debe tener al menos 3 caracteres o dejar en blanco")
+        .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios"),
+        // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== ""),
+        // .required("Revisa el nombre debe tener al menos 2 caracteres"),
       Celular: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
         .required("El celular debe tener 10 dígitos")
