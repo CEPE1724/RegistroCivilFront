@@ -726,17 +726,18 @@ export function DatosCliente() {
               </div>
 
               {/* Referencia Ubicacion */}
-              <div className="col-span-1">
+			  <div className="col-span-1">
                 <label className="block text-sm font-medium">
-                  Referencia Ubicacion
+				Referencia Ubicacion
                 </label>
-                <input
-                  type="text"
+                <textarea
                   className="block bg-[#F9FAFB] w-full max-w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
+                  rows="4"
+                  placeholder="Ingresa una referecia de ubicacion"
                   name="referenciaUbicacion"
                   onChange={handleFormChange}
 				  value={formData.referenciaUbicacion}
-                />
+                ></textarea>
 				{formErrors.referenciaUbicacion && (
                   <p className="mt-1 text-sm text-red-500 border-red-500">
                     {formErrors.referenciaUbicacion}

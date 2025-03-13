@@ -20,6 +20,7 @@ import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
 import SolicitudGrande from "./pages/SolicitudGrande";
 import Seguridad from "./pages/Seguridad";
 import { useAuth } from "./components/AuthContext/AuthContext";
+import RepositorioCreditos from "./pages/RepositorioCreditos";
 
 function App() {
 
@@ -61,6 +62,8 @@ function App() {
         <Route path="/solicitudgrande" element={<PrivateRouteWrapper title="SolicitudGrande" element={<SolicitudGrande />} />} />
         <Route path="/ListadoSolicitud" element={<PrivateRouteWrapper title="Tabla" element={<ListaSolicitud />} />} />
         <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
+
+		<Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
       </Routes>
 
       {isSessionExpired && (

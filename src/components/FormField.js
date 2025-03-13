@@ -1,5 +1,3 @@
-// fromfield
-
 import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
@@ -7,6 +5,7 @@ import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPMod
 import { APIURL } from "../configApi/apiConfig";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
 const FormField = ({
   label,
   name,

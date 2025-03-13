@@ -69,7 +69,10 @@ export function SeccionB() {
 
   return (
     <div className="py-2 w-full">
-      <form className="grid gap-4 grid-cols-1 md:grid-cols-4" onSubmit={handleSubmit}>
+      <form
+        className="grid gap-4 grid-cols-1 md:grid-cols-4"
+        onSubmit={handleSubmit}
+      >
         <div className="col-span-1">
           <label className="block text-sm font-medium">Empresa</label>
           <input
@@ -79,7 +82,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.empresa && <span className="text-red-500 text-xs">{errors.empresa}</span>}
+          {errors.empresa && (
+            <span className="text-red-500 text-xs">{errors.empresa}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -92,7 +97,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opción">Selecciona una opción</option>
           </select>
-          {errors.tipoEmpresa && <span className="text-red-500 text-xs">{errors.tipoEmpresa}</span>}
+          {errors.tipoEmpresa && (
+            <span className="text-red-500 text-xs">{errors.tipoEmpresa}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -104,7 +111,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.fechaIngreso && <span className="text-red-500 text-xs">{errors.fechaIngreso}</span>}
+          {errors.fechaIngreso && (
+            <span className="text-red-500 text-xs">{errors.fechaIngreso}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -116,7 +125,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.ingresos && <span className="text-red-500 text-xs">{errors.ingresos}</span>}
+          {errors.ingresos && (
+            <span className="text-red-500 text-xs">{errors.ingresos}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -128,7 +139,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.gastos && <span className="text-red-500 text-xs">{errors.gastos}</span>}
+          {errors.gastos && (
+            <span className="text-red-500 text-xs">{errors.gastos}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -141,7 +154,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.tipoContrato && <span className="text-red-500 text-xs">{errors.tipoContrato}</span>}
+          {errors.tipoContrato && (
+            <span className="text-red-500 text-xs">{errors.tipoContrato}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -154,7 +169,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.tipoSueldo && <span className="text-red-500 text-xs">{errors.tipoSueldo}</span>}
+          {errors.tipoSueldo && (
+            <span className="text-red-500 text-xs">{errors.tipoSueldo}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -166,7 +183,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.departamento && <span className="text-red-500 text-xs">{errors.departamento}</span>}
+          {errors.departamento && (
+            <span className="text-red-500 text-xs">{errors.departamento}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -179,7 +198,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.cargo && <span className="text-red-500 text-xs">{errors.cargo}</span>}
+          {errors.cargo && (
+            <span className="text-red-500 text-xs">{errors.cargo}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -191,20 +212,26 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.diasPago && <span className="text-red-500 text-xs">{errors.diasPago}</span>}
+          {errors.diasPago && (
+            <span className="text-red-500 text-xs">{errors.diasPago}</span>
+          )}
         </div>
 
-        <div className="col-span-1">
-          <label className="block text-sm font-medium">Afiliado IESS</label>
-          <input
-            type="checkbox"
-            name="afilado"
-            checked={formData.afilado}
-            onChange={handleInputChange}
-            className="block solcitudgrande-style"
-          />
-          {errors.afilado && <span className="text-red-500 text-xs">{errors.afilado}</span>}
-        </div>
+        <div className="col-span-1 flex flex-col items-center">
+  <label className="text-sm font-medium mb-2">Afiliado IESS</label>
+  <label className="flex items-center space-x-2 cursor-pointer">
+    <input
+      type="checkbox"
+      name="afilado"
+      checked={formData.afilado}
+      onChange={handleInputChange}
+      className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+    />
+    <span className="text-sm">Sí</span>
+  </label>
+  {errors.afilado && <span className="text-red-500 text-xs mt-1">{errors.afilado}</span>}
+</div>
+
 
         <div className="col-span-1">
           <label className="block text-sm font-medium">Provincia</label>
@@ -216,7 +243,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.provincia && <span className="text-red-500 text-xs">{errors.provincia}</span>}
+          {errors.provincia && (
+            <span className="text-red-500 text-xs">{errors.provincia}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -229,7 +258,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.canton && <span className="text-red-500 text-xs">{errors.canton}</span>}
+          {errors.canton && (
+            <span className="text-red-500 text-xs">{errors.canton}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -242,7 +273,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.parroquia && <span className="text-red-500 text-xs">{errors.parroquia}</span>}
+          {errors.parroquia && (
+            <span className="text-red-500 text-xs">{errors.parroquia}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -255,7 +288,9 @@ export function SeccionB() {
           >
             <option value="Selecciona una opcion">Selecciona una opcion</option>
           </select>
-          {errors.barrio && <span className="text-red-500 text-xs">{errors.barrio}</span>}
+          {errors.barrio && (
+            <span className="text-red-500 text-xs">{errors.barrio}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -267,7 +302,11 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.callePrincipal && <span className="text-red-500 text-xs">{errors.callePrincipal}</span>}
+          {errors.callePrincipal && (
+            <span className="text-red-500 text-xs">
+              {errors.callePrincipal}
+            </span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -279,7 +318,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.numeroCasa && <span className="text-red-500 text-xs">{errors.numeroCasa}</span>}
+          {errors.numeroCasa && (
+            <span className="text-red-500 text-xs">{errors.numeroCasa}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -291,7 +332,11 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.calleSecundaria && <span className="text-red-500 text-xs">{errors.calleSecundaria}</span>}
+          {errors.calleSecundaria && (
+            <span className="text-red-500 text-xs">
+              {errors.calleSecundaria}
+            </span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -307,12 +352,14 @@ export function SeccionB() {
             <button
               type="button"
               onClick={() => handleVerify("telefono")}
-              className="w-full sm:w-14 h-10 sm:h-14 mt-1 sm:mt-0 bg-blue-500 text-white rounded-md flex justify-center items-center shadow-sm p-2"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
             >
               <span className="text-xs">verificar</span>
             </button>
           </div>
-          {errors.telefono && <span className="text-red-500 text-xs">{errors.telefono}</span>}
+          {errors.telefono && (
+            <span className="text-red-500 text-xs">{errors.telefono}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -324,7 +371,9 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.ext && <span className="text-red-500 text-xs">{errors.ext}</span>}
+          {errors.ext && (
+            <span className="text-red-500 text-xs">{errors.ext}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -340,16 +389,20 @@ export function SeccionB() {
             <button
               type="button"
               onClick={() => handleVerify("celular")}
-              className="w-full sm:w-14 h-10 sm:h-14 mt-1 sm:mt-0 bg-blue-500 text-white rounded-md flex justify-center items-center shadow-sm p-2"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
             >
               <span className="text-xs">verificar</span>
             </button>
           </div>
-          {errors.celular && <span className="text-red-500 text-xs">{errors.celular}</span>}
+          {errors.celular && (
+            <span className="text-red-500 text-xs">{errors.celular}</span>
+          )}
         </div>
 
         <div className="col-span-1">
-          <label className="block text-sm font-medium">Referencia Ubicacion</label>
+          <label className="block text-sm font-medium">
+            Referencia Ubicacion
+          </label>
           <input
             type="text"
             name="referenciaUbicacion"
@@ -357,11 +410,18 @@ export function SeccionB() {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           />
-          {errors.referenciaUbicacion && <span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>}
+          {errors.referenciaUbicacion && (
+            <span className="text-red-500 text-xs">
+              {errors.referenciaUbicacion}
+            </span>
+          )}
         </div>
 
         <div className="col-span-1 md:col-span-4">
-          <button type="submit" className="mt-4 bg-blue-500 text-white p-2 rounded">
+          <button
+            type="submit"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+          >
             Enviar
           </button>
         </div>
