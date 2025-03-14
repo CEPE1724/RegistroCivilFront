@@ -19,6 +19,8 @@ import VerificacionTerrena from "./pages/VerificacionTerrena";
 import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
 import SolicitudGrande from "./pages/SolicitudGrande";
 import Seguridad from "./pages/Seguridad";
+import TelefonicaListSol from "./pages/TelefonicaListSol";
+import GestorDocumentosCli from "./pages/GestorDocumentos";
 import { useAuth } from "./components/AuthContext/AuthContext";
 
 function App() {
@@ -61,6 +63,8 @@ function App() {
         <Route path="/solicitudgrande" element={<PrivateRouteWrapper title="SolicitudGrande" element={<SolicitudGrande />} />} />
         <Route path="/ListadoSolicitud" element={<PrivateRouteWrapper title="Tabla" element={<ListaSolicitud />} />} />
         <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
+        <Route path="/telefonicaList" element={<PrivateRouteWrapper title="Telefonica Lista Solicitud" element={<TelefonicaListSol />} />} />
+        <Route path="/gestorDocumentos" element={<PrivateRouteWrapper title="Gestor Documentos" element={<GestorDocumentosCli />} />} />
       </Routes>
 
       {isSessionExpired && (

@@ -254,6 +254,25 @@ export function ListadoSolicitud() {
     });
   };
 
+  const handleTelefonica = (registro) => {
+    console.log("registro", registro);
+    navigate("/telefonicaList", {
+      replace: true,
+      state: {
+        id: registro.id,
+        NumeroSolicitud: registro.NumeroSolicitud,
+        nombre: registro.nombre,
+        cedula: registro.cedula,
+        fecha: registro.fecha,
+        almacen: registro.almacen,
+        foto: registro.imagen,
+        vendedor: registro.vendedor,
+        consulta: registro.consulta,
+      },
+    });
+  };
+
+
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
     setView(true);
@@ -452,7 +471,9 @@ export function ListadoSolicitud() {
                   </TableCell>
 
                   <TableCell align="center">
-                  <PhoneIcon sx={{ color: 'gray' }}/>
+                    <IconButton onClick={()=> handleTelefonica(data)}>
+                      <PhoneIcon sx={{ color: 'gray' }}/>
+                    </IconButton>
                   </TableCell>
 
                   <TableCell align="center">
