@@ -7,3 +7,4 @@ export * from './InformacionCredito';
 export * from './SeccionA';
 export * from './DatosConyuge';
 export * from './Verificacion';
+export * from './CabeceraDatosSolicitud';

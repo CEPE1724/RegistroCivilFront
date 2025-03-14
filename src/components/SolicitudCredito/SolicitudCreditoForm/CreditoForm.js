@@ -428,7 +428,8 @@ const handleSubmit = async (values) => {
           file,
           values.Bodega,
           values.Cedula,
-          solicitudData.NumeroSolicitud
+          solicitudData.NumeroSolicitud,
+          "FOTO",
         );
 
         // 5. Si la subida fue exitosa, almacenar la URL de la foto

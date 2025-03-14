@@ -1,6 +1,6 @@
 import axios from "axios";
 import { APIURL } from "../configApi/apiConfig";
-const uploadFile = async (file, almacen, cedula, numeroSolicitud) => {
+const uploadFile = async (file, almacen, cedula, numeroSolicitud, Tipo) => {
   console.log("file", file);
   console.log("almacen", almacen);
   console.log("cedula", cedula);
@@ -10,6 +10,7 @@ const uploadFile = async (file, almacen, cedula, numeroSolicitud) => {
   formData.append("almacen", almacen);
   formData.append("cedula", cedula);
   formData.append("numerosolicitud", numeroSolicitud);
+  formData.append("Tipo", Tipo);
 
   try {
     // Realizar la solicitud POST
