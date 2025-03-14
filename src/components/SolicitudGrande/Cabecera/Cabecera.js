@@ -1,9 +1,12 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import axios from "axios";  // Import axios
+
 import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { DatosCliente } from "../DatosCliente/DatosCliente";
+import DatosCliente from "../DatosCliente/DatosCliente";
 import { DatosConyuge } from "../DatosConyuge";
 import { Referencias } from "../Referencia";
 import { SeccionB } from "../SeccionB";
@@ -12,26 +15,72 @@ import { FactoresCredito } from "../FactoresCredito";
 import { useSnackbar } from 'notistack';
 import { Verificacion } from "../Verificacion/Verificacion";
 import { InformacionCredito } from "../InformacionCredito";
-export function Cabecera() {
-  const [activeTab, setActiveTab] = useState("Datos Cliente");
-  const [cedula, setCedula] = useState("");
-  const [local, setLocal] = useState("");
-  const [apellidoPaterno, setApellidoPaterno] = useState("");
-  const [primerNombre, setPrimerNombre] = useState("");
-  const [email, setEmail] = useState("");
-  const [celular, setCelular] = useState("");
-  const { enqueueSnackbar } = useSnackbar();
-  ////const seccionARef = useRef(null);
-  const seccionRef = useRef(null);  // Creas la referencia
+import { APIURL } from "../../../configApi/apiConfig";
+import { CabeceraDatosSolicitud } from "../CabeceraDatosSolicitud";
+import { Loader } from "../../Utils"; // Make sure to import the Loader component
 
-  const handleSave = () => {
-    // Llamas la validación desde el componente hijo cuando se presiona el botón guardar
-    if (seccionRef.current) {
-      seccionRef.current.handleSubmit(); // Llamada a la función expuesta de SeccionA
+
+export function Cabecera() {
+  const { state } = useLocation();
+  const { data } = state || {};
+  const [activeTab, setActiveTab] = useState("Datos Cliente");
+  const [fecha, setFecha] = useState(data?.fecha ? new Date(data.fecha).toISOString().split('T')[0] : "");
+  const [cedula, setCedula] = useState(data?.cedula || "");
+  const [local, setLocal] = useState(data?.almacen || "");
+  const [apellidoPaterno, setApellidoPaterno] = useState(data?.ApellidoPaterno || "");
+  const [segundoApellido, setSegundoApellido] = useState(data?.ApellidoMaterno || "");
+  const [primerNombre, setPrimerNombre] = useState(data?.PrimerNombre || "");
+  const [segundoNombre, setSegundoNombre] = useState(data?.SegundoNombre || "");
+  const [email, setEmail] = useState(data?.email || "");
+  const [celular, setCelular] = useState(data?.celular || "");
+  const [estado, setEstado] = useState(data?.estado || "");
+  const [bGarante, setBGarante] = useState(false);
+  const [idSolicitud, setIdSolicitud] = useState(data?.id || "");
+  const [numeroSolicitud, setNumeroSolicitud] = useState(data?.NumeroSolicitud || "");
+  const [clienteData, setClienteData] = useState(null);
+  const [loading, setLoading] = useState(true); // Loading state
+
+  const { enqueueSnackbar } = useSnackbar();
+  const seccionRef = useRef(null); // Crear la referencia para las secciones
+
+  const datosClienteRef = useRef(); // Referencia para el componente DatosCliente
+
+  useEffect(() => {
+    fetchDatosCliente();
+  }, [idSolicitud, numeroSolicitud]);
+
+  const fetchDatosCliente = async () => {
+    try {
+      // Validate that idSolicitud and numeroSolicitud are defined
+      if (!idSolicitud || !numeroSolicitud) {
+        console.error("idSolicitud or numeroSolicitud is missing.");
+        return;
+      }
+
+      // Construct the URL dynamically using the parameters
+      const url = APIURL.get_cre_solicitud_web_id(idSolicitud, numeroSolicitud);
+      console.log("Fetching data from URL:", url);
+
+      // Make the axios GET request
+      setLoading(true); // Set loading to true before making the request
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // If the response is successful, log the data
+      console.log("Fetched data:", response.data);
+
+      // Save the fetched data to state
+      setClienteData(response.data);
+      setLoading(false); // Set loading to false once data is fetched
+
+    } catch (error) {
+      console.error("Error al obtener los datos del cliente", error);
+      setLoading(false); // Set loading to false if an error occurs
     }
   };
-
-  const currentDate = new Date().toISOString().split("T")[0];
 
   const tabs = [
     "Datos Cliente",
@@ -42,13 +91,13 @@ export function Cabecera() {
     "Información de Crédito",
     "Factores de Crédito",
     "Verificación",
-
   ];
 
-  const renderTabContent = () => {
+  const renderTabContent = (clienteData) => {
+    console.log("clienteData", clienteData);
     switch (activeTab) {
       case "Datos Cliente":
-        return <DatosCliente />;
+        return <DatosCliente ref={datosClienteRef} data={clienteData} />;
       case "Datos Conyuge":
         return <DatosConyuge />;
       case "Referencias":
@@ -68,201 +117,134 @@ export function Cabecera() {
     }
   };
 
+  const validateForm = () => {
+    if (!/^\d{10}$/.test(cedula)) {
+      enqueueSnackbar("La cédula debe ser un número de 10 dígitos.", { variant: "error" });
+      return false;
+    }
+    if (!local) {
+      enqueueSnackbar("Debe seleccionar un local.", { variant: "error" });
+      return false;
+    }
+    if (apellidoPaterno.length < 2 || primerNombre.length < 2) {
+      enqueueSnackbar("El apellido paterno y el primer nombre deben tener al menos 5 caracteres.", { variant: "error" });
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      enqueueSnackbar("El email no tiene un formato válido.", { variant: "error" });
+      return false;
+    }
+    if (!/^\d{10}$/.test(celular)) {
+      enqueueSnackbar("El celular debe ser un número de 10 dígitos.", { variant: "error" });
+      return false;
+    }
+    return true;
+  };
+
   const handleInputChange = (setter) => (e) => {
     setter(e.target.value);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      enqueueSnackbar("Formulario enviado con éxito.", { variant: "success" });
+    if (!validateForm()) {
+      enqueueSnackbar("Por favor corrige los errores en el formulario..", { variant: "error" });
+      return;
     }
+    handleSave();
   };
 
-  const validateForm = () => {
-    // Validación Cedula
-    if (!/^\d{10}$/.test(cedula)) {
-      enqueueSnackbar("La cédula debe ser un número de 10 dígitos.", { variant: "error" });
-      return false;
+  const handleSave = () => {
+    const isValid = datosClienteRef.current.handleValidate(); // Llamamos a handleValidate de DatosCliente
+    if (isValid) {
+      enqueueSnackbar("Datos guardados exitosamente.", { variant: "success" });
+      // Aquí podrías proceder con el envío de los datos o alguna otra acción
+    } else {
+      enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
     }
-
-    // Validación Local
-    if (!local) {
-      enqueueSnackbar("Debe seleccionar un local.", { variant: "error" });
-      return false;
-    }
-
-    // Validación Apellido Paterno y Nombre
-    if (apellidoPaterno.length < 5 || primerNombre.length < 5) {
-      enqueueSnackbar("El apellido paterno y el primer nombre deben tener al menos 5 caracteres.", { variant: "error" });
-      return false;
-    }
-
-    // Validación Email
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      enqueueSnackbar("El email no tiene un formato válido.", { variant: "error" });
-      return false;
-    }
-
-    // Validación Celular
-    if (!/^\d{10}$/.test(celular)) {
-      enqueueSnackbar("El celular debe ser un número de 10 dígitos.", { variant: "error" });
-      return false;
-    }
-
-    return true;
   };
-
-
 
   return (
-    <div className="p-6 bg-gray-100 rounded-lg shadow-md">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 grid-rows-2 gap-4">
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Fecha</label>
-            <input
-              type="date"
-              className="solcitudgrande-style"
-              defaultValue={currentDate}
-              readOnly
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Cedula</label>
-            <input
-              type="text"
-              value={cedula}
-              onChange={handleInputChange(setCedula)}
-              className="solcitudgrande-style"
+    <>
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className="p-6 bg-gray-100 rounded-lg shadow-md">
+
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <CabeceraDatosSolicitud
+              datosConsulta={data}
+              data={{ fecha, cedula, local, apellidoPaterno, segundoApellido, primerNombre, segundoNombre, email, celular, estado, bGarante }}
+              setData={{ setFecha, setCedula, setLocal, setApellidoPaterno, setSegundoApellido, setPrimerNombre, setSegundoNombre, setEmail, setCelular, setEstado, setBGarante }}
+              handleInputChange={handleInputChange}
             />
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Local</label>
-            <select
-              value={local}
-              onChange={(e) => setLocal(e.target.value)}
-              className="solcitudgrande-style"
-            >
-              <option value="">Seleccione...</option>
-              <option value="Local 1">Local 1</option>
-              <option value="Local 2">Local 2</option>
-            </select>
+          <div className="mt-6 border-b">
+            <ul className="flex flex-wrap space-x-4">
+              {tabs.map((tab) => (
+                <li
+                  key={tab}
+                  className={`cursor-pointer p-2 ${activeTab === tab
+                    ? "border-b-2 border-blue-500 font-bold"
+                    : "text-gray-500"
+                    }`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="flex items-center mt-2 justify-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <input type="checkbox" className="w-4 h-4" id="garante" />
-              <label htmlFor="garante" className="text-sm font-semibold">
-                Garante
-              </label>
+          <div className="mt-6 mt-0">
+            {renderTabContent(clienteData)}
+          </div>
+
+          <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
+            <div className="flex items-center">
+              <button
+                onClick={handleSubmit}
+                className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+              >
+                <SaveIcon className="text-lg" />
+                <span className="text-xs">Guardar</span>
+              </button>
             </div>
 
-            <button
-              onClick={handleSubmit}
-              className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none"
-            >
-              Garante
-            </button>
+            <div className="flex items-center">
+              <button
+                onClick={() => { }}
+                className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+              >
+                <PrintIcon className="text-lg" />
+                <span className="text-xs">Imprimir</span>
+              </button>
+            </div>
+
+            <div className="flex items-center">
+              <button
+                onClick={() => { }}
+                className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+              >
+                <ManageSearchIcon className="text-lg" />
+                <span className="text-xs">Buscar</span>
+              </button>
+            </div>
+
+            <div className="flex items-center">
+              <button
+                onClick={() => { }}
+                className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+              >
+                <LogoutIcon className="text-lg" />
+                <span className="text-xs">Salir</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Apellido Paterno</label>
-            <input
-              type="text"
-              value={apellidoPaterno}
-              onChange={handleInputChange(setApellidoPaterno)}
-              className="solcitudgrande-style"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Apellido Materno</label>
-            <input
-              type="text"
-              className="solcitudgrande-style"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Primer Nombre</label>
-            <input
-              type="text"
-              value={primerNombre}
-              onChange={handleInputChange(setPrimerNombre)}
-              className="solcitudgrande-style"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Segundo Nombre</label>
-            <input
-              type="text"
-              className="solcitudgrande-style"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Email</label>
-            <input
-              type="text"
-              value={email}
-              onChange={handleInputChange(setEmail)}
-              className="solcitudgrande-style"
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-xs font-medium mb-1">Celular</label>
-            <input
-              type="text"
-              value={celular}
-              onChange={handleInputChange(setCelular)}
-              className="solcitudgrande-style"
-            />
-          </div>
         </div>
-      </div>
-
-      <div className="mt-6 border-b">
-        <ul className="flex flex-wrap space-x-4">
-          {tabs.map((tab) => (
-            <li
-              key={tab}
-              className={`cursor-pointer p-2 ${activeTab === tab
-                ? "border-b-2 border-blue-500 font-bold"
-                : "text-gray-500"
-                }`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-6 mt-0">
-        {renderTabContent()}
-      </div>
-
-      <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-        {[
-          { Icon: SaveIcon, text: "Guardar", onClick: handleSave },
-          { Icon: PrintIcon, text: "Imprimir" },
-          { Icon: ManageSearchIcon, text: "Buscar" },
-          { Icon: LogoutIcon, text: "Salir" },
-        ].map(({ Icon, text, onClick }, index) => (
-          <button
-            key={index}
-            onClick={onClick}
-            className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-          >
-            <Icon className="w-5 h-5 transition-colors group-hover:text-primaryBlue" />
-            <span>{text}</span>
-          </button>
-        ))}
-      </div>
-    </div>
+      )}
+    </>
   );
 }

@@ -13,6 +13,7 @@ module.exports = {
           moradoHover: '#212863',
           naranja: '#eb2a1b',
           naranjaHover: '#c4110b',
+          lightGrey: '#D3D3D3', // Set the color value you want
           gris: '#f2f2f2',
 		  primaryBlue: "#2D3689",
 		  primaryBlack: "#1C1C1C",

@@ -4,8 +4,12 @@
 
 @layer components {
   .solcitudgrande-style {
-    @apply block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-3 py-1 shadow-sm h-8 text-xs ;
+    @apply block bg-[#F9FAFB] w-full  border-2  px-3 py-1 shadow-sm h-8 text-xs  focus:border-primaryBlue focus:ring-2 focus:ring-primaryBlue rounded-md p-2 uppercase;
   }
+  .Informacioncliente-style {
+    @apply text-lightGrey text-xs mb-2;
+  }
+
   .label-style {
     @apply block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2 ;
   }
