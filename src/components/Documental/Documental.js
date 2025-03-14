@@ -25,6 +25,7 @@ export function Documental({
   const [view, setView] = useState(false);
   const [observacion, setObservacion] = useState({});
   const modalRef = useRef(null);
+  const [history , setHistory] = useState(false);
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -114,6 +115,10 @@ export function Documental({
 
   const handleFileChange = (e, field) => {
     const selectedFiles = Array.from(e.target.files);
+    if (selectedFiles.length === 0) {
+      enqueueSnackbar("No se ha seleccionado ningún archivo.", { variant: "error" });
+      return;
+    }
 
     // Verifica si ya hay un archivo cargado en el campo activo
     if (files[field] && files[field].length > 0) {
@@ -186,42 +191,41 @@ export function Documental({
         `Por favor, selecciona un archivo para el campo ${activeTab}`,
         { variant: "error" }
       );
+      return;
     } else if (!observacion[activeTab] || observacion[activeTab].length < 10) {
       enqueueSnackbar(
         "La observación debe tener al menos 10 caracteres para este campo.",
         { variant: "error" }
       );
-    } else {
-      // Si los datos son válidos
-      enqueueSnackbar("Archivo y observación subidos correctamente.", {
-        variant: "success",
-      });
-      setShowFileInput(false);
+      return;
     }
 
     // Subir archivos a la API
-    console.log("files[activeTab]", files[activeTab]);
-  console.log("files[activeTab][0]", files[activeTab][0]);
-    const response = await uploadFile(
-      files[activeTab][0],
-      clientInfo.almacen,
-      clientInfo.cedula,
-      clientInfo.NumeroSolicitud
-    );
+    try {
+      const response = await uploadFile(
+        files[activeTab][0],
+        clientInfo.almacen,
+        clientInfo.cedula,
+        clientInfo.NumeroSolicitud
+      );
 
-    if (response) {
-      console.log("response", response.url);
-      //abrir la url en el navegador
-      window.open(response.url, "_blank");
-      enqueueSnackbar("Archivo subido correctamente.", {
-        variant: "success",
-      });
-    } else {
+      if (response) {
+        const url = response.url;
+        console.log(url)
+        enqueueSnackbar("Archivo y observación subidos correctamente.", {
+          variant: "success",
+        });
+        setShowFileInput(false);
+      } else {
+        enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", {
+          variant: "error",
+        });
+      }
+    } catch (error) {
       enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", {
         variant: "error",
       });
     }
-
   };
 
   const handleSubmitUpFile = (e) => {
@@ -407,10 +411,29 @@ export function Documental({
             </div>
           </div>
 
-          {/* Documentos Subidos */}
-          <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
+
+
+          <div className="flex justify-center items-center mt-6 w-full">
+
+  {/* Documentos Subidos */}
+          <h2 className="text-2xl font-semibold text-center text-gray-800">
             Documentos Subidos
           </h2>
+
+            <div className="absolute right-11">
+
+            <button
+            onClick={() => setHistory(true)}
+              className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+            >
+              Historial Observaciones
+            </button>
+
+            </div>
+          </div>
+
+
+           
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {filePreviews[activeTab]?.length > 0 &&
@@ -489,19 +512,8 @@ export function Documental({
           </div>
 
           <div className="flex justify-center items-center mt-6 w-full">
-            <button
-              onClick={handleSubmit}
-              className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
-            >
-              Enviar archivos
-            </button>
 
-
-
-
-            <div className="absolute right-11">
-
-              <button
+          <button
                 onClick={() => setShowFileInput(true)}
                 class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
               >
@@ -545,6 +557,19 @@ export function Documental({
                   </g>
                 </svg>
               </button>
+            
+
+
+
+            <div className="absolute right-11">
+
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+            >
+              Enviar archivos
+            </button>
+
             </div>
           </div>
 
@@ -625,7 +650,24 @@ export function Documental({
 
         </div>
       )}
+  
 
+      {/* Historial de Observaciones */}
+   
+{history && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+      <h2 className="text-lg font-semibold mb-4">Historial de Observaciones</h2>
+      <p>Aquí va el historial de observaciones...</p>
+      <button
+        onClick={() => setHistory(false)}
+        className="mt-4 bg-red-600 text-white py-2 px-4 rounded-md shadow-lg hover:bg-red-700 transition duration-300"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+)}
 
     </div>
   );

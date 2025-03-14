@@ -210,7 +210,6 @@ export function ListadoSolicitud() {
           headers: { method: "GET", cache: "no-store" },
         
       });
-      console.error(response)
       if (response.status === 200) {
         // Retorna el nombre completo del vendedor
         const vendedor = response.data;
@@ -412,7 +411,7 @@ export function ListadoSolicitud() {
                       src={data.imagen}
                       alt="Imagen"
                     />*/}
-                    {data.id}
+                    {data.NumeroSolicitud}
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
