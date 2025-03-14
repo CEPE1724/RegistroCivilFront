@@ -10,7 +10,7 @@ import {
 } from "@mui/icons-material";
 
 
-const mockData = [
+const  data = [
   {
     id: 1,
     name: "2025",
@@ -115,8 +115,8 @@ export const RepositorioComponent = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedFileId, setSelectedFileId] = useState(null);
 
-  // Función para encontrar la ruta completa a un elemento por su ID
-  const findPathToItem = (targetId, items = mockData, currentPath = []) => {
+
+  const findPathToItem = (targetId, items =  data, currentPath = []) => {
     for (const item of items) {
       // Si encontramos el elemento, devolvemos la ruta
       if (item.id === targetId) {
@@ -135,8 +135,8 @@ export const RepositorioComponent = () => {
     return null;
   };
 
-  // Función para encontrar la ruta a un archivo y su carpeta contenedora
-  const findPathToFile = (fileId, items = mockData, currentPath = []) => {
+
+  const findPathToFile = (fileId, items =  data, currentPath = []) => {
     for (const item of items) {
       // Si es una carpeta, verificamos sus hijos
       if (item.type === "folder" && item.children) {
@@ -192,7 +192,6 @@ export const RepositorioComponent = () => {
     setOpenSidebarFolders((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Manejar clic en archivo del sidebar
   const handleSidebarFileClick = (fileId) => {
     // Encontrar la ruta a la carpeta que contiene el archivo
     const path = findPathToFile(fileId);
@@ -213,10 +212,9 @@ export const RepositorioComponent = () => {
     }
   };
 
-  // Manejar clic en archivo en la sección principal
+  
   const handleMainFileClick = (fileId) => {
     setSelectedFileId(fileId);
-    // Aquí iría la lógica para abrir/visualizar el archivo
     alert(`Archivo abierto: ID ${fileId}`);
   };
 
@@ -236,11 +234,11 @@ export const RepositorioComponent = () => {
 
   // Get the current folder content based on the navigation path
   const getCurrentFolderContent = () => {
-    let content = mockData;
+    let content =  data;
 
     // If we have a path, traverse through it
     if (currentPath.length > 0) {
-      let currentLevel = mockData;
+      let currentLevel =  data;
 
       for (const id of currentPath) {
         // Find the item with this id at the current level
@@ -266,10 +264,10 @@ export const RepositorioComponent = () => {
     return content;
   };
 
-  // Generate breadcrumb path names
+  // breadcrumb/ path /names /
   const getBreadcrumbs = () => {
     const breadcrumbs = [];
-    let currentLevel = mockData;
+    let currentLevel =  data;
 
     // Start with "Home"
     breadcrumbs.push({ id: null, name: "Home" });
@@ -295,7 +293,7 @@ export const RepositorioComponent = () => {
     if (currentPath.length === 0) return null;
 
     let currentItem = null;
-    let items = mockData;
+    let items =  data;
 
     for (const id of currentPath) {
       currentItem = items.find((item) => item.id === id);
@@ -322,7 +320,7 @@ export const RepositorioComponent = () => {
           {item.type === "folder" ? (
             <button
               className={`flex items-center w-full p-2 hover:bg-gray-200 rounded-lg transition ${
-                isInCurrentPath ? "bg-blue-100 font-medium" : ""
+                isInCurrentPath ? "  font-medium" : ""
               } ${level > 0 ? `ml-${level * 2}` : ""}`}
               onClick={() => toggleSidebarFolder(item.id, item)}
             >
@@ -341,7 +339,7 @@ export const RepositorioComponent = () => {
           ) : (
             <div
               className={`flex items-center p-2 hover:bg-gray-200 rounded-lg transition cursor-pointer ${
-                isSelectedFile ? "bg-blue-100 font-medium" : ""
+                isSelectedFile ? "  font-medium" : ""
               } ${level > 0 ? `ml-${level * 4}` : ""}`}
               onClick={() => handleSidebarFileClick(item.id)}
             >
@@ -388,14 +386,14 @@ export const RepositorioComponent = () => {
 
       {/* Sidebar */}
       <div
-        className={`bg-white p-4 border-r shadow-lg overflow-auto transition-all duration-300 ${
+        className={`bg-white p-0 m-0 border-r shadow-lg overflow-auto transition-all duration-300 ${
           sidebarOpen ? "w-64" : "w-0 overflow-hidden"
         } md:w-64`}
       >
         <h2 className="text-lg font-bold mb-4 text-gray-700">
           Repositorio Solicitudes
         </h2>
-        <nav className="space-y-1">{renderSidebarFolders(mockData)}</nav>
+        <nav className="space-y-1">{renderSidebarFolders( data)}</nav>
       </div>
 
       {/* Main content */}

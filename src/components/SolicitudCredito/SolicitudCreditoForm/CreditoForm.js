@@ -130,7 +130,7 @@ export default function CreditoForm() {
       new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
     NumeroSolicitud: "12345",
     Bodega: null,
-    idVendedor: 123,
+    idVendedor: null,
     idCompraEncuesta: null,
     Cedula: "",
     CodDactilar: "",
