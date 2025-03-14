@@ -143,11 +143,15 @@ export function ListadoSolicitud() {
         const datos = await Promise.all(
           response.data.data.map(async (item) => {
             const vendedorNombre = await fetchVendedor(item.idVendedor); // Obtiene el nombre del vendedor
-  
+            console.log("Vendedor:", vendedorNombre);
             return {
               id: item.idCre_SolicitudWeb,
               NumeroSolicitud: item.NumeroSolicitud,
               nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
+              PrimerNombre: item.PrimerNombre,
+              SegundoNombre: item.SegundoNombre,
+              ApellidoPaterno: item.ApellidoPaterno,
+              ApellidoMaterno: item.ApellidoMaterno,
               cedula: item.Cedula,
               almacen:
                 dataBodega.find((bodega) => bodega.value === item.Bodega)?.label || "Desconocido",
@@ -205,13 +209,16 @@ export function ListadoSolicitud() {
 */
   const fetchVendedor = async (idVendedor) => {
     try {
+      console.log("ID Vendedor:", idVendedor);
       const response = await axios.get(APIURL.getVendedor(idVendedor), {
       
           headers: { method: "GET", cache: "no-store" },
         
       });
       if (response.status === 200) {
+       
         // Retorna el nombre completo del vendedor
+        console.log("Vendedor:", response.data);
         const vendedor = response.data;
         const vendedorNombre = `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""} ${vendedor.ApellidoMaterno || ""}`.trim();
   
@@ -254,6 +261,7 @@ export function ListadoSolicitud() {
     });
   };
 
+
   const handleTelefonica = (registro) => {
     console.log("registro", registro);
     navigate("/telefonicaList", {
@@ -272,6 +280,17 @@ export function ListadoSolicitud() {
     });
   };
 
+
+
+  const handlesolicitud = (registro) => {
+    console.log("Registro:", registro);
+    navigate("/solicitudgrande", {
+      replace: true,
+      state: {
+        data:registro
+      },
+    });
+  };
 
   const handleOpenDialog = (row) => {
     setSelectedRow(row);
@@ -449,20 +468,11 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell>
                   <TableCell align="center">
+                  <IconButton onClick={() => handlesolicitud(data)}>
                     <PendingActionsIcon sx={{ color: 'gray' }} />
+                  </IconButton>
 
-                    {/*
-                    <div className="flex justify-center gap-2">
-                      <button onClick={() => handledocumentos(data)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:ring-0 focus:shadow-none">
-                        Documentos
-                      </button>
-
-                      <button className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-6 py-2.5 focus:shadow-none">
-                        Telefonica
-                      </button>
-                    
-                    </div>
-                    */}
+                   
                   </TableCell>
                   <TableCell align="center">
                     <IconButton onClick={() => handledocumentos(data)}>

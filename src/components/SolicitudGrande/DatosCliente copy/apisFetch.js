@@ -7,7 +7,7 @@ export const fetchNacionalidad = async (enqueueSnackbar, setNacionalidad) => {
     const response = await axios.get(APIURL.get_creNacionalidad(), {
       headers: { method: "GET", cache: "no-store" },
     });
-
+    console.log(response);
     setNacionalidad(
       response.data.map((item) => ({
         value: item.idNacionalidad,
@@ -29,7 +29,6 @@ export const fecthGenero = async (enqueueSnackbar, setGenero) => {
     const response = await axios.get(APIURL.getTiposexo(), {
       headers: { method: "GET", cache: "no-store" },
     });
-    
     setGenero(
       response.data.map((item) => ({
         value: item.idSexo,
@@ -53,7 +52,7 @@ export const fecthEstadoCivil = async (enqueueSnackbar, setEstadoCivil) => {
     });
     setEstadoCivil(
       response.data.map((item) => ({
-        value: item.idEdoCivil,
+        value: item.idEstadoCivil,
         label: item.Nombre,
       }))
     );

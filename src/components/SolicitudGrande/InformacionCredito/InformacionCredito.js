@@ -67,7 +67,7 @@ export function InformacionCredito() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 {/* Score */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Score(*)</label>
+                    <label className="Informacioncliente-style">Score(*)</label>
                     <input
                         type="number"
                         name="score"
@@ -80,7 +80,7 @@ export function InformacionCredito() {
                 </div>
                 {/* Rango Ingresos */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Rango Ingresos(*)</label>
+                    <label className="Informacioncliente-style">Rango Ingresos(*)</label>
                     <input
                         type="text"
                         name="rangeIngresos"
@@ -95,7 +95,7 @@ export function InformacionCredito() {
                 </div>
                 {/* Resultado Equifax */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Resultado Equifax(*)</label>
+                    <label className="Informacioncliente-style">Resultado Equifax(*)</label>
                     <input
                         type="text"
                         name="resultadoEquifax"
@@ -112,7 +112,7 @@ export function InformacionCredito() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 {/* Score Inclusion */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Score Inclusion(*)</label>
+                    <label className="Informacioncliente-style">Score Inclusion(*)</label>
                     <input
                         type="number"
                         name="scoreInclusion"
@@ -125,7 +125,7 @@ export function InformacionCredito() {
                 </div>
                 {/* Capacidad Pago */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Capacidad Pago(*)</label>
+                    <label className="Informacioncliente-style">Capacidad Pago(*)</label>
                     <input
                         type="number"
                         name="capacidadPago"
@@ -138,7 +138,7 @@ export function InformacionCredito() {
                 </div>
                 {/* Segmentación Equifax */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Segmentación Equifax(*)</label>
+                    <label className="Informacioncliente-style">Segmentación Equifax(*)</label>
                     <input
                         type="number"
                         name="segmentacionEquifax"
@@ -154,7 +154,7 @@ export function InformacionCredito() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                 {/* Score de Sobreendeudamiento */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Score Sobreendeudamiento(*)</label>
+                    <label className="Informacioncliente-style">Score Sobreendeudamiento(*)</label>
                     <input
                         type="number"
                         name="scoreSobreendeudamiento"
@@ -167,7 +167,7 @@ export function InformacionCredito() {
                 </div>
                 {/* Total Vencido */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Total Vencido(*)</label>
+                    <label className="Informacioncliente-style">Total Vencido(*)</label>
                     <input
                         type="number"
                         name="totalVencido"
@@ -184,7 +184,7 @@ export function InformacionCredito() {
                 <div></div>
                 {/* Cartera Castigada*/}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Cartera Castigada(*)</label>
+                    <label className="Informacioncliente-style">Cartera Castigada(*)</label>
                     <input
                         type="number"
                         name="carteraCastigada"
