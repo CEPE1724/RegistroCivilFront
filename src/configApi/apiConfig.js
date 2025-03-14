@@ -73,4 +73,9 @@ export const APIURL = {
 
    post_creVerificacionTelefonica : () => `${API_BASE_URL}creverificaciontelefonica`,
 
+
+   /*solicitud grande*/
+   get_cre_solicitud_web : () => `${API_BASE_URL}cre-solicitud-web/`,
+   get_cre_solicitud_web_id : (idSolicitud, numeroSolicitud) => `${API_BASE_URL}web-solicitudgrande/${idSolicitud}/${numeroSolicitud}`,
+
 };
