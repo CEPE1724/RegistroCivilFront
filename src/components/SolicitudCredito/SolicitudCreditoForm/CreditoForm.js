@@ -117,7 +117,7 @@ export default function CreditoForm() {
         }))
       );
     }
-  }, [data]); // Este efecto se ejecuta cuando 'data' cambia
+  }, [data]);
 
 
   if (!actividadLaboral || actividadLaboral.length === 0) {
@@ -129,8 +129,8 @@ export default function CreditoForm() {
     Fecha:
       new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
     NumeroSolicitud: "12345",
-    Bodega: 1,
-    idVendedor: 123,
+    Bodega: null,
+    idVendedor: null,
     idCompraEncuesta: null,
     Cedula: "",
     CodDactilar: "",
@@ -163,7 +163,6 @@ export default function CreditoForm() {
     {
       label: "Bodega",
       name: "Bodega",
-      type: "number",
       type: "select",
       options: dataBodega,
      
@@ -236,7 +235,11 @@ export default function CreditoForm() {
         .positive()
         .integer()
         .required("Campo requerido"),
-      Bodega: Yup.number().positive().integer().required("Campo requerido"),
+		Bodega: Yup.number()
+        .nullable()
+        .positive()
+        .integer()
+        .required("Selecciona por favor una bodega"),
       idVendedor: Yup.number().positive().integer().required("Campo requerido"),
       idCompraEncuesta: Yup.number()
         .nullable()
