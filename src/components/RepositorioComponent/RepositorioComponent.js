@@ -390,10 +390,7 @@ export const RepositorioComponent = () => {
           sidebarOpen ? "w-64" : "w-0 overflow-hidden"
         } md:w-64`}
       >
-        <h2 className="text-lg font-bold mb-4 text-gray-700">
-          Repositorio Solicitudes
-        </h2>
-        <nav className="space-y-1">{renderSidebarFolders( data)}</nav>
+        <nav className="space-y-1 mt-4">{renderSidebarFolders( data)}</nav>
       </div>
 
       {/* Main content */}
