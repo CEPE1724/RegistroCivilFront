@@ -2,7 +2,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
 
 
 
@@ -89,5 +89,21 @@ export const APIURL = {
    post_analista : () => `${API_BASE_URL}analistacredito`,
    getFechaAnalista : () => `${API_BASE_URL}fecha-analista`,
    analistacredito : () => `${API_BASE_URL}analistacredito`,
+
+   get_repositorios: (anio, mes) => {
+    let url = API_BASE_URL + 'cre-solicitud-web/repositorios';
+    let params = [];
+    if (anio != null) {
+      params.push('anio=' + encodeURIComponent(anio));
+    }
+    if (mes != null) {
+      params.push('mes=' + encodeURIComponent(mes));
+    }
+    if (params.length > 0) {
+      url += '?' + params.join('&');
+    }
+	console.log(url);
+    return url;
+  }
 
 };
