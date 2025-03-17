@@ -5,6 +5,10 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
 import { APIURL } from '../../configApi/apiConfig'
 import uploadFile from '../../hooks/uploadFile'
+import {useAuth} from '../AuthContext/AuthContext'
+import axios from "axios";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
+
 export function Documental({
   id,
   NumeroSolicitud,
@@ -16,8 +20,13 @@ export function Documental({
   vendedor,
   consulta,
 }) {
+
+  const { userData , userUsuario } = useAuth();
+  console.log("userData", userData);
+
+  console.log("userUsuario", userUsuario);
   const [files, setFiles] = useState({});
-  const [activeTab, setActiveTab] = useState("Buro Credito");
+  const [activeTab, setActiveTab] = useState("");
   const [showFileInput, setShowFileInput] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -26,6 +35,8 @@ export function Documental({
   const [observacion, setObservacion] = useState({});
   const modalRef = useRef(null);
   const [history , setHistory] = useState(false);
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -41,6 +52,67 @@ export function Documental({
   const [filePreviews, setFilePreviews] = useState({});
 
   useEffect(() => {
+    const fetchUploadedFiles = async () => {
+      try {
+        const response = await axios.get(`${APIURL.get_documentos(clientInfo.id)}`);
+  
+        if (response.status === 200 && Array.isArray(response.data)) {
+          const uploadedFiles = {};
+          const previews = {};
+  
+          response.data.forEach((file) => {
+            const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
+            if (!uploadedFiles[sectionName]) {
+              uploadedFiles[sectionName] = [];
+              previews[sectionName] = [];
+            }
+  
+            // Extrae el nombre del archivo desde la ruta
+            const fileName = file.RutaDocumento.split('/').pop();
+            const fileUrl = file.RutaDocumento;
+  
+            uploadedFiles[sectionName].push({
+              name: fileName,
+              url: fileUrl,
+              type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
+            });
+  
+            previews[sectionName].push(fileUrl);
+          });
+  
+          setFiles(uploadedFiles);
+          setFilePreviews(previews);
+        }
+      } catch (error) {
+        enqueueSnackbar("Error al obtener archivos subidos.", { variant: "error" });
+        console.error("Error al obtener archivos:", error);
+      }
+    };
+  
+    if (clientInfo.NumeroSolicitud) {
+      fetchUploadedFiles();
+    }
+  }, [clientInfo.NumeroSolicitud]);
+  
+  const getTipoDocumento = (id) => {
+    const documentoIds = {
+      1: "Buro Credito",
+      2: "Copia De Cedula",
+      3: "Contrato de Compra",
+      4: "Declaracion",
+      5: "Pagare a la Orden",
+      6: "Tabla de amortizacion",
+      7: "Gastos de cobranza",
+      8: "Compromiso Lugar de pago",
+      9: "Acta",
+      10: "Consentimiento",
+      11: "Autorización",
+    };
+    return documentoIds[id] || null;
+  };
+
+
+  useEffect(() => {
     if (location.state) {
       // Si hay datos en `location.state`, los guardamos en localStorage
       localStorage.setItem("clientInfo", JSON.stringify(location.state));
@@ -53,31 +125,33 @@ export function Documental({
       }
     }
   }, [location.state]);
-  useEffect(() => {
-    // Actualiza la información del cliente cuando cambie location.state
 
-    // Optimiza la vista previa de los archivos seleccionados
+  useEffect(() => {
     const updatedFilePreviews = {};
+  
     Object.keys(files).forEach((field) => {
       updatedFilePreviews[field] = files[field].map((file) => {
-        if (file.type === "application/pdf") {
-          // Crea URL para vista previa de archivos PDF
-          return URL.createObjectURL(file);
+        if (file instanceof File || file instanceof Blob) {
+          return URL.createObjectURL(file); // Si es un archivo local, crea una URL
         }
-        // Si no es PDF, puede que quieras otra lógica para imágenes o diferentes tipos de archivo
-        return URL.createObjectURL(file);
+        return file.url || file; // Si es una URL desde la API, úsala directamente
       });
     });
-
+  
     setFilePreviews(updatedFilePreviews);
-
-    // Cleanup: Elimina las URLs de los archivos cuando el componente se desmonte o cambie
+  
+    // Cleanup: liberar URLs de archivos locales cuando el componente se desmonta
     return () => {
       Object.values(updatedFilePreviews).forEach((previewUrls) =>
-        previewUrls.forEach((url) => URL.revokeObjectURL(url))
+        previewUrls.forEach((url) => {
+          if (url.startsWith("blob:")) {
+            URL.revokeObjectURL(url);
+          }
+        })
       );
     };
-  }, [location.state, files]); // Se ejecuta cuando 'location.state' o 'files' cambian
+  }, [files]);
+   // Se ejecuta cuando 'location.state' o 'files' cambian
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -138,7 +212,23 @@ export function Documental({
     setShowFileInput(false);
   };
 
-  const handleRemoveFile = (field, index) => {
+  const handleOpenDeleteConfirmation = (field, index) => {
+    setFileToDelete({ field, index });
+    setShowConfirmDeleteModal(true);
+  };
+
+  // Función para cerrar el modal de confirmación de eliminación
+  const closeDeleteConfirmation = () => {
+    setFileToDelete(null);
+    setShowConfirmDeleteModal(false);
+  };
+
+  // Función para eliminar archivo
+  const handleRemoveFile = () => {
+    if (!fileToDelete) return;
+
+    const { field, index } = fileToDelete;
+
     setFiles((prevFiles) => {
       if (!prevFiles[field] || prevFiles[field].length === 0) return prevFiles;
 
@@ -175,6 +265,8 @@ export function Documental({
         ? prevActiveTab
         : Object.keys(files)[0] || "";
     });
+
+    closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
   };
 
 
@@ -182,9 +274,10 @@ export function Documental({
     setView(!view);
   };
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Validar archivos y observación por cada sección
     if (!files[activeTab] || files[activeTab].length === 0) {
       enqueueSnackbar(
@@ -199,35 +292,81 @@ export function Documental({
       );
       return;
     }
-
-    // Subir archivos a la API
+  
     try {
+      // Subir archivo y obtener la URL
       const response = await uploadFile(
         files[activeTab][0],
         clientInfo.almacen,
         clientInfo.cedula,
-        clientInfo.NumeroSolicitud
+        clientInfo.NumeroSolicitud,
+        activeTab, // Mandamos el texto del tab
+        observacion[activeTab]
       );
 
-      if (response) {
-        const url = response.url;
-        console.log(url)
-        enqueueSnackbar("Archivo y observación subidos correctamente.", {
-          variant: "success",
+
+      const documentoIds = 
+      {
+        "Buro Credito": 1,
+        "Copia De Cedula" : 2,
+        "Contrato de Compra": 3,
+        "Declaracion" : 4,
+        "Pagare a la Orden" : 5,
+        "Tabla de amortizacion":6,
+        "Gastos de cobranza": 7 ,
+        "Compromiso Lugar de pago": 8,
+        "Acta" :9,
+        "Consentimiento" : 10,
+        "Autorización" : 11,
+
+      }
+
+      const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
+
+
+      // Verifica que la respuesta contenga la URL del archivo
+      if (response && response.url) {
+        const urlArchivo = response.url;
+        console.log("URL del archivo subido:", urlArchivo);
+        // validar que lso campso esten llenos
+        if (!idTipoDocumentoWEB) {
+          enqueueSnackbar("Error al obtener el ID del tipo de documento.", { variant: "error" });
+          return;
+        }
+        
+        // Crear el payload con los datos para la API
+        const payload = {
+          idCre_SolicitudWeb: clientInfo.id,
+          idTipoDocumentoWEB: idTipoDocumentoWEB, // Cambié a 2, ya que en el ejemplo de Postman usas 2
+          RutaDocumento: urlArchivo, // URL del archivo subido
+          Observacion: observacion[activeTab], // Observación recibida
+        };
+  
+        // Verifica el payload antes de enviarlo
+        console.log("Payload a enviar:", payload);
+        const apiResponse = await axios.post(APIURL.post_documentos(), payload, {
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
-        setShowFileInput(false);
+      // Comprobar que la respuesta sea exitosa
+        if (apiResponse.status === 201 || apiResponse.data?.status === 'success') {
+          enqueueSnackbar("Documento guardado correctamente en la BD.", { variant: "success" });
+          setShowFileInput(false);
+        } else {
+          enqueueSnackbar("Error al guardar el documento en la BD. " + apiResponse.data?.message || '', { variant: "error" });
+        }
       } else {
-        enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", {
-          variant: "error",
-        });
+        enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", { variant: "error" });
       }
     } catch (error) {
-      enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", {
-        variant: "error",
-      });
+      enqueueSnackbar("Error en la solicitud. Inténtalo de nuevo.", { variant: "error" });
+      console.error("Error:", error);
     }
   };
-
+  
+  
+  
   const handleSubmitUpFile = (e) => {
     e.preventDefault();
 
@@ -260,6 +399,7 @@ export function Documental({
   const completedFields = menuItems.filter(
     (field) => files[field] && files[field].length > 0
   );
+
   const pendingFields = menuItems.filter(
     (field) => !(files[field] && files[field].length > 0)
   );
@@ -454,7 +594,7 @@ export function Documental({
 
                       <button
                         type="button"
-                        onClick={() => handleRemoveFile(activeTab, index)}
+                        onClick={() => handleOpenDeleteConfirmation(activeTab, index)}
                         className="text-red-500 hover:text-red-700"
                       >
                         ❌
@@ -669,6 +809,26 @@ export function Documental({
   </div>
 )}
 
+  {/* Modal de confirmación de eliminación */}
+  {showConfirmDeleteModal && (
+        <Dialog open={showConfirmDeleteModal} onClose={closeDeleteConfirmation}>
+          <DialogTitle>Confirmación de Eliminación</DialogTitle>
+          <DialogContent>
+            <p>¿Estás seguro de que deseas eliminar este archivo?</p>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeDeleteConfirmation} color="primary">
+              Cancelar
+            </Button>
+            <Button onClick={handleRemoveFile} color="secondary">
+              Eliminar
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
     </div>
   );
 }
+
+
+

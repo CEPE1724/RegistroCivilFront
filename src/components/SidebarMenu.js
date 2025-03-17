@@ -31,6 +31,7 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("Fetching data...", userDataToken);
         const url = APIURL.getMenu(userDataToken.idUsuario);
         const response = await axios.get(url);
         setUserData(response.data);
@@ -85,6 +86,12 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
             <ManageAccountsIcon className="mr-2" />
           </ListItemIcon>
           <ListItemText inset primary="Gestor" />
+        </ListItemButton>
+        <ListItemButton component={Link} to="/calendar">
+          <ListItemIcon>
+            <ManageAccountsIcon className="mr-2" />
+          </ListItemIcon>
+          <ListItemText inset primary="Calnedario Operadoras" />
         </ListItemButton>
       </List>
     </Collapse>

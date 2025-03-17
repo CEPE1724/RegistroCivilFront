@@ -19,9 +19,11 @@ import VerificacionTerrena from "./pages/VerificacionTerrena";
 import VerificacionGeoreferencia from "./pages/VerificacionGeoreferencia";
 import SolicitudGrande from "./pages/SolicitudGrande";
 import Seguridad from "./pages/Seguridad";
+import TelefonicaListSol from "./pages/TelefonicaListSol";
+import GestorDocumentosCli from "./pages/GestorDocumentos";
 import { useAuth } from "./components/AuthContext/AuthContext";
 import RepositorioCreditos from "./pages/RepositorioCreditos";
-
+import  CalendarioOperador from "./pages/CalendarioOperador";
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -54,6 +56,7 @@ function App() {
         <Route path="/ciudadanos" element={<PrivateRouteWrapper title="Ciudadanos Almacenados" element={<Ciudadanos />} />} />
         <Route path="/proteccion-datos" element={<PrivateRouteWrapper title="Protección de Datos" element={<DataProtection />} />} />
         <Route path="/gestor" element={<PrivateRouteWrapper title="Gestor Virtual" element={<GestorVirtual />} />} />
+        <Route path="/calendar" element={<PrivateRouteWrapper title="calendar Virtual" element={<CalendarioOperador />} />} />
         <Route path="/solicitud" element={<PrivateRouteWrapper title="Solicitud" element={<SolicitudCredito />} />} />
         <Route path="/documental" element={<PrivateRouteWrapper title="Documentos" element={<Documento1 />} />} />
         <Route path="/telefonica" element={<PrivateRouteWrapper title="Telefonica" element={<VerificacionTelefonica />} />} />
@@ -63,7 +66,12 @@ function App() {
         <Route path="/ListadoSolicitud" element={<PrivateRouteWrapper title="Tabla" element={<ListaSolicitud />} />} />
         <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
 
+        <Route path="/telefonicaList" element={<PrivateRouteWrapper title="Telefonica Lista Solicitud" element={<TelefonicaListSol />} />} />
+        <Route path="/gestorDocumentos" element={<PrivateRouteWrapper title="Gestor Documentos" element={<GestorDocumentosCli />} />} />
+
+
 		<Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
+
       </Routes>
 
       {isSessionExpired && (

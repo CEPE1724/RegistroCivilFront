@@ -8,10 +8,8 @@ import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
 export default function CreditoForm() {
-  const { userData } = useAuth(); 
-  console.log("Usuario:", userData);
+  const { userData, userUsuario } = useAuth();
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
-
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
   const [tiempoVivienda, setTiempoVivienda] = useState([]);
@@ -20,8 +18,9 @@ export default function CreditoForm() {
   const { enqueueSnackbar } = useSnackbar();
   const [prevErrors, setPrevErrors] = useState({});
   const [formStatus, setFormStatus] = useState(null);
-  const [ urlCloudstorage, setUrlCloudstorage] = useState(null);
+  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
   const [dataRecibir, setDataRecibir] = useState(null);
+  const IdVendedor = userUsuario?.idPersonal;
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
     const idTipoFactura = 43;
@@ -105,8 +104,8 @@ export default function CreditoForm() {
     fetchEstabilidadLaboral();
     fetchActividadLaboral();
     fetchTipoConsulta();
-    fetchBodega();  
-  }, []);  
+    fetchBodega();
+  }, []);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -130,7 +129,7 @@ export default function CreditoForm() {
       new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
     NumeroSolicitud: "12345",
     Bodega: null,
-    idVendedor: null,
+    idVendedor: IdVendedor || null,
     idCompraEncuesta: null,
     Cedula: "",
     CodDactilar: "",
@@ -148,7 +147,7 @@ export default function CreditoForm() {
     bTerminosYCondiciones: false,
     bPoliticas: false,
     idProductos: null,
-    idCre_TiempoVivienda : null,
+    idCre_TiempoVivienda: null,
   };
 
   const formConfig = [
@@ -165,7 +164,7 @@ export default function CreditoForm() {
       name: "Bodega",
       type: "select",
       options: dataBodega,
-     
+
     },
     {
       label: "ID Vendedor",
@@ -222,25 +221,25 @@ export default function CreditoForm() {
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
 
-    { label: "Subir foto", name: "Foto", type: "file"},
-    
+    { label: "Subir foto", name: "Foto", type: "file" },
+
 
 
   ];
 
   const validationSchema = Yup.object()
     .shape({
-      Fecha: Yup.string().required("Campo requerido"),
+      Fecha: Yup.string().required("Fecha requerida"),
       NumeroSolicitud: Yup.number()
         .positive()
         .integer()
-        .required("Campo requerido"),
-		Bodega: Yup.number()
+        .required("Número de solicitud requerido"),
+      Bodega: Yup.number()
         .nullable()
         .positive()
         .integer()
         .required("Selecciona por favor una bodega"),
-      idVendedor: Yup.number().positive().integer().required("Campo requerido"),
+      idVendedor: Yup.number().positive().integer().required("ID Vendedor requerido"),
       idCompraEncuesta: Yup.number()
         .nullable()
         .positive()
@@ -268,8 +267,8 @@ export default function CreditoForm() {
         .trim()
         .min(3, "Debe tener al menos 3 caracteres o dejar en blanco")
         .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios"),
-        // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
-        // .required("Revisa el apellido debe tener al menos 2 caracteres"),
+      // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== "")
+      // .required("Revisa el apellido debe tener al menos 2 caracteres"),
       PrimerNombre: Yup.string()
         .trim()
         .min(3, "Debe tener al menos 3 caracteres")
@@ -280,8 +279,8 @@ export default function CreditoForm() {
         .trim()
         .min(3, "Debe tener al menos 3 caracteres o dejar en blanco")
         .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras y espacios"),
-        // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== ""),
-        // .required("Revisa el nombre debe tener al menos 2 caracteres"),
+      // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== ""),
+      // .required("Revisa el nombre debe tener al menos 2 caracteres"),
       Celular: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
         .required("El celular debe tener 10 dígitos")
@@ -353,112 +352,112 @@ export default function CreditoForm() {
   };
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
-  try {
-    console.log("Actualizando solicitud con ID:", idSolicitud, "con los datos:", data);
-    const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
-    const response = await axios.put(url, data, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    console.log("Solicitud actualizada con éxito:", response.data);
-    return response.data;  // Retornar datos actualizados si es necesario
-  } catch (error) {
-    console.error("Error al actualizar la solicitud:", error.message);
-    throw error;  // Re-lanzar error para manejarlo más tarde
-  }
-};
-
-const fetchConsultaSolicitud = async (idSolicitud) => {
-  try {
-    const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
-    const response = await axios.get(url, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    console.log("Solicitud consultada con éxito:", response.data);
-    setDataRecibir(response.data);  // Almacenar los datos de la solicitud
-    return response.data;  // Devolver los datos consultados
-  } catch (error) {
-    console.error("Error al consultar la solicitud:", error.message);
-    throw error;  // Re-lanzar error para manejarlo más tarde
-  }
-};
-
-const handleSubmit = async (values) => {
-  const fotourl = values.Foto; // URL de la foto que deseas cargar
-
-  // Formatear los valores para la API, con conversiones necesarias
-  const formattedValues = {
-    ...values,
-    Foto: 'prueba',  // Valor temporal de la foto mientras se maneja la carga
-    Bodega: Number(values.Bodega),
-    idActEconomina: Number(values.idActEconomina),
-    idCre_Tiempo: Number(values.idCre_Tiempo),
-    idProductos: Number(values.idProductos),
-    ApellidoMaterno: values.ApellidoMaterno?.trim().toUpperCase(),
-    ApellidoPaterno: values.ApellidoPaterno?.trim().toUpperCase(),
-    PrimerNombre: values.PrimerNombre?.trim().toUpperCase(),
-    SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
-    CodDactilar: values.CodDactilar?.toUpperCase(),
-    idCompraEncuesta: Number(values.idCompraEncuesta),
-    idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
+    try {
+      console.log("Actualizando solicitud con ID:", idSolicitud, "con los datos:", data);
+      const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
+      const response = await axios.put(url, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log("Solicitud actualizada con éxito:", response.data);
+      return response.data;  // Retornar datos actualizados si es necesario
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error.message);
+      throw error;  // Re-lanzar error para manejarlo más tarde
+    }
   };
 
+  const fetchConsultaSolicitud = async (idSolicitud) => {
+    try {
+      const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log("Solicitud consultada con éxito:", response.data);
+      setDataRecibir(response.data);  // Almacenar los datos de la solicitud
+      return response.data;  // Devolver los datos consultados
+    } catch (error) {
+      console.error("Error al consultar la solicitud:", error.message);
+      throw error;  // Re-lanzar error para manejarlo más tarde
+    }
+  };
+
+  const handleSubmit = async (values) => {
+    const fotourl = values.Foto; // URL de la foto que deseas cargar
+
+    // Formatear los valores para la API, con conversiones necesarias
+    const formattedValues = {
+      ...values,
+      Foto: 'prueba',  // Valor temporal de la foto mientras se maneja la carga
+      Bodega: Number(values.Bodega),
+      idActEconomina: Number(values.idActEconomina),
+      idCre_Tiempo: Number(values.idCre_Tiempo),
+      idProductos: Number(values.idProductos),
+      ApellidoMaterno: values.ApellidoMaterno?.trim().toUpperCase(),
+      ApellidoPaterno: values.ApellidoPaterno?.trim().toUpperCase(),
+      PrimerNombre: values.PrimerNombre?.trim().toUpperCase(),
+      SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
+      CodDactilar: values.CodDactilar?.toUpperCase(),
+      idCompraEncuesta: Number(values.idCompraEncuesta),
+      idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
+    };
 
 
-  try {
-    // 1. Crear la solicitud
-    const url = APIURL.post_cre_solicitud_web();
-    const createResponse = await axios.post(url, formattedValues, {
-      headers: { method: "POST", cache: "no-store" },
-    });
 
-    // 2. Consultar la solicitud recién creada
-    if (createResponse.data.idCre_SolicitudWeb) {
-      const solicitudData = await fetchConsultaSolicitud(createResponse.data.idCre_SolicitudWeb);
-   
-      // 3. Subir archivo si existe una foto
-      if (fotourl && solicitudData) {
-        const file = fotourl;  // El archivo completo, no solo el nombre
+    try {
+      // 1. Crear la solicitud
+      const url = APIURL.post_cre_solicitud_web();
+      const createResponse = await axios.post(url, formattedValues, {
+        headers: { method: "POST", cache: "no-store" },
+      });
 
-        // 4. Subir la foto
-        const fileUploadResponse = await uploadFile(
-          file,
-          values.Bodega,
-          values.Cedula,
-          solicitudData.NumeroSolicitud,
-          "FOTO",
-        );
+      // 2. Consultar la solicitud recién creada
+      if (createResponse.data.idCre_SolicitudWeb) {
+        const solicitudData = await fetchConsultaSolicitud(createResponse.data.idCre_SolicitudWeb);
 
-        // 5. Si la subida fue exitosa, almacenar la URL de la foto
-        if (fileUploadResponse) {
-          setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
+        // 3. Subir archivo si existe una foto
+        if (fotourl && solicitudData) {
+          const file = fotourl;  // El archivo completo, no solo el nombre
 
-          // 6. Actualizar la solicitud con la URL de la foto
-          const updatedData = {
-            Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
-          };
-          const updatedSolicitud = await fetchActualizaSolicitud(solicitudData.idCre_SolicitudWeb, updatedData);
+          // 4. Subir la foto
+          const fileUploadResponse = await uploadFile(
+            file,
+            values.Bodega,
+            values.Cedula,
+            solicitudData.NumeroSolicitud,
+            "FOTO",
+          );
+
+          // 5. Si la subida fue exitosa, almacenar la URL de la foto
+          if (fileUploadResponse) {
+            setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
+
+            // 6. Actualizar la solicitud con la URL de la foto
+            const updatedData = {
+              Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
+            };
+            const updatedSolicitud = await fetchActualizaSolicitud(solicitudData.idCre_SolicitudWeb, updatedData);
+          }
         }
       }
+
+      // Mensaje de éxito y cambio de estado del formulario
+      enqueueSnackbar("Solicitud guardada con éxito", { variant: "success", preventDuplicate: true });
+      setFormStatus("success");
+
+    } catch (error) {
+      // Manejo de errores
+      console.error("Error al enviar los datos:", error);
+      enqueueSnackbar("Error al enviar los datos. Por favor, intenta de nuevo más tarde", {
+        variant: "error",
+        preventDuplicate: true,
+      });
+      setFormStatus("error");
     }
-
-    // Mensaje de éxito y cambio de estado del formulario
-    enqueueSnackbar("Solicitud guardada con éxito", { variant: "success", preventDuplicate: true });
-    setFormStatus("success");
-
-  } catch (error) {
-    // Manejo de errores
-    console.error("Error al enviar los datos:", error);
-    enqueueSnackbar("Error al enviar los datos. Por favor, intenta de nuevo más tarde", {
-      variant: "error",
-      preventDuplicate: true,
-    });
-    setFormStatus("error");
-  }
-};
+  };
 
 
   return (
