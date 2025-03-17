@@ -8,104 +8,8 @@ import {
   ExpandMore as ExpandMoreIcon,
   Menu as MenuIcon,
 } from "@mui/icons-material";
-
-// datos quemados
-const  data = [
-  {
-    id: 1,
-    name: "2025",
-    type: "folder",
-    children: [
-      {
-        id: 2,
-        name: "Almacenes",
-        type: "folder",
-        children: [
-          {
-            id: 3,
-            name: "Quicentro",
-            type: "folder",
-            children: [
-              {
-                id: 4,
-                name: "Enero",
-                type: "folder",
-                children: [
-                  { id: 101, name: "Solicitud-001.zip", type: "file" },
-                  { id: 102, name: "Solicitud-002.zip", type: "file" },
-                  { id: 103, name: "Solicitud-003.zip", type: "file" },
-                ],
-              },
-              {
-                id: 5,
-                name: "Febrero",
-                type: "folder",
-                children: [
-                  { id: 104, name: "Solicitud-004.zip", type: "file" },
-                  { id: 105, name: "Solicitud-005.zip", type: "file" },
-                ],
-              },
-            ],
-          },
-          {
-            id: 6,
-            name: "CCI",
-            type: "folder",
-            children: [
-              {
-                id: 7,
-                name: "Enero",
-                type: "folder",
-                children: [
-                  { id: 106, name: "Solicitud-006.zip", type: "file" },
-                  { id: 107, name: "Solicitud-007.zip", type: "file" },
-                ],
-              },
-              {
-                id: 8,
-                name: "Febrero",
-                type: "folder",
-                children: [
-                  { id: 108, name: "Solicitud-008.zip", type: "file" },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 9,
-    name: "2024",
-    type: "folder",
-    children: [
-      {
-        id: 10,
-        name: "Almacenes",
-        type: "folder",
-        children: [
-          {
-            id: 11,
-            name: "Quicentro",
-            type: "folder",
-            children: [
-              {
-                id: 12,
-                name: "Diciembre",
-                type: "folder",
-                children: [
-                  { id: 109, name: "Solicitud-009.zip", type: "file" },
-                  { id: 110, name: "Solicitud-010.zip", type: "file" },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
+import { APIURL } from "../../configApi/apiConfig";
+import axios from 'axios';
 
 export const RepositorioComponent = () => {
   const [view, setView] = useState("grid");
@@ -114,96 +18,196 @@ export const RepositorioComponent = () => {
   const [currentPath, setCurrentPath] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedFileId, setSelectedFileId] = useState(null);
+  // Estado para la data transformada desde la API
+  const [repositorios, setRepositorios] = useState([]);
 
+  // Función para transformar la data de la API en la estructura de carpetas requerida
+  const transformData = (apiData) => {
+    const meses = {
+      1: "Enero",
+      2: "Febrero",
+      3: "Marzo",
+      4: "Abril",
+      5: "Mayo",
+      6: "Junio",
+      7: "Julio",
+      8: "Agosto",
+      9: "Septiembre",
+      10: "Octubre",
+      11: "Noviembre",
+      12: "Diciembre"
+    };
 
-  const findPathToItem = (targetId, items =  data, currentPath = []) => {
+    // Agrupar por Año
+    const agrupadoPorAnio = apiData.reduce((acc, item) => {
+      const anio = item.Anio;
+      if (!acc[anio]) {
+        acc[anio] = [];
+      }
+      acc[anio].push(item);
+      return acc;
+    }, {});
+
+    const dataTree = Object.keys(agrupadoPorAnio).map(anio => {
+      const itemsAnio = agrupadoPorAnio[anio];
+
+      // Agrupar por Bodega
+      const agrupadoPorBodega = itemsAnio.reduce((acc, item) => {
+        const bodega = item.Bodega;
+        if (!acc[bodega]) {
+          acc[bodega] = [];
+        }
+        acc[bodega].push(item);
+        return acc;
+      }, {});
+
+      const bodegas = Object.keys(agrupadoPorBodega).map(bodega => {
+        const itemsBodega = agrupadoPorBodega[bodega];
+
+        // Agrupar por Mes (conversión de número a nombre)
+        const agrupadoPorMes = itemsBodega.reduce((acc, item) => {
+          const mesNombre = meses[item.Mes];
+          if (!acc[mesNombre]) {
+            acc[mesNombre] = [];
+          }
+          acc[mesNombre].push(item);
+          return acc;
+        }, {});
+
+        const mesFolders = Object.keys(agrupadoPorMes).map(mesNombre => {
+          const itemsMes = agrupadoPorMes[mesNombre];
+
+          // Agrupar por día, extraído de FechaSubida
+          const agrupadoPorDia = itemsMes.reduce((acc, item) => {
+            const dia = new Date(item.FechaSubida).getDate();
+            if (!acc[dia]) {
+              acc[dia] = [];
+            }
+            acc[dia].push(item);
+            return acc;
+          }, {});
+
+          const diasFolders = Object.keys(agrupadoPorDia).map(dia => {
+            const files = agrupadoPorDia[dia].map(item => ({
+              id: `${item.idCre_SolicitudWeb}-${item.NumeroSolicitud}-${dia}`,
+              name: item.NumeroSolicitud,
+              type: "file",
+              RutaDocumento: item.RutaDocumento,
+              FechaSubida: item.FechaSubida
+            }));
+            return {
+              id: `${bodega}-${mesNombre}-dia-${dia}`,
+              name: `Día ${dia}`,
+              type: "folder",
+              children: files
+            };
+          });
+
+          return {
+            id: `${bodega}-${mesNombre}`,
+            name: mesNombre,
+            type: "folder",
+            children: diasFolders
+          };
+        });
+
+        return {
+          id: `${anio}-${bodega}`,
+          name: bodega,
+          type: "folder",
+          children: mesFolders
+        };
+      });
+
+      return {
+        id: anio,
+        name: anio,
+        type: "folder",
+        children: bodegas
+      };
+    });
+
+    return dataTree;
+  };
+
+  // Cargar data de la API y transformarla
+  useEffect(() => {
+    const fetchRepositorios = async () => {
+      try {
+        const url = APIURL.get_repositorios(); // Ajusta parámetros si es necesario
+        const response = await axios.get(url, {
+          headers: { "Content-Type": "application/json" },
+        });
+        const apiData = response.data;
+        const transformedData = transformData(apiData);
+        console.log("Data transformada:", transformedData);
+        setRepositorios(transformedData);
+      } catch (error) {
+        console.error("Error al obtener los repositorios", error);
+      }
+    };
+    fetchRepositorios();
+  }, []);
+
+  // Buscar la ruta de un item dado su id en el árbol repositorios
+  const findPathToItem = (targetId, items = repositorios, currentPath = []) => {
     for (const item of items) {
-      // Si encontramos el elemento, devolvemos la ruta
       if (item.id === targetId) {
         return [...currentPath, item.id];
       }
-
-      // Si es una carpeta, buscamos en sus hijos
       if (item.children && item.children.length > 0) {
-        const path = findPathToItem(targetId, item.children, [
-          ...currentPath,
-          item.id,
-        ]);
+        const path = findPathToItem(targetId, item.children, [...currentPath, item.id]);
         if (path) return path;
       }
     }
     return null;
   };
 
-
-  const findPathToFile = (fileId, items =  data, currentPath = []) => {
+  // Buscar la ruta de una carpeta que contenga un archivo dado su id
+  const findPathToFile = (fileId, items = repositorios, currentPath = []) => {
     for (const item of items) {
-      // Si es una carpeta, verificamos sus hijos
       if (item.type === "folder" && item.children) {
-        // Verificamos si el archivo está directamente en esta carpeta
         const fileInFolder = item.children.find(
           (child) => child.id === fileId && child.type === "file"
         );
-
         if (fileInFolder) {
-          // Encontramos el archivo, devolvemos la ruta a la carpeta que lo contiene
           return [...currentPath, item.id];
         }
-
-        // No está directamente aquí, buscamos recursivamente en las subcarpetas
-        const path = findPathToFile(fileId, item.children, [
-          ...currentPath,
-          item.id,
-        ]);
+        const path = findPathToFile(fileId, item.children, [...currentPath, item.id]);
         if (path) return path;
       }
     }
     return null;
   };
 
-  // Función para expandir automáticamente las carpetas en el sidebar basado en la ruta actual
+  // Expandir automáticamente las carpetas del sidebar según la ruta actual
   useEffect(() => {
-    // Configurar las carpetas abiertas en el sidebar basado en la ruta actual
     const newOpenFolders = { ...openSidebarFolders };
-
-    // Para cada ID en la ruta actual, marcar la carpeta como abierta
     currentPath.forEach((id) => {
       newOpenFolders[id] = true;
     });
-
     setOpenSidebarFolders(newOpenFolders);
   }, [currentPath]);
 
-  // Toggle sidebar visibility (mobile responsiveness)
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Toggle sidebar folder expansion y sincroniza con la navegación principal
   const toggleSidebarFolder = (id, item) => {
-    // Si la carpeta se está abriendo, actualiza la ruta principal
     if (!openSidebarFolders[id]) {
-      // Si hacemos clic en una carpeta en el sidebar, navegar a esa carpeta
       const path = findPathToItem(id);
       if (path) {
-        setCurrentPath(path.slice(0, -1)); // Excluimos el último ID porque queremos mostrar el contenido, no navegar dentro
+        setCurrentPath(path.slice(0, -1));
       }
     }
-
-    // Actualiza el estado de apertura de la carpeta en el sidebar
     setOpenSidebarFolders((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // Al hacer clic en un archivo en el sidebar se navega hasta su carpeta
+  // y se actualiza el archivo seleccionado. Aquí no abrimos directamente el archivo.
   const handleSidebarFileClick = (fileId) => {
-    // Encontrar la ruta a la carpeta que contiene el archivo
     const path = findPathToFile(fileId);
-
     if (path) {
-      // Navegar a esa carpeta
       setCurrentPath(path);
-
-      // Seleccionar el archivo
       setSelectedFileId(fileId);
-
-      // Asegurarse de que todas las carpetas en la ruta estén abiertas
       const newOpenFolders = { ...openSidebarFolders };
       path.forEach((id) => {
         newOpenFolders[id] = true;
@@ -212,71 +216,53 @@ export const RepositorioComponent = () => {
     }
   };
 
-  
-  const handleMainFileClick = (fileId) => {
-    setSelectedFileId(fileId);
-    alert(`Archivo abierto: ID ${fileId}`);
+  // Al hacer clic en un archivo en el área principal se abre la URL del archivo
+  const handleMainFileClick = (file) => {
+    setSelectedFileId(file.id);
+    // Aquí se maneja la lógica de abrir el archivo; por ejemplo, abriendo la URL en una nueva pestaña.
+    window.open(file.RutaDocumento, "_blank");
   };
 
-  // Navigate to a folder in the main content area
+  // Navegar a una carpeta (contenido principal)
   const navigateToFolder = (item) => {
-    // Al navegar a una carpeta, actualizar la ruta actual
     setCurrentPath([...currentPath, item.id]);
-
-    // Si es una carpeta, también abrir en el sidebar
     if (item.type === "folder") {
       setOpenSidebarFolders((prev) => ({ ...prev, [item.id]: true }));
     }
-
-    // Reset de archivo seleccionado al cambiar de carpeta
     setSelectedFileId(null);
   };
 
-  // Get the current folder content based on the navigation path
+  // Obtener el contenido de la carpeta actual basado en la ruta
   const getCurrentFolderContent = () => {
-    let content =  data;
-
-    // If we have a path, traverse through it
+    let content = repositorios;
     if (currentPath.length > 0) {
-      let currentLevel =  data;
-
+      let currentLevel = repositorios;
       for (const id of currentPath) {
-        // Find the item with this id at the current level
         const foundItem = currentLevel.find((item) => item.id === id);
-
         if (foundItem && foundItem.children) {
           currentLevel = foundItem.children;
         } else {
-          return []; // Path is invalid
+          return [];
         }
       }
-
       content = currentLevel;
     }
-
-    // Apply search filter if needed
     if (search) {
       return content.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase())
       );
     }
-
     return content;
   };
 
-  // breadcrumb/ path /names /
+  // Breadcrumbs para la navegación
   const getBreadcrumbs = () => {
     const breadcrumbs = [];
-    let currentLevel =  data;
-
-    // Start with "Home"
+    let currentLevel = repositorios;
     breadcrumbs.push({ id: null, name: "Home" });
-
-    // Add each level in the path
     for (let i = 0; i < currentPath.length; i++) {
       const id = currentPath[i];
       const item = currentLevel.find((item) => item.id === id);
-
       if (item) {
         breadcrumbs.push({ id, name: item.name });
         if (item.children) {
@@ -284,17 +270,13 @@ export const RepositorioComponent = () => {
         }
       }
     }
-
     return breadcrumbs;
   };
 
-  // Obtener el elemento actual basado en la ruta
   const getCurrentItem = () => {
     if (currentPath.length === 0) return null;
-
     let currentItem = null;
-    let items =  data;
-
+    let items = repositorios;
     for (const id of currentPath) {
       currentItem = items.find((item) => item.id === id);
       if (currentItem && currentItem.children) {
@@ -303,24 +285,20 @@ export const RepositorioComponent = () => {
         break;
       }
     }
-
     return currentItem;
   };
 
-  // Render sidebar folders recursively
+  // Renderizado recursivo de carpetas para el sidebar
   const renderSidebarFolders = (items, level = 0) => {
     return items.map((item) => {
-      // Verificar si este elemento está en la ruta actual
       const isInCurrentPath = currentPath.includes(item.id);
-      // Verificar si este archivo está seleccionado
       const isSelectedFile = item.type === "file" && item.id === selectedFileId;
-
       return (
-        <div key={item.id} className={`flex flex-col`}>
+        <div key={item.id} className="flex flex-col">
           {item.type === "folder" ? (
             <button
               className={`flex items-center w-full p-2 hover:bg-gray-200 rounded-lg transition ${
-                isInCurrentPath ? "  font-medium" : ""
+                isInCurrentPath ? "font-medium" : ""
               } ${level > 0 ? `ml-${level * 2}` : ""}`}
               onClick={() => toggleSidebarFolder(item.id, item)}
             >
@@ -339,7 +317,7 @@ export const RepositorioComponent = () => {
           ) : (
             <div
               className={`flex items-center p-2 hover:bg-gray-200 rounded-lg transition cursor-pointer ${
-                isSelectedFile ? "  font-medium" : ""
+                isSelectedFile ? "font-medium" : ""
               } ${level > 0 ? `ml-${level * 4}` : ""}`}
               onClick={() => handleSidebarFileClick(item.id)}
             >
@@ -352,16 +330,13 @@ export const RepositorioComponent = () => {
             </div>
           )}
           {item.children && openSidebarFolders[item.id] && (
-            <div className="ml-4">
-              {renderSidebarFolders(item.children, level + 1)}
-            </div>
+            <div className="ml-4">{renderSidebarFolders(item.children, level + 1)}</div>
           )}
         </div>
       );
     });
   };
 
-  // Navigate back one level
   const navigateUp = () => {
     if (currentPath.length > 0) {
       setCurrentPath(currentPath.slice(0, -1));
@@ -369,14 +344,13 @@ export const RepositorioComponent = () => {
     }
   };
 
-  // Get the current folder items
   const currentFolderContent = getCurrentFolderContent();
   const breadcrumbs = getBreadcrumbs();
   const currentItem = getCurrentItem();
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Mobile sidebar toggle */}
+      {/* Botón para toggle del sidebar en mobile */}
       <button
         className="md:hidden p-2 bg-gray-600 text-white fixed top-4 left-4 rounded-lg shadow-md z-10"
         onClick={toggleSidebar}
@@ -390,12 +364,17 @@ export const RepositorioComponent = () => {
           sidebarOpen ? "w-64" : "w-0 overflow-hidden"
         } md:w-64`}
       >
-        <nav className="space-y-1 mt-4">{renderSidebarFolders( data)}</nav>
+        <nav className="space-y-1 mt-4">
+          {repositorios.length > 0 ? (
+            renderSidebarFolders(repositorios)
+          ) : (
+            <div className="p-4 text-gray-500">Cargando...</div>
+          )}
+        </nav>
       </div>
 
-      {/* Main content */}
+      {/* Área principal */}
       <div className="flex-1 p-6 overflow-auto">
-        {/* Search and view controls */}
         <div className="flex items-center mb-6 gap-4">
           <div className="relative flex-grow">
             <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -425,7 +404,7 @@ export const RepositorioComponent = () => {
           </button>
         </div>
 
-        {/* Breadcrumbs navigation */}
+        {/* Breadcrumbs */}
         <div className="flex items-center mb-4 text-sm text-gray-600 overflow-x-auto">
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center">
@@ -434,10 +413,8 @@ export const RepositorioComponent = () => {
                 className="hover:text-gray-900 hover:underline"
                 onClick={() => {
                   if (index === 0) {
-                    // Clicking "Home" resets to root
                     setCurrentPath([]);
                   } else {
-                    // Navigate to this level
                     setCurrentPath(currentPath.slice(0, index));
                   }
                   setSelectedFileId(null);
@@ -449,7 +426,7 @@ export const RepositorioComponent = () => {
           ))}
         </div>
 
-        {/* Current folder information */}
+        {/* Título de la carpeta actual */}
         {currentItem && (
           <div className="mb-4 flex items-center">
             <FolderIcon className="w-6 h-6 text-blue-500 mr-2" />
@@ -457,7 +434,6 @@ export const RepositorioComponent = () => {
           </div>
         )}
 
-        {/* Back button (when not at root) */}
         {currentPath.length > 0 && (
           <button
             onClick={navigateUp}
@@ -468,7 +444,7 @@ export const RepositorioComponent = () => {
           </button>
         )}
 
-        {/* Folder/file grid or list view */}
+        {/* Renderizado de la carpeta o archivos en vista grid o lista */}
         <div
           className={
             view === "grid"
@@ -489,48 +465,29 @@ export const RepositorioComponent = () => {
                     ? "p-4 flex flex-col items-center gap-2 bg-white border rounded-lg shadow hover:shadow-md transition"
                     : "p-3 flex items-center gap-3 bg-white border rounded-lg shadow hover:shadow-md transition"
                 } cursor-pointer ${
-                  item.id === selectedFileId
-                    ? "ring-2 ring-blue-500 bg-blue-50"
-                    : ""
+                  item.id === selectedFileId ? "ring-2 ring-blue-500 bg-blue-50" : ""
                 }`}
                 onClick={() => {
                   if (item.type === "folder") {
                     navigateToFolder(item);
                   } else {
-                    handleMainFileClick(item.id);
+                    // Aquí pasamos el objeto completo del archivo para abrirlo
+                    handleMainFileClick(item);
                   }
                 }}
               >
                 {item.type === "folder" ? (
-                  <FolderIcon
-                    className={`${
-                      view === "grid" ? "w-12 h-12" : "w-8 h-8"
-                    } text-blue-500`}
-                  />
+                  <FolderIcon className={`${view === "grid" ? "w-12 h-12" : "w-8 h-8"} text-blue-500`} />
                 ) : (
-                  <FileIcon
-                    className={`${view === "grid" ? "w-12 h-12" : "w-8 h-8"} ${
-                      item.id === selectedFileId
-                        ? "text-blue-600"
-                        : "text-gray-500"
-                    }`}
-                  />
+                  <FileIcon className={`${view === "grid" ? "w-12 h-12" : "w-8 h-8"} ${item.id === selectedFileId ? "text-blue-600" : "text-gray-500"}`} />
                 )}
-                <div
-                  className={`${view === "grid" ? "text-center" : ""} truncate`}
-                >
-                  <div
-                    className={`font-medium ${
-                      item.id === selectedFileId ? "text-blue-700" : ""
-                    }`}
-                  >
+                <div className={`${view === "grid" ? "text-center" : ""} truncate`}>
+                  <div className={`font-medium ${item.id === selectedFileId ? "text-blue-700" : ""}`}>
                     {item.name}
                   </div>
                   {view === "list" && item.type === "folder" && (
                     <span className="text-xs text-gray-500">
-                      {item.children
-                        ? `${item.children.length} elementos`
-                        : "0 elementos"}
+                      {item.children ? `${item.children.length} elementos` : "0 elementos"}
                     </span>
                   )}
                 </div>
