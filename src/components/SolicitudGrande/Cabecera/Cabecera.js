@@ -40,6 +40,7 @@ export function Cabecera() {
   const [clienteData, setClienteData] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
 
+
   const { enqueueSnackbar } = useSnackbar();
   const seccionRef = useRef(null); // Crear la referencia para las secciones
 
@@ -94,12 +95,18 @@ export function Cabecera() {
   ];
 
   const renderTabContent = (clienteData) => {
-    console.log("clienteData", clienteData);
+    console.log("clienteData", clienteData.idEdoCivil);
+  
+    // Habilitar el tab de "Datos Conyuge" solo si idEdoCivil == 1
+    if (clienteData.idEdoCivil === 1 && activeTab !== "Datos Conyuge") {
+      setActiveTab("Datos Conyuge"); // Cambiar la pestaña activa a "Datos Conyuge" si el estado civil es 1
+    }
+  
     switch (activeTab) {
       case "Datos Cliente":
         return <DatosCliente ref={datosClienteRef} data={clienteData} />;
       case "Datos Conyuge":
-        return <DatosConyuge />;
+        return clienteData.idEdoCivil === 1 ? <DatosConyuge /> : null; 
       case "Referencias":
         return <Referencias />;
       case "Sección A- Negocio":
@@ -116,6 +123,7 @@ export function Cabecera() {
         return <div>Contenido no disponible</div>;
     }
   };
+  
 
   const validateForm = () => {
     if (!/^\d{10}$/.test(cedula)) {
@@ -221,17 +229,6 @@ export function Cabecera() {
                 <span className="text-xs">Imprimir</span>
               </button>
             </div>
-
-            <div className="flex items-center">
-              <button
-                onClick={() => { }}
-                className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-              >
-                <ManageSearchIcon className="text-lg" />
-                <span className="text-xs">Buscar</span>
-              </button>
-            </div>
-
             <div className="flex items-center">
               <button
                 onClick={() => { }}

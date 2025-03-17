@@ -328,3 +328,27 @@ export const fetchTiempoVivienda = async (enqueueSnackbar, setTiempoVivienda) =>
 	setTiempoVivienda([]);
   }
 }
+
+export const fetchFechaAnalista = async (enqueueSnackbar, setFechaAnalista) => {
+  try {
+    const response = await axios.get(APIURL.getFechaAnalista(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setFechaAnalista(
+      response.data.map((item) => ({
+        value: item.idFechaAnalista,
+        label: item.DesdeHasta,
+        desde: item.Desde,
+        hasta: item.Hasta,
+
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener fecha analista", error);
+    enqueueSnackbar("Error al cargar fecha analista", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setFechaAnalista([]);
+  }
+};
