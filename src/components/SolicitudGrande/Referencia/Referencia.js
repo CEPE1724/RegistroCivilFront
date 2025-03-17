@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
-
+import { SelectField } from "../../Utils";
 import PersonIcon from "@mui/icons-material/Person";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
@@ -419,10 +419,11 @@ export function Referencias() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Parentesco */}
                 <div className="flex flex-col">
+                    
                     <label className="text-lightGrey text-xs mb-2">Parentesco(*)</label>
                     <select
                         name="parentesco"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.parentesco}
                         onChange={handleChange}
                     >
@@ -442,7 +443,7 @@ export function Referencias() {
                         name="apellidoPaterno"
                         autocomplete="off"
                         placeholder="Apellido Paterno"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.apellidoPaterno}
                         onChange={handleChange}
                         pattern="[A-Za-z]+"
@@ -457,7 +458,7 @@ export function Referencias() {
                         name="primerNombre"
                         autocomplete="off"
                         placeholder="Primer Nombre"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.primerNombre}
                         onChange={handleChange}
                     />
@@ -470,7 +471,7 @@ export function Referencias() {
                         name="segundoNombre"
                         autocomplete="off"
                         placeholder="Segundo Nombre"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.segundoNombre}
                         onChange={handleChange}
                     />
@@ -483,7 +484,7 @@ export function Referencias() {
                     <label className="text-lightGrey text-xs mb-2">Provincia(*)</label>
                     <select
                         name="provincia"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.provincia}
                         onChange={handleChange}
                     >
@@ -500,7 +501,7 @@ export function Referencias() {
                     <label className="text-lightGrey text-xs mb-2">Cantón(*)</label>
                     <select
                         name="canton"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.canton}
                         onChange={handleChange}
                     >
@@ -520,7 +521,7 @@ export function Referencias() {
                         name="celular"
                         autocomplete="off"
                         placeholder="Celular"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.celular}
                         onChange={handleChange}
                         maxLength="10"
@@ -633,7 +634,7 @@ export function Referencias() {
                                             <label className="text-lightGrey text-xs mb-2">Estado(*)</label>
                                             <select
                                                 name="estado"
-                                                className="p-2 border rounded"
+                                                className="solcitudgrande-style"
                                                 value={formDataModal.estado}
                                                 onChange={handleChangeModal}
                                             >
@@ -653,7 +654,7 @@ export function Referencias() {
                                                 name="contactoEfectivo"
                                                 autocomplete="off"
                                                 placeholder="Contacto Efectivo"
-                                                className="p-2 border rounded"
+                                                className="solcitudgrande-style"
                                                 value={formDataModal.contactoEfectivo}
                                                 onChange={handleChangeModal}
                                                 pattern="[A-Za-z]+"
@@ -670,7 +671,7 @@ export function Referencias() {
                                     name="observaciones"
                                     rows="3"
                                     placeholder="Ingrese observaciones"
-                                    className="w-full p-2 border rounded"
+                                    className="w-full solcitudgrande-style"
                                     value={formDataModal.observaciones}
                                     onChange={handleChangeModal}
                                 ></textarea>

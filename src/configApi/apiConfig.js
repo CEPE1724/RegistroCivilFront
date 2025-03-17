@@ -85,4 +85,9 @@ export const APIURL = {
 
    post_creSolicitudVerificacionTelefonica : () => `${API_BASE_URL}cre-solicitudverificaciontelefonica`,
 
+   get_analis_cogno : (ci) => `${API_BASE_URL}usuarios/analistas/?Filtro=${ci}`,
+   post_analista : () => `${API_BASE_URL}analistacredito`,
+   getFechaAnalista : () => `${API_BASE_URL}fecha-analista`,
+   analistacredito : () => `${API_BASE_URL}analistacredito`,
+
 };
