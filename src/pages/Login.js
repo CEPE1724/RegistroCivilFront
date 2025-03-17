@@ -31,7 +31,7 @@ const Login = () => {
   
       const response = await axios.post("auth/login", {
         Nombre: userName,
-        password: password,
+        Clave: password,
       });
 
       if (response.status === 201) {

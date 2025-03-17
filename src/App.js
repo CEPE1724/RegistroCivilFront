@@ -23,7 +23,7 @@ import TelefonicaListSol from "./pages/TelefonicaListSol";
 import GestorDocumentosCli from "./pages/GestorDocumentos";
 import { useAuth } from "./components/AuthContext/AuthContext";
 import RepositorioCreditos from "./pages/RepositorioCreditos";
-
+import  CalendarioOperador from "./pages/CalendarioOperador";
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -56,6 +56,7 @@ function App() {
         <Route path="/ciudadanos" element={<PrivateRouteWrapper title="Ciudadanos Almacenados" element={<Ciudadanos />} />} />
         <Route path="/proteccion-datos" element={<PrivateRouteWrapper title="Protección de Datos" element={<DataProtection />} />} />
         <Route path="/gestor" element={<PrivateRouteWrapper title="Gestor Virtual" element={<GestorVirtual />} />} />
+        <Route path="/calendar" element={<PrivateRouteWrapper title="calendar Virtual" element={<CalendarioOperador />} />} />
         <Route path="/solicitud" element={<PrivateRouteWrapper title="Solicitud" element={<SolicitudCredito />} />} />
         <Route path="/documental" element={<PrivateRouteWrapper title="Documentos" element={<Documento1 />} />} />
         <Route path="/telefonica" element={<PrivateRouteWrapper title="Telefonica" element={<VerificacionTelefonica />} />} />

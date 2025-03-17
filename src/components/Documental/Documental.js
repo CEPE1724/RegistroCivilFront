@@ -328,7 +328,12 @@ export function Documental({
       if (response && response.url) {
         const urlArchivo = response.url;
         console.log("URL del archivo subido:", urlArchivo);
-  
+        // validar que lso campso esten llenos
+        if (!idTipoDocumentoWEB) {
+          enqueueSnackbar("Error al obtener el ID del tipo de documento.", { variant: "error" });
+          return;
+        }
+        
         // Crear el payload con los datos para la API
         const payload = {
           idCre_SolicitudWeb: clientInfo.id,
