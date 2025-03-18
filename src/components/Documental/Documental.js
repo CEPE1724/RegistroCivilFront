@@ -44,7 +44,8 @@ export function Documental({
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-   const [refreshFiles, setRefreshFiles] = useState(false);
+  const [refreshFiles, setRefreshFiles] = useState(false);
+  const [completedFields2, setCompletedFields2] = useState([]);
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -59,17 +60,19 @@ export function Documental({
   });
   const [filePreviews, setFilePreviews] = useState({});
 
+
+
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const response = await axios.get(
-          `${APIURL.get_documentos(clientInfo.id)}`
-        );
+        const response = await axios.get(APIURL.get_documentos(clientInfo.id));
 
         console.log("Respuesta API Documentos:", response.data);
         if (response.status === 200 && Array.isArray(response.data)) {
           const uploadedFiles = {};
           const previews = {};
+          const completed = new Set();
+
 
           response.data.forEach((file) => {
             console.log("Archivo recibido:", file); // ✅ Verificar estructura de cada archivo
@@ -92,10 +95,14 @@ export function Documental({
             });
 
             previews[sectionName].push(fileUrl);
+            completed.add(sectionName);
+
           });
 
           setFiles(uploadedFiles);
           setFilePreviews(previews);
+          setCompletedFields2([...completed]);
+
         }
       } catch (error) {
         enqueueSnackbar("Error al obtener archivos subidos.", {
@@ -108,7 +115,8 @@ export function Documental({
     if (clientInfo.NumeroSolicitud) {
       fetchUploadedFiles();
     }
-  }, [clientInfo.id , activeTab , refreshFiles]);
+  }, [clientInfo.id  , refreshFiles]);
+
 
   const getTipoDocumento = (id) => {
     const documentoIds = {
@@ -187,11 +195,20 @@ export function Documental({
   }, []); */
 
   const calculateProgress = () => {
-    const totalFields = menuItems.length;
-    const completedFields = menuItems.filter(
-      (field) => files[field] && files[field].length > 0
-    ).length;
-    return (completedFields / totalFields) * 100;
+    const totalFields = 11; // Siempre hay 11 documentos en total
+    const completedFieldsCount = completedFields2.length; // Contamos los vistos (✓)
+  
+    return (completedFieldsCount / totalFields) * 100;
+  };
+  
+  const patchsolicitudWeb = async () => {
+    try {
+      const response = await axios.patch(`${APIURL}/documentos-solicitud/updateEstado/${clientInfo.id}`);
+      
+      console.log('Respuesta del servidor:', response.data);
+    } catch (error) {
+      console.error('Error al actualizar documentos:', error);
+    }
   };
 
   const getProgressBarColor = () => {
@@ -200,6 +217,16 @@ export function Documental({
     if (progress < 80) return "#FF9800";
     return "#4CAF50";
   };
+
+
+  useEffect(() => {
+    if (calculateProgress() === 100) {
+      console.log("✅ Todos los archivos han sido subidos correctamente.");
+      // 🔴 Aquí puedes ejecutar la acción que necesites
+      patchsolicitudWeb();
+      ///
+    }
+  }, [calculateProgress()]); // Se ejecuta cuando el progreso cambia
 
   const handleFileChange = (e, field) => {
     const selectedFiles = Array.from(e.target.files);
@@ -265,6 +292,9 @@ export function Documental({
           enqueueSnackbar("Documento eliminado correctamente.", {
             variant: "success",
           });
+
+          setRefreshFiles((prev) => !prev); // Esto recarga los archivos en el useEffect
+
         }
       } catch (error) {
         enqueueSnackbar("Error al eliminar el documento en la BD.", {
@@ -575,45 +605,46 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
           </div>
 
           {/* Campos Completados */}
-         {/* Campos Completados */}
-{completedFields.length > 0 && (
-  <div className="mt-6">
-    <h3 className="text-lg text-gray-300 font-semibold">
-      Campos Completados
-    </h3>
-    <ul className="mt-4 space-y-4">
-      {completedFields.map((item) => {
-        const fileCount = files[item] ? files[item].length : 0;
-        return (
-          <li key={item}>
-            <a
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                setActiveTab(item);
-              }}
-              className={`inline-flex items-center text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
-                activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
-              }`}
-            >
-              {item}
-              {fileCount > 0 && (
-                <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
-                  {`+${fileCount}`}
-                </span>
-              )}
-              {/* Indicador de archivos subidos ✅ */}
-              {fileCount > 0 && (
+          {completedFields.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg text-gray-300 font-semibold">
+                Campos Completados
+              </h3>
+              <ul className="mt-4 space-y-4">
+                {completedFields.map((item) => {
+                  const fileCount = files[item] ? files[item].length : 0;
+                  return (
+                    <li key={item}>
+                      <a
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault(); // Evita que el navegador cambie la URL
+                          setActiveTab(item);
+                        }}
+                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
+                          activeTab === item
+                            ? "bg-gray-700"
+                            : "hover:bg-gray-600"
+                        }`}
+                      >
+                        {item}
+                        {fileCount > 0 && (
+                          <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
+                            {`+${fileCount}`}
+                          </span>
+                        )}
+
+                        {/* ✅ Solo mostrar visto en los que ya están en la BD */}
+              {completedFields2.includes(item) && (
                 <span className="ml-2 text-green-400 font-bold">✓</span>
               )}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-)}
-
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -693,7 +724,7 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
                       <IconButton onClick={toggleView}>
                         <VisibilityIcon />
                       </IconButton>
-
+                  {/*     
                       <button
                         type="button"
                         onClick={() =>
@@ -702,7 +733,7 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
                         className="text-red-500 hover:text-red-700"
                       >
                         ❌
-                      </button>
+                      </button>  */}
                     </div>
                   </div>
 
