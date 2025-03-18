@@ -25,6 +25,7 @@ export function CalendarPerson(props) {
   const [fechaAnalista, setFechaAnalista] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTitle, setSelectedTitle] = useState('');
+  const [selectedAnalista, setSelectedAnalista] = useState('');
   const [schedule, setSchedule] = useState({});
   const [diaActual, setDiaActual] = useState([]);
 
@@ -34,7 +35,7 @@ export function CalendarPerson(props) {
   useEffect(() => {
     fetchFechaAnalista(enqueueSnackbar, setFechaAnalista);
   }, []);
- const getWeekDates = (startDate, endDate) => {
+  const getWeekDates = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const weekDates = [];
@@ -53,6 +54,8 @@ export function CalendarPerson(props) {
 
     return weekDates;
   };
+
+
   // Filtrar fechas en el rango seleccionado
   const FechaDia = useMemo(() => {
     if (!selectedDate) return [];
@@ -69,10 +72,14 @@ export function CalendarPerson(props) {
     return weekDates;
   }, [selectedDate, fechaAnalista]);
 
-  console.log('fecha dia',FechaDia);
-  const handleMenuClick = (title) => {
+  const handleMenuClick = (title, item) => {
+    console.log('item', item);
     setSelectedTitle(title);
+    setSelectedAnalista(item.idAnalistaCredito);
   };
+
+
+
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -80,7 +87,7 @@ export function CalendarPerson(props) {
       Papa.parse(file, {
         complete: (result) => {
           const data = result.data;
-          const updatedSchedule = {};
+          const updatedSchedule = { ...schedule }; // Copiar el estado actual para actualizarlo correctamente
 
           data.forEach((row) => {
             const { Day, Hour, Status } = row;
@@ -94,18 +101,26 @@ export function CalendarPerson(props) {
             const dayIndex = days.indexOf(Day);
             const currentDayIndex = days.indexOf(currentDayName) + 1;
 
+            // Verificar si el horario no es pasado
             if (dayIndex > currentDayIndex || (dayIndex === currentDayIndex && parseInt(Hour) > currentHour)) {
               if (!updatedSchedule[Day]) updatedSchedule[Day] = {};
-              updatedSchedule[Day][Hour] = Status === 'Active';
+
+              // Alternar el estado entre Active e Inactive (igual que en handleButtonClick)
+              updatedSchedule[Day][Hour] = Status === 'Active' ? 'Active' : 'Inactive';
+
+              // Llamar a la API para guardar el horario actualizado
+              fetchsaveHorario(Day, Hour, updatedSchedule[Day][Hour]);
             }
           });
 
-          setSchedule(updatedSchedule);
+          // Actualizar el estado con el horario procesado desde el archivo
+          setSchedule(updatedSchedule); // Asegurarse de actualizar correctamente el estado
         },
         header: true,
       });
     }
   };
+
 
   const handleButtonClick = (day, hour) => {
     const currentDate = new Date();
@@ -119,11 +134,38 @@ export function CalendarPerson(props) {
       setSchedule((prevSchedule) => {
         const updatedSchedule = { ...prevSchedule };
         if (!updatedSchedule[day]) updatedSchedule[day] = {};
-        updatedSchedule[day][hour] = !updatedSchedule[day][hour];
+        const isActive = updatedSchedule[day][hour] === 'Active'; // Comprobar si ya está activo
+        updatedSchedule[day][hour] = isActive ? 'Inactive' : 'Active'; // Cambiar entre "Active" e "Inactive"
         return updatedSchedule;
       });
+
+      fetchsaveHorario(day, hour);
     } else {
       enqueueSnackbar('No se puede modificar horarios pasados', { variant: 'warning' });
+    }
+  };
+
+  const fetchsaveHorario = async (day, hour) => {
+    try {
+      // Extraer solo la parte de la hora (antes del ':')
+      const hourInt = parseInt(hour.split(':')[0], 10);  // Convierte a número entero
+
+      const currentScheduleState = schedule[day] && schedule[day][hour] === 'Active' ? 'Inactive' : 'Active';
+      const iEstadoValue = currentScheduleState === 'Active' ? 1 : 0;
+
+      const url = APIURL.posthorarioanalista();
+      const response = await axios.post(url, {
+        idAnalistaCredito: selectedAnalista,
+        Hora: hourInt,  // Usamos el valor de hour como entero
+        Dia: day,
+        Estado: currentScheduleState,  // "Active" o "Inactive"
+        iEstado: iEstadoValue,  // 1 para "Active" y 0 para "Inactive"
+        idFechaAnalista: parseInt(selectedDate, 10),  // Convertir a número entero
+      });
+
+      enqueueSnackbar('Horario guardado exitosamente!', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar('Error al guardar el horario', { variant: 'error' });
     }
   };
 
@@ -162,9 +204,9 @@ export function CalendarPerson(props) {
               <div key={index} className="mb-3">
                 <button
                   className="flex items-center space-x-2 w-full text-left text-blue-600 py-3 px-5 rounded-md hover:bg-gray-200"
-                  onClick={() => handleMenuClick(item.Nombre)}
+                  onClick={() => handleMenuClick(item.Nombre, item)}
                 >
-                  <span className="text-gray-700">{item.Nombre}</span>
+                  <span className="text-gray-700">{item.Nombre} </span>
                 </button>
               </div>
             ))
@@ -176,6 +218,7 @@ export function CalendarPerson(props) {
         <div className="flex-1 p-6 md:w-3/4">
           <div className="text-2xl font-semibold text-gray-700 mb-6">
             {selectedTitle ? `Analista: ${selectedTitle}` : 'S/N'}
+            {selectedAnalista ? ` - ${selectedAnalista}` : ''}
           </div>
           <div className="bg-white shadow-lg rounded-lg p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -191,8 +234,9 @@ export function CalendarPerson(props) {
 
           {(selectedTitle && selectedDate) && (
             <div className="bg-white shadow-lg rounded-lg p-4 mb-6">
+
               <div className="grid grid-cols-8 gap-4">
-                <div></div>
+                <div> </div>
                 {days.map((day, index) => (
                   <div key={index} className="text-center font-semibold text-gray-700">{day}</div>
                 ))}
@@ -202,7 +246,10 @@ export function CalendarPerson(props) {
                     {days.map((day, dayIndex) => (
                       <div key={dayIndex} className="text-center">
                         <button
-                          className={`w-full h-full text-sm font-semibold rounded-md transition-all duration-200 ${schedule[day] && schedule[day][hour] ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+                          className={`w-full h-full text-sm font-semibold rounded-md transition-all duration-200 ${schedule[day] && schedule[day][hour] === 'Active'
+                            ? 'bg-green-500 text-white'  // Color verde si está activo
+                            : 'bg-gray-200'  // Color gris si está inactivo
+                            }`}
                           onClick={() => handleButtonClick(day, hour)}
                         >
                           {schedule[day] && schedule[day][hour] ? (
@@ -211,13 +258,16 @@ export function CalendarPerson(props) {
                             <RadioButtonUncheckedIcon className="text-gray-600" />
                           )}
                         </button>
+
                       </div>
                     ))}
                   </React.Fragment>
                 ))}
+
               </div>
             </div>
           )}
+
 
           <div className="mt-4">
             <input
