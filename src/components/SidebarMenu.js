@@ -6,32 +6,29 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import GroupIcon from "@mui/icons-material/Group";
-import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import GroupIcon from "@mui/icons-material/Group";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import SecurityIcon from "@mui/icons-material/Security";
 import PersonIcon from "@mui/icons-material/Person";
 import GpsFixed from "@mui/icons-material/GpsFixed";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; // Flecha para submenú
 import Collapse from "@mui/material/Collapse";
 import axios from "axios"; // Importando axios
 import { APIURL } from "../configApi/apiConfig";
+
 export function SwipeableTemporaryDrawer({ userDataToken }) {
   const [open, setOpen] = useState(false);
-  const [openGestor, setOpenGestor] = useState(false);
+  const [openSubMenus, setOpenSubMenus] = useState({});
   const [userData, setUserData] = useState([]);
-  const handleGestorClick = (event) => {
-    event.stopPropagation();
-    setOpenGestor(!openGestor);
-  };
 
   // Fetching data from the API with axios
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Fetching data...", userDataToken);
         const url = APIURL.getMenu(userDataToken.idUsuario);
         const response = await axios.get(url);
         setUserData(response.data);
@@ -41,65 +38,104 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
     };
 
     fetchData();
-    fetchBodegaUsuario();
-  }, []);
+  }, [userDataToken]);
 
-  const fetchBodegaUsuario = async () => {
-    try {
-      console.log("Fetching data...", userData);
-      // Definir los parámetros que quieres enviar
-      const params = {
-        userId: userDataToken.idUsuario,  // Ejemplo de ID de usuario
-        idTipoFactura: 43,  // Ejemplo de tipo de factura
-        fecha: '2025-03-06T00:00:00.000Z',  // Fecha en formato ISO 8601
-        recibeConsignacion: true  // Parámetro de consignación
-      };
+  // Filtrar los datos de menú para los elementos principales
+  const menuItems = userData.filter(item => item.i_parent_id === null || item.i_parent_id === 0);
 
-      // Realizar la solicitud GET pasando los parámetros en la propiedad 'params'
-      const response = await axios.get(APIURL.getUsuarioBodega(), { params });
+  // Función recursiva para crear submenús
+  const createSubMenu = (parentId) => {
+    return userData
+      .filter(item => item.i_parent_id === parentId)
+      .map(item => ({
+        ...item,
+        children: createSubMenu(item.i_idmenu_items), // Recursivamente crea submenús
+      }));
+  };
 
-      // Manejar la respuesta
-    } catch (error) {
-      // Manejo de errores
-      console.error("Error fetching data:", error);
+  // Función para manejar el toggle de submenú
+  const handleSubMenuToggle = (id) => {
+    setOpenSubMenus(prevState => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+  };
+
+  // Asignar íconos dinámicamente
+  const getIcon = (iconName) => {
+    switch (iconName) {
+      case "GroupIcon": return <GroupIcon />;
+      case "ContentPasteSearchIcon": return <ContentPasteSearchIcon />;
+      case "SecurityIcon": return <SecurityIcon />;
+      case "PersonIcon": return <PersonIcon />;
+      case "GpsFixed": return <GpsFixed />;
+      case "PersonSearchIcon": return <PersonSearchIcon />;
+      case "ManageAccountsIcon": return <ManageAccountsIcon />;
+      default: return <GroupIcon />;
     }
   };
-  // Filtrar los datos de menú para los elementos principales
-  const menuItems = userData.map(item => item.i_parent_id === null ? item : null).filter(Boolean);
 
-  // Reusable ListItem Component
-  const MenuItem = ({ to, icon, text }) => (
-    <ListItem disablePadding>
-      <ListItemButton component={Link} to={to}>
-        <ListItemIcon>{icon}</ListItemIcon>
-        <ListItemText primary={text} />
-      </ListItemButton>
-    </ListItem>
+  // Componente de Item de Menú
+  const MenuItem = ({ to, icon, text, id, children }) => (
+    <div>
+      <ListItem disablePadding>
+        <ListItemButton
+          component={to ? Link : 'button'} // Usamos Link solo si `to` está definido
+          to={to}  // Usamos la ruta si existe
+          onClick={() => children && handleSubMenuToggle(id)} // Solo gestionamos el click si hay submenú
+        >
+          <ListItemIcon>{icon}</ListItemIcon>
+          <ListItemText primary={text} />
+          {children && (
+            <ListItemIcon>
+              <ArrowForwardIosIcon style={{ transform: openSubMenus[id] ? "rotate(90deg)" : "rotate(0deg)" }} />
+            </ListItemIcon>
+          )}
+        </ListItemButton>
+      </ListItem>
+      {children && openSubMenus[id] && (
+        <Collapse in={openSubMenus[id]} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {children.map((subMenu) => (
+              <MenuItem
+                key={subMenu.i_idmenu_items}
+                to={subMenu.i_route} // Aquí ahora se usa la ruta correcta para submenú
+                icon={getIcon(subMenu.i_icon)}
+                text={subMenu.i_name}
+                id={subMenu.i_idmenu_items}
+                children={subMenu.children} // Recursividad para submenú
+              />
+            ))}
+          </List>
+        </Collapse>
+      )}
+    </div>
   );
 
-  // Gestor Virtual Submenu
-  const GestorSubMenu = ({ open, onToggle }) => (
-    <Collapse in={open} timeout="auto" unmountOnExit>
-      <List component="div" disablePadding>
-        <ListItemButton component={Link} to="/gestor">
-          <ListItemIcon>
-            <ManageAccountsIcon className="mr-2" />
-          </ListItemIcon>
-          <ListItemText inset primary="Gestor" />
-        </ListItemButton>
-        <ListItemButton component={Link} to="/calendar">
-          <ListItemIcon>
-            <ManageAccountsIcon className="mr-2" />
-          </ListItemIcon>
-          <ListItemText inset primary="Calnedario Operadoras" />
-        </ListItemButton>
-      </List>
-    </Collapse>
-  );
+  // Crear la estructura del menú con los submenús
+  const structuredMenuItems = menuItems.map((menuItem) => {
+    const { i_idmenu_items, i_name, i_route, i_icon } = menuItem;
+    const icon = getIcon(i_icon);
+    const subMenu = createSubMenu(i_idmenu_items); // Creando los submenús automáticamente
+
+    return (
+      <MenuItem
+        key={i_idmenu_items}
+        to={i_route || '#'} // Ahora los menús principales también tienen su ruta
+        icon={icon}
+        text={i_name}
+        id={i_idmenu_items}
+        children={subMenu} // Enviando los submenús si existen
+      />
+    );
+  });
 
   return (
     <div>
-      <button className="ml-2 mr-4 text-white" onClick={() => setOpen(true)}>
+      <button
+        className="ml-2 mr-4 text-white p-2 bg-morado rounded-full hover:bg-morado focus:outline-none"
+        onClick={() => setOpen(true)}
+      >
         <MenuIcon />
       </button>
 
@@ -118,77 +154,20 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
         >
           <List sx={{ padding: 0 }}>
             {/* Logo */}
-            <div className="bg-morado py-2 lg:px-1 h-20 flex justify-center items-center">
-              <Link to="/">
+            <div className="bg-morado py-2 h-20 flex justify-center items-center">
+             
                 <img
                   className="sm:w-24 w-24 lg:w-36 mx-auto cursor-pointer"
                   src="/img/logo.webp"
                   alt="Logo Point"
                 />
-              </Link>
+             
             </div>
-
-            {/* Render dynamic menu items */}
-            {menuItems.map((menuItem) => {
-              const { i_idmenu_items, i_name, i_route, i_icon } = menuItem;
-
-              // Asignar iconos dinámicamente
-              let icon;
-              switch (i_icon) {
-                case "GroupIcon":
-                  icon = <GroupIcon />;
-                  break;
-                case "ContentPasteSearchIcon":
-                  icon = <ContentPasteSearchIcon />;
-                  break;
-                case "SecurityIcon":
-                  icon = <SecurityIcon />;
-                  break;
-                case "PersonIcon":
-                  icon = <PersonIcon />;
-                  break;
-                case "GpsFixed":
-                  icon = <GpsFixed />;
-                  break;
-                case "PersonSearchIcon":
-                  icon = <PersonSearchIcon />;
-                  break;
-                case "ManageAccountsIcon":
-                  icon = <ManageAccountsIcon />;
-                  break;
-                default:
-                  icon = <GroupIcon />;
-                  break;
-              }
-
-              return (
-                <MenuItem
-                  key={i_idmenu_items}
-                  to={i_route}
-                  icon={icon}
-                  text={i_name}
-                />
-              );
-            })}
-
-            {/* Gestor Virtual - with submenu */}
-            {menuItems.some(item => item.i_idmenu_items === 6) && (
-              <ListItem disablePadding>
-                <ListItemButton onClick={handleGestorClick}>
-                  <ListItemIcon>
-                    <PersonSearchIcon className="mr-2" />
-                  </ListItemIcon>
-                  <ListItemText primary="Gestor Virtual" />
-                </ListItemButton>
-              </ListItem>
-            )}
-
-            <GestorSubMenu open={openGestor} onToggle={handleGestorClick} />
+            {/* Render de los elementos del menú principal */}
+            {structuredMenuItems}
           </List>
         </Box>
       </SwipeableDrawer>
     </div>
   );
-};
-
-
+}

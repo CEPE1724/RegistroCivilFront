@@ -23,131 +23,133 @@ export const RepositorioComponent = () => {
 
   // Función para transformar la data de la API en la estructura de carpetas requerida
   const transformData = (apiData) => {
-	const meses = {
-	  1: "Enero",
-	  2: "Febrero",
-	  3: "Marzo",
-	  4: "Abril",
-	  5: "Mayo",
-	  6: "Junio",
-	  7: "Julio",
-	  8: "Agosto",
-	  9: "Septiembre",
-	  10: "Octubre",
-	  11: "Noviembre",
-	  12: "Diciembre"
-	};
+    const meses = {
+      1: "Enero",
+      2: "Febrero",
+      3: "Marzo",
+      4: "Abril",
+      5: "Mayo",
+      6: "Junio",
+      7: "Julio",
+      8: "Agosto",
+      9: "Septiembre",
+      10: "Octubre",
+      11: "Noviembre",
+      12: "Diciembre"
+    };
   
-	// Agrupar por Año
-	const agrupadoPorAnio = apiData.reduce((acc, item) => {
-	  const anio = item.Anio;
-	  if (!acc[anio]) {
-		acc[anio] = [];
-	  }
-	  acc[anio].push(item);
-	  return acc;
-	}, {});
+    // Agrupar por Año
+    const agrupadoPorAnio = apiData.reduce((acc, item) => {
+      const anio = item.Anio;
+      if (!acc[anio]) {
+        acc[anio] = [];
+      }
+      acc[anio].push(item);
+      return acc;
+    }, {});
   
-	const dataTree = Object.keys(agrupadoPorAnio).map(anio => {
-	  const itemsAnio = agrupadoPorAnio[anio];
+    const dataTree = Object.keys(agrupadoPorAnio).map(anio => {
+      const itemsAnio = agrupadoPorAnio[anio];
   
-	  // Agrupar por Bodega
-	  const agrupadoPorBodega = itemsAnio.reduce((acc, item) => {
-		const bodega = item.Bodega;
-		if (!acc[bodega]) {
-		  acc[bodega] = [];
-		}
-		acc[bodega].push(item);
-		return acc;
-	  }, {});
+      // Agrupar por Bodega
+      const agrupadoPorBodega = itemsAnio.reduce((acc, item) => {
+        const bodega = item.Bodega;
+        if (!acc[bodega]) {
+          acc[bodega] = [];
+        }
+        acc[bodega].push(item);
+        return acc;
+      }, {});
   
-	  const bodegas = Object.keys(agrupadoPorBodega).map(bodega => {
-		const itemsBodega = agrupadoPorBodega[bodega];
+      const bodegas = Object.keys(agrupadoPorBodega).map(bodega => {
+        const itemsBodega = agrupadoPorBodega[bodega];
   
-		// Agrupar por Mes (conversión de número a nombre)
-		const agrupadoPorMes = itemsBodega.reduce((acc, item) => {
-		  const mesNombre = meses[item.Mes];
-		  if (!acc[mesNombre]) {
-			acc[mesNombre] = [];
-		  }
-		  acc[mesNombre].push(item);
-		  return acc;
-		}, {});
+        // Agrupar por Mes (conversión de número a nombre)
+        const agrupadoPorMes = itemsBodega.reduce((acc, item) => {
+          const mesNombre = meses[item.Mes];
+          if (!acc[mesNombre]) {
+            acc[mesNombre] = [];
+          }
+          acc[mesNombre].push(item);
+          return acc;
+        }, {});
   
-		const mesFolders = Object.keys(agrupadoPorMes).map(mesNombre => {
-		  const itemsMes = agrupadoPorMes[mesNombre];
+        const mesFolders = Object.keys(agrupadoPorMes).map(mesNombre => {
+          const itemsMes = agrupadoPorMes[mesNombre];
   
-		  // Agrupar por día, extraído de FechaSubida
-		  const agrupadoPorDia = itemsMes.reduce((acc, item) => {
-			const dia = new Date(item.FechaSubida).getDate();
-			if (!acc[dia]) {
-			  acc[dia] = [];
-			}
-			acc[dia].push(item);
-			return acc;
-		  }, {});
+          // Agrupar por día, extraído de FechaSubida
+          const agrupadoPorDia = itemsMes.reduce((acc, item) => {
+            const dia = new Date(item.FechaSubida).getDate();
+            if (!acc[dia]) {
+              acc[dia] = [];
+            }
+            acc[dia].push(item);
+            return acc;
+          }, {});
   
-		  const diasFolders = Object.keys(agrupadoPorDia).map(dia => {
-			// Dentro de cada día, agrupar por NumeroSolicitud
-			const agrupadoPorNumeroSolicitud = agrupadoPorDia[dia].reduce((acc, item) => {
-			  const numero = item.NumeroSolicitud;
-			  if (!acc[numero]) {
-				acc[numero] = [];
-			  }
-			  acc[numero].push(item);
-			  return acc;
-			}, {});
+          const diasFolders = Object.keys(agrupadoPorDia).map(dia => {
+            // Dentro de cada día, agrupar por NumeroSolicitud
+            const agrupadoPorNumeroSolicitud = agrupadoPorDia[dia].reduce((acc, item) => {
+              console.log('cepeda',item);
+              const numero = item.NumeroSolicitud;
+              if (!acc[numero]) {
+                acc[numero] = [];
+              }
+              acc[numero].push(item);
+              return acc;
+            }, {});
   
-			// Cada subcarpeta será una carpeta con el nombre del NumeroSolicitud
-			const solicitudFolders = Object.keys(agrupadoPorNumeroSolicitud).map(numero => {
-			  const files = agrupadoPorNumeroSolicitud[numero].map(item => ({
-				id: `${item.idCre_SolicitudWeb}-${item.NumeroSolicitud}-${dia}`,
-				name: item.NumeroSolicitud,
-				type: "file",
-				RutaDocumento: item.RutaDocumento,
-				FechaSubida: item.FechaSubida
-			  }));
-			  return {
-				id: `${bodega}-${mesNombre}-dia-${dia}-ns-${numero}`,
-				name: numero,
-				type: "folder",
-				children: files
-			  };
-			});
+            // Cada subcarpeta será una carpeta con el nombre del NumeroSolicitud
+            const solicitudFolders = Object.keys(agrupadoPorNumeroSolicitud).map(numero => {
+              const files = agrupadoPorNumeroSolicitud[numero].map(item => ({
+                
+                id: `${item.idCre_SolicitudWeb}-${item.NumeroSolicitud}-${dia}-${item.FechaSubida}-${item.idDocumentosSolicitudWeb}`,
+                name: item.TipoDocumento,
+                type: "file",
+                RutaDocumento: item.RutaDocumento,
+                FechaSubida: item.FechaSubida
+              }));
+              return {
+                id: `${bodega}-${mesNombre}-dia-${dia}-ns-${numero}`,
+                name: numero,
+                type: "folder",
+                children: files
+              };
+            });
   
-			return {
-			  id: `${bodega}-${mesNombre}-dia-${dia}`,
-			  name: `${dia}`,
-			  type: "folder",
-			  children: solicitudFolders
-			};
-		  });
+            return {
+              id: `${bodega}-${mesNombre}-dia-${dia}`,
+              name: `${dia}`,
+              type: "folder",
+              children: solicitudFolders
+            };
+          });
   
-		  return {
-			id: `${bodega}-${mesNombre}`,
-			name: mesNombre,
-			type: "folder",
-			children: diasFolders
-		  };
-		});
+          return {
+            id: `${bodega}-${mesNombre}`,
+            name: mesNombre,
+            type: "folder",
+            children: diasFolders
+          };
+        });
   
-		return {
-		  id: `${anio}-${bodega}`,
-		  name: bodega,
-		  type: "folder",
-		  children: mesFolders
-		};
-	  });
+        return {
+          id: `${anio}-${bodega}`,
+          name: bodega,
+          type: "folder",
+          children: mesFolders
+        };
+      });
   
-	  return {
-		id: anio,
-		name: anio,
-		type: "folder",
-		children: bodegas
-	  };
-	});
+      return {
+        id: anio,
+        name: anio,
+        type: "folder",
+        children: bodegas
+      };
+    });
   
-	return dataTree;
+    return dataTree;
   };
   
 
@@ -371,152 +373,166 @@ export const RepositorioComponent = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Botón para toggle del sidebar en mobile */}
+  {/* Botón para toggle del sidebar en mobile */}
+  <button
+    className="md:hidden p-2 bg-gray-600 text-white fixed top-4 left-4 rounded-lg shadow-md z-10"
+    onClick={toggleSidebar}
+  >
+    <MenuIcon />
+  </button>
+
+  {/* Sidebar */}
+  <div
+    className={`bg-white p-0 m-0 border-r shadow-lg overflow-auto transition-all duration-300 ${
+      sidebarOpen ? "w-64" : "w-0 overflow-hidden"
+    } md:w-64`}
+  >
+    <nav className="space-y-1 mt-4">
+      {repositorios.length > 0 ? (
+        renderSidebarFolders(repositorios)
+      ) : (
+        <div className="p-4 text-gray-500">Cargando...</div>
+      )}
+    </nav>
+  </div>
+
+  {/* Área principal */}
+  <div className="flex-1 p-6 overflow-auto">
+    {/* Barra de búsqueda */}
+    <div className="flex items-center mb-6 gap-4">
+      <div className="relative flex-grow">
+        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        <input
+          type="text"
+          className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
+          placeholder="Buscar archivos..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <button
-        className="md:hidden p-2 bg-gray-600 text-white fixed top-4 left-4 rounded-lg shadow-md z-10"
-        onClick={toggleSidebar}
+        onClick={() => setView("grid")}
+        className={`p-2 ${
+          view === "grid" ? "bg-gray-700" : "bg-gray-500"
+        } text-white rounded-lg shadow-md hover:bg-gray-600 transition`}
       >
-        <MenuIcon />
+        <GridIcon className="w-6 h-6" />
       </button>
-
-      {/* Sidebar */}
-      <div
-        className={`bg-white p-0 m-0 border-r shadow-lg overflow-auto transition-all duration-300 ${
-          sidebarOpen ? "w-64" : "w-0 overflow-hidden"
-        } md:w-64`}
+      <button
+        onClick={() => setView("list")}
+        className={`p-2 ${
+          view === "list" ? "bg-gray-700" : "bg-gray-500"
+        } text-white rounded-lg shadow-md hover:bg-gray-600 transition`}
       >
-        <nav className="space-y-1 mt-4">
-          {repositorios.length > 0 ? (
-            renderSidebarFolders(repositorios)
-          ) : (
-            <div className="p-4 text-gray-500">Cargando...</div>
-          )}
-        </nav>
-      </div>
-
-      {/* Área principal */}
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="flex items-center mb-6 gap-4">
-          <div className="relative flex-grow">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
-            <input
-              type="text"
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-gray-500 focus:outline-none"
-              placeholder="Buscar archivos..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <button
-            onClick={() => setView("grid")}
-            className={`p-2 ${
-              view === "grid" ? "bg-gray-700" : "bg-gray-500"
-            } text-white rounded-lg shadow-md hover:bg-gray-600 transition`}
-          >
-            <GridIcon className="w-6 h-6" />
-          </button>
-          <button
-            onClick={() => setView("list")}
-            className={`p-2 ${
-              view === "list" ? "bg-gray-700" : "bg-gray-500"
-            } text-white rounded-lg shadow-md hover:bg-gray-600 transition`}
-          >
-            <ListIcon className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Breadcrumbs */}
-        <div className="flex items-center mb-4 text-sm text-gray-600 overflow-x-auto">
-          {breadcrumbs.map((crumb, index) => (
-            <div key={index} className="flex items-center">
-              {index > 0 && <span className="mx-2">/</span>}
-              <button
-                className="hover:text-gray-900 hover:underline"
-                onClick={() => {
-                  if (index === 0) {
-                    setCurrentPath([]);
-                  } else {
-                    setCurrentPath(currentPath.slice(0, index));
-                  }
-                  setSelectedFileId(null);
-                }}
-              >
-                {crumb.name}
-              </button>
-            </div>
-          ))}
-        </div>
-
-        {/* Título de la carpeta actual */}
-        {currentItem && (
-          <div className="mb-4 flex items-center">
-            <FolderIcon className="w-6 h-6 text-blue-500 mr-2" />
-            <h2 className="text-xl font-medium">{currentItem.name}</h2>
-          </div>
-        )}
-
-        {currentPath.length > 0 && (
-          <button
-            onClick={navigateUp}
-            className="mb-4 flex items-center p-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
-          >
-            <ExpandMoreIcon className="w-5 h-5 mr-1 rotate-90" />
-            Volver
-          </button>
-        )}
-
-        {/* Renderizado de la carpeta o archivos en vista grid o lista */}
-        <div
-          className={
-            view === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-              : "flex flex-col gap-2"
-          }
-        >
-          {currentFolderContent.length === 0 ? (
-            <div className="col-span-full text-center p-8 text-gray-500">
-              No hay elementos para mostrar
-            </div>
-          ) : (
-            currentFolderContent.map((item) => (
-              <div
-                key={item.id}
-                className={`${
-                  view === "grid"
-                    ? "p-4 flex flex-col items-center gap-2 bg-white border rounded-lg shadow hover:shadow-md transition"
-                    : "p-3 flex items-center gap-3 bg-white border rounded-lg shadow hover:shadow-md transition"
-                } cursor-pointer ${
-                  item.id === selectedFileId ? "ring-2 ring-blue-500 bg-blue-50" : ""
-                }`}
-                onClick={() => {
-                  if (item.type === "folder") {
-                    navigateToFolder(item);
-                  } else {
-                    // Aquí pasamos el objeto completo del archivo para abrirlo
-                    handleMainFileClick(item);
-                  }
-                }}
-              >
-                {item.type === "folder" ? (
-                  <FolderIcon className={`${view === "grid" ? "w-12 h-12" : "w-8 h-8"} text-blue-500`} />
-                ) : (
-                  <FileIcon className={`${view === "grid" ? "w-12 h-12" : "w-8 h-8"} ${item.id === selectedFileId ? "text-blue-600" : "text-gray-500"}`} />
-                )}
-                <div className={`${view === "grid" ? "text-center" : ""} truncate`}>
-                  <div className={`font-medium ${item.id === selectedFileId ? "text-blue-700" : ""}`}>
-                    {item.name}
-                  </div>
-                  {view === "list" && item.type === "folder" && (
-                    <span className="text-xs text-gray-500">
-                      {item.children ? `${item.children.length} elementos` : "0 elementos"}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+        <ListIcon className="w-6 h-6" />
+      </button>
     </div>
+
+    {/* Breadcrumbs */}
+    <div className="flex items-center mb-4 text-sm text-gray-600 overflow-x-auto">
+      {breadcrumbs.map((crumb, index) => (
+        <div key={index} className="flex items-center">
+          {index > 0 && <span className="mx-2">/</span>}
+          <button
+            className="hover:text-gray-900 hover:underline"
+            onClick={() => {
+              if (index === 0) {
+                setCurrentPath([]);
+              } else {
+                setCurrentPath(currentPath.slice(0, index));
+              }
+              setSelectedFileId(null);
+            }}
+          >
+            {crumb.name}
+          </button>
+        </div>
+      ))}
+    </div>
+
+    {/* Título de la carpeta actual */}
+    {currentItem && (
+      <div className="mb-4 flex items-center">
+        <FolderIcon className="w-6 h-6 text-blue-500 mr-2" />
+        <h2 className="text-xl font-medium">{currentItem.name}</h2>
+      </div>
+    )}
+
+    {currentPath.length > 0 && (
+      <button
+        onClick={navigateUp}
+        className="mb-4 flex items-center p-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
+      >
+        <ExpandMoreIcon className="w-5 h-5 mr-1 rotate-90" />
+        Volver
+      </button>
+    )}
+
+    {/* Renderizado de la carpeta o archivos en vista grid o lista */}
+    <div
+      className={
+        view === "grid"
+          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+          : "flex flex-col gap-2"
+      }
+    >
+      {currentFolderContent.length === 0 ? (
+        <div className="col-span-full text-center p-8 text-gray-500">
+          No hay elementos para mostrar
+        </div>
+      ) : (
+        currentFolderContent.map((item) => (
+          <div
+            key={item.id}
+            className={`${
+              view === "grid"
+                ? "p-4 flex flex-col items-center gap-2 bg-white border rounded-lg shadow hover:shadow-md transition"
+                : "p-3 flex items-center gap-3 bg-white border rounded-lg shadow hover:shadow-md transition"
+            } cursor-pointer ${
+              item.id === selectedFileId ? "ring-2 ring-blue-500 bg-blue-50" : ""
+            }`}
+            onClick={() => {
+              if (item.type === "folder") {
+                navigateToFolder(item);
+              } else {
+                // Aquí pasamos el objeto completo del archivo para abrirlo
+                handleMainFileClick(item);
+              }
+            }}
+          >
+            {item.type === "folder" ? (
+              <FolderIcon
+                className={`${view === "grid" ? "w-12 h-12" : "w-8 h-8"} text-blue-500`}
+              />
+            ) : (
+              <FileIcon
+                className={`${
+                  view === "grid" ? "w-12 h-12" : "w-8 h-8"
+                } ${item.id === selectedFileId ? "text-blue-600" : "text-gray-500"}`}
+              />
+            )}
+            <div className={`${view === "grid" ? "text-center" : ""} truncate`}>
+              <div
+                className={`font-medium ${
+                  item.id === selectedFileId ? "text-blue-700" : ""
+                }`}
+              >
+                {item.name}
+              </div>
+              {view === "list" && item.type === "folder" && (
+                <span className="text-xs text-gray-500">
+                  {item.children
+                    ? `${item.children.length} elementos`
+                    : "0 elementos"}
+                </span>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+</div>
+
   );
 };
