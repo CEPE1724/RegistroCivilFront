@@ -23,112 +23,133 @@ export const RepositorioComponent = () => {
 
   // Función para transformar la data de la API en la estructura de carpetas requerida
   const transformData = (apiData) => {
-    const meses = {
-      1: "Enero",
-      2: "Febrero",
-      3: "Marzo",
-      4: "Abril",
-      5: "Mayo",
-      6: "Junio",
-      7: "Julio",
-      8: "Agosto",
-      9: "Septiembre",
-      10: "Octubre",
-      11: "Noviembre",
-      12: "Diciembre"
-    };
-
-    // Agrupar por Año
-    const agrupadoPorAnio = apiData.reduce((acc, item) => {
-      const anio = item.Anio;
-      if (!acc[anio]) {
-        acc[anio] = [];
-      }
-      acc[anio].push(item);
-      return acc;
-    }, {});
-
-    const dataTree = Object.keys(agrupadoPorAnio).map(anio => {
-      const itemsAnio = agrupadoPorAnio[anio];
-
-      // Agrupar por Bodega
-      const agrupadoPorBodega = itemsAnio.reduce((acc, item) => {
-        const bodega = item.Bodega;
-        if (!acc[bodega]) {
-          acc[bodega] = [];
-        }
-        acc[bodega].push(item);
-        return acc;
-      }, {});
-
-      const bodegas = Object.keys(agrupadoPorBodega).map(bodega => {
-        const itemsBodega = agrupadoPorBodega[bodega];
-
-        // Agrupar por Mes (conversión de número a nombre)
-        const agrupadoPorMes = itemsBodega.reduce((acc, item) => {
-          const mesNombre = meses[item.Mes];
-          if (!acc[mesNombre]) {
-            acc[mesNombre] = [];
-          }
-          acc[mesNombre].push(item);
-          return acc;
-        }, {});
-
-        const mesFolders = Object.keys(agrupadoPorMes).map(mesNombre => {
-          const itemsMes = agrupadoPorMes[mesNombre];
-
-          // Agrupar por día, extraído de FechaSubida
-          const agrupadoPorDia = itemsMes.reduce((acc, item) => {
-            const dia = new Date(item.FechaSubida).getDate();
-            if (!acc[dia]) {
-              acc[dia] = [];
-            }
-            acc[dia].push(item);
-            return acc;
-          }, {});
-
-          const diasFolders = Object.keys(agrupadoPorDia).map(dia => {
-            const files = agrupadoPorDia[dia].map(item => ({
-              id: `${item.idCre_SolicitudWeb}-${item.NumeroSolicitud}-${dia}`,
-              name: item.NumeroSolicitud,
-              type: "file",
-              RutaDocumento: item.RutaDocumento,
-              FechaSubida: item.FechaSubida
-            }));
-            return {
-              id: `${bodega}-${mesNombre}-dia-${dia}`,
-              name: `Día ${dia}`,
-              type: "folder",
-              children: files
-            };
-          });
-
-          return {
-            id: `${bodega}-${mesNombre}`,
-            name: mesNombre,
-            type: "folder",
-            children: diasFolders
-          };
-        });
-
-        return {
-          id: `${anio}-${bodega}`,
-          name: bodega,
-          type: "folder",
-          children: mesFolders
-        };
-      });
-
-      return {
-        id: anio,
-        name: anio,
-        type: "folder",
-        children: bodegas
-      };
-    });
-
-    return dataTree;
+	const meses = {
+	  1: "Enero",
+	  2: "Febrero",
+	  3: "Marzo",
+	  4: "Abril",
+	  5: "Mayo",
+	  6: "Junio",
+	  7: "Julio",
+	  8: "Agosto",
+	  9: "Septiembre",
+	  10: "Octubre",
+	  11: "Noviembre",
+	  12: "Diciembre"
+	};
+  
+	// Agrupar por Año
+	const agrupadoPorAnio = apiData.reduce((acc, item) => {
+	  const anio = item.Anio;
+	  if (!acc[anio]) {
+		acc[anio] = [];
+	  }
+	  acc[anio].push(item);
+	  return acc;
+	}, {});
+  
+	const dataTree = Object.keys(agrupadoPorAnio).map(anio => {
+	  const itemsAnio = agrupadoPorAnio[anio];
+  
+	  // Agrupar por Bodega
+	  const agrupadoPorBodega = itemsAnio.reduce((acc, item) => {
+		const bodega = item.Bodega;
+		if (!acc[bodega]) {
+		  acc[bodega] = [];
+		}
+		acc[bodega].push(item);
+		return acc;
+	  }, {});
+  
+	  const bodegas = Object.keys(agrupadoPorBodega).map(bodega => {
+		const itemsBodega = agrupadoPorBodega[bodega];
+  
+		// Agrupar por Mes (conversión de número a nombre)
+		const agrupadoPorMes = itemsBodega.reduce((acc, item) => {
+		  const mesNombre = meses[item.Mes];
+		  if (!acc[mesNombre]) {
+			acc[mesNombre] = [];
+		  }
+		  acc[mesNombre].push(item);
+		  return acc;
+		}, {});
+  
+		const mesFolders = Object.keys(agrupadoPorMes).map(mesNombre => {
+		  const itemsMes = agrupadoPorMes[mesNombre];
+  
+		  // Agrupar por día, extraído de FechaSubida
+		  const agrupadoPorDia = itemsMes.reduce((acc, item) => {
+			const dia = new Date(item.FechaSubida).getDate();
+			if (!acc[dia]) {
+			  acc[dia] = [];
+			}
+			acc[dia].push(item);
+			return acc;
+		  }, {});
+  
+		  const diasFolders = Object.keys(agrupadoPorDia).map(dia => {
+			// Dentro de cada día, agrupar por NumeroSolicitud
+			const agrupadoPorNumeroSolicitud = agrupadoPorDia[dia].reduce((acc, item) => {
+			  const numero = item.NumeroSolicitud;
+			  if (!acc[numero]) {
+				acc[numero] = [];
+			  }
+			  acc[numero].push(item);
+			  return acc;
+			}, {});
+  
+			// Cada subcarpeta será una carpeta con el nombre del NumeroSolicitud
+			const solicitudFolders = Object.keys(agrupadoPorNumeroSolicitud).map(numero => {
+			  const files = agrupadoPorNumeroSolicitud[numero].map(item => ({
+				id: `${item.idCre_SolicitudWeb}-${item.NumeroSolicitud}-${dia}`,
+				name: item.NumeroSolicitud,
+				type: "file",
+				RutaDocumento: item.RutaDocumento,
+				FechaSubida: item.FechaSubida
+			  }));
+			  return {
+				id: `${bodega}-${mesNombre}-dia-${dia}-ns-${numero}`,
+				name: "Solicitudes",
+				type: "folder",
+				children: files
+			  };
+			});
+  
+			return {
+			  id: `${bodega}-${mesNombre}-dia-${dia}`,
+			  name: `${dia}`,
+			  type: "folder",
+			  children: solicitudFolders
+			};
+		  });
+  
+		  return {
+			id: `${bodega}-${mesNombre}`,
+			name: mesNombre,
+			type: "folder",
+			children: diasFolders
+		  };
+		});
+  
+		return {
+		  id: `${anio}-${bodega}`,
+		  name: bodega,
+		  type: "folder",
+		  children: mesFolders
+		};
+	  });
+  
+	  return {
+		id: anio,
+		name: anio,
+		type: "folder",
+		children: bodegas
+	  };
+	});
+  
+	return dataTree;
   };
+  
 
   // Cargar data de la API y transformarla
   useEffect(() => {
