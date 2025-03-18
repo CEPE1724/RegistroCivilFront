@@ -106,8 +106,11 @@ export const APIURL = {
     if (params.length > 0) {
       url += '?' + params.join('&');
     }
-	console.log(url);
     return url;
-  }
+  },
+  get_cre_tipoempresa : () => `${API_BASE_URL}cre-tipoempresa`,
+  get_tipocontrato : () => `${API_BASE_URL}cre-tipocontrato`,
+  get_cre_tiposueldo : () => `${API_BASE_URL}cre-tiposueldo`,
+  get_cre_cargo : () => `${API_BASE_URL}cre-cargo`,
 
 };
