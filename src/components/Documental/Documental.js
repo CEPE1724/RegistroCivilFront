@@ -3,11 +3,18 @@ import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
-import { APIURL } from '../../configApi/apiConfig'
-import uploadFile from '../../hooks/uploadFile'
-import {useAuth} from '../AuthContext/AuthContext'
+import { APIURL } from "../../configApi/apiConfig";
+import uploadFile from "../../hooks/uploadFile";
+import { useAuth } from "../AuthContext/AuthContext";
 import axios from "axios";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+} from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
+import { get, set } from "react-hook-form";
 
 export function Documental({
   id,
@@ -20,13 +27,12 @@ export function Documental({
   vendedor,
   consulta,
 }) {
-
-  const { userData , userUsuario } = useAuth();
+  const { userData, userUsuario } = useAuth();
   console.log("userData", userData);
 
   console.log("userUsuario", userUsuario);
   const [files, setFiles] = useState({});
-  const [activeTab, setActiveTab] = useState("");
+  const [activeTab, setActiveTab] = useState("Buro Credito");
   const [showFileInput, setShowFileInput] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -34,9 +40,11 @@ export function Documental({
   const [view, setView] = useState(false);
   const [observacion, setObservacion] = useState({});
   const modalRef = useRef(null);
-  const [history , setHistory] = useState(false);
+  const [history, setHistory] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+   const [refreshFiles, setRefreshFiles] = useState(false);
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -54,46 +62,54 @@ export function Documental({
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const response = await axios.get(`${APIURL.get_documentos(clientInfo.id)}`);
-  
+        const response = await axios.get(
+          `${APIURL.get_documentos(clientInfo.id)}`
+        );
+
+        console.log("Respuesta API Documentos:", response.data);
         if (response.status === 200 && Array.isArray(response.data)) {
           const uploadedFiles = {};
           const previews = {};
-  
+
           response.data.forEach((file) => {
+            console.log("Archivo recibido:", file); // ✅ Verificar estructura de cada archivo
+
             const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
             if (!uploadedFiles[sectionName]) {
               uploadedFiles[sectionName] = [];
               previews[sectionName] = [];
             }
-  
+
             // Extrae el nombre del archivo desde la ruta
-            const fileName = file.RutaDocumento.split('/').pop();
+            const fileName = file.RutaDocumento.split("/").pop();
             const fileUrl = file.RutaDocumento;
-  
+
             uploadedFiles[sectionName].push({
+              idDocumentoSolicitudWeb: file.idDocumentosSolicitudWeb,
               name: fileName,
               url: fileUrl,
-              type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
+              type: fileUrl.endsWith(".pdf") ? "application/pdf" : "image/jpeg",
             });
-  
+
             previews[sectionName].push(fileUrl);
           });
-  
+
           setFiles(uploadedFiles);
           setFilePreviews(previews);
         }
       } catch (error) {
-        enqueueSnackbar("Error al obtener archivos subidos.", { variant: "error" });
+        enqueueSnackbar("Error al obtener archivos subidos.", {
+          variant: "error",
+        });
         console.error("Error al obtener archivos:", error);
       }
     };
-  
+
     if (clientInfo.NumeroSolicitud) {
       fetchUploadedFiles();
     }
-  }, [clientInfo.NumeroSolicitud]);
-  
+  }, [clientInfo.id , activeTab , refreshFiles]);
+
   const getTipoDocumento = (id) => {
     const documentoIds = {
       1: "Buro Credito",
@@ -111,7 +127,6 @@ export function Documental({
     return documentoIds[id] || null;
   };
 
-
   useEffect(() => {
     if (location.state) {
       // Si hay datos en `location.state`, los guardamos en localStorage
@@ -128,7 +143,7 @@ export function Documental({
 
   useEffect(() => {
     const updatedFilePreviews = {};
-  
+
     Object.keys(files).forEach((field) => {
       updatedFilePreviews[field] = files[field].map((file) => {
         if (file instanceof File || file instanceof Blob) {
@@ -137,9 +152,9 @@ export function Documental({
         return file.url || file; // Si es una URL desde la API, úsala directamente
       });
     });
-  
+
     setFilePreviews(updatedFilePreviews);
-  
+
     // Cleanup: liberar URLs de archivos locales cuando el componente se desmonta
     return () => {
       Object.values(updatedFilePreviews).forEach((previewUrls) =>
@@ -151,9 +166,9 @@ export function Documental({
       );
     };
   }, [files]);
-   // Se ejecuta cuando 'location.state' o 'files' cambian
+  // Se ejecuta cuando 'location.state' o 'files' cambian
 
-  useEffect(() => {
+  /* useEffect(() => {
     const handleClickOutside = (event) => {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
         setShowFileInput(false);
@@ -169,8 +184,7 @@ export function Documental({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
-
+  }, []); */
 
   const calculateProgress = () => {
     const totalFields = menuItems.length;
@@ -190,7 +204,9 @@ export function Documental({
   const handleFileChange = (e, field) => {
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length === 0) {
-      enqueueSnackbar("No se ha seleccionado ningún archivo.", { variant: "error" });
+      enqueueSnackbar("No se ha seleccionado ningún archivo.", {
+        variant: "error",
+      });
       return;
     }
 
@@ -213,7 +229,15 @@ export function Documental({
   };
 
   const handleOpenDeleteConfirmation = (field, index) => {
-    setFileToDelete({ field, index });
+    const file = files[field][index]; // Obtenemos el archivo seleccionado
+    console.log("Archivo seleccionado para eliminar:", file); // ✅ Verificar que tiene idDocumentoSolicitudWeb
+
+    setFileToDelete({
+      field,
+      index,
+      id: file.idDocumentoSolicitudWeb, // ✅ Asegúrate de que se esté pasando bien
+    });
+
     setShowConfirmDeleteModal(true);
   };
 
@@ -224,75 +248,131 @@ export function Documental({
   };
 
   // Función para eliminar archivo
-  const handleRemoveFile = () => {
+  const handleRemoveFile = async () => {
     if (!fileToDelete) return;
-
-    const { field, index } = fileToDelete;
-
+  
+    const { field, index, id } = fileToDelete; // ✅ Extraemos el ID
+    console.log(fileToDelete);
+  
+    if (id) {
+      try {
+        // 1️⃣ Enviar PATCH a la API para actualizar el estado del documento
+        const response = await axios.patch(APIURL.patch_documentos(id), {
+          idEstadoDocumento: 4, // 👈 Aquí estableces el nuevo estado en la base de datos
+        });
+  
+        if (response.status === 200) {
+          enqueueSnackbar("Documento eliminado correctamente.", {
+            variant: "success",
+          });
+        }
+      } catch (error) {
+        enqueueSnackbar("Error al eliminar el documento en la BD.", {
+          variant: "error",
+        });
+        console.error("Error en la actualización:", error);
+        return; // ❌ Evitamos seguir eliminando localmente si hay error en la API
+      }
+    }
+  
+    // 2️⃣ Eliminar el archivo del estado local, ya sea que tenga ID o no
     setFiles((prevFiles) => {
       if (!prevFiles[field] || prevFiles[field].length === 0) return prevFiles;
-
+  
       const updatedFiles = { ...prevFiles };
       updatedFiles[field] = updatedFiles[field].filter((_, i) => i !== index);
-
-      // Si se eliminan todos los archivos, eliminamos la clave
+  
       if (updatedFiles[field].length === 0) {
         delete updatedFiles[field];
       }
-
+  
       return updatedFiles;
     });
-
+  
     setFilePreviews((prevPreviews) => {
       if (!prevPreviews[field] || prevPreviews[field].length === 0)
         return prevPreviews;
-
+  
       const updatedPreviews = { ...prevPreviews };
-      updatedPreviews[field] = updatedPreviews[field].filter(
-        (_, i) => i !== index
-      );
-
+      updatedPreviews[field] = updatedPreviews[field].filter((_, i) => i !== index);
+  
       if (updatedPreviews[field].length === 0) {
         delete updatedPreviews[field];
       }
-
+  
       return updatedPreviews;
     });
-
-    // Si eliminamos todos los archivos de una pestaña activa, cambiar a otra pestaña
-    setActiveTab((prevActiveTab) => {
-      return files[field] && files[field].length > 1
-        ? prevActiveTab
-        : Object.keys(files)[0] || "";
-    });
-
+  
     closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
   };
-
-
+  
   const toggleView = () => {
     setView(!view);
   };
 
+ 
+
+  const verificarDocumento = async (idCreSolicitudWeb, tipoDocumento) => {
+    try {
+      const response = await axios.get(APIURL.getCheckDocumento(idCreSolicitudWeb, tipoDocumento));
+      console.log("Respuesta del backend:", response.data);
+      return response.data; // Devolverá `true` o `false`
+    } catch (error) {
+      console.error("Error al verificar el documento:", error);
+      return false;
+    }
+  };
+
+  const getNumeroDocumento = (nombre) => {
+    const documentoIds = {
+       1: "Buro Credito",
+       2: "Copia De Cedula",
+       3: "Contrato de Compra",
+       4: "Declaracion",
+       5: "Pagare a la Orden",
+       6: "Tabla de amortizacion",
+       7: "Gastos de cobranza",
+       8: "Compromiso Lugar de pago",
+       9: "Acta",
+       10: "Consentimiento",
+       11: "Autorización",
+    };
+
+    // Buscamos la clave (número) correspondiente al nombre
+    const id = Object.keys(documentoIds).find(key => documentoIds[key] === nombre);
+
+    return id ? Number(id) : null; // Convertimos a número si existe, sino retornamos null
+};
+
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    // Validar archivos y observación por cada sección
-    if (!files[activeTab] || files[activeTab].length === 0) {
-      enqueueSnackbar(
-        `Por favor, selecciona un archivo para el campo ${activeTab}`,
-        { variant: "error" }
-      );
-      return;
-    } else if (!observacion[activeTab] || observacion[activeTab].length < 10) {
-      enqueueSnackbar(
-        "La observación debe tener al menos 10 caracteres para este campo.",
-        { variant: "error" }
-      );
+    e.preventDefault();    
+    setIsUploading(true); 
+
+    const tipoDocumento = getNumeroDocumento(activeTab);
+    const documentoExiste = await verificarDocumento(clientInfo.id, tipoDocumento);
+    console.log(documentoExiste)
+
+    if (documentoExiste.exists) {
+      enqueueSnackbar("Ya existe un documento cargado para este campo.", { variant: "error" });
+      setIsUploading(false); // Ocultar modal si hay error
       return;
     }
   
+    if (!files[activeTab] || files[activeTab].length === 0) {
+      enqueueSnackbar(`Por favor, selecciona un archivo para el campo ${activeTab}`, { variant: "error" });
+      setIsUploading(false);
+      return;
+    } 
+
+    // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
+if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[activeTab].length < 10) {
+  enqueueSnackbar("Si proporcionas una observación, debe tener al menos 10 caracteres para este campo.", { variant: "error" });
+  setIsUploading(false);
+  return;
+}
+
+
     try {
       // Subir archivo y obtener la URL
       const response = await uploadFile(
@@ -304,25 +384,21 @@ export function Documental({
         observacion[activeTab]
       );
 
-
-      const documentoIds = 
-      {
+      const documentoIds = {
         "Buro Credito": 1,
-        "Copia De Cedula" : 2,
+        "Copia De Cedula": 2,
         "Contrato de Compra": 3,
-        "Declaracion" : 4,
-        "Pagare a la Orden" : 5,
-        "Tabla de amortizacion":6,
-        "Gastos de cobranza": 7 ,
+        Declaracion: 4,
+        "Pagare a la Orden": 5,
+        "Tabla de amortizacion": 6,
+        "Gastos de cobranza": 7,
         "Compromiso Lugar de pago": 8,
-        "Acta" :9,
-        "Consentimiento" : 10,
-        "Autorización" : 11,
-
-      }
+        Acta: 9,
+        Consentimiento: 10,
+        Autorización: 11,
+      };
 
       const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
-
 
       // Verifica que la respuesta contenga la URL del archivo
       if (response && response.url) {
@@ -330,10 +406,12 @@ export function Documental({
         console.log("URL del archivo subido:", urlArchivo);
         // validar que lso campso esten llenos
         if (!idTipoDocumentoWEB) {
-          enqueueSnackbar("Error al obtener el ID del tipo de documento.", { variant: "error" });
+          enqueueSnackbar("Error al obtener el ID del tipo de documento.", {
+            variant: "error",
+          });
           return;
         }
-        
+
         // Crear el payload con los datos para la API
         const payload = {
           idCre_SolicitudWeb: clientInfo.id,
@@ -341,32 +419,51 @@ export function Documental({
           RutaDocumento: urlArchivo, // URL del archivo subido
           Observacion: observacion[activeTab], // Observación recibida
         };
-  
+
         // Verifica el payload antes de enviarlo
         console.log("Payload a enviar:", payload);
-        const apiResponse = await axios.post(APIURL.post_documentos(), payload, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      // Comprobar que la respuesta sea exitosa
-        if (apiResponse.status === 201 || apiResponse.data?.status === 'success') {
-          enqueueSnackbar("Documento guardado correctamente en la BD.", { variant: "success" });
+        const apiResponse = await axios.post(
+          APIURL.post_documentos(),
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        // Comprobar que la respuesta sea exitosa
+        if (
+          apiResponse.status === 201 ||
+          apiResponse.data?.status === "success"
+        ) {
+          enqueueSnackbar("Documento guardado correctamente en la BD.", {
+            variant: "success",
+          });
           setShowFileInput(false);
+          setRefreshFiles((prev) => !prev);
         } else {
-          enqueueSnackbar("Error al guardar el documento en la BD. " + apiResponse.data?.message || '', { variant: "error" });
+          enqueueSnackbar(
+            "Error al guardar el documento en la BD. " +
+              apiResponse.data?.message || "",
+            { variant: "error" }
+          );
         }
       } else {
-        enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", { variant: "error" });
+        enqueueSnackbar("Error al subir el archivo. Inténtalo de nuevo.", {
+          variant: "error",
+        });
       }
     } catch (error) {
-      enqueueSnackbar("Error en la solicitud. Inténtalo de nuevo.", { variant: "error" });
+      enqueueSnackbar("Error en la solicitud. Inténtalo de nuevo.", {
+        variant: "error",
+      });
       console.error("Error:", error);
+    } finally 
+    {
+      setIsUploading(false);
     }
   };
-  
-  
-  
+
   const handleSubmitUpFile = (e) => {
     e.preventDefault();
 
@@ -407,8 +504,9 @@ export function Documental({
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"
-          } md:block transition-all duration-300 ease-in-out`}
+        className={`w-64 bg-[#2d3689] text-white ${
+          isMenuOpen ? "block" : "hidden"
+        } md:block transition-all duration-300 ease-in-out`}
       >
         <div className="p-6">
           <h2 className="text-2xl font-bold text-gray-100">Menú</h2>
@@ -455,9 +553,13 @@ export function Documental({
                   <li key={item}>
                     <a
                       href="#"
-                      onClick={() => setActiveTab(item)}
-                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
-                        }`}
+                      onClick={(event) => {
+                        event.preventDefault(); // Evita que el navegador cambie la URL
+                        setActiveTab(item);
+                      }}
+                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
+                        activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
+                      }`}
                     >
                       {item}
                       {fileCount > 0 && (
@@ -473,37 +575,45 @@ export function Documental({
           </div>
 
           {/* Campos Completados */}
-          {completedFields.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg text-gray-300 font-semibold">
-                Campos Completados
-              </h3>
-              <ul className="mt-4 space-y-4">
-                {completedFields.map((item) => {
-                  const fileCount = files[item] ? files[item].length : 0;
-                  return (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        onClick={() => setActiveTab(item)}
-                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item
-                            ? "bg-gray-700"
-                            : "hover:bg-gray-600"
-                          }`}
-                      >
-                        {item}
-                        {fileCount > 0 && (
-                          <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
-                            {`+${fileCount}`}
-                          </span>
-                        )}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+         {/* Campos Completados */}
+{completedFields.length > 0 && (
+  <div className="mt-6">
+    <h3 className="text-lg text-gray-300 font-semibold">
+      Campos Completados
+    </h3>
+    <ul className="mt-4 space-y-4">
+      {completedFields.map((item) => {
+        const fileCount = files[item] ? files[item].length : 0;
+        return (
+          <li key={item}>
+            <a
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                setActiveTab(item);
+              }}
+              className={`inline-flex items-center text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
+                activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
+              }`}
+            >
+              {item}
+              {fileCount > 0 && (
+                <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
+                  {`+${fileCount}`}
+                </span>
+              )}
+              {/* Indicador de archivos subidos ✅ */}
+              {fileCount > 0 && (
+                <span className="ml-2 text-green-400 font-bold">✓</span>
+              )}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
+
         </div>
       </div>
 
@@ -551,29 +661,21 @@ export function Documental({
             </div>
           </div>
 
-
-
           <div className="flex justify-center items-center mt-6 w-full">
-
-  {/* Documentos Subidos */}
-          <h2 className="text-2xl font-semibold text-center text-gray-800">
-            Documentos Subidos
-          </h2>
+            {/* Documentos Subidos */}
+            <h2 className="text-2xl font-semibold text-center text-gray-800">
+              Documentos Subidos
+            </h2>
 
             <div className="absolute right-11">
-
-            <button
-            onClick={() => setHistory(true)}
-              className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
-            >
-              Historial Observaciones
-            </button>
-
+              <button
+                onClick={() => setHistory(true)}
+                className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+              >
+                Historial Observaciones
+              </button>
             </div>
           </div>
-
-
-           
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {filePreviews[activeTab]?.length > 0 &&
@@ -594,7 +696,9 @@ export function Documental({
 
                       <button
                         type="button"
-                        onClick={() => handleOpenDeleteConfirmation(activeTab, index)}
+                        onClick={() =>
+                          handleOpenDeleteConfirmation(activeTab, index)
+                        }
                         className="text-red-500 hover:text-red-700"
                       >
                         ❌
@@ -652,79 +756,74 @@ export function Documental({
           </div>
 
           <div className="flex justify-center items-center mt-6 w-full">
-
-          <button
-                onClick={() => setShowFileInput(true)}
-                class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
-              >
-                <svg
-                  class="w-7 h-7 fill-white delay-50 duration-200 group-hover/button:-translate-y-12 sm:w-20 sm:h-20"
-                  stroke="#000000"
-                  stroke-width="2"
-                  viewBox="-3.84 -3.84 31.68 31.68"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  transform="rotate(0)"
-                >
-                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                  <g id="SVGRepo_iconCarrier">
-                    <path
-                      opacity="0.1"
-                      d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
-                      fill="#f7f7f7"
-                    ></path>
-                    <path
-                      d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
-                      stroke="#000000"
-                      stroke-width="2"
-                      stroke-linejoin="round"
-                    ></path>
-                    <path
-                      d="M12 11L12 16"
-                      stroke="#000000"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>
-                    <path
-                      d="M14.5 13.5L9.5 13.5"
-                      stroke="#000000"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    ></path>
-                  </g>
-                </svg>
-              </button>
-            
-
-
-
-            <div className="absolute right-11">
-
             <button
-              onClick={handleSubmit}
-              className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+              onClick={() => setShowFileInput(true)}
+              class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
             >
-              Enviar archivos
+              <svg
+                class="w-7 h-7 fill-white delay-50 duration-200 group-hover/button:-translate-y-12 sm:w-20 sm:h-20"
+                stroke="#000000"
+                stroke-width="2"
+                viewBox="-3.84 -3.84 31.68 31.68"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                transform="rotate(0)"
+              >
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g
+                  id="SVGRepo_tracerCarrier"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></g>
+                <g id="SVGRepo_iconCarrier">
+                  <path
+                    opacity="0.1"
+                    d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
+                    fill="#f7f7f7"
+                  ></path>
+                  <path
+                    d="M17.8284 6.82843C18.4065 7.40649 18.6955 7.69552 18.8478 8.06306C19 8.4306 19 8.83935 19 9.65685L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21H9C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 7C5 5.11438 5 4.17157 5.58579 3.58579C6.17157 3 7.11438 3 9 3H12.3431C13.1606 3 13.5694 3 13.9369 3.15224C14.3045 3.30448 14.5935 3.59351 15.1716 4.17157L17.8284 6.82843Z"
+                    stroke="#000000"
+                    stroke-width="2"
+                    stroke-linejoin="round"
+                  ></path>
+                  <path
+                    d="M12 11L12 16"
+                    stroke="#000000"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                  <path
+                    d="M14.5 13.5L9.5 13.5"
+                    stroke="#000000"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  ></path>
+                </g>
+              </svg>
             </button>
 
+            <div className="absolute right-11">
+              <button
+                onClick={handleSubmit}
+                className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+              >
+                Enviar archivos
+              </button>
             </div>
           </div>
-
         </div>
-
 
         {/* Modal de subir archivo */}
         {showFileInput && (
           <div
             ref={modalRef}
-            className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50">
-            <div
-              className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
-              <div
-                className="flex justify-between items-center mb-4">
+            className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50"
+          >
+            <div className="bg-white p-6 rounded-lg shadow-lg w-96 relative">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold text-gray-800">
                   Subir Nuevo Documento
                 </h2>
@@ -774,7 +873,8 @@ export function Documental({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div
             ref={modalRef}
-            className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative">
+            className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative"
+          >
             <button
               onClick={toggleView}
               className="absolute top-2 right-2 text-lg"
@@ -787,30 +887,30 @@ export function Documental({
               title="Vista previa del archivo"
             ></iframe>
           </div>
-
         </div>
       )}
-  
 
       {/* Historial de Observaciones */}
-   
-{history && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-      <h2 className="text-lg font-semibold mb-4">Historial de Observaciones</h2>
-      <p>Aquí va el historial de observaciones...</p>
-      <button
-        onClick={() => setHistory(false)}
-        className="mt-4 bg-red-600 text-white py-2 px-4 rounded-md shadow-lg hover:bg-red-700 transition duration-300"
-      >
-        Cerrar
-      </button>
-    </div>
-  </div>
-)}
 
-  {/* Modal de confirmación de eliminación */}
-  {showConfirmDeleteModal && (
+      {history && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h2 className="text-lg font-semibold mb-4">
+              Historial de Observaciones
+            </h2>
+            <p>Aquí va el historial de observaciones...</p>
+            <button
+              onClick={() => setHistory(false)}
+              className="mt-4 bg-red-600 text-white py-2 px-4 rounded-md shadow-lg hover:bg-red-700 transition duration-300"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de eliminación */}
+      {showConfirmDeleteModal && (
         <Dialog open={showConfirmDeleteModal} onClose={closeDeleteConfirmation}>
           <DialogTitle>Confirmación de Eliminación</DialogTitle>
           <DialogContent>
@@ -826,9 +926,22 @@ export function Documental({
           </DialogActions>
         </Dialog>
       )}
+
+
+
+
+{isUploading && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+      <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <p className="text-lg font-semibold text-gray-700">Subiendo archivo...</p>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
-
-
-
