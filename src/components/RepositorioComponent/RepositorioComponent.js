@@ -109,7 +109,7 @@ export const RepositorioComponent = () => {
 			  }));
 			  return {
 				id: `${bodega}-${mesNombre}-dia-${dia}-ns-${numero}`,
-				name: "Solicitudes",
+				name: numero,
 				type: "folder",
 				children: files
 			  };
