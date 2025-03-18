@@ -78,6 +78,7 @@ export const APIURL = {
    post_documentos : () => `${API_BASE_URL}documentos-solicitud`,
    get_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
    patch_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
+   patch_solicitudweb : (id) => `${API_BASE_URL}documentos-solicitud/updateEstado/${id}`,
 
 
    /*solicitud grande*/
@@ -109,5 +110,7 @@ export const APIURL = {
 	console.log(url);
     return url;
   }
+
+
 
 };
