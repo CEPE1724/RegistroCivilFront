@@ -40,11 +40,11 @@ export function GestorDocumentos({
         consulta: "",
     });
     console.log("clientInfo", clientInfo);
-
-    useEffect(() => {
+    console.log("datos api", APIURL.get_documentos(clientInfo.id));
+    
         const fetchUploadedFiles = async () => {
             try {
-                const response = await axios.get(`${APIURL.get_documentos(12)}`);
+                const response = await axios.get(`${APIURL.get_documentos(clientInfo.id)}`);
 
                 if (response.status === 200 && Array.isArray(response.data)) {
                     const uploadedFiles = {};
@@ -62,6 +62,7 @@ export function GestorDocumentos({
                         const fileUrl = file.RutaDocumento;
 
                         uploadedFiles[sectionName].push({
+                            idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb, // Añadimos el ID del documento
                             name: fileName,
                             url: fileUrl,
                             type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
@@ -79,26 +80,31 @@ export function GestorDocumentos({
             }
         };
 
+        useEffect(() => {
         if (clientInfo.id) {
             fetchUploadedFiles();
         }
     }, [clientInfo.id]);
 
     //api cambiar estado del documento
-    const estadoDocumentos = async (datos) => {
+    const estadoDocumentos = async (idDocumentosSolicitudWeb, idEstadoDocumento) => {
         try {
             const token = localStorage.getItem("token");
-            const url = APIURL.post_documentos();
+            const url = APIURL.patch_documentos(idDocumentosSolicitudWeb);
+            const datos = {
+                idEstadoDocumento: idEstadoDocumento, // Enviar el nuevo estado
+            };
 
-            const response = await axios.post(url, datos, {
+            const response = await axios.patch(url, datos, {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
             });
 
-            if (response.status == 201) {
+            if (response.status == 200) {
                 enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
+                await fetchUploadedFiles();
             } else {
                 enqueueSnackbar("Error al enviar los datos 1", { variant: "error" });
             }
@@ -106,6 +112,16 @@ export function GestorDocumentos({
             console.error("Error al enviar los datos 2:", error.response?.data);
             enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
         }
+    };
+
+    // Función rechazo de documento
+    const handleRechazar = (idDocumentosSolicitudWeb) => {
+        estadoDocumentos(idDocumentosSolicitudWeb, 4);
+    };
+
+    // Función aprobación de documento
+    const handleAprobar = (idDocumentosSolicitudWeb) => {
+        estadoDocumentos(idDocumentosSolicitudWeb, 2);
     };
 
     const getTipoDocumento = (id) => {
@@ -222,6 +238,7 @@ export function GestorDocumentos({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 mb-6">
                         {Object.entries(files).map(([sectionName, sectionFiles]) => (
                             sectionFiles.map((file, index) => (
+                                console.log("imagen url", file.url),
                                 <div
                                     key={`${sectionName}-${index}`}
                                     className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
@@ -245,6 +262,7 @@ export function GestorDocumentos({
                                                 type="button"
                                                 name="rechazar"
                                                 className="text-red-500 hover:text-red-700"
+                                                onClick={() => handleRechazar(file.idDocumentosSolicitudWeb)}
                                             >
                                                 ❌
                                             </button>
@@ -252,6 +270,7 @@ export function GestorDocumentos({
                                                 type="button"
                                                 name="aprobar"
                                                 className="text-green-500 hover:text-green-700"
+                                                onClick={() => handleAprobar(file.idDocumentosSolicitudWeb)}
                                             >
                                                 ✅
                                             </button>
@@ -277,6 +296,7 @@ export function GestorDocumentos({
                                                 alt="Vista previa archivo"
                                                 className="w-full h-auto rounded-md"
                                             />
+                            
                                         )}
                                     </div>
                                 </div>
@@ -310,7 +330,7 @@ export function GestorDocumentos({
 
                         <iframe
                             src={currentFileUrl}
-                            className="w-full h-5/6"
+                            className="w-full h-full"
                             title="Vista previa del archivo"
                         ></iframe>
                     </div>
