@@ -14,7 +14,7 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
-import { get } from "react-hook-form";
+import { get, set } from "react-hook-form";
 
 export function Documental({
   id,
@@ -43,6 +43,8 @@ export function Documental({
   const [history, setHistory] = useState(false);
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [fileToDelete, setFileToDelete] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+   const [refreshFiles, setRefreshFiles] = useState(false);
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -106,7 +108,7 @@ export function Documental({
     if (clientInfo.NumeroSolicitud) {
       fetchUploadedFiles();
     }
-  }, [clientInfo.id]);
+  }, [clientInfo.id , activeTab , refreshFiles]);
 
   const getTipoDocumento = (id) => {
     const documentoIds = {
@@ -248,61 +250,62 @@ export function Documental({
   // Función para eliminar archivo
   const handleRemoveFile = async () => {
     if (!fileToDelete) return;
-
+  
     const { field, index, id } = fileToDelete; // ✅ Extraemos el ID
     console.log(fileToDelete);
-    try {
-      // 1️⃣ Enviar PATCH a la API para actualizar el estado del documento
-      const response = await axios.patch(APIURL.patch_documentos(id), {
-        idEstadoDocumento: 4, // 👈 Aquí estableces el nuevo estado en la base de datos
-      });
-
-      if (response.status === 200) {
-        enqueueSnackbar("Documento eliminado correctamente.", {
-          variant: "success",
+  
+    if (id) {
+      try {
+        // 1️⃣ Enviar PATCH a la API para actualizar el estado del documento
+        const response = await axios.patch(APIURL.patch_documentos(id), {
+          idEstadoDocumento: 4, // 👈 Aquí estableces el nuevo estado en la base de datos
         });
-
-        // 2️⃣ Eliminar el archivo del estado local
-        setFiles((prevFiles) => {
-          if (!prevFiles[field] || prevFiles[field].length === 0)
-            return prevFiles;
-
-          const updatedFiles = { ...prevFiles };
-          updatedFiles[field] = updatedFiles[field].filter(
-            (_, i) => i !== index
-          );
-
-          if (updatedFiles[field].length === 0) {
-            delete updatedFiles[field];
-          }
-
-          return updatedFiles;
+  
+        if (response.status === 200) {
+          enqueueSnackbar("Documento eliminado correctamente.", {
+            variant: "success",
+          });
+        }
+      } catch (error) {
+        enqueueSnackbar("Error al eliminar el documento en la BD.", {
+          variant: "error",
         });
-
-        setFilePreviews((prevPreviews) => {
-          if (!prevPreviews[field] || prevPreviews[field].length === 0)
-            return prevPreviews;
-
-          const updatedPreviews = { ...prevPreviews };
-          updatedPreviews[field] = updatedPreviews[field].filter(
-            (_, i) => i !== index
-          );
-
-          if (updatedPreviews[field].length === 0) {
-            delete updatedPreviews[field];
-          }
-
-          return updatedPreviews;
-        });
-
-        closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
+        console.error("Error en la actualización:", error);
+        return; // ❌ Evitamos seguir eliminando localmente si hay error en la API
       }
-    } catch (error) {
-      enqueueSnackbar("Error al eliminar el documento.", { variant: "error" });
-      console.error("Error en la actualización:", error);
     }
+  
+    // 2️⃣ Eliminar el archivo del estado local, ya sea que tenga ID o no
+    setFiles((prevFiles) => {
+      if (!prevFiles[field] || prevFiles[field].length === 0) return prevFiles;
+  
+      const updatedFiles = { ...prevFiles };
+      updatedFiles[field] = updatedFiles[field].filter((_, i) => i !== index);
+  
+      if (updatedFiles[field].length === 0) {
+        delete updatedFiles[field];
+      }
+  
+      return updatedFiles;
+    });
+  
+    setFilePreviews((prevPreviews) => {
+      if (!prevPreviews[field] || prevPreviews[field].length === 0)
+        return prevPreviews;
+  
+      const updatedPreviews = { ...prevPreviews };
+      updatedPreviews[field] = updatedPreviews[field].filter((_, i) => i !== index);
+  
+      if (updatedPreviews[field].length === 0) {
+        delete updatedPreviews[field];
+      }
+  
+      return updatedPreviews;
+    });
+  
+    closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
   };
-
+  
   const toggleView = () => {
     setView(!view);
   };
@@ -344,31 +347,31 @@ export function Documental({
 
   const handleSubmit = async (e) => {
     e.preventDefault();    
+    setIsUploading(true); 
+
     const tipoDocumento = getNumeroDocumento(activeTab);
     const documentoExiste = await verificarDocumento(clientInfo.id, tipoDocumento);
     console.log(documentoExiste)
 
-    if (documentoExiste) { // Si es true, significa que ya hay un documento
-      enqueueSnackbar("Ya existe un documento cargado para este campo.", {
-        variant: "error",
-      });
+    if (documentoExiste.exists) {
+      enqueueSnackbar("Ya existe un documento cargado para este campo.", { variant: "error" });
+      setIsUploading(false); // Ocultar modal si hay error
       return;
     }
-    // Validar archivos y observación por cada sección
+  
     if (!files[activeTab] || files[activeTab].length === 0) {
-      enqueueSnackbar(
-        `Por favor, selecciona un archivo para el campo ${activeTab}`,
-        { variant: "error" }
-      );
+      enqueueSnackbar(`Por favor, selecciona un archivo para el campo ${activeTab}`, { variant: "error" });
+      setIsUploading(false);
       return;
-      
-    } else if (!observacion[activeTab] || observacion[activeTab].length < 10) {
-      enqueueSnackbar(
-        "La observación debe tener al menos 10 caracteres para este campo.",
-        { variant: "error" }
-      );
-      return;
-    }
+    } 
+
+    // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
+if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[activeTab].length < 10) {
+  enqueueSnackbar("Si proporcionas una observación, debe tener al menos 10 caracteres para este campo.", { variant: "error" });
+  setIsUploading(false);
+  return;
+}
+
 
     try {
       // Subir archivo y obtener la URL
@@ -437,6 +440,7 @@ export function Documental({
             variant: "success",
           });
           setShowFileInput(false);
+          setRefreshFiles((prev) => !prev);
         } else {
           enqueueSnackbar(
             "Error al guardar el documento en la BD. " +
@@ -454,6 +458,9 @@ export function Documental({
         variant: "error",
       });
       console.error("Error:", error);
+    } finally 
+    {
+      setIsUploading(false);
     }
   };
 
@@ -568,41 +575,45 @@ export function Documental({
           </div>
 
           {/* Campos Completados */}
-          {completedFields.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg text-gray-300 font-semibold">
-                Campos Completados
-              </h3>
-              <ul className="mt-4 space-y-4">
-                {completedFields.map((item) => {
-                  const fileCount = files[item] ? files[item].length : 0;
-                  return (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault(); // Evita que el navegador cambie la URL
-                          setActiveTab(item);
-                        }}
-                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
-                          activeTab === item
-                            ? "bg-gray-700"
-                            : "hover:bg-gray-600"
-                        }`}
-                      >
-                        {item}
-                        {fileCount > 0 && (
-                          <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
-                            {`+${fileCount}`}
-                          </span>
-                        )}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
+         {/* Campos Completados */}
+{completedFields.length > 0 && (
+  <div className="mt-6">
+    <h3 className="text-lg text-gray-300 font-semibold">
+      Campos Completados
+    </h3>
+    <ul className="mt-4 space-y-4">
+      {completedFields.map((item) => {
+        const fileCount = files[item] ? files[item].length : 0;
+        return (
+          <li key={item}>
+            <a
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                setActiveTab(item);
+              }}
+              className={`inline-flex items-center text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
+                activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
+              }`}
+            >
+              {item}
+              {fileCount > 0 && (
+                <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
+                  {`+${fileCount}`}
+                </span>
+              )}
+              {/* Indicador de archivos subidos ✅ */}
+              {fileCount > 0 && (
+                <span className="ml-2 text-green-400 font-bold">✓</span>
+              )}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+)}
+
         </div>
       </div>
 
@@ -915,6 +926,22 @@ export function Documental({
           </DialogActions>
         </Dialog>
       )}
+
+
+
+
+{isUploading && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+      <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" viewBox="0 0 24 24">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      <p className="text-lg font-semibold text-gray-700">Subiendo archivo...</p>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
