@@ -25,6 +25,8 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
 import PhoneIcon from "@mui/icons-material/Phone";
 import EventIcon from "@mui/icons-material/Event";
+import {FaUserFriends ,FaUser ,FaMapMarkerAlt , FaMobileAlt ,
+	FaPlus,FaTimes,FaPhoneAlt,FaCog,FaCommentDots  } from "react-icons/fa";
 
 export function Referencias() {
 
@@ -415,312 +417,336 @@ export function Referencias() {
     };
 
     return (
-        <div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {/* Parentesco */}
-                <div className="flex flex-col">
-                    
-                    <label className="text-lightGrey text-xs mb-2">Parentesco(*)</label>
-                    <select
-                        name="parentesco"
-                        className="solcitudgrande-style"
-                        value={formData.parentesco}
-                        onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoParentesco.map((opcion) => (
-                            <option key={opcion.idParentesco} value={opcion.idParentesco}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                {/* Apellido Paterno */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Apellido Paterno(*)</label>
-                    <input
-                        type="text"
-                        name="apellidoPaterno"
-                        autocomplete="off"
-                        placeholder="Apellido Paterno"
-                        className="solcitudgrande-style"
-                        value={formData.apellidoPaterno}
-                        onChange={handleChange}
-                        pattern="[A-Za-z]+"
-                        title="Solo se permiten letras"
-                    />
-                </div>
-                {/* Primer Nombre */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Primer Nombre(*)</label>
-                    <input
-                        type="text"
-                        name="primerNombre"
-                        autocomplete="off"
-                        placeholder="Primer Nombre"
-                        className="solcitudgrande-style"
-                        value={formData.primerNombre}
-                        onChange={handleChange}
-                    />
-                </div>
-                {/* Segundo Nombre */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Segundo Nombre</label>
-                    <input
-                        type="text"
-                        name="segundoNombre"
-                        autocomplete="off"
-                        placeholder="Segundo Nombre"
-                        className="solcitudgrande-style"
-                        value={formData.segundoNombre}
-                        onChange={handleChange}
-                    />
-                </div>
-            </div>
-            {/* Segunda fila */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {/* Provincia */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Provincia(*)</label>
-                    <select
-                        name="provincia"
-                        className="solcitudgrande-style"
-                        value={formData.provincia}
-                        onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoProvincia.map((opcion) => (
-                            <option key={opcion.idProvincia} value={opcion.idProvincia}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                {/* Canton */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Cantón(*)</label>
-                    <select
-                        name="canton"
-                        className="solcitudgrande-style"
-                        value={formData.canton}
-                        onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoCanton.map((opcion) => (
-                            <option key={opcion.idCanton} value={opcion.idCanton}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                {/* Celular */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Celular(*)</label>
-                    <input
-                        type="text"
-                        name="celular"
-                        autocomplete="off"
-                        placeholder="Celular"
-                        className="solcitudgrande-style"
-                        value={formData.celular}
-                        onChange={handleChange}
-                        maxLength="10"
-                        pattern="\d{10}"
-                    />
-                </div>
-                {/* Botones */}
-                <div className="flex items-center justify-center">
-                    <button onClick={handleAgregar} className="p-2 bg-blue-500 text-white rounded mr-2">
-                        Agregar
-                    </button>
-
-                    <button onClick={handleLimpiar} className="p-2 bg-blue-500 text-white rounded">
-                        Limpiar
-                    </button>
-                </div>
-            </div>
-            {/* Tabla */}
-            <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
-                <div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
-                    <table className="min-w-full table-auto">
-                        <thead className="bg-gray-200">
-                            <tr>
-                                <th className="px-4 py-2 text-center font-bold">Parentesco</th>
-                                <th className="px-4 py-2 text-center font-bold">Apellido Paterno</th>
-                                <th className="px-4 py-2 text-center font-bold">Primer Nombre</th>
-                                <th className="px-4 py-2 text-center font-bold">Segundo Nombre</th>
-                                <th className="px-4 py-2 text-center font-bold">Provincia</th>
-                                <th className="px-4 py-2 text-center font-bold">Cantón</th>
-                                <th className="px-4 py-2 text-center font-bold">Celular</th>
-                                <th className="px-4 py-2 text-center font-bold">....</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {/* Tabla Referencias */}
-                            {tablaDatos.map((row, index) => (
-                                <tr key={index}>
-                                    <td className="px-4 py-2 text-center">{idToTextMap[row.parentesco]}</td>
-                                    <td className="px-4 py-2 text-center">{row.apellidoPaterno}</td>
-                                    <td className="px-4 py-2 text-center">{row.primerNombre}</td>
-                                    <td className="px-4 py-2 text-center">{row.segundoNombre}</td>
-                                    <td className="px-4 py-2 text-center">{idToTextMapProvincia[row.provincia]}</td>
-                                    <td className="px-4 py-2 text-center">{idToTextMapCanton[row.canton]}</td>
-                                    <td className="px-4 py-2 text-center">{row.celular}</td>
-                                    <td className="px-4 py-2 text-center">
-                                        <IconButton color="primary" aria-label="call" onClick={() => handleOpenDialog(index)}>
-                                            <CallIcon />
-                                        </IconButton>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Dialog */}
-            <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-                <DialogTitle className="text-xl font-bold">
-                    Verificación Telefonica
-                </DialogTitle>
-                <DialogContent dividers>
-                    {selectedRow && (
-                        <div>
-                            {/* Datos */}
-                            <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-                                {/*primer columna */}
-                                <div className="md:w-1/3">
-                                    <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
-                                        <div className="flex items-center gap-2">
-                                            <PersonIcon className="text-blue-500" fontSize="medium" />
-                                            <p>
-                                                {selectedRow.primerNombre}{" "}
-                                                {selectedRow.segundoNombre}{" "}
-                                                {selectedRow.apellidoPaterno}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <PhoneIcon className="text-blue-500" fontSize="medium" />
-                                            <p className="font-semibold">Teléfono:</p>
-                                            <p>{selectedRow.celular}</p>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                {/*segunda columna */}
-                                <div className="md:w-1/3">
-                                    <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
-                                        <div className="flex items-center gap-2">
-                                            <EventIcon className="text-blue-500" fontSize="medium" />
-                                            <p className="font-semibold">Fecha:</p>
-                                            <p>{getCurrentDateTime()}</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <SupervisorAccountIcon
-                                                className="text-blue-500"
-                                                fontSize="medium"
-                                            />
-                                            <p className="font-semibold">Referencia:</p>
-                                            <p>{idToTextMap[selectedRow.parentesco]}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                {/*tercera columna */}
-                                <div className="md:w-1/3">
-                                    <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
-                                        {/* estado */}
-                                        <div className="flex flex-col">
-                                            <label className="text-lightGrey text-xs mb-2">Estado(*)</label>
-                                            <select
-                                                name="estado"
-                                                className="solcitudgrande-style"
-                                                value={formDataModal.estado}
-                                                onChange={handleChangeModal}
-                                            >
-                                                <option value="">Seleccione una opción</option>
-                                                {datoEstado.map((opcion) => (
-                                                    <option key={opcion.idEstadoGestns} value={opcion.idEstadoGestns}>
-                                                        {opcion.DESCRIPCION}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div className="flex flex-col">
-                                            <label className="text-lightGrey text-xs mb-2">Contacto Efectivo(*)</label>
-                                            <input
-                                                type="text"
-                                                name="contactoEfectivo"
-                                                autocomplete="off"
-                                                placeholder="Contacto Efectivo"
-                                                className="solcitudgrande-style"
-                                                value={formDataModal.contactoEfectivo}
-                                                onChange={handleChangeModal}
-                                                pattern="[A-Za-z]+"
-                                                title="Solo se permiten letras"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {/*  Observaciones */}
-                            <div className="mt-6">
-                                <label className="text-lightGrey text-xs mb-2">Observaciones(*)</label>
-                                <textarea
-                                    name="observaciones"
-                                    rows="3"
-                                    placeholder="Ingrese observaciones"
-                                    className="w-full solcitudgrande-style"
-                                    value={formDataModal.observaciones}
-                                    onChange={handleChangeModal}
-                                ></textarea>
-                            </div>
-
-                            {/* Tabla Modal */}
-                            <div className="mt-6">
-                                <h3 className="text-lg font-bold mb-2">Registros Guardados</h3>
-                                <TableContainer component={Paper}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>Fecha</TableCell>
-                                                <TableCell>Celular</TableCell>
-                                                <TableCell>Contacto</TableCell>
-                                                <TableCell>Referencia</TableCell>
-                                                <TableCell>Estado</TableCell>
-                                                <TableCell>Observaciones</TableCell>
-                                                <TableCell>Notas del Sistema</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {tablaModal.map((registro, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{registro.fecha}</TableCell>
-                                                    <TableCell>{registro.celularMod}</TableCell>
-                                                    <TableCell>{registro.contactoEfectivo}</TableCell>
-                                                    <TableCell>{registro.referencia}</TableCell>
-                                                    <TableCell>{idToTextMapEstado[registro.estado]}</TableCell>
-                                                    <TableCell>{registro.observaciones}</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </div>
-                        </div>
-                    )}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleGuardarModal} color="primary">
-                        Guardar
-                    </Button>
-                    <Button onClick={handleCloseDialog} color="primary">
-                        Cerrar
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    )
+		<div>
+		  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+			{/* Parentesco */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaUserFriends className="mr-2 text-primaryBlue" />
+				Parentesco(*)
+			  </label>
+			  <select
+				name="parentesco"
+				className="solcitudgrande-style"
+				value={formData.parentesco}
+				onChange={handleChange}
+			  >
+				<option value="">Seleccione una opción</option>
+				{datoParentesco.map((opcion) => (
+				  <option key={opcion.idParentesco} value={opcion.idParentesco}>
+					{opcion.Nombre}
+				  </option>
+				))}
+			  </select>
+			</div>
+			{/* Apellido Paterno */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaUser className="mr-2 text-primaryBlue" />
+				Apellido Paterno(*)
+			  </label>
+			  <input
+				type="text"
+				name="apellidoPaterno"
+				autoComplete="off"
+				placeholder="Apellido Paterno"
+				className="solcitudgrande-style"
+				value={formData.apellidoPaterno}
+				onChange={handleChange}
+				pattern="[A-Za-z]+"
+				title="Solo se permiten letras"
+			  />
+			</div>
+			{/* Primer Nombre */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaUser className="mr-2 text-primaryBlue" />
+				Primer Nombre(*)
+			  </label>
+			  <input
+				type="text"
+				name="primerNombre"
+				autoComplete="off"
+				placeholder="Primer Nombre"
+				className="solcitudgrande-style"
+				value={formData.primerNombre}
+				onChange={handleChange}
+			  />
+			</div>
+			{/* Segundo Nombre */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaUser className="mr-2 text-primaryBlue" />
+				Segundo Nombre
+			  </label>
+			  <input
+				type="text"
+				name="segundoNombre"
+				autoComplete="off"
+				placeholder="Segundo Nombre"
+				className="solcitudgrande-style"
+				value={formData.segundoNombre}
+				onChange={handleChange}
+			  />
+			</div>
+		  </div>
+	  
+		  {/* Segunda fila */}
+		  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+			{/* Provincia */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+				Provincia(*)
+			  </label>
+			  <select
+				name="provincia"
+				className="solcitudgrande-style"
+				value={formData.provincia}
+				onChange={handleChange}
+			  >
+				<option value="">Seleccione una opción</option>
+				{datoProvincia.map((opcion) => (
+				  <option key={opcion.idProvincia} value={opcion.idProvincia}>
+					{opcion.Nombre}
+				  </option>
+				))}
+			  </select>
+			</div>
+			{/* Cantón */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+				Cantón(*)
+			  </label>
+			  <select
+				name="canton"
+				className="solcitudgrande-style"
+				value={formData.canton}
+				onChange={handleChange}
+			  >
+				<option value="">Seleccione una opción</option>
+				{datoCanton.map((opcion) => (
+				  <option key={opcion.idCanton} value={opcion.idCanton}>
+					{opcion.Nombre}
+				  </option>
+				))}
+			  </select>
+			</div>
+			{/* Celular */}
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaMobileAlt className="mr-2 text-primaryBlue" />
+				Celular(*)
+			  </label>
+			  <input
+				type="text"
+				name="celular"
+				autoComplete="off"
+				placeholder="Celular"
+				className="solcitudgrande-style"
+				value={formData.celular}
+				onChange={handleChange}
+				maxLength="10"
+				pattern="\d{10}"
+			  />
+			</div>
+			{/* Botones */}
+			<div className="flex items-center justify-center space-x-2">
+			  <button onClick={handleAgregar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex intems-center">
+				<FaPlus className="mr-1" />
+				Agregar
+			  </button>
+			  <button onClick={handleLimpiar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex intems-center">
+				<FaTimes className="mr-1" />
+				Limpiar
+			  </button>
+			</div>
+		  </div>
+	  
+		  {/* Tabla */}
+		  <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
+			<div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
+			  <table className="min-w-full table-auto">
+				<thead className="bg-primaryBlue">
+				  <tr>
+					<th className="px-4 py-2 text-center font-bold text-white">Parentesco</th>
+					<th className="px-4 py-2 text-center font-bold text-white">Apellido Paterno</th>
+					<th className="px-4 py-2 text-center font-bold text-white">Primer Nombre</th>
+					<th className="px-4 py-2 text-center font-bold text-white">Segundo Nombre</th>
+					<th className="px-4 py-2 text-center font-bold text-white">Provincia</th>
+					<th className="px-4 py-2 text-center font-bold text-white">Cantón</th>
+					<th className="px-4 py-2 text-center font-bold text-white">Celular</th>
+					<th className="px-4 py-2 text-center font-bold text-white">....</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  {tablaDatos.map((row, index) => (
+					<tr key={index} className="hover:bg-gray-100">
+					  <td className="px-4 py-2 text-center">{idToTextMap[row.parentesco]}</td>
+					  <td className="px-4 py-2 text-center">{row.apellidoPaterno}</td>
+					  <td className="px-4 py-2 text-center">{row.primerNombre}</td>
+					  <td className="px-4 py-2 text-center">{row.segundoNombre}</td>
+					  <td className="px-4 py-2 text-center">{idToTextMapProvincia[row.provincia]}</td>
+					  <td className="px-4 py-2 text-center">{idToTextMapCanton[row.canton]}</td>
+					  <td className="px-4 py-2 text-center">{row.celular}</td>
+					  <td className="px-4 py-2 text-center">
+						<IconButton color="primary" aria-label="call" onClick={() => handleOpenDialog(index)}>
+						  <CallIcon />
+						</IconButton>
+					  </td>
+					</tr>
+				  ))}
+				</tbody>
+			  </table>
+			</div>
+		  </div>
+	  
+		  {/* Dialog */}
+		  <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+			<DialogTitle className="text-xl font-bold">
+			  Verificación Telefonica
+			</DialogTitle>
+			<DialogContent dividers>
+			  {selectedRow && (
+				<div>
+				  {/* Datos */}
+				  <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
+					{/* Primer columna */}
+					<div className="md:w-1/3">
+					  <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
+						<div className="flex items-center gap-2">
+						  <PersonIcon className="text-blue-500" fontSize="medium" />
+						  <p>
+							{selectedRow.primerNombre} {selectedRow.segundoNombre} {selectedRow.apellidoPaterno}
+						  </p>
+						</div>
+						<div className="flex items-center gap-2">
+						  <PhoneIcon className="text-blue-500" fontSize="medium" />
+						  <p className="font-semibold">Teléfono:</p>
+						  <p>{selectedRow.celular}</p>
+						</div>
+					  </div>
+					</div>
+					{/* Segunda columna */}
+					<div className="md:w-1/3">
+					  <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
+						<div className="flex items-center gap-2">
+						  <EventIcon className="text-blue-500" fontSize="medium" />
+						  <p className="font-semibold">Fecha:</p>
+						  <p>{getCurrentDateTime()}</p>
+						</div>
+						<div className="flex items-center gap-2">
+						  <SupervisorAccountIcon className="text-blue-500" fontSize="medium" />
+						  <p className="font-semibold">Referencia:</p>
+						  <p>{idToTextMap[selectedRow.parentesco]}</p>
+						</div>
+					  </div>
+					</div>
+					{/* Tercera columna */}
+					<div className="md:w-1/3">
+					  <div className="grid grid-cols-1 gap-y-4 text-base leading-relaxed">
+						{/* Estado */}
+						<div className="flex flex-col">
+						  <label className="text-xs font-medium mb-1 flex items-center">
+							<FaCog className="mr-2 text-primaryBlue" />
+							Estado(*)
+						  </label>
+						  <select
+							name="estado"
+							className="solcitudgrande-style"
+							value={formDataModal.estado}
+							onChange={handleChangeModal}
+						  >
+							<option value="">Seleccione una opción</option>
+							{datoEstado.map((opcion) => (
+							  <option key={opcion.idEstadoGestns} value={opcion.idEstadoGestns}>
+								{opcion.DESCRIPCION}
+							  </option>
+							))}
+						  </select>
+						</div>
+						{/* Contacto Efectivo */}
+						<div className="flex flex-col">
+						  <label className="text-xs font-medium mb-1 flex items-center">
+							<FaPhoneAlt className="mr-2 text-primaryBlue" />
+							Contacto Efectivo(*)
+						  </label>
+						  <input
+							type="text"
+							name="contactoEfectivo"
+							autoComplete="off"
+							placeholder="Contacto Efectivo"
+							className="solcitudgrande-style"
+							value={formDataModal.contactoEfectivo}
+							onChange={handleChangeModal}
+							pattern="[A-Za-z]+"
+							title="Solo se permiten letras"
+						  />
+						</div>
+					  </div>
+					</div>
+				  </div>
+				  {/* Observaciones */}
+				  <div className="mt-6">
+					<label className="text-xs font-medium mb-1 flex items-center">
+					  <FaCommentDots className="mr-2 text-primaryBlue" />
+					  Observaciones(*)
+					</label>
+					<textarea
+					  name="observaciones"
+					  rows="3"
+					  placeholder="Ingrese observaciones"
+					  className="w-full solcitudgrande-style"
+					  value={formDataModal.observaciones}
+					  onChange={handleChangeModal}
+					></textarea>
+				  </div>
+				  {/* Tabla Modal */}
+				  <div className="mt-6">
+					<h3 className="text-lg font-bold mb-2">Registros Guardados</h3>
+					<TableContainer component={Paper}>
+					  <Table>
+						<TableHead className="bg-primaryBlue">
+						  <TableRow>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Fecha</TableCell>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Celular</TableCell>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Contacto</TableCell>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Referencia</TableCell>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Estado</TableCell>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Observaciones</TableCell>
+							<TableCell className="px-4 py-2 text-center font-bold text-white">Notas del Sistema</TableCell>
+						  </TableRow>
+						</TableHead>
+						<TableBody>
+						  {tablaModal.map((registro, index) => (
+							<TableRow key={index} className="hover:bg-gray-100">
+							  <TableCell>{registro.fecha}</TableCell>
+							  <TableCell>{registro.celularMod}</TableCell>
+							  <TableCell>{registro.contactoEfectivo}</TableCell>
+							  <TableCell>{registro.referencia}</TableCell>
+							  <TableCell>{idToTextMapEstado[registro.estado]}</TableCell>
+							  <TableCell>{registro.observaciones}</TableCell>
+							  <TableCell></TableCell>
+							</TableRow>
+						  ))}
+						</TableBody>
+					  </Table>
+					</TableContainer>
+				  </div>
+				</div>
+			  )}
+			</DialogContent>
+			<DialogActions>
+			  <Button onClick={handleGuardarModal} color="primary">
+				Guardar
+			  </Button>
+			  <Button onClick={handleCloseDialog} color="primary">
+				Cerrar
+			  </Button>
+			</DialogActions>
+		  </Dialog>
+		</div>
+	  );
+	  
 }

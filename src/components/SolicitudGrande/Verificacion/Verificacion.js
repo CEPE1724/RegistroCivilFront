@@ -83,73 +83,74 @@ export function Verificacion() {
 			Opciones: ["Revisar", "Anular"]
 		  },
 	]
-
-  return (
-    <>
-      <div className="p-4 sm:p-6 bg-gray-50 overflow-auto">
-
-		<div className="flex items-center gap-2">
-        <button
-          type="button"
-		  onClick={ () => setIsTrabajoModalOpen(true) }
-          className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
-        >
-          <span className="text-xs">Trabajo</span>
-        </button>
-		<button
-          type="button"
-		  onClick={ () => setDomicilioModalOpen(true) }
-          className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
-        >
-          <span className="text-xs">Domicilio</span>
-        </button>
-      </div>
-
-	  <div className="bg-white shadow-lg rounded-lg border border-gray-300">
-      <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align="center"
-                  sx={{ fontWeight: "bold" }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {data.map((data, index) => (
-              <TableRow key={index}>
-                {columns.map((column) => (
-                  <TableCell key={column.id} align="center">
-                    {data[column?.label]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
-      </div>
-
-	  {isTrabajoModalOpen &&
-		<TrabajoModal
-			openModal={ () => setIsTrabajoModalOpen(true) }
-			closeModal={ () => setIsTrabajoModalOpen(false) }
-		/>
-	  }
-	  {isDomicilioModalOpen &&
-		<DomicilioModal
-			openModal={ () => setIsTrabajoModalOpen(true) }
-			closeModal={ () => setDomicilioModalOpen(false) }
-		/>
-	  }
 	  
-    </>
-  );
+	return (
+		<>
+		  <div className="p-4 sm:p-6 bg-gray-50 overflow-auto">
+			{/* Botones */}
+			<div className="flex items-center gap-2 mb-4">
+			  <button
+				type="button"
+				onClick={() => setIsTrabajoModalOpen(true)}
+				className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+			  >
+				<span className="text-xs">Trabajo</span>
+			  </button>
+			  <button
+				type="button"
+				onClick={() => setDomicilioModalOpen(true)}
+				className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+			  >
+				<span className="text-xs">Domicilio</span>
+			  </button>
+			</div>
+	  
+			{/* Tabla adaptada con Tailwind */}
+			<div className="bg-white shadow-lg rounded-lg border border-gray-300 overflow-auto">
+			  <table className="min-w-full table-auto">
+				<thead className="bg-primaryBlue">
+				  <tr>
+					{columns.map((column) => (
+					  <th
+						key={column.id}
+						className="px-4 py-2 text-center font-bold text-white"
+					  >
+						{column.label}
+					  </th>
+					))}
+				  </tr>
+				</thead>
+				<tbody>
+				  {data.map((dataRow, index) => (
+					<tr key={index} className="hover:bg-gray-100">
+					  {columns.map((column) => (
+						<td
+						  key={column.id}
+						  className="px-4 py-2 text-center"
+						>
+						  {dataRow[column.label]}
+						</td>
+					  ))}
+					</tr>
+				  ))}
+				</tbody>
+			  </table>
+			</div>
+		  </div>
+	  
+		  {isTrabajoModalOpen && (
+			<TrabajoModal
+			  openModal={() => setIsTrabajoModalOpen(true)}
+			  closeModal={() => setIsTrabajoModalOpen(false)}
+			/>
+		  )}
+		  {isDomicilioModalOpen && (
+			<DomicilioModal
+			  openModal={() => setIsTrabajoModalOpen(true)}
+			  closeModal={() => setDomicilioModalOpen(false)}
+			/>
+		  )}
+		</>
+	  );
+	  
 };
