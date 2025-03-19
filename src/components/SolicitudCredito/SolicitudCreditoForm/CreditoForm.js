@@ -148,6 +148,7 @@ export default function CreditoForm() {
     bPoliticas: false,
     idProductos: null,
     idCre_TiempoVivienda: null,
+	otp_code : ""
   };
 
   const formConfig = [
@@ -325,30 +326,6 @@ export default function CreditoForm() {
 
   const handleCancel = () => {
     console.log("Formulario cancelado");
-  };
-
-  const showFormErrors = (errors) => {
-    if (Object.keys(errors).length > 0) {
-      enqueueSnackbar('Por favor, revisa el campo nombre y todos los demás campos para que puedan funcionar correctamente.', {
-        variant: "error",
-        preventDuplicate: true,
-        autoHideDuration: 6000
-      });
-    }
-
-    Object.keys(errors).forEach(fieldName => {
-      if (!prevErrors[fieldName] || prevErrors[fieldName] !== errors[fieldName]) {
-        const fieldConfig = formConfig.find(f => f.name === fieldName);
-        const fieldLabel = fieldConfig ? fieldConfig.label : fieldName;
-
-        enqueueSnackbar(`Error en ${fieldLabel}: ${errors[fieldName]}`, {
-          variant: "error",
-          preventDuplicate: true,
-          autoHideDuration: 4000
-        });
-      }
-    });
-    setPrevErrors(errors);
   };
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
