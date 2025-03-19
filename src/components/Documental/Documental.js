@@ -115,7 +115,7 @@ export function Documental({
     if (clientInfo.NumeroSolicitud) {
       fetchUploadedFiles();
     }
-  }, [clientInfo.id  , refreshFiles]);
+  }, [clientInfo.id, refreshFiles]);
 
 
   const getTipoDocumento = (id) => {
@@ -197,14 +197,14 @@ export function Documental({
   const calculateProgress = () => {
     const totalFields = 11; // Siempre hay 11 documentos en total
     const completedFieldsCount = completedFields2.length; // Contamos los vistos (✓)
-  
+
     return (completedFieldsCount / totalFields) * 100;
   };
-  
+
   const patchsolicitudWeb = async () => {
     try {
       const response = await axios.patch(`${APIURL}/documentos-solicitud/updateEstado/${clientInfo.id}`);
-      
+
       console.log('Respuesta del servidor:', response.data);
     } catch (error) {
       console.error('Error al actualizar documentos:', error);
@@ -277,17 +277,17 @@ export function Documental({
   // Función para eliminar archivo
   const handleRemoveFile = async () => {
     if (!fileToDelete) return;
-  
+
     const { field, index, id } = fileToDelete; // ✅ Extraemos el ID
     console.log(fileToDelete);
-  
+
     if (id) {
       try {
         // 1️⃣ Enviar PATCH a la API para actualizar el estado del documento
         const response = await axios.patch(APIURL.patch_documentos(id), {
           idEstadoDocumento: 4, // 👈 Aquí estableces el nuevo estado en la base de datos
         });
-  
+
         if (response.status === 200) {
           enqueueSnackbar("Documento eliminado correctamente.", {
             variant: "success",
@@ -304,43 +304,43 @@ export function Documental({
         return; // ❌ Evitamos seguir eliminando localmente si hay error en la API
       }
     }
-  
+
     // 2️⃣ Eliminar el archivo del estado local, ya sea que tenga ID o no
     setFiles((prevFiles) => {
       if (!prevFiles[field] || prevFiles[field].length === 0) return prevFiles;
-  
+
       const updatedFiles = { ...prevFiles };
       updatedFiles[field] = updatedFiles[field].filter((_, i) => i !== index);
-  
+
       if (updatedFiles[field].length === 0) {
         delete updatedFiles[field];
       }
-  
+
       return updatedFiles;
     });
-  
+
     setFilePreviews((prevPreviews) => {
       if (!prevPreviews[field] || prevPreviews[field].length === 0)
         return prevPreviews;
-  
+
       const updatedPreviews = { ...prevPreviews };
       updatedPreviews[field] = updatedPreviews[field].filter((_, i) => i !== index);
-  
+
       if (updatedPreviews[field].length === 0) {
         delete updatedPreviews[field];
       }
-  
+
       return updatedPreviews;
     });
-  
+
     closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
   };
-  
+
   const toggleView = () => {
     setView(!view);
   };
 
- 
+
 
   const verificarDocumento = async (idCreSolicitudWeb, tipoDocumento) => {
     try {
@@ -355,29 +355,29 @@ export function Documental({
 
   const getNumeroDocumento = (nombre) => {
     const documentoIds = {
-       1: "Buro Credito",
-       2: "Copia De Cedula",
-       3: "Contrato de Compra",
-       4: "Declaracion",
-       5: "Pagare a la Orden",
-       6: "Tabla de amortizacion",
-       7: "Gastos de cobranza",
-       8: "Compromiso Lugar de pago",
-       9: "Acta",
-       10: "Consentimiento",
-       11: "Autorización",
+      1: "Buro Credito",
+      2: "Copia De Cedula",
+      3: "Contrato de Compra",
+      4: "Declaracion",
+      5: "Pagare a la Orden",
+      6: "Tabla de amortizacion",
+      7: "Gastos de cobranza",
+      8: "Compromiso Lugar de pago",
+      9: "Acta",
+      10: "Consentimiento",
+      11: "Autorización",
     };
 
     // Buscamos la clave (número) correspondiente al nombre
     const id = Object.keys(documentoIds).find(key => documentoIds[key] === nombre);
 
     return id ? Number(id) : null; // Convertimos a número si existe, sino retornamos null
-};
+  };
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();    
-    setIsUploading(true); 
+    e.preventDefault();
+    setIsUploading(true);
 
     const tipoDocumento = getNumeroDocumento(activeTab);
     const documentoExiste = await verificarDocumento(clientInfo.id, tipoDocumento);
@@ -388,19 +388,19 @@ export function Documental({
       setIsUploading(false); // Ocultar modal si hay error
       return;
     }
-  
+
     if (!files[activeTab] || files[activeTab].length === 0) {
       enqueueSnackbar(`Por favor, selecciona un archivo para el campo ${activeTab}`, { variant: "error" });
       setIsUploading(false);
       return;
-    } 
+    }
 
     // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
-if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[activeTab].length < 10) {
-  enqueueSnackbar("Si proporcionas una observación, debe tener al menos 10 caracteres para este campo.", { variant: "error" });
-  setIsUploading(false);
-  return;
-}
+    if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[activeTab].length < 10) {
+      enqueueSnackbar("Si proporcionas una observación, debe tener al menos 10 caracteres para este campo.", { variant: "error" });
+      setIsUploading(false);
+      return;
+    }
 
 
     try {
@@ -474,7 +474,7 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
         } else {
           enqueueSnackbar(
             "Error al guardar el documento en la BD. " +
-              apiResponse.data?.message || "",
+            apiResponse.data?.message || "",
             { variant: "error" }
           );
         }
@@ -488,8 +488,7 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
         variant: "error",
       });
       console.error("Error:", error);
-    } finally 
-    {
+    } finally {
       setIsUploading(false);
     }
   };
@@ -534,9 +533,8 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`w-64 bg-[#2d3689] text-white ${
-          isMenuOpen ? "block" : "hidden"
-        } md:block transition-all duration-300 ease-in-out`}
+        className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"
+          } md:block transition-all duration-300 ease-in-out`}
       >
         <div className="p-6">
           <h2 className="text-2xl font-bold text-gray-100">Menú</h2>
@@ -587,9 +585,8 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
                         event.preventDefault(); // Evita que el navegador cambie la URL
                         setActiveTab(item);
                       }}
-                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
-                        activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
-                      }`}
+                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
+                        }`}
                     >
                       {item}
                       {fileCount > 0 && (
@@ -621,11 +618,10 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
                           event.preventDefault(); // Evita que el navegador cambie la URL
                           setActiveTab(item);
                         }}
-                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${
-                          activeTab === item
+                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item
                             ? "bg-gray-700"
                             : "hover:bg-gray-600"
-                        }`}
+                          }`}
                       >
                         {item}
                         {fileCount > 0 && (
@@ -635,9 +631,9 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
                         )}
 
                         {/* ✅ Solo mostrar visto en los que ya están en la BD */}
-              {completedFields2.includes(item) && (
-                <span className="ml-2 text-green-400 font-bold">✓</span>
-              )}
+                        {completedFields2.includes(item) && (
+                          <span className="ml-2 text-green-400 font-bold">✓</span>
+                        )}
                       </a>
                     </li>
                   );
@@ -724,7 +720,7 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
                       <IconButton onClick={toggleView}>
                         <VisibilityIcon />
                       </IconButton>
-                  {/*     
+                      {/*     
                       <button
                         type="button"
                         onClick={() =>
@@ -961,17 +957,17 @@ if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[a
 
 
 
-{isUploading && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-      <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-      </svg>
-      <p className="text-lg font-semibold text-gray-700">Subiendo archivo...</p>
-    </div>
-  </div>
-)}
+      {isUploading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            <p className="text-lg font-semibold text-gray-700">Subiendo archivo...</p>
+          </div>
+        </div>
+      )}
 
     </div>
   );

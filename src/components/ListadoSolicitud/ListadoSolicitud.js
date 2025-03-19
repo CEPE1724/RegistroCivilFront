@@ -159,14 +159,14 @@ export function ListadoSolicitud() {
               consulta:
                 tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
               estado:
-                item.Estado === 0
-                  ? "pendiente"
-                  : item.Estado === 1
-                  ? "aprobado"
+                item.Estado === 1
+                  ? "PENDIENTE"
                   : item.Estado === 2
-                  ? "anulado"
+                  ? "APROBADO"
                   : item.Estado === 3
-                  ? "rechazado"
+                  ? "ANULADO"
+                  : item.Estado === 4
+                  ? "RECHAZADO"
                   : "desconocido",
               imagen: item.Foto,
               celular: item.Celular,

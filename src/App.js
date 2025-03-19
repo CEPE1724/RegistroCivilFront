@@ -23,7 +23,8 @@ import TelefonicaListSol from "./pages/TelefonicaListSol";
 import GestorDocumentosCli from "./pages/GestorDocumentos";
 import { useAuth } from "./components/AuthContext/AuthContext";
 import RepositorioCreditos from "./pages/RepositorioCreditos";
-import  CalendarioOperador from "./pages/CalendarioOperador";
+import CalendarioOperador from "./pages/CalendarioOperador";
+import AgenteDocumental from "./pages/AgenteDocumental";
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -65,13 +66,10 @@ function App() {
         <Route path="/solicitudgrande" element={<PrivateRouteWrapper title="SolicitudGrande" element={<SolicitudGrande />} />} />
         <Route path="/ListadoSolicitud" element={<PrivateRouteWrapper title="Tabla" element={<ListaSolicitud />} />} />
         <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
-
         <Route path="/telefonicaList" element={<PrivateRouteWrapper title="Telefonica Lista Solicitud" element={<TelefonicaListSol />} />} />
         <Route path="/gestorDocumentos" element={<PrivateRouteWrapper title="Gestor Documentos" element={<GestorDocumentosCli />} />} />
-
-
-		<Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
-
+        <Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
+        <Route path="/agentedocumental" element={<PrivateRouteWrapper title="Repositorio" element={<AgenteDocumental />} />} />
       </Routes>
 
       {isSessionExpired && (
