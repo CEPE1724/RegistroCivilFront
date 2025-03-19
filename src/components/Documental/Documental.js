@@ -7,6 +7,10 @@ import { APIURL } from "../../configApi/apiConfig";
 import uploadFile from "../../hooks/uploadFile";
 import { useAuth } from "../AuthContext/AuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa"; // Importar icono de usuario
+
+
 import {
   Dialog,
   DialogActions,
@@ -28,6 +32,7 @@ export function Documental({
   consulta,
 }) {
   const { userData, userUsuario } = useAuth();
+  const navigate = useNavigate();
   console.log("userData", userData);
 
   console.log("userUsuario", userUsuario);
@@ -46,6 +51,14 @@ export function Documental({
   const [isUploading, setIsUploading] = useState(false);
   const [refreshFiles, setRefreshFiles] = useState(false);
   const [completedFields2, setCompletedFields2] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [observaciones, setObservaciones] = useState([]);
+
+
+  const handleConfirm = () => {
+    setIsModalOpen(false);
+    patchsolicitudWeb(); // Llama a la función después de la confirmación
+  };
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -203,14 +216,27 @@ export function Documental({
 
   const patchsolicitudWeb = async () => {
     try {
-      const response = await axios.patch(`${APIURL}/documentos-solicitud/updateEstado/${clientInfo.id}`);
-
-      console.log('Respuesta del servidor:', response.data);
+      const response = await axios.patch(APIURL.patch_solicitudweb(clientInfo.id));
+  
+      if (response.status === 200) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
+        navigate("/ListadoSolicitud", {
+          replace: true});
+      } else {
+        enqueueSnackbar("Error al actualizar la solicitud.", {
+          variant: "error",
+        });
+      }
     } catch (error) {
-      console.error('Error al actualizar documentos:', error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+      console.error("Error al actualizar la solicitud:", error);
     }
   };
-
+  
   const getProgressBarColor = () => {
     const progress = calculateProgress();
     if (progress < 50) return "#FF0000";
@@ -219,15 +245,15 @@ export function Documental({
   };
 
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (calculateProgress() === 100) {
       console.log("✅ Todos los archivos han sido subidos correctamente.");
-      // 🔴 Aquí puedes ejecutar la acción que necesites
+      // 
       patchsolicitudWeb();
       ///
     }
   }, [calculateProgress()]); // Se ejecuta cuando el progreso cambia
-
+*/
   const handleFileChange = (e, field) => {
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length === 0) {
@@ -375,6 +401,22 @@ export function Documental({
   };
 
 
+
+  const fetchObservaciones = async () => {
+    const numeroActivetab = getNumeroDocumento(activeTab);
+    try {
+      const response = await axios.get(
+        APIURL.get_observaciones(clientInfo.id, numeroActivetab)
+      );
+      console.log("Observaciones recibidas:", response.data);
+      setObservaciones(response.data);
+      setHistory(true);
+    } catch (error) {
+      console.error("Error al obtener las observaciones:", error);
+    }
+  };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUploading(true);
@@ -448,6 +490,8 @@ export function Documental({
           idTipoDocumentoWEB: idTipoDocumentoWEB, // Cambié a 2, ya que en el ejemplo de Postman usas 2
           RutaDocumento: urlArchivo, // URL del archivo subido
           Observacion: observacion[activeTab], // Observación recibida
+          Usuario: userData.Nombre,
+          IdUsuario: userData.idUsuario,
         };
 
         // Verifica el payload antes de enviarlo
@@ -561,8 +605,8 @@ export function Documental({
               </div>
               {calculateProgress() === 100 && (
                 <div className="flex justify-center mt-6">
-                  <button className="bg-green-600 text-white py-2 px-6 rounded-md shadow-md hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105">
-                    Funcionalidad Nueva
+                  <button onClick={() => setIsModalOpen(true)} className="bg-green-600 text-white py-2 px-6 rounded-md shadow-md hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105">
+                     Enviar verificación
                   </button>
                 </div>
               )}
@@ -696,7 +740,7 @@ export function Documental({
 
             <div className="absolute right-11">
               <button
-                onClick={() => setHistory(true)}
+                onClick={fetchObservaciones}
                 className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
               >
                 Historial Observaciones
@@ -720,7 +764,6 @@ export function Documental({
                       <IconButton onClick={toggleView}>
                         <VisibilityIcon />
                       </IconButton>
-                      {/*     
                       <button
                         type="button"
                         onClick={() =>
@@ -729,7 +772,7 @@ export function Documental({
                         className="text-red-500 hover:text-red-700"
                       >
                         ❌
-                      </button>  */}
+                      </button>  
                     </div>
                   </div>
 
@@ -919,16 +962,39 @@ export function Documental({
 
       {/* Historial de Observaciones */}
 
-      {history && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-            <h2 className="text-lg font-semibold mb-4">
-              Historial de Observaciones
-            </h2>
-            <p>Aquí va el historial de observaciones...</p>
+    {/* Modal para mostrar el chat de observaciones */}
+    {history && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-md w-96 max-h-[500px] flex flex-col">
+            <h2 className="text-lg font-semibold mb-4 text-center">Historial de Observaciones</h2>
+
+            {/* Área de mensajes tipo chat */}
+            <div className="flex-grow overflow-y-auto max-h-80 p-2 space-y-4 bg-gray-100 rounded-lg">
+              {observaciones.length > 0 ? (
+                observaciones.map((obs, index) => (
+                  <div key={index} className={`flex ${index % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                    <div className="flex items-start space-x-2 max-w-[80%]">
+                      {/* Icono de usuario */}
+                      <FaUserCircle className="text-gray-600 text-2xl" />
+                      
+                      {/* Burbuja de chat */}
+                      <div className={`p-3 rounded-lg shadow-md ${index % 2 === 0 ? "bg-white text-gray-900" : "bg-blue-500 text-white"}`}>
+                        <p className="font-semibold">{obs.Usuario || "Usuario desconocido"}</p>
+                        <p className="text-sm">{obs.Observacion || "Sin observación"}</p>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(obs.Fecha).toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center">No hay observaciones registradas.</p>
+              )}
+            </div>
+
+            {/* Botón de cierre */}
             <button
               onClick={() => setHistory(false)}
-              className="mt-4 bg-red-600 text-white py-2 px-4 rounded-md shadow-lg hover:bg-red-700 transition duration-300"
+              className="mt-4 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
             >
               Cerrar
             </button>
@@ -954,7 +1020,29 @@ export function Documental({
         </Dialog>
       )}
 
-
+{isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-lg font-semibold">
+              ¿Estás seguro de enviar los documentos a verificación?
+            </h2>
+            <div className="mt-4 flex justify-end gap-4">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 
       {isUploading && (

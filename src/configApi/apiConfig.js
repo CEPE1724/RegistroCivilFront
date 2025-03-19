@@ -2,7 +2,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+const API_BASE_URL = "http://192.168.137.232:3025/api/v1/";
 
 
 
@@ -79,10 +79,12 @@ export const APIURL = {
    get_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
    patch_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
    patch_solicitudweb : (id) => `${API_BASE_URL}documentos-solicitud/updateEstado/${id}`,
+   get_observaciones: (idSolicitud, idTipoDocumento) => `${API_BASE_URL}documentos-solicitud/observaciones?idSolicitud=${idSolicitud}&idTipoDocumento=${idTipoDocumento}`,
+   
 
 
    /*solicitud grande*/
-   get_cre_solicitud_web : () => `${API_BASE_URL}cre-solicitud-web/`,
+   get_cre_solicitud_web : () => `${API_BASE_URL}cre-solicitud-web/all`,
    get_cre_solicitud_web_id : (idSolicitud, numeroSolicitud) => `${API_BASE_URL}web-solicitudgrande/${idSolicitud}/${numeroSolicitud}`,
 
    post_creSolicitudVerificacionTelefonica : () => `${API_BASE_URL}cre-solicitudverificaciontelefonica`,

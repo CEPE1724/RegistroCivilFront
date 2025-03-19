@@ -25,6 +25,7 @@ import { useAuth } from "./components/AuthContext/AuthContext";
 import RepositorioCreditos from "./pages/RepositorioCreditos";
 import CalendarioOperador from "./pages/CalendarioOperador";
 import AgenteDocumental from "./pages/AgenteDocumental";
+import Dashboard from "./pages/Dashboard";
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -52,7 +53,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/*" element={<><TitleUpdater title="Página no encontrada - POINT" /><PaginaNotFound /></>} />
 
-
+        <Route path="/dashboard" element={<PrivateRouteWrapper title="dashboard" element={<Dashboard />} />} />
         <Route path="/nueva-consulta" element={<PrivateRouteWrapper title="Nueva Consulta" element={<Home />} />} />
         <Route path="/ciudadanos" element={<PrivateRouteWrapper title="Ciudadanos Almacenados" element={<Ciudadanos />} />} />
         <Route path="/proteccion-datos" element={<PrivateRouteWrapper title="Protección de Datos" element={<DataProtection />} />} />
