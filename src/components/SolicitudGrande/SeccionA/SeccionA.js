@@ -3,6 +3,8 @@ import { useSnackbar } from "notistack";
 import { useImperativeHandle, forwardRef } from "react";
 import { APIURL } from "../../../configApi/apiConfig";
 import axios from "axios";
+import { FaStoreAlt , FaMoneyCheckAlt , FaMapMarkerAlt,FaClock , FaMoneyBillWave ,
+	FaRoad , FaHouseUser, FaMapPin , FaRulerCombined, FaIndustry,FaSlidersH   } from "react-icons/fa";
 
 export const SeccionA = forwardRef((props, ref) => {
   const [nombreNegocio, setNombreNegocio] = useState("");
@@ -299,242 +301,269 @@ export const SeccionA = forwardRef((props, ref) => {
   }));
 
   return (
-    <div className="p-6">
-      {/* Rejilla adaptable para responsive */}
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {/* Primera fila: Nombre, Tiempo, Metros, Ingresos y Gastos */}
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">
-              Nombre de Negocio
-            </label>
-            <input
-              type="text"
-              className="solcitudgrande-style"
-              value={nombreNegocio}
-              onChange={(e) => setNombreNegocio(e.target.value.toUpperCase())}
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">
-              Tiempo del Negocio
-            </label>
-            <input
-              type="number"
-              className="solcitudgrande-style"
-              value={tiempoNegocio}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value >= 0 || e.target.value === "") {
-                  setTiempoNegocio(e.target.value);
-                }
-              }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Metros</label>
-            <input
-              type="number"
-              className="solcitudgrande-style"
-              value={metros}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value >= 0 || e.target.value === "") {
-                  setMetros(e.target.value);
-                }
-              }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Ingresos</label>
-            <input
-              type="number"
-              required
-              className="solcitudgrande-style"
-              value={ingresos}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value >= 0 || e.target.value === "") {
-                  setIngresos(e.target.value);
-                }
-              }}
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Gastos</label>
-            <input
-              type="number"
-              className="solcitudgrande-style"
-              value={gastos}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value);
-                if (value >= 0 || e.target.value === "") {
-                  setGastos(e.target.value);
-                }
-              }}
-            />
-          </div>
-
-          {/* Segunda fila: Cantón, Parroquia, Barrio */}
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Provincia</label>
-            <select
-              className="solcitudgrande-style"
-              value={idProvincia} // Usamos idProvincia en el value
-              onChange={(e) => {
-                const idSeleccionada = e.target.value;
-             // Esto te dará el ID de la provincia
-                setProvincia(e.target.options[e.target.selectedIndex].text); // Guardamos el nombre de la provincia
-                setIdProvincia(idSeleccionada);      // Actualizamos el idProvincia
-              }}
-            >
-              <option value="">Seleccione</option>
-              {provincias.map((prov) => (
-                <option key={prov.idProvincia} value={prov.idProvincia}>
-                  {prov.label} 
-                </option>
-              ))}
-            </select>
-          </div>
-         
-
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Cantón</label>
-            <select
-              className="solcitudgrande-style"
-              value={idCanton}
-              onChange={(e) => {
-                const idSeleccionada = e.target.value;
-                setCanton(e.target.options[e.target.selectedIndex].text);
-                setIdCanton(idSeleccionada);
-              }
-              }
-            >
-             <option value="">Seleccione</option>
-              {cantones.map((canton) => (
-                <option key={canton.idCanton} value={canton.idCanton}>
-                  {canton.label}
-                </option>
-                ))}
-            </select>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Parroquia</label>
-            <select
-              className="solcitudgrande-style"
-              value={idParroquia}
-              onChange={(e) => {
-                const idSeleccionada = e.target.value;
-                setParroquia(e.target.options[e.target.selectedIndex].text);
-                setIdParroquia(idSeleccionada);
-              }
-              }
-            >
-              <option>Seleccione</option>
-                {parroquias.map((parroquia) => (
-                    <option key={parroquia.idParroquia} value={parroquia.idParroquia}>
-                        {parroquia.label}
-                    </option>
-                ))}
-            </select>
-          </div>
-          <div>
-            <div className="flex flex-col">
-                <label className="text-sm font-semibold mb-1">Barrio</label>
-                <select
-                    className="solcitudgrande-style"
-                    value={barrio}
-                    onChange={(e) => setBarrio(e.target.value.toUpperCase())}
-                >
-                    <option>Seleccione</option>
-                    {barrios.map((barrio) => (
-                    <option key={barrio.idBarrio} value={barrio.idBarrio}>
-                        {barrio.label}
-                    </option>
-                    ))}
-                </select>
-          </div>
-            </div>
-
-          <div className="lg:col-span-1"></div>
-
-          {/* Tercera fila: Calle Principal, Calle Secundaria, Número de Casa, Referencia de Ubicación */}
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">
-              Calle Principal
-            </label>
-            <input
-              type="text"
-              className="solcitudgrande-style"
-              value={callePrincipal}
-              onChange={(e) => setCallePrincipal(e.target.value.toUpperCase())}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">Número Casa</label>
-            <input
-              type="text"
-              className="solcitudgrande-style"
-              value={numeroCasa}
-              onChange={(e) => setNumeroCasa(e.target.value.toUpperCase())}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold mb-1">
-              Calle Secundaria
-            </label>
-            <input
-              type="text"
-              className="solcitudgrande-style"
-              value={calleSecundaria}
-              onChange={(e) => setCalleSecundaria(e.target.value.toUpperCase())}
-            />
-          </div>
-
-          <div className="flex flex-col lg:col-span-2">
-            <label className="text-sm font-semibold mb-1">
-              Referencia Ubicación
-            </label>
-            <textarea
-              className="solcitudgrande-style h-20"
-              value={referenciaUbicacion}
-              onChange={(e) =>
-                setReferenciaUbicacion(e.target.value.toUpperCase())
-              }
-            ></textarea>
-          </div>
-
-          {/* Cuarta fila: Actividad del Negocio y Opciones */}
-          <div className="flex flex-col lg:col-span-2">
-            <label className="text-sm font-semibold mb-1">
-              Actividad del Negocio
-            </label>
-            <textarea
-              className="solcitudgrande-style h-20"
-              value={actividadNegocio}
-              onChange={(e) =>
-                setActividadNegocio(e.target.value.toUpperCase())
-              }
-            ></textarea>
-          </div>
-
-          {/* Opciones */}
-          <div className="lg:col-span-2 flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-2 lg:space-y-0">
-            <label className="text-sm font-semibold">Opciones:</label>
-            <label className="inline-flex items-center">
-              <input type="checkbox" className="mr-2" />
-              Afiliado Tributario
-            </label>
-            <label className="inline-flex items-center">
-              <input type="checkbox" className="mr-2" />
-              Obligado a Llevar Contabilidad
-            </label>
-          </div>
-        </div>
-      </form>
-    </div>
+	<div className="p-6">
+	  {/* Rejilla adaptable para responsive */}
+	  <form onSubmit={handleSubmit}>
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+		  {/* Primera fila: Nombre, Tiempo, Metros, Ingresos y Gastos */}
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaStoreAlt className="mr-2 text-primaryBlue" />
+			  Nombre de Negocio
+			</label>
+			<input
+			  type="text"
+			  className="solcitudgrande-style"
+			  value={nombreNegocio}
+			  onChange={(e) => setNombreNegocio(e.target.value.toUpperCase())}
+			/>
+		  </div>
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaClock className="mr-2 text-primaryBlue" />
+			  Tiempo del Negocio
+			</label>
+			<input
+			  type="number"
+			  className="solcitudgrande-style"
+			  value={tiempoNegocio}
+			  onChange={(e) => {
+				const value = parseFloat(e.target.value);
+				if (value >= 0 || e.target.value === "") {
+				  setTiempoNegocio(e.target.value);
+				}
+			  }}
+			/>
+		  </div>
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaRulerCombined className="mr-2 text-primaryBlue" />
+			  Metros
+			</label>
+			<input
+			  type="number"
+			  className="solcitudgrande-style"
+			  value={metros}
+			  onChange={(e) => {
+				const value = parseFloat(e.target.value);
+				if (value >= 0 || e.target.value === "") {
+				  setMetros(e.target.value);
+				}
+			  }}
+			/>
+		  </div>
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaMoneyBillWave className="mr-2 text-primaryBlue" />
+			  Ingresos
+			</label>
+			<input
+			  type="number"
+			  required
+			  className="solcitudgrande-style"
+			  value={ingresos}
+			  onChange={(e) => {
+				const value = parseFloat(e.target.value);
+				if (value >= 0 || e.target.value === "") {
+				  setIngresos(e.target.value);
+				}
+			  }}
+			/>
+		  </div>
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
+			  Gastos
+			</label>
+			<input
+			  type="number"
+			  className="solcitudgrande-style"
+			  value={gastos}
+			  onChange={(e) => {
+				const value = parseFloat(e.target.value);
+				if (value >= 0 || e.target.value === "") {
+				  setGastos(e.target.value);
+				}
+			  }}
+			/>
+		  </div>
+  
+		  {/* Segunda fila: Provincia, Cantón, Parroquia, Barrio */}
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+			  Provincia
+			</label>
+			<select
+			  className="solcitudgrande-style"
+			  value={idProvincia} // Usamos idProvincia en el value
+			  onChange={(e) => {
+				const idSeleccionada = e.target.value;
+				// Guardamos el nombre de la provincia y actualizamos el id
+				setProvincia(e.target.options[e.target.selectedIndex].text);
+				setIdProvincia(idSeleccionada);
+			  }}
+			>
+			  <option value="">Seleccione</option>
+			  {provincias.map((prov) => (
+				<option key={prov.idProvincia} value={prov.idProvincia}>
+				  {prov.label}
+				</option>
+			  ))}
+			</select>
+		  </div>
+  
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+			  Cantón
+			</label>
+			<select
+			  className="solcitudgrande-style"
+			  value={idCanton}
+			  onChange={(e) => {
+				const idSeleccionada = e.target.value;
+				setCanton(e.target.options[e.target.selectedIndex].text);
+				setIdCanton(idSeleccionada);
+			  }}
+			>
+			  <option value="">Seleccione</option>
+			  {cantones.map((canton) => (
+				<option key={canton.idCanton} value={canton.idCanton}>
+				  {canton.label}
+				</option>
+			  ))}
+			</select>
+		  </div>
+  
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+			  Parroquia
+			</label>
+			<select
+			  className="solcitudgrande-style"
+			  value={idParroquia}
+			  onChange={(e) => {
+				const idSeleccionada = e.target.value;
+				setParroquia(e.target.options[e.target.selectedIndex].text);
+				setIdParroquia(idSeleccionada);
+			  }}
+			>
+			  <option>Seleccione</option>
+			  {parroquias.map((parroquia) => (
+				<option key={parroquia.idParroquia} value={parroquia.idParroquia}>
+				  {parroquia.label}
+				</option>
+			  ))}
+			</select>
+		  </div>
+		  <div>
+			<div className="flex flex-col">
+			  <label className="text-xs font-medium mb-1 flex items-center">
+				<FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+				Barrio
+			  </label>
+			  <select
+				className="solcitudgrande-style"
+				value={barrio}
+				onChange={(e) => setBarrio(e.target.value.toUpperCase())}
+			  >
+				<option>Seleccione</option>
+				{barrios.map((barrio) => (
+				  <option key={barrio.idBarrio} value={barrio.idBarrio}>
+					{barrio.label}
+				  </option>
+				))}
+			  </select>
+			</div>
+		  </div>
+  
+		  <div className="lg:col-span-1"></div>
+  
+		  {/* Tercera fila: Calle Principal, Número Casa, Calle Secundaria, Referencia Ubicación */}
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaRoad className="mr-2 text-primaryBlue" />
+			  Calle Principal
+			</label>
+			<input
+			  type="text"
+			  className="solcitudgrande-style"
+			  value={callePrincipal}
+			  onChange={(e) => setCallePrincipal(e.target.value.toUpperCase())}
+			/>
+		  </div>
+  
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaHouseUser className="mr-2 text-primaryBlue" />
+			  Número Casa
+			</label>
+			<input
+			  type="text"
+			  className="solcitudgrande-style"
+			  value={numeroCasa}
+			  onChange={(e) => setNumeroCasa(e.target.value.toUpperCase())}
+			/>
+		  </div>
+  
+		  <div className="flex flex-col">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaRoad className="mr-2 text-primaryBlue" />
+			  Calle Secundaria
+			</label>
+			<input
+			  type="text"
+			  className="solcitudgrande-style"
+			  value={calleSecundaria}
+			  onChange={(e) => setCalleSecundaria(e.target.value.toUpperCase())}
+			/>
+		  </div>
+  
+		  <div className="flex flex-col lg:col-span-2">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaMapPin className="mr-2 text-primaryBlue" />
+			  Referencia Ubicación
+			</label>
+			<textarea
+			  className="solcitudgrande-style h-20"
+			  value={referenciaUbicacion}
+			  onChange={(e) => setReferenciaUbicacion(e.target.value.toUpperCase())}
+			></textarea>
+		  </div>
+  
+		  {/* Cuarta fila: Actividad del Negocio y Opciones */}
+		  <div className="flex flex-col lg:col-span-2">
+			<label className="text-xs font-medium mb-1 flex items-center">
+			  <FaIndustry className="mr-2 text-primaryBlue" />
+			  Actividad del Negocio
+			</label>
+			<textarea
+			  className="solcitudgrande-style h-20"
+			  value={actividadNegocio}
+			  onChange={(e) => setActividadNegocio(e.target.value.toUpperCase())}
+			></textarea>
+		  </div>
+  
+		  {/* Opciones */}
+		  <div className="lg:col-span-2 flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-2 lg:space-y-0">
+			<label className="text-xs font-medium flex items-center">
+			  <FaSlidersH className="mr-2 text-primaryBlue" />
+			  Opciones:
+			</label>
+			<label className="inline-flex items-center">
+			  <input type="checkbox" className="mr-2" />
+			  Afiliado Tributario
+			</label>
+			<label className="inline-flex items-center">
+			  <input type="checkbox" className="mr-2" />
+			  Obligado a Llevar Contabilidad
+			</label>
+		  </div>
+		</div>
+	  </form>
+	</div>
   );
+  
 });

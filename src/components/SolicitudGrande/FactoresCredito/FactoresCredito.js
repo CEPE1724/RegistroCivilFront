@@ -9,7 +9,10 @@ import PrintIcon from "@mui/icons-material/Print";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
 import { enqueueSnackbar } from "notistack";
-import { set } from "react-hook-form";
+import { FaListAlt ,FaUser, FaBriefcase ,FaMoneyBillWave ,FaMoneyCheckAlt ,
+	FaStarHalfAlt ,FaCheckCircle,FaInfoCircle  ,FaCommentDots
+} from "react-icons/fa";
+
 
 // Definir el componente con forwardRef correctamente
 export const FactoresCredito = forwardRef((props, ref) => {
@@ -283,183 +286,203 @@ export const FactoresCredito = forwardRef((props, ref) => {
   }));
 
   return (
-    <div>
-      {/* Aquí agregamos el botón de impresión */}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4 pt-0">
-        {/* Tipo */}
-        <div className="flex flex-col ">
-          <label className="text-lightGrey text-xs mb-2">Tipo</label>
-          <select
-            name="tipo"
-            className="p-2 border rounded "
-            value={formData.tipo}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una opción</option>
-            {tipo.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Tipo Cliente */}
-        <div className="flex flex-col">
-          <label className="text-lightGrey text-xs mb-2">Tipo Cliente</label>
-          <select
-            name="tipoCliente"
-            className="p-2 border rounded"
-            value={formData.tipoCliente}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una opción</option>
-            {tipoCliente.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Tipo Trabajo */}
-        <div className="flex flex-col">
-          <label className="text-lightGrey text-xs mb-2">Tipo Trabajo</label>
-          <select
-            name="tipoTrabajo"
-            className="p-2 border rounded"
-            value={formData.tipoTrabajo}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una opción</option>
-            {tipoTrabajo.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="lg:col-span-1"></div>
-
-        {/* Cuota Asignada */}
-        <div className="flex flex-col w-full">
-          <label className="text-lightGrey text-xs mb-2">Cuota Asignada</label>
-          <input
-            type="number"
-            name="cuotaAsignada"
-            placeholder="Cuota Asignada"
-            className="p-2 border rounded"
-            value={formData.cuotaAsignada}
-            onChange={handleChange}
-          />
-        </div>
-
-        {/* Cupo */}
-        <div className="flex flex-col ">
-          <label className="text-lightGrey text-xs mb-2">Cupo</label>
-          <input
-            type="number"
-            name="cupo"
-            placeholder="Cupo"
-            className="p-2 border rounded w-full"
-            value={formData.cupo}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="flex justify-between items-center pl-8 mb-4 pt-6">
-        <IconButton
-          color="primary"
-          aria-label="Imprimir"
-          onClick={() => window.print()} 
-          style={{ fontSize: '40px' }}// Función de impresión
-         
-        >
-
-          <PrintIcon/>
-        </IconButton>
-      </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-        {/* Calificación */}
-        <div className="flex flex-col">
-          <label className="text-lightGrey text-xs mb-2">Calificación</label>
-          <select
-            name="calificacion"
-            className="p-2 border rounded w-full"
-            value={formData.calificacion}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una opción</option>
-            {calificacion.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Estado */}
-        <div className="flex items-center gap-2 w-full">
-          <div className="flex flex-col w-full">
-            <label className="text-lightGrey text-xs mb-2">Estado</label>
-            <select
-              name="estado"
-              className="p-2 border rounded w-full"
-              value={formData.estado}
-              onChange={(e) => {
-                const idSeleccionada = e.target.value;
-                
-                setFormData((prev) => ({ ...prev, estado: idSeleccionada }));
-                setIdEstado(idSeleccionada); // Guardar el id del estado
-              }}
-            >
-              <option value="">Seleccione una opción</option>
-              {estado.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Estado Solicitud */}
-        <div className="flex items-center gap-2 w-full">
-          <div className="flex flex-col w-full">
-            <label className="text-lightGrey text-xs mb-2">
-              Estado Solicitud
-            </label>
-            <select
-              name="estadoSolicitud"
-              className="p-2 border rounded w-full"
-              value={formData.estadoSolicitud}
-              onChange={handleChange}
-            >
-              <option value="">Seleccione una opción</option>
-              {estadoSolicitud.map((item) => (
-                <option key={item.value} value={item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col col-span-2 ">
-        <label className="text-lightGrey text-xs mb-2">Observaciones</label>
-        <textarea
-          name="observaciones"
-          placeholder="Observaciones"
-          className="p-2 border rounded w-full"
-          value={formData.observaciones}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
+	<div>
+	  {/* Botón de impresión y selects superiores */}
+	  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4 pt-0">
+		{/* Tipo */}
+		<div className="flex flex-col">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaListAlt className="mr-2 text-primaryBlue" />
+			Tipo
+		  </label>
+		  <select
+			name="tipo"
+			className="solcitudgrande-style"
+			value={formData.tipo}
+			onChange={handleChange}
+		  >
+			<option value="">Seleccione una opción</option>
+			{tipo.map((item) => (
+			  <option key={item.value} value={item.value}>
+				{item.label}
+			  </option>
+			))}
+		  </select>
+		</div>
+  
+		{/* Tipo Cliente */}
+		<div className="flex flex-col">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaUser className="mr-2 text-primaryBlue" />
+			Tipo Cliente
+		  </label>
+		  <select
+			name="tipoCliente"
+			className="solcitudgrande-style"
+			value={formData.tipoCliente}
+			onChange={handleChange}
+		  >
+			<option value="">Seleccione una opción</option>
+			{tipoCliente.map((item) => (
+			  <option key={item.value} value={item.value}>
+				{item.label}
+			  </option>
+			))}
+		  </select>
+		</div>
+  
+		{/* Tipo Trabajo */}
+		<div className="flex flex-col">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaBriefcase className="mr-2 text-primaryBlue" />
+			Tipo Trabajo
+		  </label>
+		  <select
+			name="tipoTrabajo"
+			className="solcitudgrande-style"
+			value={formData.tipoTrabajo}
+			onChange={handleChange}
+		  >
+			<option value="">Seleccione una opción</option>
+			{tipoTrabajo.map((item) => (
+			  <option key={item.value} value={item.value}>
+				{item.label}
+			  </option>
+			))}
+		  </select>
+		</div>
+  
+		<div className="lg:col-span-1"></div>
+  
+		{/* Cuota Asignada */}
+		<div className="flex flex-col w-full">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaMoneyBillWave className="mr-2 text-primaryBlue" />
+			Cuota Asignada
+		  </label>
+		  <input
+			type="number"
+			name="cuotaAsignada"
+			placeholder="Cuota Asignada"
+			className="solcitudgrande-style"
+			value={formData.cuotaAsignada}
+			onChange={handleChange}
+		  />
+		</div>
+  
+		{/* Cupo */}
+		<div className="flex flex-col">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
+			Cupo
+		  </label>
+		  <input
+			type="number"
+			name="cupo"
+			placeholder="Cupo"
+			className="solcitudgrande-style"
+			value={formData.cupo}
+			onChange={handleChange}
+		  />
+		</div>
+  
+		<div className="flex justify-between items-center pl-8 mb-4 pt-6">
+		  <IconButton
+			color="primary"
+			aria-label="Imprimir"
+			onClick={() => window.print()} 
+			style={{ fontSize: '40px' }}
+		  >
+			<PrintIcon />
+		  </IconButton>
+		</div>
+	  </div>
+  
+	  {/* Segunda sección: Calificación, Estado y Estado Solicitud */}
+	  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+		{/* Calificación */}
+		<div className="flex flex-col">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaStarHalfAlt className="mr-2 text-primaryBlue" />
+			Calificación
+		  </label>
+		  <select
+			name="calificacion"
+			className="solcitudgrande-style w-full"
+			value={formData.calificacion}
+			onChange={handleChange}
+		  >
+			<option value="">Seleccione una opción</option>
+			{calificacion.map((item) => (
+			  <option key={item.value} value={item.value}>
+				{item.label}
+			  </option>
+			))}
+		  </select>
+		</div>
+  
+		{/* Estado */}
+		<div className="flex flex-col w-full">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaCheckCircle className="mr-2 text-primaryBlue" />
+			Estado
+		  </label>
+		  <select
+			name="estado"
+			className="solcitudgrande-style w-full"
+			value={formData.estado}
+			onChange={(e) => {
+			  const idSeleccionada = e.target.value;
+			  setFormData((prev) => ({ ...prev, estado: idSeleccionada }));
+			  setIdEstado(idSeleccionada);
+			}}
+		  >
+			<option value="">Seleccione una opción</option>
+			{estado.map((item) => (
+			  <option key={item.value} value={item.value}>
+				{item.label}
+			  </option>
+			))}
+		  </select>
+		</div>
+  
+		{/* Estado Solicitud */}
+		<div className="flex flex-col w-full">
+		  <label className="text-xs font-medium mb-1 flex items-center">
+			<FaInfoCircle className="mr-2 text-primaryBlue" />
+			Estado Solicitud
+		  </label>
+		  <select
+			name="estadoSolicitud"
+			className="solcitudgrande-style w-full"
+			value={formData.estadoSolicitud}
+			onChange={handleChange}
+		  >
+			<option value="">Seleccione una opción</option>
+			{estadoSolicitud.map((item) => (
+			  <option key={item.value} value={item.value}>
+				{item.label}
+			  </option>
+			))}
+		  </select>
+		</div>
+	  </div>
+  
+	  {/* Observaciones */}
+	  <div className="flex flex-col">
+		<label className="text-xs font-medium mb-1 flex items-center">
+		  <FaCommentDots className="mr-2 text-primaryBlue" />
+		  Observaciones
+		</label>
+		<textarea
+		  name="observaciones"
+		  placeholder="Observaciones"
+		  className="solcitudgrande-style w-full"
+		  value={formData.observaciones}
+		  onChange={handleChange}
+		/>
+	  </div>
+	</div>
   );
+  
 });
