@@ -1,75 +1,73 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { APIURL } from '../../../configApi/apiConfig';
+import { useSnackbar } from 'notistack';
 
 const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP }) => {
-  const [otp, setOtp] = useState(Array(5).fill('')); // Ahora es un array de 5 dígitos
+  const [otp, setOtp] = useState(Array(5).fill('')); // Array de 5 dígitos
   const [isValid, setIsValid] = useState(null);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutos en segundos
-  const [otpSent, setOtpSent] = useState(false); // Nuevo estado para controlar si el OTP fue enviado
+  const [otpSent, setOtpSent] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState(phoneNumberOTP);
-console.log(phoneNumberOTP);
-  // Función para manejar los cambios de los campos OTP
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [otpValidated, setOtpValidated] = useState(false);
+  
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Maneja el ingreso de cada dígito del OTP
   const handleInputChange = (e, index) => {
     const value = e.target.value;
     if (value.length <= 1 && /^[0-9]*$/.test(value)) {
       const updatedOtp = [...otp];
       updatedOtp[index] = value;
       setOtp(updatedOtp);
-
-      // Mover al siguiente campo cuando se ingresa un valor
+      // Mover al siguiente input si se ingresó un valor
       if (index < otp.length - 1 && value !== "") {
         document.getElementById(`otp-input-${index + 1}`).focus();
       }
     }
   };
 
-
-
-  // cambiar estado optsent a false cuando se cierre el modal
-
-  // Función para manejar la validación del OTP
+  // Función para validar el OTP
   const ValidarCodigo = async () => {
     const otpCode = otp.join('');
+    setIsVerifying(true);
+    // Muestra el mensaje de Snackbar "Verificando OTP"
+    enqueueSnackbar('Verificando OTP...', { variant: 'info', autoHideDuration: 2000 });
     try {
       const url = APIURL.verifyOTP();
-      console.log(url, phoneNumberOTP, otpCode);
       const response = await axios.post(url, {
         phoneNumber: phoneNumberOTP,
         otpCode,
       });
-
       if (response.data.success) {
+        setOtpValidated(true); // Mantiene el botón bloqueado
         setIsValid(true);
-        onVerifyOtp(true);
+        onVerifyOtp(true, otpCode); // Se envía el OTP validado al componente padre
       } else {
         setIsValid(false);
       }
     } catch (error) {
       console.error(error);
       alert('Hubo un error al verificar el OTP');
+    } finally {
+      setIsVerifying(false);
     }
   };
 
-  // Función para actualizar el cronómetro
+  // Actualización del cronómetro
   useEffect(() => {
     if (timeLeft > 0 && isOpen) {
-   
-      // Solo iniciar el timer si el modal está abierto
       const timer = setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
-
-      // Enviar el OTP automáticamente cuando el modal se abra, solo si aún no se ha enviado
-     
-
-      return () => clearInterval(timer); // Limpiar el intervalo cuando el componente se desmonta o timeLeft cambia
+      return () => clearInterval(timer);
     } else if (timeLeft <= 0) {
-      // Cerrar el modal cuando el tiempo expire
       onClose();
     }
-  }, [isOpen, timeLeft, otpSent, phoneNumber]); // Agregar otpSent en las dependencias
+  }, [isOpen, timeLeft, otpSent, phoneNumber]);
 
+  // Formatea el tiempo en minutos y segundos
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -85,7 +83,7 @@ console.log(phoneNumberOTP);
             Se enviará un código de 5 dígitos a tu teléfono móvil {phoneNumber}. El código tendrá una duración de 5 minutos.
           </p>
 
-          {/* Campos OTP */}
+          {/* Inputs para cada dígito del OTP */}
           <div className="flex justify-between mb-4">
             {otp.map((_, index) => (
               <input
@@ -106,26 +104,26 @@ console.log(phoneNumberOTP);
             <p className="text-sm text-gray-500">Tiempo restante: {formatTime(timeLeft)}</p>
           </div>
 
-          {/* Botón de validación */}
+          {/* Botón de validación del OTP */}
           <div className="mt-6">
             <button
               className="w-full py-2 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 disabled:opacity-50"
               onClick={ValidarCodigo}
-              disabled={timeLeft <= 0} // Deshabilita el botón si el tiempo ha expirado
-              type='button'
+              disabled={timeLeft <= 0 || isVerifying || otpValidated}
+              type="button"
             >
               Validar OTP
             </button>
           </div>
 
-          {/* Mensaje de error */}
+          {/* Mensaje de error en caso de fallo en la validación */}
           {isValid === false && (
             <p className="text-red-500 text-xs mt-2 text-center">
               El código OTP es incorrecto. Intenta de nuevo.
             </p>
           )}
 
-          {/* Cerrar el modal */}
+          {/* Botón para cerrar el modal */}
           <div className="mt-6 text-center">
             <button
               className="text-gray-500 hover:text-gray-700 text-sm"
@@ -141,3 +139,4 @@ console.log(phoneNumberOTP);
 };
 
 export default OTPModal;
+

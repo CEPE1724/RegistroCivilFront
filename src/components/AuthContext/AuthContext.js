@@ -47,7 +47,6 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const userPerfil = await fetchPerfil(token); // Asegúrate de que esta función esté correctamente definida
-          console.log("Datos del perfil:", userPerfil);
           setUserData(userPerfil.usuario);
         } catch (error) {
           console.error("Error al obtener los datos del perfil:", error.message);

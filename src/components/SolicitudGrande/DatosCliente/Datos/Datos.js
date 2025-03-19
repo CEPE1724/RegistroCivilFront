@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, use } from "react";
 import { useSnackbar } from "notistack";
 import {
     fetchNacionalidad, fecthGenero, fecthEstadoCivil, fetchNivelEducacion, fetchProfesion, fetchSituacionLaboral,
@@ -11,7 +11,6 @@ const Datos = forwardRef((props,  ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
     const [formErrors, setFormErrors] = useState({});
-    // lisa de nacionaldiad si data.idnacionalidad tiene dato valor por defaul es el valor de data.idnacionalidad
     const [nacionalidad, setNacionalidad] = useState([]);
     const [genero, setGenero] = useState([]);
     const [provinciaNacimiento, setProvinciaNacimiento] = useState([]);
@@ -21,6 +20,7 @@ const Datos = forwardRef((props,  ref) => {
     const [profesion, setProfesion] = useState([]);
     const [situacionLaboral, setSituacionLaboral] = useState([]);
     const [actividadEconomica, setActividadEconomica] = useState([]);
+    
     const [formData, setFormData] = useState({
         nacionalidad: data?.idNacionalidad || '',
         fechaNacimiento: data?.FechaNacimiento || '',
@@ -28,15 +28,14 @@ const Datos = forwardRef((props,  ref) => {
         provinciaNacimiento: data?.idProvinciaNacimiento || '',
         cantonNacimiento: data?.idCantonNacimiento || '',
         estadoCivil: data?.idEdoCivil || '',
-        dependientes: '',
+        dependientes: data?.NumeroHijos || 0,
         nivelEducacion: data?.idNivelEducacion || '',
         profesion: data?.idProfesion || '',
-        situacionLaboral: '',
-        actividadEconomica: '',
+        situacionLaboral: data.idSituacionLaboral || '',
+        actividadEconomica: data.idActEconomica || '',
         observacionActividadEconomica: data?.ObservacionesActividadEconomica || '',
     });
 
-    console.log("edison bernaba", formData);
     useEffect(() => {
         // Cargar los datos de las opciones del formulario
         fetchNacionalidad(enqueueSnackbar, setNacionalidad);
@@ -54,6 +53,12 @@ const Datos = forwardRef((props,  ref) => {
             fetchCantones(formData.provinciaNacimiento, enqueueSnackbar, setCantonNacimiento);
         }
     }, [formData.provinciaNacimiento, enqueueSnackbar]);
+
+    useEffect(() => {
+        if (formData.situacionLaboral) {
+            fetchActividadEconomina(enqueueSnackbar, formData.situacionLaboral, setActividadEconomica);
+        }
+    }, [formData.situacionLaboral, enqueueSnackbar]);
 
     // Función que maneja los cambios en los campos del formulario
     const handleFormChange = useCallback((e) => {
@@ -159,7 +164,8 @@ const Datos = forwardRef((props,  ref) => {
 
 
     useImperativeHandle(ref, () => ({
-        validateForm
+        validateForm,
+        getFormData: () => formData
     }));
 
     return (
@@ -168,7 +174,7 @@ const Datos = forwardRef((props,  ref) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     {/* Nacionalidad */}
                     <SelectField
-                        label="Nacionalidad"
+                        label="Nacionalidad (*)"
                         icon={<FaStore />}
                         value={formData.nacionalidad}
                         onChange={handleFormChange}
@@ -182,7 +188,7 @@ const Datos = forwardRef((props,  ref) => {
                     <div className="col-span-1">
                         <label className="text-xs font-medium mb-1 flex items-center">
                             <FaCalendarAlt className="mr-2 text-primaryBlue" />
-                            Fecha Nacimiento
+                            Fecha Nacimiento (*)
                         </label>
                         <input
                             type="date"
@@ -202,7 +208,7 @@ const Datos = forwardRef((props,  ref) => {
                     {/* Género */}
                     <div className="col-span-1">
                         <SelectField
-                            label="Género"
+                            label="Género (*)"
                             icon={<FaTransgender  />}
                             value={formData.genero}
                             onChange={handleFormChange}
@@ -216,7 +222,7 @@ const Datos = forwardRef((props,  ref) => {
                     {/* Estado Civil */}
                     <div className="col-span-1">
                         <SelectField
-                            label="Estado Civil"
+                            label="Estado Civil (*)"
                             icon={<FaCog />}
                             value={formData.estadoCivil}
                             onChange={handleFormChange}
@@ -231,7 +237,7 @@ const Datos = forwardRef((props,  ref) => {
                     <div className="col-span-1">
                         <label className="text-xs font-medium mb-1 flex items-center">
                             <FaChild className="mr-2 text-primaryBlue" />
-                            Dependientes
+                            Dependientes (*)
                         </label>
                         <input
                             type="number"
@@ -252,7 +258,7 @@ const Datos = forwardRef((props,  ref) => {
                     {/* Nivel de Educación */}
                     <div className="col-span-1">
                         <SelectField
-                            label="Nivel Educación"
+                            label="Nivel Educación (*)"
                             icon={<FaUserGraduate  />}
                             value={formData.nivelEducacion}
                             onChange={handleFormChange}
@@ -263,7 +269,7 @@ const Datos = forwardRef((props,  ref) => {
                     </div>
                     <div className="col-span-1">
                         <SelectField
-                            label="Profesión"
+                            label="Profesión (*)"
                             icon={<FaUserSecret  />}
                             value={formData.profesion}
                             onChange={handleFormChange}
@@ -274,7 +280,7 @@ const Datos = forwardRef((props,  ref) => {
                     </div>
                     <div className="mb-6">
                         <SelectField
-                            label="Situación Laboral"
+                            label="Situación Laboral (*)"
                             icon={<FaToolbox  />}
                             value={formData.situacionLaboral}
                             onChange={handleFormChange}
@@ -285,7 +291,7 @@ const Datos = forwardRef((props,  ref) => {
                     </div>
                     <div className="mb-6">
                         <SelectField
-                            label="Actividad Económica"
+                            label="Actividad Económica (*)"
                             icon={<FaMapMarkerAlt />}
                             value={formData.actividadEconomica}
                             onChange={handleFormChange}
@@ -296,7 +302,7 @@ const Datos = forwardRef((props,  ref) => {
                     </div>
                     <div className="mb-6">
                         <SelectField
-                            label="Provincia Nacimiento"
+                            label="Provincia Nacimiento (*)"
                             icon={<FaMapMarkerAlt />}
                             value={formData.provinciaNacimiento}
                             onChange={handleFormChange}
@@ -308,7 +314,7 @@ const Datos = forwardRef((props,  ref) => {
                     </div>
                     <div className="mb-6">
                         <SelectField
-                            label="Cantón Nacimiento"
+                            label="Cantón Nacimiento (*)"
                             icon={<FaMapMarkerAlt />}
                             value={formData.cantonNacimiento}
                             onChange={handleFormChange}
@@ -319,8 +325,10 @@ const Datos = forwardRef((props,  ref) => {
                         />
                     </div>
                     <div className="mb-6">
+
                         <label className="text-xs font-medium mb-1 flex items-center">
-                            Actividad Económica
+                            <FaChild className="mr-2 text-primaryBlue" />
+                            Actividad Económica (*)
                         </label>
                         <textarea
                             className="form-input"
@@ -334,8 +342,6 @@ const Datos = forwardRef((props,  ref) => {
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 });
