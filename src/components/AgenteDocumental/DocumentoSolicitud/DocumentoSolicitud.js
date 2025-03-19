@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import { useAuth } from '../../AuthContext/AuthContext';
 import { FaEye } from 'react-icons/fa'; // Importamos el ícono de ojo
+import { useNavigate } from "react-router-dom";
 
 export function DocumentoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -12,6 +13,7 @@ export function DocumentoSolicitud() {
   const [totalCount, setTotalCount] = useState(0);
   const [limit] = useState(10); // You can set the limit here, or make it dynamic
   const [offset, setOffset] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,7 +81,23 @@ export function DocumentoSolicitud() {
 
   // Función que muestra un alert al hacer clic en el ícono de ojo
   const handleEyeClick = (cliente) => {
-    alert(`Detalles de cliente: ${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`);
+    //alert(`Detalles de cliente: ${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`);
+    console.log("cliente", cliente)
+    navigate('/gestorDocumentos', { 
+      replace: true,
+      state: {
+        id: cliente.idCre_SolicitudWeb,
+        NumeroSolicitud: cliente.NumeroSolicitud,
+        nombre: cliente.PrimerNombre,
+        apellido: cliente.ApellidoPaterno,
+        cedula: cliente.Cedula,
+        fecha: cliente.FechaCreacion,
+        almacen: cliente.b_Nombre,
+        foto: cliente.Foto,
+        vendedor: cliente.Vendedor,
+        consulta: cliente.Consulta,
+      },
+    });
   };
 
   return (

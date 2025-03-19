@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import * as React from 'react';
 import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -6,6 +7,13 @@ import { IconButton } from "@mui/material";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 export function GestorDocumentos({
     id,
@@ -27,6 +35,12 @@ export function GestorDocumentos({
     const [currentFileUrl, setCurrentFileUrl] = useState("");
     const modalRef = useRef(null);
     const [filePreviews, setFilePreviews] = useState({});
+    const [open, setOpen] = React.useState(false);
+
+    // Estado para mantener todos los documentos de la solicitud (tanto visibles como procesados)
+    const [allDocuments, setAllDocuments] = useState([]);
+    // Estado para mantener el estado de los documentos (aprobados, rechazados, pendientes)
+    const [documentStatus, setDocumentStatus] = useState({});
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -39,60 +53,126 @@ export function GestorDocumentos({
         vendedor: "",
         consulta: "",
     });
-    console.log("clientInfo", clientInfo);
-    console.log("datos api", APIURL.get_documentos(clientInfo.id));
-    
-        const fetchUploadedFiles = async () => {
+
+    // Función para obtener TODOS los documentos (incluyendo aprobados y rechazados)
+    const fetchAllDocuments = async () => {
+        try {
+            if (!clientInfo.id) return;
+
+            // Obtenemos documentos con estado 2 (pendientes)
+            const pendingUrl = APIURL.get_documentosEstado(clientInfo.id, 2);
+            const pendingResponse = await axios.get(pendingUrl);
+
+            // Obtenemos documentos con estado 3 (aprobados)
+            const approvedUrl = APIURL.get_documentosEstado(clientInfo.id, 3);
+            let approvedDocs = [];
             try {
-                const response = await axios.get(`${APIURL.get_documentos(clientInfo.id)}`);
-
-                if (response.status === 200 && Array.isArray(response.data)) {
-                    const uploadedFiles = {};
-                    const previews = {};
-
-                    response.data.forEach((file) => {
-                        const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
-                        if (!uploadedFiles[sectionName]) {
-                            uploadedFiles[sectionName] = [];
-                            previews[sectionName] = [];
-                        }
-
-                        // Extrae el nombre del archivo desde la ruta
-                        const fileName = file.RutaDocumento.split('/').pop();
-                        const fileUrl = file.RutaDocumento;
-
-                        uploadedFiles[sectionName].push({
-                            idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb, // Añadimos el ID del documento
-                            name: fileName,
-                            url: fileUrl,
-                            type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
-                        });
-
-                        previews[sectionName].push(fileUrl);
-                    });
-
-                    setFiles(uploadedFiles);
-                    setFilePreviews(previews);
+                const approvedResponse = await axios.get(approvedUrl);
+                if (approvedResponse.status === 200 && Array.isArray(approvedResponse.data)) {
+                    approvedDocs = approvedResponse.data;
                 }
             } catch (error) {
-                enqueueSnackbar("Error al obtener archivos subidos.", { variant: "error" });
-                console.error("Error al obtener archivos:", error);
+                console.log("No hay documentos aprobados o error al obtenerlos");
             }
-        };
 
-        useEffect(() => {
+            // Obtenemos documentos con estado 4 (rechazados)
+            const rejectedUrl = APIURL.get_documentosEstado(clientInfo.id, 4);
+            let rejectedDocs = [];
+            try {
+                const rejectedResponse = await axios.get(rejectedUrl);
+                if (rejectedResponse.status === 200 && Array.isArray(rejectedResponse.data)) {
+                    rejectedDocs = rejectedResponse.data;
+                }
+            } catch (error) {
+                console.log("No hay documentos rechazados o error al obtenerlos");
+            }
+
+            // Combinamos todos los documentos
+            const allDocs = [
+                ...(Array.isArray(pendingResponse.data) ? pendingResponse.data : []),
+                ...approvedDocs,
+                ...rejectedDocs
+            ];
+
+            // Procesamos la información de todos los documentos
+            const processedDocs = [];
+            const docStatus = {};
+
+            allDocs.forEach(doc => {
+                const fileName = doc.RutaDocumento.split('/').pop();
+                const docType = getTipoDocumento(doc.idTipoDocumentoWEB);
+
+                processedDocs.push({
+                    id: doc.idDocumentosSolicitudWeb,
+                    name: fileName,
+                    url: doc.RutaDocumento,
+                    type: doc.idTipoDocumentoWEB,
+                    typeName: docType,
+                    estado: doc.idEstadoDocumento
+                });
+
+                // Guardamos el estado del documento
+                docStatus[doc.idDocumentosSolicitudWeb] = doc.idEstadoDocumento;
+            });
+
+            setAllDocuments(processedDocs);
+            setDocumentStatus(docStatus);
+
+            // También actualizamos los archivos para mostrar en la interfaz (solo los pendientes)
+            if (pendingResponse.status === 200 && Array.isArray(pendingResponse.data)) {
+                const uploadedFiles = {};
+                const previews = {};
+
+                pendingResponse.data.forEach((file) => {
+                    const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
+                    if (!uploadedFiles[sectionName]) {
+                        uploadedFiles[sectionName] = [];
+                        previews[sectionName] = [];
+                    }
+
+                    // Extrae el nombre del archivo desde la ruta
+                    const fileName = file.RutaDocumento.split('/').pop();
+                    const fileUrl = file.RutaDocumento;
+
+                    uploadedFiles[sectionName].push({
+                        idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb,
+                        name: fileName,
+                        url: fileUrl,
+                        type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
+                        idTipoDocumento: file.idTipoDocumentoWEB
+                    });
+
+                    previews[sectionName].push(fileUrl);
+                });
+
+                setFiles(uploadedFiles);
+                setFilePreviews(previews);
+            }
+        } catch (error) {
+            enqueueSnackbar("Error al obtener archivos.", { variant: "error" });
+            console.error("Error al obtener archivos:", error);
+        }
+    };
+
+    useEffect(() => {
         if (clientInfo.id) {
-            fetchUploadedFiles();
+            fetchAllDocuments();
+
+            // Intentar cargar estados guardados de localStorage si existen
+            const savedDocStatus = localStorage.getItem(`docStatus_${clientInfo.id}`);
+            if (savedDocStatus) {
+                setDocumentStatus(JSON.parse(savedDocStatus));
+            }
         }
     }, [clientInfo.id]);
 
-    //api cambiar estado del documento
+    // API cambiar estado del documento
     const estadoDocumentos = async (idDocumentosSolicitudWeb, idEstadoDocumento) => {
         try {
             const token = localStorage.getItem("token");
             const url = APIURL.patch_documentos(idDocumentosSolicitudWeb);
             const datos = {
-                idEstadoDocumento: idEstadoDocumento, // Enviar el nuevo estado
+                idEstadoDocumento: idEstadoDocumento,
             };
 
             const response = await axios.patch(url, datos, {
@@ -102,16 +182,34 @@ export function GestorDocumentos({
                 },
             });
 
-            if (response.status == 200) {
+            if (response.status === 200) {
                 enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
-                await fetchUploadedFiles();
+
+                // Actualizamos el estado del documento
+                const updatedStatus = { ...documentStatus };
+                updatedStatus[idDocumentosSolicitudWeb] = idEstadoDocumento;
+                setDocumentStatus(updatedStatus);
+
+                // Guardamos en localStorage
+                localStorage.setItem(`docStatus_${clientInfo.id}`, JSON.stringify(updatedStatus));
+
+                // Actualizamos la lista de archivos pendientes
+                await fetchAllDocuments();
             } else {
-                enqueueSnackbar("Error al enviar los datos 1", { variant: "error" });
+                enqueueSnackbar("Error al enviar los datos", { variant: "error" });
             }
         } catch (error) {
-            console.error("Error al enviar los datos 2:", error.response?.data);
+            console.error("Error al enviar los datos:", error.response?.data);
             enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
         }
+    };
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
     };
 
     // Función rechazo de documento
@@ -121,7 +219,7 @@ export function GestorDocumentos({
 
     // Función aprobación de documento
     const handleAprobar = (idDocumentosSolicitudWeb) => {
-        estadoDocumentos(idDocumentosSolicitudWeb, 2);
+        estadoDocumentos(idDocumentosSolicitudWeb, 3);
     };
 
     const getTipoDocumento = (id) => {
@@ -139,6 +237,22 @@ export function GestorDocumentos({
             11: "Autorización",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
+    };
+
+    // Obtener el color según estado del documento
+    const getStatusColor = (docId) => {
+        const status = documentStatus[docId];
+        if (status === 3) return "text-green-500"; // Aprobado
+        if (status === 4) return "text-red-500";   // Rechazado
+        return "text-gray-300"; // Pendiente
+    };
+
+    // Obtener el estado en texto
+    const getStatusText = (docId) => {
+        const status = documentStatus[docId];
+        if (status === 3) return "✓ Aprobado";
+        if (status === 4) return "✗ Rechazado";
+        return "• Pendiente";
     };
 
     useEffect(() => {
@@ -172,15 +286,47 @@ export function GestorDocumentos({
         setView(!view);
     };
 
+    // Agrupar documentos por tipo
+    const documentsByType = allDocuments.reduce((acc, doc) => {
+        if (!acc[doc.typeName]) {
+            acc[doc.typeName] = [];
+        }
+        acc[doc.typeName].push(doc);
+        return acc;
+    }, {});
+
     return (
         <div className="flex min-h-screen bg-gray-100">
             <div
-                className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"
-                    } md:block transition-all duration-300 ease-in-out`}
+                className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"} md:block transition-all duration-300 ease-in-out overflow-y-auto`}
             >
                 <div className="p-6">
                     <h2 className="text-2xl font-bold text-gray-100">Número de Solicitud: </h2>
                     <p>{clientInfo.NumeroSolicitud}</p>
+
+                    {/* Lista de todos los documentos */}
+                    <div className="mt-6">
+                        <h3 className="text-lg font-semibold mb-2">Documentos:</h3>
+                        {Object.entries(documentsByType).map(([typeName, docs]) => (
+                            <div key={typeName} className="mb-4">
+                                <h4 className="text-white font-medium mb-1">{typeName}:</h4>
+                                <ul className="pl-3 space-y-1">
+                                    {docs.map(doc => (
+                                        <li
+                                            key={doc.id}
+                                            className={`text-sm flex items-center justify-between ${getStatusColor(doc.id)}`}
+                                        >
+                                            <span className="truncate">{doc.name}</span>
+                                            <span className="text-xs ml-1 whitespace-nowrap">{getStatusText(doc.id)}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                        {allDocuments.length === 0 && (
+                            <p className="text-sm text-gray-300">No hay documentos disponibles</p>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -232,13 +378,15 @@ export function GestorDocumentos({
                         <h2 className="text-2xl font-semibold text-center text-gray-800">
                             Documentos Subidos
                         </h2>
+                        <Button variant="outlined" onClick={handleClickOpen}>
+                            Modal 
+                        </Button>
                     </div>
 
-                    {/* Documentos */}
+                    {/* Documentos pendientes */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 mb-6">
                         {Object.entries(files).map(([sectionName, sectionFiles]) => (
                             sectionFiles.map((file, index) => (
-                                console.log("imagen url", file.url),
                                 <div
                                     key={`${sectionName}-${index}`}
                                     className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
@@ -246,14 +394,14 @@ export function GestorDocumentos({
                                     <div className="flex justify-between items-center">
                                         <div>
                                             <span className="text-sm font-medium text-gray-700 truncate">
-                                                {file.name || "Documento"}
+                                                {sectionName || "Documento"}
                                             </span>
                                             <p className="text-xs text-gray-500 mt-1">
-                                                {sectionName}
+                                                {file.name}
                                             </p>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1">
                                             <IconButton onClick={() => toggleView(file.url)}>
                                                 <VisibilityIcon />
                                             </IconButton>
@@ -274,12 +422,12 @@ export function GestorDocumentos({
                                             >
                                                 ✅
                                             </button>
+
                                         </div>
                                     </div>
 
                                     <div className="mt-4">
                                         {file.type === "application/pdf" ? (
-
                                             <object
                                                 data={file.url}
                                                 type="application/pdf"
@@ -296,7 +444,6 @@ export function GestorDocumentos({
                                                 alt="Vista previa archivo"
                                                 className="w-full h-auto rounded-md"
                                             />
-                            
                                         )}
                                     </div>
                                 </div>
@@ -305,7 +452,7 @@ export function GestorDocumentos({
 
                         {Object.keys(files).length === 0 && (
                             <div className="col-span-3 text-center py-10">
-                                <p className="text-gray-500">No hay documentos disponibles para esta solicitud.</p>
+                                <p className="text-gray-500">No hay documentos pendientes para esta solicitud.</p>
                             </div>
                         )}
                     </div>
@@ -336,6 +483,50 @@ export function GestorDocumentos({
                     </div>
                 </div>
             )}
+
+            <React.Fragment>
+                <Dialog
+                    open={open}
+                    onClose={handleClose}
+                    slotProps={{
+                        paper: {
+                            component: 'form',
+                            onSubmit: (event) => {
+                                event.preventDefault();
+                                const formData = new FormData(event.currentTarget);
+                                const formJson = Object.fromEntries(formData.entries());
+                                const email = formJson.email;
+                                console.log(email);
+                                handleClose();
+                            },
+                        },
+                    }}
+                >
+                    <DialogTitle>Observaciones</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            To subscribe to this website, please enter your email address here. We
+                            will send updates occasionally.
+                        </DialogContentText>
+                        <TextField
+                            autoFocus
+                            required
+                            margin="dense"
+                            id="name"
+                            name="email"
+                            label="Email Address"
+                            type="email"
+                            fullWidth
+                            variant="standard"
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose}>Cancel</Button>
+                        <Button type="submit">Subscribe</Button>
+                    </DialogActions>
+                </Dialog>
+            </React.Fragment>
+
         </div>
     );
 }
