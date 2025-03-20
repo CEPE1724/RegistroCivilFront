@@ -125,8 +125,6 @@ export default function CreditoForm() {
 
 
   const initialValues = {
-    Fecha:
-      new Date(new Date().toLocaleString("en-US", { timeZone: "America/Guayaquil" })).toISOString().split("T")[0] + "T00:00:00Z",
     NumeroSolicitud: "12345",
     Bodega: null,
     idVendedor: IdVendedor || null,
@@ -152,7 +150,6 @@ export default function CreditoForm() {
   };
 
   const formConfig = [
-    { label: "Fecha", name: "Fecha", type: "text", hidden: true },
     {
       label: "Número de Solicitud",
       name: "NumeroSolicitud",
@@ -230,7 +227,6 @@ export default function CreditoForm() {
 
   const validationSchema = Yup.object()
     .shape({
-      Fecha: Yup.string().required("Fecha requerida"),
       NumeroSolicitud: Yup.number()
         .positive()
         .integer()

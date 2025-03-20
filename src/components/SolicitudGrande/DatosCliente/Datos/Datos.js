@@ -229,7 +229,7 @@ const Datos = forwardRef((props,  ref) => {
                             options={estadoCivil}
                             name="estadoCivil"
                             error={formErrors.estadoCivil}
-                            readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
+                            //readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
                         />
                     </div>
 
