@@ -43,6 +43,7 @@ export function Cabecera() {
   const { enqueueSnackbar } = useSnackbar();
   const seccionRef = useRef(null); // Crear la referencia para las secciones
   const datosRef = useRef(); // Referencia al componente Datos
+  const datosDomicilioRef = useRef(); // Referencia para el componente Domicilio
   const datosClienteRef = useRef(); // Referencia para el componente DatosCliente
   const ref = useRef(); // Create ref for imperative handle
 
@@ -99,7 +100,7 @@ export function Cabecera() {
       case "Datos Cliente":
         return <Datos ref={datosRef} data={clienteData} />;
       case "Domicilio":
-        return <Domicilio ref={datosClienteRef} data={clienteData} />;
+        return <Domicilio ref={datosDomicilioRef} data={clienteData} />;
       case "Datos Conyuge":
         return clienteData.idEdoCivil === 1 ? <DatosConyuge /> : null;
       case "Referencias":
@@ -158,16 +159,101 @@ export function Cabecera() {
     return true;
   };
   const handleSave = () => {
-    const formData = datosRef.current.getFormData();
-    const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
-    if (isValid) {
-      fetchSaveDatosNacimiento(formData);
-      // Aquí podrías proceder con el envío de los datos o alguna otra acción
-    } else {
-      enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+    // Obtenemos los datos del formulario de acuerdo a su tab 
+    if (activeTab === "Datos Cliente") {
+      const formData = datosRef.current.getFormData();
+      const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
+      if (isValid) {
+        fetchSaveDatosNacimiento(formData);
+        // Aquí podrías proceder con el envío de los datos o alguna otra acción
+      } else {
+        enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+      }
+    }
+    if (activeTab === "Domicilio") {
+      const formData = datosDomicilioRef.current.getFormData();
+      const isValid = datosDomicilioRef.current.validateForm(); // Llamamos a validateForm del componente Datos
+      if (!isValid) {
+        fetchSaveDatosDomicilio(formData);
+        // Aquí podrías proceder con el envío de los datos o alguna otra acción
+      } else {
+        enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+      }
+
     }
   };
 
+  const getParsedDecimalValue = (value) => {
+  if (value) {
+    // Remove any non-numeric characters (e.g., commas) and ensure it's a valid decimal
+    const sanitizedValue = value.replace(/[^0-9.-]+/g, '');
+    let parsedValue = parseFloat(sanitizedValue);
+
+    // If parsed value is an integer, ensure it has decimals (e.g., 500 => 500.00)
+    if (parsedValue === parseInt(parsedValue)) {
+      parsedValue = parseFloat(parsedValue.toFixed(2)); // Ensure it's a decimal with two decimal places
+    }
+
+    return isNaN(parsedValue) ? null : parsedValue;
+  }
+  return null;
+};
+
+  const fetchSaveDatosDomicilio = async (formData) => {
+    try {
+      console.log("Datos de nacimiento a guardar: cepeda", formData);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      // Función para asegurar que los valores sean válidos y numéricos
+      const getParsedValue = (value) => (value ? parseInt(value) : null);
+      
+
+      const response = await axios.patch(
+        url,
+        {
+          /*idProvinciaDomicilio,	idCantonDomicilio	,idParroquiaDomicilio,	idBarrioDomicilio	,
+Email	,CallePrincipal	,NumeroCasa	,CalleSecundaria,	ReferenciaUbicacion,	TelefonoDomicilio	,
+TelefonoDomiliarDos,	Celular	,idTipoVivienda	,idCre_Tiempo,	NombreArrendador	,
+TelefonoArrendador	,CelularArrendador,	idInmueble,	idCantonInmueble	,ValorInmmueble,*/
+          idProvinciaDomicilio: getParsedValue(formData.provincia),
+          idCantonDomicilio: getParsedValue(formData.canton),
+          idParroquiaDomicilio: getParsedValue(formData.parroquia),
+          idBarrioDomicilio: getParsedValue(formData.barrio),
+          CallePrincipal: formData.callePrincipal,
+          NumeroCasa: formData.numeroCasa,
+          CalleSecundaria: formData.calleSecundaria,
+          ReferenciaUbicacion: formData.referenciaUbicacion,
+          TelefonoDomicilio: formData.telefonoCasa,
+          TelefonoDomiliarDos: formData.telefonoCasa2,
+          Celular: formData.celular,
+          idTipoVivienda: getParsedValue(formData.tipoVivienda),
+          idCre_Tiempo: getParsedValue(formData.tiempoVivienda),
+          NombreArrendador: formData.nombreArrendador,
+          TelefonoArrendador: formData.telfArrendador,
+          CelularArrendador: formData.celularArrendador,
+          idInmueble: getParsedValue(formData.inmueble),
+          idCantonInmueble: getParsedValue(formData.ciudadInmueble),
+          ValorInmmueble: formData.valorInmueble,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Datos de nacimiento guardados correctamente:", response.data);
+
+      // Si todo sale bien
+      enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
+    } catch (error) {
+      // Si ocurre algún error
+      enqueueSnackbar("Error al guardar los datos de nacimiento.", { variant: "error" });
+      console.error("Error al guardar los datos de nacimiento", error);
+    }
+  };
+
+ 
+  
   const fetchSaveDatosNacimiento = async (formData) => {
     try {
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);

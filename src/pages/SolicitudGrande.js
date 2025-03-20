@@ -1,10 +1,10 @@
 
 
-import React, { Component } from 'react';
+import React from 'react';
 import Layout from "../components/Layout";
 
 
-import { Cabecera, DatosCliente, DatosConyuge, Referencias, SeccionB } from '../components'
+import { Cabecera } from '../components'
 const SolicitudGrande = () => {
 
     return (

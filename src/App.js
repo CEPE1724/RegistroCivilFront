@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import { Modal, Box, Button, Typography } from "@mui/material";

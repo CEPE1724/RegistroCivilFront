@@ -4,27 +4,14 @@ import { Doughnut, Bar } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { APIURL } from '../../configApi/apiConfig';
 import axios from "axios";
-import { TextField, Grid, Box, Typography, Paper, Button } from "@mui/material";
-import { DatePicker } from '@mui/lab';
-
 
 Chart.register(...registerables);
-
-
-// Datos para las tarjetas
-const stats = [
-  { label: "Numero de solicitudes de credito", value: "$30,000", icon: <MonetizationOn />, growth: "+4.4%" },
-  { label: "USERS", value: "50,021", icon: <People />, growth: "+2.6%" },
-  { label: "ORDERS", value: "45,021", icon: <ShoppingCart />, growth: "+3.1%" },
-  { label: "TICKETS", value: "20,516", icon: <ConfirmationNumber />, growth: "+3.1%" },
-];
 
 export function Dashboards() {
   const [doughnutData, setDoughnutData] = useState({
     labels: ["Pendiente", "Aprobado", "Anulado", "Rechazado"],
     datasets: [{ data: [0, 0, 0, 0], backgroundColor: ["#007bff", "#00c853", "#ffab00", "#ff3d00"] }],
   });
-
 
   const [totalSolicitudes, setTotalSolicitudes] = useState(0);
   const [fechaInicio, setFechaInicio] = useState("");
@@ -40,7 +27,7 @@ export function Dashboards() {
         },
         params: {
           limit: 100,
-          fechaInicio,  // Pasamos las fechas como parámetros
+          fechaInicio,
           fechaFin
         },
       });
@@ -78,106 +65,94 @@ export function Dashboards() {
       fetchSolicitudes(fechaInicio, fechaFin);
     }
   }, [fechaInicio, fechaFin]);
-  return (
-    <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
-      <Typography variant="h4" gutterBottom>Dashboard</Typography>
 
-          {/* Sección de filtro de fechas */}
- {/* Sección de filtros */}
- <Grid container spacing={2} sx={{ mb: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+
+      {/* Sección de filtros */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        <div>
+          <input
             type="date"
-            label="Fecha Inicio"
-            variant="outlined"
-            fullWidth
+            className="p-2 w-full rounded border border-gray-300"
             value={fechaInicio}
             onChange={(e) => setFechaInicio(e.target.value)}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
+        </div>
+        <div>
+          <input
             type="date"
-            label="Fecha Fin"
-            variant="outlined"
-            fullWidth
+            className="p-2 w-full rounded border border-gray-300"
             value={fechaFin}
             onChange={(e) => setFechaFin(e.target.value)}
           />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Button
-            variant="contained"
-            fullWidth
+        </div>
+        <div>
+          <button
             onClick={() => fetchSolicitudes(fechaInicio, fechaFin)}
+            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Filtrar
-          </Button>
-        </Grid>
-      </Grid>
-
+          </button>
+        </div>
+      </div>
 
       {/* Sección de tarjetas */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box>
-              <Typography variant="subtitle2">Número de solicitudes de crédito</Typography>
-              <Typography variant="h6">{totalSolicitudes}</Typography> {/* Aquí se muestra el total */}
-              <Typography color="green">+4.4%</Typography>
-            </Box>
-            <Box sx={{ fontSize: 30 }}><MonetizationOn /></Box>
-          </Paper>
-        </Grid>
-
-        {/* Otras tarjetas (Usuarios, Órdenes, Tickets) */}
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box>
-              <Typography variant="subtitle2">USERS</Typography>
-              <Typography variant="h6">50,021</Typography>
-              <Typography color="green">+2.6%</Typography>
-            </Box>
-            <Box sx={{ fontSize: 30 }}><People /></Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box>
-              <Typography variant="subtitle2">ORDERS</Typography>
-              <Typography variant="h6">45,021</Typography>
-              <Typography color="green">+3.1%</Typography>
-            </Box>
-            <Box sx={{ fontSize: 30 }}><ShoppingCart /></Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box>
-              <Typography variant="subtitle2">TICKETS</Typography>
-              <Typography variant="h6">20,516</Typography>
-              <Typography color="green">+3.1%</Typography>
-            </Box>
-            <Box sx={{ fontSize: 30 }}><ConfirmationNumber /></Box>
-          </Paper>
-        </Grid>
-      </Grid>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white p-4 rounded shadow-md">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">Número de solicitudes de crédito</p>
+              <h2 className="text-xl font-semibold">{totalSolicitudes}</h2>
+              <p className="text-green-500">+4.4%</p>
+            </div>
+            <div className="text-4xl text-blue-600"><MonetizationOn /></div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded shadow-md">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">USERS</p>
+              <h2 className="text-xl font-semibold">50,021</h2>
+              <p className="text-green-500">+2.6%</p>
+            </div>
+            <div className="text-4xl text-green-500"><People /></div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded shadow-md">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">ORDERS</p>
+              <h2 className="text-xl font-semibold">45,021</h2>
+              <p className="text-green-500">+3.1%</p>
+            </div>
+            <div className="text-4xl text-orange-500"><ShoppingCart /></div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded shadow-md">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">TICKETS</p>
+              <h2 className="text-xl font-semibold">20,516</h2>
+              <p className="text-green-500">+3.1%</p>
+            </div>
+            <div className="text-4xl text-red-500"><ConfirmationNumber /></div>
+          </div>
+        </div>
+      </div>
 
       {/* Sección de gráficos */}
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Bar Chart</Typography>
-            <Bar data={{ labels: ["Jan", "Feb", "Mar"], datasets: [{ label: "Sales", data: [10, 20, 30], backgroundColor: "#007bff" }] }} />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6">Doughnut Chart</Typography>
-            <Doughnut data={doughnutData} />
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="bg-white p-4 rounded shadow-md">
+          <h3 className="text-xl font-semibold mb-4">Bar Chart</h3>
+          <Bar data={{ labels: ["Jan", "Feb", "Mar"], datasets: [{ label: "Sales", data: [10, 20, 30], backgroundColor: "#007bff" }] }} />
+        </div>
+        <div className="bg-white p-4 rounded shadow-md">
+          <h3 className="text-xl font-semibold mb-4">Doughnut Chart</h3>
+          <Doughnut data={doughnutData} />
+        </div>
+      </div>
+    </div>
   );
 }

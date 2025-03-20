@@ -15,6 +15,7 @@ import { InputField } from "../../../Utils";
 const Domicilio = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
+    console.log('ec',data);
     const [formErrors, setFormErrors] = useState({});
     const [provincia, setProvincia] = useState([]);
     const [cantones, setCantones] = useState([]);
@@ -25,28 +26,37 @@ const Domicilio = forwardRef((props, ref) => {
     const [tipoVivienda, setTipoVivienda] = useState([]);
     const [inmueble, setInmueble] = useState([]);
     const [ciudadInmueble, setCiudadInmueble] = useState([]);
+    /* 
+          idTipoVivienda: getParsedValue(formData.tipoVivienda),
+          idCre_Tiempo: getParsedValue(formData.tiempoVivienda),
+          NombreArrendador: formData.nombreArrendador,
+          TelefonoArrendador: formData.telfArrendador,
+          CelularArrendador: formData.celularArrendador,
+          idInmueble: getParsedValue(formData.inmueble),
+          idCantonInmueble: getParsedValue(formData.ciudadInmueble),
+          ValorInmmueble: formData.valorInmueble,*/
     const [formData, setFormData] = useState({
 
-        provincia: '',
-        canton: '',
-        parroquia: '',
-        barrio: '',
-        callePrincipal: '',
-        numeroCasa: '',
-        calleSecundaria: '',
+        provincia: data.idProvinciaDomicilio,
+        canton: data.idCantonDomicilio,
+        parroquia: data.idParroquiaDomicilio,
+        barrio: data.idBarrioDomicilio,
+        callePrincipal: data.CallePrincipal,
+        numeroCasa: data.NumeroCasa,
+        calleSecundaria: data.CalleSecundaria,
         ubicacionDomicilio: '',
-        referenciaUbicacion: '',
-        telefonoCasa: '',
-        telefonoCasa2: '',
-        celular: '',
-        tipoVivienda: '',
-        tiempoVivienda: '',
-        nombreArrendador: '',
-        telfArrendador: '',
-        celularArrendador: '',
-        inmueble: '',
-        ciudadInmueble: '',
-        valorInmueble: ''
+        referenciaUbicacion: data.ReferenciaUbicacion,
+        telefonoCasa: data.TelefonoDomicilio,
+        telefonoCasa2: data.TelefonoDomiliarDos,
+        celular: data.Celular,
+        tipoVivienda: data.idTipoVivienda,
+        tiempoVivienda: data.idCre_Tiempo,
+        nombreArrendador: data.NombreArrendador,
+        telfArrendador: data.TelefonoArrendador,
+        celularArrendador: data.CelularArrendador,
+        inmueble: data.idInmueble,
+        ciudadInmueble: data.idCantonInmueble,
+        valorInmueble: data.ValorInmmueble
     });
 
     useEffect(() => {
@@ -126,7 +136,7 @@ const Domicilio = forwardRef((props, ref) => {
             callePrincipal: 'Calle Principal es requerida',
             numeroCasa: 'Número Casa es requerido',
             calleSecundaria: 'Calle Secundaria es requerida',
-            ubicacionDomicilio: 'Ubicacion Domicilio es requerida',
+            //ubicacionDomicilio: 'Ubicacion Domicilio es requerida',
             referenciaUbicacion: 'Referencia Ubicacion es requerida',
             telefonoCasa: 'Telefono Casa es requerido',
             telefonoCasa2: 'Telefono Casa 2 es requerido',
@@ -171,6 +181,7 @@ const Domicilio = forwardRef((props, ref) => {
 
     useImperativeHandle(ref, () => ({
         validateForm,
+        getFormData: () => formData,
     }));
 
 
@@ -254,6 +265,7 @@ const Domicilio = forwardRef((props, ref) => {
                             className="solcitudgrande-style"
                             name="numeroCasa"
                             onChange={handleFormChange}
+                            value={formData.numeroCasa}
                         />
                         {formErrors.numeroCasa && (
                             <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -271,6 +283,7 @@ const Domicilio = forwardRef((props, ref) => {
                             className="solcitudgrande-style"
                             name="calleSecundaria"
                             onChange={handleFormChange}
+                            value={formData.calleSecundaria}
                         />
                         {formErrors.calleSecundaria && (
                             <p className="mt-1 text-sm text-red-500 border-red-500">

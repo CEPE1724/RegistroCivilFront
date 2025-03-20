@@ -292,9 +292,10 @@ export const fecthTipoVivienda = async (enqueueSnackbar, setTipoVivienda) => {
 	const response = await axios.get(APIURL.get_cre_tipoVivienda(), {
 	  headers: { method: "GET", cache: "no-store" },
 	});
+  console.log(response.data);
 	setTipoVivienda(
 	  response.data.map((item) => ({
-		value: item.idCanton,
+		value: item.idTipoVivienda,
 		label: item.Nombre,
 	  }))
 	);
