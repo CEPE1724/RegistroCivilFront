@@ -15,48 +15,36 @@ import { InputField } from "../../../Utils";
 const Domicilio = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
-    console.log('ec',data);
     const [formErrors, setFormErrors] = useState({});
     const [provincia, setProvincia] = useState([]);
     const [cantones, setCantones] = useState([]);
     const [parroquias, setParroquias] = useState([]);
     const [barrios, setBarrios] = useState([]);
-
     const [tiempoVivienda, setTiempoVivienda] = useState([]);
     const [tipoVivienda, setTipoVivienda] = useState([]);
     const [inmueble, setInmueble] = useState([]);
     const [ciudadInmueble, setCiudadInmueble] = useState([]);
-    /* 
-          idTipoVivienda: getParsedValue(formData.tipoVivienda),
-          idCre_Tiempo: getParsedValue(formData.tiempoVivienda),
-          NombreArrendador: formData.nombreArrendador,
-          TelefonoArrendador: formData.telfArrendador,
-          CelularArrendador: formData.celularArrendador,
-          idInmueble: getParsedValue(formData.inmueble),
-          idCantonInmueble: getParsedValue(formData.ciudadInmueble),
-          ValorInmmueble: formData.valorInmueble,*/
     const [formData, setFormData] = useState({
-
-        provincia: data.idProvinciaDomicilio,
-        canton: data.idCantonDomicilio,
-        parroquia: data.idParroquiaDomicilio,
-        barrio: data.idBarrioDomicilio,
-        callePrincipal: data.CallePrincipal,
-        numeroCasa: data.NumeroCasa,
-        calleSecundaria: data.CalleSecundaria,
+        provincia: data.idProvinciaDomicilio || 0,
+        canton: data.idCantonDomicilio || 0,
+        parroquia: data.idParroquiaDomicilio || 0,
+        barrio: data.idBarrioDomicilio || 0,
+        callePrincipal: data.CallePrincipal || '',
+        numeroCasa: data.NumeroCasa || '',
+        calleSecundaria: data.CalleSecundaria || '',
         ubicacionDomicilio: '',
-        referenciaUbicacion: data.ReferenciaUbicacion,
-        telefonoCasa: data.TelefonoDomicilio,
-        telefonoCasa2: data.TelefonoDomiliarDos,
-        celular: data.Celular,
-        tipoVivienda: data.idTipoVivienda,
-        tiempoVivienda: data.idCre_Tiempo,
-        nombreArrendador: data.NombreArrendador,
-        telfArrendador: data.TelefonoArrendador,
-        celularArrendador: data.CelularArrendador,
-        inmueble: data.idInmueble,
-        ciudadInmueble: data.idCantonInmueble,
-        valorInmueble: data.ValorInmmueble
+        referenciaUbicacion: data.ReferenciaUbicacion || '',
+        telefonoCasa: data.TelefonoDomicilio || '',
+        telefonoCasa2: data.TelefonoDomiliarDos || '',
+        celular: data.Celular || '',
+        tipoVivienda: data.idTipoVivienda || 0,
+        tiempoVivienda: data.idCre_Tiempo || 0,
+        nombreArrendador: data.NombreArrendador || '',
+        telfArrendador: data.TelefonoArrendador || '',
+        celularArrendador: data.CelularArrendador || '',
+        inmueble: data.idInmueble || 0,
+        ciudadInmueble: data.idCantonInmueble || 0,
+        valorInmueble: data.ValorInmmueble || 0
     });
 
     useEffect(() => {
@@ -65,9 +53,25 @@ const Domicilio = forwardRef((props, ref) => {
         fecthTipoVivienda(enqueueSnackbar, setTipoVivienda);
         fecthInmueble(enqueueSnackbar, setInmueble);
         fecthCiudadInmueble(enqueueSnackbar, setCiudadInmueble);
-
     }, []);
 
+    useEffect(() => {
+        if (formData.provincia) {
+            fetchCantones(formData.provincia, enqueueSnackbar, setCantones);
+        }
+    }, [formData.provincia, enqueueSnackbar]);
+
+    useEffect(() => {
+        if (formData.canton) {
+            fetchParroquias(formData.canton, enqueueSnackbar, setParroquias);
+        }
+    }, [formData.canton, enqueueSnackbar]);
+
+    useEffect(() => {
+        if (formData.parroquia) {
+            fetchBarrios(formData.parroquia, enqueueSnackbar, setBarrios);
+        }
+    }, [formData.parroquia, enqueueSnackbar]);
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         // Expresión regular para detectar caracteres no permitidos
@@ -136,50 +140,77 @@ const Domicilio = forwardRef((props, ref) => {
             callePrincipal: 'Calle Principal es requerida',
             numeroCasa: 'Número Casa es requerido',
             calleSecundaria: 'Calle Secundaria es requerida',
-            //ubicacionDomicilio: 'Ubicacion Domicilio es requerida',
             referenciaUbicacion: 'Referencia Ubicacion es requerida',
-            telefonoCasa: 'Telefono Casa es requerido',
-            telefonoCasa2: 'Telefono Casa 2 es requerido',
+            // telefonoCasa: 'Telefono Casa es requerido',
+            //telefonoCasa2: 'Telefono Casa 2 es requerido',
             celular: 'Celular es requerido',
             tipoVivienda: 'Tipo Vivienda es requerido',
             tiempoVivienda: 'Tiempo Vivienda es requerido',
-            nombreArrendador: 'Nombre Arrendador es requerido',
-            telfArrendador: 'Telefono Arrendador es requerido',
-            celularArrendador: 'Celular Arrendador es requerido',
-            inmueble: 'Inmueble es requerido',
-            ciudadInmueble: 'Ciudad Inmueble es requerido',
-            valorInmueble: 'Valor Inmueble es requerido'
         };
+
+        // Validación condicional para arrendador (si tipoVivienda es 1)
+        if (formData.tipoVivienda == 1) {
+            requiredFieldMessages.nombreArrendador = 'Nombre Arrendador es requerido';
+            requiredFieldMessages.telfArrendador = 'Telefono Arrendador es requerido';
+            requiredFieldMessages.celularArrendador = 'Celular Arrendador es requerido';
+        }
+
+        // Validación condicional para inmueble (si tipoVivienda es 3 o 4)
+        if (formData.tipoVivienda == 3 || formData.tipoVivienda == 4) {
+            requiredFieldMessages.inmueble = 'Inmueble es requerido';
+            requiredFieldMessages.ciudadInmueble = 'Ciudad Inmueble es requerido';
+            requiredFieldMessages.valorInmueble = 'Valor Inmueble es requerido';
+        }
 
         const newFormErrors = {};
         let isValid = true;
 
+        // Verificamos todos los campos requeridos en formData
         for (const [key, value] of Object.entries(formData)) {
-            if (value === '') {
+            console.log('key', key, value);
+            if ((value === '' || value === null) && requiredFieldMessages[key]) {
+                console.log('key000111', key, requiredFieldMessages[key], value);
                 newFormErrors[key] = requiredFieldMessages[key];
                 isValid = false;
             }
         }
-        //validar telefono casa y celular
-        if (formData.telefonoCasa.length < 9) {
-            newFormErrors.telefonoCasa = 'El telefono debe tener 9 digitos';
-            isValid = false;
+
+        // Validar longitud de teléfono y celular
+        if (formData.telefonoCasa) {
+            if (formData.telefonoCasa && formData.telefonoCasa.length !== 9) {
+                newFormErrors.telefonoCasa = 'El telefono debe tener 9 digitos';
+                isValid = false;
+            }
         }
-        if (formData.telefonoCasa2.length < 9) {
-            newFormErrors.telefonoCasa2 = 'El telefono debe tener 9 digitos';
-            isValid = false;
+
+        if (formData.telefonoCasa2) {
+            if (formData.telefonoCasa2 && formData.telefonoCasa2.length !== 9) {
+                newFormErrors.telefonoCasa2 = 'El telefono debe tener 9 digitos';
+                isValid = false;
+            }
         }
-        if (formData.celular.length < 10) {
+
+        if (formData.celular && formData.celular.length !== 10) {
+            console.log('celular', formData.celular);
             newFormErrors.celular = 'El celular debe tener 10 digitos';
             isValid = false;
         }
 
+        // Validar teléfono/celular del arrendador si tipoVivienda es 1
+        if (formData.tipoVivienda == 1) {
+            if (formData.telfArrendador && !(formData.telfArrendador.length === 9 || formData.telfArrendador.length === 10)) {
+                newFormErrors.telfArrendador = 'El Telefono/Celular debe tener 9 o 10 digitos';
+                isValid = false;
+            }
+        }
+        console.log('formData', formData);
         setFormErrors(newFormErrors);
         return isValid;
-    }
-        , [formData]);
+    }, [formData]);
+
 
     useImperativeHandle(ref, () => ({
+
         validateForm,
         getFormData: () => formData,
     }));
@@ -198,7 +229,6 @@ const Domicilio = forwardRef((props, ref) => {
                         options={provincia}
                         name="provincia"
                         error={formErrors.provincia}
-                        readOnly={data.idProvinciaDomicilio !== undefined && data.idProvinciaDomicilio !== null && data.idProvinciaDomicilio !== "" && data.idProvinciaDomicilio > 0}
                     />
                     <div className="col-span-1">
                         <SelectField
@@ -209,7 +239,6 @@ const Domicilio = forwardRef((props, ref) => {
                             options={cantones}
                             name="canton"
                             error={formErrors.canton}
-                            readOnly={data.idCantonDomicilio !== undefined && data.idCantonDomicilio !== null && data.idCantonDomicilio !== "" && data.idCantonDomicilio > 0}
                         />
                     </div>
                     <div className="col-span-1">
@@ -221,7 +250,6 @@ const Domicilio = forwardRef((props, ref) => {
                             options={parroquias}
                             name="parroquia"
                             error={formErrors.parroquia}
-                            readOnly={data.idParroquiaDomicilio !== undefined && data.idParroquiaDomicilio !== null && data.idParroquiaDomicilio !== "" && data.idParroquiaDomicilio > 0}
                         />
                     </div>
                     <div className="col-span-1">
@@ -233,7 +261,6 @@ const Domicilio = forwardRef((props, ref) => {
                             options={barrios}
                             name="barrio"
                             error={formErrors.barrio}
-                            readOnly={data.idBarrioDomicilio !== undefined && data.idBarrioDomicilio !== null && data.idBarrioDomicilio !== "" && data.idBarrioDomicilio > 0}
                         />
                     </div>
                     <div className="col-span-1">
@@ -417,108 +444,116 @@ const Domicilio = forwardRef((props, ref) => {
                             error={formErrors.tiempoVivienda}
                         />
                     </div>
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaUserAlt className="mr-2 text-primaryBlue" />
-                            Nombre Arrendador
-                        </label>
-                        <input
-                            type="text"
-                            className="solcitudgrande-style"
-                            name="nombreArrendador"
-                            onChange={handleFormChange}
-                            value={formData.nombreArrendador}
-                        />
-                        {formErrors.nombreArrendador && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.nombreArrendador}
-                            </p>
-                        )}
-                    </div>
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaPhoneAlt className="mr-2 text-primaryBlue" />
-                            Telefono Arrendador
-                        </label>
-                        <input
-                            type="text"
-                            className="solcitudgrande-style"
-                            name="telfArrendador"
-                            onChange={handleFormChange}
-                            value={formData.telfArrendador}
-                            onInput={e => {
-                                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                            }}
-                            maxLength={10}
-                        />
-                        {formErrors.telfArrendador && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.telfArrendador}
-                            </p>
-                        )}
-                    </div>
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaPhoneAlt className="mr-2 text-primaryBlue" />
-                            Celular Arrendador
-                        </label>
-                        <input
-                            type="text"
-                            className="solcitudgrande-style"
-                            name="celularArrendador"
-                            onChange={handleFormChange}
-                            value={formData.celularArrendador}
-                            onInput={e => {
-                                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                            }}
-                            maxLength={10}
-                        />
-                        {formErrors.celularArrendador && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.celularArrendador}
-                            </p>
-                        )}
-                    </div>
-                    <div className="col-span-1">
-                        <SelectField
-                            label="Inmueble"
-                            icon={<FaStore />}
-                            value={formData.inmueble}
-                            onChange={handleFormChange}
-                            options={inmueble}
-                            name="inmueble"
-                            error={formErrors.inmueble}
-                        />
-                    </div>
-                    <div className="col-span-1">
-                        <SelectField
-                            label="Ciudad Inmueble"
-                            icon={<FaStore />}
-                            value={formData.ciudadInmueble}
-                            onChange={handleFormChange}
-                            options={ciudadInmueble}
-                            name="ciudadInmueble"
-                            error={formErrors.ciudadInmueble}
-                        />
-                    </div>
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaStore className="mr-2 text-primaryBlue" />
-                            Valor Inmueble
-                        </label>
-                        <input
-                            type="number"
-                            className="solcitudgrande-style"
-                            name="valorInmueble"
-                            onChange={handleFormChange}
-                            value={formData.valorInmueble}
-                        />
-                        {formErrors.valorInmueble && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.valorInmueble}
-                            </p>
-                        )}
-                    </div>
+                    {(formData.tipoVivienda == 1) && (
+                        <>
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaUserAlt className="mr-2 text-primaryBlue" />
+                                    Nombre Arrendador
+                                </label>
+                                <input
+                                    type="text"
+                                    className="solcitudgrande-style"
+                                    name="nombreArrendador"
+                                    onChange={handleFormChange}
+                                    value={formData.nombreArrendador}
+                                />
+                                {formErrors.nombreArrendador && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.nombreArrendador}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaPhoneAlt className="mr-2 text-primaryBlue" />
+                                    Telefono Arrendador
+                                </label>
+                                <input
+                                    type="text"
+                                    className="solcitudgrande-style"
+                                    name="telfArrendador"
+                                    onChange={handleFormChange}
+                                    value={formData.telfArrendador}
+                                    onInput={e => {
+                                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                                    }}
+                                    maxLength={10}
+                                />
+                                {formErrors.telfArrendador && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.telfArrendador}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaPhoneAlt className="mr-2 text-primaryBlue" />
+                                    Celular Arrendador
+                                </label>
+                                <input
+                                    type="text"
+                                    className="solcitudgrande-style"
+                                    name="celularArrendador"
+                                    onChange={handleFormChange}
+                                    value={formData.celularArrendador}
+                                    onInput={e => {
+                                        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                                    }}
+                                    maxLength={10}
+                                />
+                                {formErrors.celularArrendador && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.celularArrendador}
+                                    </p>
+                                )}
+                            </div>
+                        </>
+                    )}
+                    {(formData.tipoVivienda == 3 || formData.tipoVivienda == 4) && (
+                        <>
+                            <div className="col-span-1">
+                                <SelectField
+                                    label="Inmueble"
+                                    icon={<FaStore />}
+                                    value={formData.inmueble}
+                                    onChange={handleFormChange}
+                                    options={inmueble}
+                                    name="inmueble"
+                                    error={formErrors.inmueble}
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <SelectField
+                                    label="Ciudad Inmueble"
+                                    icon={<FaStore />}
+                                    value={formData.ciudadInmueble}
+                                    onChange={handleFormChange}
+                                    options={ciudadInmueble}
+                                    name="ciudadInmueble"
+                                    error={formErrors.ciudadInmueble}
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaStore className="mr-2 text-primaryBlue" />
+                                    Valor Inmueble
+                                </label>
+                                <input
+                                    type="number"
+                                    className="solcitudgrande-style"
+                                    name="valorInmueble"
+                                    onChange={handleFormChange}
+                                    value={formData.valorInmueble}
+                                />
+                                {formErrors.valorInmueble && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.valorInmueble}
+                                    </p>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
