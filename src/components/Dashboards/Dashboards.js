@@ -257,7 +257,6 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
               } else {
                 // Si la fecha es inválida, se asigna la fecha de hoy
                 setFechaInicio(today);
-                alert("Fecha de inicio inválida. Se ha establecido la fecha de hoy.");
               }
             }}
 />
