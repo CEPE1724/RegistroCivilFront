@@ -3,6 +3,8 @@ import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
@@ -33,11 +35,12 @@ export function GestorDocumentos({
     const [currentDocId, setCurrentDocId] = useState(null);  // ID del documento
     const [observacion, setObservacion] = useState("");
     const [observaciones, setObservaciones] = useState({}); // Para almacenar las observaciones por documento
-    // Estado para mantener todos los documentos de la solicitud
-    const [allDocuments, setAllDocuments] = useState([]);
-    // Estado para mantener el estado de los documentos (aprobados, rechazados, pendientes)
+    const [allDocuments, setAllDocuments] = useState([]); // Estado para mantener todos los documentos de la solicitud
     const [documentStatus, setDocumentStatus] = useState({});
-    console.log("observacion", observacion);    
+
+    const [currentIndex, setCurrentIndex] = useState(0);  // Estado para el carrusel
+    const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
+    console.log("flatFiles", flatFiles);
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -50,7 +53,6 @@ export function GestorDocumentos({
         vendedor: "",
         consulta: "",
     });
-    console.log("clienteInfo", clientInfo);
 
     // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
@@ -68,7 +70,6 @@ export function GestorDocumentos({
                 const approvedResponse = await axios.get(approvedUrl);
                 if (approvedResponse.status === 200 && Array.isArray(approvedResponse.data)) {
                     approvedDocs = approvedResponse.data;
-                    console.log("approvedDocs", approvedDocs);
                 }
             } catch (error) {
                 console.log("No hay documentos aprobados o error al obtenerlos");
@@ -121,6 +122,7 @@ export function GestorDocumentos({
             if (pendingResponse.status === 200 && Array.isArray(pendingResponse.data)) {
                 const uploadedFiles = {};
                 const previews = {};
+                const allFiles = [];
 
                 pendingResponse.data.forEach((file) => {
                     const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
@@ -132,27 +134,34 @@ export function GestorDocumentos({
                     // Extrae el nombre del archivo desde la ruta
                     const fileName = file.RutaDocumento.split('/').pop();
                     const fileUrl = file.RutaDocumento;
-
-                    uploadedFiles[sectionName].push({
+                    const fileObj = {
                         idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb,
                         name: fileName,
                         url: fileUrl,
-                        type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
-                        idTipoDocumento: file.idTipoDocumentoWEB
-                    });
+                        type: 'application/pdf',
+                        idTipoDocumento: file.idTipoDocumentoWEB,
+                        sectionName: sectionName
+                    };
 
+                    uploadedFiles[sectionName].push(fileObj);
                     previews[sectionName].push(fileUrl);
+
+                    // Agregar al array plano para el carrusel
+                    allFiles.push(fileObj);
                 });
 
                 setFiles(uploadedFiles);
                 setFilePreviews(previews);
+                setFlatFiles(allFiles);
+
+                // Reiniciar el índice del carrusel cuando cambian los archivos
+                setCurrentIndex(0);
             }
         } catch (error) {
             enqueueSnackbar("Error al obtener archivos.", { variant: "error" });
             console.error("Error al obtener archivos:", error);
         }
     };
-    console.log("allDocuments", allDocuments);
 
     useEffect(() => {
         if (clientInfo.id) {
@@ -221,43 +230,43 @@ export function GestorDocumentos({
     };
 
     //api enviar datos modal    
-        const enviarObservacion = async (datos) => {
-            try {
-                const token = localStorage.getItem("token");
-                const url = APIURL.post_observaciones(); 
-    
-                const response = await axios.post(url, datos, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-    
-                if (response.status == 201) {
-                    enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
-                } else {
-                    enqueueSnackbar("Error al enviar los datos 1", { variant: "error" });
-                }
-            } catch (error) {
-                console.error("Error al enviar los datos 2:", error.response?.data);
-                enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
-            }
-        };
+    const enviarObservacion = async (datos) => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.post_observaciones();
 
-        const handleEnviarObservacion = () => {
-        
-            //objeto que se enviara a la api  
-            const datosObserv = {
-                idCre_SolicitudWeb: clientInfo.id,
-                idDocumentosSolicitudWeb: currentDocId.idDocumentosSolicitudWeb,
-                idUsuario: null,
-                observacion: observacion,
-                tipoUsuario: 1,
-                Usuario: "Dan",
-                idTipoDocumentoWEB: currentDocId.idTipoDocumento,             
-            };
-            enviarObservacion(datosObserv);
+            const response = await axios.post(url, datos, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status == 201) {
+                enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
+            } else {
+                enqueueSnackbar("Error al enviar los datos 1", { variant: "error" });
+            }
+        } catch (error) {
+            console.error("Error al enviar los datos 2:", error.response?.data);
+            enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
+        }
+    };
+
+    const handleEnviarObservacion = () => {
+        //objeto que se enviara a la api  
+        const datosObserv = {
+            idCre_SolicitudWeb: clientInfo.id,
+            idDocumentosSolicitudWeb: currentDocId.idDocumentosSolicitudWeb,
+            idUsuario: null,
+            Observacion: String(observacion),
+            TipoUsuario: 1,
+            Usuario: "Dan",
+            idTipoDocumentoWEB: currentDocId.idTipoDocumento,
+            Fecha: new Date(),
         };
+        enviarObservacion(datosObserv);
+    };
 
     // Función para mostrar el modal de confirmación
     const openConfirmModal = (file, action) => {
@@ -277,9 +286,13 @@ export function GestorDocumentos({
 
         // Ejecutar la acción correspondiente
         if (confirmAction === 'aprobar') {
-            estadoDocumentos(currentDocId, 3, observacion);
+            estadoDocumentos(currentDocId.idDocumentosSolicitudWeb, 3);
+            if (observacion.trim()) {
+                handleEnviarObservacion();
+            }
         } else if (confirmAction === 'rechazar') {
-            estadoDocumentos(currentDocId, 4, observacion);
+            estadoDocumentos(currentDocId.idDocumentosSolicitudWeb, 4);
+            handleEnviarObservacion();
         }
 
         // Cerrar el modal
@@ -381,7 +394,7 @@ export function GestorDocumentos({
         setCurrentFileUrl(fileUrl);
         setView(!view);
     };
-  console.log("clientInfo", currentDocId);
+
     // Agrupar documentos por tipo
     const documentsByType = allDocuments.reduce((acc, doc) => {
         if (!acc[doc.typeName]) {
@@ -390,6 +403,17 @@ export function GestorDocumentos({
         acc[doc.typeName].push(doc);
         return acc;
     }, {});
+
+    // Funciones para el carrusel
+    const nextSlide = () => {
+        if (flatFiles.length === 0) return;
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % flatFiles.length);
+    };
+
+    const prevSlide = () => {
+        if (flatFiles.length === 0) return;
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + flatFiles.length) % flatFiles.length);
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-100">
@@ -476,34 +500,40 @@ export function GestorDocumentos({
                         </h2>
                     </div>
 
-                    {/* Documentos pendientes */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 mb-6">
-                        {Object.entries(files).map(([sectionName, sectionFiles]) => (
-                            sectionFiles.map((file, index) => (
-                                <div
-                                    key={`${sectionName}-${index}`}
-                                    className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-700 truncate">
-                                                {sectionName || "Documento"}
-                                            </span>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {file.name}
-                                            </p>
-                                        </div>
+                    {/* Carrusel de documentos */}
+                    <div className="mt-8 mb-6">
+                        {flatFiles.length > 0 ? (
+                            <div className="relative">
+                                {/* Indicador de documento actual */}
+                                <div className="text-center mb-2">
+                                    <span className="text-sm font-semibold text-gray-700">
+                                        Documento {currentIndex + 1} de {flatFiles.length} - {flatFiles[currentIndex].sectionName}
+                                    </span>
+                                </div>
 
-                                        <div className="flex items-center gap-1">
-                                            <IconButton onClick={() => toggleView(file.url)}>
+                                {/* Contenedor carrusel */}
+                                <div className="flex items-center">
+                                    {/* Botón Anterior */}
+                                    <button
+                                        onClick={prevSlide}
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow-md mr-4 focus:outline-none"
+                                        aria-label="Documento anterior"
+                                    >
+                                        <ArrowBackIosIcon fontSize="small" />
+                                    </button>
+
+                                    {/* Documento actual */}
+                                    <div className="flex-1 bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-200 relative h-screen flex flex-col">
+                                        {/* Botones */}
+                                        <div className="absolute top-2 right-2 flex items-center gap-1 z-10 bg-white bg-opacity-70 p-1 rounded-md">
+                                            <IconButton onClick={() => toggleView(flatFiles[currentIndex].url)}>
                                                 <VisibilityIcon />
                                             </IconButton>
-
                                             <button
                                                 type="button"
                                                 name="rechazar"
                                                 className="text-red-500 hover:text-red-700"
-                                                onClick={() => handleRechazar(file)}
+                                                onClick={() => handleRechazar(flatFiles[currentIndex])}
                                             >
                                                 ❌
                                             </button>
@@ -511,40 +541,47 @@ export function GestorDocumentos({
                                                 type="button"
                                                 name="aprobar"
                                                 className="text-green-500 hover:text-green-700"
-                                                onClick={() => handleAprobar(file)}
+                                                onClick={() => handleAprobar(flatFiles[currentIndex])}
                                             >
                                                 ✅
                                             </button>
-
                                         </div>
-                                    </div>
 
-                                    <div className="mt-4">
-                                        {file.type === "application/pdf" ? (
+                                        {/* Información del documento */}
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">
+                                                {flatFiles[currentIndex].sectionName}
+                                            </h3>
+                                            <p className="text-sm text-gray-500">{flatFiles[currentIndex].name}</p>
+                                        </div>
+
+                                        {/* Vista previa del documento */}
+                                        <div className="w-full flex-1 flex items-center justify-center">
                                             <object
-                                                data={file.url}
+                                                data={flatFiles[currentIndex].url}
                                                 type="application/pdf"
                                                 width="100%"
-                                                height="200px"
+                                                height="100%"
                                                 className="rounded-md"
                                                 aria-label="Vista previa PDF"
                                             >
                                                 <p>Vista previa no disponible</p>
                                             </object>
-                                        ) : (
-                                            <img
-                                                src={file.url}
-                                                alt="Vista previa archivo"
-                                                className="w-full h-auto rounded-md"
-                                            />
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
-                        ))}
 
-                        {Object.keys(files).length === 0 && (
-                            <div className="col-span-3 text-center py-10">
+                                    {/* Botón Siguiente */}
+                                    <button
+                                        onClick={nextSlide}
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow-md ml-4 focus:outline-none"
+                                        aria-label="Documento siguiente"
+                                    >
+                                        <ArrowForwardIosIcon fontSize="small" />
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-10">
                                 <p className="text-gray-500">No hay documentos pendientes para esta solicitud.</p>
                             </div>
                         )}
@@ -599,7 +636,6 @@ export function GestorDocumentos({
                             <label htmlFor="observacion" className="block text-sm font-medium text-gray-700 mb-1">
                                 Observación {confirmAction === 'rechazar' && <span className="text-red-500">*</span>}
                             </label>
-                            <label>{currentDocId.idTipoDocumento}</label>
                             <textarea
                                 id="observacion"
                                 rows="4"
@@ -610,9 +646,6 @@ export function GestorDocumentos({
                                 value={observacion}
                                 onChange={(e) => setObservacion(e.target.value)}
                             ></textarea>
-                            {confirmAction === 'rechazar' && !observacion.trim() && (
-                                <p className="text-xs text-red-500 mt-1">La observación es obligatoria</p>
-                            )}
                         </div>
 
                         <div className="flex justify-end gap-2">
@@ -626,8 +659,8 @@ export function GestorDocumentos({
                             <button
                                 type="button"
                                 className={`px-4 py-2 text-white rounded-md ${confirmAction === 'aprobar'
-                                        ? 'bg-green-600 hover:bg-green-700'
-                                        : 'bg-red-600 hover:bg-red-700'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : 'bg-red-600 hover:bg-red-700'
                                     }`}
                                 onClick={handleConfirmAction}
                             >
