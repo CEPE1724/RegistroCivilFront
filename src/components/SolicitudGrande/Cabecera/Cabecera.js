@@ -7,8 +7,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DatosCliente from "../DatosCliente/DatosCliente";
-import  DatosConyuge  from "../DatosConyuge/DatosConyuge";
-import { Referencias } from "../Referencia";
+import DatosConyuge from "../DatosConyuge/DatosConyuge";
 import { SeccionB } from "../SeccionB";
 import { SeccionA } from "../SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
@@ -20,6 +19,7 @@ import { CabeceraDatosSolicitud } from "../CabeceraDatosSolicitud";
 import { Loader } from "../../Utils"; // Make sure to import the Loader component
 import Datos from "../DatosCliente/Datos/Datos";
 import Domicilio from "../DatosCliente/Domicilio/Domicilio";
+import  Referencias  from "../Referencia/Referencia";
 export function Cabecera() {
   const { state } = useLocation();
   const { data } = state || {};
@@ -45,6 +45,7 @@ export function Cabecera() {
   const datosRef = useRef(); // Referencia al componente Datos
   const datosDomicilioRef = useRef(); // Referencia para el componente Domicilio
   const datosConyuge = useRef(); // Referencia para el componente DatosConyuge
+  const datosReferencias = useRef(); // Referencia para el componente Referencias
   const ref = useRef(); // Create ref for imperative handle
 
   useEffect(() => {
@@ -84,13 +85,13 @@ export function Cabecera() {
     { name: "Dependiente", icon: <LogoutIcon fontSize="small" /> },
     { name: "Información de Crédito", icon: <SaveIcon fontSize="small" /> },
     { name: "Factores de Crédito", icon: <PrintIcon fontSize="small" /> },
-   // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
+    // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
   ];
 
   const renderTabContent = (clienteData) => {
-   /* if (clienteData.idEdoCivil === 1 && activeTab !== "Datos Conyuge") {
-      setActiveTab("Datos Conyuge");
-    }*/
+    /* if (clienteData.idEdoCivil === 1 && activeTab !== "Datos Conyuge") {
+       setActiveTab("Datos Conyuge");
+     }*/
 
     switch (activeTab) {
 
@@ -101,14 +102,14 @@ export function Cabecera() {
       case "Datos Conyuge":
         return clienteData.idEdoCivil === 1 ? <DatosConyuge ref={datosConyuge} data={clienteData} /> : null;
       case "Referencias":
-        return <Referencias />;
+        return <Referencias data = {clienteData}  />;
       case "Negocio":
         return <SeccionA ref={seccionRef} />;
       case "Dependiente":
         return <SeccionB />;
       case "Factores de Crédito":
         return <FactoresCredito ref={seccionRef} />;
-     {/*} case "Verificación":
+        {/*} case "Verificación":
         return <Verificacion />;*/}
       case "Información de Crédito":
         return <InformacionCredito />;
@@ -180,25 +181,77 @@ export function Cabecera() {
       } else {
         enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
       }
+    }
+    if (activeTab === "Datos Conyuge") {
+      const formData = datosConyuge.current.getFormData();
+      const isValid = datosConyuge.current.validateForm(); // Llamamos a validateForm del componente Datos
 
+      if (isValid) {
+         fetchSaveDatosConyuge(formData);
+        setActiveTab("Referencias");
+        // Aquí podrías proceder con el envío de los datos o alguna otra acción
+      } 
+      //else {
+        //enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+      //}
     }
   };
 
   const getParsedDecimalValue = (value) => {
-  if (value) {
-    // Remove any non-numeric characters (e.g., commas) and ensure it's a valid decimal
-    const sanitizedValue = value.replace(/[^0-9.-]+/g, '');
-    let parsedValue = parseFloat(sanitizedValue);
+    if (value) {
+      // Remove any non-numeric characters (e.g., commas) and ensure it's a valid decimal
+      const sanitizedValue = value.replace(/[^0-9.-]+/g, '');
+      let parsedValue = parseFloat(sanitizedValue);
 
-    // If parsed value is an integer, ensure it has decimals (e.g., 500 => 500.00)
-    if (parsedValue === parseInt(parsedValue)) {
-      parsedValue = parseFloat(parsedValue.toFixed(2)); // Ensure it's a decimal with two decimal places
+      // If parsed value is an integer, ensure it has decimals (e.g., 500 => 500.00)
+      if (parsedValue === parseInt(parsedValue)) {
+        parsedValue = parseFloat(parsedValue.toFixed(2)); // Ensure it's a decimal with two decimal places
+      }
+
+      return isNaN(parsedValue) ? null : parsedValue;
     }
+    return null;
+  };
 
-    return isNaN(parsedValue) ? null : parsedValue;
-  }
-  return null;
-};
+  const fetchSaveDatosConyuge = async (formData) => {
+    try {
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      console.log("URL:", url);
+      // Función para asegurar que los valores sean válidos y numéricos
+      const getParsedValue = (value) => (value ? parseInt(value) : null);
+
+      const response = await axios.patch(
+        url,
+        {
+          idTipoDocConyuge: getParsedValue(formData.tipoDocumento),
+          ApellidoPaternoConyuge: formData.apellidoPaterno,
+          PrimerNombreConyuge: formData.primerNombre,
+          SegundoNombreConyuge: formData.segundoNombre,	
+          CedulaConyuge: formData.numeroDocumento,	
+          FechaNacimientoConyuge: formData.fechaNacimiento,
+          idNacionalidadConyuge: getParsedValue(formData.nacionalidad),	
+          idGeneroConyuge: getParsedValue(formData.sexo),
+          idNivelEducacionConyuge: getParsedValue(formData.nivelEducacion),	
+          idProfesionConyuge: getParsedValue(formData.profesion),
+
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Datos del conyuge guardados correctamente:", response.data);
+
+      // Si todo sale bien
+      enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
+    } catch (error) {
+      // Si ocurre algún error
+      enqueueSnackbar("Error al guardar los datos del conyuge.", { variant: "error" });
+      console.error("Error al guardar los datos del conyuge", error);
+    }
+  };
 
   const fetchSaveDatosDomicilio = async (formData) => {
     try {
@@ -206,15 +259,11 @@ export function Cabecera() {
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
-      
+
 
       const response = await axios.patch(
         url,
         {
-          /*idProvinciaDomicilio,	idCantonDomicilio	,idParroquiaDomicilio,	idBarrioDomicilio	,
-Email	,CallePrincipal	,NumeroCasa	,CalleSecundaria,	ReferenciaUbicacion,	TelefonoDomicilio	,
-TelefonoDomiliarDos,	Celular	,idTipoVivienda	,idCre_Tiempo,	NombreArrendador	,
-TelefonoArrendador	,CelularArrendador,	idInmueble,	idCantonInmueble	,ValorInmmueble,*/
           idProvinciaDomicilio: getParsedValue(formData.provincia),
           idCantonDomicilio: getParsedValue(formData.canton),
           idParroquiaDomicilio: getParsedValue(formData.parroquia),
@@ -243,8 +292,8 @@ TelefonoArrendador	,CelularArrendador,	idInmueble,	idCantonInmueble	,ValorInmmue
       );
 
       console.log("Datos de nacimiento guardados correctamente:", response.data);
-     // se dirija al tab de datos de conyuge
-     
+      // se dirija al tab de datos de conyuge
+
       // Si todo sale bien
       enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
     } catch (error) {
@@ -254,8 +303,8 @@ TelefonoArrendador	,CelularArrendador,	idInmueble,	idCantonInmueble	,ValorInmmue
     }
   };
 
- 
-  
+
+
   const fetchSaveDatosNacimiento = async (formData) => {
     try {
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);

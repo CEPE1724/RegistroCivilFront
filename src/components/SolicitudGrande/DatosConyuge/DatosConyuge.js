@@ -1,13 +1,13 @@
 
 
-import React, { useState, useEffect, forwardRef } from "react";
+import React, { useState, useEffect, forwardRef, useCallback, useImperativeHandle } from "react";
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
 import { SelectField } from "../../Utils";
 import { useSnackbar } from "notistack";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
 import {
-    fetchTipoDocumento, fetchNacionalidad, fecthGenero
+    fetchTipoDocumento, fetchNacionalidad, fecthGenero, fetchNivelEducacion, fetchProfesion
 } from "../DatosCliente/apisFetch";
 
 const DatosConyuge = forwardRef((props, ref) => {
@@ -18,7 +18,7 @@ const DatosConyuge = forwardRef((props, ref) => {
     const [datoDocumento, setDatoDocumento] = useState([]);  //estado tipo documento
     const [datoSexo, setDatoSexo] = useState([]);  //estado sexo
     const [datoNivelEducacion, setDatoNivelEducacion] = useState([]);  //estado nivel educacion
-    const [nacionalidad, setNacionalidad ] = useState([]);  //estado nivel educacion
+    const [nacionalidad, setNacionalidad] = useState([]);  //estado nivel educacion
     const [datoProfesion, setDatoProfesion] = useState([]);  //estado profesion
     const [dataGenero, setGenero] = useState([]);  //estado genero
     //almacenar datos del formulario
@@ -40,82 +40,10 @@ const DatosConyuge = forwardRef((props, ref) => {
         fetchTipoDocumento(enqueueSnackbar, setDatoDocumento);
         fetchNacionalidad(enqueueSnackbar, setNacionalidad);
         fecthGenero(enqueueSnackbar, setGenero);
+        fetchNivelEducacion(enqueueSnackbar, setDatoNivelEducacion);
+        fetchProfesion(enqueueSnackbar, setDatoProfesion);
     }, []);
 
-    // api de sexo
-    useEffect(() => {
-        fetchDatosexo();
-    }, []);
-
-    const fetchDatosexo = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const url = APIURL.getTiposexo();
-            const response = await axios.get(url,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setDatoSexo(response.data);
-        } catch (error) {
-            enqueueSnackbar("Error fetching Dato: " + error.message, {
-                variant: "error",
-            });
-        }
-    };
-
-    //api nivel educacion
-    useEffect(() => {
-        fetchDatoNivelEducacion();
-    }, []);
-
-    const fetchDatoNivelEducacion = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const url = APIURL.getNiveleducacion();
-            const response = await axios.get(url,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setDatoNivelEducacion(response.data);
-        } catch (error) {
-            enqueueSnackbar("Error fetching Dato: " + error.message, {
-                variant: "error",
-            });
-        }
-    };
-
-    //api profesion 
-    useEffect(() => {
-        fetchDatoProfesion();
-    }, []);
-
-    const fetchDatoProfesion = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const url = APIURL.getProfesion();
-            const response = await axios.get(url,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setDatoProfesion(response.data);
-        } catch (error) {
-            enqueueSnackbar("Error fetching Dato: " + error.message, {
-                variant: "error",
-            });
-        }
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -138,48 +66,63 @@ const DatosConyuge = forwardRef((props, ref) => {
             setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleAgregar = () => {
+    const validateForm = useCallback(() => {
+        let isValid = true;
         // Validar campos
         if (formData.tipoDocumento === "") {
             enqueueSnackbar("El tipo de documento es requerido", { variant: "error" });
+            isValid = false;
             return;
         }
         if (formData.apellidoPaterno.length < 3) {
             enqueueSnackbar("El apellido paterno debe tener mínimo 3 caracteres", { variant: "error" });
+            isValid = false;
             return;
         }
         if (formData.primerNombre.length < 3) {
             enqueueSnackbar("El primer nombre debe tener mínimo 3 caracteres", { variant: "error" });
+            isValid = false;
             return;
         }
         if (formData.numeroDocumento.length < 10) {
             enqueueSnackbar("Ingrese un número de documento valido", { variant: "error" });
+            isValid = false;
             return;
         }
         if (formData.fechaNacimiento === "") {
             enqueueSnackbar("La fecha de nacimiento es requerida", { variant: "error" });
+            isValid = false;
             return;
         }
-        if (formData.nacionalidad === "" || formData.nacionalidad ==0 ) {
+        if (formData.nacionalidad === "" || formData.nacionalidad == 0) {
             enqueueSnackbar("La nacionalidad es requerida", { variant: "error" });
+            isValid = false;
             return;
         }
         if (formData.sexo === "") {
             enqueueSnackbar("El sexo es requerido", { variant: "error" });
+            isValid = false;
             return;
         }
-        if (formData.nivelEducacion === "" || formData.nivelEducacion ==0 )
-            {
+        if (formData.nivelEducacion === "" || formData.nivelEducacion == 0) {
             enqueueSnackbar("El nivel de educación es requerido", { variant: "error" });
+            isValid = false;
             return;
         }
-        if (formData.profesion === "" || formData.profesion ==0 )
-             {
+        if (formData.profesion === "" || formData.profesion == 0) {
             enqueueSnackbar("La profesión es requerida", { variant: "error" });
+            isValid = false;
             return;
         }
-        enqueueSnackbar("Datos Guardados", { variant: "success" });
-    };
+        if (!isValid) return;
+        return isValid;
+    }, [formData]);
+
+    useImperativeHandle(ref, () => ({
+
+        validateForm,
+        getFormData: () => formData,
+    }));
 
     return (
         <div>
@@ -276,7 +219,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                 </div>
                 {/* Nacionalidad */}
                 <div className="flex flex-col">
-                  
+
                     <SelectField
                         label="Nacionalidad"
                         icon={<FaStore />}
@@ -290,7 +233,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                 </div>
                 {/* Sexo */}
                 <div className="flex flex-col">
-                <SelectField
+                    <SelectField
                         label="Sexo(*)"
                         icon={<FaStore />}
                         value={formData.sexo}
@@ -302,44 +245,26 @@ const DatosConyuge = forwardRef((props, ref) => {
             </div>
             {/* Tercera fila */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {/* Nivel Educacion */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Nivel Educacion(*)</label>
-                    <select
-                        name="nivelEducacion"
-                        className="p-2 border rounded"
-                        value={formData.nivelEducacion}
-                        onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoNivelEducacion.map((opcion) => (
-                            <option key={opcion.idNivelEducacion} value={opcion.idNivelEducacion}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <SelectField
+                    label="Nivel Educacion(*)"
+                    icon={<FaStore />}
+                    value={formData.nivelEducacion}
+                    onChange={handleChange}
+                    options={datoNivelEducacion}
+                    name="nivelEducacion"
+                />
                 {/* Profesion */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Profesión(*)</label>
-                    <select
-                        name="profesion"
-                        className="p-2 border rounded"
+                    <SelectField
+                        label="Profesión(*)"
+                        icon={<FaStore />}
                         value={formData.profesion}
                         onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoProfesion.map((opcion) => (
-                            <option key={opcion.idProfesion} value={opcion.idProfesion}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
+                        options={datoProfesion}
+                        name="profesion"
+                    />
+
                 </div>
-                {/* boton guardar */}
-                <button onClick={handleAgregar} className="p-2 bg-blue-500 text-white rounded mr-2">
-                    Agregar
-                </button>
             </div>
         </div>
     )

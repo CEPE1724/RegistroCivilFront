@@ -399,3 +399,5 @@ export const fetchTipoDocumento = async (enqueueSnackbar, setTipoDocumento) => {
     setTipoDocumento([]);
   }
 };
+
+
