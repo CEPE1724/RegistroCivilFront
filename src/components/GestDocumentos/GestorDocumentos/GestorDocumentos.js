@@ -1,19 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import * as React from 'react';
 import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 
 export function GestorDocumentos({
     id,
@@ -34,13 +28,19 @@ export function GestorDocumentos({
     const [view, setView] = useState(false);
     const [currentFileUrl, setCurrentFileUrl] = useState("");
     const modalRef = useRef(null);
+    const confirmModalRef = useRef(null);
     const [filePreviews, setFilePreviews] = useState({});
-    const [open, setOpen] = React.useState(false);
-
-    // Estado para mantener todos los documentos de la solicitud (tanto visibles como procesados)
-    const [allDocuments, setAllDocuments] = useState([]);
-    // Estado para mantener el estado de los documentos (aprobados, rechazados, pendientes)
+    const [showConfirmModal, setShowConfirmModal] = useState(false); // Estados para el modal de confirmación
+    const [confirmAction, setConfirmAction] = useState(null); // 'aprobar' o 'rechazar'
+    const [currentDocId, setCurrentDocId] = useState(null);  // ID del documento
+    const [observacion, setObservacion] = useState("");
+    const [observaciones, setObservaciones] = useState({}); // Para almacenar las observaciones por documento
+    const [allDocuments, setAllDocuments] = useState([]); // Estado para mantener todos los documentos de la solicitud
     const [documentStatus, setDocumentStatus] = useState({});
+
+    const [currentIndex, setCurrentIndex] = useState(0);  // Estado para el carrusel
+    const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
+    console.log("flatFiles", flatFiles);
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -54,7 +54,7 @@ export function GestorDocumentos({
         consulta: "",
     });
 
-    // Función para obtener TODOS los documentos (incluyendo aprobados y rechazados)
+    // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
         try {
             if (!clientInfo.id) return;
@@ -122,6 +122,7 @@ export function GestorDocumentos({
             if (pendingResponse.status === 200 && Array.isArray(pendingResponse.data)) {
                 const uploadedFiles = {};
                 const previews = {};
+                const allFiles = [];
 
                 pendingResponse.data.forEach((file) => {
                     const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
@@ -133,20 +134,28 @@ export function GestorDocumentos({
                     // Extrae el nombre del archivo desde la ruta
                     const fileName = file.RutaDocumento.split('/').pop();
                     const fileUrl = file.RutaDocumento;
-
-                    uploadedFiles[sectionName].push({
+                    const fileObj = {
                         idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb,
                         name: fileName,
                         url: fileUrl,
-                        type: fileUrl.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg',
-                        idTipoDocumento: file.idTipoDocumentoWEB
-                    });
+                        type: 'application/pdf',
+                        idTipoDocumento: file.idTipoDocumentoWEB,
+                        sectionName: sectionName
+                    };
 
+                    uploadedFiles[sectionName].push(fileObj);
                     previews[sectionName].push(fileUrl);
+
+                    // Agregar al array plano para el carrusel
+                    allFiles.push(fileObj);
                 });
 
                 setFiles(uploadedFiles);
                 setFilePreviews(previews);
+                setFlatFiles(allFiles);
+
+                // Reiniciar el índice del carrusel cuando cambian los archivos
+                setCurrentIndex(0);
             }
         } catch (error) {
             enqueueSnackbar("Error al obtener archivos.", { variant: "error" });
@@ -162,6 +171,12 @@ export function GestorDocumentos({
             const savedDocStatus = localStorage.getItem(`docStatus_${clientInfo.id}`);
             if (savedDocStatus) {
                 setDocumentStatus(JSON.parse(savedDocStatus));
+            }
+
+            // Cargar observaciones guardadas
+            const savedObservaciones = localStorage.getItem(`observaciones_${clientInfo.id}`);
+            if (savedObservaciones) {
+                setObservaciones(JSON.parse(savedObservaciones));
             }
         }
     }, [clientInfo.id]);
@@ -183,7 +198,17 @@ export function GestorDocumentos({
             });
 
             if (response.status === 200) {
-                enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
+                // Guardamos la observación
+                const updatedObservaciones = { ...observaciones };
+                updatedObservaciones[idDocumentosSolicitudWeb] = observacion;
+                setObservaciones(updatedObservaciones);
+
+                // Guardamos en localStorage
+                localStorage.setItem(`observaciones_${clientInfo.id}`, JSON.stringify(updatedObservaciones));
+
+                // Mensaje según la acción
+                const accion = idEstadoDocumento === 3 ? "aprobado" : "rechazado";
+                enqueueSnackbar(`Documento ${accion} correctamente`, { variant: "success" });
 
                 // Actualizamos el estado del documento
                 const updatedStatus = { ...documentStatus };
@@ -204,22 +229,89 @@ export function GestorDocumentos({
         }
     };
 
-    const handleClickOpen = () => {
-        setOpen(true);
+    //api enviar datos modal    
+    const enviarObservacion = async (datos) => {
+        try {
+            const token = localStorage.getItem("token");
+            const url = APIURL.post_observaciones();
+
+            const response = await axios.post(url, datos, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status == 201) {
+                enqueueSnackbar("Datos enviados correctamente", { variant: "success" });
+            } else {
+                enqueueSnackbar("Error al enviar los datos 1", { variant: "error" });
+            }
+        } catch (error) {
+            console.error("Error al enviar los datos 2:", error.response?.data);
+            enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
+        }
     };
 
-    const handleClose = () => {
-        setOpen(false);
+    const handleEnviarObservacion = () => {
+        //objeto que se enviara a la api  
+        const datosObserv = {
+            idCre_SolicitudWeb: clientInfo.id,
+            idDocumentosSolicitudWeb: currentDocId.idDocumentosSolicitudWeb,
+            idUsuario: null,
+            Observacion: String(observacion),
+            TipoUsuario: 1,
+            Usuario: "Dan",
+            idTipoDocumentoWEB: currentDocId.idTipoDocumento,
+            Fecha: new Date(),
+        };
+        enviarObservacion(datosObserv);
     };
 
-    // Función rechazo de documento
-    const handleRechazar = (idDocumentosSolicitudWeb) => {
-        estadoDocumentos(idDocumentosSolicitudWeb, 4);
+    // Función para mostrar el modal de confirmación
+    const openConfirmModal = (file, action) => {
+        setCurrentDocId(file);
+        setConfirmAction(action);
+        setObservacion(""); // Limpiar la observación anterior
+        setShowConfirmModal(true);
     };
 
-    // Función aprobación de documento
-    const handleAprobar = (idDocumentosSolicitudWeb) => {
-        estadoDocumentos(idDocumentosSolicitudWeb, 3);
+    // Función para confirmar la acción
+    const handleConfirmAction = () => {
+        // Validar si es necesaria la observación
+        if (confirmAction === 'rechazar' && !observacion.trim()) {
+            enqueueSnackbar("La observación es obligatoria al rechazar un documento", { variant: "error" });
+            return;
+        }
+
+        // Ejecutar la acción correspondiente
+        if (confirmAction === 'aprobar') {
+            estadoDocumentos(currentDocId.idDocumentosSolicitudWeb, 3);
+            if (observacion.trim()) {
+                handleEnviarObservacion();
+            }
+        } else if (confirmAction === 'rechazar') {
+            estadoDocumentos(currentDocId.idDocumentosSolicitudWeb, 4);
+            handleEnviarObservacion();
+        }
+
+        // Cerrar el modal
+        setShowConfirmModal(false);
+    };
+
+    // Función para cancelar la acción
+    const handleCancelAction = () => {
+        setShowConfirmModal(false);
+        setObservacion("");
+    };
+
+    // Funciones actualizadas para abrir el modal antes de ejecutar la acción
+    const handleRechazar = (file) => {
+        openConfirmModal(file, 'rechazar');
+    };
+
+    const handleAprobar = (file) => {
+        openConfirmModal(file, 'aprobar');
     };
 
     const getTipoDocumento = (id) => {
@@ -281,6 +373,23 @@ export function GestorDocumentos({
         };
     }, []);
 
+    // Efecto para detectar clicks fuera del modal de confirmación
+    useEffect(() => {
+        const handleClickOutsideConfirm = (event) => {
+            if (confirmModalRef.current && !confirmModalRef.current.contains(event.target)) {
+                setShowConfirmModal(false);
+            }
+        };
+
+        if (showConfirmModal) {
+            document.addEventListener("mousedown", handleClickOutsideConfirm);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutsideConfirm);
+        };
+    }, [showConfirmModal]);
+
     const toggleView = (fileUrl) => {
         setCurrentFileUrl(fileUrl);
         setView(!view);
@@ -294,6 +403,17 @@ export function GestorDocumentos({
         acc[doc.typeName].push(doc);
         return acc;
     }, {});
+
+    // Funciones para el carrusel
+    const nextSlide = () => {
+        if (flatFiles.length === 0) return;
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % flatFiles.length);
+    };
+
+    const prevSlide = () => {
+        if (flatFiles.length === 0) return;
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + flatFiles.length) % flatFiles.length);
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-100">
@@ -378,39 +498,42 @@ export function GestorDocumentos({
                         <h2 className="text-2xl font-semibold text-center text-gray-800">
                             Documentos Subidos
                         </h2>
-                        <Button variant="outlined" onClick={handleClickOpen}>
-                            Modal 
-                        </Button>
                     </div>
 
-                    {/* Documentos pendientes */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 mb-6">
-                        {Object.entries(files).map(([sectionName, sectionFiles]) => (
-                            sectionFiles.map((file, index) => (
-                                <div
-                                    key={`${sectionName}-${index}`}
-                                    className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-700 truncate">
-                                                {sectionName || "Documento"}
-                                            </span>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {file.name}
-                                            </p>
-                                        </div>
+                    {/* Carrusel de documentos */}
+                    <div className="mt-8 mb-6">
+                        {flatFiles.length > 0 ? (
+                            <div className="relative">
+                                {/* Indicador de documento actual */}
+                                <div className="text-center mb-2">
+                                    <span className="text-sm font-semibold text-gray-700">
+                                        Documento {currentIndex + 1} de {flatFiles.length} - {flatFiles[currentIndex].sectionName}
+                                    </span>
+                                </div>
 
-                                        <div className="flex items-center gap-1">
-                                            <IconButton onClick={() => toggleView(file.url)}>
+                                {/* Contenedor carrusel */}
+                                <div className="flex items-center">
+                                    {/* Botón Anterior */}
+                                    <button
+                                        onClick={prevSlide}
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow-md mr-4 focus:outline-none"
+                                        aria-label="Documento anterior"
+                                    >
+                                        <ArrowBackIosIcon fontSize="small" />
+                                    </button>
+
+                                    {/* Documento actual */}
+                                    <div className="flex-1 bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-200 relative h-screen flex flex-col">
+                                        {/* Botones */}
+                                        <div className="absolute top-2 right-2 flex items-center gap-1 z-10 bg-white bg-opacity-70 p-1 rounded-md">
+                                            <IconButton onClick={() => toggleView(flatFiles[currentIndex].url)}>
                                                 <VisibilityIcon />
                                             </IconButton>
-
                                             <button
                                                 type="button"
                                                 name="rechazar"
                                                 className="text-red-500 hover:text-red-700"
-                                                onClick={() => handleRechazar(file.idDocumentosSolicitudWeb)}
+                                                onClick={() => handleRechazar(flatFiles[currentIndex])}
                                             >
                                                 ❌
                                             </button>
@@ -418,40 +541,47 @@ export function GestorDocumentos({
                                                 type="button"
                                                 name="aprobar"
                                                 className="text-green-500 hover:text-green-700"
-                                                onClick={() => handleAprobar(file.idDocumentosSolicitudWeb)}
+                                                onClick={() => handleAprobar(flatFiles[currentIndex])}
                                             >
                                                 ✅
                                             </button>
-
                                         </div>
-                                    </div>
 
-                                    <div className="mt-4">
-                                        {file.type === "application/pdf" ? (
+                                        {/* Información del documento */}
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">
+                                                {flatFiles[currentIndex].sectionName}
+                                            </h3>
+                                            <p className="text-sm text-gray-500">{flatFiles[currentIndex].name}</p>
+                                        </div>
+
+                                        {/* Vista previa del documento */}
+                                        <div className="w-full flex-1 flex items-center justify-center">
                                             <object
-                                                data={file.url}
+                                                data={flatFiles[currentIndex].url}
                                                 type="application/pdf"
                                                 width="100%"
-                                                height="200px"
+                                                height="100%"
                                                 className="rounded-md"
                                                 aria-label="Vista previa PDF"
                                             >
                                                 <p>Vista previa no disponible</p>
                                             </object>
-                                        ) : (
-                                            <img
-                                                src={file.url}
-                                                alt="Vista previa archivo"
-                                                className="w-full h-auto rounded-md"
-                                            />
-                                        )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))
-                        ))}
 
-                        {Object.keys(files).length === 0 && (
-                            <div className="col-span-3 text-center py-10">
+                                    {/* Botón Siguiente */}
+                                    <button
+                                        onClick={nextSlide}
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-full shadow-md ml-4 focus:outline-none"
+                                        aria-label="Documento siguiente"
+                                    >
+                                        <ArrowForwardIosIcon fontSize="small" />
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-10">
                                 <p className="text-gray-500">No hay documentos pendientes para esta solicitud.</p>
                             </div>
                         )}
@@ -484,49 +614,62 @@ export function GestorDocumentos({
                 </div>
             )}
 
-            <React.Fragment>
-                <Dialog
-                    open={open}
-                    onClose={handleClose}
-                    slotProps={{
-                        paper: {
-                            component: 'form',
-                            onSubmit: (event) => {
-                                event.preventDefault();
-                                const formData = new FormData(event.currentTarget);
-                                const formJson = Object.fromEntries(formData.entries());
-                                const email = formJson.email;
-                                console.log(email);
-                                handleClose();
-                            },
-                        },
-                    }}
-                >
-                    <DialogTitle>Observaciones</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            To subscribe to this website, please enter your email address here. We
-                            will send updates occasionally.
-                        </DialogContentText>
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="name"
-                            name="email"
-                            label="Email Address"
-                            type="email"
-                            fullWidth
-                            variant="standard"
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit">Subscribe</Button>
-                    </DialogActions>
-                </Dialog>
-            </React.Fragment>
+            {/* Modal de confirmación */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div
+                        ref={confirmModalRef}
+                        className="bg-white p-6 rounded-lg shadow-lg w-1/3 max-w-md relative"
+                    >
+                        <div className="mb-4">
+                            <h3 className="text-xl font-medium text-gray-900">
+                                {confirmAction === 'aprobar' ? 'Aprobar Documento' : 'Rechazar Documento'}
+                            </h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                {confirmAction === 'aprobar'
+                                    ? ''
+                                    : 'Explique el motivo del rechazo.'}
+                            </p>
+                        </div>
 
+                        <div className="mb-4">
+                            <label htmlFor="observacion" className="block text-sm font-medium text-gray-700 mb-1">
+                                Observación {confirmAction === 'rechazar' && <span className="text-red-500">*</span>}
+                            </label>
+                            <textarea
+                                id="observacion"
+                                rows="4"
+                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                placeholder={confirmAction === 'aprobar'
+                                    ? "Observación (opcional)"
+                                    : "Observación (obligatorio)"}
+                                value={observacion}
+                                onChange={(e) => setObservacion(e.target.value)}
+                            ></textarea>
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                                onClick={handleCancelAction}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                className={`px-4 py-2 text-white rounded-md ${confirmAction === 'aprobar'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : 'bg-red-600 hover:bg-red-700'
+                                    }`}
+                                onClick={handleConfirmAction}
+                            >
+                                {confirmAction === 'aprobar' ? 'Aprobar' : 'Rechazar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

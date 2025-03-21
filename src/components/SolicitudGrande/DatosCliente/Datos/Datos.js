@@ -4,10 +4,10 @@ import {
     fetchNacionalidad, fecthGenero, fecthEstadoCivil, fetchNivelEducacion, fetchProfesion, fetchSituacionLaboral,
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
-import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender  ,FaChild, FaUserGraduate, FaUserSecret, FaToolbox    } from "react-icons/fa";
+import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
 import { SelectField } from "../../../Utils";
 
-const Datos = forwardRef((props,  ref) => {
+const Datos = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
     const [formErrors, setFormErrors] = useState({});
@@ -20,7 +20,7 @@ const Datos = forwardRef((props,  ref) => {
     const [profesion, setProfesion] = useState([]);
     const [situacionLaboral, setSituacionLaboral] = useState([]);
     const [actividadEconomica, setActividadEconomica] = useState([]);
-    
+
     const [formData, setFormData] = useState({
         nacionalidad: data?.idNacionalidad || '',
         fechaNacimiento: data?.FechaNacimiento || '',
@@ -56,7 +56,11 @@ const Datos = forwardRef((props,  ref) => {
 
     useEffect(() => {
         if (formData.situacionLaboral) {
+            // Asegurarnos de que el valor de 'situacionLaboral' esté listo y hacer la solicitud para actualizar la actividad económica
             fetchActividadEconomina(enqueueSnackbar, formData.situacionLaboral, setActividadEconomica);
+        } else {
+            // Si no hay situación laboral seleccionada, podemos resetear o limpiar las actividades económicas
+            setActividadEconomica([]);
         }
     }, [formData.situacionLaboral, enqueueSnackbar]);
 
@@ -121,7 +125,9 @@ const Datos = forwardRef((props,  ref) => {
 
         // Validación de campos obligatorios
         for (const field in formData) {
+            console.log('datos cabecera', field);
             if (!formData[field]) {
+                console.log('datos cabeceraed', field);
                 errors[field] = requiredFieldMessages[field] || `Este campo es obligatorio`;
             }
         }
@@ -139,7 +145,7 @@ const Datos = forwardRef((props,  ref) => {
 
         // Validación de campos de texto (no caracteres especiales)
         const textFields = [
-             'observacionActividadEconomica'
+            'observacionActividadEconomica'
         ];
         textFields.forEach(field => {
             if (formData[field] && /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g.test(formData[field])) {
@@ -153,7 +159,9 @@ const Datos = forwardRef((props,  ref) => {
             errors.fechaNacimiento = 'Formato de fecha inválido';
         }
 
-        // Si hay errores, los devolvemos y evitamos el envío
+        if (formData.actividadEconomica === '' || formData.actividadEconomica === null || formData.actividadEconomica === undefined || formData.actividadEconomica === 0) {
+            errors.actividadEconomica = 'Selecciona tu actividad económica';
+        }     // Si hay errores, los devolvemos y evitamos el envío
         if (Object.keys(errors).length > 0) {
             setFormErrors(errors);
             return false;
@@ -209,7 +217,7 @@ const Datos = forwardRef((props,  ref) => {
                     <div className="col-span-1">
                         <SelectField
                             label="Género (*)"
-                            icon={<FaTransgender  />}
+                            icon={<FaTransgender />}
                             value={formData.genero}
                             onChange={handleFormChange}
                             options={genero}
@@ -229,7 +237,7 @@ const Datos = forwardRef((props,  ref) => {
                             options={estadoCivil}
                             name="estadoCivil"
                             error={formErrors.estadoCivil}
-                            readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
+                        //readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
                         />
                     </div>
 
@@ -259,7 +267,7 @@ const Datos = forwardRef((props,  ref) => {
                     <div className="col-span-1">
                         <SelectField
                             label="Nivel Educación (*)"
-                            icon={<FaUserGraduate  />}
+                            icon={<FaUserGraduate />}
                             value={formData.nivelEducacion}
                             onChange={handleFormChange}
                             options={nivelEducacion}
@@ -270,7 +278,7 @@ const Datos = forwardRef((props,  ref) => {
                     <div className="col-span-1">
                         <SelectField
                             label="Profesión (*)"
-                            icon={<FaUserSecret  />}
+                            icon={<FaUserSecret />}
                             value={formData.profesion}
                             onChange={handleFormChange}
                             options={profesion}
@@ -281,7 +289,7 @@ const Datos = forwardRef((props,  ref) => {
                     <div className="mb-6">
                         <SelectField
                             label="Situación Laboral (*)"
-                            icon={<FaToolbox  />}
+                            icon={<FaToolbox />}
                             value={formData.situacionLaboral}
                             onChange={handleFormChange}
                             options={situacionLaboral}
