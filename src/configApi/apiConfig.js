@@ -3,7 +3,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.137.232:3025/api/v1/";
+const API_BASE_URL = "http://192.168.137.9:3025/api/v1/";
 
 
 
@@ -25,6 +25,7 @@ export const APIURL = {
     postImg : () => `${API_BASE_URL}subir-img`,
 	  getEstabilidadLaboral : () => `${API_BASE_URL}cre-tiempo/1`,
     getCreVerificacionTelefonica : () => `${API_BASE_URL}cre-verificacion-telefonica`,
+    getCreVerificacionTelefonicaMaestro : (id) => `${API_BASE_URL}cre-verificacion-telefonica-maestro/${id}`,
     getCreSolicitudCredito : () => `${API_BASE_URL}cre-solicitud-web`,
     getActividadEconomina : () => `${API_BASE_URL}cre-actividadeconomina/2`,
     getTipoConsulta : () => `${API_BASE_URL}compraencuesta/1`,
