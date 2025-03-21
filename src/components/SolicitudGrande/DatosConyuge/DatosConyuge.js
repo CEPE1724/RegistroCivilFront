@@ -1,54 +1,46 @@
-import React, { useState, useEffect } from "react";
+
+
+import React, { useState, useEffect, forwardRef } from "react";
+import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
+import { SelectField } from "../../Utils";
 import { useSnackbar } from "notistack";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
+import {
+    fetchTipoDocumento, fetchNacionalidad, fecthGenero
+} from "../DatosCliente/apisFetch";
 
-export function DatosConyuge() {
-
+const DatosConyuge = forwardRef((props, ref) => {
+    const { data } = props;
+    console.log("conyuge data", data);
     const { enqueueSnackbar } = useSnackbar();
     const [dato, setDato] = useState([]);  //estados de nacionalidad
     const [datoDocumento, setDatoDocumento] = useState([]);  //estado tipo documento
     const [datoSexo, setDatoSexo] = useState([]);  //estado sexo
     const [datoNivelEducacion, setDatoNivelEducacion] = useState([]);  //estado nivel educacion
+    const [nacionalidad, setNacionalidad ] = useState([]);  //estado nivel educacion
     const [datoProfesion, setDatoProfesion] = useState([]);  //estado profesion
+    const [dataGenero, setGenero] = useState([]);  //estado genero
     //almacenar datos del formulario
     const [formData, setFormData] = useState({
-        tipoDocumento: "",
-        apellidoPaterno: "",
-        primerNombre: "",
-        segundoNombre: "",
-        numeroDocumento: "",
-        fechaNacimiento: "",
-        nacionalidad: "",
-        sexo: "",
-        nivelEducacion: "",
-        profesion: "",
+        tipoDocumento: data.idTipoDocConyuge,
+        apellidoPaterno: data.ApellidoPaternoConyuge,
+        primerNombre: data.PrimerNombreConyuge,
+        segundoNombre: data.SegundoNombreConyuge,
+        numeroDocumento: data.CedulaConyuge,
+        fechaNacimiento: data.FechaNacimientoConyuge,
+        nacionalidad: data.idNacionalidadConyuge,
+        sexo: data.idGeneroConyuge,
+        nivelEducacion: data.idNivelEducacionConyuge,
+        profesion: data.idProfesionConyuge,
     });
 
     //llamada api documento
     useEffect(() => {
-        fetchDato();
+        fetchTipoDocumento(enqueueSnackbar, setDatoDocumento);
+        fetchNacionalidad(enqueueSnackbar, setNacionalidad);
+        fecthGenero(enqueueSnackbar, setGenero);
     }, []);
-
-    const fetchDato = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const url = APIURL.getTipodocumento();
-            const response = await axios.get(url,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            setDatoDocumento(response.data);
-        } catch (error) {
-            enqueueSnackbar("Error fetching Dato: " + error.message, {
-                variant: "error",
-            });
-        }
-    };
 
     // api de sexo
     useEffect(() => {
@@ -168,7 +160,7 @@ export function DatosConyuge() {
             enqueueSnackbar("La fecha de nacimiento es requerida", { variant: "error" });
             return;
         }
-        if (formData.nacionalidad === "") {
+        if (formData.nacionalidad === "" || formData.nacionalidad ==0 ) {
             enqueueSnackbar("La nacionalidad es requerida", { variant: "error" });
             return;
         }
@@ -176,11 +168,13 @@ export function DatosConyuge() {
             enqueueSnackbar("El sexo es requerido", { variant: "error" });
             return;
         }
-        if (formData.nivelEducacion === "") {
+        if (formData.nivelEducacion === "" || formData.nivelEducacion ==0 )
+            {
             enqueueSnackbar("El nivel de educación es requerido", { variant: "error" });
             return;
         }
-        if (formData.profesion === "") {
+        if (formData.profesion === "" || formData.profesion ==0 )
+             {
             enqueueSnackbar("La profesión es requerida", { variant: "error" });
             return;
         }
@@ -191,60 +185,61 @@ export function DatosConyuge() {
         <div>
             {/* Primera Fila */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                {/* Tipo Documento */}
-                <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Tipo Documento(*)</label>
-                    <select
-                        name="tipoDocumento"
-                        className="p-2 border rounded"
+                <div className="col-span-1">
+                    <SelectField
+                        label="tipoDocumento"
+                        icon={<FaStore />}
                         value={formData.tipoDocumento}
                         onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoDocumento.map((opcion) => (
-                            <option key={opcion.idTipoDoc} value={opcion.idTipoDoc}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
+                        options={datoDocumento}
+                        name="tipoDocumento"
+                    // error={formErrors.barrio}
+                    />
                 </div>
+
                 {/* Apellido Paterno */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Apellido Paterno(*)</label>
+                    <label className="text-xs font-medium mb-1 flex items-center">
+                        <FaUserAlt className="mr-2 text-primaryBlue" />
+                        Apellido Paterno(*)
+                    </label>
+
                     <input
-                        name="apellidoPaterno"
                         type="text"
-                        autocomplete="off"
-                        placeholder="Apellido Paterno"
-                        className="p-2 border rounded"
-                        value={formData.apellidoPaterno}
+                        className="solcitudgrande-style"
+                        name="callePrincipal"
                         onChange={handleChange}
+                        value={formData.apellidoPaterno}
                     />
+
                 </div>
                 {/* Primer Nombre */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Primer Nombre(*)</label>
+                    <label className="text-xs font-medium mb-1 flex items-center">
+                        <FaUserAlt className="mr-2 text-primaryBlue" />
+                        Primer Nombre(*)
+                    </label>
                     <input
-                        name="primerNombre"
                         type="text"
-                        autocomplete="off"
-                        placeholder="Primer Nombre"
-                        className="p-2 border rounded"
-                        value={formData.primerNombre}
+                        className="solcitudgrande-style"
+                        name="primerNombre"
                         onChange={handleChange}
+                        value={formData.primerNombre}
                     />
+
                 </div>
                 {/* Segundo Nombre */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Segundo Nombre</label>
+                    <label className="text-xs font-medium mb-1 flex items-center">
+                        <FaUserAlt className="mr-2 text-primaryBlue" />
+                        Segundo Nombre(*)
+                    </label>
                     <input
-                        name="segundoNombre"
                         type="text"
-                        autocomplete="off"
-                        placeholder="Segundo Nombre"
-                        className="p-2 border rounded"
-                        value={formData.segundoNombre}
+                        className="solcitudgrande-style"
+                        name="segundoNombre"
                         onChange={handleChange}
+                        value={formData.segundoNombre}
                     />
                 </div>
             </div>
@@ -252,26 +247,28 @@ export function DatosConyuge() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {/* Numero Documento */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">N. Documento(*)</label>
+                    <label className="text-xs font-medium mb-1 flex items-center">
+                        <FaUserAlt className="mr-2 text-primaryBlue" />
+                        N. Documento(*)
+                    </label>
                     <input
+                        type="text"
+                        className="solcitudgrande-style"
                         name="numeroDocumento"
-                        type="number"
-                        autocomplete="off"
-                        placeholder="N. Documento"
-                        className="p-2 border rounded"
-                        value={formData.numeroDocumento}
                         onChange={handleChange}
-                        maxLength="10"
-                        pattern="\d{10}"
+                        value={formData.numeroDocumento}
                     />
                 </div>
                 {/* Fecha Nacimiento */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">F. Nacimiento(*)</label>
+                    <label className="text-xs font-medium mb-1 flex items-center">
+                        <FaUserAlt className="mr-2 text-primaryBlue" />
+                        F. Nacimiento(*)
+                    </label>
                     <input
                         name="fechaNacimiento"
                         type="date"
-                        className="p-2 border rounded"
+                        className="solcitudgrande-style"
                         value={formData.fechaNacimiento}
                         onChange={handleChange}
                         max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]}
@@ -279,37 +276,28 @@ export function DatosConyuge() {
                 </div>
                 {/* Nacionalidad */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Nacionalidad(*)</label>
-                    <select
-                        name="nacionalidad"
-                        className="p-2 border rounded"
+                  
+                    <SelectField
+                        label="Nacionalidad"
+                        icon={<FaStore />}
                         value={formData.nacionalidad}
                         onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoDocumento.map((opcion) => (
-                            <option key={opcion.idTipoDoc} value={opcion.idTipoDoc}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
+                        options={nacionalidad}
+                        name="nacionalidad"
+                    // error={formErrors.barrio}
+                    />
+
                 </div>
                 {/* Sexo */}
                 <div className="flex flex-col">
-                    <label className="text-lightGrey text-xs mb-2">Sexo(*)</label>
-                    <select
-                        name="sexo"
-                        className="p-2 border rounded"
+                <SelectField
+                        label="Sexo(*)"
+                        icon={<FaStore />}
                         value={formData.sexo}
                         onChange={handleChange}
-                    >
-                        <option value="">Seleccione una opción</option>
-                        {datoSexo.map((opcion) => (
-                            <option key={opcion.idSexo} value={opcion.idSexo}>
-                                {opcion.Nombre}
-                            </option>
-                        ))}
-                    </select>
+                        options={dataGenero}
+                        name="sexo"
+                    />
                 </div>
             </div>
             {/* Tercera fila */}
@@ -355,4 +343,6 @@ export function DatosConyuge() {
             </div>
         </div>
     )
-}
+});
+
+export default DatosConyuge;

@@ -7,7 +7,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DatosCliente from "../DatosCliente/DatosCliente";
-import { DatosConyuge } from "../DatosConyuge";
+import  DatosConyuge  from "../DatosConyuge/DatosConyuge";
 import { Referencias } from "../Referencia";
 import { SeccionB } from "../SeccionB";
 import { SeccionA } from "../SeccionA";
@@ -44,12 +44,12 @@ export function Cabecera() {
   const seccionRef = useRef(null); // Crear la referencia para las secciones
   const datosRef = useRef(); // Referencia al componente Datos
   const datosDomicilioRef = useRef(); // Referencia para el componente Domicilio
-  const datosClienteRef = useRef(); // Referencia para el componente DatosCliente
+  const datosConyuge = useRef(); // Referencia para el componente DatosConyuge
   const ref = useRef(); // Create ref for imperative handle
 
   useEffect(() => {
     fetchDatosCliente();
-  }, [idSolicitud, numeroSolicitud]);
+  }, [idSolicitud, numeroSolicitud, activeTab]);
 
   const fetchDatosCliente = async () => {
     try {
@@ -99,7 +99,7 @@ export function Cabecera() {
       case "Domicilio":
         return <Domicilio ref={datosDomicilioRef} data={clienteData} />;
       case "Datos Conyuge":
-        return clienteData.idEdoCivil === 1 ? <DatosConyuge /> : null;
+        return clienteData.idEdoCivil === 1 ? <DatosConyuge ref={datosConyuge} data={clienteData} /> : null;
       case "Referencias":
         return <Referencias />;
       case "Negocio":
@@ -162,6 +162,7 @@ export function Cabecera() {
       const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         fetchSaveDatosNacimiento(formData);
+        setActiveTab("Domicilio");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
       } else {
         enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
@@ -174,6 +175,7 @@ export function Cabecera() {
 
       if (isValid) {
         fetchSaveDatosDomicilio(formData);
+        setActiveTab("Datos Conyuge");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
       } else {
         enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
@@ -241,7 +243,8 @@ TelefonoArrendador	,CelularArrendador,	idInmueble,	idCantonInmueble	,ValorInmmue
       );
 
       console.log("Datos de nacimiento guardados correctamente:", response.data);
-
+     // se dirija al tab de datos de conyuge
+     
       // Si todo sale bien
       enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
     } catch (error) {

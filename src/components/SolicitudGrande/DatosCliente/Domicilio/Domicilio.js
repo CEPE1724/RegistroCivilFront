@@ -22,6 +22,7 @@ const Domicilio = forwardRef((props, ref) => {
     const [barrios, setBarrios] = useState([]);
     const [tiempoVivienda, setTiempoVivienda] = useState([]);
     const [tipoVivienda, setTipoVivienda] = useState([]);
+   
     const [inmueble, setInmueble] = useState([]);
     const [ciudadInmueble, setCiudadInmueble] = useState([]);
     const [formData, setFormData] = useState({
@@ -131,6 +132,8 @@ const Domicilio = forwardRef((props, ref) => {
         }
     };
 
+    console.log('vivienda', formData.tipoVivienda);
+
     const validateForm = useCallback(() => {
         const requiredFieldMessages = {
             provincia: 'Provincia es requerida',
@@ -168,7 +171,7 @@ const Domicilio = forwardRef((props, ref) => {
         // Verificamos todos los campos requeridos en formData
         for (const [key, value] of Object.entries(formData)) {
             console.log('key', key, value);
-            if ((value === '' || value === null) && requiredFieldMessages[key]) {
+            if ((value === '' || value === null || value == 0) && requiredFieldMessages[key]) {
                 console.log('key000111', key, requiredFieldMessages[key], value);
                 newFormErrors[key] = requiredFieldMessages[key];
                 isValid = false;
@@ -193,6 +196,16 @@ const Domicilio = forwardRef((props, ref) => {
         if (formData.celular && formData.celular.length !== 10) {
             console.log('celular', formData.celular);
             newFormErrors.celular = 'El celular debe tener 10 digitos';
+            isValid = false;
+        }
+
+        if (formData.tipoVivienda == 0) {
+            newFormErrors.telfArrendador = 'Tipo Vivienda es requerido';
+            isValid = false;
+        }
+
+        if (formData.tiempoVivienda == 0) {
+            newFormErrors.telfArrendador = 'Tiempo Vivienda es requerido';
             isValid = false;
         }
 

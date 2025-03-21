@@ -29,7 +29,7 @@ export const fecthGenero = async (enqueueSnackbar, setGenero) => {
     const response = await axios.get(APIURL.getTiposexo(), {
       headers: { method: "GET", cache: "no-store" },
     });
-    
+
     setGenero(
       response.data.map((item) => ({
         value: item.idSexo,
@@ -112,49 +112,71 @@ export const fetchProfesion = async (enqueueSnackbar, setProfesion) => {
   }
 };
 
-export const fetchSituacionLaboral = async (enqueueSnackbar, setSituacionLaboral) => {
-    try {
-      const response = await axios.get(APIURL.getTipoTrabajo());
-      if (response.status === 200) {
-        setSituacionLaboral(
-          response.data.map((item) => ({
-            value: item.idTipoTrabajo,
-            label: item.Tipo,
-          }))
-        );
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      console.error("Error al obtener situacion laboral:", error);
-      enqueueSnackbar("No se pudo cargar Situacion Laboral", {
-        variant: "error",
-      });
-	  setSituacionLaboral([]);
-    }
-  };
-
-export const fetchActividadEconomina = async (enqueueSnackbar, idSituacionLaboral, setActividadLaboral, ) => {
-    try {
-		console.log(idSituacionLaboral);
-      const response = await axios.get(APIURL.get_cre_actividadeconomina(idSituacionLaboral), {
-        headers: { method: "GET", cache: "no-store" },
-      });
-      setActividadLaboral(
+export const fetchSituacionLaboral_1 = async (enqueueSnackbar, setSituacionLaboral) => {
+  try {
+    const response = await axios.get(APIURL.getTipoTrabajo());
+    if (response.status === 200) {
+      setSituacionLaboral(
         response.data.map((item) => ({
-          value: item.idActEconomica,
-          label: item.Nombre,
+          value: item.idTipoTrabajo,
+          label: item.Tipo,
         }))
       );
-    } catch (error) {
-      console.error("Error al obtener actividad laboral", error);
-	  enqueueSnackbar("Error al cargar actividad laboral", {
-		variant: "error",
-		preventDuplicate: true,
-		});				
-      setActividadLaboral([]);
+    } else {
+      throw new Error("Error en la respuesta del servidor");
     }
-  };
+  } catch (error) {
+    console.error("Error al obtener situacion laboral:", error);
+    enqueueSnackbar("No se pudo cargar Situacion Laboral", {
+      variant: "error",
+    });
+    setSituacionLaboral([]);
+  }
+};
+
+export const fetchSituacionLaboral = async (enqueueSnackbar, setSituacionLaboral) => {
+  try {
+    const response = await axios.get(APIURL.getActividadEconominasituacionLaboral());
+    if (response.status === 200) {
+      setSituacionLaboral(
+        response.data.map((item) => ({
+          value: item.idSituacionLaboral,
+          label: item.Descripcion,
+        }))
+      );
+    } else {
+      throw new Error("Error en la respuesta del servidor");
+    }
+  } catch (error) {
+    console.error("Error al obtener situacion laboral:", error);
+    enqueueSnackbar("No se pudo cargar Situacion Laboral", {
+      variant: "error",
+    });
+    setSituacionLaboral([]);
+  }
+};
+
+export const fetchActividadEconomina = async (enqueueSnackbar, idSituacionLaboral, setActividadLaboral,) => {
+  try {
+    console.log(idSituacionLaboral);
+    const response = await axios.get(APIURL.get_cre_actividadeconomina(idSituacionLaboral), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setActividadLaboral(
+      response.data.map((item) => ({
+        value: item.idActEconomica,
+        label: item.Nombre,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener actividad laboral", error);
+    enqueueSnackbar("Error al cargar actividad laboral", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setActividadLaboral([]);
+  }
+};
 
 // fetchs de segunda seccion de formulario
 export const fetchProvincias = async (enqueueSnackbar, setProvincia) => {
@@ -246,87 +268,86 @@ export const fetchBarrios = async (
 };
 
 export const fecthInmueble = async (enqueueSnackbar, setInmueble) => {
-	  try {
-	const response = await axios.get(APIURL.get_cre_inmueble(), {
-	  headers: { method: "GET", cache: "no-store" },
-	});
-	setInmueble(
-	  response.data.map((item) => ({
-		value: item.idInmueble,
-		label: item.Nombre,
-	  }))
-	);
+  try {
+    const response = await axios.get(APIURL.get_cre_inmueble(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setInmueble(
+      response.data.map((item) => ({
+        value: item.idInmueble,
+        label: item.Nombre,
+      }))
+    );
   } catch (error) {
-	console.error("Error al obtener inmueble", error);
-	enqueueSnackbar("Error al cargar inmueble", {
-	  variant: "error",
-	  preventDuplicate: true,
-	});
-	setInmueble([]);
+    console.error("Error al obtener inmueble", error);
+    enqueueSnackbar("Error al cargar inmueble", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setInmueble([]);
   }
 }
 
 export const fecthCiudadInmueble = async (enqueueSnackbar, setCiudadInmueble) => {
-	  try {
-	const response = await axios.get(APIURL.get_cre_CiudadInmueble(), {
-	  headers: { method: "GET", cache: "no-store" },
-	});
-	setCiudadInmueble(
-	  response.data.map((item) => ({
-		value: item.idCanton,
-		label: item.Nombre,
-	  }))
-	);
+  try {
+    const response = await axios.get(APIURL.get_cre_CiudadInmueble(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setCiudadInmueble(
+      response.data.map((item) => ({
+        value: item.idCanton,
+        label: item.Nombre,
+      }))
+    );
   } catch (error) {
-	console.error("Error al obtener ciudad inmueble", error);
-	enqueueSnackbar("Error al cargar ciudad inmueble", {
-	  variant: "error",
-	  preventDuplicate: true,
-	});
-	setCiudadInmueble([]);
+    console.error("Error al obtener ciudad inmueble", error);
+    enqueueSnackbar("Error al cargar ciudad inmueble", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setCiudadInmueble([]);
   }
 }
 
 export const fecthTipoVivienda = async (enqueueSnackbar, setTipoVivienda) => {
-	  try {
-	const response = await axios.get(APIURL.get_cre_tipoVivienda(), {
-	  headers: { method: "GET", cache: "no-store" },
-	});
-  console.log(response.data);
-	setTipoVivienda(
-	  response.data.map((item) => ({
-		value: item.idTipoVivienda,
-		label: item.Nombre,
-	  }))
-	);
+  try {
+    const response = await axios.get(APIURL.get_cre_tipoVivienda(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setTipoVivienda(
+      response.data.map((item) => ({
+        value: item.idTipoVivienda,
+        label: item.Nombre,
+      }))
+    );
   } catch (error) {
-	console.error("Error al obtener tipo vivienda", error);
-	enqueueSnackbar("Error al cargar tipo vivienda", {
-	  variant: "error",
-	  preventDuplicate: true,
-	});
-	setTipoVivienda([]);
+    console.error("Error al obtener tipo vivienda", error);
+    enqueueSnackbar("Error al cargar tipo vivienda", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setTipoVivienda([]);
   }
 }
 
 export const fetchTiempoVivienda = async (enqueueSnackbar, setTiempoVivienda) => {
-	  try {
-	const response = await axios.get(APIURL.get_cre_tiempoVivienda(), {
-	  headers: { method: "GET", cache: "no-store" },
-	});
-	setTiempoVivienda(
-	  response.data.map((item) => ({
-		value: item.idCre_Tiempo,
-		label: item.Descripcion,
-	  }))
-	);
+  try {
+    const response = await axios.get(APIURL.get_cre_tiempoVivienda(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setTiempoVivienda(
+      response.data.map((item) => ({
+        value: item.idCre_Tiempo,
+        label: item.Descripcion,
+      }))
+    );
   } catch (error) {
-	console.error("Error al obtener tiempo vivienda", error);
-	enqueueSnackbar("Error al cargar tiempo vivienda", {
-	  variant: "error",
-	  preventDuplicate: true,
-	});
-	setTiempoVivienda([]);
+    console.error("Error al obtener tiempo vivienda", error);
+    enqueueSnackbar("Error al cargar tiempo vivienda", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setTiempoVivienda([]);
   }
 }
 
@@ -351,5 +372,30 @@ export const fetchFechaAnalista = async (enqueueSnackbar, setFechaAnalista) => {
       preventDuplicate: true,
     });
     setFechaAnalista([]);
+  }
+};
+
+
+
+/* select de tipo docuemto */
+export const fetchTipoDocumento = async (enqueueSnackbar, setTipoDocumento) => {
+  try {
+    const response = await axios.get(APIURL.getTipodocumento(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+
+    setTipoDocumento(
+      response.data.map((item) => ({
+        value: item.idTipoDoc,
+        label: item.Nombre,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener nacionalidad", error);
+    enqueueSnackbar("Error al cargar nacionalidad", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setTipoDocumento([]);
   }
 };
