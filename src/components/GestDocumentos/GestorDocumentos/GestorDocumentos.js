@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import { IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
@@ -20,13 +19,11 @@ export function GestorDocumentos({
     vendedor,
     consulta,
 }) {
-    const { userData, userUsuario } = useAuth();
     const [files, setFiles] = useState({});
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
     const location = useLocation();
     const [view, setView] = useState(false);
-    const [currentFileUrl, setCurrentFileUrl] = useState("");
     const modalRef = useRef(null);
     const confirmModalRef = useRef(null);
     const [filePreviews, setFilePreviews] = useState({});
@@ -40,7 +37,6 @@ export function GestorDocumentos({
 
     const [currentIndex, setCurrentIndex] = useState(0);  // Estado para el carrusel
     const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
-    console.log("flatFiles", flatFiles);
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -61,7 +57,15 @@ export function GestorDocumentos({
 
             // Obtenemos documentos con estado 2 (pendientes)
             const pendingUrl = APIURL.get_documentosEstado(clientInfo.id, 2);
-            const pendingResponse = await axios.get(pendingUrl);
+            let pendingDocs = [];
+            try {
+                const pendingResponse = await axios.get(pendingUrl);
+                if (pendingResponse.status === 200 && Array.isArray(pendingResponse.data)) {
+                    pendingDocs = pendingResponse.data;
+                }
+            } catch (error) {
+                console.log("No hay documentos pendientes o error al obtenerlos");
+            }
 
             // Obtenemos documentos con estado 3 (aprobados)
             const approvedUrl = APIURL.get_documentosEstado(clientInfo.id, 3);
@@ -89,12 +93,12 @@ export function GestorDocumentos({
 
             // Combinamos todos los documentos
             const allDocs = [
-                ...(Array.isArray(pendingResponse.data) ? pendingResponse.data : []),
+                ...pendingDocs,
                 ...approvedDocs,
                 ...rejectedDocs
             ];
 
-            // Procesamos la información de todos los documentos
+            // Procesamos la información de todos los documentos 
             const processedDocs = [];
             const docStatus = {};
 
@@ -118,45 +122,45 @@ export function GestorDocumentos({
             setAllDocuments(processedDocs);
             setDocumentStatus(docStatus);
 
-            // También actualizamos los archivos para mostrar en la interfaz (solo los pendientes)
-            if (pendingResponse.status === 200 && Array.isArray(pendingResponse.data)) {
-                const uploadedFiles = {};
-                const previews = {};
-                const allFiles = [];
+            // todos los documentos para el carrusel
+            const uploadedFiles = {};
+            const previews = {};
+            const allFiles = [];
 
-                pendingResponse.data.forEach((file) => {
-                    const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
-                    if (!uploadedFiles[sectionName]) {
-                        uploadedFiles[sectionName] = [];
-                        previews[sectionName] = [];
-                    }
+            // Procesar todos los documentos para la interfaz
+            allDocs.forEach((file) => {
+                const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
+                if (!uploadedFiles[sectionName]) {
+                    uploadedFiles[sectionName] = [];
+                    previews[sectionName] = [];
+                }
 
-                    // Extrae el nombre del archivo desde la ruta
-                    const fileName = file.RutaDocumento.split('/').pop();
-                    const fileUrl = file.RutaDocumento;
-                    const fileObj = {
-                        idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb,
-                        name: fileName,
-                        url: fileUrl,
-                        type: 'application/pdf',
-                        idTipoDocumento: file.idTipoDocumentoWEB,
-                        sectionName: sectionName
-                    };
+                // Extrae el nombre del archivo desde la ruta
+                const fileName = file.RutaDocumento.split('/').pop();
+                const fileUrl = file.RutaDocumento;
+                const fileObj = {
+                    idDocumentosSolicitudWeb: file.idDocumentosSolicitudWeb,
+                    name: fileName,
+                    url: fileUrl,
+                    type: 'application/pdf',
+                    idTipoDocumento: file.idTipoDocumentoWEB,
+                    sectionName: sectionName,
+                    estado: file.idEstadoDocumento
+                };
 
-                    uploadedFiles[sectionName].push(fileObj);
-                    previews[sectionName].push(fileUrl);
+                uploadedFiles[sectionName].push(fileObj);
+                previews[sectionName].push(fileUrl);
 
-                    // Agregar al array plano para el carrusel
-                    allFiles.push(fileObj);
-                });
+                // Agregar al array plano para el carrusel
+                allFiles.push(fileObj);
+            });
 
-                setFiles(uploadedFiles);
-                setFilePreviews(previews);
-                setFlatFiles(allFiles);
+            setFiles(uploadedFiles);
+            setFilePreviews(previews);
+            setFlatFiles(allFiles);
 
-                // Reiniciar el índice del carrusel cuando cambian los archivos
-                setCurrentIndex(0);
-            }
+            // Reiniciar el índice del carrusel cuando cambian los archivos
+            setCurrentIndex(0);
         } catch (error) {
             enqueueSnackbar("Error al obtener archivos.", { variant: "error" });
             console.error("Error al obtener archivos:", error);
@@ -280,7 +284,7 @@ export function GestorDocumentos({
     const handleConfirmAction = () => {
         // Validar si es necesaria la observación
         if (confirmAction === 'rechazar' && !observacion.trim()) {
-            enqueueSnackbar("La observación es obligatoria al rechazar un documento", { variant: "error" });
+            enqueueSnackbar("Por favor ingrese una observación", { variant: "error" });
             return;
         }
 
@@ -291,6 +295,10 @@ export function GestorDocumentos({
                 handleEnviarObservacion();
             }
         } else if (confirmAction === 'rechazar') {
+            if (observacion.length < 10) {
+                enqueueSnackbar("La observación debe tener al menos 10 caracteres", { variant: "error" });
+                return;
+            }
             estadoDocumentos(currentDocId.idDocumentosSolicitudWeb, 4);
             handleEnviarObservacion();
         }
@@ -347,6 +355,36 @@ export function GestorDocumentos({
         return "• Pendiente";
     };
 
+    // título según el estado del documento actual
+    const getCurrentDocumentStatusTitle = () => {
+        if (flatFiles.length === 0) return "Documentos Subidos";
+
+        const currentDocument = flatFiles[currentIndex];
+        switch (currentDocument.estado) {
+            case 3:
+                return "Documento Aprobado";
+            case 4:
+                return "Documento Rechazado";
+            default:
+                return "Documento Pendiente";
+        }
+    };
+
+    //color según el estado del documento actual
+    const getCurrentDocumentStatusClass = () => {
+        if (flatFiles.length === 0) return "text-gray-800";
+
+        const currentDocument = flatFiles[currentIndex];
+        switch (currentDocument.estado) {
+            case 3:
+                return "text-green-600";
+            case 4:
+                return "text-red-600";
+            default:
+                return "text-gray-800";
+        }
+    };
+
     useEffect(() => {
         if (location.state) {
             localStorage.setItem("clientInfo", JSON.stringify(location.state));
@@ -390,11 +428,6 @@ export function GestorDocumentos({
         };
     }, [showConfirmModal]);
 
-    const toggleView = (fileUrl) => {
-        setCurrentFileUrl(fileUrl);
-        setView(!view);
-    };
-
     // Agrupar documentos por tipo
     const documentsByType = allDocuments.reduce((acc, doc) => {
         if (!acc[doc.typeName]) {
@@ -415,6 +448,57 @@ export function GestorDocumentos({
         setCurrentIndex((prevIndex) => (prevIndex - 1 + flatFiles.length) % flatFiles.length);
     };
 
+    // botones de acción según el estado del documento
+    const renderActionButtons = (document) => {
+        switch (document.estado) {
+            case 2: // Pendiente - mostrar ambos botones
+                return (
+                    <>
+                        <button
+                            type="button"
+                            name="rechazar"
+                            className="text-red-500 hover:text-red-700"
+                            onClick={() => handleRechazar(document)}
+                        >
+                            ❌
+                        </button>
+                        <button
+                            type="button"
+                            name="aprobar"
+                            className="text-green-500 hover:text-green-700"
+                            onClick={() => handleAprobar(document)}
+                        >
+                            ✅
+                        </button>
+                    </>
+                );
+            case 3: // Aprobado - mostrar solo rechazar
+                return (
+                    <button
+                        type="button"
+                        name="rechazar"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleRechazar(document)}
+                    >
+                        ❌
+                    </button>
+                );
+            case 4: // Rechazado - mostrar solo aprobar
+                return (
+                    <button
+                        type="button"
+                        name="aprobar"
+                        className="text-green-500 hover:text-green-700"
+                        onClick={() => handleAprobar(document)}
+                    >
+                        ✅
+                    </button>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="flex min-h-screen bg-gray-100">
             <div
@@ -425,32 +509,44 @@ export function GestorDocumentos({
                     <p>{clientInfo.NumeroSolicitud}</p>
 
                     {/* Lista de todos los documentos */}
-                    <div className="mt-6">
-                        <h3 className="text-lg font-semibold mb-2">Documentos:</h3>
-                        {Object.entries(documentsByType).map(([typeName, docs]) => (
-                            <div key={typeName} className="mb-4">
-                                <h4 className="text-white font-medium mb-1">{typeName}:</h4>
-                                <ul className="pl-3 space-y-1">
-                                    {docs.map(doc => (
-                                        <li
-                                            key={doc.id}
-                                            className={`text-sm flex items-center justify-between ${getStatusColor(doc.id)}`}
-                                        >
-                                            <span className="truncate">{doc.name}</span>
-                                            <span className="text-xs ml-1 whitespace-nowrap">{getStatusText(doc.id)}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                        {allDocuments.length === 0 && (
-                            <p className="text-sm text-gray-300">No hay documentos disponibles</p>
-                        )}
-                    </div>
-                </div>
-            </div>
+                                        <div className="mt-6">
+                                            <h3 className="text-lg font-semibold mb-2">Documentos:</h3>
+                                            {Object.entries(documentsByType).map(([typeName, docs]) => (
+                                                <div key={typeName} className="mb-4">
+                                                    <h4 
+                                                        className="text-white font-medium mb-1 cursor-pointer hover:underline"
+                                                        onClick={() => {
+                                                            // Encuentra el primer documento de este tipo en flatFiles
+                                                            const index = flatFiles.findIndex(file => file.sectionName === typeName);
+                                                            if (index !== -1) {
+                                                                setCurrentIndex(index);
+                                                                setIsMenuOpen(false); 
+                                                            }
+                                                        }}
+                                                    >
+                                                        {typeName}:
+                                                    </h4>
+                                                    <ul className="pl-3 space-y-1">
+                                                        {docs.map(doc => (
+                                                            <li
+                                                                key={doc.id}
+                                                                className={`text-sm flex items-center justify-between ${getStatusColor(doc.id)}`}
+                                                            >
+                                                                <span className="truncate">{doc.name}</span>
+                                                                <span className="text-xs ml-1 whitespace-nowrap">{getStatusText(doc.id)}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                            {allDocuments.length === 0 && (
+                                                <p className="text-sm text-gray-300">No hay documentos disponibles</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
 
-            {/* Menu Toggle Button */}
+                                {/* Menu Toggle Button */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="fixed top-6 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
@@ -495,8 +591,8 @@ export function GestorDocumentos({
                     </div>
 
                     <div className="flex justify-center items-center mt-6 w-full">
-                        <h2 className="text-2xl font-semibold text-center text-gray-800">
-                            Documentos Subidos
+                        <h2 className={`text-2xl font-semibold text-center ${getCurrentDocumentStatusClass()}`}>
+                            {getCurrentDocumentStatusTitle()}
                         </h2>
                     </div>
 
@@ -508,6 +604,13 @@ export function GestorDocumentos({
                                 <div className="text-center mb-2">
                                     <span className="text-sm font-semibold text-gray-700">
                                         Documento {currentIndex + 1} de {flatFiles.length} - {flatFiles[currentIndex].sectionName}
+                                    </span>
+                                    <span className={`ml-2 text-sm font-medium ${flatFiles[currentIndex].estado === 3 ? "text-green-600" :
+                                        flatFiles[currentIndex].estado === 4 ? "text-red-600" :
+                                            "text-gray-500"}`}>
+                                        {flatFiles[currentIndex].estado === 3 ? "(Aprobado)" :
+                                            flatFiles[currentIndex].estado === 4 ? "(Rechazado)" :
+                                                "(Pendiente)"}
                                     </span>
                                 </div>
 
@@ -523,32 +626,29 @@ export function GestorDocumentos({
                                     </button>
 
                                     {/* Documento actual */}
-                                    <div className="flex-1 bg-gray-50 p-6 rounded-lg shadow-lg border border-gray-200 relative h-screen flex flex-col">
+                                    <div className={`flex-1 bg-gray-50 p-6 rounded-lg shadow-lg border ${flatFiles[currentIndex].estado === 3 ? "border-green-300" :
+                                        flatFiles[currentIndex].estado === 4 ? "border-red-300" :
+                                            "border-gray-200"} relative h-screen flex flex-col`}>
+
+                                        {/* Estado visual del documento */}
+                                        {flatFiles[currentIndex].estado === 3 && (
+                                            <div className="absolute top-0 left-0 w-full bg-green-100 text-green-800 py-1 px-4 text-center font-medium">
+                                                ✅ Este documento esta aprobado ✅
+                                            </div>
+                                        )}
+                                        {flatFiles[currentIndex].estado === 4 && (
+                                            <div className="absolute top-0 left-0 w-full bg-red-100 text-red-800 py-1 px-4 text-center font-medium">
+                                                ❌ Este documento esta rechazado ❌
+                                            </div>
+                                        )}
+
                                         {/* Botones */}
-                                        <div className="absolute top-2 right-2 flex items-center gap-1 z-10 bg-white bg-opacity-70 p-1 rounded-md">
-                                            <IconButton onClick={() => toggleView(flatFiles[currentIndex].url)}>
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                            <button
-                                                type="button"
-                                                name="rechazar"
-                                                className="text-red-500 hover:text-red-700"
-                                                onClick={() => handleRechazar(flatFiles[currentIndex])}
-                                            >
-                                                ❌
-                                            </button>
-                                            <button
-                                                type="button"
-                                                name="aprobar"
-                                                className="text-green-500 hover:text-green-700"
-                                                onClick={() => handleAprobar(flatFiles[currentIndex])}
-                                            >
-                                                ✅
-                                            </button>
+                                        <div className="absolute top-2 right-2 flex items-center gap-3 z-10 bg-white bg-opacity-70 p-3 rounded-md">
+                                            {renderActionButtons(flatFiles[currentIndex])}
                                         </div>
 
                                         {/* Información del documento */}
-                                        <div className="mb-4">
+                                        <div className="mb-4 mt-8">
                                             <h3 className="text-lg font-semibold text-gray-800">
                                                 {flatFiles[currentIndex].sectionName}
                                             </h3>
@@ -588,32 +688,6 @@ export function GestorDocumentos({
                     </div>
                 </div>
             </div>
-
-            {/* Vista previa */}
-            {view && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div
-                        ref={modalRef}
-                        className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative">
-                        <div className="flex justify-between items-center mb-3">
-                            <h3 className="text-lg font-medium">Vista previa del documento</h3>
-                            <button
-                                onClick={() => toggleView("")}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                ❌
-                            </button>
-                        </div>
-
-                        <iframe
-                            src={currentFileUrl}
-                            className="w-full h-full"
-                            title="Vista previa del archivo"
-                        ></iframe>
-                    </div>
-                </div>
-            )}
-
             {/* Modal de confirmación */}
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -642,9 +716,24 @@ export function GestorDocumentos({
                                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                 placeholder={confirmAction === 'aprobar'
                                     ? "Observación (opcional)"
-                                    : "Observación (obligatorio)"}
+                                    : "Mínimo 10 caracteres (obligatorio)"}
                                 value={observacion}
-                                onChange={(e) => setObservacion(e.target.value)}
+                                onChange={(e) => {
+                                    // Elimina espacios al inicio
+                                    const value = e.target.value;
+                                    if (value === '' || value.match(/^\S/) || observacion.length > 0) {
+                                        setObservacion(value);
+                                    }
+                                }}
+                                onPaste={(e) => {
+                                    // Para eventos de pegado, elimina espacios iniciales
+                                    const pasteText = e.clipboardData.getData('text');
+                                    if (observacion.length === 0) {
+                                        e.preventDefault();
+                                        const trimmedText = pasteText.replace(/^\s+/, '');
+                                        setObservacion(trimmedText);
+                                    }
+                                }}
                             ></textarea>
                         </div>
 
