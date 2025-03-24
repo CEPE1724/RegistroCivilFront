@@ -23,16 +23,16 @@ const DatosConyuge = forwardRef((props, ref) => {
     const [dataGenero, setGenero] = useState([]);  //estado genero
     //almacenar datos del formulario
     const [formData, setFormData] = useState({
-        tipoDocumento: data.idTipoDocConyuge,
-        apellidoPaterno: data.ApellidoPaternoConyuge,
-        primerNombre: data.PrimerNombreConyuge,
-        segundoNombre: data.SegundoNombreConyuge,
-        numeroDocumento: data.CedulaConyuge,
-        fechaNacimiento: data.FechaNacimientoConyuge,
-        nacionalidad: data.idNacionalidadConyuge,
-        sexo: data.idGeneroConyuge,
-        nivelEducacion: data.idNivelEducacionConyuge,
-        profesion: data.idProfesionConyuge,
+        tipoDocumento: data.idTipoDocConyuge || "",
+        apellidoPaterno: data.ApellidoPaternoConyuge || "",
+        primerNombre: data.PrimerNombreConyuge || "",
+        segundoNombre: data.SegundoNombreConyuge || "",
+        numeroDocumento: data.CedulaConyuge || "",
+        fechaNacimiento: data.FechaNacimientoConyuge || "",
+        nacionalidad: data.idNacionalidadConyuge || 0,
+        sexo: data.idGeneroConyuge || 0,
+        nivelEducacion: data.idNivelEducacionConyuge || 0,
+        profesion: data.idProfesionConyuge || 0,
     });
 
     //llamada api documento
@@ -74,11 +74,13 @@ const DatosConyuge = forwardRef((props, ref) => {
             isValid = false;
             return;
         }
+
         if (formData.apellidoPaterno.length < 3) {
             enqueueSnackbar("El apellido paterno debe tener mínimo 3 caracteres", { variant: "error" });
             isValid = false;
             return;
         }
+
         if (formData.primerNombre.length < 3) {
             enqueueSnackbar("El primer nombre debe tener mínimo 3 caracteres", { variant: "error" });
             isValid = false;
@@ -122,7 +124,7 @@ const DatosConyuge = forwardRef((props, ref) => {
 
         validateForm,
         getFormData: () => formData,
-    }));
+    })); 
 
     return (
         <div>
@@ -130,7 +132,7 @@ const DatosConyuge = forwardRef((props, ref) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div className="col-span-1">
                     <SelectField
-                        label="tipoDocumento"
+                        label="Tipo Documento"
                         icon={<FaStore />}
                         value={formData.tipoDocumento}
                         onChange={handleChange}

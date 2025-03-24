@@ -1,299 +1,327 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, forwardRef, useCallback, useImperativeHandle } from "react";
 import { useSnackbar } from "notistack";
-import { useImperativeHandle, forwardRef } from "react";
+import {
+  fetchNacionalidad, fecthGenero, fecthEstadoCivil, fetchNivelEducacion, fetchProfesion, fetchSituacionLaboral,
+  fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina,
+  fetchTiempoVivienda,
+  fecthTipoVivienda,
+  fecthInmueble,
+  fecthCiudadInmueble
+} from "../DatosCliente/apisFetch";
 import { APIURL } from "../../../configApi/apiConfig";
 import axios from "axios";
-import { FaStoreAlt , FaMoneyCheckAlt , FaMapMarkerAlt,FaClock , FaMoneyBillWave ,
-	FaRoad , FaHouseUser, FaMapPin , FaRulerCombined, FaIndustry,FaSlidersH   } from "react-icons/fa";
-
-export const SeccionA = forwardRef((props, ref) => {
+import {
+  FaStoreAlt, FaMoneyCheckAlt, FaMapMarkerAlt, FaClock, FaMoneyBillWave,
+  FaRoad, FaHouseUser, FaMapPin, FaRulerCombined, FaIndustry, FaSlidersH, FaStore
+} from "react-icons/fa";
+import { SelectField } from "../../Utils";
+const SeccionA = forwardRef((props, ref) => {
+  const { data } = props;
+  const { enqueueSnackbar } = useSnackbar();
+  console.log("negocios", data);
   const [nombreNegocio, setNombreNegocio] = useState("");
-  const [tiempoNegocio, setTiempoNegocio] = useState("");
+  const [tiempoNegocio, setTiempoNegocio] = useState([]);
   const [metros, setMetros] = useState("");
   const [ingresos, setIngresos] = useState("");
   const [gastos, setGastos] = useState("");
-  const [provincia, setProvincia] = useState("");
-  const [canton, setCanton] = useState("");
-  const [parroquia, setParroquia] = useState("");
-  const [barrio, setBarrio] = useState("");
+  const [provincia, setProvincia] = useState([]);
+  const [canton, setCanton] = useState([]);
+  const [parroquia, setParroquia] = useState([]);
+  const [barrio, setBarrio] = useState([]);
   const [callePrincipal, setCallePrincipal] = useState("");
   const [numeroCasa, setNumeroCasa] = useState("");
   const [calleSecundaria, setCalleSecundaria] = useState("");
   const [referenciaUbicacion, setReferenciaUbicacion] = useState("");
   const [actividadNegocio, setActividadNegocio] = useState("");
-  const { enqueueSnackbar } = useSnackbar();
-  const [provincias, setProvincias] = useState([]);
-  const [cantones, setCantones] = useState([]);
-  const [idProvincia, setIdProvincia] = useState("");
-  const [parroquias, setParroquias] = useState([]);
-  const [idCanton, setIdCanton] = useState("");
-  const [barrios, setBarrios] = useState([]);
-  const [idParroquia, setIdParroquia] = useState("");
 
 
+  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState({
+    nombreNegocio: data.NombreNegocio || "",
+    tiempoNegocio: data.idCre_TiempoNegocio || "",
+    metros: data.MetrosCuadrados || 0,
+    ingresos: data.IngresosNegosio || 0,
+    gastos: data.EgresosNegocio || 0,
+    provincia: data.idProvinciaNegocio || 0,
+    canton: data.idCantonNegocio || 0,
+    parroquia: data.idParroquiaNegocio || 0,
+    barrio: data.idBarrioNegocio || 0,
+    callePrincipal: data.CallePrincipalNegocio || "",
+    numeroCasa: data.NumeroCasaNegocio || "",
+    calleSecundaria: data.CalleSecundariaNegocio || "",
+    referenciaUbicacion: data.ReferenciaUbicacionNegocio || "",
+    actividadNegocio: data.ActividadEconomicaNegocio || "",
+    AfiliadoTributario: data.AfiliadoTributario || false,
+    ObligadoContabilidad: data.ObligadoContabilidad || false,
+  });
+
   useEffect(() => {
-    // Cada vez que idProvincia cambie (ya sea que se seleccione o se deseleccione), resetear todos los valores
-    setCantones([]);
-    setParroquias([]);
-    setBarrios([]);
-    setIdCanton(""); // Limpiar canton
-    setIdParroquia(""); // Limpiar parroquia
-    setCanton(""); // Limpiar texto de canton
-    setParroquia(""); // Limpiar texto de parroquia
-    setBarrio(""); // Limpiar texto de barrio
-  }, [idProvincia]);
-  
-  useEffect(() => {
-    // Cada vez que idCanton cambie, resetear parroquias y barrios
-    setParroquias([]);
-    setBarrios([]);
-    setIdParroquia(""); // Limpiar parroquia
-    setParroquia(""); // Limpiar texto de parroquia
-    setBarrio(""); // Limpiar texto de barrio
-  }, [idCanton]);
-  
-  useEffect(() => {
-    // Cada vez que idParroquia cambie, resetear barrios
-    setBarrios([]);
-    setBarrio(""); // Limpiar texto de barrio
-  }, [idParroquia]);
-  
-  useEffect(() => {
-    // Cargar provincias inicialmente
-    fetchProvincias();
+
+    fetchTiempoVivienda(enqueueSnackbar, setTiempoNegocio);
+    fetchProvincias(enqueueSnackbar, setProvincia);
+
   }, []);
-  
+
   useEffect(() => {
-    if (idProvincia) {
-      // Si hay provincia seleccionada, obtener los cantones
-      fetchCantones(idProvincia);
+    if (formData.provincia) {
+      fetchCantones(formData.provincia, enqueueSnackbar, setCanton);
     }
-  }, [idProvincia]);
-  
+  }, [formData.provincia, enqueueSnackbar]);
+
   useEffect(() => {
-    if (idCanton) {
-      // Si hay cantón seleccionado, obtener las parroquias
-      fetchparroquias(idCanton);
+    if (formData.canton) {
+      fetchParroquias(formData.canton, enqueueSnackbar, setParroquia);
     }
-  }, [idCanton]);
-  
+  }, [formData.canton, enqueueSnackbar]);
+
   useEffect(() => {
-    if (idParroquia) {
-      // Si hay parroquia seleccionada, obtener los barrios
-      fetchBarrios(idParroquia);
+    if (formData.parroquia) {
+      fetchBarrios(formData.parroquia, enqueueSnackbar, setBarrio);
     }
-  }, [idParroquia]);
-  
-
-  const fetchBarrios = async (idParroquia) => {
-    try {
-      const response = await axios.get(APIURL.getBarrios(idParroquia), {
-        headers: { method: "GET", cache: "no-store" },
-      });
-      setBarrios(
-        response.data.map((item) => ({
-          idBarrio: item.idBarrio,
-          label: item.Nombre,
-        }))
-      );
-    } catch (error) {
-      console.error("Error al obtener barrios", error);
-      setBarrios([]);
-    }
-  };
+  }, [formData.parroquia, enqueueSnackbar]);
 
 
 
-  const fetchparroquias = async (idCanton) => {
-    try {
-      const response = await axios.get(APIURL.getParroquias(idCanton), {
-        headers: { method: "GET", cache: "no-store" },
-      });
-      setParroquias(
-        response.data.map((item) => ({
-          idParroquia: item.idParroquia,
-          label: item.Nombre,
-        }))
-      );
-    } catch (error) {
-      console.error("Error al obtener parroquias", error);
-      setParroquias([]);
-    }
-  };
 
-  const fetchProvincias = async () => {
-    try {
-      const response = await axios.get(APIURL.getProvincias(), {
-        headers: { method: "GET", cache: "no-store" },
-      });
-      setProvincias(
-        response.data.map((item) => ({
-          idProvincia: item.idProvincia,
-          label: item.Nombre,
-        }))
-      );
-    } catch (error) {
-      console.error("Error al obtener provincias", error);
-      setProvincias([]);
-    }
-  };
-
-  const fetchCantones = async (idProvincia) => {
-    try {   
-        const response = await axios.get(APIURL.getCantones(idProvincia), {
-            headers: { method: "GET", cache: "no-store" },
-            });
-            setCantones(
-                response.data.map((item) => ({
-                    idCanton: item.idCanton,
-                    label: item.Nombre,
-                }))
-            );
-        } catch (error) {
-            console.error("Error al obtener cantones", error);
-            setCantones([]);
-        }
-    };
 
   const handleSubmit = (e) => {
-    e && e.preventDefault();
+    e.preventDefault();
+    if (validateForm()) {
+      console.log("Formulario enviado con éxito", formData);
+    } else {
+      console.log("Errores en el formulario", errors);
+    }
+  };
 
-    // Validaciones
-    if (!nombreNegocio || nombreNegocio.length <= 3) {
-      enqueueSnackbar("El nombre del negocio debe tener más de 3 caracteres", {
-        variant: "error",
+  const handleFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    // Expresión regular para detectar caracteres no permitidos
+    const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
+
+    if (invalidCharsRegex.test(value)) {
+      // Si hay caracteres no permitidos, los eliminamos y actualizamos formData y formErrors
+      const cleanedValue = value.replace(invalidCharsRegex, '');
+
+      setFormData((prevState) => ({
+        ...prevState,
+        [name]: cleanedValue,
+      }));
+
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        [name]: 'Este campo contiene caracteres no permitidos',
+      }));
+
+      return;
+    }
+
+    // Si el valor es válido, actualizar normalmente
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+
+    // Limpiar el error si el valor es válido
+    if (errors[name]) {
+      setErrors((prevErrors) => {
+        const newErrors = { ...prevErrors };
+        delete newErrors[name];
+        return newErrors;
       });
-      return;
     }
 
-    if (!tiempoNegocio || tiempoNegocio <= 0 || tiempoNegocio > 100000000000) {
-      enqueueSnackbar("El tiempo del negocio debe ser un número mayor a 0", {
-        variant: "error",
-      });
-      return;
+    if (name === 'provincia' && value) {
+      fetchCantones(value, enqueueSnackbar, setCanton);
+      setCanton([]);
+      setParroquia([]);
+      setBarrio([]);
+      setFormData((prev) => ({ ...prev, canton: '', parroquia: '', barrio: '' }));
     }
 
-    if (!metros || metros <= 0 || metros > 100000000000) {
-      enqueueSnackbar("Los metros deben ser un número mayor a 0", {
-        variant: "error",
-      });
-      return;
+    if (name === 'canton' && value) {
+      fetchParroquias(value, enqueueSnackbar, setParroquia);
+      setParroquia([]);
+      setBarrio([]);
+      setFormData((prev) => ({ ...prev, parroquia: '', barrio: '' }));
     }
 
-    if (!ingresos || ingresos <= 0 || ingresos > 100000000000) {
-      enqueueSnackbar("Los ingresos deben ser un número mayor a 0", {
-        variant: "error",
-      });
-      return;
+    if (name === 'parroquia' && value) {
+      fetchBarrios(value, enqueueSnackbar, setBarrio);
+      setBarrio([]);
+      setFormData((prev) => ({ ...prev, barrio: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    let showSnackbar = false; // Esta variable controla si mostramos un snackbar
+    if (!formData.nombreNegocio || formData.nombreNegocio.length <= 3) {
+      newErrors.nombreNegocio = "Este campo es obligatorio";
+      if (!showSnackbar) { // Solo mostrar el snackbar si aún no se ha mostrado uno
+        enqueueSnackbar("El nombre del negocio debe tener más de 3 caracteres", { variant: "error" });
+        showSnackbar = true; // Asegura que solo se muestre un snackbar
+      }
     }
 
-    if (!gastos || gastos <= 0 || gastos > 100000000000) {
-      enqueueSnackbar("Los gastos deben ser un número mayor a 0", {
-        variant: "error",
-      });
-      return;
+    if (!formData.tiempoNegocio || formData.tiempoNegocio <= 0 || formData.tiempoNegocio > 100000000000) {
+      newErrors.tiempoNegocio = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("El tiempo del negocio debe ser un número mayor a 0", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (gastos > ingresos) {
-      enqueueSnackbar("Los gastos no pueden ser mayores a los ingresos", {
-        variant: "error",
-      });
-      return;
+    if (!formData.metros || formData.metros <= 0 || formData.metros > 100000000000) {
+      newErrors.metros = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("Los metros deben ser un número mayor a 0", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!provincia) {
-      enqueueSnackbar("La provincia es obligatoria", { variant: "error" });
-      return;
+    if (!formData.ingresos || formData.ingresos <= 0 || formData.ingresos > 100000000000) {
+      newErrors.ingresos = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("Los ingresos deben ser un número mayor a 0", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!canton) {
-      enqueueSnackbar("El cantón es obligatorio", { variant: "error" });
-      return;
+    if (!formData.gastos || formData.gastos <= 0 || formData.gastos > 100000000000) {
+      newErrors.gastos = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("Los gastos deben ser un número mayor a 0", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!parroquia) {
-      enqueueSnackbar("La parroquia es obligatoria", { variant: "error" });
-      return;
+    if (formData.gastos > formData.ingresos) {
+      newErrors.gastos = "Los gastos no pueden ser mayores a los ingresos";
+      if (!showSnackbar) {
+        enqueueSnackbar("Los gastos no pueden ser mayores a los ingresos", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!barrio) {
-      enqueueSnackbar("El barrio es obligatorio", { variant: "error" });
-      return;
+    if (!formData.provincia) {
+      newErrors.provincia = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("La provincia es obligatoria", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (barrio.length > 100) {
-      enqueueSnackbar("El barrio no debe exceder los 100 caracteres", {
-        variant: "error",
-      });
-      return;
+    if (!formData.canton) {
+      newErrors.canton = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("El cantón es obligatorio", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!callePrincipal) {
-      enqueueSnackbar("La calle principal es obligatoria", {
-        variant: "error",
-      });
-      return;
+    if (!formData.parroquia) {
+      newErrors.parroquia = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("La parroquia es obligatoria", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (callePrincipal.length > 100) {
-      enqueueSnackbar("La calle principal no debe exceder los 100 caracteres", {
-        variant: "error",
-      });
-      return;
+    if (!formData.barrio) {
+      newErrors.barrio = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("El barrio es obligatorio", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!numeroCasa) {
-      enqueueSnackbar("El número de casa es obligatorio", { variant: "error" });
-      return;
+    if (formData.barrio.length > 100) {
+      newErrors.barrio = "El barrio no debe exceder los 100 caracteres";
+      if (!showSnackbar) {
+        enqueueSnackbar("El barrio no debe exceder los 100 caracteres", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!calleSecundaria) {
-      enqueueSnackbar("La calle secundaria es obligatoria", {
-        variant: "error",
-      });
-      return;
+    if (!formData.callePrincipal) {
+      newErrors.callePrincipal = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("La calle principal es obligatoria", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (calleSecundaria.length > 100) {
-      enqueueSnackbar(
-        "La calle secundaria no debe exceder los 100 caracteres",
-        { variant: "error" }
-      );
-      return;
+    if (formData.callePrincipal.length > 100) {
+      newErrors.callePrincipal = "La calle principal no debe exceder los 100 caracteres";
+      if (!showSnackbar) {
+        enqueueSnackbar("La calle principal no debe exceder los 100 caracteres", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!referenciaUbicacion) {
-      enqueueSnackbar("La referencia de ubicación es obligatoria", {
-        variant: "error",
-      });
-      return;
+    if (!formData.numeroCasa) {
+      newErrors.numeroCasa = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("El número de casa es obligatorio", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (referenciaUbicacion.length > 300) {
-      enqueueSnackbar(
-        "La referencia de ubicación no debe exceder los 300 caracteres",
-        { variant: "error" }
-      );
-      return;
+    if (!formData.calleSecundaria) {
+      newErrors.calleSecundaria = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("La calle secundaria es obligatoria", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (!actividadNegocio) {
-      enqueueSnackbar("La actividad del negocio es obligatoria", {
-        variant: "error",
-      });
-      return;
+    if (formData.calleSecundaria.length > 100) {
+      newErrors.calleSecundaria = "La calle secundaria no debe exceder los 100 caracteres";
+      if (!showSnackbar) {
+        enqueueSnackbar("La calle secundaria no debe exceder los 100 caracteres", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    if (actividadNegocio.length > 300) {
-      enqueueSnackbar(
-        "La actividad del negocio no debe exceder los 300 caracteres",
-        { variant: "error" }
-      );
-      return;
+    if (!formData.referenciaUbicacion) {
+      newErrors.referenciaUbicacion = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("La referencia de ubicación es obligatoria", { variant: "error" });
+        showSnackbar = true;
+      }
     }
 
-    // Si todas las validaciones pasan, mostramos el mensaje de éxito
-    enqueueSnackbar("Formulario enviado con éxito", { variant: "success" });
+    if (formData.referenciaUbicacion.length > 300) {
+      newErrors.referenciaUbicacion = "La referencia de ubicación no debe exceder los 300 caracteres";
+      if (!showSnackbar) {
+        enqueueSnackbar("La referencia de ubicación no debe exceder los 300 caracteres", { variant: "error" });
+        showSnackbar = true;
+      }
+    }
+
+    if (!formData.actividadNegocio) {
+      newErrors.actividadNegocio = "Este campo es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("La actividad del negocio es obligatoria", { variant: "error" });
+        showSnackbar = true;
+      }
+    }
+
+    if (formData.actividadNegocio.length > 300) {
+      newErrors.actividadNegocio = "La actividad del negocio no debe exceder los 300 caracteres";
+      if (!showSnackbar) {
+        enqueueSnackbar("La actividad del negocio no debe exceder los 300 caracteres", { variant: "error" });
+        showSnackbar = true;
+      }
+    }
+
+    // Actualizamos los errores en el estado
+    setErrors(newErrors);
+
+    // Retorna si no hay errores en el formulario
+    return Object.keys(newErrors).length === 0;
+
+
   };
 
   useImperativeHandle(ref, () => ({
@@ -301,269 +329,258 @@ export const SeccionA = forwardRef((props, ref) => {
   }));
 
   return (
-	<div className="p-6">
-	  {/* Rejilla adaptable para responsive */}
-	  <form onSubmit={handleSubmit}>
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-		  {/* Primera fila: Nombre, Tiempo, Metros, Ingresos y Gastos */}
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaStoreAlt className="mr-2 text-primaryBlue" />
-			  Nombre de Negocio
-			</label>
-			<input
-			  type="text"
-			  className="solcitudgrande-style"
-			  value={nombreNegocio}
-			  onChange={(e) => setNombreNegocio(e.target.value.toUpperCase())}
-			/>
-		  </div>
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaClock className="mr-2 text-primaryBlue" />
-			  Tiempo del Negocio
-			</label>
-			<input
-			  type="number"
-			  className="solcitudgrande-style"
-			  value={tiempoNegocio}
-			  onChange={(e) => {
-				const value = parseFloat(e.target.value);
-				if (value >= 0 || e.target.value === "") {
-				  setTiempoNegocio(e.target.value);
-				}
-			  }}
-			/>
-		  </div>
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaRulerCombined className="mr-2 text-primaryBlue" />
-			  Metros
-			</label>
-			<input
-			  type="number"
-			  className="solcitudgrande-style"
-			  value={metros}
-			  onChange={(e) => {
-				const value = parseFloat(e.target.value);
-				if (value >= 0 || e.target.value === "") {
-				  setMetros(e.target.value);
-				}
-			  }}
-			/>
-		  </div>
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaMoneyBillWave className="mr-2 text-primaryBlue" />
-			  Ingresos
-			</label>
-			<input
-			  type="number"
-			  required
-			  className="solcitudgrande-style"
-			  value={ingresos}
-			  onChange={(e) => {
-				const value = parseFloat(e.target.value);
-				if (value >= 0 || e.target.value === "") {
-				  setIngresos(e.target.value);
-				}
-			  }}
-			/>
-		  </div>
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
-			  Gastos
-			</label>
-			<input
-			  type="number"
-			  className="solcitudgrande-style"
-			  value={gastos}
-			  onChange={(e) => {
-				const value = parseFloat(e.target.value);
-				if (value >= 0 || e.target.value === "") {
-				  setGastos(e.target.value);
-				}
-			  }}
-			/>
-		  </div>
-  
-		  {/* Segunda fila: Provincia, Cantón, Parroquia, Barrio */}
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-			  Provincia
-			</label>
-			<select
-			  className="solcitudgrande-style"
-			  value={idProvincia} // Usamos idProvincia en el value
-			  onChange={(e) => {
-				const idSeleccionada = e.target.value;
-				// Guardamos el nombre de la provincia y actualizamos el id
-				setProvincia(e.target.options[e.target.selectedIndex].text);
-				setIdProvincia(idSeleccionada);
-			  }}
-			>
-			  <option value="">Seleccione</option>
-			  {provincias.map((prov) => (
-				<option key={prov.idProvincia} value={prov.idProvincia}>
-				  {prov.label}
-				</option>
-			  ))}
-			</select>
-		  </div>
-  
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-			  Cantón
-			</label>
-			<select
-			  className="solcitudgrande-style"
-			  value={idCanton}
-			  onChange={(e) => {
-				const idSeleccionada = e.target.value;
-				setCanton(e.target.options[e.target.selectedIndex].text);
-				setIdCanton(idSeleccionada);
-			  }}
-			>
-			  <option value="">Seleccione</option>
-			  {cantones.map((canton) => (
-				<option key={canton.idCanton} value={canton.idCanton}>
-				  {canton.label}
-				</option>
-			  ))}
-			</select>
-		  </div>
-  
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-			  Parroquia
-			</label>
-			<select
-			  className="solcitudgrande-style"
-			  value={idParroquia}
-			  onChange={(e) => {
-				const idSeleccionada = e.target.value;
-				setParroquia(e.target.options[e.target.selectedIndex].text);
-				setIdParroquia(idSeleccionada);
-			  }}
-			>
-			  <option>Seleccione</option>
-			  {parroquias.map((parroquia) => (
-				<option key={parroquia.idParroquia} value={parroquia.idParroquia}>
-				  {parroquia.label}
-				</option>
-			  ))}
-			</select>
-		  </div>
-		  <div>
-			<div className="flex flex-col">
-			  <label className="text-xs font-medium mb-1 flex items-center">
-				<FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-				Barrio
-			  </label>
-			  <select
-				className="solcitudgrande-style"
-				value={barrio}
-				onChange={(e) => setBarrio(e.target.value.toUpperCase())}
-			  >
-				<option>Seleccione</option>
-				{barrios.map((barrio) => (
-				  <option key={barrio.idBarrio} value={barrio.idBarrio}>
-					{barrio.label}
-				  </option>
-				))}
-			  </select>
-			</div>
-		  </div>
-  
-		  <div className="lg:col-span-1"></div>
-  
-		  {/* Tercera fila: Calle Principal, Número Casa, Calle Secundaria, Referencia Ubicación */}
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaRoad className="mr-2 text-primaryBlue" />
-			  Calle Principal
-			</label>
-			<input
-			  type="text"
-			  className="solcitudgrande-style"
-			  value={callePrincipal}
-			  onChange={(e) => setCallePrincipal(e.target.value.toUpperCase())}
-			/>
-		  </div>
-  
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaHouseUser className="mr-2 text-primaryBlue" />
-			  Número Casa
-			</label>
-			<input
-			  type="text"
-			  className="solcitudgrande-style"
-			  value={numeroCasa}
-			  onChange={(e) => setNumeroCasa(e.target.value.toUpperCase())}
-			/>
-		  </div>
-  
-		  <div className="flex flex-col">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaRoad className="mr-2 text-primaryBlue" />
-			  Calle Secundaria
-			</label>
-			<input
-			  type="text"
-			  className="solcitudgrande-style"
-			  value={calleSecundaria}
-			  onChange={(e) => setCalleSecundaria(e.target.value.toUpperCase())}
-			/>
-		  </div>
-  
-		  <div className="flex flex-col lg:col-span-2">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaMapPin className="mr-2 text-primaryBlue" />
-			  Referencia Ubicación
-			</label>
-			<textarea
-			  className="solcitudgrande-style h-20"
-			  value={referenciaUbicacion}
-			  onChange={(e) => setReferenciaUbicacion(e.target.value.toUpperCase())}
-			></textarea>
-		  </div>
-  
-		  {/* Cuarta fila: Actividad del Negocio y Opciones */}
-		  <div className="flex flex-col lg:col-span-2">
-			<label className="text-xs font-medium mb-1 flex items-center">
-			  <FaIndustry className="mr-2 text-primaryBlue" />
-			  Actividad del Negocio
-			</label>
-			<textarea
-			  className="solcitudgrande-style h-20"
-			  value={actividadNegocio}
-			  onChange={(e) => setActividadNegocio(e.target.value.toUpperCase())}
-			></textarea>
-		  </div>
-  
-		  {/* Opciones */}
-		  <div className="lg:col-span-2 flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-2 lg:space-y-0">
-			<label className="text-xs font-medium flex items-center">
-			  <FaSlidersH className="mr-2 text-primaryBlue" />
-			  Opciones:
-			</label>
-			<label className="inline-flex items-center">
-			  <input type="checkbox" className="mr-2" />
-			  Afiliado Tributario
-			</label>
-			<label className="inline-flex items-center">
-			  <input type="checkbox" className="mr-2" />
-			  Obligado a Llevar Contabilidad
-			</label>
-		  </div>
-		</div>
-	  </form>
-	</div>
-  );
-  
+    <div className="p-6">
+      {/* Rejilla adaptable para responsive */}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {/* Primera fila: Nombre, Tiempo, Metros, Ingresos y Gastos */}
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaStoreAlt className="mr-2 text-primaryBlue" />
+            Nombre de Negocio
+          </label>
+          <input
+            type="text"
+            className="solcitudgrande-style"
+            value={formData.nombreNegocio}
+            name="nombreNegocio"
+            onChange={handleFormChange}
+          />
+          {errors.nombreNegocio && (
+            <span className="text-red-500 text-xs">{errors.nombreNegocio}</span>
+          )}
+        </div>
+        <div className="col-span-1">
+          <SelectField
+            label="Tiempo del Negocio"
+            icon={<FaClock />}
+            value={formData.tiempoNegocio}
+            onChange={handleFormChange}
+            options={tiempoNegocio}
+            name="tiempoNegocio"
+            error={errors.tiempoNegocio}
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaRulerCombined className="mr-2 text-primaryBlue" />
+            Metros
+          </label>
+          <input
+            type="number"
+            required
+            className="solcitudgrande-style"
+            value={formData.metros}
+            onChange={handleFormChange}
+            name={"metros"}
+          />
+          {errors.metros && (
+            <span className="text-red-500 text-xs">{errors.metros}</span>
+          )}
+        </div>
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMoneyBillWave className="mr-2 text-primaryBlue" />
+            Ingresos
+          </label>
+          <input
+            type="number"
+            required
+            className="solcitudgrande-style"
+            value={formData.ingresos}
+            onChange={handleFormChange}
+            name={"ingresos"}
+          />
+          {errors.metros && (
+            <span className="text-red-500 text-xs">{errors.metros}</span>
+          )}
+        </div>
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
+            Gastos
+          </label>
+          <input
+            type="number"
+            className="solcitudgrande-style"
+            value={formData.gastos}
+            onChange={handleFormChange}
+            name={"gastos"}
+          />
+          {errors.gastos && (
+            <span className="text-red-500 text-xs">{errors.gastos}</span>
+          )}
+        </div>
+
+        {/* Segunda fila: Provincia, Cantón, Parroquia, Barrio */}
+        <div className="flex flex-col">
+          <SelectField
+            label="Provincia"
+            icon={<FaMapMarkerAlt />}
+            value={formData.provincia}
+            onChange={handleFormChange}
+            options={provincia}
+            name="provincia"
+            error={errors.provincia}
+          />
+
+        </div>
+
+        <div className="col-span-1">
+          <SelectField
+            label="Canton"
+            icon={<FaStore />}
+            value={formData.canton}
+            onChange={handleFormChange}
+            options={canton}
+            name="canton"
+            error={errors.canton}
+          />
+        </div>
+        <div className="col-span-1">
+          <SelectField
+            label="Parroquia"
+            icon={<FaStore />}
+            value={formData.parroquia}
+            onChange={handleFormChange}
+            options={parroquia}
+            name="parroquia"
+            error={errors.parroquia}
+          />
+        </div>
+        <div className="col-span-1">
+          <SelectField
+            label="Barrio"
+            icon={<FaStore />}
+            value={formData.barrio}
+            onChange={handleFormChange}
+            options={barrio}
+            name="barrio"
+            error={errors.barrio}
+          />
+        </div>
+
+
+
+        <div className="lg:col-span-1"></div>
+
+        {/* Tercera fila: Calle Principal, Número Casa, Calle Secundaria, Referencia Ubicación */}
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaRoad className="mr-2 text-primaryBlue" />
+            Calle Principal
+          </label>
+          <input
+            type="text"
+            required
+            className="solcitudgrande-style"
+            value={formData.callePrincipal}
+            onChange={handleFormChange}
+            name="callePrincipal"
+          />
+          {errors.callePrincipal && (
+            <span className="text-red-500 text-xs">{errors.callePrincipal}</span>
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaHouseUser className="mr-2 text-primaryBlue" />
+            Número Casa
+          </label>
+          <input
+            type="text"
+            required
+            className="solcitudgrande-style"
+            value={formData.numeroCasa}
+            onChange={handleFormChange}
+            name="numeroCasa"
+          />
+          {errors.numeroCasa && (
+            <span className="text-red-500 text-xs">{errors.numeroCasa}</span>
+          )}
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaRoad className="mr-2 text-primaryBlue" />
+            Calle Secundaria
+          </label>
+          <input
+            type="text"
+            required
+            className="solcitudgrande-style"
+            value={formData.calleSecundaria}
+            onChange={handleFormChange}
+            name="calleSecundaria"
+          />
+          {errors.numeroCasa && (
+            <span className="text-red-500 text-xs">{errors.numeroCasa}</span>
+          )}
+        </div>
+
+        <div className="flex flex-col lg:col-span-2">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMapPin className="mr-2 text-primaryBlue" />
+            Referencia Ubicación
+          </label>
+          <textarea
+            className="solcitudgrande-style h-20"
+            value={formData.referenciaUbicacion}
+            onChange={handleFormChange}
+            name="referenciaUbicacion"
+            required
+          />
+          {errors.referenciaUbicacion && (
+            <span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>
+          )}
+        </div>
+
+        {/* Cuarta fila: Actividad del Negocio y Opciones */}
+        <div className="flex flex-col lg:col-span-2">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaIndustry className="mr-2 text-primaryBlue" />
+            Actividad del Negocio
+          </label>
+          <textarea
+            className="solcitudgrande-style h-20"
+            value={formData.actividadNegocio}
+            onChange={handleFormChange}
+            name="actividadNegocio"
+            required
+
+          />
+          {errors.actividadNegocio && (
+            <span className="text-red-500 text-xs">{errors.actividadNegocio}</span>
+          )}
+
+        </div>
+
+        {/* Opciones */}
+        <div className="lg:col-span-2 flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-2 lg:space-y-0">
+          <label className="text-xs font-medium flex items-center">
+            <FaSlidersH className="mr-2 text-primaryBlue" />
+            Opciones:
+          </label>
+          <label className="inline-flex items-center">
+            <input type="checkbox" className="mr-2" />
+            Afiliado Tributario
+          </label>
+          <label className="inline-flex items-center">
+            <input type="checkbox" className="mr-2" />
+            Obligado a Llevar Contabilidad
+          </label>
+        </div>
+      </div>
+      <button
+        onClick={handleSubmit}
+        className="bg-primaryBlue text-white font-semibold py-2 px-8 rounded-md mt-6"
+      >
+        Enviar
+      </button>
+    </div>
+  )
 });
+
+export default SeccionA;
