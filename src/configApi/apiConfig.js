@@ -100,4 +100,6 @@ export const APIURL = {
   post_cre_referenciasclientesweb: () => `${API_BASE_URL}cre-referenciasclientesweb`,
   get_cre_referenciasclientesweb_id: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/${id}`,
 
+  get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
+
 };
