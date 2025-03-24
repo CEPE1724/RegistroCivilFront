@@ -1,186 +1,334 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'; // Icono de activado
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'; // Icono de desactivado
-import Papa from 'papaparse'; // Importamos papaparse para leer archivos CSV
-import { ModalAnalista } from './ModalAnalista';
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import Papa from "papaparse";
+import { ModalAnalista } from "./ModalAnalista";
 import { fetchFechaAnalista } from "../../components/SolicitudGrande/DatosCliente/apisFetch";
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
 import { SelectField } from "../../components/Utils";
-import { APIURL } from '../../configApi/apiConfig';
+import { APIURL } from "../../configApi/apiConfig";
 
+// Horas de 8:00 a 21:00
 const hours = [];
 for (let i = 8; i <= 21; i++) {
   hours.push(`${i}:00`);
 }
 
-let days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const days = [
+  "Lunes",
+  "Martes",
+  "Miercoles",
+  "Jueves",
+  "Viernes",
+  "Sabado",
+  "Domingo",
+];
 
 export function CalendarPerson(props) {
-  const { window } = props;
   const { enqueueSnackbar } = useSnackbar();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuData, setMenuData] = useState([]);
   const [fechaAnalista, setFechaAnalista] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTitle, setSelectedTitle] = useState('');
-  const [selectedAnalista, setSelectedAnalista] = useState('');
+  const [selectedTitle, setSelectedTitle] = useState("");
+  const [selectedAnalista, setSelectedAnalista] = useState("");
   const [schedule, setSchedule] = useState({});
-  const [diaActual, setDiaActual] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [fileInputLabel, setFileInputLabel] = useState(
+    "Importar horarios (CSV)"
+  );
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Se obtiene el rango de fechas desde la API (por ejemplo, [ { idFechaAnalista, DesdeHasta, Desde, Hasta }, ... ])
   useEffect(() => {
     fetchFechaAnalista(enqueueSnackbar, setFechaAnalista);
-  }, []);
+  }, [enqueueSnackbar]);
+
+  // A partir de la fecha "Desde" y "Hasta" de la API se genera la grilla semanal.
   const getWeekDates = (startDate, endDate) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const weekDates = [];
 
-    // Ajustar el inicio a lunes
+    console.log(
+      "[getWeekDates] startDate:",
+      startDate,
+      " => start local:",
+      start
+    );
+    console.log("[getWeekDates] endDate:", endDate, " => end local:", end);
+
+    // Ajustamos para que la semana inicie en lunes
     const dayOfWeek = start.getDay();
-    const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek; // Ajustar al lunes más cercano
+    const diff = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
     start.setDate(start.getDate() + diff);
 
-    // Crear una lista de fechas para los días de la semana
     while (start <= end) {
       const currentDate = new Date(start);
-      weekDates.push({ day: daysOfWeek[start.getDay() - 1], date: currentDate.getDate() });
+      weekDates.push({
+        day: days[start.getDay() === 0 ? 6 : start.getDay() - 1],
+        date: currentDate.getDate(),
+        fullDate: new Date(currentDate), // representa el día a medianoche
+      });
+      console.log("[getWeekDates] pushing day =>", currentDate.toString());
       start.setDate(start.getDate() + 1);
     }
-
     return weekDates;
   };
 
-
-  // Filtrar fechas en el rango seleccionado
-  const FechaDia = useMemo(() => {
+  // Se construye la grilla de días a partir del rango seleccionado
+  const fechaDias = useMemo(() => {
     if (!selectedDate) return [];
 
-    // Convierte la fecha seleccionada a un formato Date
+    console.log("fechaAnalista");
+    console.log(fechaAnalista);
+    console.log("selectedDate");
+    console.log(selectedDate);
+
     const selectedRange = fechaAnalista.find(
-      (range) => range.DesdeHasta === selectedDate
+      (range) => range.value === selectedDate
     );
 
     if (!selectedRange) return [];
 
     const { Desde, Hasta } = selectedRange;
-    const weekDates = getWeekDates(Desde, Hasta);
-    return weekDates;
+    console.log("[useMemo] Rango seleccionado =>", selectedRange);
+    const result = getWeekDates(selectedRange.desde, selectedRange.hasta);
+    console.log("[useMemo] resultado getWeekDates =>", result);
+    return result;
   }, [selectedDate, fechaAnalista]);
 
   const handleMenuClick = (title, item) => {
-    console.log('item', item);
     setSelectedTitle(title);
     setSelectedAnalista(item.idAnalistaCredito);
   };
 
+  // Función que determina si una celda es editable.
+  const isEditableCell = (fullDate, hour) => {
+    if (!fullDate) {
+      console.log("[isEditableCell] Sin fullDate, retorna false");
+      return false;
+    }
+    const now = new Date();
 
+    const cellYear = fullDate.getFullYear();
+    const cellMonth = fullDate.getMonth();
+    const cellDay = fullDate.getDate();
 
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth();
+    const nowDay = now.getDate();
 
+    // LOG para debug
+    console.log("--- [isEditableCell] ---");
+    console.log("fullDate:", fullDate.toString(), "| hour:", hour);
+    console.log(
+      "cell =>",
+      cellYear,
+      cellMonth,
+      cellDay,
+      " / now =>",
+      nowYear,
+      nowMonth,
+      nowDay
+    );
+
+    // Comparación a nivel de fecha
+    if (cellYear < nowYear) {
+      console.log("[isEditableCell] Año pasado, retorna false");
+      return false;
+    }
+    if (cellYear > nowYear) {
+      console.log("[isEditableCell] Año futuro, retorna true");
+      return true;
+    }
+    if (cellMonth < nowMonth) {
+      console.log("[isEditableCell] Mes pasado, retorna false");
+      return false;
+    }
+    if (cellMonth > nowMonth) {
+      console.log("[isEditableCell] Mes futuro, retorna true");
+      return true;
+    }
+    if (cellDay < nowDay) {
+      console.log("[isEditableCell] Día pasado, retorna false");
+      return false;
+    }
+    if (cellDay > nowDay) {
+      console.log("[isEditableCell] Día futuro, retorna true");
+      return true;
+    }
+
+    // Si es el mismo día, comparamos la hora
+    const [hStr, mStr = "0"] = hour.split(":");
+    const cellTime = new Date(fullDate);
+    cellTime.setHours(parseInt(hStr, 10), parseInt(mStr, 10), 0, 0);
+
+    console.log(
+      "[isEditableCell] Mismo día, comparando horas => cellTime:",
+      cellTime.toString(),
+      "| now:",
+      now.toString()
+    );
+    const result = cellTime.getTime() > now.getTime();
+    console.log("[isEditableCell] => retorna:", result);
+    return result;
+  };
+
+  // Manejo de carga del archivo CSV
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      Papa.parse(file, {
-        complete: (result) => {
-          const data = result.data;
-          const updatedSchedule = { ...schedule }; // Copiar el estado actual para actualizarlo correctamente
+    if (!file) return;
 
-          data.forEach((row) => {
-            const { Day, Hour, Status } = row;
-            if (!days.includes(Day) || !hours.includes(Hour)) return;
+    setFileInputLabel(file.name);
+    setIsLoading(true);
 
-            // Validación para no permitir horarios pasados
-            const currentDate = new Date();
-            const currentDayName = currentDate.toLocaleDateString('es-ES', { weekday: 'long' });
-            const currentHour = currentDate.getHours();
+    Papa.parse(file, {
+      header: true,
+      complete: (result) => {
+        const data = result.data;
+        const updatedSchedule = { ...schedule };
+        let processedCount = 0;
+        const validRows = data.filter(
+          (row) => row.Day && row.Hour && row.Status
+        );
 
-            const dayIndex = days.indexOf(Day);
-            const currentDayIndex = days.indexOf(currentDayName) + 1;
+        console.log("[handleFileUpload] CSV parseado =>", data);
+        console.log("[handleFileUpload] Filas válidas =>", validRows);
 
-            // Verificar si el horario no es pasado
-            if (dayIndex > currentDayIndex || (dayIndex === currentDayIndex && parseInt(Hour) > currentHour)) {
-              if (!updatedSchedule[Day]) updatedSchedule[Day] = {};
+        validRows.forEach((row) => {
+          const { Day, Hour, Status } = row;
+          if (!days.includes(Day) || !hours.includes(Hour)) {
+            console.log("[handleFileUpload] Day u Hour no válidos =>", row);
+            return;
+          }
+          console.log(fechaDias);
+          const fechaDia = fechaDias.find((fd) => fd.day === Day);
+          console.log(
+            "[handleFileUpload] Revisando =>",
+            Day,
+            Hour,
+            Status,
+            " => fechaDia =>",
+            fechaDia
+          );
 
-              // Alternar el estado entre Active e Inactive (igual que en handleButtonClick)
-              updatedSchedule[Day][Hour] = Status === 'Active' ? 'Active' : 'Inactive';
+          // Solo importamos la celda si es editable
+          if (fechaDia && !isEditableCell(fechaDia.fullDate, Hour)) {
+            console.log("[handleFileUpload] No editable => se omite");
+            return;
+          }
 
-              // Llamar a la API para guardar el horario actualizado
-              fetchsaveHorario(Day, Hour, updatedSchedule[Day][Hour]);
-            }
-          });
+          if (!updatedSchedule[Day]) updatedSchedule[Day] = {};
+          updatedSchedule[Day][Hour] =
+            Status === "Active" ? "Active" : "Inactive";
+          processedCount++;
+          fetchsaveHorario(Day, Hour, updatedSchedule[Day][Hour]);
+        });
 
-          // Actualizar el estado con el horario procesado desde el archivo
-          setSchedule(updatedSchedule); // Asegurarse de actualizar correctamente el estado
-        },
-        header: true,
-      });
-    }
+        setSchedule(updatedSchedule);
+        setIsLoading(false);
+        enqueueSnackbar(
+          `Se importaron ${processedCount} horarios correctamente`,
+          { variant: "success" }
+        );
+      },
+      error: (error) => {
+        console.error("Error al procesar el archivo:", error);
+        enqueueSnackbar("Error al procesar el archivo", { variant: "error" });
+        setIsLoading(false);
+        setFileInputLabel("Importar horarios (CSV)");
+      },
+    });
   };
 
-
+  // Al hacer clic en una celda se alterna su estado (si es editable)
   const handleButtonClick = (day, hour) => {
-    const currentDate = new Date();
-    const currentDayName = currentDate.toLocaleDateString('es-ES', { weekday: 'long' });
-    const currentHour = currentDate.getHours();
+    const fechaDia = fechaDias.find((fd) => fd.day === day);
+    console.log(
+      "[handleButtonClick] day:",
+      day,
+      "hour:",
+      hour,
+      " => fechaDia:",
+      fechaDia
+    );
 
-    const dayIndex = days.indexOf(day);
-    const currentDayIndex = days.indexOf(currentDayName) + 1;
-
-    if (dayIndex > currentDayIndex || (dayIndex === currentDayIndex && parseInt(hour) > currentHour)) {
-      setSchedule((prevSchedule) => {
-        const updatedSchedule = { ...prevSchedule };
-        if (!updatedSchedule[day]) updatedSchedule[day] = {};
-        const isActive = updatedSchedule[day][hour] === 'Active'; // Comprobar si ya está activo
-        updatedSchedule[day][hour] = isActive ? 'Inactive' : 'Active'; // Cambiar entre "Active" e "Inactive"
-        return updatedSchedule;
+    if (fechaDia && !isEditableCell(fechaDia.fullDate, hour)) {
+      enqueueSnackbar("No se puede modificar horarios pasados", {
+        variant: "warning",
       });
-
-      fetchsaveHorario(day, hour);
-    } else {
-      enqueueSnackbar('No se puede modificar horarios pasados', { variant: 'warning' });
+      return;
     }
+
+    setSchedule((prevSchedule) => {
+      const updatedSchedule = { ...prevSchedule };
+      if (!updatedSchedule[day]) updatedSchedule[day] = {};
+      const isActive = updatedSchedule[day][hour] === "Active";
+      updatedSchedule[day][hour] = isActive ? "Inactive" : "Active";
+      return updatedSchedule;
+    });
+
+    fetchsaveHorario(day, hour);
   };
 
-  const fetchsaveHorario = async (day, hour) => {
+  // Guarda el horario a través de la API
+  const fetchsaveHorario = async (day, hour, status) => {
     try {
-      // Extraer solo la parte de la hora (antes del ':')
-      const hourInt = parseInt(hour.split(':')[0], 10);  // Convierte a número entero
+      const hourInt = parseInt(hour.split(":")[0], 10);
 
-      const currentScheduleState = schedule[day] && schedule[day][hour] === 'Active' ? 'Inactive' : 'Active';
-      const iEstadoValue = currentScheduleState === 'Active' ? 1 : 0;
+      const currentStatus =
+        status ||
+        (schedule[day] && schedule[day][hour] === "Active"
+          ? "Inactive"
+          : "Active");
+      const iEstadoValue = currentStatus === "Active" ? 1 : 0;
 
       const url = APIURL.posthorarioanalista();
-      const response = await axios.post(url, {
+      console.log("[fetchsaveHorario] POST =>", {
         idAnalistaCredito: selectedAnalista,
-        Hora: hourInt,  // Usamos el valor de hour como entero
+        Hora: hourInt,
         Dia: day,
-        Estado: currentScheduleState,  // "Active" o "Inactive"
-        iEstado: iEstadoValue,  // 1 para "Active" y 0 para "Inactive"
-        idFechaAnalista: parseInt(selectedDate, 10),  // Convertir a número entero
+        Estado: currentStatus,
+        iEstado: iEstadoValue,
+        idFechaAnalista: parseInt(selectedDate, 10),
+      });
+      await axios.post(url, {
+        idAnalistaCredito: selectedAnalista,
+        Hora: hourInt,
+        Dia: day,
+        Estado: currentStatus,
+        iEstado: iEstadoValue,
+        idFechaAnalista: parseInt(selectedDate, 10),
       });
 
-      enqueueSnackbar('Horario guardado exitosamente!', { variant: 'success' });
+      if (!status) {
+        enqueueSnackbar("Horario guardado exitosamente", {
+          variant: "success",
+          preventDuplicate: true,
+        });
+      }
     } catch (error) {
-      enqueueSnackbar('Error al guardar el horario', { variant: 'error' });
+      console.error("Error al guardar el horario:", error);
+      enqueueSnackbar("Error al guardar el horario", { variant: "error" });
     }
   };
 
+  // Carga la lista de analistas para el menú lateral
   const fetchMenuData = async () => {
     try {
       const url = APIURL.analistacredito();
       const response = await axios.get(url);
       setMenuData(response.data);
     } catch (error) {
-      console.error('Error al obtener los datos del menú:', error);
+      console.error("Error al obtener los datos del menú:", error);
+      enqueueSnackbar("Error al cargar analistas", { variant: "error" });
     }
-  };
-
-  const handleInputChange = (event) => {
-    setSelectedDate(event.target.value);
   };
 
   useEffect(() => {
@@ -188,99 +336,249 @@ export function CalendarPerson(props) {
   }, [isModalOpen]);
 
   return (
-    <div className="flex flex-col bg-gray-100 overflow-x-hidden">
-      <div className="flex flex-col md:flex-row">
-        <div className="flex flex-col w-full md:w-1/4 bg-white p-5 text-black border-r border-gray-300 shadow-lg">
-          <button
-            className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 transition ease-in-out delay-75 hover:bg-blue-700 text-white text-sm font-medium rounded-md hover:-translate-y-1 hover:scale-110"
-            onClick={openModal}
-          >
-            Agregar
-          </button>
+    <div className="flex flex-col bg-gray-100 min-h-screen">
+      {/* Cabecera */}
+        <h1 className="text-2xl font-bold text-center mb-4 mt-4">Calendario de Disponibilidad</h1>
 
-          <h3 className="font-bold text-lg text-gray-700 mt-5">Analistas</h3>
-          {menuData.length > 0 ? (
-            menuData.map((item, index) => (
-              <div key={index} className="mb-3">
-                <button
-                  className="flex items-center space-x-2 w-full text-left text-blue-600 py-3 px-5 rounded-md hover:bg-gray-200"
-                  onClick={() => handleMenuClick(item.Nombre, item)}
+      <div className="flex flex-col md:flex-row flex-1">
+        {/* Panel lateral de analistas */}
+        <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg m-4 overflow-hidden">
+          <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
+            <h2 className="font-bold text-lg text-gray-800">Analistas</h2>
+            <button
+              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors shadow-md"
+              onClick={openModal}
+              title="Agregar analista"
+            >
+              <PersonAddIcon />
+            </button>
+          </div>
+
+          <div className="overflow-y-auto max-h-96 p-2">
+            {menuData.length > 0 ? (
+              menuData.map((item, index) => (
+                <div
+                  key={index}
+                  className={`mb-2 rounded-md ${
+                    selectedAnalista === item.idAnalistaCredito
+                      ? "bg-blue-50 border-l-4 border-blue-600"
+                      : "hover:bg-gray-50"
+                  }`}
                 >
-                  <span className="text-gray-700">{item.Nombre} </span>
-                </button>
-              </div>
-            ))
-          ) : (
-            <p>No se encontraron datos para el menú</p>
-          )}
+                  <button
+                    className="flex items-center w-full text-left py-3 px-4 rounded-md transition-colors"
+                    onClick={() => handleMenuClick(item.Nombre, item)}
+                  >
+                    <span
+                      className={`${
+                        selectedAnalista === item.idAnalistaCredito
+                          ? "font-medium text-blue-800"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {item.Nombre}
+                    </span>
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-center py-4 text-gray-500">
+                No se encontraron analistas
+              </p>
+            )}
+          </div>
         </div>
 
-        <div className="flex-1 p-6 md:w-3/4">
-          <div className="text-2xl font-semibold text-gray-700 mb-6">
-            {selectedTitle ? `Analista: ${selectedTitle}` : 'S/N'}
-            {selectedAnalista ? ` - ${selectedAnalista}` : ''}
-          </div>
-          <div className="bg-white shadow-lg rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Horario</h2>
-              <SelectField
-                label="Fecha"
-                value={selectedDate}
-                onChange={handleInputChange}
-                options={fechaAnalista}
-              />
-            </div>
-          </div>
+        {/* Contenido principal */}
+        <div className="flex-1 p-4">
+          {/* Cabecera de contenido */}
+          <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {selectedTitle ? (
+                    <>
+                      <span className="text-blue-700">Analista:</span>{" "}
+                      {selectedTitle}
+                      <span className="text-sm text-gray-500 ml-2">
+                        ID: {selectedAnalista}
+                      </span>
+                    </>
+                  ) : (
+                    "Seleccione un analista"
+                  )}
+                </h2>
+              </div>
 
-          {(selectedTitle && selectedDate) && (
-            <div className="bg-white shadow-lg rounded-lg p-4 mb-6">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="w-full sm:w-64">
+                  <SelectField
+                    label="Fecha"
+                    value={selectedDate}
+                    onChange={(e) =>
+                      setSelectedDate(parseInt(e.target.value, 10))
+                    }
+                    options={fechaAnalista.map((item) => ({
+                      label: item.label,
+                      value: item.value,
+                    }))}
+                  />
+                </div>
 
-              <div className="grid grid-cols-8 gap-4">
-                <div> </div>
-                {days.map((day, index) => (
-                  <div key={index} className="text-center font-semibold text-gray-700">{day}</div>
-                ))}
-                {hours.map((hour, index) => (
-                  <React.Fragment key={index}>
-                    <div className="text-center text-gray-700">{hour}</div>
-                    {days.map((day, dayIndex) => (
-                      <div key={dayIndex} className="text-center">
-                        <button
-                          className={`w-full h-full text-sm font-semibold rounded-md transition-all duration-200 ${schedule[day] && schedule[day][hour] === 'Active'
-                            ? 'bg-green-500 text-white'  // Color verde si está activo
-                            : 'bg-gray-200'  // Color gris si está inactivo
-                            }`}
-                          onClick={() => handleButtonClick(day, hour)}
-                        >
-                          {schedule[day] && schedule[day][hour] ? (
-                            <CheckCircleIcon className="text-white" />
-                          ) : (
-                            <RadioButtonUncheckedIcon className="text-gray-600" />
-                          )}
-                        </button>
-
-                      </div>
-                    ))}
-                  </React.Fragment>
-                ))}
-
+                <label className="flex items-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md cursor-pointer transition-colors border border-gray-300">
+                  <UploadFileIcon className="text-blue-600" />
+                  <span className="text-sm truncate max-w-xs">
+                    {fileInputLabel}
+                  </span>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
               </div>
             </div>
-          )}
-
-
-          <div className="mt-4">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleFileUpload}
-              className="py-2 px-4 border border-blue-500 rounded-md cursor-pointer"
-            />
           </div>
 
-          <ModalAnalista isOpen={isModalOpen} onClose={closeModal} />
+          {/* Calendario */}
+          {selectedTitle && selectedDate ? (
+            <div className="bg-white rounded-lg shadow-lg p-4 mb-4">
+              {isLoading ? (
+                <div className="flex justify-center items-center p-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <div className="min-w-max">
+                    <div className="grid grid-cols-8 gap-2">
+                      {/* Cabecera del calendario */}
+                      <div className="p-2 font-medium text-gray-500 bg-gray-50 rounded-tl-md"></div>
+                      {days.map((day, index) => {
+                        const fechaDia = fechaDias.find((fd) => fd.day === day);
+                        // Para la cabecera, si el día es pasado se muestra con fondo gris
+                        const dayEditable = fechaDia
+                          ? isEditableCell(fechaDia.fullDate, hours[0])
+                          : false;
+                        console.log(
+                          `[Cabecera] day: ${day}, dayEditable: ${dayEditable}`
+                        );
+                        return (
+                          <div
+                            key={index}
+                            className={`p-2 text-center font-semibold rounded-t-md ${
+                              !dayEditable
+                                ? "bg-gray-200 text-gray-500"
+                                : "bg-blue-50 text-blue-800"
+                            }`}
+                          >
+                            <div>{day}</div>
+                            {fechaDia && (
+                              <div className="text-xs text-gray-500">
+                                {fechaDia.date}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* Filas de horas */}
+                      {hours.map((hour, hourIndex) => (
+                        <React.Fragment key={hourIndex}>
+                          <div className="p-2 text-center bg-gray-50 font-medium text-gray-700">
+                            {hour}
+                          </div>
+                          {days.map((day, dayIndex) => {
+                            const fechaDia = fechaDias.find(
+                              (fd) => fd.day === day
+                            );
+                            const editable = fechaDia
+                              ? isEditableCell(fechaDia.fullDate, hour)
+                              : false;
+                            const isActive = schedule[day]?.[hour] === "Active";
+                            console.log(
+                              `[Fila de horas] day: ${day}, hour: ${hour}, editable: ${editable}, isActive: ${isActive}`
+                            );
+
+                            return (
+                              <div key={dayIndex} className="text-center p-1">
+                                <button
+                                  className={`w-full h-10 rounded-md transition-all duration-200 flex items-center justify-center ${
+                                    !editable
+                                      ? "bg-gray-100 cursor-not-allowed opacity-50"
+                                      : isActive
+                                      ? "bg-green-500 hover:bg-green-600 shadow-sm"
+                                      : "bg-gray-200 hover:bg-gray-300"
+                                  }`}
+                                  onClick={() => handleButtonClick(day, hour)}
+                                  disabled={!editable}
+                                  title={
+                                    !editable
+                                      ? "Horario pasado"
+                                      : isActive
+                                      ? "Disponible"
+                                      : "No disponible"
+                                  }
+                                >
+                                  {isActive ? (
+                                    <CheckCircleIcon className="text-white" />
+                                  ) : (
+                                    <RadioButtonUncheckedIcon className="text-gray-600" />
+                                  )}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Leyenda */}
+              <div className="flex flex-wrap gap-4 mt-6 text-sm bg-gray-50 p-3 rounded-md">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                  <span>Disponible</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-gray-200 rounded-full mr-2"></div>
+                  <span>No disponible</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-gray-100 opacity-50 rounded-full mr-2"></div>
+                  <span>Horario pasado</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow-lg p-12 text-center">
+              <div className="text-blue-800 mb-4 text-5xl opacity-30">
+                <CalendarIcon />
+              </div>
+              <p className="text-gray-500">
+                Seleccione un analista y una fecha para configurar el horario
+              </p>
+            </div>
+          )}
         </div>
       </div>
+
+      <ModalAnalista isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 }
+
+// Componente de icono de calendario para el estado vacío
+const CalendarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="80"
+    height="80"
+    fill="currentColor"
+    viewBox="0 0 16 16"
+  >
+    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+  </svg>
+);
