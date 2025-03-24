@@ -83,7 +83,7 @@ export function DocumentoSolicitud() {
   const handleEyeClick = (cliente) => {
     //alert(`Detalles de cliente: ${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`);
     console.log("cliente", cliente)
-    navigate('/gestorDocumentos', { 
+    navigate('/gestorDocumentos', {
       replace: true,
       state: {
         id: cliente.idCre_SolicitudWeb,
@@ -117,43 +117,48 @@ export function DocumentoSolicitud() {
           </div>
         )}
 
-        {/* Select de Bodegas */}
-        {!loading && (
-          <div className="mb-6">
-            <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2">
-              Selecciona una Bodega
-            </label>
-            <select
-              id="bodega-select"
-              className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={selectedBodega}
-              onChange={handleBodegaChange}
-            >
-              <option value="" disabled>
-                Selecciona una bodega
-              </option>
-              {bodegas.length > 0 ? (
-                bodegas.map((bodega) => (
-                  <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
-                    {bodega.b_Nombre}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No se encontraron bodegas.</option>
-              )}
-            </select>
-          </div>
-        )}
+        <div className="flex flex-row items-center space-x-4 w-full mb-6">
+          {/* Select de Bodegas */}
+          {!loading && (
+            <div className="flex-grow">
+              <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2">
+                Selecciona una Bodega
+              </label>
+              <select
+                id="bodega-select"
+                className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedBodega}
+                onChange={handleBodegaChange}
+              >
+                <option value="" disabled>
+                  Selecciona una bodega
+                </option>
+                {bodegas.length > 0 ? (
+                  bodegas.map((bodega) => (
+                    <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
+                      {bodega.b_Nombre}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No se encontraron bodegas.</option>
+                )}
+              </select>
+            </div>
+          )}
 
-        {/* Buscador de Clientes */}
-        <div className="flex justify-center mb-6">
-          <input
-            type="text"
-            placeholder="Buscar cliente..."
-            className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          {/* Buscador de Clientes */}
+          <div className="flex-grow">
+            <label htmlFor="cliente-search" className="block text-gray-700 font-semibold mb-2">
+              Buscar Cliente
+            </label>
+            <input
+              type="text"
+              placeholder="Buscar cliente..."
+              className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Cards de Clientes */}
