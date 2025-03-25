@@ -45,8 +45,6 @@ const Referencias = forwardRef((props, ref) => {
       const url = APIURL.get_cre_referenciasclientesweb_id(id);
       const response = await axios.get(url);
       setReferencias(response.data);
-      console.log("Referencias edison:", response.data);
-      SearchData(data.idCre_SolicitudWeb);
     } catch (error) {
       console.error("Error al buscar los datos:", error);
     }
@@ -59,7 +57,7 @@ const Referencias = forwardRef((props, ref) => {
     fetchDato();
     fetchDatoProvincia();
 
-  }, []);
+  }, [data.idCre_SolicitudWeb]);
 
   const fetchDato = async () => {
     try {

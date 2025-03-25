@@ -401,3 +401,90 @@ export const fetchTipoDocumento = async (enqueueSnackbar, setTipoDocumento) => {
 };
 
 
+export const fetchTipoEmpresa = async (enqueueSnackbar, setTipoEmpresa) => {
+  try {
+    const response = await axios.get(APIURL.get_cre_tipoempresa(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setTipoEmpresa(
+      response.data.map((item) => ({
+        value: item.idTipoEmpresa,
+        label: item.Descripción,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener Tipo Empresa", error);
+    enqueueSnackbar("Error al cargar Tipo Empresa", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setTipoEmpresa([]);
+  }
+};
+
+export const fetchTipoContrato = async (enqueueSnackbar, setTipoContrato) => {
+  try {
+    const response = await axios.get(APIURL.get_tipocontrato(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    console.log('tipo Trabajao',response);
+    setTipoContrato(
+      response.data.map((item) => ({
+        value: item.idTipoContrato,
+        label: item.Nombre,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener Tipo Contrato", error);
+    enqueueSnackbar("Error al cargar Tipo Contrato", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setTipoContrato([]);
+  }
+};
+
+  export const fecthTipoSueldo = async (enqueueSnackbar, setTipoSueldo) => {
+    try {
+      const response = await axios.get(APIURL.get_cre_tiposueldo(), {
+        headers: { method: "GET", cache: "no-store" },
+      });
+      setTipoSueldo(
+        response.data.map((item) => ({
+          value: item.idTipoSueldo,
+          label: item.Nombre,
+        }))
+      );
+    } catch (error) {
+      console.error("Error al obtener Tipo Sueldo", error);
+      enqueueSnackbar("Error al cargar Tipo Sueldo", {
+        variant: "error",
+        preventDuplicate: true,
+      });
+      setTipoSueldo([]);
+    }
+  }
+
+  
+
+	export const fetchCargo = async (enqueueSnackbar, setCargo) => {
+		try {
+			const response = await axios.get(APIURL.get_cre_cargo(), {
+				headers: { method: "GET", cache: "no-store" },
+			});
+			setCargo(
+				response.data.map((item) => ({
+					value: item.idCargo,
+					label: item.Nombre,
+				}))
+			);
+		} catch (error) {
+			console.error("Error al obtener Cargo", error);
+			enqueueSnackbar("Error al cargar Cargo", {
+				variant: "error",
+				preventDuplicate: true,
+			});
+			setCargo([]);
+
+		}
+	};
