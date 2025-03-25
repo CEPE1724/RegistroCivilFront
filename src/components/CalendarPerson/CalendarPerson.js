@@ -145,28 +145,35 @@ export function CalendarPerson(props) {
 	  if (selectedAnalista && selectedDate) {
 		const url = `${APIURL.get_horariosanalistas()}/analista/${selectedAnalista}/fecha/${selectedDate}`;
 		console.log("[fetchHorariosAPI] URL:", url);
-		
 		try {
 		  const { data: horarios } = await axios.get(url);
 		  console.log("[fetchHorariosAPI] Data:", horarios);
-		  
+		  if (!horarios || horarios.length === 0) {
+			setSchedule({});
+			enqueueSnackbar("No hay datos disponibles para este analista", { variant: "info", preventDuplicate: true });
+			return;
+		  }
 		  const newSchedule = horarios.reduce((acc, { Dia, Hora, Estado }) => {
 			const hourStr = `${Hora}:00`;
 			acc[Dia] = acc[Dia] || {};
 			acc[Dia][hourStr] = Estado;
 			return acc;
 		  }, {});
-		  
 		  setSchedule(newSchedule);
 		} catch (error) {
 		  console.error("[fetchHorariosAPI] Error:", error);
-		  enqueueSnackbar("Error al cargar los horarios del analista", { variant: "error" });
+		  if (error.response && error.response.status === 404) {
+			setSchedule({});
+			enqueueSnackbar("No hay datos disponibles para este analista", { variant: "info" });
+		  } else {
+			enqueueSnackbar("Error al cargar los horarios del analista", { variant: "error" });
+		  }
 		}
 	  }
 	};
-	
 	fetchHorariosAPI();
   }, [selectedAnalista, selectedDate]);
+  
   
 
   // Manejo de carga del archivo CSV
@@ -363,9 +370,9 @@ export function CalendarPerson(props) {
                     <>
                       <span className="text-blue-700">Analista:</span>{" "}
                       {selectedTitle}
-                      <span className="text-sm text-gray-500 ml-2">
+                      {/* <span className="text-sm text-gray-500 ml-2">
                         ID: {selectedAnalista}
-                      </span>
+                      </span> */}
                     </>
                   ) : (
                     "Seleccione un analista"
@@ -410,7 +417,25 @@ export function CalendarPerson(props) {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700"></div>
                 </div>
               ) : (
+				
                 <div className="overflow-x-auto">
+
+					{/* Leyenda */}
+					<div className="flex flex-wrap gap-4 text-sm bg-gray-50 p-3 rounded-md mb-2">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                  <span>Disponible</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-gray-300 rounded-full mr-2"></div>
+                  <span>No disponible</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-gray-200 opacity-50 rounded-full mr-2"></div>
+                  <span>Horario pasado</span>
+                </div>
+              </div>
+					
                   <div className="min-w-max">
                     <div className="grid grid-cols-8 gap-2">
                       {/* Cabecera del calendario */}
@@ -487,21 +512,7 @@ export function CalendarPerson(props) {
                   </div>
                 </div>
               )}
-              {/* Leyenda */}
-              <div className="flex flex-wrap gap-4 mt-6 text-sm bg-gray-50 p-3 rounded-md">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
-                  <span>Disponible</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-gray-200 rounded-full mr-2"></div>
-                  <span>No disponible</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-gray-100 opacity-50 rounded-full mr-2"></div>
-                  <span>Horario pasado</span>
-                </div>
-              </div>
+              
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-lg p-12 text-center">
