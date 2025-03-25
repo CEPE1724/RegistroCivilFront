@@ -45,13 +45,16 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import HouseIcon from '@mui/icons-material/House';
 import { red } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
+import { useAuth } from "../AuthContext/AuthContext";
+import HourglassFullIcon from '@mui/icons-material/HourglassFull';
+
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
-
-  const [search, setSearch] = useState("");
+  const [bodegass, setBodegass] = useState([]);
+  const [selectedBodega, setSelectedBodega] = useState("todos");
   const [dataBodega, setDataBodega] = useState([]);
-  const [estado, setEstado] = useState("");
+  const [estado, setEstado] = useState("todos");
   const [datos, setDatos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
@@ -59,42 +62,74 @@ export function ListadoSolicitud() {
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
   const itemsPerPage = 5;
-  const [tipoConsulta, setTipoConsulta] = useState([]);
-  const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
-  const [searchDateTo, setSearchDateTo] = useState("");
-  const navigate = useNavigate();
+  const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
+  const [tipo, setTipo] = useState([]);
+  const [tipoClienteMap, setTipoClienteMap] = useState({});
 
+
+  const [tipoConsulta, setTipoConsulta] = useState([]);
+  const [fechaInicio, setFechaInicio] = useState(today);
+  const [fechaFin, setFechaFin] = useState(today);
+
+  const navigate = useNavigate();
+  const { userData } = useAuth();
+  const bodegas = data || [];  // Safely access the bodegas data
+  const estadosOpciones = [
+    { label: "Todos", value: "todos" },
+    { label: "Pendiente", value: 1 },
+    { label: "Aprobado", value: 2 },
+    { label: "Anulado", value: 3 },
+    { label: "Rechazado", value: 4 },
+  ];
+
+
+
+  // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await Promise.all([fetchTipoConsulta(), fetchBodega()]);
+        await Promise.all([fetchTipoConsulta(), fetchBodega(), fetchTipoCliente()]);
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
       }
     };
-  
     fetchData();
-  }, []); // Solo se ejecuta una vez al montar el componente
-  
-  useEffect(() => {
-    if (tipoConsulta.length > 0 && dataBodega.length > 0) {
-      fetchSolicitudes();
-    }
-  }, [currentPage, tipoConsulta, dataBodega]); // Se ejecuta cuando `tipoConsulta` o `dataBodega` se actualizan
-  
+  }, []);
+
+  // Obtener bodegas
   const fetchBodega = async () => {
-    const userId = 1;
-    const idTipoFactura = 43;
-    const fecha = new Date().toISOString();
-    const recibeConsignacion = true;
-  
     try {
+      const userId = userData.idUsuario;
+      const idTipoFactura = 43;
+      const fecha = new Date().toISOString();
+      const recibeConsignacion = true;
+
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
     } catch (err) {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
-  
+
+
+
+  const getColorByEstado = (estado) => {
+    switch (estado) {
+      case 1:
+        return "#007BFF"; // Azul
+      case 2:
+        return "#FFC107"; // Amarillo
+      case 3:
+        return "#FF5722"; // Naranja
+      case 4:
+        return "#28A745"; // Verde
+      case 5:
+        return "#DC3545"; // Rojo
+      default:
+        return "#6C757D"; // Gris para estados desconocidos
+    }
+  };
+
+  // Obtener tipo de consulta
   const fetchTipoConsulta = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -104,14 +139,12 @@ export function ListadoSolicitud() {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (response.status === 200) {
-        setTipoConsulta(
-          response.data.map((item) => ({
-            id: item.idCompraEncuesta,
-            descripcion: item.Descripcion,
-          }))
-        );
+        setTipoConsulta(response.data.map(item => ({
+          id: item.idCompraEncuesta,
+          descripcion: item.Descripcion,
+        })));
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -119,65 +152,100 @@ export function ListadoSolicitud() {
       console.error("Error fetching tipo de consulta:", error);
     }
   };
-  
+
+  const fetchTipoCliente = async () => {
+    try {
+      const response = await axios.get(APIURL.getTipoCliente());
+      if (response.status === 200) {
+        // Crear un mapeo de idTipoCliente a Nombre
+        const tipoMap = response.data.reduce((acc, item) => {
+          acc[item.idTipoCliente] = item.Nombre;
+          return acc;
+        }, {});
+        setTipoClienteMap(tipoMap);
+        setTipo(
+          response.data.map((item) => ({
+            value: item.idTipoCliente,
+            label: item.Nombre,
+          }))
+        );
+      } else {
+        throw new Error("Error en la respuesta del servidor");
+      }
+    } catch (error) {
+      console.error("Error al obtener el tipo de cliente:", error);
+      enqueueSnackbar("No se pudo cargar los tipos de clientes", {
+        variant: "error",
+      });
+    }
+  };
+
+  // Obtener solicitudes con filtros aplicados
+  useEffect(() => {
+    if (tipoConsulta.length > 0 && dataBodega.length > 0) {
+      fetchSolicitudes();
+    }
+  }, [currentPage, tipoConsulta, dataBodega, selectedBodega, estado, fechaInicio, fechaFin]);
+
   const fetchSolicitudes = async () => {
+     console.log(selectedBodega);
     if (tipoConsulta.length === 0 || dataBodega.length === 0) return;
-  
+
     try {
       const token = localStorage.getItem("token");
       const offset = (currentPage - 1) * itemsPerPage;
+
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        params: { limit: itemsPerPage, offset: offset },
+        params: {
+          limit: itemsPerPage,
+          offset: offset,
+          fechaInicio: fechaInicio,
+          fechaFin: fechaFin,
+          bodega: selectedBodega === "todos" ? 0 :selectedBodega,
+          estado: estado === "todos" ? 0 : estado,
+        },
       });
-  
+
       if (response.status === 200) {
-        console.log("Datos de la solicitud:", response.data);
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
-  
-        // Mapea los datos y realiza la llamada a fetchVendedor para obtener el nombre del vendedor
+
+        // Mapeo de datos con fetchVendedor
         const datos = await Promise.all(
-          response.data.data.map(async (item) => {
-            const vendedorNombre = await fetchVendedor(item.idVendedor); // Obtiene el nombre del vendedor
-            console.log("Vendedor:", vendedorNombre);
+          response.data.data.map(async item => {
+            const vendedorNombre = await fetchVendedor(item.idVendedor);
             return {
               id: item.idCre_SolicitudWeb,
               NumeroSolicitud: item.NumeroSolicitud,
               nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
-              PrimerNombre: item.PrimerNombre,
-              SegundoNombre: item.SegundoNombre,
-              ApellidoPaterno: item.ApellidoPaterno,
-              ApellidoMaterno: item.ApellidoMaterno,
               cedula: item.Cedula,
               almacen:
-                dataBodega.find((bodega) => bodega.value === item.Bodega)?.label || "Desconocido",
-              vendedor: vendedorNombre, // Aquí asignamos el nombre del vendedor
+                dataBodega.find(bodega => bodega.value === item.Bodega)?.label || "Desconocido",
+              vendedor: vendedorNombre,
               consulta:
-                tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
+                tipoConsulta.find(tipo => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
               estado:
-                item.Estado === 1
-                  ? "PENDIENTE"
-                  : item.Estado === 2
-                  ? "APROBADO"
-                  : item.Estado === 3
-                  ? "ANULADO"
-                  : item.Estado === 4
-                  ? "RECHAZADO"
-                  : "desconocido",
+                item.Estado === 1 ? "PENDIENTE" :
+                item.Estado === 2 ? "APROBADO" :
+                item.Estado === 3 ? "ANULADO" :
+                item.Estado === 4 ? "RECHAZADO" : "Desconocido",
               imagen: item.Foto,
               celular: item.Celular,
               email: item.Email,
               fecha: item.Fecha,
               afiliado: item.bAfiliado ? "Sí" : "No",
               tieneRuc: item.bTieneRuc ? "Sí" : "No",
+              tipoCliente:
+              tipoClienteMap[item.idTipoCliente] || "Desconocido",
+              idEstadoVerificacionDocumental: item.idEstadoVerificacionDocumental,
             };
           })
         );
-  
+
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
@@ -189,57 +257,34 @@ export function ListadoSolicitud() {
     }
   };
 
-/*
-  const fetchparroquias = async (idCanton) => {
+  // Obtener vendedor
+  const fetchVendedor = async idVendedor => {
     try {
-      const response = await axios.get(APIURL.getParroquias(idCanton), {
+      const response = await axios.get(APIURL.getVendedor(idVendedor), {
         headers: { method: "GET", cache: "no-store" },
       });
-      setParroquias(
-        response.data.map((item) => ({
-          idParroquia: item.idParroquia,
-          label: item.Nombre,
-        }))
-      );
-    } catch (error) {
-      console.error("Error al obtener parroquias", error);
-      setParroquias([]);
-    }
-  };
-*/
-  const fetchVendedor = async (idVendedor) => {
-    try {
-      console.log("ID Vendedor:", idVendedor);
-      const response = await axios.get(APIURL.getVendedor(idVendedor), {
-      
-          headers: { method: "GET", cache: "no-store" },
-        
-      });
+
       if (response.status === 200) {
-       
-        // Retorna el nombre completo del vendedor
-        console.log("Vendedor:", response.data);
         const vendedor = response.data;
-        const vendedorNombre = `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""} ${vendedor.ApellidoMaterno || ""}`.trim();
-  
-        // Si no tiene nombre, devolvemos "No disponible"
-        return vendedorNombre || "No disponible";
+        return `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""} ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible";
       }
     } catch (error) {
       console.error("Error fetching vendedor data:", error);
-      return "No disponible"; // Si hay un error, se puede devolver un valor predeterminado
+      return "No disponible";
     }
   };
 
+  // Manejar cambio de bodega
+  const handleBodegaChange = (event) => {
+    setSelectedBodega(event.target.value);
+  };
 
   useEffect(() => {
     if (data && data.length > 0) {
-      setDataBodega(
-        data.map((item) => ({
-          value: item.b_Bodega,
-          label: item.b_Nombre,
-        }))
-      );
+      setDataBodega(data.map(item => ({
+        value: item.b_Bodega,
+        label: item.b_Nombre,
+      })));
     }
   }, [data]);
 
@@ -301,15 +346,7 @@ export function ListadoSolicitud() {
     setView(false);
     setSelectedRow(null);
   };
-  const filteredData = datos.filter(
-    (item) =>
-      item.nombre.toLowerCase().includes(search.toLowerCase()) &&
-      (estado ? item.estado === estado : true) &&
-      (searchDateFrom
-        ? new Date(item.fecha) >= new Date(searchDateFrom)
-        : true) &&
-      (searchDateTo ? new Date(item.fecha) <= new Date(searchDateTo) : true)
-  );
+
 
   const handleSolictud = () => {
     navigate("/solicitud", { replace: true });
@@ -327,8 +364,8 @@ export function ListadoSolicitud() {
           label="Fecha Desde"
           type="date"
           variant="outlined"
-          value={searchDateFrom}
-          onChange={(e) => setSearchDateFrom(e.target.value)}
+          value={fechaInicio}
+          onChange={(e) => setFechaInicio(e.target.value)}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -339,22 +376,29 @@ export function ListadoSolicitud() {
           label="Fecha Hasta"
           type="date"
           variant="outlined"
-          value={searchDateTo}
-          onChange={(e) => setSearchDateTo(e.target.value)}
+          value={fechaFin}
+          onChange={(e) => setFechaFin(e.target.value)}
           fullWidth
           size="small"
           InputLabelProps={{
             shrink: true,
           }}
         />
-        <TextField
-          label="Buscar por nombre"
-          variant="outlined"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          fullWidth
-          size="small"
-        />
+        <FormControl size="small" fullWidth>
+          <InputLabel>Buscar por bodega</InputLabel>
+          <Select
+            value={selectedBodega}
+            onChange={handleBodegaChange}
+            label="Buscar por nombre"
+          >
+                <MenuItem value="todos">Todos</MenuItem>
+            {bodegas.map((bodega) => (
+              <MenuItem key={bodega.b_Bodega} value={bodega.b_Bodega}>
+                {bodega.b_Nombre}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <FormControl size="small" fullWidth>
           <InputLabel>Estado</InputLabel>
           <Select
@@ -362,14 +406,11 @@ export function ListadoSolicitud() {
             onChange={(e) => setEstado(e.target.value)}
             label="Estado"
           >
-            <MenuItem value="">
-              <em>Seleccionar</em>
-            </MenuItem>
-            <MenuItem value="activo">Activo</MenuItem>
-            <MenuItem value="pendiente">Pendiente</MenuItem>
-            <MenuItem value="anulado">Anulado</MenuItem>
-            <MenuItem value="aprobado">Aprobado</MenuItem>
-            <MenuItem value="rechazado">Rechazado</MenuItem>
+            {estadosOpciones.map((estado) => (
+              <MenuItem key={estado.value} value={estado.value}>
+                {estado.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
         <button
@@ -424,6 +465,9 @@ export function ListadoSolicitud() {
                   Estado
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  TIPO CLIENTE
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Opciones
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
@@ -441,25 +485,21 @@ export function ListadoSolicitud() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredData.map((data) => (
+              {datos.map((data) => (
                 <TableRow key={data.id}>
                   <TableCell align="center">
-                    {/*<img
-                      className="rounded-md object-cover w-1/3 h-full mx-auto"
-                      src={data.imagen}
-                      alt="Imagen"
-                    />*/}
                     {data.NumeroSolicitud}
                   </TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
                   <TableCell align="center">
-                    {data.fecha.substring(0, 10)}
+                    {new Date(data.fecha).toLocaleString()}
                   </TableCell>
                   <TableCell align="center">{data.almacen}</TableCell>
                   <TableCell align="center">{data.vendedor}</TableCell>
                   <TableCell align="center">{data.consulta}</TableCell>
                   <TableCell align="center">{data.estado}</TableCell>
+                  <TableCell align="center">{data.tipoCliente}</TableCell>
                   <TableCell align="center">
                     <Tooltip title="Ver más" arrow placement="top">
                       <IconButton onClick={() => handleOpenDialog(data)}>
@@ -468,24 +508,21 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell>
                   <TableCell align="center">
-                  <IconButton onClick={() => handlesolicitud(data)}>
-                    <PendingActionsIcon sx={{ color: 'gray' }} />
-                  </IconButton>
-
-                   
+                    <IconButton onClick={() => handlesolicitud(data)}>
+                      <PendingActionsIcon sx={{ color: 'gray' }} />
+                    </IconButton>
                   </TableCell>
                   <TableCell align="center">
                     <IconButton onClick={() => handledocumentos(data)}>
-                      <FolderIcon sx={{ color: 'gray' }} />
+                    <HourglassFullIcon sx={{ color: getColorByEstado(data.idEstadoVerificacionDocumental) }} />
+
                     </IconButton>
                   </TableCell>
-
                   <TableCell align="center">
-                    <IconButton onClick={()=> handleTelefonica(data)}>
-                      <PhoneIcon sx={{ color: 'gray' }}/>
+                    <IconButton onClick={() => handleTelefonica(data)}>
+                      <PhoneIcon sx={{ color: 'gray' }} />
                     </IconButton>
                   </TableCell>
-
                   <TableCell align="center">
                     <HouseIcon sx={{ color: 'gray' }} />
                   </TableCell>
@@ -504,7 +541,6 @@ export function ListadoSolicitud() {
         <DialogContent dividers>
           {selectedRow && (
             <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-              {/* Imagen */}
               <div className="flex justify-center items-center md:w-1/3">
                 <img
                   src={selectedRow.imagen}
@@ -512,8 +548,6 @@ export function ListadoSolicitud() {
                   className="w-64 h-64 object-cover rounded-md"
                 />
               </div>
-
-              {/* Datos */}
               <div className="md:w-2/3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
                   <div className="flex items-center gap-2">
@@ -543,7 +577,6 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Tipo de Consulta:</p>
                     <p>{selectedRow.consulta}</p>
                   </div>
-                  {/* Estado con color dinámico en el texto */}
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
@@ -606,7 +639,6 @@ export function ListadoSolicitud() {
         </DialogActions>
       </Dialog>
 
-      {/* Paginación */}
       {totalPages > 1 && (
         <div className="mt-6 flex justify-center items-center gap-4">
           <button
