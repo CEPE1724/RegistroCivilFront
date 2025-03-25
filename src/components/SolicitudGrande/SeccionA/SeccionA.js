@@ -81,18 +81,6 @@ const SeccionA = forwardRef((props, ref) => {
   }, [formData.parroquia, enqueueSnackbar]);
 
 
-
-
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      console.log("Formulario enviado con éxito", formData);
-    } else {
-      console.log("Errores en el formulario", errors);
-    }
-  };
-
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
     // Expresión regular para detectar caracteres no permitidos
@@ -325,7 +313,8 @@ const SeccionA = forwardRef((props, ref) => {
   };
 
   useImperativeHandle(ref, () => ({
-    handleSubmit, // Exponemos la función handleSubmit al padre
+    validateForm,
+		getFormData: () => formData,
   }));
 
   return (
@@ -573,12 +562,6 @@ const SeccionA = forwardRef((props, ref) => {
           </label>
         </div>
       </div>
-      <button
-        onClick={handleSubmit}
-        className="bg-primaryBlue text-white font-semibold py-2 px-8 rounded-md mt-6"
-      >
-        Enviar
-      </button>
     </div>
   )
 });

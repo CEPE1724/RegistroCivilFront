@@ -9,7 +9,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import DatosCliente from "../DatosCliente/DatosCliente";
 import DatosConyuge from "../DatosConyuge/DatosConyuge";
 import SeccionB from "../../SolicitudGrande/SeccionB/SeccionB";
-import  SeccionA  from "../../SolicitudGrande/SeccionA/SeccionA";
+import SeccionA from "../../SolicitudGrande/SeccionA/SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
 import { useSnackbar } from 'notistack';
 import { Verificacion } from "../Verificacion/Verificacion";
@@ -199,8 +199,7 @@ export function Cabecera() {
       //enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
       //}
     }
-
-    if (activeTab === "Dependiente") {
+    if (activeTab === "Dependiente" && clienteData.idSituacionLaboral === 1) {
       const formData = datosTrabajo.current.getFormData();
       const isValid = datosTrabajo.current.validateForm(); // Llamamos a validateForm del componente Datos
 
@@ -208,6 +207,61 @@ export function Cabecera() {
         fetchSaveDatosTrabajo(formData);
         setActiveTab("Factores de Crédito");
       }
+    }
+
+    if (activeTab === "Negocio" && clienteData.idSituacionLaboral != 1) {
+      const formData = datosNegocio.current.getFormData();
+      const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
+      console.log("datos negocio", formData);
+      if (isValid) {
+        fetchSaveDatosNegocio(formData);
+       // setActiveTab("Factores de Crédito");
+      }
+    }
+  };
+
+  const fetchSaveDatosNegocio = async (formData) => {
+    try {
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      // Función para asegurar que los valores sean válidos y numéricos
+      const getParsedValue = (value) => (value ? parseInt(value) : null);
+      const getParsedDecimalValue = (value) => (value ? parseFloat(value) : null);
+      const gestString = (value) => (value ? value : null);
+      const IngresosTrabajoString = String(formData.ingresos);  // Convierte a string
+      const EgresosTrabajoString = String(formData.gastos);     // Convierte a string
+
+      const response = await axios.patch(
+        url,
+        {
+          NombreNegocio: formData.nombreNegocio,
+          idCre_TiempoNegocio: getParsedValue(formData.tiempoNegocio),
+          MetrosCuadrados: getParsedValue(formData.metros),
+          idProvinciaNegocio: getParsedValue(formData.provincia),
+          idCantonNegocio: getParsedValue(formData.canton),
+          idParroquiaNegocio: getParsedValue(formData.parroquia),
+          idBarrioNegocio: getParsedValue(formData.barrio),
+          CallePrincipalNegocio: formData.callePrincipal,
+          NumeroCasaNegocio: formData.numeroCasa,
+          CalleSecundariaNegocio: formData.calleSecundaria,
+          ReferenciaUbicacionNegocio: formData.referenciaUbicacion,
+          IngresosNegosio: IngresosTrabajoString,
+          EgresosNegocio: EgresosTrabajoString,
+          ActividadEconomicaNegocio: formData.actividadNegocio,
+          AfiliadoTributario: formData.AfiliadoTributario,
+          OblidagoLlevarContabilidad: formData.ObligadoContabilidad
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // Si todo sale bien
+      enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
+    } catch (error) {
+      // Si ocurre algún error
+      enqueueSnackbar("Error al guardar los datos del conyuge.", { variant: "error" });
+      console.error("Error al guardar los datos del conyuge", error);
     }
   };
 
@@ -229,9 +283,7 @@ export function Cabecera() {
 
   const fetchSaveDatosTrabajo = async (formData) => {
     try {
-      console.log("Datos de trabajo a guardar:", formData);
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
-      console.log("URL:", url);
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
       const getParsedDecimalValue = (value) => (value ? parseFloat(value) : null);
@@ -272,9 +324,6 @@ export function Cabecera() {
           },
         }
       );
-
-      console.log("Datos del conyuge guardados correctamente:", response.data);
-
       // Si todo sale bien
       enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
     } catch (error) {
@@ -288,7 +337,6 @@ export function Cabecera() {
   const fetchSaveDatosConyuge = async (formData) => {
     try {
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
-      console.log("URL:", url);
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
 
@@ -313,9 +361,6 @@ export function Cabecera() {
           },
         }
       );
-
-      console.log("Datos del conyuge guardados correctamente:", response.data);
-
       // Si todo sale bien
       enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
     } catch (error) {
@@ -327,7 +372,6 @@ export function Cabecera() {
 
   const fetchSaveDatosDomicilio = async (formData) => {
     try {
-      console.log("Datos de nacimiento a guardar: cepeda", formData);
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
@@ -362,10 +406,6 @@ export function Cabecera() {
           },
         }
       );
-
-      console.log("Datos de nacimiento guardados correctamente:", response.data);
-      // se dirija al tab de datos de conyuge
-
       // Si todo sale bien
       enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
     } catch (error) {
@@ -380,7 +420,6 @@ export function Cabecera() {
   const fetchSaveDatosNacimiento = async (formData) => {
     try {
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
-      console.log("URL:", url);
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
 
@@ -406,9 +445,6 @@ export function Cabecera() {
           },
         }
       );
-
-      console.log("Datos de nacimiento guardados correctamente:", response.data);
-
       // Si todo sale bien
       enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
     } catch (error) {
