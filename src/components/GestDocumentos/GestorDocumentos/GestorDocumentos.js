@@ -3,7 +3,6 @@ import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import CancelIcon from "@mui/icons-material/Cancel";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
@@ -12,6 +11,7 @@ export function GestorDocumentos({
     id,
     NumeroSolicitud,
     nombre,
+    apellido,
     cedula,
     fecha,
     almacen,
@@ -34,9 +34,10 @@ export function GestorDocumentos({
     const [observaciones, setObservaciones] = useState({}); // Para almacenar las observaciones por documento
     const [allDocuments, setAllDocuments] = useState([]); // Estado para mantener todos los documentos de la solicitud
     const [documentStatus, setDocumentStatus] = useState({});
-
     const [currentIndex, setCurrentIndex] = useState(0);  // Estado para el carrusel
     const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
+    const [showApproveAllButton, setShowApproveAllButton] = useState(false); // Mostrar botón de aprobar 
+    const [showRevisionButton, setShowRevisionButton] = useState(false); // Mostrar botón de revisión
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -49,6 +50,19 @@ export function GestorDocumentos({
         vendedor: "",
         consulta: "",
     });
+
+    // mostrar botones
+    useEffect(() => {
+        if (allDocuments.length > 0) {
+            // si todos los documentos estan aprovados
+            const allApproved = allDocuments.every(doc => doc.estado === 3);
+            setShowApproveAllButton(allApproved);
+
+            // si algun documento esta rechazado
+            const hasRejectedDocs = allDocuments.some(doc => doc.estado === 4);
+            setShowRevisionButton(hasRejectedDocs);
+        }
+    }, [allDocuments]);
 
     // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
@@ -230,6 +244,37 @@ export function GestorDocumentos({
         } catch (error) {
             console.error("Error al enviar los datos:", error.response?.data);
             enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
+        }
+    };
+
+    //api actualizar estado de solicitudWeb
+    const updateEstadoVerificacion = async (idEstadoVerificacionDocumental) => {
+        try {
+            const url = APIURL.update_soliciutd_telefonica(clientInfo.id, idEstadoVerificacionDocumental);
+
+            const response = await axios.patch(url);
+
+            if (response.status === 200) {
+                // Mensaje de éxito con el estado actualizado
+                const estadoTexto = {
+                    3: "Enviado para corrección",
+                    4: "Aprobados",
+                    5: "Rechazados"
+                }[idEstadoVerificacionDocumental] || "Actualizado";
+
+                enqueueSnackbar(`Documentos ${estadoTexto}`, {
+                    variant: "success",
+                });
+            } else {
+                enqueueSnackbar("Error al actualizar la solicitud.", {
+                    variant: "error",
+                });
+            }
+        } catch (error) {
+            enqueueSnackbar("Error al actualizar la solicitud.", {
+                variant: "error",
+            });
+            console.error("Error al actualizar la solicitud:", error);
         }
     };
 
@@ -505,48 +550,71 @@ export function GestorDocumentos({
                 className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"} md:block transition-all duration-300 ease-in-out overflow-y-auto`}
             >
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold text-gray-100">Número de Solicitud: </h2>
-                    <p>{clientInfo.NumeroSolicitud}</p>
-
+                    <div>
+                        <button name="rechTodo"
+                            className="bg-red-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-red-700 transition duration-300 mb-3"
+                            onClick={() => updateEstadoVerificacion(5)}
+                        >
+                            Rechazar
+                        </button>
+                        {showApproveAllButton && (
+                            <button
+                                name="aprobTodo"
+                                className="bg-green-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-green-700 transition duration-300 mb-3"
+                                onClick={() => updateEstadoVerificacion(4)}
+                            >
+                                Aprobar
+                            </button>
+                        )}
+                        {showRevisionButton && (
+                            <button
+                                name="revTodo"
+                                className="bg-gray-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-gray-700 transition duration-300"
+                                onClick={() => updateEstadoVerificacion(3)}
+                            >
+                                Corrección
+                            </button>
+                        )}
+                    </div>
                     {/* Lista de todos los documentos */}
-                                        <div className="mt-6">
-                                            <h3 className="text-lg font-semibold mb-2">Documentos:</h3>
-                                            {Object.entries(documentsByType).map(([typeName, docs]) => (
-                                                <div key={typeName} className="mb-4">
-                                                    <h4 
-                                                        className="text-white font-medium mb-1 cursor-pointer hover:underline"
-                                                        onClick={() => {
-                                                            // Encuentra el primer documento de este tipo en flatFiles
-                                                            const index = flatFiles.findIndex(file => file.sectionName === typeName);
-                                                            if (index !== -1) {
-                                                                setCurrentIndex(index);
-                                                                setIsMenuOpen(false); 
-                                                            }
-                                                        }}
-                                                    >
-                                                        {typeName}:
-                                                    </h4>
-                                                    <ul className="pl-3 space-y-1">
-                                                        {docs.map(doc => (
-                                                            <li
-                                                                key={doc.id}
-                                                                className={`text-sm flex items-center justify-between ${getStatusColor(doc.id)}`}
-                                                            >
-                                                                <span className="truncate">{doc.name}</span>
-                                                                <span className="text-xs ml-1 whitespace-nowrap">{getStatusText(doc.id)}</span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ))}
-                                            {allDocuments.length === 0 && (
-                                                <p className="text-sm text-gray-300">No hay documentos disponibles</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="mt-6">
+                        <h3 className="text-lg font-semibold mb-2">Documentos:</h3>
+                        {Object.entries(documentsByType).map(([typeName, docs]) => (
+                            <div key={typeName} className="mb-4">
+                                <h4
+                                    className="text-white font-medium mb-1 cursor-pointer hover:underline"
+                                    onClick={() => {
+                                        // Encuentra el primer documento de este tipo en flatFiles
+                                        const index = flatFiles.findIndex(file => file.sectionName === typeName);
+                                        if (index !== -1) {
+                                            setCurrentIndex(index);
+                                            setIsMenuOpen(false);
+                                        }
+                                    }}
+                                >
+                                    {typeName}:
+                                </h4>
+                                <ul className="pl-3 space-y-1">
+                                    {docs.map(doc => (
+                                        <li
+                                            key={doc.id}
+                                            className={`text-sm flex items-center justify-between ${getStatusColor(doc.id)}`}
+                                        >
+                                            <span className="truncate">{doc.name}</span>
+                                            <span className="text-xs ml-1 whitespace-nowrap">{getStatusText(doc.id)}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                        {allDocuments.length === 0 && (
+                            <p className="text-sm text-gray-300">No hay documentos disponibles</p>
+                        )}
+                    </div>
+                </div>
+            </div>
 
-                                {/* Menu Toggle Button */}
+            {/* Menu Toggle Button */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="fixed top-6 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
@@ -643,7 +711,7 @@ export function GestorDocumentos({
                                         )}
 
                                         {/* Botones */}
-                                        <div className="absolute top-2 right-2 flex items-center gap-3 z-10 bg-white bg-opacity-70 p-3 rounded-md">
+                                        <div className="absolute top-2 right-2 flex items-center gap-3 z-10 bg-grey-50 bg-opacity-70 p-3 rounded-md">
                                             {renderActionButtons(flatFiles[currentIndex])}
                                         </div>
 
