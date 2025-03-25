@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import { useAuth } from '../../AuthContext/AuthContext';
 import { FaEye } from 'react-icons/fa'; // Importamos el ícono de ojo
+import NumbersIcon from '@mui/icons-material/Numbers';
+import BadgeIcon from '@mui/icons-material/Badge';
+import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
+import PhoneIcon from '@mui/icons-material/Phone';
 import { useNavigate } from "react-router-dom";
 
 export function DocumentoSolicitud() {
@@ -91,11 +95,11 @@ export function DocumentoSolicitud() {
         nombre: cliente.PrimerNombre,
         apellido: cliente.ApellidoPaterno,
         cedula: cliente.Cedula,
-        fecha: cliente.FechaCreacion,
-        almacen: cliente.b_Nombre,
+        fecha: cliente.Fecha,
+        almacen: cliente.Bodega,
         foto: cliente.Foto,
-        vendedor: cliente.Vendedor,
-        consulta: cliente.Consulta,
+        vendedor: cliente.idVendedor,
+        consulta: cliente.idCompraEncuesta,
       },
     });
   };
@@ -188,19 +192,13 @@ export function DocumentoSolicitud() {
 
                 {/* Contenido de la tarjeta */}
                 <h2 className="text-2xl font-semibold text-gray-800">{cliente.PrimerNombre} {cliente.ApellidoPaterno}</h2>
-                <p className="text-gray-600 mt-2">Número de solicitud: {cliente.NumeroSolicitud}</p>
-                <p className="text-gray-600">Cédula: {cliente.Cedula}</p>
-                <p className="text-gray-600">Email: {cliente.Email}</p>
-                <p className="text-gray-600">Teléfono: {cliente.Celular}</p>
-                <p className="text-gray-600">Código Dactilar: {cliente.CodDactilar}</p>
+                <p className="text-gray-600"><NumbersIcon fontSize="small"/> Número de solicitud: {cliente.NumeroSolicitud}</p>
+                <p className="text-gray-600"><BadgeIcon fontSize="small"/> Cédula: {cliente.Cedula}</p>
+                <p className="text-gray-600"><AlternateEmailIcon fontSize="small"/> Email: {cliente.Email}</p>
+                <p className="text-gray-600"><PhoneIcon fontSize="small"/> Teléfono: {cliente.Celular}</p>
 
                 <p className={`mt-4 font-semibold text-sm ${cliente.Estado === 1 ? 'text-yellow-600' : cliente.Estado === 2 ? 'text-green-600' : 'text-red-600'}`}>
                   Estado: {cliente.Estado === 1 ? 'Pendiente' : cliente.Estado === 2 ? 'Aprobado' : 'Rechazado'}
-                </p>
-
-                {/* Términos y Condiciones */}
-                <p className="mt-2 text-sm text-gray-500">
-                  {cliente.bTerminosYCondiciones ? 'Términos y condiciones aceptados' : 'Términos y condiciones no aceptados'}
                 </p>
               </div>
             ))
