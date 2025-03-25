@@ -376,6 +376,7 @@ export default function CreditoForm() {
       CodDactilar: values.CodDactilar?.toUpperCase(),
       idCompraEncuesta: Number(values.idCompraEncuesta),
       idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
+      idEstadoVerificacionDocumental : 1,
     };
 
 

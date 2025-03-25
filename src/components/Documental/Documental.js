@@ -57,7 +57,7 @@ export function Documental({
 
   const handleConfirm = () => {
     setIsModalOpen(false);
-    patchsolicitudWeb(); // Llama a la función después de la confirmación
+    patchsolicitudWeb(); 
   };
 
   const [clientInfo, setClientInfo] = useState({
@@ -105,7 +105,9 @@ export function Documental({
               name: fileName,
               url: fileUrl,
               type: fileUrl.endsWith(".pdf") ? "application/pdf" : "image/jpeg",
+              estado : file.idEstadoDocumento,
             });
+            
 
             previews[sectionName].push(fileUrl);
             completed.add(sectionName);
@@ -217,7 +219,7 @@ export function Documental({
   const patchsolicitudWeb = async () => {
     try {
       const response = await axios.patch(APIURL.patch_solicitudweb(clientInfo.id));
-  
+      await axios.patch(APIURL.update_soliciutd_telefonica(clientInfo.id, 2));
       if (response.status === 200) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -237,6 +239,8 @@ export function Documental({
     }
   };
   
+
+ 
   const getProgressBarColor = () => {
     const progress = calculateProgress();
     if (progress < 50) return "#FF0000";
@@ -311,7 +315,7 @@ export function Documental({
       try {
         // 1️⃣ Enviar PATCH a la API para actualizar el estado del documento
         const response = await axios.patch(APIURL.patch_documentos(id), {
-          idEstadoDocumento: 4, // 👈 Aquí estableces el nuevo estado en la base de datos
+          idEstadoDocumento: 5, // 👈 Aquí estableces el nuevo estado en la base de datos
         });
 
         if (response.status === 200) {

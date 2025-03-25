@@ -8,8 +8,8 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DatosCliente from "../DatosCliente/DatosCliente";
 import DatosConyuge from "../DatosConyuge/DatosConyuge";
-import { SeccionB } from "../SeccionB";
-import { SeccionA } from "../SeccionA";
+import SeccionB from "../../SolicitudGrande/SeccionB/SeccionB";
+import  SeccionA  from "../../SolicitudGrande/SeccionA/SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
 import { useSnackbar } from 'notistack';
 import { Verificacion } from "../Verificacion/Verificacion";
@@ -19,7 +19,7 @@ import { CabeceraDatosSolicitud } from "../CabeceraDatosSolicitud";
 import { Loader } from "../../Utils"; // Make sure to import the Loader component
 import Datos from "../DatosCliente/Datos/Datos";
 import Domicilio from "../DatosCliente/Domicilio/Domicilio";
-import  Referencias  from "../Referencia/Referencia";
+import Referencias from "../Referencia/Referencia";
 export function Cabecera() {
   const { state } = useLocation();
   const { data } = state || {};
@@ -46,6 +46,9 @@ export function Cabecera() {
   const datosDomicilioRef = useRef(); // Referencia para el componente Domicilio
   const datosConyuge = useRef(); // Referencia para el componente DatosConyuge
   const datosReferencias = useRef(); // Referencia para el componente Referencias
+  const datosTrabajo = useRef(); // Referencia para el componente Trabajo
+  const datosNegocio = useRef(); // Referencia para el componente Negocio
+
   const ref = useRef(); // Create ref for imperative handle
 
   useEffect(() => {
@@ -102,11 +105,11 @@ export function Cabecera() {
       case "Datos Conyuge":
         return clienteData.idEdoCivil === 1 ? <DatosConyuge ref={datosConyuge} data={clienteData} /> : null;
       case "Referencias":
-        return <Referencias data = {clienteData}  />;
-      case "Negocio":
-        return <SeccionA ref={seccionRef} />;
+        return <Referencias data={clienteData} />;
       case "Dependiente":
-        return <SeccionB />;
+        return clienteData.idSituacionLaboral === 1 ? <SeccionB ref={datosTrabajo} data={clienteData} /> : null;
+      case "Negocio":
+        return clienteData.idSituacionLaboral != 1 ? <SeccionA ref={datosNegocio} data={clienteData} /> : null;
       case "Factores de Crédito":
         return <FactoresCredito ref={seccionRef} />;
         {/*} case "Verificación":
@@ -183,17 +186,28 @@ export function Cabecera() {
       }
     }
     if (activeTab === "Datos Conyuge") {
+
       const formData = datosConyuge.current.getFormData();
       const isValid = datosConyuge.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
-         fetchSaveDatosConyuge(formData);
+        fetchSaveDatosConyuge(formData);
         setActiveTab("Referencias");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
-      } 
+      }
       //else {
-        //enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+      //enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
       //}
+    }
+
+    if (activeTab === "Dependiente") {
+      const formData = datosTrabajo.current.getFormData();
+      const isValid = datosTrabajo.current.validateForm(); // Llamamos a validateForm del componente Datos
+
+      if (isValid) {
+        fetchSaveDatosTrabajo(formData);
+        setActiveTab("Factores de Crédito");
+      }
     }
   };
 
@@ -213,6 +227,64 @@ export function Cabecera() {
     return null;
   };
 
+  const fetchSaveDatosTrabajo = async (formData) => {
+    try {
+      console.log("Datos de trabajo a guardar:", formData);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      console.log("URL:", url);
+      // Función para asegurar que los valores sean válidos y numéricos
+      const getParsedValue = (value) => (value ? parseInt(value) : null);
+      const getParsedDecimalValue = (value) => (value ? parseFloat(value) : null);
+      const gestString = (value) => (value ? value : null);
+      const IngresosTrabajoString = String(formData.ingresos);  // Convierte a string
+      const EgresosTrabajoString = String(formData.gastos);     // Convierte a string
+
+      const response = await axios.patch(
+        url,
+        {
+          NombreEmpresa: formData.empresa,
+          idTipoEmpresa: getParsedValue(formData.tipoEmpresa),
+          FechaIngresoEmpresa: formData.fechaIngreso,
+          IngresosTrabajo: IngresosTrabajoString,
+          EgresosTrabajo: EgresosTrabajoString,
+          idTipoContrato: getParsedValue(formData.tipoContrato),
+          idTipoSueldo: getParsedValue(formData.tipoSueldo),
+          Departaento: formData.departamento,
+          idCargo: getParsedValue(formData.cargo),
+          DiaPago: getParsedValue(formData.diasPago),
+          AfiliadoIESS: formData.afiliado,
+          idProvinciaTrabajo: getParsedValue(formData.provincia),
+          idCantonTrabajo: getParsedValue(formData.canton),
+          idParroquiaTrabajo: getParsedValue(formData.parroquia),
+          idBarrioTrabajo: getParsedValue(formData.barrio),
+          CallePrincipalTrabajo: formData.callePrincipal,
+          NumeroCasaTrabajo: formData.numeroCasa,
+          CalleSecundariaTrabajo: formData.calleSecundaria,
+          TelefonoTrabajo: formData.telefono,
+          Ext: formData.ext,
+          CelularTrabajo: formData.celular,
+          ReferenciaUbicacionTrabajo: formData.referenciaUbicacion,
+
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Datos del conyuge guardados correctamente:", response.data);
+
+      // Si todo sale bien
+      enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
+    } catch (error) {
+      // Si ocurre algún error
+      enqueueSnackbar("Error al guardar los datos del conyuge.", { variant: "error" });
+      console.error("Error al guardar los datos del conyuge", error);
+    }
+  };
+
+
   const fetchSaveDatosConyuge = async (formData) => {
     try {
       const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
@@ -226,12 +298,12 @@ export function Cabecera() {
           idTipoDocConyuge: getParsedValue(formData.tipoDocumento),
           ApellidoPaternoConyuge: formData.apellidoPaterno,
           PrimerNombreConyuge: formData.primerNombre,
-          SegundoNombreConyuge: formData.segundoNombre,	
-          CedulaConyuge: formData.numeroDocumento,	
+          SegundoNombreConyuge: formData.segundoNombre,
+          CedulaConyuge: formData.numeroDocumento,
           FechaNacimientoConyuge: formData.fechaNacimiento,
-          idNacionalidadConyuge: getParsedValue(formData.nacionalidad),	
+          idNacionalidadConyuge: getParsedValue(formData.nacionalidad),
           idGeneroConyuge: getParsedValue(formData.sexo),
-          idNivelEducacionConyuge: getParsedValue(formData.nivelEducacion),	
+          idNivelEducacionConyuge: getParsedValue(formData.nivelEducacion),
           idProfesionConyuge: getParsedValue(formData.profesion),
 
         },
