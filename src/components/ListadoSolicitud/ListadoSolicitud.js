@@ -47,6 +47,10 @@ import { red } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
 import HourglassFullIcon from '@mui/icons-material/HourglassFull';
+import PendingIcon from '@mui/icons-material/Pending';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+
 
 
 export function ListadoSolicitud() {
@@ -109,7 +113,20 @@ export function ListadoSolicitud() {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
-
+  const getIconByEstado = (estadoId) => {
+    switch (estadoId) {
+      case 1: // Estado "Aprobado"
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      case 2: // Estado "En revisión"
+        return <PendingIcon sx={{ color: "#FFC107" }} />;
+      case 3: // Estado "Corrección"
+        return <ReportProblemIcon sx={{ color: "#FF5722" }} />;
+      case 4: // Estado "Rechazado"
+        return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+      default:
+        return <FolderIcon sx={{ color: "#6C757D" }} />; // Estado por defecto
+    }
+  };
 
 
   const getColorByEstado = (estado) => {
@@ -513,11 +530,10 @@ export function ListadoSolicitud() {
                     </IconButton>
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton onClick={() => handledocumentos(data)}>
-                    <HourglassFullIcon sx={{ color: getColorByEstado(data.idEstadoVerificacionDocumental) }} />
-
-                    </IconButton>
-                  </TableCell>
+  <IconButton onClick={() => handledocumentos(data)}>
+    {getIconByEstado(data.idEstadoVerificacionDocumental)}
+  </IconButton>
+</TableCell>
                   <TableCell align="center">
                     <IconButton onClick={() => handleTelefonica(data)}>
                       <PhoneIcon sx={{ color: 'gray' }} />
