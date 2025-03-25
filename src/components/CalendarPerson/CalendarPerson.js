@@ -457,7 +457,7 @@ export function CalendarPerson(props) {
 									isActive 
 									  ? (editable 
 										   ? "bg-green-500 hover:bg-green-600 shadow-sm" 
-										   : "bg-green-500 cursor-not-allowed")
+										   : "bg-green-400 cursor-not-allowed")
 									  : !editable
 										? "bg-gray-100 cursor-not-allowed opacity-50"
 										: "bg-gray-200 hover:bg-gray-300"
