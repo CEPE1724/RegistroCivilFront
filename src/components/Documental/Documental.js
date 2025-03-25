@@ -10,7 +10,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa"; // Importar icono de usuario
 
-
 import {
   Dialog,
   DialogActions,
@@ -54,10 +53,9 @@ export function Documental({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observaciones, setObservaciones] = useState([]);
 
-
   const handleConfirm = () => {
     setIsModalOpen(false);
-    patchsolicitudWeb(); 
+    patchsolicitudWeb();
   };
 
   const [clientInfo, setClientInfo] = useState({
@@ -73,8 +71,6 @@ export function Documental({
   });
   const [filePreviews, setFilePreviews] = useState({});
 
-
-
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
@@ -85,7 +81,6 @@ export function Documental({
           const uploadedFiles = {};
           const previews = {};
           const completed = new Set();
-
 
           response.data.forEach((file) => {
             console.log("Archivo recibido:", file); // ✅ Verificar estructura de cada archivo
@@ -105,19 +100,16 @@ export function Documental({
               name: fileName,
               url: fileUrl,
               type: fileUrl.endsWith(".pdf") ? "application/pdf" : "image/jpeg",
-              estado : file.idEstadoDocumento,
+              estado: file.idEstadoDocumento,
             });
-            
 
             previews[sectionName].push(fileUrl);
             completed.add(sectionName);
-
           });
 
           setFiles(uploadedFiles);
           setFilePreviews(previews);
           setCompletedFields2([...completed]);
-
         }
       } catch (error) {
         enqueueSnackbar("Error al obtener archivos subidos.", {
@@ -131,7 +123,6 @@ export function Documental({
       fetchUploadedFiles();
     }
   }, [clientInfo.id, refreshFiles]);
-
 
   const getTipoDocumento = (id) => {
     const documentoIds = {
@@ -218,14 +209,17 @@ export function Documental({
 
   const patchsolicitudWeb = async () => {
     try {
-      const response = await axios.patch(APIURL.patch_solicitudweb(clientInfo.id));
+      const response = await axios.patch(
+        APIURL.patch_solicitudweb(clientInfo.id)
+      );
       await axios.patch(APIURL.update_soliciutd_telefonica(clientInfo.id, 2));
       if (response.status === 200) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
         });
         navigate("/ListadoSolicitud", {
-          replace: true});
+          replace: true,
+        });
       } else {
         enqueueSnackbar("Error al actualizar la solicitud.", {
           variant: "error",
@@ -238,16 +232,13 @@ export function Documental({
       console.error("Error al actualizar la solicitud:", error);
     }
   };
-  
 
- 
   const getProgressBarColor = () => {
     const progress = calculateProgress();
     if (progress < 50) return "#FF0000";
     if (progress < 80) return "#FF9800";
     return "#4CAF50";
   };
-
 
   /*useEffect(() => {
     if (calculateProgress() === 100) {
@@ -324,7 +315,6 @@ export function Documental({
           });
 
           setRefreshFiles((prev) => !prev); // Esto recarga los archivos en el useEffect
-
         }
       } catch (error) {
         enqueueSnackbar("Error al eliminar el documento en la BD.", {
@@ -354,7 +344,9 @@ export function Documental({
         return prevPreviews;
 
       const updatedPreviews = { ...prevPreviews };
-      updatedPreviews[field] = updatedPreviews[field].filter((_, i) => i !== index);
+      updatedPreviews[field] = updatedPreviews[field].filter(
+        (_, i) => i !== index
+      );
 
       if (updatedPreviews[field].length === 0) {
         delete updatedPreviews[field];
@@ -370,11 +362,11 @@ export function Documental({
     setView(!view);
   };
 
-
-
   const verificarDocumento = async (idCreSolicitudWeb, tipoDocumento) => {
     try {
-      const response = await axios.get(APIURL.getCheckDocumento(idCreSolicitudWeb, tipoDocumento));
+      const response = await axios.get(
+        APIURL.getCheckDocumento(idCreSolicitudWeb, tipoDocumento)
+      );
       console.log("Respuesta del backend:", response.data);
       return response.data; // Devolverá `true` o `false`
     } catch (error) {
@@ -399,12 +391,12 @@ export function Documental({
     };
 
     // Buscamos la clave (número) correspondiente al nombre
-    const id = Object.keys(documentoIds).find(key => documentoIds[key] === nombre);
+    const id = Object.keys(documentoIds).find(
+      (key) => documentoIds[key] === nombre
+    );
 
     return id ? Number(id) : null; // Convertimos a número si existe, sino retornamos null
   };
-
-
 
   const fetchObservaciones = async () => {
     const numeroActivetab = getNumeroDocumento(activeTab);
@@ -420,34 +412,47 @@ export function Documental({
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsUploading(true);
 
     const tipoDocumento = getNumeroDocumento(activeTab);
-    const documentoExiste = await verificarDocumento(clientInfo.id, tipoDocumento);
-    console.log(documentoExiste)
+    const documentoExiste = await verificarDocumento(
+      clientInfo.id,
+      tipoDocumento
+    );
+    console.log(documentoExiste);
 
     if (documentoExiste.exists) {
-      enqueueSnackbar("Ya existe un documento cargado para este campo.", { variant: "error" });
+      enqueueSnackbar("Ya existe un documento cargado para este campo.", {
+        variant: "error",
+      });
       setIsUploading(false); // Ocultar modal si hay error
       return;
     }
 
     if (!files[activeTab] || files[activeTab].length === 0) {
-      enqueueSnackbar(`Por favor, selecciona un archivo para el campo ${activeTab}`, { variant: "error" });
+      enqueueSnackbar(
+        `Por favor, selecciona un archivo para el campo ${activeTab}`,
+        { variant: "error" }
+      );
       setIsUploading(false);
       return;
     }
 
     // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
-    if (observacion[activeTab] && observacion[activeTab].length > 0 && observacion[activeTab].length < 10) {
-      enqueueSnackbar("Si proporcionas una observación, debe tener al menos 10 caracteres para este campo.", { variant: "error" });
+    if (
+      observacion[activeTab] &&
+      observacion[activeTab].length > 0 &&
+      observacion[activeTab].length < 10
+    ) {
+      enqueueSnackbar(
+        "Si proporcionas una observación, debe tener al menos 10 caracteres para este campo.",
+        { variant: "error" }
+      );
       setIsUploading(false);
       return;
     }
-
 
     try {
       // Subir archivo y obtener la URL
@@ -522,7 +527,7 @@ export function Documental({
         } else {
           enqueueSnackbar(
             "Error al guardar el documento en la BD. " +
-            apiResponse.data?.message || "",
+              apiResponse.data?.message || "",
             { variant: "error" }
           );
         }
@@ -581,116 +586,130 @@ export function Documental({
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"
-          } md:block transition-all duration-300 ease-in-out`}
-      >
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-gray-100">Menú</h2>
-
-          {/* Progreso de Archivos */}
-          <div className="mt-6">
-            <div className="relative pt-1">
-              <label className="block text-sm font-semibold text-gray-300">
-                Progreso de Archivos
-              </label>
-              <div className="flex mb-2 items-center justify-between">
-                <span className="text-xs font-medium text-gray-300">
-                  {Math.round(calculateProgress())}%
-                </span>
-              </div>
-              <div className="flex mb-2">
-                <div
-                  className="w-full bg-gray-200 rounded-full h-2.5"
-                  style={{
-                    backgroundColor: getProgressBarColor(),
-                    width: `${calculateProgress()}%`,
-                  }}
-                ></div>
-              </div>
-              {calculateProgress() === 100 && (
-                <div className="flex justify-center mt-6">
-                  <button onClick={() => setIsModalOpen(true)} className="bg-green-600 text-white py-2 px-6 rounded-md shadow-md hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105">
-                     Enviar verificación
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Campos Pendientes */}
-          <div className="mt-6">
-            <h3 className="text-lg text-gray-300 font-semibold">
-              Campos Pendientes
-            </h3>
-            <ul className="mt-4 space-y-4">
-              {pendingFields.map((item) => {
-                const fileCount = files[item] ? files[item].length : 0;
-                return (
-                  <li key={item}>
-                    <a
-                      href="#"
-                      onClick={(event) => {
-                        event.preventDefault(); // Evita que el navegador cambie la URL
-                        setActiveTab(item);
-                      }}
-                      className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item ? "bg-gray-700" : "hover:bg-gray-600"
-                        }`}
-                    >
-                      {item}
-                      {fileCount > 0 && (
-                        <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
-                          {`+${fileCount}`}
-                        </span>
-                      )}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Campos Completados */}
-          {completedFields.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg text-gray-300 font-semibold">
-                Campos Completados
-              </h3>
-              <ul className="mt-4 space-y-4">
-                {completedFields.map((item) => {
-                  const fileCount = files[item] ? files[item].length : 0;
-                  return (
-                    <li key={item}>
-                      <a
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault(); // Evita que el navegador cambie la URL
-                          setActiveTab(item);
-                        }}
-                        className={`block text-gray-300 hover:text-white py-2 px-4 rounded-md transition-all duration-200 ease-in-out ${activeTab === item
-                            ? "bg-gray-700"
-                            : "hover:bg-gray-600"
-                          }`}
-                      >
-                        {item}
-                        {fileCount > 0 && (
-                          <span className="text-white px-2 ml-2 bg-green-500 rounded-full text-xs font-bold">
-                            {`+${fileCount}`}
-                          </span>
-                        )}
-
-                        {/* ✅ Solo mostrar visto en los que ya están en la BD */}
-                        {completedFields2.includes(item) && (
-                          <span className="ml-2 text-green-400 font-bold">✓</span>
-                        )}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-        </div>
+  className={`w-64 bg-white text-gray-800 shadow-lg ${
+    isMenuOpen ? "block" : "hidden"
+  } md:block transition-all duration-300 ease-in-out`}
+>
+  <div className="p-4 space-y-6">
+    {/* Progreso de Archivos */}
+    <div>
+      <label className="block text-sm font-semibold text-gray-500">
+        Progreso de Archivos
+      </label>
+      <div className="mt-2 flex items-center justify-between">
+        <span className="text-sm text-gray-600">{Math.round(calculateProgress())}%</span>
       </div>
+
+      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+        <div
+          className="rounded-full h-2 transition-all duration-500 ease-in-out"
+          style={{
+            width: `${calculateProgress()}%`,
+            backgroundColor: getProgressBarColor(),
+          }}
+        ></div>
+      </div>
+
+      {calculateProgress() === 100 && (
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-green-500 text-sm text-white py-2 px-4 rounded shadow hover:bg-green-600 transition-transform duration-300 transform hover:scale-105"
+          >
+            Enviar verificación
+          </button>
+        </div>
+      )}
+    </div>
+
+    {/* Campos Pendientes */}
+    <div>
+      <h3 className="text-sm font-medium text-gray-500">Campos Pendientes</h3>
+      <ul className="mt-2 space-y-1">
+        {pendingFields.map((item) => {
+          const fileCount = files[item]?.length || 0;
+          const isSelected = activeTab === item;
+
+          return (
+            <li key={item}>
+              <a
+                href="#"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setActiveTab(item);
+                }}
+                className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200 
+                  ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-lg" // Contraste con color azul
+                      : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                  }`}
+              >
+                {item}
+                {fileCount > 0 && (
+                  <span
+                    className={`text-xs font-bold px-2 py-1 rounded-full ${
+                      isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
+                    }`}
+                  >
+                    {`+${fileCount}`}
+                  </span>
+                )}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+
+    {/* Campos Completados */}
+    {completedFields.length > 0 && (
+      <div>
+        <h3 className="text-sm font-medium text-gray-500">Campos Completados</h3>
+        <ul className="mt-2 space-y-1">
+          {completedFields.map((item) => {
+            const fileCount = files[item]?.length || 0;
+            const isSelected = activeTab === item;
+
+            return (
+              <li key={item}>
+                <a
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setActiveTab(item);
+                  }}
+                  className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
+                  ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-lg" // Contraste con azul
+                      : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                  }`}
+                >
+                  {item}
+                  <div className="flex items-center">
+                    {fileCount > 0 && (
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
+                        }`}
+                      >
+                        {`+${fileCount}`}
+                      </span>
+                    )}
+                    {completedFields2.includes(item) && (
+                      <span className="ml-2 text-green-500 font-bold">✓</span>
+                    )}
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+  </div>
+</div>
 
       {/* Menu Toggle Button */}
       <button
@@ -701,7 +720,7 @@ export function Documental({
       </button>
 
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-white">
+      <div className="flex-1 p-2 bg-white">
         <div className="w-full bg-white p-6 rounded-lg shadow-lg">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-6">
@@ -715,8 +734,8 @@ export function Documental({
                 </div>
               )}
 
-              <div className="md:w-3/4 mt-6 pl-4 bg-white shadow-lg rounded-lg p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base leading-relaxed pl-10">
+              <div className="md:w-3/4 mt-2 pl-4 bg-white shadow-lg rounded-lg p-1 ">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base leading-relaxed pl-10">
                   {[
                     ["Número de Solicitud", clientInfo.NumeroSolicitud],
                     ["Nombre", clientInfo.nombre],
@@ -736,13 +755,11 @@ export function Documental({
             </div>
           </div>
 
-          <div className="flex justify-center items-center mt-6 w-full">
+          <div className="flex justify-center items-center mt-8 w-full">
             {/* Documentos Subidos */}
-            <h2 className="text-2xl font-semibold text-center text-gray-800">
-              Documentos Subidos
-            </h2>
+        
 
-            <div className="absolute right-11">
+            <div className=" pb-4 pt-5 md:absolute md:right-11 ">
               <button
                 onClick={fetchObservaciones}
                 className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
@@ -776,7 +793,7 @@ export function Documental({
                         className="text-red-500 hover:text-red-700"
                       >
                         ❌
-                      </button>  
+                      </button>
                     </div>
                   </div>
 
@@ -879,7 +896,7 @@ export function Documental({
               </svg>
             </button>
 
-            <div className="absolute right-11">
+            <div className="ml-4 md:absolute md:right-11">
               <button
                 onClick={handleSubmit}
                 className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
@@ -966,32 +983,53 @@ export function Documental({
 
       {/* Historial de Observaciones */}
 
-    {/* Modal para mostrar el chat de observaciones */}
-    {history && (
+      {/* Modal para mostrar el chat de observaciones */}
+      {history && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-md w-96 max-h-[500px] flex flex-col">
-            <h2 className="text-lg font-semibold mb-4 text-center">Historial de Observaciones</h2>
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              Historial de Observaciones
+            </h2>
 
             {/* Área de mensajes tipo chat */}
             <div className="flex-grow overflow-y-auto max-h-80 p-2 space-y-4 bg-gray-100 rounded-lg">
               {observaciones.length > 0 ? (
                 observaciones.map((obs, index) => (
-                  <div key={index} className={`flex ${index % 2 === 0 ? "justify-start" : "justify-end"}`}>
+                  <div
+                    key={index}
+                    className={`flex ${
+                      index % 2 === 0 ? "justify-start" : "justify-end"
+                    }`}
+                  >
                     <div className="flex items-start space-x-2 max-w-[80%]">
                       {/* Icono de usuario */}
                       <FaUserCircle className="text-gray-600 text-2xl" />
-                      
+
                       {/* Burbuja de chat */}
-                      <div className={`p-3 rounded-lg shadow-md ${index % 2 === 0 ? "bg-white text-gray-900" : "bg-blue-500 text-white"}`}>
-                        <p className="font-semibold">{obs.Usuario || "Usuario desconocido"}</p>
-                        <p className="text-sm">{obs.Observacion || "Sin observación"}</p>
-                        <p className="text-xs text-gray-500 mt-1">{new Date(obs.Fecha).toLocaleString()}</p>
+                      <div
+                        className={`p-3 rounded-lg shadow-md ${
+                          index % 2 === 0
+                            ? "bg-white text-gray-900"
+                            : "bg-blue-500 text-white"
+                        }`}
+                      >
+                        <p className="font-semibold">
+                          {obs.Usuario || "Usuario desconocido"}
+                        </p>
+                        <p className="text-sm">
+                          {obs.Observacion || "Sin observación"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(obs.Fecha).toLocaleString()}
+                        </p>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center">No hay observaciones registradas.</p>
+                <p className="text-gray-500 text-center">
+                  No hay observaciones registradas.
+                </p>
               )}
             </div>
 
@@ -1024,7 +1062,7 @@ export function Documental({
         </Dialog>
       )}
 
-{isModalOpen && (
+      {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-lg font-semibold">
@@ -1048,19 +1086,33 @@ export function Documental({
         </div>
       )}
 
-
       {isUploading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-            <svg className="animate-spin h-10 w-10 text-blue-500 mb-4" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            <svg
+              className="animate-spin h-10 w-10 text-blue-500 mb-4"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8H4z"
+              ></path>
             </svg>
-            <p className="text-lg font-semibold text-gray-700">Subiendo archivo...</p>
+            <p className="text-lg font-semibold text-gray-700">
+              Subiendo archivo...
+            </p>
           </div>
         </div>
       )}
-
     </div>
   );
 }
