@@ -17,15 +17,7 @@ for (let i = 8; i <= 21; i++) {
   hours.push(`${i}:00`);
 }
 
-const days = [
-  "Lunes",
-  "Martes",
-  "Miercoles",
-  "Jueves",
-  "Viernes",
-  "Sabado",
-  "Domingo",
-];
+const days = ["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"];
 
 export function CalendarPerson(props) {
   const { enqueueSnackbar } = useSnackbar();
@@ -37,9 +29,7 @@ export function CalendarPerson(props) {
   const [selectedAnalista, setSelectedAnalista] = useState("");
   const [schedule, setSchedule] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [fileInputLabel, setFileInputLabel] = useState(
-    "Importar horarios (CSV)"
-  );
+  const [fileInputLabel, setFileInputLabel] = useState("Importar horarios (CSV)");
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -54,14 +44,6 @@ export function CalendarPerson(props) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const weekDates = [];
-
-    console.log(
-      "[getWeekDates] startDate:",
-      startDate,
-      " => start local:",
-      start
-    );
-    console.log("[getWeekDates] endDate:", endDate, " => end local:", end);
 
     // Ajustamos para que la semana inicie en lunes
     const dayOfWeek = start.getDay();
@@ -124,20 +106,6 @@ export function CalendarPerson(props) {
     const nowMonth = now.getMonth();
     const nowDay = now.getDate();
 
-    // LOG para debug
-    console.log("--- [isEditableCell] ---");
-    console.log("fullDate:", fullDate.toString(), "| hour:", hour);
-    console.log(
-      "cell =>",
-      cellYear,
-      cellMonth,
-      cellDay,
-      " / now =>",
-      nowYear,
-      nowMonth,
-      nowDay
-    );
-
     // Comparación a nivel de fecha
     if (cellYear < nowYear) {
       console.log("[isEditableCell] Año pasado, retorna false");
@@ -168,17 +136,38 @@ export function CalendarPerson(props) {
     const [hStr, mStr = "0"] = hour.split(":");
     const cellTime = new Date(fullDate);
     cellTime.setHours(parseInt(hStr, 10), parseInt(mStr, 10), 0, 0);
-
-    console.log(
-      "[isEditableCell] Mismo día, comparando horas => cellTime:",
-      cellTime.toString(),
-      "| now:",
-      now.toString()
-    );
     const result = cellTime.getTime() > now.getTime();
-    console.log("[isEditableCell] => retorna:", result);
     return result;
   };
+
+  useEffect(() => {
+	const fetchHorariosAPI = async () => {
+	  if (selectedAnalista && selectedDate) {
+		const url = `${APIURL.get_horariosanalistas()}/analista/${selectedAnalista}/fecha/${selectedDate}`;
+		console.log("[fetchHorariosAPI] URL:", url);
+		
+		try {
+		  const { data: horarios } = await axios.get(url);
+		  console.log("[fetchHorariosAPI] Data:", horarios);
+		  
+		  const newSchedule = horarios.reduce((acc, { Dia, Hora, Estado }) => {
+			const hourStr = `${Hora}:00`;
+			acc[Dia] = acc[Dia] || {};
+			acc[Dia][hourStr] = Estado;
+			return acc;
+		  }, {});
+		  
+		  setSchedule(newSchedule);
+		} catch (error) {
+		  console.error("[fetchHorariosAPI] Error:", error);
+		  enqueueSnackbar("Error al cargar los horarios del analista", { variant: "error" });
+		}
+	  }
+	};
+	
+	fetchHorariosAPI();
+  }, [selectedAnalista, selectedDate]);
+  
 
   // Manejo de carga del archivo CSV
   const handleFileUpload = (event) => {
@@ -198,9 +187,6 @@ export function CalendarPerson(props) {
           (row) => row.Day && row.Hour && row.Status
         );
 
-        console.log("[handleFileUpload] CSV parseado =>", data);
-        console.log("[handleFileUpload] Filas válidas =>", validRows);
-
         validRows.forEach((row) => {
           const { Day, Hour, Status } = row;
           if (!days.includes(Day) || !hours.includes(Hour)) {
@@ -209,14 +195,6 @@ export function CalendarPerson(props) {
           }
           console.log(fechaDias);
           const fechaDia = fechaDias.find((fd) => fd.day === Day);
-          console.log(
-            "[handleFileUpload] Revisando =>",
-            Day,
-            Hour,
-            Status,
-            " => fechaDia =>",
-            fechaDia
-          );
 
           // Solo importamos la celda si es editable
           if (fechaDia && !isEditableCell(fechaDia.fullDate, Hour)) {
@@ -250,14 +228,6 @@ export function CalendarPerson(props) {
   // Al hacer clic en una celda se alterna su estado (si es editable)
   const handleButtonClick = (day, hour) => {
     const fechaDia = fechaDias.find((fd) => fd.day === day);
-    console.log(
-      "[handleButtonClick] day:",
-      day,
-      "hour:",
-      hour,
-      " => fechaDia:",
-      fechaDia
-    );
 
     if (fechaDia && !isEditableCell(fechaDia.fullDate, hour)) {
       enqueueSnackbar("No se puede modificar horarios pasados", {
@@ -290,14 +260,6 @@ export function CalendarPerson(props) {
       const iEstadoValue = currentStatus === "Active" ? 1 : 0;
 
       const url = APIURL.posthorarioanalista();
-      console.log("[fetchsaveHorario] POST =>", {
-        idAnalistaCredito: selectedAnalista,
-        Hora: hourInt,
-        Dia: day,
-        Estado: currentStatus,
-        iEstado: iEstadoValue,
-        idFechaAnalista: parseInt(selectedDate, 10),
-      });
       await axios.post(url, {
         idAnalistaCredito: selectedAnalista,
         Hora: hourInt,
@@ -338,7 +300,9 @@ export function CalendarPerson(props) {
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
       {/* Cabecera */}
-        <h1 className="text-2xl font-bold text-center mb-4 mt-4">Calendario de Disponibilidad</h1>
+      <h1 className="text-2xl font-bold text-center mb-4 mt-4">
+        Calendario de Disponibilidad
+      </h1>
 
       <div className="flex flex-col md:flex-row flex-1">
         {/* Panel lateral de analistas */}
@@ -353,7 +317,6 @@ export function CalendarPerson(props) {
               <PersonAddIcon />
             </button>
           </div>
-
           <div className="overflow-y-auto max-h-96 p-2">
             {menuData.length > 0 ? (
               menuData.map((item, index) => (
@@ -409,7 +372,6 @@ export function CalendarPerson(props) {
                   )}
                 </h2>
               </div>
-
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <div className="w-full sm:w-64">
                   <SelectField
@@ -424,7 +386,6 @@ export function CalendarPerson(props) {
                     }))}
                   />
                 </div>
-
                 <label className="flex items-center gap-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md cursor-pointer transition-colors border border-gray-300">
                   <UploadFileIcon className="text-blue-600" />
                   <span className="text-sm truncate max-w-xs">
@@ -456,13 +417,9 @@ export function CalendarPerson(props) {
                       <div className="p-2 font-medium text-gray-500 bg-gray-50 rounded-tl-md"></div>
                       {days.map((day, index) => {
                         const fechaDia = fechaDias.find((fd) => fd.day === day);
-                        // Para la cabecera, si el día es pasado se muestra con fondo gris
                         const dayEditable = fechaDia
                           ? isEditableCell(fechaDia.fullDate, hours[0])
                           : false;
-                        console.log(
-                          `[Cabecera] day: ${day}, dayEditable: ${dayEditable}`
-                        );
                         return (
                           <div
                             key={index}
@@ -481,7 +438,6 @@ export function CalendarPerson(props) {
                           </div>
                         );
                       })}
-
                       {/* Filas de horas */}
                       {hours.map((hour, hourIndex) => (
                         <React.Fragment key={hourIndex}>
@@ -489,27 +445,23 @@ export function CalendarPerson(props) {
                             {hour}
                           </div>
                           {days.map((day, dayIndex) => {
-                            const fechaDia = fechaDias.find(
-                              (fd) => fd.day === day
-                            );
+                            const fechaDia = fechaDias.find((fd) => fd.day === day);
                             const editable = fechaDia
                               ? isEditableCell(fechaDia.fullDate, hour)
                               : false;
                             const isActive = schedule[day]?.[hour] === "Active";
-                            console.log(
-                              `[Fila de horas] day: ${day}, hour: ${hour}, editable: ${editable}, isActive: ${isActive}`
-                            );
-
                             return (
                               <div key={dayIndex} className="text-center p-1">
                                 <button
                                   className={`w-full h-10 rounded-md transition-all duration-200 flex items-center justify-center ${
-                                    !editable
-                                      ? "bg-gray-100 cursor-not-allowed opacity-50"
-                                      : isActive
-                                      ? "bg-green-500 hover:bg-green-600 shadow-sm"
-                                      : "bg-gray-200 hover:bg-gray-300"
-                                  }`}
+									isActive 
+									  ? (editable 
+										   ? "bg-green-500 hover:bg-green-600 shadow-sm" 
+										   : "bg-green-400 cursor-not-allowed")
+									  : !editable
+										? "bg-gray-100 cursor-not-allowed opacity-50"
+										: "bg-gray-200 hover:bg-gray-300"
+								  }`}
                                   onClick={() => handleButtonClick(day, hour)}
                                   disabled={!editable}
                                   title={
@@ -535,7 +487,6 @@ export function CalendarPerson(props) {
                   </div>
                 </div>
               )}
-
               {/* Leyenda */}
               <div className="flex flex-wrap gap-4 mt-6 text-sm bg-gray-50 p-3 rounded-md">
                 <div className="flex items-center">
@@ -554,7 +505,7 @@ export function CalendarPerson(props) {
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-              <div className="text-blue-800 mb-4 text-5xl opacity-30">
+              <div className="text-blue-800 mb-4 text-5xl opacity-30 flex align-center justify-center">
                 <CalendarIcon />
               </div>
               <p className="text-gray-500">
@@ -564,7 +515,6 @@ export function CalendarPerson(props) {
           )}
         </div>
       </div>
-
       <ModalAnalista isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );

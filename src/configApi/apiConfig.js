@@ -106,4 +106,6 @@ export const APIURL = {
   get_cre_referenciasclientesweb_id: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/${id}`,
   update_soliciutd_telefonica:(id, estado) => `${API_BASE_URL}cre-solicitud-web/updatetelefonica/${id}/${estado}`,
 
+  get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
+
 };
