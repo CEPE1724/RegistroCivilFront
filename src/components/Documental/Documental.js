@@ -58,7 +58,6 @@ export function Documental({
   const handleConfirm = () => {
     setIsModalOpen(false);
     patchsolicitudWeb(); 
-    patch_verificacion_telefonica();// Llama a la función después de la confirmación
   };
 
   const [clientInfo, setClientInfo] = useState({
@@ -220,7 +219,7 @@ export function Documental({
   const patchsolicitudWeb = async () => {
     try {
       const response = await axios.patch(APIURL.patch_solicitudweb(clientInfo.id));
-  
+      await axios.patch(APIURL.update_soliciutd_telefonica(clientInfo.id, 2));
       if (response.status === 200) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -241,12 +240,7 @@ export function Documental({
   };
   
 
-  const patch_verificacion_telefonica = async () => 
-  {
-  
-     await axios.patch(APIURL.update_soliciutd_telefonica(clientInfo.id));
-
-  }
+ 
   const getProgressBarColor = () => {
     const progress = calculateProgress();
     if (progress < 50) return "#FF0000";
