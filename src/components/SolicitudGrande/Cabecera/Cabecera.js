@@ -117,7 +117,7 @@ console.log("idSolicitud", clienteData);
         {/*} case "Verificación":
         return <Verificacion />;*/}
       case "Información de Crédito":
-        return <InformacionCredito />;
+        return <InformacionCredito data={clienteData}  />;
       default:
         return <div>Contenido no disponible</div>;
     }

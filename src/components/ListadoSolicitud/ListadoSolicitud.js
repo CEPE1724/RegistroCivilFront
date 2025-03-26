@@ -688,7 +688,7 @@ export function ListadoSolicitud() {
         </div>
       )}
 
-      
+
     </div>
   );
 }
