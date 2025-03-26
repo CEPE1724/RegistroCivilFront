@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef, useCallback, useImperativeHandle } from "react";
 import { useSnackbar } from "notistack";
 import { FaStar,FaChartLine,FaFileInvoiceDollar,FaUserCheck,FaHandHoldingUsd,FaChartPie,
 	FaExclamationTriangle,FaExclamationCircle,FaBan
  } from "react-icons/fa";
+const InformacionCredito = forwardRef((props, ref) => {
+  const { data } = props;
 
-export function InformacionCredito() {
 
     const { enqueueSnackbar } = useSnackbar();
     //almacenar datos del formulario
@@ -284,7 +285,8 @@ export function InformacionCredito() {
 			</div>
 		  </div>
 		</div>
-	  );
-	  
-	  
-}
+	  )
+	});
+	
+	export default InformacionCredito;
+	
