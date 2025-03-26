@@ -61,8 +61,10 @@ export function DocumentoSolicitud() {
       );
       const result = await response.json();
       if (result.data) {
-        setClientesList(result.data);
-        setTotalCount(result.totalCount);
+        // Filtrar los clientes con idEstadoVerificacionDocumental mayor a 1
+        const filteredClientes = result.data.filter(cliente => cliente.idEstadoVerificacionDocumental > 1);
+        setClientesList(filteredClientes);
+        setTotalCount(filteredClientes.length);
       } else {
         setClientesList([]);
       }
@@ -100,6 +102,7 @@ export function DocumentoSolicitud() {
         foto: cliente.Foto,
         vendedor: cliente.idVendedor,
         consulta: cliente.idCompraEncuesta,
+        estadoVerifD: cliente.idEstadoVerificacionDocumental,
       },
     });
   };
@@ -134,8 +137,8 @@ export function DocumentoSolicitud() {
                 value={selectedBodega}
                 onChange={handleBodegaChange}
               >
-                <option value="" disabled>
-                  Selecciona una bodega
+                <option value="">
+                  Todas las bodega
                 </option>
                 {bodegas.length > 0 ? (
                   bodegas.map((bodega) => (
@@ -171,7 +174,7 @@ export function DocumentoSolicitud() {
             filteredClientes.map((cliente) => (
               <div
                 key={cliente.idCre_SolicitudWeb}
-                className={`relative bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 ${cliente.Estado === 1 ? 'border-2 border-yellow-500' : cliente.Estado === 2 ? 'border-2 border-green-500' : 'border-2 border-red-500'}`}
+                className={`relative bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 ${cliente.idEstadoVerificacionDocumental === 2 ? 'border-2 border-yellow-500' : cliente.idEstadoVerificacionDocumental === 3 ? 'border-2 border-yellow-500' : cliente.idEstadoVerificacionDocumental === 4 ? 'border-2 border-green-500' : 'border-2 border-red-500'}`}
               >
                 {/* Icono de ojo como botón */}
                 <button
@@ -196,9 +199,8 @@ export function DocumentoSolicitud() {
                 <p className="text-gray-600"><BadgeIcon fontSize="small"/> Cédula: {cliente.Cedula}</p>
                 <p className="text-gray-600"><AlternateEmailIcon fontSize="small"/> Email: {cliente.Email}</p>
                 <p className="text-gray-600"><PhoneIcon fontSize="small"/> Teléfono: {cliente.Celular}</p>
-
-                <p className={`mt-4 font-semibold text-sm ${cliente.Estado === 1 ? 'text-yellow-600' : cliente.Estado === 2 ? 'text-green-600' : 'text-red-600'}`}>
-                  Estado: {cliente.Estado === 1 ? 'Pendiente' : cliente.Estado === 2 ? 'Aprobado' : 'Rechazado'}
+                <p className={`mt-4 font-semibold text-sm ${cliente.idEstadoVerificacionDocumental === 2 ? 'text-yellow-600' : cliente.idEstadoVerificacionDocumental === 3 ? 'text-yellow-600' : cliente.idEstadoVerificacionDocumental === 4 ? 'text-green-600' : 'text-red-600'}`}>
+                  Estado: {cliente.idEstadoVerificacionDocumental === 2 ? 'Revisión' : cliente.idEstadoVerificacionDocumental === 3 ? 'Corrección' : cliente.idEstadoVerificacionDocumental === 4 ? 'Aprobado' : 'Rechazado'}
                 </p>
               </div>
             ))
