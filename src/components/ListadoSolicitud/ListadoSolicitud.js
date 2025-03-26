@@ -45,6 +45,7 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import HouseIcon from '@mui/icons-material/House';
 import { red } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
+import LocationModal from "./LocationModal";
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -63,6 +64,7 @@ export function ListadoSolicitud() {
   const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
   const [searchDateTo, setSearchDateTo] = useState("");
   const navigate = useNavigate();
+  const [openLocationModal, setOpenLocationModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -320,6 +322,10 @@ export function ListadoSolicitud() {
     setCurrentPage(page);
   };
 
+  const handleOpenModal = () => {
+		setOpenLocationModal(prev => !prev);
+	}
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
@@ -486,8 +492,8 @@ export function ListadoSolicitud() {
                     </IconButton>
                   </TableCell>
 
-                  <TableCell align="center">
-                    <HouseIcon sx={{ color: 'gray' }} />
+                  <TableCell align="center cursor-pointer hover:bg-gray-100 hover:p-2">
+                    <HouseIcon sx={{ color: 'gray' }} onClick={ (e) => handleOpenModal(e, data)} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -628,6 +634,13 @@ export function ListadoSolicitud() {
           </button>
         </div>
       )}
+	  <LocationModal
+        isOpen={ () => handleOpenModal() }
+		openLocationModal = { openLocationModal }
+        locationType={null}
+        locationData={null}
+        onLocationChange={null}
+      />
     </div>
   );
 }
