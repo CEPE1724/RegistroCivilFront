@@ -33,6 +33,8 @@ export function Documental({
   const { userData, userUsuario } = useAuth();
   const navigate = useNavigate();
   console.log("userData", userData);
+  const {state} = useLocation();
+  console.log("state", state);
 
   console.log("userUsuario", userUsuario);
   const [files, setFiles] = useState({});
@@ -58,6 +60,10 @@ export function Documental({
     patchsolicitudWeb();
   };
 
+ const [newCompletedFields, setCompletedFields] = useState([]);
+ const [corrections, setCorrections] = useState(new Set());
+ const [showOnlyCorrections, setShowOnlyCorrections] = useState(false);
+
   const [clientInfo, setClientInfo] = useState({
     id: null,
     nombre: "",
@@ -68,24 +74,29 @@ export function Documental({
     NumeroSolicitud: "",
     vendedor: "",
     consulta: "",
+    idEstadoVerificacionDocumental: "",
   });
   const [filePreviews, setFilePreviews] = useState({});
-
+  const [filesToCorrect,setFilesToCorrect] = useState([]);
+  
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const response = await axios.get(APIURL.get_documentos(clientInfo.id));
-
+        const response = await axios.get(APIURL.get_documentos(clientInfo.id,clientInfo.idEstadoVerificacionDocumental));
+        
         console.log("Respuesta API Documentos:", response.data);
         if (response.status === 200 && Array.isArray(response.data)) {
           const uploadedFiles = {};
           const previews = {};
           const completed = new Set();
+          const corrections = new Set(); // Para almacenar las secciones con documentos con idEstadoDocumento === 4
+
 
           response.data.forEach((file) => {
             console.log("Archivo recibido:", file); // ✅ Verificar estructura de cada archivo
 
             const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
+            console.log("aaaaaaaaaaaaa", sectionName);
             if (!uploadedFiles[sectionName]) {
               uploadedFiles[sectionName] = [];
               previews[sectionName] = [];
@@ -100,16 +111,40 @@ export function Documental({
               name: fileName,
               url: fileUrl,
               type: fileUrl.endsWith(".pdf") ? "application/pdf" : "image/jpeg",
+
               estado: file.idEstadoDocumento,
             });
 
+          console.log("uploadedFiles", uploadedFiles);
+
             previews[sectionName].push(fileUrl);
-            completed.add(sectionName);
+
+            if (file.idEstadoDocumento >= 4) {
+              console.log("Sección a corregir:", sectionName);
+              corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
+            } else {
+              completed.add(sectionName); // Se considera campo completado si no está en corrección
+            }
+            /*previews[sectionName].push(fileUrl);
+            completed.add(sectionName);*/
           });
 
           setFiles(uploadedFiles);
           setFilePreviews(previews);
           setCompletedFields2([...completed]);
+          setFilesToCorrect([...corrections]); // Actualizamos los campos a corregir
+
+
+     
+          const newCompletedFields = Object.keys(uploadedFiles);
+          setCompletedFields(newCompletedFields);
+
+            // Si hay documentos con estado 4, solo mostrar esos tabs
+        if (corrections.size > 0) {
+          setShowOnlyCorrections(true); // Mostrar solo las correcciones
+        } else {
+          setShowOnlyCorrections(false); // Mostrar todo si no hay correcciones
+        }
         }
       } catch (error) {
         enqueueSnackbar("Error al obtener archivos subidos.", {
@@ -119,10 +154,10 @@ export function Documental({
       }
     };
 
-    if (clientInfo.NumeroSolicitud) {
+    if (clientInfo.NumeroSolicitud && !showOnlyCorrections) {
       fetchUploadedFiles();
     }
-  }, [clientInfo.id, refreshFiles]);
+  }, [clientInfo.id , refreshFiles]); // Se ejecuta cuando el ID del cliente cambia
 
   const getTipoDocumento = (id) => {
     const documentoIds = {
@@ -201,6 +236,7 @@ export function Documental({
   }, []); */
 
   const calculateProgress = () => {
+
     const totalFields = 11; // Siempre hay 11 documentos en total
     const completedFieldsCount = completedFields2.length; // Contamos los vistos (✓)
 
@@ -259,7 +295,7 @@ export function Documental({
     }
 
     // Verifica si ya hay un archivo cargado en el campo activo
-    if (files[field] && files[field].length > 0) {
+    if (files[field] && files[field].length > 0 && clientInfo.idEstadoVerificacionDocumental === 1) {
       // Si ya hay un archivo, muestra un mensaje de error
       enqueueSnackbar(
         `Ya tienes un archivo cargado en el campo "${field}". Primero debes eliminarlo antes de cargar uno nuevo.`,
@@ -354,6 +390,8 @@ export function Documental({
 
       return updatedPreviews;
     });
+
+
 
     closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
   };
@@ -456,14 +494,43 @@ export function Documental({
 
     try {
       // Subir archivo y obtener la URL
-      const response = await uploadFile(
-        files[activeTab][0],
-        clientInfo.almacen,
-        clientInfo.cedula,
-        clientInfo.NumeroSolicitud,
-        activeTab, // Mandamos el texto del tab
-        observacion[activeTab]
-      );
+      console.log("asdasdasdasdasdasdasdasdasas estoy aquiiii",files)
+     let response;
+  
+
+     const getFile = (tab) => {
+      // Busca el archivo físico (sin URL)
+      return files[tab]?.find(file => !file?.url); // Si no tiene URL, es un archivo físico
+    };
+    
+    if (clientInfo.idEstadoVerificacionDocumental === 1) {
+      const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
+      if (fileToUpload) {
+        response = await uploadFile(
+          fileToUpload, 
+          clientInfo.almacen,
+          clientInfo.cedula,
+          clientInfo.NumeroSolicitud,
+          activeTab, // Mandamos el texto del tab
+          observacion[activeTab]
+        );
+      }
+    }
+    
+    if (clientInfo.idEstadoVerificacionDocumental === 3) {
+      const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
+      if (fileToUpload) {
+        response = await uploadFile(
+          fileToUpload,
+          clientInfo.almacen,
+          clientInfo.cedula,
+          clientInfo.NumeroSolicitud,
+          activeTab, // Mandamos el texto del tab
+          observacion[activeTab]
+        );
+      }
+    }
+
 
       const documentoIds = {
         "Buro Credito": 1,
@@ -579,6 +646,8 @@ export function Documental({
     (field) => files[field] && files[field].length > 0
   );
 
+   console.log("filePreviews", filePreviews);
+
   const pendingFields = menuItems.filter(
     (field) => !(files[field] && files[field].length > 0)
   );
@@ -590,38 +659,80 @@ export function Documental({
     isMenuOpen ? "block" : "hidden"
   } md:block transition-all duration-300 ease-in-out`}
 >
-  <div className="p-4 space-y-6">
-    {/* Progreso de Archivos */}
-    <div>
-      <label className="block text-sm font-semibold text-gray-500">
-        Progreso de Archivos
-      </label>
-      <div className="mt-2 flex items-center justify-between">
-        <span className="text-sm text-gray-600">{Math.round(calculateProgress())}%</span>
-      </div>
-
-      <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-        <div
-          className="rounded-full h-2 transition-all duration-500 ease-in-out"
-          style={{
-            width: `${calculateProgress()}%`,
-            backgroundColor: getProgressBarColor(),
-          }}
-        ></div>
-      </div>
-
-      {calculateProgress() === 100 && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="bg-green-500 text-sm text-white py-2 px-4 rounded shadow hover:bg-green-600 transition-transform duration-300 transform hover:scale-105"
-          >
-            Enviar verificación
-          </button>
-        </div>
-      )}
+<div className="p-4 space-y-6">
+  {/* Progreso de Archivos */}
+  <div>
+    <label className="block text-sm font-semibold text-gray-500">
+      Progreso de Archivos
+    </label>
+    <div className="mt-2 flex items-center justify-between">
+      <span className="text-sm text-gray-600">{Math.round(calculateProgress())}%</span>
     </div>
 
+    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+      <div
+        className="rounded-full h-2 transition-all duration-500 ease-in-out"
+        style={{
+          width: `${calculateProgress()}%`,
+          backgroundColor: getProgressBarColor(),
+        }}
+      ></div>
+    </div>
+
+    {calculateProgress() === 100 && (
+      <div className="mt-4 text-center">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-green-500 text-sm text-white py-2 px-4 rounded shadow hover:bg-green-600 transition-transform duration-300 transform hover:scale-105"
+        >
+          Enviar verificación
+        </button>
+      </div>
+    )}
+  </div>
+
+
+  {showOnlyCorrections ? (
+  // Mostrar solo los tabs con documentos en estado 4
+  <div>
+    <h3 className="text-sm font-medium text-red-500">Campos a Corregir</h3>
+    <ul className="mt-2 space-y-1">
+      {filesToCorrect.map((item) => {
+        const fileCount = files[item]?.length || 0;
+        const isSelected = activeTab === item;
+
+        return (
+          <li key={item}>
+            <a
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                setActiveTab(item);
+              }}
+              className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
+                ${isSelected
+                  ? "bg-red-600 text-white shadow-lg"
+                  : "text-red-600 hover:bg-red-100 hover:text-red-800"
+                }`}
+            >
+              {item}
+              {fileCount > 0 && (
+                <span
+                  className={`text-xs font-bold px-2 py-1 rounded-full ${
+                    isSelected ? "bg-white text-red-600" : "bg-red-500 text-white"
+                  }`}
+                >
+                  {`+${fileCount}`}
+                </span>
+              )}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+) : (
+  <>
     {/* Campos Pendientes */}
     <div>
       <h3 className="text-sm font-medium text-gray-500">Campos Pendientes</h3>
@@ -638,11 +749,10 @@ export function Documental({
                   event.preventDefault();
                   setActiveTab(item);
                 }}
-                className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200 
-                  ${
-                    isSelected
-                      ? "bg-blue-600 text-white shadow-lg" // Contraste con color azul
-                      : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
+                  ${isSelected
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
                   }`}
               >
                 {item}
@@ -680,11 +790,10 @@ export function Documental({
                     setActiveTab(item);
                   }}
                   className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                  ${
-                    isSelected
-                      ? "bg-blue-600 text-white shadow-lg" // Contraste con azul
+                    ${isSelected
+                      ? "bg-blue-600 text-white shadow-lg"
                       : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                  }`}
+                    }`}
                 >
                   {item}
                   <div className="flex items-center">
@@ -708,9 +817,15 @@ export function Documental({
         </ul>
       </div>
     )}
-  </div>
-</div>
+  </>
+)}
 
+
+
+
+     
+   </div>
+ </div>
       {/* Menu Toggle Button */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -734,6 +849,8 @@ export function Documental({
                 </div>
               )}
 
+            
+
               <div className="md:w-3/4 mt-2 pl-4 bg-white shadow-lg rounded-lg p-1 ">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base leading-relaxed pl-10">
                   {[
@@ -744,6 +861,8 @@ export function Documental({
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],
+                    ["idEstadoVerificacionDOcumental", clientInfo.idEstadoVerificacionDocumental],
+                    ["idcresolcitudweb", clientInfo.id],
                   ].map(([label, value], idx) => (
                     <div key={idx} className="flex items-center gap-4">
                       <p className="font-semibold text-gray-700">{label}:</p>
@@ -770,56 +889,64 @@ export function Documental({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            {filePreviews[activeTab]?.length > 0 &&
-              filePreviews[activeTab]?.map((previewUrl, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
+  {filePreviews[activeTab]?.length > 0 &&
+    filePreviews[activeTab]?.map((previewUrl, index) => {
+      const file = files[activeTab]?.[index];
+      if (file?.estado !== 5) { // Verifica si el estado es diferente de 5
+        return (
+          <div
+            key={index}
+            className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-700">
+                {file?.name || "Sin nombre"}
+              </span>
+
+              <div className="flex items-center gap-2">
+                <IconButton onClick={toggleView}>
+                  <VisibilityIcon />
+                </IconButton>
+                {/* Mostrar el estado del archivo */}
+                <h1>{file?.estado}</h1>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleOpenDeleteConfirmation(activeTab, index)
+                  }
+                  className="text-red-500 hover:text-red-700"
                 >
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-700">
-                      {files[activeTab]?.[index]?.name || "Sin nombre"}
-                    </span>
+                  ❌
+                </button>
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-2">
-                      <IconButton onClick={toggleView}>
-                        <VisibilityIcon />
-                      </IconButton>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          handleOpenDeleteConfirmation(activeTab, index)
-                        }
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ❌
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    {files[activeTab][index]?.type === "application/pdf" ? (
-                      <object
-                        data={previewUrl}
-                        type="application/pdf"
-                        width="100%"
-                        height="200px"
-                        className="rounded-md"
-                        aria-label="Vista previa PDF"
-                      >
-                        <p>Vista previa no disponible</p>
-                      </object>
-                    ) : (
-                      <img
-                        src={previewUrl}
-                        alt="Vista previa archivo"
-                        className="w-full h-auto rounded-md"
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="mt-4">
+              {file?.type === "application/pdf" ? (
+                <object
+                  data={previewUrl}
+                  type="application/pdf"
+                  width="100%"
+                  height="200px"
+                  className="rounded-md"
+                  aria-label="Vista previa PDF"
+                >
+                  <p>Vista previa no disponible</p>
+                </object>
+              ) : (
+                <img
+                  src={previewUrl}
+                  alt="Vista previa archivo"
+                  className="w-full h-auto rounded-md"
+                />
+              )}
+            </div>
           </div>
+        );
+      }
+      return null; // Si el estado es 5, no se renderiza nada
+    })}
+</div>
 
           {/* Observación */}
           <div className="mb-6">
