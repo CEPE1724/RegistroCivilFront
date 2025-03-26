@@ -205,7 +205,7 @@ export function ListadoSolicitud() {
   }, [currentPage, tipoConsulta, dataBodega, selectedBodega, estado, fechaInicio, fechaFin]);
 
   const fetchSolicitudes = async () => {
-     console.log(selectedBodega);
+    console.log(selectedBodega);
     if (tipoConsulta.length === 0 || dataBodega.length === 0) return;
 
     try {
@@ -222,7 +222,7 @@ export function ListadoSolicitud() {
           offset: offset,
           fechaInicio: fechaInicio,
           fechaFin: fechaFin,
-          bodega: selectedBodega === "todos" ? 0 :selectedBodega,
+          bodega: selectedBodega === "todos" ? 0 : selectedBodega,
           estado: estado === "todos" ? 0 : estado,
         },
       });
@@ -239,6 +239,10 @@ export function ListadoSolicitud() {
               id: item.idCre_SolicitudWeb,
               NumeroSolicitud: item.NumeroSolicitud,
               nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
+              PrimerNombre: item.PrimerNombre,
+               SegundoNombre: item.SegundoNombre,
+               ApellidoPaterno: item.ApellidoPaterno,
+               ApellidoMaterno: item.ApellidoMaterno,
               cedula: item.Cedula,
               almacen:
                 dataBodega.find(bodega => bodega.value === item.Bodega)?.label || "Desconocido",
@@ -247,9 +251,9 @@ export function ListadoSolicitud() {
                 tipoConsulta.find(tipo => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
               estado:
                 item.Estado === 1 ? "PENDIENTE" :
-                item.Estado === 2 ? "APROBADO" :
-                item.Estado === 3 ? "ANULADO" :
-                item.Estado === 4 ? "RECHAZADO" : "Desconocido",
+                  item.Estado === 2 ? "APROBADO" :
+                    item.Estado === 3 ? "ANULADO" :
+                      item.Estado === 4 ? "RECHAZADO" : "Desconocido",
               imagen: item.Foto,
               celular: item.Celular,
               email: item.Email,
@@ -257,7 +261,7 @@ export function ListadoSolicitud() {
               afiliado: item.bAfiliado ? "Sí" : "No",
               tieneRuc: item.bTieneRuc ? "Sí" : "No",
               tipoCliente:
-              tipoClienteMap[item.idTipoCliente] || "Desconocido",
+                tipoClienteMap[item.idTipoCliente] || "Desconocido",
               idEstadoVerificacionDocumental: item.idEstadoVerificacionDocumental,
             };
           })
@@ -306,7 +310,7 @@ export function ListadoSolicitud() {
   }, [data]);
 
   const handledocumentos = (registro) => {
- 
+
     navigate("/documental", {
       replace: true,
       state: {
@@ -349,7 +353,7 @@ export function ListadoSolicitud() {
     navigate("/solicitudgrande", {
       replace: true,
       state: {
-        data:registro
+        data: registro
       },
     });
   };
@@ -408,7 +412,7 @@ export function ListadoSolicitud() {
             onChange={handleBodegaChange}
             label="Buscar por nombre"
           >
-                <MenuItem value="todos">Todos</MenuItem>
+            <MenuItem value="todos">Todos</MenuItem>
             {bodegas.map((bodega) => (
               <MenuItem key={bodega.b_Bodega} value={bodega.b_Bodega}>
                 {bodega.b_Nombre}
@@ -458,13 +462,13 @@ export function ListadoSolicitud() {
             <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
               <TableRow>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Numero solicitud
+                  N° Solicitud
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Nombres
+                  Cliente
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Cedula
+                  Cédula
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Fecha
@@ -482,10 +486,10 @@ export function ListadoSolicitud() {
                   Estado
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  TIPO CLIENTE
+                  Tipo de Cliente
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Opciones
+                  Detalles
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Solicitud
@@ -525,22 +529,30 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell>
                   <TableCell align="center">
-                    <IconButton onClick={() => handlesolicitud(data)}>
-                      <PendingActionsIcon sx={{ color: 'gray' }} />
-                    </IconButton>
+                    <Tooltip title="Solicitud" arrow placement="top">
+                      <IconButton onClick={() => handlesolicitud(data)}>
+                        <PendingActionsIcon sx={{ color: 'gray' }} />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                   <TableCell align="center">
-  <IconButton onClick={() => handledocumentos(data)}>
-    {getIconByEstado(data.idEstadoVerificacionDocumental)}
-  </IconButton>
-</TableCell>
-                  <TableCell align="center">
-                    <IconButton onClick={() => handleTelefonica(data)}>
-                      <PhoneIcon sx={{ color: 'gray' }} />
-                    </IconButton>
+                    <Tooltip title="Documental" arrow placement="top">
+                      <IconButton onClick={() => handledocumentos(data)}>
+                        {getIconByEstado(data.idEstadoVerificacionDocumental)}
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                   <TableCell align="center">
-                    <HouseIcon sx={{ color: 'gray' }} />
+                    <Tooltip title="Telefonica" arrow placement="top">
+                      <IconButton onClick={() => handleTelefonica(data)}>
+                        <PhoneIcon sx={{ color: 'gray' }} />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="Terrena" arrow placement="top">
+                      <HouseIcon sx={{ color: 'gray' }} />
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
@@ -596,19 +608,18 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
+                        ? "text-green-500"
+                        : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-gray-500"
+                            : selectedRow.estado === "aprobado"
+                              ? "text-blue-500"
+                              : selectedRow.estado === "rechazado"
+                                ? "text-red-500"
+                                : "text-gray-700"
+                        }`}
                     >
                       {selectedRow.estado}
                     </span>
@@ -676,6 +687,8 @@ export function ListadoSolicitud() {
           </button>
         </div>
       )}
+
+      
     </div>
   );
 }

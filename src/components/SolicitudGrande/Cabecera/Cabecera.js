@@ -13,7 +13,7 @@ import SeccionA from "../../SolicitudGrande/SeccionA/SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
 import { useSnackbar } from 'notistack';
 import { Verificacion } from "../Verificacion/Verificacion";
-import { InformacionCredito } from "../InformacionCredito";
+import  InformacionCredito  from "../InformacionCredito/InformacionCredito";
 import { APIURL } from "../../../configApi/apiConfig";
 import { CabeceraDatosSolicitud } from "../CabeceraDatosSolicitud";
 import { Loader } from "../../Utils"; // Make sure to import the Loader component
@@ -23,6 +23,7 @@ import Referencias from "../Referencia/Referencia";
 export function Cabecera() {
   const { state } = useLocation();
   const { data } = state || {};
+  console.log("data cabecera", data);
   const [activeTab, setActiveTab] = useState("Datos Cliente");
   const [fecha, setFecha] = useState(data?.fecha ? new Date(data.fecha).toISOString().split('T')[0] : "");
   const [cedula, setCedula] = useState(data?.cedula || "");
@@ -48,7 +49,8 @@ export function Cabecera() {
   const datosReferencias = useRef(); // Referencia para el componente Referencias
   const datosTrabajo = useRef(); // Referencia para el componente Trabajo
   const datosNegocio = useRef(); // Referencia para el componente Negocio
-
+  const datosInformacionCredito = useRef(); // Referencia para el componente InformacionCredito
+console.log("idSolicitud", clienteData);
   const ref = useRef(); // Create ref for imperative handle
 
   useEffect(() => {
@@ -111,7 +113,7 @@ export function Cabecera() {
       case "Negocio":
         return clienteData.idSituacionLaboral != 1 ? <SeccionA ref={datosNegocio} data={clienteData} /> : null;
       case "Factores de Crédito":
-        return <FactoresCredito ref={seccionRef} />;
+        return <FactoresCredito ref={datosInformacionCredito} data={clienteData}  />;
         {/*} case "Verificación":
         return <Verificacion />;*/}
       case "Información de Crédito":
