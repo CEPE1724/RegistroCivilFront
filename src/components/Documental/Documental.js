@@ -154,7 +154,7 @@ export function Documental({
       }
     };
 
-    if (clientInfo.NumeroSolicitud && !showOnlyCorrections) {
+    if (clientInfo.NumeroSolicitud ) {
       fetchUploadedFiles();
     }
   }, [clientInfo.id , refreshFiles]); // Se ejecuta cuando el ID del cliente cambia
@@ -236,12 +236,23 @@ export function Documental({
   }, []); */
 
   const calculateProgress = () => {
-
-    const totalFields = 11; // Siempre hay 11 documentos en total
-    const completedFieldsCount = completedFields2.length; // Contamos los vistos (✓)
-
-    return (completedFieldsCount / totalFields) * 100;
+    if (showOnlyCorrections) {
+      // Modo Correcciones: Progreso basado SOLO en las secciones con estado 4
+      if (!filesToCorrect.length) return 0; // Evita dividir por 0
+  
+      const totalCorrections = filesToCorrect.length; // Secciones a corregir
+      const completedCorrections = completedFields2.filter(field => filesToCorrect.includes(field)).length;
+  
+      return (completedCorrections / totalCorrections) * 100;
+    } else {
+      // Modo Normal: Progreso basado en los 11 campos totales
+      const totalFields = 11;
+      const completedFieldsCount = completedFields2.length;
+  
+      return (completedFieldsCount / totalFields) * 100;
+    }
   };
+  
 
   const patchsolicitudWeb = async () => {
     try {
@@ -698,8 +709,8 @@ export function Documental({
     <h3 className="text-sm font-medium text-red-500">Campos a Corregir</h3>
     <ul className="mt-2 space-y-1">
       {filesToCorrect.map((item) => {
-        const fileCount = files[item]?.length || 0;
-        const isSelected = activeTab === item;
+      const fileCount = files[item]?.filter(file => !file?.url).length || 0;
+      const isSelected = activeTab === item;
 
         return (
           <li key={item}>
@@ -725,6 +736,9 @@ export function Documental({
                   {`+${fileCount}`}
                 </span>
               )}
+               {completedFields2.includes(item) && (
+                      <span className="ml-2 text-green-500 font-bold">✓</span>
+                    )}
             </a>
           </li>
         );
