@@ -19,16 +19,12 @@ export const FactoresCredito = forwardRef((props, ref) => {
   const { data } = props;
   console.log('factores de credito',data);
   const [tipo, setTipo] = useState([]);
-  const [tipoCliente, setTipoCliente] = useState([]);
-  const [tipoTrabajo, setTipoTrabajo] = useState([]);
   const [calificacion, setCalificacion] = useState([]);
   const [estado, setEstado] = useState([]);
   const [estadoSolicitud, setEstadoSolicitud] = useState([]);
   const [idEstado, setIdEstado] = useState("");
   useEffect(() => {
     fetchTipoCliente();
-    fetchDetalleTipoCliente();
-    fetchTipoTrabajo();
     fetchCalificacion();
     fetchEstado();
   }, []);
@@ -60,51 +56,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
         variant: "error",
       });
       //  setTipo([]);
-    }
-  };
-
-  const fetchTipoTrabajo = async () => {
-    try {
-      const response = await axios.get(APIURL.getTipoTrabajo());
-      if (response.status === 200) {
-        setTipoTrabajo(
-          response.data.map((item) => ({
-            value: item.idTipoTrabajo,
-            label: item.Tipo,
-          }))
-        );
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      console.error("Error al obtener el tipo de trabajo:", error);
-      enqueueSnackbar("No se pudo cargar los tipos de trabajo", {
-        variant: "error",
-      });
-      // setTipoTrabajo([]);
-    }
-  };
-
-  const fetchDetalleTipoCliente = async () => {
-    try {
-      const response = await axios.get(APIURL.getDetalleTipoCliente());
-      if (response.status === 200) {
-        setTipoCliente(
-          response.data.map((item) => ({
-            value: item.idDetalleTipoCliente,
-            label: item.Nombre,
-          }))
-        );
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      console.error("Error al obtener el detalle del tipo de cliente:", error);
-      enqueueSnackbar(
-        "No se pudo cargar los detalles de los tipos de clientes",
-        { variant: "error" }
-      );
-      // setTipoCliente([]);
     }
   };
 
@@ -311,50 +262,9 @@ export const FactoresCredito = forwardRef((props, ref) => {
 			))}
 		  </select>
 		</div>
+
   
-		{/* Tipo Cliente */}
-		<div className="flex flex-col">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaUser className="mr-2 text-primaryBlue" />
-			Tipo Cliente
-		  </label>
-		  <select
-			name="tipoCliente"
-			className="solcitudgrande-style"
-			value={formData.tipoCliente}
-			onChange={handleChange}
-		  >
-			<option value="">Seleccione una opción</option>
-			{tipoCliente.map((item) => (
-			  <option key={item.value} value={item.value}>
-				{item.label}
-			  </option>
-			))}
-		  </select>
-		</div>
-  
-		{/* Tipo Trabajo */}
-		<div className="flex flex-col">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaBriefcase className="mr-2 text-primaryBlue" />
-			Tipo Trabajo
-		  </label>
-		  <select
-			name="tipoTrabajo"
-			className="solcitudgrande-style"
-			value={formData.tipoTrabajo}
-			onChange={handleChange}
-		  >
-			<option value="">Seleccione una opción</option>
-			{tipoTrabajo.map((item) => (
-			  <option key={item.value} value={item.value}>
-				{item.label}
-			  </option>
-			))}
-		  </select>
-		</div>
-  
-		<div className="lg:col-span-1"></div>
+
   
 		{/* Cuota Asignada */}
 		<div className="flex flex-col w-full">
