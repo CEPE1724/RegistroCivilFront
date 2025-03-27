@@ -10,6 +10,7 @@ import { SelectField } from "../../../Utils";
 const Datos = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
+    console.log('datos cabecera', data);
     const [formErrors, setFormErrors] = useState({});
     const [nacionalidad, setNacionalidad] = useState([]);
     const [genero, setGenero] = useState([]);
@@ -110,22 +111,35 @@ const Datos = forwardRef((props, ref) => {
             nacionalidad: 'Por favor, selecciona tu nacionalidad',
             fechaNacimiento: 'Ingresa tu fecha de nacimiento (formato YYYY-MM-DD)',
             genero: 'Por favor, selecciona tu género',
-            provinciaNacimiento: 'Selecciona la provincia donde naciste',
-            cantonNacimiento: 'Selecciona el cantón donde naciste',
+           //provinciaNacimiento: 'Selecciona la provincia donde naciste',
+            //cantonNacimiento: 'Selecciona el cantón donde naciste',
             estadoCivil: 'Por favor, indica tu estado civil',
-            dependientes: 'Ingresa el número de personas dependientes (0 si no tienes)',
+           // dependientes: 'Ingresa el número de personas dependientes (0 si no tienes)',
             nivelEducacion: 'Selecciona tu nivel de educación',
             profesion: 'Indica tu profesión actual',
             situacionLaboral: 'Selecciona tu situación laboral actual',
             actividadEconomica: 'Selecciona tu actividad económica', // Asegúrate de incluir este campo
             observacionActividadEconomica: 'Describe brevemente tu actividad económica',
         };
+        if (formData.nacionalidad == 54) {
+            requiredFieldMessages.provinciaNacimiento= 'Selecciona la provincia donde naciste';
+            requiredFieldMessages.cantonNacimiento = 'Selecciona el cantón donde naciste';
+        }
 
         const errors = {};
 
         // Validación de campos obligatorios
         for (const field in formData) {
             console.log('datos cabecera', field);
+            if (field === 'provinciaNacimiento' && formData.nacionalidad !== 54) {
+                continue;
+            }
+            if (field === 'cantonNacimiento' && formData.nacionalidad !== 54) {
+                continue;
+            }
+            if (field === 'dependientes' && formData.dependientes === 0) {
+                continue;
+            }
             if (!formData[field]) {
                 console.log('datos cabeceraed', field);
                 errors[field] = requiredFieldMessages[field] || `Este campo es obligatorio`;
@@ -237,7 +251,7 @@ const Datos = forwardRef((props, ref) => {
                             options={estadoCivil}
                             name="estadoCivil"
                             error={formErrors.estadoCivil}
-                        //readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
+                            readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
                         />
                     </div>
 
@@ -295,6 +309,7 @@ const Datos = forwardRef((props, ref) => {
                             options={situacionLaboral}
                             name="situacionLaboral"
                             error={formErrors.situacionLaboral}
+                            readOnly={data.idSituacionLaboral !== undefined && data.idSituacionLaboral !== null && data.idSituacionLaboral !== "" && data.idSituacionLaboral > 0}
                         />
                     </div>
                     <div className="mb-6">
@@ -306,8 +321,11 @@ const Datos = forwardRef((props, ref) => {
                             options={actividadEconomica}
                             name="actividadEconomica"
                             error={formErrors.actividadEconomica}
+                            readOnly={data.idActEconomica !== undefined && data.idActEconomica !== null && data.idActEconomica !== "" && data.idActEconomica > 0}
                         />
                     </div>
+                    { data.idNacionalidad == 54 && (
+                        <>
                     <div className="mb-6">
                         <SelectField
                             label="Provincia Nacimiento (*)"
@@ -332,6 +350,8 @@ const Datos = forwardRef((props, ref) => {
                             readOnly={data.idCantonNacimiento !== undefined && data.idCantonNacimiento !== null && data.idCantonNacimiento !== "" && data.idCantonNacimiento > 0}
                         />
                     </div>
+                    </>
+                    )}
                     <div className="mb-6">
 
                         <label className="text-xs font-medium mb-1 flex items-center">

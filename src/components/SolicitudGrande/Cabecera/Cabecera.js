@@ -187,7 +187,7 @@ console.log("idSolicitud", clienteData);
         enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
       }
     }
-    if (activeTab === "Datos Conyuge") {
+    if (activeTab === "Datos Conyuge" && clienteData.idEdoCivil === 1) {
 
       const formData = datosConyuge.current.getFormData();
       const isValid = datosConyuge.current.validateForm(); // Llamamos a validateForm del componente Datos

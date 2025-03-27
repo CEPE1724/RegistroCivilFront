@@ -138,6 +138,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         onChange={handleChange}
                         options={datoDocumento}
                         name="tipoDocumento"
+                        readOnly={data.idTipoDocConyuge !== undefined && data.idTipoDocConyuge !== null && data.idTipoDocConyuge !== "" && data.idTipoDocConyuge > 0}
                     // error={formErrors.barrio}
                     />
                 </div>
@@ -155,6 +156,8 @@ const DatosConyuge = forwardRef((props, ref) => {
                         name="callePrincipal"
                         onChange={handleChange}
                         value={formData.apellidoPaterno}
+                        readOnly={data.ApellidoPaternoConyuge !== undefined && data.ApellidoPaternoConyuge !== null && data.ApellidoPaternoConyuge !== "" }
+                   
                     />
 
                 </div>
@@ -170,6 +173,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         name="primerNombre"
                         onChange={handleChange}
                         value={formData.primerNombre}
+                        readOnly={data.PrimerNombreConyuge !== undefined && data.PrimerNombreConyuge !== null && data.PrimerNombreConyuge !== ""}
                     />
 
                 </div>
@@ -185,6 +189,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         name="segundoNombre"
                         onChange={handleChange}
                         value={formData.segundoNombre}
+                        readOnly={data.SegundoNombreConyuge !== undefined && data.SegundoNombreConyuge !== null && data.SegundoNombreConyuge !== ""}
                     />
                 </div>
             </div>
@@ -202,6 +207,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         name="numeroDocumento"
                         onChange={handleChange}
                         value={formData.numeroDocumento}
+                        readOnly={data.CedulaConyuge !== undefined && data.CedulaConyuge !== null && data.CedulaConyuge !== ""}
                     />
                 </div>
                 {/* Fecha Nacimiento */}
@@ -217,6 +223,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         value={formData.fechaNacimiento}
                         onChange={handleChange}
                         max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split("T")[0]}
+                        readOnly={data.FechaNacimientoConyuge !== undefined && data.FechaNacimientoConyuge !== null && data.FechaNacimientoConyuge !== ""}
                     />
                 </div>
                 {/* Nacionalidad */}
@@ -229,6 +236,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         onChange={handleChange}
                         options={nacionalidad}
                         name="nacionalidad"
+                        readOnly={data.idNacionalidadConyuge !== undefined && data.idNacionalidadConyuge !== null && data.idNacionalidadConyuge !== "" && data.idNacionalidadConyuge > 0}
                     // error={formErrors.barrio}
                     />
 
@@ -242,6 +250,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                         onChange={handleChange}
                         options={dataGenero}
                         name="sexo"
+                        readOnly={data.idGeneroConyuge !== undefined && data.idGeneroConyuge !== null && data.idGeneroConyuge !== "" && data.idGeneroConyuge > 0}
                     />
                 </div>
             </div>
