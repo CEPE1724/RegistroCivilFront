@@ -50,6 +50,7 @@ import HourglassFullIcon from "@mui/icons-material/HourglassFull";
 import PendingIcon from "@mui/icons-material/Pending";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import LocationModal from "./LocationModal";
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
