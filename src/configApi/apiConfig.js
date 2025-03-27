@@ -64,7 +64,7 @@ export const APIURL = {
 
    post_creVerificacionTelefonica : () => `${API_BASE_URL}creverificaciontelefonica`,
    post_documentos : () => `${API_BASE_URL}documentos-solicitud`,
-   get_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
+   get_documentos : (id,idEstadoVerificacionDocumental) => `${API_BASE_URL}documentos-solicitud/documentos/${id}/${idEstadoVerificacionDocumental}`,
    get_documentosEstado : (id, estado) => `${API_BASE_URL}documentos-solicitud/${id}/${estado}`,
    patch_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
    patch_solicitudweb : (id) => `${API_BASE_URL}documentos-solicitud/updateEstado/${id}`,

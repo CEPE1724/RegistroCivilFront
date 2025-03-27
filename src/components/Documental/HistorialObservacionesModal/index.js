@@ -1,2 +1,1 @@
-export * from './Documental';
 export * from './HistorialObservacionesModal';

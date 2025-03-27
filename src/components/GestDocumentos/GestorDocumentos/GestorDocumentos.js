@@ -6,6 +6,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export function GestorDocumentos({
     id,
@@ -18,9 +19,11 @@ export function GestorDocumentos({
     foto,
     vendedor,
     consulta,
+    estadoVerifD,
 }) {
     const [files, setFiles] = useState({});
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
     const location = useLocation();
     const [view, setView] = useState(false);
@@ -38,6 +41,10 @@ export function GestorDocumentos({
     const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
     const [showApproveAllButton, setShowApproveAllButton] = useState(false); // Mostrar botón de aprobar 
     const [showRevisionButton, setShowRevisionButton] = useState(false); // Mostrar botón de revisión
+    // estados para el modal global
+    const [showGlobalConfirmModal, setShowGlobalConfirmModal] = useState(false);
+    const [globalConfirmAction, setGlobalConfirmAction] = useState(null);
+    const globalConfirmModalRef = useRef(null);
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -49,18 +56,26 @@ export function GestorDocumentos({
         NumeroSolicitud: "",
         vendedor: "",
         consulta: "",
+        estadoVerifD: "",
     });
 
     // mostrar botones
     useEffect(() => {
         if (allDocuments.length > 0) {
-            // si todos los documentos estan aprovados
-            const allApproved = allDocuments.every(doc => doc.estado === 3);
-            setShowApproveAllButton(allApproved);
+            const allReviewed = allDocuments.every(doc => doc.estado === 3 || doc.estado === 4);
 
-            // si algun documento esta rechazado
-            const hasRejectedDocs = allDocuments.some(doc => doc.estado === 4);
-            setShowRevisionButton(hasRejectedDocs);
+            if (allReviewed) {
+                // si todos los documentos estan aprovados
+                const allApproved = allDocuments.every(doc => doc.estado === 3);
+                setShowApproveAllButton(allApproved);
+                // si algun documento esta rechazado
+                const hasRejectedDocs = allDocuments.some(doc => doc.estado === 4);
+                setShowRevisionButton(hasRejectedDocs);
+            } else {
+                // Reset button visibility if not all documents are reviewed
+                setShowApproveAllButton(false);
+                setShowRevisionButton(false);
+            }
         }
     }, [allDocuments]);
 
@@ -495,10 +510,32 @@ export function GestorDocumentos({
 
     // botones de acción según el estado del documento
     const renderActionButtons = (document) => {
-        switch (document.estado) {
-            case 2: // Pendiente - mostrar ambos botones
-                return (
-                    <>
+        //habilitar botones cuando estadoVerifD = 2
+        if (clientInfo.estadoVerifD === 2) {
+            switch (document.estado) {
+                case 2: // Pendiente - mostrar ambos botones
+                    return (
+                        <>
+                            <button
+                                type="button"
+                                name="rechazar"
+                                className="text-red-500 hover:text-red-700"
+                                onClick={() => handleRechazar(document)}
+                            >
+                                ❌
+                            </button>
+                            <button
+                                type="button"
+                                name="aprobar"
+                                className="text-green-500 hover:text-green-700"
+                                onClick={() => handleAprobar(document)}
+                            >
+                                ✅
+                            </button>
+                        </>
+                    );
+                case 3: // Aprobado - mostrar solo rechazar
+                    return (
                         <button
                             type="button"
                             name="rechazar"
@@ -507,6 +544,9 @@ export function GestorDocumentos({
                         >
                             ❌
                         </button>
+                    );
+                case 4: // Rechazado - mostrar solo aprobar
+                    return (
                         <button
                             type="button"
                             name="aprobar"
@@ -515,32 +555,54 @@ export function GestorDocumentos({
                         >
                             ✅
                         </button>
-                    </>
-                );
-            case 3: // Aprobado - mostrar solo rechazar
-                return (
-                    <button
-                        type="button"
-                        name="rechazar"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => handleRechazar(document)}
-                    >
-                        ❌
-                    </button>
-                );
-            case 4: // Rechazado - mostrar solo aprobar
-                return (
-                    <button
-                        type="button"
-                        name="aprobar"
-                        className="text-green-500 hover:text-green-700"
-                        onClick={() => handleAprobar(document)}
-                    >
-                        ✅
-                    </button>
-                );
+                    );
+                default:
+                    return null;
+            }
+        }
+    };
+
+    // detectar clicks fuera del modal global
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (globalConfirmModalRef.current && !globalConfirmModalRef.current.contains(event.target)) {
+                setShowGlobalConfirmModal(false);
+            }
+        };
+        if (showGlobalConfirmModal) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showGlobalConfirmModal]);
+
+    // abrir modal global
+    const openGlobalConfirmModal = (action) => {
+        setGlobalConfirmAction(action);
+        setShowGlobalConfirmModal(true);
+    };
+
+    // Función para manejar la acción global
+    const handleGlobalConfirmAction = () => {
+        setShowGlobalConfirmModal(false);
+
+        // Actualizar estado de todo el documento
+        switch (globalConfirmAction) {
+            case 'rechTodo':
+                updateEstadoVerificacion(5);
+                navigate("/agentedocumental", { replace: true });
+                break;
+            case 'aprobTodo':
+                updateEstadoVerificacion(4);
+                navigate("/agentedocumental", { replace: true });
+                break;
+            case 'revTodo':
+                updateEstadoVerificacion(3);
+                navigate("/agentedocumental", { replace: true });
+                break;
             default:
-                return null;
+                break;
         }
     };
 
@@ -550,32 +612,34 @@ export function GestorDocumentos({
                 className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"} md:block transition-all duration-300 ease-in-out overflow-y-auto`}
             >
                 <div className="p-6">
-                    <div>
-                        <button name="rechTodo"
-                            className="bg-red-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-red-700 transition duration-300 mb-3"
-                            onClick={() => updateEstadoVerificacion(5)}
-                        >
-                            Rechazar
-                        </button>
-                        {showApproveAllButton && (
-                            <button
-                                name="aprobTodo"
-                                className="bg-green-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-green-700 transition duration-300 mb-3"
-                                onClick={() => updateEstadoVerificacion(4)}
+                    {clientInfo.estadoVerifD === 2 && (
+                        <div>
+                            <button name="rechTodo"
+                                className="bg-red-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-red-700 transition duration-300 mb-3"
+                                onClick={() => openGlobalConfirmModal('rechTodo')}
                             >
-                                Aprobar
+                                Rechazar
                             </button>
-                        )}
-                        {showRevisionButton && (
-                            <button
-                                name="revTodo"
-                                className="bg-gray-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-gray-700 transition duration-300"
-                                onClick={() => updateEstadoVerificacion(3)}
-                            >
-                                Corrección
-                            </button>
-                        )}
-                    </div>
+                            {showApproveAllButton && (
+                                <button
+                                    name="aprobTodo"
+                                    className="bg-green-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-green-700 transition duration-300 mb-3"
+                                    onClick={() => openGlobalConfirmModal('aprobTodo')}
+                                >
+                                    Aprobar
+                                </button>
+                            )}
+                            {showRevisionButton && (
+                                <button
+                                    name="revTodo"
+                                    className="bg-gray-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-gray-700 transition duration-300"
+                                    onClick={() => openGlobalConfirmModal('revTodo')}
+                                >
+                                    Corrección
+                                </button>
+                            )}
+                        </div>
+                    )}
                     {/* Lista de todos los documentos */}
                     <div className="mt-6">
                         <h3 className="text-lg font-semibold mb-2">Documentos:</h3>
@@ -822,6 +886,58 @@ export function GestorDocumentos({
                                 onClick={handleConfirmAction}
                             >
                                 {confirmAction === 'aprobar' ? 'Aprobar' : 'Rechazar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal global */}
+            {showGlobalConfirmModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div
+                        ref={globalConfirmModalRef}
+                        className="bg-white p-6 rounded-lg shadow-lg w-1/3 max-w-md relative"
+                    >
+                        <div className="mb-4">
+                            <h3 className="text-xl font-medium text-gray-900">
+                                {globalConfirmAction === 'rechTodo'
+                                    ? 'Rechazar Todos los Documentos'
+                                    : globalConfirmAction === 'aprobTodo'
+                                        ? 'Aprobar Todos los Documentos'
+                                        : 'Enviar Todos los Documentos a Corrección'}
+                            </h3>
+                            <p className="text-sm text-gray-500 mt-2">
+                                {globalConfirmAction === 'rechTodo'
+                                    ? '¿Está seguro de que desea rechazar todos los documentos?'
+                                    : globalConfirmAction === 'aprobTodo'
+                                        ? '¿Está seguro de que desea aprobar todos los documentos?'
+                                        : '¿Está seguro de que desea enviar todos los documentos a corrección?'}
+                            </p>
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                                onClick={() => setShowGlobalConfirmModal(false)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                className={`px-4 py-2 text-white rounded-md ${globalConfirmAction === 'rechTodo'
+                                    ? 'bg-red-600 hover:bg-red-700'
+                                    : globalConfirmAction === 'aprobTodo'
+                                        ? 'bg-green-600 hover:bg-green-700'
+                                        : 'bg-gray-600 hover:bg-gray-700'
+                                    }`}
+                                onClick={handleGlobalConfirmAction}
+                            >
+                                {globalConfirmAction === 'rechTodo'
+                                    ? 'Rechazar'
+                                    : globalConfirmAction === 'aprobTodo'
+                                        ? 'Aprobar'
+                                        : 'Corrección'}
                             </button>
                         </div>
                     </div>

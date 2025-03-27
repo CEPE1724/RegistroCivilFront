@@ -16,6 +16,7 @@ export default function CreditoForm() {
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [dataBodega, setDataBodega] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
+  const [ActEconomina , setActEconomina] = useState([]);
   const [prevErrors, setPrevErrors] = useState({});
   const [formStatus, setFormStatus] = useState(null);
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
@@ -63,18 +64,36 @@ export default function CreditoForm() {
 
   const fetchActividadLaboral = async () => {
     try {
-      const response = await axios.get(APIURL.getActividadEconomina(), {
+      const response = await axios.get(APIURL.getActividadEconominasituacionLaboral(), {
         headers: { method: "GET", cache: "no-store" },
       });
       setActividadLaboral(
+        response.data.map((item) => ({
+          value: item.idSituacionLaboral,
+          label: item.Descripcion,
+        }))
+      );
+    } catch (error) {
+      console.error("Error al obtener actividad laboral", error);
+      setActividadLaboral([]);
+    }
+  };
+
+  const fetchActEconomina = async (idSituacionLaboral) => {
+    try {
+      if (!idSituacionLaboral) return; // Si no hay idSituacionLaboral, no hacer la consulta.
+      const response = await axios.get(APIURL.get_cre_actividadeconomina(idSituacionLaboral), {
+        headers: { method: "GET", cache: "no-store" },
+      });
+      setActEconomina(
         response.data.map((item) => ({
           value: item.idActEconomica,
           label: item.Nombre,
         }))
       );
     } catch (error) {
-      console.error("Error al obtener actividad laboral", error);
-      setActividadLaboral([]);
+      console.error("Error al obtener actividad económica", error);
+      setActEconomina([]);
     }
   };
 
@@ -107,6 +126,14 @@ export default function CreditoForm() {
     fetchBodega();
   }, []);
 
+
+
+  const handleSituacionLaboralChange = (selectedOption) => {
+   // alert(selectedOption);
+    //setActividadLaboral([selectedOption]);  // Aseguramos que se actualiza el estado con un solo valor
+    fetchActEconomina(selectedOption);  // Realizamos la llamada para obtener la actividad económica
+  };
+
   useEffect(() => {
     if (data && data.length > 0) {
       setDataBodega(
@@ -137,6 +164,7 @@ export default function CreditoForm() {
     SegundoNombre: "",
     Celular: "",
     Email: "",
+    idSituacionLaboral: null,
     idActEconomina: null,
     idCre_Tiempo: null,
     bAfiliado: false,
@@ -188,10 +216,17 @@ export default function CreditoForm() {
     { label: "Email", name: "Email", type: "email" },
 
     {
-      label: "Actividad Laboral",
-      name: "idActEconomina",
+      label: "Situacion Laboral",
+      name: "idSituacionLaboral",
       type: "select",
       options: actividadLaboral,
+      onchange: handleSituacionLaboralChange , 
+    },
+    {
+      label: "Actividad Economica",
+      name: "idActEconomina",
+      type: "select",
+      options: ActEconomina,
     },
     {
       label: "Estabilidad Laboral",
@@ -284,6 +319,11 @@ export default function CreditoForm() {
         .trim(),
       Email: Yup.string().email("Correo inválido").required("Ingresa un correo válido"),
 
+      idSituacionLaboral: Yup.number()
+        .nullable()
+        .positive()
+        .integer()
+        .required("Selecciona por favor la situación laboral"),
       idActEconomina: Yup.number()
         .nullable()
         .positive()
@@ -366,6 +406,7 @@ export default function CreditoForm() {
       ...values,
       Foto: 'prueba',  // Valor temporal de la foto mientras se maneja la carga
       Bodega: Number(values.Bodega),
+      idSituacionLaboral: Number(values.idSituacionLaboral),
       idActEconomina: Number(values.idActEconomina),
       idCre_Tiempo: Number(values.idCre_Tiempo),
       idProductos: Number(values.idProductos),

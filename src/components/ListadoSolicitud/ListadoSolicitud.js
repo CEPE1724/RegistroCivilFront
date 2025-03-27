@@ -38,19 +38,18 @@ import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
 import FolderIcon from "@mui/icons-material/Folder";
-import PhoneIcon from '@mui/icons-material/Phone';
+import PhoneIcon from "@mui/icons-material/Phone";
 import { useNavigate } from "react-router-dom";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
-import HouseIcon from '@mui/icons-material/House';
+import HouseIcon from "@mui/icons-material/House";
 import { red } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
-import HourglassFullIcon from '@mui/icons-material/HourglassFull';
-import PendingIcon from '@mui/icons-material/Pending';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import LocationModal from "./LocationModal";
+import HourglassFullIcon from "@mui/icons-material/HourglassFull";
+import PendingIcon from "@mui/icons-material/Pending";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -72,14 +71,13 @@ export function ListadoSolicitud() {
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
 
-
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [fechaInicio, setFechaInicio] = useState(today);
   const [fechaFin, setFechaFin] = useState(today);
 
   const navigate = useNavigate();
   const { userData } = useAuth();
-  const bodegas = data || [];  // Safely access the bodegas data
+  const bodegas = data || []; // Safely access the bodegas data
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
     { label: "Pendiente", value: 1 },
@@ -96,7 +94,11 @@ export function ListadoSolicitud() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await Promise.all([fetchTipoConsulta(), fetchBodega(), fetchTipoCliente()]);
+        await Promise.all([
+          fetchTipoConsulta(),
+          fetchBodega(),
+          fetchTipoCliente(),
+        ]);
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
       }
@@ -112,43 +114,55 @@ export function ListadoSolicitud() {
       const fecha = new Date().toISOString();
       const recibeConsignacion = true;
 
-      await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
+      await fetchBodegaUsuario(
+        userId,
+        idTipoFactura,
+        fecha,
+        recibeConsignacion
+      );
     } catch (err) {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
+
   const getIconByEstado = (estadoId) => {
     switch (estadoId) {
       case 1: // Estado "Aprobado"
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+        return <FolderIcon sx={{ color: "#6C757D" }} />; // Estado por defecto
       case 2: // Estado "En revisión"
         return <PendingIcon sx={{ color: "#FFC107" }} />;
       case 3: // Estado "Corrección"
         return <ReportProblemIcon sx={{ color: "#FF5722" }} />;
-      case 4: // Estado "Rechazado"
+      case 4: // Estado "Aprobado"
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      case 5: // Estado "Rechazado"
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
-      default:
-        return <FolderIcon sx={{ color: "#6C757D" }} />; // Estado por defecto
     }
   };
 
-
-  const getColorByEstado = (estado) => {
-    switch (estado) {
+  const getTooltipByEstado = (estadoId) => {
+    switch (estadoId) {
       case 1:
-        return "#007BFF"; // Azul
+        return "En proceso";
       case 2:
-        return "#FFC107"; // Amarillo
+        return "En Revisión";
       case 3:
-        return "#FF5722"; // Naranja
+        return "Corrección Requerida";
       case 4:
-        return "#28A745"; // Verde
+        return "todos los documentos han sido aprobados";
       case 5:
-        return "#DC3545"; // Rojo
+        return "Rechazado";
       default:
-        return "#6C757D"; // Gris para estados desconocidos
+        return "Estado desconocido";
     }
   };
+
+  /* idEstadoVerificacionDocumental	Nombre
+1	PROCESO
+2	REVISIÓN
+3	CORRECIÓN
+4	APROBACION
+5	RECHAZAR */
 
   // Obtener tipo de consulta
   const fetchTipoConsulta = async () => {
@@ -162,10 +176,12 @@ export function ListadoSolicitud() {
       });
 
       if (response.status === 200) {
-        setTipoConsulta(response.data.map(item => ({
-          id: item.idCompraEncuesta,
-          descripcion: item.Descripcion,
-        })));
+        setTipoConsulta(
+          response.data.map((item) => ({
+            id: item.idCompraEncuesta,
+            descripcion: item.Descripcion,
+          }))
+        );
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -206,7 +222,15 @@ export function ListadoSolicitud() {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
       fetchSolicitudes();
     }
-  }, [currentPage, tipoConsulta, dataBodega, selectedBodega, estado, fechaInicio, fechaFin]);
+  }, [
+    currentPage,
+    tipoConsulta,
+    dataBodega,
+    selectedBodega,
+    estado,
+    fechaInicio,
+    fechaFin,
+  ]);
 
   const fetchSolicitudes = async () => {
     console.log(selectedBodega);
@@ -237,36 +261,43 @@ export function ListadoSolicitud() {
 
         // Mapeo de datos con fetchVendedor
         const datos = await Promise.all(
-          response.data.data.map(async item => {
+          response.data.data.map(async (item) => {
             const vendedorNombre = await fetchVendedor(item.idVendedor);
             return {
               id: item.idCre_SolicitudWeb,
               NumeroSolicitud: item.NumeroSolicitud,
               nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
               PrimerNombre: item.PrimerNombre,
-               SegundoNombre: item.SegundoNombre,
-               ApellidoPaterno: item.ApellidoPaterno,
-               ApellidoMaterno: item.ApellidoMaterno,
+              SegundoNombre: item.SegundoNombre,
+              ApellidoPaterno: item.ApellidoPaterno,
+              ApellidoMaterno: item.ApellidoMaterno,
               cedula: item.Cedula,
               almacen:
-                dataBodega.find(bodega => bodega.value === item.Bodega)?.label || "Desconocido",
+                dataBodega.find((bodega) => bodega.value === item.Bodega)
+                  ?.label || "Desconocido",
               vendedor: vendedorNombre,
               consulta:
-                tipoConsulta.find(tipo => tipo.id === item.idCompraEncuesta)?.descripcion || "Desconocido",
+                tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)
+                  ?.descripcion || "Desconocido",
               estado:
-                item.Estado === 1 ? "PENDIENTE" :
-                  item.Estado === 2 ? "APROBADO" :
-                    item.Estado === 3 ? "ANULADO" :
-                      item.Estado === 4 ? "RECHAZADO" : "Desconocido",
+                item.Estado === 1
+                  ? "PENDIENTE"
+                  : item.Estado === 2
+                  ? "APROBADO"
+                  : item.Estado === 3
+                  ? "ANULADO"
+                  : item.Estado === 4
+                  ? "RECHAZADO"
+                  : "Desconocido",
               imagen: item.Foto,
               celular: item.Celular,
               email: item.Email,
               fecha: item.Fecha,
               afiliado: item.bAfiliado ? "Sí" : "No",
               tieneRuc: item.bTieneRuc ? "Sí" : "No",
-              tipoCliente:
-                tipoClienteMap[item.idTipoCliente] || "Desconocido",
-              idEstadoVerificacionDocumental: item.idEstadoVerificacionDocumental,
+              tipoCliente: tipoClienteMap[item.idTipoCliente] || "Desconocido",
+              idEstadoVerificacionDocumental:
+                item.idEstadoVerificacionDocumental,
             };
           })
         );
@@ -283,7 +314,7 @@ export function ListadoSolicitud() {
   };
 
   // Obtener vendedor
-  const fetchVendedor = async idVendedor => {
+  const fetchVendedor = async (idVendedor) => {
     try {
       const response = await axios.get(APIURL.getVendedor(idVendedor), {
         headers: { method: "GET", cache: "no-store" },
@@ -291,7 +322,11 @@ export function ListadoSolicitud() {
 
       if (response.status === 200) {
         const vendedor = response.data;
-        return `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""} ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible";
+        return (
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
+            vendedor.ApellidoPaterno || ""
+          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+        );
       }
     } catch (error) {
       console.error("Error fetching vendedor data:", error);
@@ -306,10 +341,12 @@ export function ListadoSolicitud() {
 
   useEffect(() => {
     if (data && data.length > 0) {
-      setDataBodega(data.map(item => ({
-        value: item.b_Bodega,
-        label: item.b_Nombre,
-      })));
+      setDataBodega(
+        data.map((item) => ({
+          value: item.b_Bodega,
+          label: item.b_Nombre,
+        }))
+      );
     }
   }, [data]);
 
@@ -326,10 +363,10 @@ export function ListadoSolicitud() {
         foto: registro.imagen,
         vendedor: registro.vendedor,
         consulta: registro.consulta,
+        idEstadoVerificacionDocumental: registro.idEstadoVerificacionDocumental,
       },
     });
   };
-
 
   const handleTelefonica = (registro) => {
     console.log("registro", registro);
@@ -349,14 +386,12 @@ export function ListadoSolicitud() {
     });
   };
 
-
-
   const handlesolicitud = (registro) => {
     console.log("Registro:", registro);
     navigate("/solicitudgrande", {
       replace: true,
       state: {
-        data: registro
+        data: registro,
       },
     });
   };
@@ -370,7 +405,6 @@ export function ListadoSolicitud() {
     setView(false);
     setSelectedRow(null);
   };
-
 
   const handleSolictud = () => {
     navigate("/solicitud", { replace: true });
@@ -517,9 +551,7 @@ export function ListadoSolicitud() {
             <TableBody>
               {datos.map((data) => (
                 <TableRow key={data.id}>
-                  <TableCell align="center">
-                    {data.NumeroSolicitud}
-                  </TableCell>
+                  <TableCell align="center">{data.NumeroSolicitud}</TableCell>
                   <TableCell align="center">{data.nombre}</TableCell>
                   <TableCell align="center">{data.cedula}</TableCell>
                   <TableCell align="center">
@@ -540,21 +572,30 @@ export function ListadoSolicitud() {
                   <TableCell align="center">
                     <Tooltip title="Solicitud" arrow placement="top">
                       <IconButton onClick={() => handlesolicitud(data)}>
-                        <PendingActionsIcon sx={{ color: 'gray' }} />
+                        <PendingActionsIcon sx={{ color: "gray" }} />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Documental" arrow placement="top">
-                      <IconButton onClick={() => handledocumentos(data)}>
-                        {getIconByEstado(data.idEstadoVerificacionDocumental)}
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+
+
+                 <TableCell align="center">
+  <Tooltip title={getTooltipByEstado(data.idEstadoVerificacionDocumental)} arrow placement="top">
+    <span>
+      <IconButton 
+        onClick={() => handledocumentos(data)} 
+        disabled={data.idEstadoVerificacionDocumental === 2 || data.idEstadoVerificacionDocumental === 4 || data.idEstadoVerificacionDocumental === 5}
+      >
+        {getIconByEstado(data.idEstadoVerificacionDocumental)}
+      </IconButton>
+    </span>
+  </Tooltip>
+</TableCell>
+
+
                   <TableCell align="center">
                     <Tooltip title="Telefonica" arrow placement="top">
                       <IconButton onClick={() => handleTelefonica(data)}>
-                        <PhoneIcon sx={{ color: 'gray' }} />
+                        <PhoneIcon sx={{ color: "gray" }} />
                       </IconButton>
                     </Tooltip>
                   </TableCell> 
@@ -617,18 +658,19 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
-                        ? "text-green-500"
-                        : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${
+                        selectedRow.estado === "activo"
+                          ? "text-green-500"
+                          : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                            ? "text-gray-500"
-                            : selectedRow.estado === "aprobado"
-                              ? "text-blue-500"
-                              : selectedRow.estado === "rechazado"
-                                ? "text-red-500"
-                                : "text-gray-700"
-                        }`}
+                          ? "text-gray-500"
+                          : selectedRow.estado === "aprobado"
+                          ? "text-blue-500"
+                          : selectedRow.estado === "rechazado"
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
                     >
                       {selectedRow.estado}
                     </span>
