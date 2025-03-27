@@ -24,7 +24,6 @@ function LocationModal({
     files: "",
   };
   const initialLocation = locationData || defaultLocation;
-  console.log(userSolicitudData);
 
   const [localLocation, setLocalLocation] = useState(initialLocation);
   const [errors, setErrors] = useState({
@@ -96,10 +95,10 @@ function LocationModal({
         error = "La dirección contiene caracteres no permitidos.";
       }
     } else if (name === "files") {
-	  if (files.length === 0) {
-		error = "Debe subir al menos un archivo.";
-	  }
-	}
+      if (files.length === 0) {
+        error = "Debe subir al menos tres archivos.";
+      }
+    }
     return error;
   };
 
@@ -155,6 +154,11 @@ function LocationModal({
         files: "Debe subir al menos un archivo válido.",
       }));
     }
+  };
+
+  const handleRemoveFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+    showSnackbar("Archivo eliminado.", "info");
   };
 
   const handleGetCurrentLocation = async () => {
@@ -225,58 +229,100 @@ function LocationModal({
     }));
   };
 
-  // En este ejemplo se usa el nombre de los archivos como "ruta".
-  const handleSave = async () => {
-	
-	const newErrors = {
-	  address: validateField("address", localLocation.address),
-	  latitude: validateField("latitude", localLocation.latitude),
-	  longitude: validateField("longitude", localLocation.longitude),
-	  files: validateField("files", files.length),
-	};
-	setErrors(newErrors);
-	const errorMessages = Object.values(newErrors).filter((e) => e !== "").join(" ");
-	if (errorMessages) {
-	  showSnackbar(errorMessages, "error");
-	  return;
-	}
-  
-	if (files.length === 0) {
-	  setErrors((prev) => ({ ...prev, files: "Debe subir al menos un archivo." }));
-	  showSnackbar("Debe subir al menos un archivo.", "error");
-	  return;
-	}
-  
-	const uploadedUrls = await uploadFiles();
-	if (!uploadedUrls) return;
-  
-	const payload = {
-	  id: userSolicitudData.id,
-	  cedula: userSolicitudData.cedula,
-	  latitud: parseFloat(localLocation.latitude),
-	  longitud: parseFloat(localLocation.longitude),
-	  direccion: localLocation.address,
-	  ip: "192.168.2.183",
-	  UrlImagen: uploadedUrls,
-	};
-  
-	try {
-	  await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);
-	  showSnackbar("Ubicación guardada exitosamente.", "success");
-	  if (onLocationChange) {
-		onLocationChange(localLocation);
-	  }
-	  setTimeout(() => {
-		if (isOpen) {
-		  isOpen();
-		}
-	  }, 3000);
-	} catch (error) {
-	  console.error("Error al guardar la ubicación:", error);
-	  showSnackbar("Error al guardar la ubicación. Por favor, intente más tarde.", "error");
-	}
+  // Función de subida de archivos: llama al backend y retorna las URLs públicas
+  const uploadFiles = async () => {
+    if (!files || files.length === 0) {
+      showSnackbar("Debe subir al menos un archivo.", "error");
+      return null;
+    }
+    if (files.length < 3) {
+      showSnackbar("Debe subir al menos 3 archivos.", "error");
+      return null;
+    }
+    const uploadEndpoint = APIURL.postFileupload();
+    try {
+      const uploadResults = await Promise.all(
+        files.map(async (file) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("almacen", userSolicitudData.almacen);
+          formData.append("cedula", userSolicitudData.cedula);
+          formData.append("numerosolicitud", userSolicitudData.NumeroSolicitud);
+          formData.append("Tipo", userSolicitudData.Tipo || "DEFAULT");
+          const res = await fetch(uploadEndpoint, {
+            method: "POST",
+            body: formData,
+          });
+          const data = await res.json();
+          if (!res.ok || !data.url) throw new Error("Upload failed");
+          return data.url;
+        })
+      );
+      return uploadResults;
+    } catch (error) {
+      console.error("Error al subir archivos:", error);
+      showSnackbar("Error al subir algunos archivos.", "error");
+      return null;
+    }
   };
-  
+
+  const handleSave = async () => {
+    const newErrors = {
+      address: validateField("address", localLocation.address),
+      latitude: validateField("latitude", localLocation.latitude),
+      longitude: validateField("longitude", localLocation.longitude),
+      files: validateField("files", files.length),
+    };
+    setErrors(newErrors);
+    const errorMessages = Object.values(newErrors)
+      .filter((e) => e !== "")
+      .join(" ");
+    if (errorMessages) {
+      showSnackbar(errorMessages, "error");
+      return;
+    }
+
+    if (files.length < 3) {
+      setErrors((prev) => ({
+        ...prev,
+        files: "Debe subir al menos 3 archivos.",
+      }));
+      showSnackbar("Debe subir al menos 3 archivos.", "error");
+      return;
+    }
+
+    const uploadedUrls = await uploadFiles();
+    if (!uploadedUrls) return;
+
+    const payload = {
+      id: userSolicitudData.id,
+      cedula: userSolicitudData.cedula,
+      latitud: parseFloat(localLocation.latitude),
+      longitud: parseFloat(localLocation.longitude),
+      direccion: localLocation.address,
+      ip: "192.168.2.183",
+      UrlImagen: uploadedUrls,
+    };
+
+    try {
+      await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);
+      showSnackbar("Ubicación guardada exitosamente.", "success");
+      if (onLocationChange) {
+        onLocationChange(localLocation);
+      }
+      setTimeout(() => {
+        if (isOpen) {
+          isOpen();
+        }
+      }, 3000);
+    } catch (error) {
+      console.error("Error al guardar la ubicación:", error);
+      showSnackbar(
+        "Error al guardar la ubicación. Por favor, intente más tarde.",
+        "error"
+      );
+    }
+  };
 
   if (!openLocationModal) return null;
 
@@ -318,51 +364,20 @@ function LocationModal({
       ? "bg-red-600"
       : "bg-blue-600";
 
-	  const uploadFiles = async () => {
-		if (!files || files.length === 0) {
-		  showSnackbar("Debe subir al menos un archivo.", "error");
-		  return null;
-		}
-	  
-		const uploadEndpoint = APIURL.postFileupload();
-	  
-		try {
-		  const uploadResults = await Promise.all(
-			files.map(async (file) => {
-			  const formData = new FormData();
-			  formData.append("file", file);
-			  formData.append("almacen", userSolicitudData.almacen);
-			  formData.append("cedula", userSolicitudData.cedula);
-			  formData.append("numerosolicitud", userSolicitudData.NumeroSolicitud);
-			  formData.append("Tipo", userSolicitudData.Tipo || "DEFAULT");
-	  
-			  const res = await fetch(uploadEndpoint, {
-				method: "POST",
-				body: formData,
-			  });
-	  
-			  const data = await res.json();
-			  if (!res.ok || !data.url) throw new Error("Upload failed");
-			  return data.url;
-			})
-		  );
-	  
-		  return uploadResults;
-		} catch (error) {
-		  console.error("Error al subir archivos:", error);
-		  showSnackbar("Error al subir algunos archivos.", "error");
-		  return null;
-		}
-	  };
-	  
-
-	  
-
   const googleMapsApiKey = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
       <div className="bg-white rounded-xl w-full max-w-2xl p-2 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+        {/* Botón de cierre en la esquina superior derecha */}
+        <button
+          className="absolute top-2 right-2 p-1 text-gray-600 hover:text-gray-900"
+          onClick={() => isOpen()}
+          title="Cerrar"
+        >
+          <span className="text-xl">&times;</span>
+        </button>
+
         {/* Mapa con Autocomplete alineado a la derecha */}
         <div className="relative mb-4 rounded-xl overflow-hidden shadow-lg">
           <LoadScript
@@ -456,7 +471,7 @@ function LocationModal({
             </label>
             <input
               type="file"
-			  name="files"
+              name="files"
               multiple
               onChange={handleFileChange}
               className={`w-full text-xs p-1 border rounded-md focus:outline-none focus:ring-1 ${
@@ -467,7 +482,7 @@ function LocationModal({
               accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             />
             {errors.files && (
-              <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.files}</p>
             )}
           </div>
           <div>
@@ -489,7 +504,7 @@ function LocationModal({
           </div>
         </div>
 
-        {/* Lista de archivos seleccionados (opcional) */}
+        {/* Lista de archivos seleccionados */}
         {files.length > 0 && (
           <div className="mb-4">
             <p className="text-xs font-medium text-gray-700">
@@ -497,7 +512,18 @@ function LocationModal({
             </p>
             <ul className="list-disc list-inside text-xs text-gray-600">
               {files.map((file, index) => (
-                <li key={index}>{file.name}</li>
+                <li key={index} className="flex items-center justify-evenly">
+                  <span>{file.name}</span>
+                  <button
+                    className="text-white bg-red-500 text-[14px] font-bold p-1 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    onClick={() =>
+                      setFiles(files.filter((_, i) => i !== index))
+                    }
+                    title="Eliminar archivo"
+                  >
+                    X
+                  </button>
+                </li>
               ))}
             </ul>
           </div>
@@ -507,7 +533,7 @@ function LocationModal({
         <div className="flex justify-end gap-3">
           <button
             className="px-3 py-1 text-[10px] text-gray-600 hover:bg-gray-100 rounded-md transition duration-200"
-            onClick={isOpen}
+            onClick={() => isOpen()}
           >
             Cancelar
           </button>
