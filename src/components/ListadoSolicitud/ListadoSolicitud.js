@@ -88,6 +88,8 @@ export function ListadoSolicitud() {
     { label: "Rechazado", value: 4 },
   ];
 
+  const [userSolicitudData, setUserSolicitudData] = useState([]);
+
 
 
   // Cargar datos iniciales
@@ -312,7 +314,6 @@ export function ListadoSolicitud() {
   }, [data]);
 
   const handledocumentos = (registro) => {
-
     navigate("/documental", {
       replace: true,
       state: {
@@ -380,8 +381,10 @@ export function ListadoSolicitud() {
     setCurrentPage(page);
   };
 
-  const handleOpenModal = () => {
-		setOpenLocationModal(prev => !prev);
+  const handleOpenModal = (data) => {
+	console.log(data);
+	setUserSolicitudData(data);
+		setOpenLocationModal(prevState => !prevState);
 	}
 
   return (
@@ -555,8 +558,8 @@ export function ListadoSolicitud() {
                       </IconButton>
                     </Tooltip>
                   </TableCell> 
-                  <TableCell align="center">
-                    <Tooltip title="Terrena" arrow placement="top" onClick={ (e) => handleOpenModal(e, data)}>
+                  <TableCell align="center"  className="cursor-pointer">
+                    <Tooltip title="Terrena" arrow placement="top" onClick={ (e) => handleOpenModal(data)}>
                       <HouseIcon sx={{ color: 'gray' }} />
                     </Tooltip>
                   </TableCell>
@@ -699,6 +702,7 @@ export function ListadoSolicitud() {
         locationType={null}
         locationData={null}
         onLocationChange={null}
+		userSolicitudData={userSolicitudData}
       />
     </div>
   );
