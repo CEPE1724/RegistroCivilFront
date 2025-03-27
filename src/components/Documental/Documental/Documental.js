@@ -3,13 +3,13 @@ import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton } from "@mui/material";
-import { APIURL } from "../../configApi/apiConfig";
-import uploadFile from "../../hooks/uploadFile";
-import { useAuth } from "../AuthContext/AuthContext";
+import { APIURL } from "../../../configApi/apiConfig";
+import uploadFile from "../../../hooks/uploadFile";
+import { useAuth } from "../../AuthContext/AuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa"; // Importar icono de usuario
-
+import {HistorialObservacionesModal} from "../HistorialObservacionesModal";
 import {
   Dialog,
   DialogActions,
@@ -33,7 +33,7 @@ export function Documental({
   const { userData, userUsuario } = useAuth();
   const navigate = useNavigate();
   console.log("userData", userData);
-  const {state} = useLocation();
+  const { state } = useLocation();
   console.log("state", state);
 
   console.log("userUsuario", userUsuario);
@@ -60,9 +60,9 @@ export function Documental({
     patchsolicitudWeb();
   };
 
- const [newCompletedFields, setCompletedFields] = useState([]);
- const [corrections, setCorrections] = useState(new Set());
- const [showOnlyCorrections, setShowOnlyCorrections] = useState(false);
+  const [newCompletedFields, setCompletedFields] = useState([]);
+  const [corrections, setCorrections] = useState(new Set());
+  const [showOnlyCorrections, setShowOnlyCorrections] = useState(false);
 
   const [clientInfo, setClientInfo] = useState({
     id: null,
@@ -77,13 +77,13 @@ export function Documental({
     idEstadoVerificacionDocumental: "",
   });
   const [filePreviews, setFilePreviews] = useState({});
-  const [filesToCorrect,setFilesToCorrect] = useState([]);
-  
+  const [filesToCorrect, setFilesToCorrect] = useState([]);
+
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const response = await axios.get(APIURL.get_documentos(clientInfo.id,clientInfo.idEstadoVerificacionDocumental));
-        
+        const response = await axios.get(APIURL.get_documentos(clientInfo.id, clientInfo.idEstadoVerificacionDocumental));
+
         console.log("Respuesta API Documentos:", response.data);
         if (response.status === 200 && Array.isArray(response.data)) {
           const uploadedFiles = {};
@@ -115,7 +115,7 @@ export function Documental({
               estado: file.idEstadoDocumento,
             });
 
-          console.log("uploadedFiles", uploadedFiles);
+            console.log("uploadedFiles", uploadedFiles);
 
             previews[sectionName].push(fileUrl);
 
@@ -135,16 +135,16 @@ export function Documental({
           setFilesToCorrect([...corrections]); // Actualizamos los campos a corregir
 
 
-     
+
           const newCompletedFields = Object.keys(uploadedFiles);
           setCompletedFields(newCompletedFields);
 
-            // Si hay documentos con estado 4, solo mostrar esos tabs
-        if (corrections.size > 0) {
-          setShowOnlyCorrections(true); // Mostrar solo las correcciones
-        } else {
-          setShowOnlyCorrections(false); // Mostrar todo si no hay correcciones
-        }
+          // Si hay documentos con estado 4, solo mostrar esos tabs
+          if (corrections.size > 0) {
+            setShowOnlyCorrections(true); // Mostrar solo las correcciones
+          } else {
+            setShowOnlyCorrections(false); // Mostrar todo si no hay correcciones
+          }
         }
       } catch (error) {
         enqueueSnackbar("Error al obtener archivos subidos.", {
@@ -157,7 +157,7 @@ export function Documental({
     if (clientInfo.NumeroSolicitud && !showOnlyCorrections) {
       fetchUploadedFiles();
     }
-  }, [clientInfo.id , refreshFiles]); // Se ejecuta cuando el ID del cliente cambia
+  }, [clientInfo.id, refreshFiles]); // Se ejecuta cuando el ID del cliente cambia
 
   const getTipoDocumento = (id) => {
     const documentoIds = {
@@ -494,42 +494,42 @@ export function Documental({
 
     try {
       // Subir archivo y obtener la URL
-      console.log("asdasdasdasdasdasdasdasdasas estoy aquiiii",files)
-     let response;
-  
+      console.log("asdasdasdasdasdasdasdasdasas estoy aquiiii", files)
+      let response;
 
-     const getFile = (tab) => {
-      // Busca el archivo físico (sin URL)
-      return files[tab]?.find(file => !file?.url); // Si no tiene URL, es un archivo físico
-    };
-    
-    if (clientInfo.idEstadoVerificacionDocumental === 1) {
-      const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
-      if (fileToUpload) {
-        response = await uploadFile(
-          fileToUpload, 
-          clientInfo.almacen,
-          clientInfo.cedula,
-          clientInfo.NumeroSolicitud,
-          activeTab, // Mandamos el texto del tab
-          observacion[activeTab]
-        );
+
+      const getFile = (tab) => {
+        // Busca el archivo físico (sin URL)
+        return files[tab]?.find(file => !file?.url); // Si no tiene URL, es un archivo físico
+      };
+
+      if (clientInfo.idEstadoVerificacionDocumental === 1) {
+        const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
+        if (fileToUpload) {
+          response = await uploadFile(
+            fileToUpload,
+            clientInfo.almacen,
+            clientInfo.cedula,
+            clientInfo.NumeroSolicitud,
+            activeTab, // Mandamos el texto del tab
+            observacion[activeTab]
+          );
+        }
       }
-    }
-    
-    if (clientInfo.idEstadoVerificacionDocumental === 3) {
-      const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
-      if (fileToUpload) {
-        response = await uploadFile(
-          fileToUpload,
-          clientInfo.almacen,
-          clientInfo.cedula,
-          clientInfo.NumeroSolicitud,
-          activeTab, // Mandamos el texto del tab
-          observacion[activeTab]
-        );
+
+      if (clientInfo.idEstadoVerificacionDocumental === 3) {
+        const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
+        if (fileToUpload) {
+          response = await uploadFile(
+            fileToUpload,
+            clientInfo.almacen,
+            clientInfo.cedula,
+            clientInfo.NumeroSolicitud,
+            activeTab, // Mandamos el texto del tab
+            observacion[activeTab]
+          );
+        }
       }
-    }
 
 
       const documentoIds = {
@@ -594,7 +594,7 @@ export function Documental({
         } else {
           enqueueSnackbar(
             "Error al guardar el documento en la BD. " +
-              apiResponse.data?.message || "",
+            apiResponse.data?.message || "",
             { variant: "error" }
           );
         }
@@ -646,7 +646,7 @@ export function Documental({
     (field) => files[field] && files[field].length > 0
   );
 
-   console.log("filePreviews", filePreviews);
+  console.log("filePreviews", filePreviews);
 
   const pendingFields = menuItems.filter(
     (field) => !(files[field] && files[field].length > 0)
@@ -655,177 +655,173 @@ export function Documental({
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-  className={`w-64 bg-white text-gray-800 shadow-lg ${
-    isMenuOpen ? "block" : "hidden"
-  } md:block transition-all duration-300 ease-in-out`}
->
-<div className="p-4 space-y-6">
-  {/* Progreso de Archivos */}
-  <div>
-    <label className="block text-sm font-semibold text-gray-500">
-      Progreso de Archivos
-    </label>
-    <div className="mt-2 flex items-center justify-between">
-      <span className="text-sm text-gray-600">{Math.round(calculateProgress())}%</span>
-    </div>
+        className={`w-64 bg-white text-gray-800 shadow-lg ${isMenuOpen ? "block" : "hidden"
+          } md:block transition-all duration-300 ease-in-out`}
+      >
+        <div className="p-4 space-y-6">
+          {/* Progreso de Archivos */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-500">
+              Progreso de Archivos
+            </label>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-sm text-gray-600">{Math.round(calculateProgress())}%</span>
+            </div>
 
-    <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-      <div
-        className="rounded-full h-2 transition-all duration-500 ease-in-out"
-        style={{
-          width: `${calculateProgress()}%`,
-          backgroundColor: getProgressBarColor(),
-        }}
-      ></div>
-    </div>
-
-    {calculateProgress() === 100 && (
-      <div className="mt-4 text-center">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-green-500 text-sm text-white py-2 px-4 rounded shadow hover:bg-green-600 transition-transform duration-300 transform hover:scale-105"
-        >
-          Enviar verificación
-        </button>
-      </div>
-    )}
-  </div>
-
-
-  {showOnlyCorrections ? (
-  // Mostrar solo los tabs con documentos en estado 4
-  <div>
-    <h3 className="text-sm font-medium text-red-500">Campos a Corregir</h3>
-    <ul className="mt-2 space-y-1">
-      {filesToCorrect.map((item) => {
-        const fileCount = files[item]?.length || 0;
-        const isSelected = activeTab === item;
-
-        return (
-          <li key={item}>
-            <a
-              href="#"
-              onClick={(event) => {
-                event.preventDefault();
-                setActiveTab(item);
-              }}
-              className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                ${isSelected
-                  ? "bg-red-600 text-white shadow-lg"
-                  : "text-red-600 hover:bg-red-100 hover:text-red-800"
-                }`}
-            >
-              {item}
-              {fileCount > 0 && (
-                <span
-                  className={`text-xs font-bold px-2 py-1 rounded-full ${
-                    isSelected ? "bg-white text-red-600" : "bg-red-500 text-white"
-                  }`}
-                >
-                  {`+${fileCount}`}
-                </span>
-              )}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-) : (
-  <>
-    {/* Campos Pendientes */}
-    <div>
-      <h3 className="text-sm font-medium text-gray-500">Campos Pendientes</h3>
-      <ul className="mt-2 space-y-1">
-        {pendingFields.map((item) => {
-          const fileCount = files[item]?.length || 0;
-          const isSelected = activeTab === item;
-
-          return (
-            <li key={item}>
-              <a
-                href="#"
-                onClick={(event) => {
-                  event.preventDefault();
-                  setActiveTab(item);
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+              <div
+                className="rounded-full h-2 transition-all duration-500 ease-in-out"
+                style={{
+                  width: `${calculateProgress()}%`,
+                  backgroundColor: getProgressBarColor(),
                 }}
-                className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                  ${isSelected
-                    ? "bg-blue-600 text-white shadow-lg"
-                    : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                  }`}
-              >
-                {item}
-                {fileCount > 0 && (
-                  <span
-                    className={`text-xs font-bold px-2 py-1 rounded-full ${
-                      isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
-                    }`}
-                  >
-                    {`+${fileCount}`}
-                  </span>
-                )}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+              ></div>
+            </div>
 
-    {/* Campos Completados */}
-    {completedFields.length > 0 && (
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">Campos Completados</h3>
-        <ul className="mt-2 space-y-1">
-          {completedFields.map((item) => {
-            const fileCount = files[item]?.length || 0;
-            const isSelected = activeTab === item;
-
-            return (
-              <li key={item}>
-                <a
-                  href="#"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setActiveTab(item);
-                  }}
-                  className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                    ${isSelected
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                    }`}
+            {calculateProgress() === 100 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-green-500 text-sm text-white py-2 px-4 rounded shadow hover:bg-green-600 transition-transform duration-300 transform hover:scale-105"
                 >
-                  {item}
-                  <div className="flex items-center">
-                    {fileCount > 0 && (
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded-full ${
-                          isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
-                        }`}
+                  Enviar verificación
+                </button>
+              </div>
+            )}
+          </div>
+
+
+          {showOnlyCorrections ? (
+            // Mostrar solo los tabs con documentos en estado 4
+            <div>
+              <h3 className="text-sm font-medium text-red-500">Campos a Corregir</h3>
+              <ul className="mt-2 space-y-1">
+                {filesToCorrect.map((item) => {
+                  const fileCount = files[item]?.length || 0;
+                  const isSelected = activeTab === item;
+
+                  return (
+                    <li key={item}>
+                      <a
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          setActiveTab(item);
+                        }}
+                        className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
+                ${isSelected
+                            ? "bg-red-600 text-white shadow-lg"
+                            : "text-red-600 hover:bg-red-100 hover:text-red-800"
+                          }`}
                       >
-                        {`+${fileCount}`}
-                      </span>
-                    )}
-                    {completedFields2.includes(item) && (
-                      <span className="ml-2 text-green-500 font-bold">✓</span>
-                    )}
-                  </div>
-                </a>
-              </li>
-            );
-          })}
-        </ul>
+                        {item}
+                        {fileCount > 0 && (
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-white text-red-600" : "bg-red-500 text-white"
+                              }`}
+                          >
+                            {`+${fileCount}`}
+                          </span>
+                        )}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
+            <>
+              {/* Campos Pendientes */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-500">Campos Pendientes</h3>
+                <ul className="mt-2 space-y-1">
+                  {pendingFields.map((item) => {
+                    const fileCount = files[item]?.length || 0;
+                    const isSelected = activeTab === item;
+
+                    return (
+                      <li key={item}>
+                        <a
+                          href="#"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setActiveTab(item);
+                          }}
+                          className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
+                  ${isSelected
+                              ? "bg-blue-600 text-white shadow-lg"
+                              : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                            }`}
+                        >
+                          {item}
+                          {fileCount > 0 && (
+                            <span
+                              className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
+                                }`}
+                            >
+                              {`+${fileCount}`}
+                            </span>
+                          )}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              {/* Campos Completados */}
+              {completedFields.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500">Campos Completados</h3>
+                  <ul className="mt-2 space-y-1">
+                    {completedFields.map((item) => {
+                      const fileCount = files[item]?.length || 0;
+                      const isSelected = activeTab === item;
+
+                      return (
+                        <li key={item}>
+                          <a
+                            href="#"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              setActiveTab(item);
+                            }}
+                            className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
+                    ${isSelected
+                                ? "bg-blue-600 text-white shadow-lg"
+                                : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                              }`}
+                          >
+                            {item}
+                            <div className="flex items-center">
+                              {fileCount > 0 && (
+                                <span
+                                  className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
+                                    }`}
+                                >
+                                  {`+${fileCount}`}
+                                </span>
+                              )}
+                              {completedFields2.includes(item) && (
+                                <span className="ml-2 text-green-500 font-bold">✓</span>
+                              )}
+                            </div>
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+
+
+
+
+
+        </div>
       </div>
-    )}
-  </>
-)}
-
-
-
-
-     
-   </div>
- </div>
       {/* Menu Toggle Button */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -849,7 +845,7 @@ export function Documental({
                 </div>
               )}
 
-            
+
 
               <div className="md:w-3/4 mt-2 pl-4 bg-white shadow-lg rounded-lg p-1 ">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base leading-relaxed pl-10">
@@ -876,7 +872,7 @@ export function Documental({
 
           <div className="flex justify-center items-center mt-8 w-full">
             {/* Documentos Subidos */}
-        
+
 
             <div className=" pb-4 pt-5 md:absolute md:right-11 ">
               <button
@@ -889,64 +885,64 @@ export function Documental({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-  {filePreviews[activeTab]?.length > 0 &&
-    filePreviews[activeTab]?.map((previewUrl, index) => {
-      const file = files[activeTab]?.[index];
-      if (file?.estado !== 5) { // Verifica si el estado es diferente de 5
-        return (
-          <div
-            key={index}
-            className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
-          >
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">
-                {file?.name || "Sin nombre"}
-              </span>
+            {filePreviews[activeTab]?.length > 0 &&
+              filePreviews[activeTab]?.map((previewUrl, index) => {
+                const file = files[activeTab]?.[index];
+                if (file?.estado !== 5) { // Verifica si el estado es diferente de 5
+                  return (
+                    <div
+                      key={index}
+                      className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-700">
+                          {file?.name || "Sin nombre"}
+                        </span>
 
-              <div className="flex items-center gap-2">
-                <IconButton onClick={toggleView}>
-                  <VisibilityIcon />
-                </IconButton>
-                {/* Mostrar el estado del archivo */}
-                <h1>{file?.estado}</h1>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleOpenDeleteConfirmation(activeTab, index)
-                  }
-                  className="text-red-500 hover:text-red-700"
-                >
-                  ❌
-                </button>
-              </div>
-            </div>
+                        <div className="flex items-center gap-2">
+                          <IconButton onClick={toggleView}>
+                            <VisibilityIcon />
+                          </IconButton>
+                          {/* Mostrar el estado del archivo */}
+                          <h1>{file?.estado}</h1>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleOpenDeleteConfirmation(activeTab, index)
+                            }
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            ❌
+                          </button>
+                        </div>
+                      </div>
 
-            <div className="mt-4">
-              {file?.type === "application/pdf" ? (
-                <object
-                  data={previewUrl}
-                  type="application/pdf"
-                  width="100%"
-                  height="200px"
-                  className="rounded-md"
-                  aria-label="Vista previa PDF"
-                >
-                  <p>Vista previa no disponible</p>
-                </object>
-              ) : (
-                <img
-                  src={previewUrl}
-                  alt="Vista previa archivo"
-                  className="w-full h-auto rounded-md"
-                />
-              )}
-            </div>
+                      <div className="mt-4">
+                        {file?.type === "application/pdf" ? (
+                          <object
+                            data={previewUrl}
+                            type="application/pdf"
+                            width="100%"
+                            height="200px"
+                            className="rounded-md"
+                            aria-label="Vista previa PDF"
+                          >
+                            <p>Vista previa no disponible</p>
+                          </object>
+                        ) : (
+                          <img
+                            src={previewUrl}
+                            alt="Vista previa archivo"
+                            className="w-full h-auto rounded-md"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+                return null; // Si el estado es 5, no se renderiza nada
+              })}
           </div>
-        );
-      }
-      return null; // Si el estado es 5, no se renderiza nada
-    })}
-</div>
 
           {/* Observación */}
           <div className="mb-6">
@@ -1111,65 +1107,11 @@ export function Documental({
       {/* Historial de Observaciones */}
 
       {/* Modal para mostrar el chat de observaciones */}
-      {history && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-md w-96 max-h-[500px] flex flex-col">
-            <h2 className="text-lg font-semibold mb-4 text-center">
-              Historial de Observaciones
-            </h2>
-
-            {/* Área de mensajes tipo chat */}
-            <div className="flex-grow overflow-y-auto max-h-80 p-2 space-y-4 bg-gray-100 rounded-lg">
-              {observaciones.length > 0 ? (
-                observaciones.map((obs, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${
-                      index % 2 === 0 ? "justify-start" : "justify-end"
-                    }`}
-                  >
-                    <div className="flex items-start space-x-2 max-w-[80%]">
-                      {/* Icono de usuario */}
-                      <FaUserCircle className="text-gray-600 text-2xl" />
-
-                      {/* Burbuja de chat */}
-                      <div
-                        className={`p-3 rounded-lg shadow-md ${
-                          index % 2 === 0
-                            ? "bg-white text-gray-900"
-                            : "bg-blue-500 text-white"
-                        }`}
-                      >
-                        <p className="font-semibold">
-                          {obs.Usuario || "Usuario desconocido"}
-                        </p>
-                        <p className="text-sm">
-                          {obs.Observacion || "Sin observación"}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(obs.Fecha).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center">
-                  No hay observaciones registradas.
-                </p>
-              )}
-            </div>
-
-            {/* Botón de cierre */}
-            <button
-              onClick={() => setHistory(false)}
-              className="mt-4 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
+      <HistorialObservacionesModal
+        history={history}
+        setHistory={setHistory}
+        observaciones={observaciones}
+      />
 
       {/* Modal de confirmación de eliminación */}
       {showConfirmDeleteModal && (
