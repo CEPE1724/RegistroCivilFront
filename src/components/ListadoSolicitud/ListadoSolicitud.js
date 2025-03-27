@@ -50,6 +50,11 @@ import HourglassFullIcon from "@mui/icons-material/HourglassFull";
 import PendingIcon from "@mui/icons-material/Pending";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { Popover, Box, Typography } from "@mui/material";
+import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icono de tres puntos verticales
+
+
+
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -83,6 +88,23 @@ export function ListadoSolicitud() {
     { label: "Rechazado", value: 4 },
   ];
 
+  const [anchorEl, setAnchorEl] = useState(null); // Estado para el Popover
+
+
+  // Abre el Popover cuando el InfoIcon es clickeado
+  const [selectedEstado, setSelectedEstado] = useState(null);
+
+  const handlePopoverOpen = (event, idEstado) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedEstado(idEstado);
+  };
+  
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+    setSelectedEstado(null);
+  };
+  
+  const open = Boolean(anchorEl); 
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
@@ -210,6 +232,72 @@ export function ListadoSolicitud() {
     }
   };
 
+  const getPopoverStyles = (idEstado) => {
+    switch (idEstado) {
+      case 1: // PROCESO
+        return {
+          backgroundColor: "#F4F6F9", // Gris suave, elegante
+          color: "#4A4A4A", // Texto gris oscuro
+          border: "1px solid #B0BEC5", // Borde gris suave
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra sutil
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 2: // REVISIÓN
+        return {
+          backgroundColor: "#F9F9F9", // Fondo blanco suculento
+          color: "#5F6368", // Texto gris oscuro sutil
+          border: "1px solid #CED4DA", // Borde gris muy claro
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 3: // CORRECCIÓN
+        return {
+          backgroundColor: "#E3F2F1", // Fondo verde aguamarina suave
+          color: "#00796B", // Texto verde oscuro, elegante
+          border: "1px solid #80CBC4", // Borde azul verdoso suave
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 4: // APROBACIÓN
+        return {
+          backgroundColor: "#E8F5E9", // Fondo verde suave claro
+          color: "#388E3C", // Texto verde oscuro, profesional
+          border: "1px solid #C8E6C9", // Borde verde muy suave
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 5: // RECHAZADO
+        return {
+          backgroundColor: "#FFEBEE", // Fondo rojo muy suave, elegante
+          color: "#D32F2F", // Texto rojo oscuro
+          border: "1px solid #FFCDD2", // Borde rojo claro
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      default:
+        return {
+          backgroundColor: "#F5F5F5", // Fondo gris claro
+          color: "#4A4A4A", // Texto gris oscuro
+          border: "1px solid #B0BEC5", // Borde gris claro
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+    }
+  };
+  
+  
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
@@ -564,19 +652,68 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell>
 
-
-                 <TableCell align="center">
-  <Tooltip title={getTooltipByEstado(data.idEstadoVerificacionDocumental)} arrow placement="top">
+                  <TableCell align="center">
+  <div>
     <span>
-      <IconButton 
-        onClick={() => handledocumentos(data)} 
+      <IconButton
+        onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
         disabled={data.idEstadoVerificacionDocumental === 2 || data.idEstadoVerificacionDocumental === 4 || data.idEstadoVerificacionDocumental === 5}
       >
         {getIconByEstado(data.idEstadoVerificacionDocumental)}
       </IconButton>
+
+      {/* InfoIcon al lado del IconButton */}
+      <MoreVertIcon
+      onClick={(event) => handlePopoverOpen(event, data.idEstadoVerificacionDocumental)}
+      style={{ cursor: 'pointer' }} // Estilo para separarlo un poco y hacerlo clickeable
+      />
     </span>
-  </Tooltip>
+
+    {/* El Popover siempre estará aquí, pero se mostrará solo cuando 'open' sea true */}
+    <Popover
+  open={open}
+  anchorEl={anchorEl}
+  onClose={handlePopoverClose}
+  anchorOrigin={{
+    vertical: "bottom",
+    horizontal: "center",
+  }}
+  transformOrigin={{
+    vertical: "top",
+    horizontal: "center",
+  }}
+  
+  PaperProps={{
+    sx: {
+      ...getPopoverStyles(selectedEstado),
+      //borderRadius: 8, // Bordes redondeados
+      ///backgroundColor: "#f2f2f2", // Fondo gris claro
+      //boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+     /// border: "2px solid #FF007F", // Borde rosado fuerte // Sombra para profundidad
+    },
+  }}
+>
+  <Box sx={{ 
+    width: "300px",  // Ancho más razonable para el Box
+    height: "200px", // Alto más adecuado para el Box
+    borderRadius: 8,  // Bordes redondeados para mejorar el diseño
+    padding: 2,  // Ajuste de padding para el contenido interno
+  }}>
+    <Typography variant="h6">Detalles adicionales</Typography>
+    <Typography variant="body2">
+la vida es bella 
+lasndas
+asdasdasdasdasdasdasdasdasasasd
+loremipsum
+
+    </Typography>
+  </Box>
+</Popover>
+
+  </div>
 </TableCell>
+
+
 
 
                   <TableCell align="center">

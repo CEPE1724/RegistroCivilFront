@@ -55,10 +55,35 @@ export function Documental({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observaciones, setObservaciones] = useState([]);
 
-  const handleConfirm = () => {
-    setIsModalOpen(false);
-    patchsolicitudWeb();
-  };
+  const handleConfirm = async () => {
+    setIsModalOpen(false); // Cierra el modal
+    patchsolicitudWeb(); // Llamada extra si la necesitas
+  
+    if (showOnlyCorrections) {
+      try {
+        // 1️⃣ Enviar PATCH a la API para actualizar el estado de los documentos
+        const response = await axios.patch(APIURL.patch_cancelados(id), {
+          idEstadoDocumento: 6, // Enviar el estado 6 en el cuerpo del PATCH
+        });
+    
+        if (response.status === 200) {
+          enqueueSnackbar("Documentos cancelados correctamente.", {
+            variant: "success",
+          });
+    
+          setRefreshFiles((prev) => !prev); // Esto recarga los archivos en el useEffect
+        }
+      } catch (error) {
+        enqueueSnackbar("Error al cancelar los documentos.", {
+          variant: "error",
+        });
+        console.error("Error en la actualización:", error);
+        return; // Evitamos seguir si hay error en la API
+      }
+    }
+};
+  
+
 
  const [newCompletedFields, setCompletedFields] = useState([]);
  const [corrections, setCorrections] = useState(new Set());
@@ -315,6 +340,30 @@ export function Documental({
       return; // No permite cargar más archivos si ya existe uno
     }
 
+
+
+
+    if (showOnlyCorrections) {
+      // Verifica si la sección está en los campos a corregir y si ya existen archivos con estado 5 cargados en esa sección
+      const filesWithState5 = files[activeTab]?.some(file => file.estado !== 5);
+      
+      
+      
+      ///alert (filesWithState5)// Verifica si hay archivos con estado 5
+    
+      if (filesToCorrect.includes(activeTab) && filesWithState5) {
+        enqueueSnackbar(
+          "No puedes subir archivos en este campo hasta que se corrijan los documentos pendientes.",
+          { variant: "error" }
+        );
+        setIsUploading(false); // Detén el proceso de carga
+        return; // No permite cargar más archivos
+      }
+    }
+    
+    
+
+
     // Si no hay archivo, se puede agregar el nuevo archivo
     setFiles((prevFiles) => ({
       ...prevFiles,
@@ -488,6 +537,24 @@ export function Documental({
       setIsUploading(false);
       return;
     }
+
+    if (showOnlyCorrections) {
+      // Verificar que exista al menos un archivo físico (sin URL) en el campo activo
+      const hasPhysicalFile = files[activeTab]?.some(file => !file?.url);
+      if (!hasPhysicalFile) {
+      enqueueSnackbar(
+        "Por favor sube un archivo .",
+        { variant: "error" }
+      );
+      setIsUploading(false); // Detener el proceso de subida
+      return;
+      }
+    }
+      
+
+
+
+    
 
     // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
     if (
