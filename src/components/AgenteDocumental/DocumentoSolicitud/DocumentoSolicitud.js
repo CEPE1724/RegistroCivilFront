@@ -18,6 +18,7 @@ export function DocumentoSolicitud() {
   const [limit] = useState(10); // You can set the limit here, or make it dynamic
   const [offset, setOffset] = useState(0);
   const navigate = useNavigate();
+  const [selectedEstado, setSelectedEstado] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,11 +80,22 @@ export function DocumentoSolicitud() {
     setSelectedBodega(event.target.value);
   };
 
+  const handleEstadoChange = (event) => {
+    setSelectedEstado(event.target.value);
+  };
+
   // Filter clients by name
-  const filteredClientes = clientesList.filter((cliente) =>
-    cliente.PrimerNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.ApellidoPaterno.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredClientes = clientesList.filter((cliente) => {
+    const matchesSearch =
+      cliente.PrimerNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.ApellidoPaterno.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesEstado =
+      selectedEstado === "" ||
+      cliente.idEstadoVerificacionDocumental === parseInt(selectedEstado);
+
+    return matchesSearch && matchesEstado;
+  });
 
   // Función que muestra un alert al hacer clic en el ícono de ojo
   const handleEyeClick = (cliente) => {
@@ -166,6 +178,23 @@ export function DocumentoSolicitud() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <div className="flex-grow">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Estados:
+            </label>
+            <select
+              id="estado-select"
+              className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={selectedEstado}
+              onChange={handleEstadoChange}
+            >
+              <option value="">Todos</option>
+              <option value="2">Revisión</option>
+              <option value="3">Corrección</option>
+              <option value="4">Aprobado</option>
+              <option value="5">Rechazado</option>
+            </select>
+          </div>
         </div>
 
         {/* Cards de Clientes */}
@@ -195,10 +224,10 @@ export function DocumentoSolicitud() {
 
                 {/* Contenido de la tarjeta */}
                 <h2 className="text-2xl font-semibold text-gray-800">{cliente.PrimerNombre} {cliente.ApellidoPaterno}</h2>
-                <p className="text-gray-600"><NumbersIcon fontSize="small"/> Número de solicitud: {cliente.NumeroSolicitud}</p>
-                <p className="text-gray-600"><BadgeIcon fontSize="small"/> Cédula: {cliente.Cedula}</p>
-                <p className="text-gray-600"><AlternateEmailIcon fontSize="small"/> Email: {cliente.Email}</p>
-                <p className="text-gray-600"><PhoneIcon fontSize="small"/> Teléfono: {cliente.Celular}</p>
+                <p className="text-gray-600"><NumbersIcon fontSize="small" /> Número de solicitud: {cliente.NumeroSolicitud}</p>
+                <p className="text-gray-600"><BadgeIcon fontSize="small" /> Cédula: {cliente.Cedula}</p>
+                <p className="text-gray-600"><AlternateEmailIcon fontSize="small" /> Email: {cliente.Email}</p>
+                <p className="text-gray-600"><PhoneIcon fontSize="small" /> Teléfono: {cliente.Celular}</p>
                 <p className={`mt-4 font-semibold text-sm ${cliente.idEstadoVerificacionDocumental === 2 ? 'text-yellow-600' : cliente.idEstadoVerificacionDocumental === 3 ? 'text-yellow-600' : cliente.idEstadoVerificacionDocumental === 4 ? 'text-green-600' : 'text-red-600'}`}>
                   Estado: {cliente.idEstadoVerificacionDocumental === 2 ? 'Revisión' : cliente.idEstadoVerificacionDocumental === 3 ? 'Corrección' : cliente.idEstadoVerificacionDocumental === 4 ? 'Aprobado' : 'Rechazado'}
                 </p>

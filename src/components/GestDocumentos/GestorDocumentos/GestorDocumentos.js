@@ -681,28 +681,28 @@ export function GestorDocumentos({
             {/* Menu Toggle Button */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="fixed top-6 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
+                className="fixed top-7 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
             >
                 {isMenuOpen ? "❌" : "☰"}
             </button>
 
             {/* Main Content */}
-            <div className="flex-1 p-6 bg-white">
-                <div className="w-full bg-white p-6 rounded-lg shadow-lg">
-                    <div className="mb-6">
-                        <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1 p-3 md:p-6 bg-white">
+                <div className="w-full bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                    <div className="mb-4 md:mb-6">
+                        <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
                             {clientInfo.foto && (
-                                <div className="flex justify-center items-center md:w-1/4">
+                                <div className="flex justify-center items-center">
                                     <img
                                         src={clientInfo.foto}
                                         alt="Foto del cliente"
-                                        className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                                        className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 object-cover border-4 border-gray-300 rounded-lg"
                                     />
                                 </div>
                             )}
 
-                            <div className="md:w-3/4 mt-6 pl-4 bg-white shadow-lg rounded-lg p-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base leading-relaxed pl-10">
+                            <div className="flex-1 mt-4 md:mt-6 px-2 md:px-4 bg-white shadow-lg rounded-lg p-4 md:p-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 text-sm md:text-base leading-relaxed">
                                     {[
                                         ["Número de Solicitud", clientInfo.NumeroSolicitud],
                                         ["Nombre", clientInfo.nombre],
@@ -712,9 +712,9 @@ export function GestorDocumentos({
                                         ["Tipo de consulta", clientInfo.consulta],
                                         ["Almacén", clientInfo.almacen],
                                     ].map(([label, value], idx) => (
-                                        <div key={idx} className="flex items-center gap-4">
-                                            <p className="font-semibold text-gray-700">{label}:</p>
-                                            <p className="text-gray-500">{value}</p>
+                                        <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 md:gap-4">
+                                            <p className="font-semibold text-gray-700 whitespace-nowrap">{label}:</p>
+                                            <p className="text-gray-500 break-words">{value || "-"}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -722,8 +722,8 @@ export function GestorDocumentos({
                         </div>
                     </div>
 
-                    <div className="flex justify-center items-center mt-6 w-full">
-                        <h2 className={`text-2xl font-semibold text-center ${getCurrentDocumentStatusClass()}`}>
+                    <div className="flex justify-center items-center mt-4 md:mt-6 w-full">
+                        <h2 className={`text-xl md:text-2xl font-semibold text-center ${getCurrentDocumentStatusClass()}`}>
                             {getCurrentDocumentStatusTitle()}
                         </h2>
                     </div>
