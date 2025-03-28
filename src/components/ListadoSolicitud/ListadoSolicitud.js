@@ -50,6 +50,9 @@ import HourglassFullIcon from "@mui/icons-material/HourglassFull";
 import PendingIcon from "@mui/icons-material/Pending";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+
+import LocationModal from "./LocationModal";
+
 import { Popover, Box, Typography } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icono de tres puntos verticales
 
@@ -69,6 +72,9 @@ export function ListadoSolicitud() {
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
   const itemsPerPage = 5;
+  const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
+  const [searchDateTo, setSearchDateTo] = useState("");
+  const [openLocationModal, setOpenLocationModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
@@ -112,7 +118,13 @@ export function ListadoSolicitud() {
     setSelectedEstado(null);
   };
 
+
+  const [userSolicitudData, setUserSolicitudData] = useState([]);
+
+
+
   const open = Boolean(anchorEl);
+
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
@@ -522,6 +534,12 @@ export function ListadoSolicitud() {
     setCurrentPage(page);
   };
 
+  const handleOpenModal = (data) => {
+	console.log(data);
+	setUserSolicitudData(data);
+		setOpenLocationModal(prevState => !prevState);
+	}
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
@@ -789,10 +807,10 @@ export function ListadoSolicitud() {
                         <PhoneIcon sx={{ color: "gray" }} />
                       </IconButton>
                     </Tooltip>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Terrena" arrow placement="top">
-                      <HouseIcon sx={{ color: "gray" }} />
+                  </TableCell> 
+                  <TableCell align="center"  className="cursor-pointer">
+                    <Tooltip title="Terrena" arrow placement="top" onClick={ (e) => handleOpenModal(data)}>
+                      <HouseIcon sx={{ color: 'gray' }} />
                     </Tooltip>
                   </TableCell>
                 </TableRow>
@@ -928,7 +946,14 @@ export function ListadoSolicitud() {
           </button>
         </div>
       )}
-
+	  <LocationModal
+        isOpen={ () => handleOpenModal() }
+		openLocationModal = { openLocationModal }
+        locationType={null}
+        locationData={null}
+        onLocationChange={null}
+		userSolicitudData={userSolicitudData}
+      />
     </div>
   );
 }
