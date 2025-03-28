@@ -120,125 +120,162 @@ export function DocumentoSolicitud() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Cargando mientras se obtienen los datos */}
-        {loading && (
-          <div className="text-center py-4">
-            <p className="text-gray-600">Cargando bodegas...</p>
-          </div>
-        )}
 
-        {/* Error handling */}
-        {error && (
-          <div className="text-center py-4">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
-
-        <div className="flex flex-row items-center space-x-4 w-full mb-6">
-          {/* Select de Bodegas */}
-          {!loading && (
-            <div className="flex-grow">
-              <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2">
-                Selecciona una Bodega
-              </label>
-              <select
-                id="bodega-select"
-                className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={selectedBodega}
-                onChange={handleBodegaChange}
-              >
-                <option value="">
-                  Todas las bodega
-                </option>
-                {bodegas.length > 0 ? (
-                  bodegas.map((bodega) => (
-                    <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
-                      {bodega.b_Nombre}
-                    </option>
-                  ))
-                ) : (
-                  <option value="" disabled>No se encontraron bodegas.</option>
-                )}
-              </select>
-            </div>
-          )}
-
-          {/* Buscador de Clientes */}
-          <div className="flex-grow">
-            <label htmlFor="cliente-search" className="block text-gray-700 font-semibold mb-2">
-              Buscar Cliente
-            </label>
-            <input
-              type="text"
-              placeholder="Buscar cliente..."
-              className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <div className="flex-grow">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Estados:
+    <div className="min-h-screen bg-gray-100 py-8 px-6">
+    <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
+  
+      {/* Cargando mientras se obtienen los datos */}
+      {loading && (
+        <div className="text-center py-4">
+          <p className="text-gray-600 font-semibold text-lg">Cargando información...</p>
+        </div>
+      )}
+  
+      {/* Error handling */}
+      {error && (
+        <div className="text-center py-4">
+          <p className="text-red-600 font-semibold text-lg">{error}</p>
+        </div>
+      )}
+  
+      {/* Filtros de selección y búsqueda */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        {/* Select de Bodegas */}
+        {!loading && (
+          <div className="sm:w-full">
+            <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2">
+              Seleccionar Bodega
             </label>
             <select
-              id="estado-select"
-              className="w-full sm:w-1/2 p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={selectedEstado}
-              onChange={handleEstadoChange}
+              id="bodega-select"
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+              value={selectedBodega}
+              onChange={handleBodegaChange}
             >
-              <option value="">Todos</option>
-              <option value="2">Revisión</option>
-              <option value="3">Corrección</option>
-              <option value="4">Aprobado</option>
-              <option value="5">Rechazado</option>
+              <option value="">Todas las bodegas</option>
+              {bodegas.length > 0 ? (
+                bodegas.map((bodega) => (
+                  <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
+                    {bodega.b_Nombre}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No se encontraron bodegas.</option>
+              )}
             </select>
           </div>
+        )}
+  
+        {/* Buscador de Clientes */}
+        <div className="sm:w-full">
+          <label htmlFor="cliente-search" className="block text-gray-700 font-semibold mb-2">
+            Buscar Cliente
+          </label>
+          <input
+            type="text"
+            placeholder="Buscar cliente..."
+            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-
-        {/* Cards de Clientes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredClientes.length > 0 ? (
-            filteredClientes.map((cliente) => (
-              <div
-                key={cliente.idCre_SolicitudWeb}
-                className={`relative bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 ${cliente.idEstadoVerificacionDocumental === 2 ? 'border-2 border-yellow-500' : cliente.idEstadoVerificacionDocumental === 3 ? 'border-2 border-yellow-500' : cliente.idEstadoVerificacionDocumental === 4 ? 'border-2 border-green-500' : 'border-2 border-red-500'}`}
-              >
-                {/* Icono de ojo como botón */}
-                <button
-                  onClick={() => handleEyeClick(cliente)}
-                  className="absolute top-3 right-3 text-gray-700 hover:text-blue-600 focus:outline-none"
-                >
-                  <FaEye size={24} />
-                </button>
-
-                {/* Foto del cliente */}
-                <div className="flex justify-center mb-4">
-                  <img
-                    src={cliente.Foto || 'https://via.placeholder.com/150'} // Si no tiene foto, mostramos un placeholder
-                    alt={`${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`}
-                    className="w-32 h-32 rounded-full object-cover border-2 border-gray-300"
-                  />
+  
+        {/* Select de Estado */}
+        <div className="sm:w-full">
+          <label className="block text-gray-700 font-semibold mb-2">Estados:</label>
+          <select
+            id="estado-select"
+            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+            value={selectedEstado}
+            onChange={handleEstadoChange}
+          >
+            <option value="">Todos</option>
+            <option value="2">Revisión</option>
+            <option value="3">Corrección</option>
+            <option value="4">Aprobado</option>
+            <option value="5">Rechazado</option>
+          </select>
+        </div>
+      </div>
+  
+      {/* Clientes List */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredClientes.length > 0 ? (
+          filteredClientes.map((cliente) => (
+            <div
+              key={cliente.idCre_SolicitudWeb}
+              className={`relative p-6 bg-white rounded-lg shadow-lg transition-all duration-300 border-l-4 
+                ${cliente.idEstadoVerificacionDocumental === 2 ? 'border-[#f1c40f]' : // Yellow
+                cliente.idEstadoVerificacionDocumental === 3 ? 'border-[#f39c12]' : // Orange
+                cliente.idEstadoVerificacionDocumental === 4 ? 'border-[#2d3689]' : // Blue
+                'border-[#d0160e]'}`} // Red for "Rejected"
+            >
+              {/* Foto del cliente */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  {cliente.Foto ? (
+                    <img
+                      src={cliente.Foto}
+                      alt={`${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 shadow-sm mr-4"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold">
+                      {cliente.PrimerNombre.charAt(0)}{cliente.ApellidoPaterno.charAt(0)}
+                    </div>
+                  )}
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">{cliente.PrimerNombre} {cliente.ApellidoPaterno}</h2>
+                    <p className="text-gray-600 text-sm">{cliente.NumeroSolicitud}</p>
+                  </div>
                 </div>
-
-                {/* Contenido de la tarjeta */}
-                <h2 className="text-2xl font-semibold text-gray-800">{cliente.PrimerNombre} {cliente.ApellidoPaterno}</h2>
-                <p className="text-gray-600"><NumbersIcon fontSize="small" /> Número de solicitud: {cliente.NumeroSolicitud}</p>
-                <p className="text-gray-600"><BadgeIcon fontSize="small" /> Cédula: {cliente.Cedula}</p>
-                <p className="text-gray-600"><AlternateEmailIcon fontSize="small" /> Email: {cliente.Email}</p>
-                <p className="text-gray-600"><PhoneIcon fontSize="small" /> Teléfono: {cliente.Celular}</p>
-                <p className={`mt-4 font-semibold text-sm ${cliente.idEstadoVerificacionDocumental === 2 ? 'text-yellow-600' : cliente.idEstadoVerificacionDocumental === 3 ? 'text-yellow-600' : cliente.idEstadoVerificacionDocumental === 4 ? 'text-green-600' : 'text-red-600'}`}>
-                  Estado: {cliente.idEstadoVerificacionDocumental === 2 ? 'Revisión' : cliente.idEstadoVerificacionDocumental === 3 ? 'Corrección' : cliente.idEstadoVerificacionDocumental === 4 ? 'Aprobado' : 'Rechazado'}
+  
+                {/* Estado */}
+                <p className={`text-sm font-semibold ${cliente.idEstadoVerificacionDocumental === 2 ? 'text-[#f1c40f]' :
+                  cliente.idEstadoVerificacionDocumental === 3 ? 'text-[#f39c12]' :
+                  cliente.idEstadoVerificacionDocumental === 4 ? 'text-[#2d3689]' :
+                  'text-[#d0160e]'}`}>
+                  {cliente.idEstadoVerificacionDocumental === 2 ? 'Revisión' :
+                    cliente.idEstadoVerificacionDocumental === 3 ? 'Corrección' :
+                    cliente.idEstadoVerificacionDocumental === 4 ? 'Aprobado' :
+                    'Rechazado'}
                 </p>
               </div>
-            ))
-          ) : (
-            <p className="text-center text-gray-500 col-span-full">No se encontraron resultados.</p>
-          )}
-        </div>
-
+  
+              {/* Detalles */}
+              <div className="mt-4">
+                <p className="text-gray-600 text-sm flex items-center mb-2">
+                  <NumbersIcon fontSize="small" />  {cliente.NumeroSolicitud}
+                </p>
+                <p className="text-gray-600 text-sm flex items-center mb-2">
+                  <BadgeIcon fontSize="small" />  {cliente.Cedula}
+                </p>
+                <p className="text-gray-600 text-sm flex items-center mb-2">
+                  <AlternateEmailIcon fontSize="small" />  {cliente.Email}
+                </p>
+                <p className="text-gray-600 text-sm flex items-center mb-2">
+                  <PhoneIcon fontSize="small" />  {cliente.Celular}
+                </p>
+              </div>
+  
+              {/* Botón de detalles */}
+              <button
+                onClick={() => handleEyeClick(cliente)}
+                className="mt-4 inline-block text-[#2d3689] hover:text-[#1a2a6c] font-semibold"
+              >
+                Ver detalles
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 col-span-full">No se encontraron resultados.</p>
+        )}
       </div>
+  
     </div>
+  </div>
+  
+  
+
   );
 }

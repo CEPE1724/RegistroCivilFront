@@ -9,7 +9,7 @@ import { useAuth } from "../../AuthContext/AuthContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa"; // Importar icono de usuario
-import {HistorialObservacionesModal} from "../HistorialObservacionesModal";
+import { HistorialObservacionesModal } from "../HistorialObservacionesModal";
 import {
   Dialog,
   DialogActions,
@@ -55,9 +55,32 @@ export function Documental({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observaciones, setObservaciones] = useState([]);
 
-  const handleConfirm = () => {
-    setIsModalOpen(false);
-    patchsolicitudWeb();
+  const handleConfirm = async () => {
+    setIsModalOpen(false); // Cierra el modal
+    patchsolicitudWeb(); // Llamada extra si la necesitas
+
+    if (showOnlyCorrections) {
+      try {
+        // 1️⃣ Enviar PATCH a la API para actualizar el estado de los documentos
+        const response = await axios.patch(APIURL.patch_cancelados(id), {
+          idEstadoDocumento: 6, // Enviar el estado 6 en el cuerpo del PATCH
+        });
+
+        if (response.status === 200) {
+          enqueueSnackbar("Documentos cancelados correctamente.", {
+            variant: "success",
+          });
+
+          setRefreshFiles((prev) => !prev); // Esto recarga los archivos en el useEffect
+        }
+      } catch (error) {
+        enqueueSnackbar("Error al cancelar los documentos.", {
+          variant: "error",
+        });
+        console.error("Error en la actualización:", error);
+        return; // Evitamos seguir si hay error en la API
+      }
+    }
   };
 
   const [newCompletedFields, setCompletedFields] = useState([]);
@@ -154,7 +177,7 @@ export function Documental({
       }
     };
 
-    if (clientInfo.NumeroSolicitud && !showOnlyCorrections) {
+    if (clientInfo.NumeroSolicitud) {
       fetchUploadedFiles();
     }
   }, [clientInfo.id, refreshFiles]); // Se ejecuta cuando el ID del cliente cambia
@@ -236,19 +259,37 @@ export function Documental({
   }, []); */
 
   const calculateProgress = () => {
+    if (showOnlyCorrections) {
+      // Modo Correcciones: Progreso basado SOLO en las secciones con estado 4
+      if (!filesToCorrect.length) return 0; // Evita dividir por 0
 
-    const totalFields = 11; // Siempre hay 11 documentos en total
-    const completedFieldsCount = completedFields2.length; // Contamos los vistos (✓)
+      const totalCorrections = filesToCorrect.length; // Secciones a corregir
+      const completedCorrections = completedFields2.filter(field => filesToCorrect.includes(field)).length;
 
-    return (completedFieldsCount / totalFields) * 100;
+      return (completedCorrections / totalCorrections) * 100;
+    } else {
+      // Modo Normal: Progreso basado en los 11 campos totales
+      const totalFields = 11;
+      const completedFieldsCount = completedFields2.length;
+
+      return (completedFieldsCount / totalFields) * 100;
+    }
   };
 
   const patchsolicitudWeb = async () => {
     try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
       const response = await axios.patch(
         APIURL.patch_solicitudweb(clientInfo.id)
       );
       await axios.patch(APIURL.update_soliciutd_telefonica(clientInfo.id, 2));
+      await axios.post(url, {
+
+        idCre_SolicitudWeb: clientInfo.id,
+        Tipo: 3,
+        idEstadoVerificacionDocumental: 2,
+        Usuario: userData.Nombre,
+      });
       if (response.status === 200) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -294,6 +335,7 @@ export function Documental({
       return;
     }
 
+
     // Verifica si ya hay un archivo cargado en el campo activo
     if (files[field] && files[field].length > 0 && clientInfo.idEstadoVerificacionDocumental === 1) {
       // Si ya hay un archivo, muestra un mensaje de error
@@ -304,6 +346,23 @@ export function Documental({
       return; // No permite cargar más archivos si ya existe uno
     }
 
+    if (showOnlyCorrections) {
+      // Verifica si la sección está en los campos a corregir y si ya existen archivos con estado 5 cargados en esa sección
+      const filesWithState5 = files[activeTab]?.some(file => file.estado !== 5);
+
+
+
+      ///alert (filesWithState5)// Verifica si hay archivos con estado 5
+
+      if (filesToCorrect.includes(activeTab) && filesWithState5) {
+        enqueueSnackbar(
+          "No puedes subir archivos en este campo hasta que se corrijan los documentos pendientes.",
+          { variant: "error" }
+        );
+        setIsUploading(false); // Detén el proceso de carga
+        return; // No permite cargar más archivos
+      }
+    }
     // Si no hay archivo, se puede agregar el nuevo archivo
     setFiles((prevFiles) => ({
       ...prevFiles,
@@ -476,6 +535,18 @@ export function Documental({
       );
       setIsUploading(false);
       return;
+    }
+    if (showOnlyCorrections) {
+      // Verificar que exista al menos un archivo físico (sin URL) en el campo activo
+      const hasPhysicalFile = files[activeTab]?.some(file => !file?.url);
+      if (!hasPhysicalFile) {
+        enqueueSnackbar(
+          "Por favor sube un archivo .",
+          { variant: "error" }
+        );
+        setIsUploading(false); // Detener el proceso de subida
+        return;
+      }
     }
 
     // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
@@ -697,7 +768,7 @@ export function Documental({
               <h3 className="text-sm font-medium text-red-500">Campos a Corregir</h3>
               <ul className="mt-2 space-y-1">
                 {filesToCorrect.map((item) => {
-                  const fileCount = files[item]?.length || 0;
+                  const fileCount = files[item]?.filter(file => !file?.url).length || 0;
                   const isSelected = activeTab === item;
 
                   return (
@@ -722,6 +793,9 @@ export function Documental({
                           >
                             {`+${fileCount}`}
                           </span>
+                        )}
+                        {completedFields2.includes(item) && (
+                          <span className="ml-2 text-green-500 font-bold">✓</span>
                         )}
                       </a>
                     </li>
@@ -762,6 +836,7 @@ export function Documental({
                               {`+${fileCount}`}
                             </span>
                           )}
+
                         </a>
                       </li>
                     );

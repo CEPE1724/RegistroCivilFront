@@ -50,7 +50,14 @@ import HourglassFullIcon from "@mui/icons-material/HourglassFull";
 import PendingIcon from "@mui/icons-material/Pending";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+
 import LocationModal from "./LocationModal";
+
+import { Popover, Box, Typography } from "@mui/material";
+import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icono de tres puntos verticales
+
+
+
 
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
@@ -86,10 +93,37 @@ export function ListadoSolicitud() {
     { label: "Anulado", value: 3 },
     { label: "Rechazado", value: 4 },
   ];
+  const [clienteEstados, setClienteEstados] = useState([]);
+  
+  const [anchorEl, setAnchorEl] = useState(null); // Estado para el Popover
+
+  const estadoColores = {
+    1: "#d0160e", // Rojo para Revisión
+    2: "#f5a623", // Amarillo para Corrección
+    3: "#2d3689", // Azul para Aprobado
+    4: "#32CD32", // Verde para Aprobado
+  };
+
+  // Abre el Popover cuando el InfoIcon es clickeado
+  const [selectedEstado, setSelectedEstado] = useState(null);
+
+  const handlePopoverOpen = (event, idEstado, data) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedEstado(idEstado);
+    fetchtiemposolicitudesweb_all(data.id);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+    setSelectedEstado(null);
+  };
+
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
 
 
+
+  const open = Boolean(anchorEl);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -107,6 +141,25 @@ export function ListadoSolicitud() {
     fetchData();
   }, []);
 
+
+  const fetchtiemposolicitudesweb_all = async (idCre_SolicitudWeb) => {
+    try {
+      const url = APIURL.get_tiemposolicitudesweb_all(idCre_SolicitudWeb);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setClienteEstados(data);
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching tiemposolicitudesweb data:", error);
+    }
+  };
   // Obtener bodegas
   const fetchBodega = async () => {
     try {
@@ -218,6 +271,72 @@ export function ListadoSolicitud() {
     }
   };
 
+  const getPopoverStyles = (idEstado) => {
+    switch (idEstado) {
+      case 1: // PROCESO
+        return {
+          backgroundColor: "#F4F6F9", // Gris suave, elegante
+          color: "#4A4A4A", // Texto gris oscuro
+          border: "1px solid #B0BEC5", // Borde gris suave
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra sutil
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 2: // REVISIÓN
+        return {
+          backgroundColor: "#F9F9F9", // Fondo blanco suculento
+          color: "#5F6368", // Texto gris oscuro sutil
+          border: "1px solid #CED4DA", // Borde gris muy claro
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 3: // CORRECCIÓN
+        return {
+          backgroundColor: "#E3F2F1", // Fondo verde aguamarina suave
+          color: "#00796B", // Texto verde oscuro, elegante
+          border: "1px solid #80CBC4", // Borde azul verdoso suave
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 4: // APROBACIÓN
+        return {
+          backgroundColor: "#E8F5E9", // Fondo verde suave claro
+          color: "#388E3C", // Texto verde oscuro, profesional
+          border: "1px solid #C8E6C9", // Borde verde muy suave
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      case 5: // RECHAZADO
+        return {
+          backgroundColor: "#FFEBEE", // Fondo rojo muy suave, elegante
+          color: "#D32F2F", // Texto rojo oscuro
+          border: "1px solid #FFCDD2", // Borde rojo claro
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+      default:
+        return {
+          backgroundColor: "#F5F5F5", // Fondo gris claro
+          color: "#4A4A4A", // Texto gris oscuro
+          border: "1px solid #B0BEC5", // Borde gris claro
+          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
+          fontFamily: "Roboto, sans-serif", // Tipografía moderna
+          fontWeight: "500", // Peso medio
+          padding: "12px", // Padding cómodo
+        };
+    }
+  };
+
+
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
@@ -279,17 +398,17 @@ export function ListadoSolicitud() {
               vendedor: vendedorNombre,
               consulta:
                 tipoConsulta.find((tipo) => tipo.id === item.idCompraEncuesta)
-                  ?.descripcion || "Desconocido",
+                  ?.descripcion || "CLIENTE NO APLICA",
               estado:
                 item.Estado === 1
                   ? "PENDIENTE"
                   : item.Estado === 2
-                  ? "APROBADO"
-                  : item.Estado === 3
-                  ? "ANULADO"
-                  : item.Estado === 4
-                  ? "RECHAZADO"
-                  : "Desconocido",
+                    ? "APROBADO"
+                    : item.Estado === 3
+                      ? "ANULADO"
+                      : item.Estado === 4
+                        ? "RECHAZADO"
+                        : "Desconocido",
               imagen: item.Foto,
               celular: item.Celular,
               email: item.Email,
@@ -324,9 +443,8 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
-            vendedor.ApellidoPaterno || ""
-          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
+            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -578,19 +696,109 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell>
 
+                  <TableCell align="center">
+                    <div>
+                      <span>
+                        <IconButton
+                          onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
+                          disabled={data.idEstadoVerificacionDocumental === 2 || data.idEstadoVerificacionDocumental === 4 || data.idEstadoVerificacionDocumental === 5}
+                        >
+                          {getIconByEstado(data.idEstadoVerificacionDocumental)}
+                        </IconButton>
 
-                 <TableCell align="center">
-  <Tooltip title={getTooltipByEstado(data.idEstadoVerificacionDocumental)} arrow placement="top">
-    <span>
-      <IconButton 
-        onClick={() => handledocumentos(data)} 
-        disabled={data.idEstadoVerificacionDocumental === 2 || data.idEstadoVerificacionDocumental === 4 || data.idEstadoVerificacionDocumental === 5}
+                        {/* InfoIcon al lado del IconButton */}
+                        <MoreVertIcon
+                          onClick={(event) => handlePopoverOpen(event, data.idEstadoVerificacionDocumental, data)}
+                          style={{ cursor: 'pointer' }} // Estilo para separarlo un poco y hacerlo clickeable
+                        />
+                      </span>
+
+                      {/* El Popover siempre estará aquí, pero se mostrará solo cuando 'open' sea true */}
+                      <Popover
+      open={open}
+      anchorEl={anchorEl}
+      onClose={handlePopoverClose}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "center",
+      }}
+      PaperProps={{
+        sx: {
+          borderRadius: 8,
+          backgroundColor: "#ffffff",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          border: "1px solid #dcdcdc",
+          padding: 2,
+        },
+      }}
+    >
+      <Box
+        sx={{
+          width: "350px", // Ajuste el ancho para que se vea más profesional
+          padding: 2,
+          borderRadius: 8,
+          backgroundColor: "#f7f9fb",
+        }}
       >
-        {getIconByEstado(data.idEstadoVerificacionDocumental)}
-      </IconButton>
-    </span>
-  </Tooltip>
-</TableCell>
+        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2d3689", marginBottom: 1 }}>
+          Historial de Revisión Documental
+        </Typography>
+
+        {/* Lista de Estados */}
+        <Box sx={{ marginTop: 2 }}>
+          {clienteEstados.map((estado, index) => (
+            <Box
+              key={estado.idTiempoSolicitudesWeb}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "16px",
+                padding: "10px",
+                backgroundColor: "#fff",
+                borderRadius: "8px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              {/* Icono de estado */}
+              <Box
+                sx={{
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "50%",
+                  backgroundColor: estadoColores[estado.idEstadoVerificacionDocumental],
+                  marginRight: "10px",
+                }}
+              />
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: "bold", color: "#333" }}>
+                  {estado.idEstadoVerificacionDocumental === 1 && "Revisión"}
+                  {estado.idEstadoVerificacionDocumental === 2 && "Corrección"}
+                  {estado.idEstadoVerificacionDocumental === 3 && "Aprobado"}
+                  {estado.idEstadoVerificacionDocumental === 4 && "Finalizado"}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#777" }}>
+                  <strong>Fecha:</strong> {new Date(estado.FechaSistema).toLocaleString()}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#777" }}>
+                  <strong>Revisado por:</strong> {estado.Usuario}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </Box>
+    </Popover>
+
+
+
+                    </div>
+                  </TableCell>
+
+
 
 
                   <TableCell align="center">
@@ -659,19 +867,18 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
+                        ? "text-green-500"
+                        : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-gray-500"
+                            : selectedRow.estado === "aprobado"
+                              ? "text-blue-500"
+                              : selectedRow.estado === "rechazado"
+                                ? "text-red-500"
+                                : "text-gray-700"
+                        }`}
                     >
                       {selectedRow.estado}
                     </span>

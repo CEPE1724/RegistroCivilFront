@@ -229,7 +229,16 @@ export function GestorDocumentos({
                     Authorization: `Bearer ${token}`,
                 },
             });
+/*
+            const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+            await axios.post(url_estado, {
 
+                idCre_SolicitudWeb: idDocumentosSolicitudWeb,
+                Tipo: 3,
+                idEstadoVerificacionDocumental: idEstadoDocumento,
+                Usuario: 'ECEPEDA',
+            });
+*/
             if (response.status === 200) {
                 // Guardamos la observación
                 const updatedObservaciones = { ...observaciones };
@@ -271,6 +280,15 @@ export function GestorDocumentos({
 
             if (response.status === 200) {
                 // Mensaje de éxito con el estado actualizado
+                const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+                await axios.post(url_estado, {
+    
+                    idCre_SolicitudWeb: clientInfo.id,
+                    Tipo: 3,
+                    idEstadoVerificacionDocumental: idEstadoVerificacionDocumental,
+                    Usuario: 'ECEPEDA',
+                });
+
                 const estadoTexto = {
                     3: "Enviado para corrección",
                     4: "Aprobados",

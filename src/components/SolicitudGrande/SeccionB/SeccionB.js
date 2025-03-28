@@ -4,7 +4,7 @@ import { useSnackbar } from "notistack";
 import axios from "axios";
 import { SelectField } from "../../Utils";
 import {
-	fetchTipoEmpresa, fetchTipoContrato, fecthTipoSueldo, fetchCargo, fetchBarrios, fetchParroquias, fetchCantones, fetchProvincias
+	fetchTipoEmpresa, fetchTipoContrato, fecthTipoSueldo, fetchCargo, fetchCognoTrabajocargo,fetchBarrios, fetchParroquias, fetchCantones, fetchProvincias
 } from "../DatosCliente/apisFetch";
 import {
 	FaCalendarAlt, FaMoneyCheckAlt, FaFileContract, FaCity, FaMapMarkerAlt, FaUserCheck,
@@ -35,7 +35,7 @@ const SeccionB = forwardRef((props, ref) => {
 		fetchTipoEmpresa(enqueueSnackbar, setTipoEmpresa);
 		fetchTipoContrato(enqueueSnackbar, setTipoContrato);
 		fecthTipoSueldo(enqueueSnackbar, setTipoSueldo);
-		fetchCargo(enqueueSnackbar, setCargo);
+		fetchCognoTrabajocargo(enqueueSnackbar, setCargo);
 
 		fetchProvincias(enqueueSnackbar, setProvincia);
 	}, []);
@@ -54,7 +54,7 @@ const SeccionB = forwardRef((props, ref) => {
 		departamento: data.Departaento || "",
 		cargo: data.idCargo || 0,
 		diasPago: data.DiaPago || 0,
-		afiliado: data.AfiliadoIESS || false,
+		afiliado: data.AfiliadoIESS || 1,
 		provincia: data.idProvinciaTrabajo || 0,
 		canton: data.idCantonTrabajo || 0,
 		parroquia: data.idParroquiaTrabajo || 0,
@@ -384,6 +384,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.fechaIngreso}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
+						readOnly={true} // Deshabilitar el campo de fecha
 					/>
 					{errors.fechaIngreso && (
 						<span className="text-red-500 text-xs">{errors.fechaIngreso}</span>
@@ -401,6 +402,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.ingresos}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
+						readOnly = {data.IngresosTrabajo !== 0 && data.IngresosTrabajo !== null && data.IngresosTrabajo !== undefined} // Deshabilitar el campo de ingresos
 					/>
 					{errors.ingresos && (
 						<span className="text-red-500 text-xs">{errors.ingresos}</span>
@@ -475,6 +477,7 @@ const SeccionB = forwardRef((props, ref) => {
 						options={cargo}
 						name="cargo"
 						error={errors.cargo}
+						readOnly={data.idCargo !== 0 && data.idCargo !== null && data.idCargo !== undefined} // Deshabilitar el campo de cargo
 					/>
 				</div>
 
@@ -507,6 +510,7 @@ const SeccionB = forwardRef((props, ref) => {
 							checked={formData.afiliado}
 							onChange={handleInputChange}
 							className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+						    disabled={true} // Deshabilitar el checkbox
 						/>
 						<span className="text-sm">Sí</span>
 					</label>

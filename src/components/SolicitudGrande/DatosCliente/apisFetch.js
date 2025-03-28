@@ -427,7 +427,7 @@ export const fetchTipoContrato = async (enqueueSnackbar, setTipoContrato) => {
     const response = await axios.get(APIURL.get_tipocontrato(), {
       headers: { method: "GET", cache: "no-store" },
     });
-    console.log('tipo Trabajao',response);
+    console.log('tipo Trabajao', response);
     setTipoContrato(
       response.data.map((item) => ({
         value: item.idTipoContrato,
@@ -444,47 +444,68 @@ export const fetchTipoContrato = async (enqueueSnackbar, setTipoContrato) => {
   }
 };
 
-  export const fecthTipoSueldo = async (enqueueSnackbar, setTipoSueldo) => {
-    try {
-      const response = await axios.get(APIURL.get_cre_tiposueldo(), {
-        headers: { method: "GET", cache: "no-store" },
-      });
-      setTipoSueldo(
-        response.data.map((item) => ({
-          value: item.idTipoSueldo,
-          label: item.Nombre,
-        }))
-      );
-    } catch (error) {
-      console.error("Error al obtener Tipo Sueldo", error);
-      enqueueSnackbar("Error al cargar Tipo Sueldo", {
-        variant: "error",
-        preventDuplicate: true,
-      });
-      setTipoSueldo([]);
-    }
+export const fecthTipoSueldo = async (enqueueSnackbar, setTipoSueldo) => {
+  try {
+    const response = await axios.get(APIURL.get_cre_tiposueldo(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setTipoSueldo(
+      response.data.map((item) => ({
+        value: item.idTipoSueldo,
+        label: item.Nombre,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener Tipo Sueldo", error);
+    enqueueSnackbar("Error al cargar Tipo Sueldo", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setTipoSueldo([]);
   }
+}
 
-  
 
-	export const fetchCargo = async (enqueueSnackbar, setCargo) => {
-		try {
-			const response = await axios.get(APIURL.get_cre_cargo(), {
-				headers: { method: "GET", cache: "no-store" },
-			});
-			setCargo(
-				response.data.map((item) => ({
-					value: item.idCargo,
-					label: item.Nombre,
-				}))
-			);
-		} catch (error) {
-			console.error("Error al obtener Cargo", error);
-			enqueueSnackbar("Error al cargar Cargo", {
-				variant: "error",
-				preventDuplicate: true,
-			});
-			setCargo([]);
 
-		}
-	};
+export const fetchCargo = async (enqueueSnackbar, setCargo) => {
+  try {
+    const response = await axios.get(APIURL.get_cre_cargo(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setCargo(
+      response.data.map((item) => ({
+        value: item.idCargo,
+        label: item.Nombre,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener Cargo", error);
+    enqueueSnackbar("Error al cargar Cargo", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setCargo([]);
+
+  }
+};
+
+export const fetchCognoTrabajocargo = async (enqueueSnackbar, setCognoTrabajoCargo) => {
+  try {
+    const response = await axios.get(APIURL.get_cognotrabajocargo(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setCognoTrabajoCargo(
+      response.data.map((item) => ({
+        value: item.idCognoTrabajoCargo,
+        label: item.NombreCargo,
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener Cogno Trabajo Cargo", error);
+    enqueueSnackbar("Error al cargar Cogno Trabajo Cargo", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setCognoTrabajoCargo([]);
+  }
+};
