@@ -138,6 +138,42 @@ console.log("idSolicitud", clienteData);
       return;
     }
     handleSave();
+    
+  };
+/*
+  idNacionalidad: getParsedValue(formData.nacionalidad),
+          FechaNacimiento: formData.fechaNacimiento,
+          idGenero: getParsedValue(formData.genero),
+          idProvinciaNacimiento: getParsedValue(formData.provinciaNacimiento),
+          idCantonNacimiento: getParsedValue(formData.cantonNacimiento),
+          idEdoCivil: getParsedValue(formData.estadoCivil),
+          NumeroHijos: getParsedValue(formData.dependientes),
+          idNivelEducacion: getParsedValue(formData.nivelEducacion),
+          idProfesion: getParsedValue(formData.profesion),
+          idSituacionLaboral: getParsedValue(formData.situacionLaboral),
+          idActEconomica: getParsedValue(formData.actividadEconomica),
+          ObservacionesActividadEconomica: formData.observacionActividadEconomica*/
+  const validarcaposdata = () => {
+    const isValidaData ={
+      idNacionalidad: clienteData.idNacionalidad,
+      FechaNacimiento: clienteData.FechaNacimiento,
+      idGenero: clienteData.idGenero,
+      idProvinciaNacimiento: clienteData.idProvinciaNacimiento,
+      idCantonNacimiento: clienteData.idCantonNacimiento,
+      idEdoCivil: clienteData.idEdoCivil,
+      NumeroHijos: clienteData.NumeroHijos,
+      idNivelEducacion: clienteData.idNivelEducacion,
+      idProfesion: clienteData.idProfesion,
+      idSituacionLaboral: clienteData.idSituacionLaboral,
+      idActEconomica: clienteData.idActEconomica,
+      ObservacionesActividadEconomica: clienteData.ObservacionesActividadEconomica,
+    };
+    const isValid = Object.values(isValidaData).every((value) => value !== null && value !== undefined && value !== "");
+    if (!isValid) {
+      enqueueSnackbar("Por favor completa todos los campos obligatorios.", { variant: "error" });
+      return false;
+    }
+    return true;
   };
 
   const validateForm = () => {
@@ -227,6 +263,10 @@ console.log("idSolicitud", clienteData);
       }
     }
     fetchInsertarDatos(tipoDato); // Llamar a la función para insertar datos
+    const isValid = validarcaposdata(); // Llamar a la función de validación de campos
+    if (isValid) {
+      enqueueSnackbar("Por favor completa todos los campos obligatorios.", { variant: "error" });
+    }
   };
 
   const fetchInsertarDatos = async (tipo) => {

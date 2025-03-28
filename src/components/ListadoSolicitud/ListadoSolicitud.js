@@ -681,8 +681,8 @@ export function ListadoSolicitud() {
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handledocumentos(data)}
-                          disabled={data.idEstadoVerificacionSolicitud === 1}
+                          onClick={() => handlesolicitud(data)}
+                          disabled={data.idEstadoVerificacionSolicitud === 10}
                         >
                           {getSolicitudIconByEstado(data.idEstadoVerificacionDocumental)}
                           </IconButton>
@@ -749,7 +749,7 @@ export function ListadoSolicitud() {
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
+                          onClick={() => handleTelefonica(data)} // Aquí va la lógica para manejar el clic
                           disabled={data.idEstadoVerificacionTelefonica === 1}
                         >
                           {getPhoneIconByEstado(data.idEstadoVerificacionDocumental)}
