@@ -94,7 +94,7 @@ export function ListadoSolicitud() {
     { label: "Rechazado", value: 4 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
-  
+
   const [anchorEl, setAnchorEl] = useState(null); // Estado para el Popover
 
   const estadoColores = {
@@ -535,10 +535,10 @@ export function ListadoSolicitud() {
   };
 
   const handleOpenModal = (data) => {
-	console.log(data);
-	setUserSolicitudData(data);
-		setOpenLocationModal(prevState => !prevState);
-	}
+    console.log(data);
+    setUserSolicitudData(data);
+    setOpenLocationModal(prevState => !prevState);
+  }
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -715,83 +715,83 @@ export function ListadoSolicitud() {
 
                       {/* El Popover siempre estará aquí, pero se mostrará solo cuando 'open' sea true */}
                       <Popover
-      open={open}
-      anchorEl={anchorEl}
-      onClose={handlePopoverClose}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "center",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "center",
-      }}
-      PaperProps={{
-        sx: {
-          borderRadius: 8,
-          backgroundColor: "#ffffff",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #dcdcdc",
-          padding: 2,
-        },
-      }}
-    >
-      <Box
-        sx={{
-          width: "350px", // Ajuste el ancho para que se vea más profesional
-          padding: 2,
-          borderRadius: 8,
-          backgroundColor: "#f7f9fb",
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2d3689", marginBottom: 1 }}>
-          Historial de Revisión Documental
-        </Typography>
+                        open={open}
+                        anchorEl={anchorEl}
+                        onClose={handlePopoverClose}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "center",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "center",
+                        }}
+                        PaperProps={{
+                          sx: {
+                            borderRadius: 8,
+                            backgroundColor: "#ffffff",
+                            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                            border: "1px solid #dcdcdc",
+                            padding: 2,
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: "350px", // Ajuste el ancho para que se vea más profesional
+                            padding: 2,
+                            borderRadius: 8,
+                            backgroundColor: "#f7f9fb",
+                          }}
+                        >
+                          <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2d3689", marginBottom: 1 }}>
+                            Historial de Revisión Documental
+                          </Typography>
 
-        {/* Lista de Estados */}
-        <Box sx={{ marginTop: 2 }}>
-          {clienteEstados.map((estado, index) => (
-            <Box
-              key={estado.idTiempoSolicitudesWeb}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "16px",
-                padding: "10px",
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-              }}
-            >
-              {/* Icono de estado */}
-              <Box
-                sx={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "50%",
-                  backgroundColor: estadoColores[estado.idEstadoVerificacionDocumental],
-                  marginRight: "10px",
-                }}
-              />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: "bold", color: "#333" }}>
-                  {estado.idEstadoVerificacionDocumental === 1 && "Revisión"}
-                  {estado.idEstadoVerificacionDocumental === 2 && "Corrección"}
-                  {estado.idEstadoVerificacionDocumental === 3 && "Aprobado"}
-                  {estado.idEstadoVerificacionDocumental === 4 && "Finalizado"}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#777" }}>
-                  <strong>Fecha:</strong> {new Date(estado.FechaSistema).toLocaleString()}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#777" }}>
-                  <strong>Revisado por:</strong> {estado.Usuario}
-                </Typography>
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    </Popover>
+                          {/* Lista de Estados */}
+                          <Box sx={{ marginTop: 2 }}>
+                            {clienteEstados.map((estado, index) => (
+                              <Box
+                                key={estado.idTiempoSolicitudesWeb}
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  marginBottom: "16px",
+                                  padding: "10px",
+                                  backgroundColor: "#fff",
+                                  borderRadius: "8px",
+                                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+                                }}
+                              >
+                                {/* Icono de estado */}
+                                <Box
+                                  sx={{
+                                    width: "12px",
+                                    height: "12px",
+                                    borderRadius: "50%",
+                                    backgroundColor: estadoColores[estado.idEstadoVerificacionDocumental],
+                                    marginRight: "10px",
+                                  }}
+                                />
+                                <Box>
+                                  <Typography variant="body2" sx={{ fontWeight: "bold", color: "#333" }}>
+                                    {estado.idEstadoVerificacionDocumental === 1 && "Revisión"}
+                                    {estado.idEstadoVerificacionDocumental === 2 && "Corrección"}
+                                    {estado.idEstadoVerificacionDocumental === 3 && "Aprobado"}
+                                    {estado.idEstadoVerificacionDocumental === 4 && "Finalizado"}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: "#777" }}>
+                                    <strong>Fecha:</strong> {new Date(estado.FechaSistema).toLocaleString()}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: "#777" }}>
+                                    <strong>Revisado por:</strong> {estado.Usuario}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            ))}
+                          </Box>
+                        </Box>
+                      </Popover>
 
 
 
@@ -807,9 +807,9 @@ export function ListadoSolicitud() {
                         <PhoneIcon sx={{ color: "gray" }} />
                       </IconButton>
                     </Tooltip>
-                  </TableCell> 
-                  <TableCell align="center"  className="cursor-pointer">
-                    <Tooltip title="Terrena" arrow placement="top" onClick={ (e) => handleOpenModal(data)}>
+                  </TableCell>
+                  <TableCell align="center" className="cursor-pointer">
+                    <Tooltip title="Terrena" arrow placement="top" onClick={(e) => handleOpenModal(data)}>
                       <HouseIcon sx={{ color: 'gray' }} />
                     </Tooltip>
                   </TableCell>
@@ -946,13 +946,13 @@ export function ListadoSolicitud() {
           </button>
         </div>
       )}
-	  <LocationModal
-        isOpen={ () => handleOpenModal() }
-		openLocationModal = { openLocationModal }
+      <LocationModal
+        isOpen={() => handleOpenModal()}
+        openLocationModal={openLocationModal}
         locationType={null}
         locationData={null}
         onLocationChange={null}
-		userSolicitudData={userSolicitudData}
+        userSolicitudData={userSolicitudData}
       />
     </div>
   );
