@@ -1731,6 +1731,10 @@ body {
   gap: 1.5rem;
 }
 
+.gap-8 {
+  gap: 2rem;
+}
+
 .gap-x-8 {
   column-gap: 2rem;
 }
@@ -2341,6 +2345,10 @@ body {
   --tw-bg-opacity: 0.9;
 }
 
+.bg-opacity-40 {
+  --tw-bg-opacity: 0.4;
+}
+
 .bg-gradient-to-b {
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
 }
@@ -2592,6 +2600,10 @@ body {
 
 .pt-\[0\.36rem\] {
   padding-top: 0.36rem;
+}
+
+.pt-2 {
+  padding-top: 0.5rem;
 }
 
 .text-left {

@@ -86,7 +86,7 @@ export function ListadoSolicitud() {
   const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
   const [searchDateTo, setSearchDateTo] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
-  const [ openVerificacionModal, setOpenVerificacionModal] = useState(false);
+  const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
@@ -220,15 +220,15 @@ export function ListadoSolicitud() {
   const getPhoneIconByEstado = (estado) => {
     switch (estado) {
       case 1: // NO ASIGNADO
-        return <PhoneDisabledIcon /> ;
+        return <PhoneDisabledIcon />;
       case 2: // ASIGNADO
         return <PhoneInTalkIcon sx={{ color: "#6C757D" }} />;
       case 3: // GESTIONANDO
-      return <SettingsPhoneIcon sx={{color : "#FFC107"}} />;
+        return <SettingsPhoneIcon sx={{ color: "#FFC107" }} />;
       case 4: // APROBADO
-      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       case 5: // RECHAZADO
-      return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+        return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
       default: // Estado no especificado
         return <PhoneIcon />;
     }
@@ -260,8 +260,8 @@ export function ListadoSolicitud() {
         return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
     }
   };
-  
-  
+
+
   /* idEstadoVerificacionDocumental	Nombre
 1	PROCESO
 2	REVISIÓN
@@ -388,12 +388,12 @@ export function ListadoSolicitud() {
                 item.Estado === 1
                   ? "PENDIENTE"
                   : item.Estado === 2
-                  ? "APROBADO"
-                  : item.Estado === 3
-                  ? "ANULADO"
-                  : item.Estado === 4
-                  ? "RECHAZADO"
-                  : "Desconocido",
+                    ? "APROBADO"
+                    : item.Estado === 3
+                      ? "ANULADO"
+                      : item.Estado === 4
+                        ? "RECHAZADO"
+                        : "Desconocido",
               imagen: item.Foto,
               celular: item.Celular,
               email: item.Email,
@@ -432,9 +432,8 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
-            vendedor.ApellidoPaterno || ""
-          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
+            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -532,11 +531,10 @@ export function ListadoSolicitud() {
   }
 
 
-	const handleOpenModalVerificacion = (data) => {
-		setUserSolicitudData(data);
-		setOpenVerificacionModal(prevState => !prevState);
-	}
-
+  const handleOpenModalVerificacion = (data) => {
+    setUserSolicitudData(data);
+    setOpenVerificacionModal(prevState => !prevState);
+  }
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
@@ -695,7 +693,7 @@ export function ListadoSolicitud() {
                           disabled={data.idEstadoVerificacionSolicitud === 10}
                         >
                           {getSolicitudIconByEstado(data.idEstadoVerificacionDocumental)}
-                          </IconButton>
+                        </IconButton>
 
                         <MoreVertIcon
                           onClick={(event) => handlePopoverOpen(event, 1, data)}
@@ -763,7 +761,7 @@ export function ListadoSolicitud() {
                           disabled={data.idEstadoVerificacionTelefonica === 1}
                         >
                           {getPhoneIconByEstado(data.idEstadoVerificacionDocumental)}
-                          </IconButton>
+                        </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
 
@@ -791,7 +789,7 @@ export function ListadoSolicitud() {
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
+                          onClick={() => handleOpenModalVerificacion(data)} // Aquí va la lógica para manejar el clic
                           disabled={
                             data.idEstadoVerificacionSolicitud === 1 ||
                             data.idEstadoVerificacionTerrena === 1
@@ -809,21 +807,6 @@ export function ListadoSolicitud() {
                       </span>
 
 
-                  <TableCell align="center">
-                    <Tooltip title="Telefonica" arrow placement="top">
-                      <IconButton onClick={() => handleTelefonica(data)}>
-                        <PhoneIcon sx={{ color: "gray" }} />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell> 
-                  <TableCell align="center"  className="cursor-pointer">
-                    <Tooltip title="Terrena" arrow placement="top" onClick={
-						() =>handleOpenModalVerificacion(data)
-					}>
-                      <HouseIcon sx={{ color: 'gray' }} />
-                    </Tooltip>
-
-
                       <DocumentStatusPopover
                         open={
                           popoverData.open &&
@@ -835,7 +818,6 @@ export function ListadoSolicitud() {
                         estadoColores={estadoColores}
                       />
                     </div>
-
                   </TableCell>
                 </TableRow>
               ))}
@@ -891,19 +873,18 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
+                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
                           ? "text-green-500"
                           : selectedRow.estado === "pendiente"
-                          ? "text-yellow-500"
-                          : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-yellow-500"
+                            : selectedRow.estado === "anulado"
+                              ? "text-gray-500"
+                              : selectedRow.estado === "aprobado"
+                                ? "text-blue-500"
+                                : selectedRow.estado === "rechazado"
+                                  ? "text-red-500"
+                                  : "text-gray-700"
+                        }`}
                     >
                       {selectedRow.estado}
                     </span>
@@ -979,11 +960,11 @@ export function ListadoSolicitud() {
         onLocationChange={null}
         userSolicitudData={userSolicitudData}
       />
-	  <VerificacionTerrenaModal
-        isOpen={ () => handleOpenModalVerificacion() }
-		openVerificacionModal = { openVerificacionModal }
-		userSolicitudData={userSolicitudData}
-		userData={userData}
+      <VerificacionTerrenaModal
+        isOpen={() => handleOpenModalVerificacion()}
+        openVerificacionModal={openVerificacionModal}
+        userSolicitudData={userSolicitudData}
+        userData={userData}
       />
     </div>
   );
