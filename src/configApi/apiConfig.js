@@ -1,5 +1,8 @@
 import { get } from "react-hook-form";
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+
+const API_BASE_URL = "http://192.168.137.169:3025/api/v1/";
+
+
 
 const SOCKET_BASE_URL = "http://192.168.2.167:3008";
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
@@ -115,5 +118,8 @@ export const APIURL = {
   get_cognotrabajocargo: () => `${API_BASE_URL}cognotrabajocargo`,
   post_createtiemposolicitudeswebDto : () => `${API_BASE_URL}tiemposolicitudesweb`,
   get_tiemposolicitudesweb_all : (id) => `${API_BASE_URL}tiemposolicitudesweb/all/${id}`,
+  /*   @Get('all/estado/:idCre_SolicitudWeb/:tipo')
+ */
+  get_tiemposolicitudesweb : (id ,estado) => `${API_BASE_URL}tiemposolicitudesweb/all/estado/${id}/${estado}`,
 
 };
