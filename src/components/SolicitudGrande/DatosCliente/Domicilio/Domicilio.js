@@ -11,7 +11,7 @@ import {
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
 import { SelectField } from "../../../Utils";
 import { InputField } from "../../../Utils";
-
+import { LocationModal} from "../../LocationModal";
 const Domicilio = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
@@ -22,7 +22,8 @@ const Domicilio = forwardRef((props, ref) => {
     const [barrios, setBarrios] = useState([]);
     const [tiempoVivienda, setTiempoVivienda] = useState([]);
     const [tipoVivienda, setTipoVivienda] = useState([]);
-   
+    const [openLocationModal, setOpenLocationModal] = useState(false);
+    
     const [inmueble, setInmueble] = useState([]);
     const [ciudadInmueble, setCiudadInmueble] = useState([]);
     const [formData, setFormData] = useState({
@@ -73,6 +74,7 @@ const Domicilio = forwardRef((props, ref) => {
             fetchBarrios(formData.parroquia, enqueueSnackbar, setBarrios);
         }
     }, [formData.parroquia, enqueueSnackbar]);
+   
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         // Expresión regular para detectar caracteres no permitidos
@@ -132,6 +134,10 @@ const Domicilio = forwardRef((props, ref) => {
         }
     };
 
+    const handleOpenModal = (data) => {
+        console.log(data);
+        setOpenLocationModal(prevState => !prevState);
+      }
     console.log('vivienda', formData.tipoVivienda);
 
     const validateForm = useCallback(() => {
@@ -340,7 +346,7 @@ const Domicilio = forwardRef((props, ref) => {
                             type="button"
                             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
                             name="ubicacionDomicilio"
-                            onClick={handleFormChange}
+                            onClick={handleOpenModal(data)}
                         >
                             Ubicacion Domicilio
                         </button>
@@ -569,6 +575,14 @@ const Domicilio = forwardRef((props, ref) => {
                     )}
                 </div>
             </div>
+             <LocationModal
+                    isOpen={() => handleOpenModal()}
+                    openLocationModal={openLocationModal}
+                    locationType={null}
+                    locationData={null}
+                    onLocationChange={null}
+                    userSolicitudData={data}
+                  />
         </div>
 
     );

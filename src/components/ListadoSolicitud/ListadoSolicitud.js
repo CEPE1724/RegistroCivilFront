@@ -103,6 +103,7 @@ export function ListadoSolicitud() {
   const [clienteEstados, setClienteEstados] = useState([]);
 
 
+
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
     2: "#f5a623", // Amarillo para Corrección
@@ -521,13 +522,10 @@ export function ListadoSolicitud() {
   const handleOpenModal = (data) => {
     console.log(data);
     setUserSolicitudData(data);
-    setOpenLocationModal((prevState) => !prevState);
-  };
 
-  console.log(
-    "voy a imprimir los estadossssssss de cliente estados porque no pasa ",
-    clienteEstados
-  );
+    setOpenLocationModal(prevState => !prevState);
+  }
+
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -731,6 +729,7 @@ export function ListadoSolicitud() {
                         />
                       </span>
 
+
                       <DocumentStatusPopover
                         open={
                           popoverData.open &&
@@ -743,6 +742,7 @@ export function ListadoSolicitud() {
                       />
                     </div>
                   </TableCell>
+
 
                   {/* telefonica */}
                   <TableCell align="center">
@@ -797,6 +797,7 @@ export function ListadoSolicitud() {
                           style={{ cursor: "pointer" }}
                         />
                       </span>
+
 
                       <DocumentStatusPopover
                         open={

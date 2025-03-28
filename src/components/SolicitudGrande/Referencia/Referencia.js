@@ -7,8 +7,9 @@ import {
   FaUserFriends, FaUser, FaMapMarkerAlt, FaMobileAlt,
   FaPlus, FaTimes, FaPhoneAlt, FaCog, FaCommentDots
 } from "react-icons/fa";
-
+import { useAuth } from "../../AuthContext/AuthContext";
 const Referencias = forwardRef((props, ref) => {
+  const { userData, userUsuario } = useAuth();
   const { data } = props;
   const { enqueueSnackbar } = useSnackbar();
   const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
@@ -263,7 +264,6 @@ const Referencias = forwardRef((props, ref) => {
     }
     const newReferencia = { ...formData };
     fecthSave(newReferencia);
-    console.log("Referencia:", newReferencia);
     setTablaDatos(prevDatos => [...prevDatos, newReferencia]);
     const currentCantonId = formData.canton;
     const currentProvinciaId = formData.provincia;
@@ -280,9 +280,28 @@ const Referencias = forwardRef((props, ref) => {
       fetchDatoCanton(currentProvinciaId);
     }
 
+    fetchInsertarDatos(); // Llamar a la función para insertar datos
+
     //setTablaDatos([...tablaDatos, formData]);
     enqueueSnackbar("Datos Guardados", { variant: "success" });
+    
     //handleLimpiar();  Limpia el formulario para agregar otro registro
+  };
+
+  const fetchInsertarDatos = async () => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+
+        idCre_SolicitudWeb: data.idCre_SolicitudWeb,
+        Tipo: 1,
+        idEstadoVerificacionDocumental: 5,
+        Usuario: userData.Nombre,
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
   };
 
   const fecthSave = async (formData) => {
