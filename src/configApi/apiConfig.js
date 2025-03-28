@@ -68,6 +68,7 @@ export const APIURL = {
    get_documentosEstado : (id, estado) => `${API_BASE_URL}documentos-solicitud/${id}/${estado}`,
    patch_documentos : (id) => `${API_BASE_URL}documentos-solicitud/${id}`,
    patch_solicitudweb : (id) => `${API_BASE_URL}documentos-solicitud/updateEstado/${id}`,
+   patch_cancelados: (id) => `${API_BASE_URL}documentos-solicitud/update-cancelados/${id}`,
    get_observaciones: (idSolicitud, idTipoDocumento) => `${API_BASE_URL}documentos-solicitud/observaciones?idSolicitud=${idSolicitud}&idTipoDocumento=${idTipoDocumento}`,
    post_observaciones: () => `${API_BASE_URL}historial-observaciones`,
    /*solicitud grande*/
@@ -107,5 +108,7 @@ export const APIURL = {
   update_soliciutd_telefonica:(id, estado) => `${API_BASE_URL}cre-solicitud-web/updatetelefonica/${id}/${estado}`,
 
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
-
+  get_cognotrabajocargo: () => `${API_BASE_URL}cognotrabajocargo`,
+  post_createtiemposolicitudeswebDto : () => `${API_BASE_URL}tiemposolicitudesweb`,
+  get_tiemposolicitudesweb_all : (id) => `${API_BASE_URL}tiemposolicitudesweb/all/${id}`,
 };

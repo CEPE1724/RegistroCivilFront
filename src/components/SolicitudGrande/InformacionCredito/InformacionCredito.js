@@ -170,12 +170,12 @@ const InformacionCredito = forwardRef((props, ref) => {
 						Segmentación Equifax(*)
 					</label>
 					<input
-						type="number"
+						type="text"
 						name="segmentacionEquifax"
 						autoComplete="off"
 						placeholder="Segmentación Equifax"
 						className="solcitudgrande-style"
-						value={formData.segmentacionEquifax}
+						value={data.SegmentacionEquifax}
 						onChange={handleChange}
 						readOnly={true}
 					/>

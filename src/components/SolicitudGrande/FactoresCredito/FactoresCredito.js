@@ -9,15 +9,16 @@ import PrintIcon from "@mui/icons-material/Print";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
 import { enqueueSnackbar } from "notistack";
-import { FaListAlt ,FaUser, FaBriefcase ,FaMoneyBillWave ,FaMoneyCheckAlt ,
-	FaStarHalfAlt ,FaCheckCircle,FaInfoCircle  ,FaCommentDots
+import {
+  FaListAlt, FaUser, FaBriefcase, FaMoneyBillWave, FaMoneyCheckAlt,
+  FaStarHalfAlt, FaCheckCircle, FaInfoCircle, FaCommentDots
 } from "react-icons/fa";
 
 
 // Definir el componente con forwardRef correctamente
 export const FactoresCredito = forwardRef((props, ref) => {
   const { data } = props;
-  console.log('factores de credito',data);
+  console.log('factores de credito', data);
   const [tipo, setTipo] = useState([]);
   const [calificacion, setCalificacion] = useState([]);
   const [estado, setEstado] = useState([]);
@@ -124,7 +125,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
   };
 
   const [formData, setFormData] = useState({
-    tipoCliente: "",
+    tipoCliente: data.idTipoCliente || 0,
     tipo: "",
     tipoTrabajo: "",
     cuotaAsignada: "",
@@ -239,162 +240,163 @@ export const FactoresCredito = forwardRef((props, ref) => {
   }));
 
   return (
-	<div>
-	  {/* Botón de impresión y selects superiores */}
-	  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4 pt-0">
-		{/* Tipo */}
-		<div className="flex flex-col">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaListAlt className="mr-2 text-primaryBlue" />
-			Tipo
-		  </label>
-		  <select
-			name="tipo"
-			className="solcitudgrande-style"
-			value={formData.tipo}
-			onChange={handleChange}
-		  >
-			<option value="">Seleccione una opción</option>
-			{tipo.map((item) => (
-			  <option key={item.value} value={item.value}>
-				{item.label}
-			  </option>
-			))}
-		  </select>
-		</div>
+    <div>
+      {/* Botón de impresión y selects superiores */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4 pt-0">
+        {/* Tipo */}
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaListAlt className="mr-2 text-primaryBlue" />
+            Tipo
+          </label>
+          <select
+            name="tipo"
+            className="solcitudgrande-style"
+            value={data.idTipoCliente}
+            onChange={handleChange}
+            disabled
+          >
+            <option value="">Seleccione una opción</option>
+            {tipo.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-  
 
-  
-		{/* Cuota Asignada */}
-		<div className="flex flex-col w-full">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaMoneyBillWave className="mr-2 text-primaryBlue" />
-			Cuota Asignada
-		  </label>
-		  <input
-			type="number"
-			name="cuotaAsignada"
-			placeholder="Cuota Asignada"
-			className="solcitudgrande-style"
-			value={formData.cuotaAsignada}
-			onChange={handleChange}
-		  />
-		</div>
-  
-		{/* Cupo */}
-		<div className="flex flex-col">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
-			Cupo
-		  </label>
-		  <input
-			type="number"
-			name="cupo"
-			placeholder="Cupo"
-			className="solcitudgrande-style"
-			value={formData.cupo}
-			onChange={handleChange}
-		  />
-		</div>
-  
-		<div className="flex justify-between items-center pl-8 mb-4 pt-6">
-		  <IconButton
-			color="primary"
-			aria-label="Imprimir"
-			onClick={() => window.print()} 
-			style={{ fontSize: '40px' }}
-		  >
-			<PrintIcon />
-		  </IconButton>
-		</div>
-	  </div>
-  
-	  {/* Segunda sección: Calificación, Estado y Estado Solicitud */}
-	  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-		{/* Calificación */}
-		<div className="flex flex-col">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaStarHalfAlt className="mr-2 text-primaryBlue" />
-			Calificación
-		  </label>
-		  <select
-			name="calificacion"
-			className="solcitudgrande-style w-full"
-			value={formData.calificacion}
-			onChange={handleChange}
-		  >
-			<option value="">Seleccione una opción</option>
-			{calificacion.map((item) => (
-			  <option key={item.value} value={item.value}>
-				{item.label}
-			  </option>
-			))}
-		  </select>
-		</div>
-  
-		{/* Estado */}
-		<div className="flex flex-col w-full">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaCheckCircle className="mr-2 text-primaryBlue" />
-			Estado
-		  </label>
-		  <select
-			name="estado"
-			className="solcitudgrande-style w-full"
-			value={formData.estado}
-			onChange={(e) => {
-			  const idSeleccionada = e.target.value;
-			  setFormData((prev) => ({ ...prev, estado: idSeleccionada }));
-			  setIdEstado(idSeleccionada);
-			}}
-		  >
-			<option value="">Seleccione una opción</option>
-			{estado.map((item) => (
-			  <option key={item.value} value={item.value}>
-				{item.label}
-			  </option>
-			))}
-		  </select>
-		</div>
-  
-		{/* Estado Solicitud */}
-		<div className="flex flex-col w-full">
-		  <label className="text-xs font-medium mb-1 flex items-center">
-			<FaInfoCircle className="mr-2 text-primaryBlue" />
-			Estado Solicitud
-		  </label>
-		  <select
-			name="estadoSolicitud"
-			className="solcitudgrande-style w-full"
-			value={formData.estadoSolicitud}
-			onChange={handleChange}
-		  >
-			<option value="">Seleccione una opción</option>
-			{estadoSolicitud.map((item) => (
-			  <option key={item.value} value={item.value}>
-				{item.label}
-			  </option>
-			))}
-		  </select>
-		</div>
-	  </div>
-  
-	  {/* Observaciones */}
-	  <div className="flex flex-col">
-		<label className="text-xs font-medium mb-1 flex items-center">
-		  <FaCommentDots className="mr-2 text-primaryBlue" />
-		  Observaciones
-		</label>
-		<textarea
-		  name="observaciones"
-		  placeholder="Observaciones"
-		  className="solcitudgrande-style w-full"
-		  value={formData.observaciones}
-		  onChange={handleChange}
-		/>
-	  </div>
-	</div>
+
+
+        {/* Cuota Asignada */}
+        <div className="flex flex-col w-full">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMoneyBillWave className="mr-2 text-primaryBlue" />
+            Cuota Asignada
+          </label>
+          <input
+            type="number"
+            name="cuotaAsignada"
+            placeholder="Cuota Asignada"
+            className="solcitudgrande-style"
+            value={formData.cuotaAsignada}
+            onChange={handleChange}
+          />
+        </div>
+
+        {/* Cupo */}
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
+            Cupo
+          </label>
+          <input
+            type="number"
+            name="cupo"
+            placeholder="Cupo"
+            className="solcitudgrande-style"
+            value={formData.cupo}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="flex justify-between items-center pl-8 mb-4 pt-6">
+          <IconButton
+            color="primary"
+            aria-label="Imprimir"
+            onClick={() => window.print()}
+            style={{ fontSize: '40px' }}
+          >
+            <PrintIcon />
+          </IconButton>
+        </div>
+      </div>
+
+      {/* Segunda sección: Calificación, Estado y Estado Solicitud */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+        {/* Calificación */}
+        <div className="flex flex-col">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaStarHalfAlt className="mr-2 text-primaryBlue" />
+            Calificación
+          </label>
+          <select
+            name="calificacion"
+            className="solcitudgrande-style w-full"
+            value={formData.calificacion}
+            onChange={handleChange}
+          >
+            <option value="">Seleccione una opción</option>
+            {calificacion.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Estado */}
+        <div className="flex flex-col w-full">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaCheckCircle className="mr-2 text-primaryBlue" />
+            Estado
+          </label>
+          <select
+            name="estado"
+            className="solcitudgrande-style w-full"
+            value={formData.estado}
+            onChange={(e) => {
+              const idSeleccionada = e.target.value;
+              setFormData((prev) => ({ ...prev, estado: idSeleccionada }));
+              setIdEstado(idSeleccionada);
+            }}
+          >
+            <option value="">Seleccione una opción</option>
+            {estado.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Estado Solicitud */}
+        <div className="flex flex-col w-full">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaInfoCircle className="mr-2 text-primaryBlue" />
+            Estado Solicitud
+          </label>
+          <select
+            name="estadoSolicitud"
+            className="solcitudgrande-style w-full"
+            value={formData.estadoSolicitud}
+            onChange={handleChange}
+          >
+            <option value="">Seleccione una opción</option>
+            {estadoSolicitud.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Observaciones */}
+      <div className="flex flex-col">
+        <label className="text-xs font-medium mb-1 flex items-center">
+          <FaCommentDots className="mr-2 text-primaryBlue" />
+          Observaciones
+        </label>
+        <textarea
+          name="observaciones"
+          placeholder="Observaciones"
+          className="solcitudgrande-style w-full"
+          value={formData.observaciones}
+          onChange={handleChange}
+        />
+      </div>
+    </div>
   );
-  
+
 });
