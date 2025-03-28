@@ -122,4 +122,7 @@ export const APIURL = {
  */
   get_tiemposolicitudesweb : (id ,estado) => `${API_BASE_URL}tiemposolicitudesweb/all/estado/${id}/${estado}`,
 
+  get_ingresoCobrador: () => `${API_BASE_URL}ingreso-cobrador`,
+  post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
+
 };

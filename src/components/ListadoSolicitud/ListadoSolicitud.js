@@ -55,6 +55,9 @@ import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import CancelIcon from "@mui/icons-material/Cancel";
 import LocationModal from "./LocationModal";
+
+import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
+
 import SettingsPhoneIcon from '@mui/icons-material/SettingsPhone';
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // PENDIENTE
 import HomeIcon from "@mui/icons-material/Home"; // DATOS DOMICILIO
@@ -62,6 +65,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite"; // DATOS CÓNYUGE
 import ContactsIcon from "@mui/icons-material/Contacts"; // DATOS REFERENCIAS
 import CreditScoreIcon from "@mui/icons-material/CreditScore"; // INFORMACIÓN DE CRÉDITO
 import AssessmentIcon from "@mui/icons-material/Assessment"; // FACTORES DE CRÉDITO
+
 
 import { Popover, Box, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert"; // Icono de tres puntos verticales
@@ -82,6 +86,7 @@ export function ListadoSolicitud() {
   const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
   const [searchDateTo, setSearchDateTo] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
+  const [ openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
@@ -520,12 +525,17 @@ export function ListadoSolicitud() {
   };
 
   const handleOpenModal = (data) => {
-    console.log(data);
+
     setUserSolicitudData(data);
 
     setOpenLocationModal(prevState => !prevState);
   }
 
+
+	const handleOpenModalVerificacion = (data) => {
+		setUserSolicitudData(data);
+		setOpenVerificacionModal(prevState => !prevState);
+	}
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -799,6 +809,21 @@ export function ListadoSolicitud() {
                       </span>
 
 
+                  <TableCell align="center">
+                    <Tooltip title="Telefonica" arrow placement="top">
+                      <IconButton onClick={() => handleTelefonica(data)}>
+                        <PhoneIcon sx={{ color: "gray" }} />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell> 
+                  <TableCell align="center"  className="cursor-pointer">
+                    <Tooltip title="Terrena" arrow placement="top" onClick={
+						() =>handleOpenModalVerificacion(data)
+					}>
+                      <HouseIcon sx={{ color: 'gray' }} />
+                    </Tooltip>
+
+
                       <DocumentStatusPopover
                         open={
                           popoverData.open &&
@@ -810,6 +835,7 @@ export function ListadoSolicitud() {
                         estadoColores={estadoColores}
                       />
                     </div>
+
                   </TableCell>
                 </TableRow>
               ))}
@@ -952,6 +978,12 @@ export function ListadoSolicitud() {
         locationData={null}
         onLocationChange={null}
         userSolicitudData={userSolicitudData}
+      />
+	  <VerificacionTerrenaModal
+        isOpen={ () => handleOpenModalVerificacion() }
+		openVerificacionModal = { openVerificacionModal }
+		userSolicitudData={userSolicitudData}
+		userData={userData}
       />
     </div>
   );
