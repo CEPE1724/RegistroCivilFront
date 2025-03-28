@@ -116,4 +116,7 @@ export const APIURL = {
   post_createtiemposolicitudeswebDto : () => `${API_BASE_URL}tiemposolicitudesweb`,
   get_tiemposolicitudesweb_all : (id) => `${API_BASE_URL}tiemposolicitudesweb/all/${id}`,
 
+  get_ingresoCobrador: () => `${API_BASE_URL}ingreso-cobrador`,
+  post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
+
 };

@@ -1,0 +1,131 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { APIURL } from "../../configApi/apiConfig";
+import { useSnackbar } from "notistack";
+
+export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal, userSolicitudData, userData }) {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [verificador, setVerificador] = useState("");
+  const [verificadores, setVerificadores] = useState([]);
+  const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
+
+  const isFormValid = tipoVerificacion && verificador;
+
+  const handleTipoVerificacion = (tipo) => {
+    setTipoVerificacion((prev) => (prev === tipo ? null : tipo));
+  };
+
+  const resetForm = () => {
+    setVerificador("");
+    setTipoVerificacion(null);
+  };
+
+  const handleCancelar = () => {
+    resetForm();
+    isOpen(); // cerrar modal
+  };
+
+  const handleAceptar = async () => {
+    if (!isFormValid) return;
+
+    const payload = {
+      idCre_solicitud: userSolicitudData?.id,
+      idVerificador: verificador,
+      bDomicilio: tipoVerificacion === "domicilio",
+      bTrabajo: tipoVerificacion === "trabajo",
+      Usuario: userData?.Usuario,
+    };
+
+    try {
+      const response = await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
+      enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
+      resetForm();
+      isOpen(); // cerrar modal
+    } catch (error) {
+      console.error("❌ Error al enviar verificación:", error);
+      enqueueSnackbar("Error al registrar la verificación", { variant: "error" });
+    }
+  };
+
+  useEffect(() => {
+    const fetchVerificadores = async () => {
+      try {
+        const response = await fetch(APIURL.get_ingresoCobrador());
+        if (!response.ok) throw new Error("Error al obtener verificadores");
+        const data = await response.json();
+        setVerificadores(data);
+      } catch (error) {
+        console.error("❌ Error al cargar verificadores:", error);
+        enqueueSnackbar("Error al cargar verificadores", { variant: "error" });
+      }
+    };
+
+    if (openVerificacionModal) fetchVerificadores();
+  }, [openVerificacionModal, enqueueSnackbar]);
+
+  if (!openVerificacionModal) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4">
+        <h2 className="text-xl font-semibold text-center text-red-600">
+          Selección el tipo de Verificación ?
+        </h2>
+
+        <div className="flex justify-center gap-8">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={tipoVerificacion === "domicilio"}
+              onChange={() => handleTipoVerificacion("domicilio")}
+            />
+            Domicilio
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={tipoVerificacion === "trabajo"}
+              onChange={() => handleTipoVerificacion("trabajo")}
+            />
+            Trabajo
+          </label>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm">Verificador:</label>
+          <select
+            className="w-full border rounded px-3 py-2"
+            value={verificador}
+            onChange={(e) => setVerificador(e.target.value)}
+          >
+            <option value="">Seleccione un verificador</option>
+            {verificadores.map((v) => (
+              <option key={v.idIngresoCobrador} value={v.idIngresoCobrador}>
+                {v.Nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex justify-end gap-4 pt-2">
+          <button
+            className="bg-gray-200 hover:bg-gray-300 text-sm px-4 py-2 rounded"
+            onClick={handleCancelar}
+          >
+            Cancelar
+          </button>
+          <button
+            className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${
+              !isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
+            onClick={handleAceptar}
+            disabled={!isFormValid}
+          >
+            Aceptar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

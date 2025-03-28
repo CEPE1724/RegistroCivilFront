@@ -52,6 +52,7 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 import LocationModal from "./LocationModal";
+import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 
 import { Popover, Box, Typography } from "@mui/material";
 import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icono de tres puntos verticales
@@ -75,6 +76,7 @@ export function ListadoSolicitud() {
   const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
   const [searchDateTo, setSearchDateTo] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
+  const [ openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
@@ -535,9 +537,14 @@ export function ListadoSolicitud() {
   };
 
   const handleOpenModal = (data) => {
-	console.log(data);
+
 	setUserSolicitudData(data);
 		setOpenLocationModal(prevState => !prevState);
+	}
+
+	const handleOpenModalVerificacion = (data) => {
+		setUserSolicitudData(data);
+		setOpenVerificacionModal(prevState => !prevState);
 	}
 
   return (
@@ -809,7 +816,9 @@ export function ListadoSolicitud() {
                     </Tooltip>
                   </TableCell> 
                   <TableCell align="center"  className="cursor-pointer">
-                    <Tooltip title="Terrena" arrow placement="top" onClick={ (e) => handleOpenModal(data)}>
+                    <Tooltip title="Terrena" arrow placement="top" onClick={
+						() =>handleOpenModalVerificacion(data)
+					}>
                       <HouseIcon sx={{ color: 'gray' }} />
                     </Tooltip>
                   </TableCell>
@@ -953,6 +962,12 @@ export function ListadoSolicitud() {
         locationData={null}
         onLocationChange={null}
 		userSolicitudData={userSolicitudData}
+      />
+	  <VerificacionTerrenaModal
+        isOpen={ () => handleOpenModalVerificacion() }
+		openVerificacionModal = { openVerificacionModal }
+		userSolicitudData={userSolicitudData}
+		userData={userData}
       />
     </div>
   );
