@@ -92,13 +92,25 @@ export function TelefonicaList({
     7: "ASIGNADO",
   }
 
-  const handleSubmit = () => {
-    const todosContactados = tablaDatos.every(
+  const handleSubmit = async () => {
+    const todosContactados = tablaDatos.filter(
       (item) => item.idEstadoGestns === 5 // Suponiendo que "contactado" es un string o id del estado
-    );
+    ).length;
 
-    if (todosContactados) {
+    if (todosContactados >=2 ) {
       enqueueSnackbar("Enviado para validar", { variant: "success" });
+
+      const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+            await axios.post(url_estado, {
+              idCre_SolicitudWeb: clientInfo.id,
+              Tipo: 3,
+              idEstadoVerificacionDocumental: 4,
+              Usuario: userData.Nombre,
+              Telefono: ``, 
+            });
+            // enqueueSnackbar(`TiempoSolicitudesWeb actualizada :D`, {
+            //   variant: "success",
+            // });
     } else {
       enqueueSnackbar("No todos los registros están en estado 'Contactado'.", { variant: "error" });
     }
@@ -117,6 +129,7 @@ export function TelefonicaList({
   const [idToTextMapEstado, setIdToTextMapEstado] = useState({}); //estado para mapear IDs a textos de api Estado
   const [datoParentesco, setDatoParentesco] = useState([]); //estado parentesco
   const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
+  const contactedDocs = tablaDatos.filter(doc => doc.idEstadoGestns === 5);
 
   useEffect(() => {
     if (clientInfo.id) {
@@ -199,7 +212,7 @@ export function TelefonicaList({
  
     
 
-  
+
 
   //Cerrar modal
   const handleCloseDialog = () => {
@@ -209,7 +222,7 @@ export function TelefonicaList({
 
   };
 
-  
+
 
 
   const handleChangeModal = (e) => {
@@ -283,6 +296,7 @@ export function TelefonicaList({
       // Llamada para guardar los datos
       await enviarDatosModal(datosParaEnviar);
   
+      setShouldReload(prevState => !prevState);
       // Crear nuevo registro para mostrar en la tabla
       const nuevoRegistro = {
         fecha: datosParaEnviar.Fecha,
@@ -298,10 +312,22 @@ export function TelefonicaList({
   
       // **Recargar datos de la API** después de guardar
       await fetchSearchCreSolicitudVerificacionTelefonica(clientInfo.id, idCre_VerificacionTelefonicaMaestro)
-        .then(response => {
+        .then(async response => {
           if (response.status === 200) {
             setApiResponseData(response.data); // Actualizar los datos con los nuevos datos desde la API
             console.log("Datos actualizados desde la API:", response.data);
+
+            const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+            await axios.post(url_estado, {
+              idCre_SolicitudWeb: clientInfo.id,
+              Tipo: 3,
+              idEstadoVerificacionDocumental: 3,
+              Usuario: userData.Nombre,
+              Telefono: `${selectedRow.Telefono}-${idToTextMapEstado[nuevoRegistro.estado]}`, //selectedRow.Telefono+"-"+selectedRow.Contacto,
+            });
+            // enqueueSnackbar(`TiempoSolicitudesWeb actualizada :D`, {
+            //   variant: "success",
+            // });
           }
         })
         .catch(error => console.error("Error al actualizar datos:", error));
@@ -313,7 +339,7 @@ export function TelefonicaList({
       enqueueSnackbar("Error al guardar los datos", { variant: "error" });
     }
   };
-  
+
 
   useEffect(() => {
     if (location.state) {
@@ -480,9 +506,11 @@ export function TelefonicaList({
                     </div>
                     
                   ))}
-                  <button onClick={handleSubmit}  className=" px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
-                    Validar
+                  {contactedDocs.length > 1 && (
+                    <button onClick={handleSubmit} className=" px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                      Validar
                     </button>
+                  )}
                 </div>
                
               </div>
@@ -631,22 +659,22 @@ export function TelefonicaList({
                         </TableRow>
                       </TableHead>
                       <TableBody>
-  {apiResponseData.map((registro, index) => (
-    <TableRow key={index} className="hover:bg-gray-100">
-      <TableCell className="text-sm px-4 py-2">{new Date(registro.Fecha).toLocaleString()}</TableCell>
-      <TableCell className="text-sm px-4 py-2">{registro.Telefono}</TableCell>
-      <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">{registro.Contacto}</TableCell>
-      <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">{idToTextMap[registro.idParentesco]}</TableCell>
-      <TableCell className="text-sm px-4 py-2">{idToTextMapEstado[registro.idEstadoGestns]}</TableCell>
-      
-      {/* Aquí está el ajuste */}
-      <TableCell className="text-sm px-4 py-2 max-w-[200px] whitespace-normal break-words">
-        {registro.Observaciones}
-      </TableCell>
+                        {apiResponseData.map((registro, index) => (
+                          <TableRow key={index} className="hover:bg-gray-100">
+                            <TableCell className="text-sm px-4 py-2">{new Date(registro.Fecha).toLocaleString()}</TableCell>
+                            <TableCell className="text-sm px-4 py-2">{registro.Telefono}</TableCell>
+                            <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">{registro.Contacto}</TableCell>
+                            <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">{idToTextMap[registro.idParentesco]}</TableCell>
+                            <TableCell className="text-sm px-4 py-2">{idToTextMapEstado[registro.idEstadoGestns]}</TableCell>
 
-    </TableRow>
-  ))}
-</TableBody>
+                            {/* Aquí está el ajuste */}
+                            <TableCell className="text-sm px-4 py-2 max-w-[200px] whitespace-normal break-words">
+                              {registro.Observaciones}
+                            </TableCell>
+
+                          </TableRow>
+                        ))}
+                      </TableBody>
 
                     </Table>
                   </TableContainer>

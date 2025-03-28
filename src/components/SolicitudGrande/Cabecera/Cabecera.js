@@ -20,7 +20,9 @@ import { Loader } from "../../Utils"; // Make sure to import the Loader componen
 import Datos from "../DatosCliente/Datos/Datos";
 import Domicilio from "../DatosCliente/Domicilio/Domicilio";
 import Referencias from "../Referencia/Referencia";
+import { useAuth } from "../../AuthContext/AuthContext";
 export function Cabecera() {
+  const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
   const { data } = state || {};
   console.log("data cabecera", data);
@@ -136,6 +138,42 @@ console.log("idSolicitud", clienteData);
       return;
     }
     handleSave();
+    
+  };
+/*
+  idNacionalidad: getParsedValue(formData.nacionalidad),
+          FechaNacimiento: formData.fechaNacimiento,
+          idGenero: getParsedValue(formData.genero),
+          idProvinciaNacimiento: getParsedValue(formData.provinciaNacimiento),
+          idCantonNacimiento: getParsedValue(formData.cantonNacimiento),
+          idEdoCivil: getParsedValue(formData.estadoCivil),
+          NumeroHijos: getParsedValue(formData.dependientes),
+          idNivelEducacion: getParsedValue(formData.nivelEducacion),
+          idProfesion: getParsedValue(formData.profesion),
+          idSituacionLaboral: getParsedValue(formData.situacionLaboral),
+          idActEconomica: getParsedValue(formData.actividadEconomica),
+          ObservacionesActividadEconomica: formData.observacionActividadEconomica*/
+  const validarcaposdata = () => {
+    const isValidaData ={
+      idNacionalidad: clienteData.idNacionalidad,
+      FechaNacimiento: clienteData.FechaNacimiento,
+      idGenero: clienteData.idGenero,
+      idProvinciaNacimiento: clienteData.idProvinciaNacimiento,
+      idCantonNacimiento: clienteData.idCantonNacimiento,
+      idEdoCivil: clienteData.idEdoCivil,
+      NumeroHijos: clienteData.NumeroHijos,
+      idNivelEducacion: clienteData.idNivelEducacion,
+      idProfesion: clienteData.idProfesion,
+      idSituacionLaboral: clienteData.idSituacionLaboral,
+      idActEconomica: clienteData.idActEconomica,
+      ObservacionesActividadEconomica: clienteData.ObservacionesActividadEconomica,
+    };
+    const isValid = Object.values(isValidaData).every((value) => value !== null && value !== undefined && value !== "");
+    if (!isValid) {
+      enqueueSnackbar("Por favor completa todos los campos obligatorios.", { variant: "error" });
+      return false;
+    }
+    return true;
   };
 
   const validateForm = () => {
@@ -162,8 +200,10 @@ console.log("idSolicitud", clienteData);
     return true;
   };
   const handleSave = () => {
+    let tipoDato = 0;
     // Obtenemos los datos del formulario de acuerdo a su tab 
     if (activeTab === "Datos Cliente") {
+      tipoDato = 2;
       const formData = datosRef.current.getFormData();
       const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
@@ -175,7 +215,7 @@ console.log("idSolicitud", clienteData);
       }
     }
     if (activeTab === "Domicilio") {
-
+      tipoDato = 3;
       const formData = datosDomicilioRef.current.getFormData();
       const isValid = datosDomicilioRef.current.validateForm(); // Llamamos a validateForm del componente Datos
 
@@ -188,7 +228,7 @@ console.log("idSolicitud", clienteData);
       }
     }
     if (activeTab === "Datos Conyuge" && clienteData.idEdoCivil === 1) {
-
+      tipoDato = 4;
       const formData = datosConyuge.current.getFormData();
       const isValid = datosConyuge.current.validateForm(); // Llamamos a validateForm del componente Datos
 
@@ -202,6 +242,7 @@ console.log("idSolicitud", clienteData);
       //}
     }
     if (activeTab === "Dependiente" && clienteData.idSituacionLaboral === 1) {
+      tipoDato = 7;
       const formData = datosTrabajo.current.getFormData();
       const isValid = datosTrabajo.current.validateForm(); // Llamamos a validateForm del componente Datos
 
@@ -212,6 +253,7 @@ console.log("idSolicitud", clienteData);
     }
 
     if (activeTab === "Negocio" && clienteData.idSituacionLaboral != 1) {
+      tipoDato = 6;
       const formData = datosNegocio.current.getFormData();
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       console.log("datos negocio", formData);
@@ -220,7 +262,28 @@ console.log("idSolicitud", clienteData);
        // setActiveTab("Factores de Crédito");
       }
     }
+    fetchInsertarDatos(tipoDato); // Llamar a la función para insertar datos
+    const isValid = validarcaposdata(); // Llamar a la función de validación de campos
+    if (isValid) {
+      enqueueSnackbar("Por favor completa todos los campos obligatorios.", { variant: "error" });
+    }
   };
+
+  const fetchInsertarDatos = async (tipo) => {
+    try{
+     const url = APIURL.post_createtiemposolicitudeswebDto();
+
+          await axios.post(url, {
+    
+            idCre_SolicitudWeb: clienteData.idCre_SolicitudWeb,
+            Tipo: 1,
+            idEstadoVerificacionDocumental: tipo,
+            Usuario: userData.Nombre,
+          });
+        }catch (error) {
+          console.error("Error al guardar los datos del cliente", error);
+        }
+    };
 
   const fetchSaveDatosNegocio = async (formData) => {
     try {

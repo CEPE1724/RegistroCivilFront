@@ -43,23 +43,33 @@ import { useNavigate } from "react-router-dom";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import HouseIcon from "@mui/icons-material/House";
-import { red } from "@mui/material/colors";
+import { red, yellow } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
 import HourglassFullIcon from "@mui/icons-material/HourglassFull";
 import PendingIcon from "@mui/icons-material/Pending";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-
+import PhoneDisabledIcon from "@mui/icons-material/PhoneDisabled";
+import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
+import SmartphoneIcon from "@mui/icons-material/Smartphone";
+import CancelIcon from "@mui/icons-material/Cancel";
 import LocationModal from "./LocationModal";
+
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 
+import SettingsPhoneIcon from '@mui/icons-material/SettingsPhone';
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // PENDIENTE
+import HomeIcon from "@mui/icons-material/Home"; // DATOS DOMICILIO
+import FavoriteIcon from "@mui/icons-material/Favorite"; // DATOS CÓNYUGE
+import ContactsIcon from "@mui/icons-material/Contacts"; // DATOS REFERENCIAS
+import CreditScoreIcon from "@mui/icons-material/CreditScore"; // INFORMACIÓN DE CRÉDITO
+import AssessmentIcon from "@mui/icons-material/Assessment"; // FACTORES DE CRÉDITO
+
+
 import { Popover, Box, Typography } from "@mui/material";
-import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icono de tres puntos verticales
-
-
-
-
+import MoreVertIcon from "@mui/icons-material/MoreVert"; // Icono de tres puntos verticales
+import DocumentStatusPopover from "./DocumentStatusPopover";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const [bodegass, setBodegass] = useState([]);
@@ -96,8 +106,8 @@ export function ListadoSolicitud() {
     { label: "Rechazado", value: 4 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
-  
-  const [anchorEl, setAnchorEl] = useState(null); // Estado para el Popover
+
+
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -107,25 +117,29 @@ export function ListadoSolicitud() {
   };
 
   // Abre el Popover cuando el InfoIcon es clickeado
-  const [selectedEstado, setSelectedEstado] = useState(null);
 
-  const handlePopoverOpen = (event, idEstado, data) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedEstado(idEstado);
-    fetchtiemposolicitudesweb_all(data.id);
+  const handlePopoverOpen = (event, tipo, data) => {
+    fetchtiemposolicitudesweb(data.id, tipo);
+    setPopoverData({
+      open: true,
+      anchorEl: event.currentTarget,
+      selectedRowId: data.id, // Guardar la ID de la fila seleccionada
+    });
   };
+
+  const [popoverData, setPopoverData] = React.useState({
+    open: false,
+    anchorEl: null,
+    clienteEstados: [],
+    selectedRowId: null, // ID para identificar qué fila tiene el popover abierto
+  });
 
   const handlePopoverClose = () => {
-    setAnchorEl(null);
-    setSelectedEstado(null);
+    setPopoverData({ open: false, anchorEl: null, selectedRowId: null });
   };
-
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
 
-
-
-  const open = Boolean(anchorEl);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -143,10 +157,9 @@ export function ListadoSolicitud() {
     fetchData();
   }, []);
 
-
-  const fetchtiemposolicitudesweb_all = async (idCre_SolicitudWeb) => {
+  const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
     try {
-      const url = APIURL.get_tiemposolicitudesweb_all(idCre_SolicitudWeb);
+      const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
@@ -154,7 +167,12 @@ export function ListadoSolicitud() {
       });
       if (response.status === 200) {
         const data = response.data;
+        console.log("imprimo la data a ver que pex", data);
         setClienteEstados(data);
+        console.log(
+          "voy a imprimir los estadossssssss de cliente estados porque no pasa ",
+          clienteEstados
+        );
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -162,6 +180,7 @@ export function ListadoSolicitud() {
       console.error("Error fetching tiemposolicitudesweb data:", error);
     }
   };
+
   // Obtener bodegas
   const fetchBodega = async () => {
     try {
@@ -196,23 +215,53 @@ export function ListadoSolicitud() {
     }
   };
 
-  const getTooltipByEstado = (estadoId) => {
-    switch (estadoId) {
-      case 1:
-        return "En proceso";
-      case 2:
-        return "En Revisión";
-      case 3:
-        return "Corrección Requerida";
-      case 4:
-        return "todos los documentos han sido aprobados";
-      case 5:
-        return "Rechazado";
-      default:
-        return "Estado desconocido";
+
+
+  const getPhoneIconByEstado = (estado) => {
+    switch (estado) {
+      case 1: // NO ASIGNADO
+        return <PhoneDisabledIcon /> ;
+      case 2: // ASIGNADO
+        return <PhoneInTalkIcon sx={{ color: "#6C757D" }} />;
+      case 3: // GESTIONANDO
+      return <SettingsPhoneIcon sx={{color : "#FFC107"}} />;
+      case 4: // APROBADO
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      case 5: // RECHAZADO
+      return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+      default: // Estado no especificado
+        return <PhoneIcon />;
     }
   };
 
+  const getSolicitudIconByEstado = (estado) => {
+    switch (estado) {
+      case 1: // PENDIENTE
+        return <PendingActionsIcon sx={{ color: "gray" }} />;
+      case 2: // DATOS CLIENTE
+        return <PersonIcon sx={{ color: "gray" }} />;
+      case 3: // DATOS DOMICILIO
+        return <HomeIcon sx={{ color: "gray" }} />;
+      case 4: // DATOS CÓNYUGE
+        return <SupervisorAccountIcon sx={{ color: "gray" }} />;
+      case 5: // DATOS REFERENCIAS
+        return <ContactsIcon sx={{ color: "gray" }} />;
+      case 6: // DATOS NEGOCIO
+        return <StoreIcon sx={{ color: "gray" }} />;
+      case 7: // DATOS DEPENDIENTE
+        return <BadgeIcon sx={{ color: "gray" }} />;
+      case 8: // INFORMACIÓN DE CRÉDITO
+        return <CreditScoreIcon sx={{ color: "gray" }} />;
+      case 9: // FACTORES DE CRÉDITO
+        return <AssessmentIcon sx={{ color: "gray" }} />;
+      case 10: // COMPLETADO
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />; // Verde para COMPLETADO
+      default: // Default icon si el estado es desconocido
+        return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
+    }
+  };
+  
+  
   /* idEstadoVerificacionDocumental	Nombre
 1	PROCESO
 2	REVISIÓN
@@ -272,72 +321,6 @@ export function ListadoSolicitud() {
       });
     }
   };
-
-  const getPopoverStyles = (idEstado) => {
-    switch (idEstado) {
-      case 1: // PROCESO
-        return {
-          backgroundColor: "#F4F6F9", // Gris suave, elegante
-          color: "#4A4A4A", // Texto gris oscuro
-          border: "1px solid #B0BEC5", // Borde gris suave
-          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra sutil
-          fontFamily: "Roboto, sans-serif", // Tipografía moderna
-          fontWeight: "500", // Peso medio
-          padding: "12px", // Padding cómodo
-        };
-      case 2: // REVISIÓN
-        return {
-          backgroundColor: "#F9F9F9", // Fondo blanco suculento
-          color: "#5F6368", // Texto gris oscuro sutil
-          border: "1px solid #CED4DA", // Borde gris muy claro
-          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
-          fontFamily: "Roboto, sans-serif", // Tipografía moderna
-          fontWeight: "500", // Peso medio
-          padding: "12px", // Padding cómodo
-        };
-      case 3: // CORRECCIÓN
-        return {
-          backgroundColor: "#E3F2F1", // Fondo verde aguamarina suave
-          color: "#00796B", // Texto verde oscuro, elegante
-          border: "1px solid #80CBC4", // Borde azul verdoso suave
-          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
-          fontFamily: "Roboto, sans-serif", // Tipografía moderna
-          fontWeight: "500", // Peso medio
-          padding: "12px", // Padding cómodo
-        };
-      case 4: // APROBACIÓN
-        return {
-          backgroundColor: "#E8F5E9", // Fondo verde suave claro
-          color: "#388E3C", // Texto verde oscuro, profesional
-          border: "1px solid #C8E6C9", // Borde verde muy suave
-          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
-          fontFamily: "Roboto, sans-serif", // Tipografía moderna
-          fontWeight: "500", // Peso medio
-          padding: "12px", // Padding cómodo
-        };
-      case 5: // RECHAZADO
-        return {
-          backgroundColor: "#FFEBEE", // Fondo rojo muy suave, elegante
-          color: "#D32F2F", // Texto rojo oscuro
-          border: "1px solid #FFCDD2", // Borde rojo claro
-          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
-          fontFamily: "Roboto, sans-serif", // Tipografía moderna
-          fontWeight: "500", // Peso medio
-          padding: "12px", // Padding cómodo
-        };
-      default:
-        return {
-          backgroundColor: "#F5F5F5", // Fondo gris claro
-          color: "#4A4A4A", // Texto gris oscuro
-          border: "1px solid #B0BEC5", // Borde gris claro
-          boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)", // Sombra suave
-          fontFamily: "Roboto, sans-serif", // Tipografía moderna
-          fontWeight: "500", // Peso medio
-          padding: "12px", // Padding cómodo
-        };
-    }
-  };
-
 
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
@@ -405,12 +388,12 @@ export function ListadoSolicitud() {
                 item.Estado === 1
                   ? "PENDIENTE"
                   : item.Estado === 2
-                    ? "APROBADO"
-                    : item.Estado === 3
-                      ? "ANULADO"
-                      : item.Estado === 4
-                        ? "RECHAZADO"
-                        : "Desconocido",
+                  ? "APROBADO"
+                  : item.Estado === 3
+                  ? "ANULADO"
+                  : item.Estado === 4
+                  ? "RECHAZADO"
+                  : "Desconocido",
               imagen: item.Foto,
               celular: item.Celular,
               email: item.Email,
@@ -420,6 +403,10 @@ export function ListadoSolicitud() {
               tipoCliente: tipoClienteMap[item.idTipoCliente] || "Desconocido",
               idEstadoVerificacionDocumental:
                 item.idEstadoVerificacionDocumental,
+              idEstadoVerificacionSolicitud: item.idEstadoVerificacionSolicitud,
+              idEstadoVerificacionTelefonica:
+                item.idEstadoVerificacionTelefonica,
+              idEstadoVerificacionTerrena: item.idEstadoVerificacionTerrena,
             };
           })
         );
@@ -445,8 +432,9 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
-            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
+            vendedor.ApellidoPaterno || ""
+          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -538,9 +526,11 @@ export function ListadoSolicitud() {
 
   const handleOpenModal = (data) => {
 
-	setUserSolicitudData(data);
-		setOpenLocationModal(prevState => !prevState);
-	}
+    setUserSolicitudData(data);
+
+    setOpenLocationModal(prevState => !prevState);
+  }
+
 
 	const handleOpenModalVerificacion = (data) => {
 		setUserSolicitudData(data);
@@ -661,7 +651,7 @@ export function ListadoSolicitud() {
                   Detalles
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Solicitud
+                  Solicitudes
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Documental
@@ -670,7 +660,7 @@ export function ListadoSolicitud() {
                   Telefonica
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Terrena
+                  Terrenales
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -695,117 +685,128 @@ export function ListadoSolicitud() {
                       </IconButton>
                     </Tooltip>
                   </TableCell>
+
+                  {/* solicitud */}
                   <TableCell align="center">
-                    <Tooltip title="Solicitud" arrow placement="top">
-                      <IconButton onClick={() => handlesolicitud(data)}>
-                        <PendingActionsIcon sx={{ color: "gray" }} />
-                      </IconButton>
-                    </Tooltip>
+                    <div>
+                      <span>
+                        <IconButton
+                          onClick={() => handlesolicitud(data)}
+                          disabled={data.idEstadoVerificacionSolicitud === 10}
+                        >
+                          {getSolicitudIconByEstado(data.idEstadoVerificacionDocumental)}
+                          </IconButton>
+
+                        <MoreVertIcon
+                          onClick={(event) => handlePopoverOpen(event, 1, data)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </span>
+
+                      <DocumentStatusPopover
+                        open={
+                          popoverData.open &&
+                          popoverData.selectedRowId === data.id
+                        } // Verificar si el popover corresponde a esta fila
+                        anchorEl={popoverData.anchorEl}
+                        onClose={handlePopoverClose}
+                        clienteEstados={clienteEstados}
+                        estadoColores={estadoColores}
+                      />
+                    </div>
                   </TableCell>
 
+                  {/* documental */}
                   <TableCell align="center">
                     <div>
                       <span>
                         <IconButton
                           onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
-                          disabled={data.idEstadoVerificacionDocumental === 2 || data.idEstadoVerificacionDocumental === 4 || data.idEstadoVerificacionDocumental === 5}
+                          disabled={
+                            data.idEstadoVerificacionDocumental === 2 ||
+                            data.idEstadoVerificacionDocumental === 4 ||
+                            data.idEstadoVerificacionDocumental === 5
+                          }
                         >
                           {getIconByEstado(data.idEstadoVerificacionDocumental)}
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
+
                         <MoreVertIcon
-                          onClick={(event) => handlePopoverOpen(event, data.idEstadoVerificacionDocumental, data)}
-                          style={{ cursor: 'pointer' }} // Estilo para separarlo un poco y hacerlo clickeable
+                          onClick={(event) => handlePopoverOpen(event, 3, data)}
+                          style={{ cursor: "pointer" }}
                         />
                       </span>
 
-                      {/* El Popover siempre estará aquí, pero se mostrará solo cuando 'open' sea true */}
-                      <Popover
-      open={open}
-      anchorEl={anchorEl}
-      onClose={handlePopoverClose}
-      anchorOrigin={{
-        vertical: "bottom",
-        horizontal: "center",
-      }}
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "center",
-      }}
-      PaperProps={{
-        sx: {
-          borderRadius: 8,
-          backgroundColor: "#ffffff",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #dcdcdc",
-          padding: 2,
-        },
-      }}
-    >
-      <Box
-        sx={{
-          width: "350px", // Ajuste el ancho para que se vea más profesional
-          padding: 2,
-          borderRadius: 8,
-          backgroundColor: "#f7f9fb",
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#2d3689", marginBottom: 1 }}>
-          Historial de Revisión Documental
-        </Typography>
 
-        {/* Lista de Estados */}
-        <Box sx={{ marginTop: 2 }}>
-          {clienteEstados.map((estado, index) => (
-            <Box
-              key={estado.idTiempoSolicitudesWeb}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "16px",
-                padding: "10px",
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-              }}
-            >
-              {/* Icono de estado */}
-              <Box
-                sx={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "50%",
-                  backgroundColor: estadoColores[estado.idEstadoVerificacionDocumental],
-                  marginRight: "10px",
-                }}
-              />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: "bold", color: "#333" }}>
-                  {estado.idEstadoVerificacionDocumental === 1 && "Revisión"}
-                  {estado.idEstadoVerificacionDocumental === 2 && "Corrección"}
-                  {estado.idEstadoVerificacionDocumental === 3 && "Aprobado"}
-                  {estado.idEstadoVerificacionDocumental === 4 && "Finalizado"}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#777" }}>
-                  <strong>Fecha:</strong> {new Date(estado.FechaSistema).toLocaleString()}
-                </Typography>
-                <Typography variant="body2" sx={{ color: "#777" }}>
-                  <strong>Revisado por:</strong> {estado.Usuario}
-                </Typography>
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      </Box>
-    </Popover>
-
-
-
+                      <DocumentStatusPopover
+                        open={
+                          popoverData.open &&
+                          popoverData.selectedRowId === data.id
+                        } // Verificar si el popover corresponde a esta fila
+                        anchorEl={popoverData.anchorEl}
+                        onClose={handlePopoverClose}
+                        clienteEstados={clienteEstados}
+                        estadoColores={estadoColores}
+                      />
                     </div>
                   </TableCell>
 
 
+                  {/* telefonica */}
+                  <TableCell align="center">
+                    <div>
+                      <span>
+                        <IconButton
+                          onClick={() => handleTelefonica(data)} // Aquí va la lógica para manejar el clic
+                          disabled={data.idEstadoVerificacionTelefonica === 1}
+                        >
+                          {getPhoneIconByEstado(data.idEstadoVerificacionDocumental)}
+                          </IconButton>
+
+                        {/* InfoIcon al lado del IconButton */}
+
+                        <MoreVertIcon
+                          onClick={(event) => handlePopoverOpen(event, 2, data)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </span>
+
+                      <DocumentStatusPopover
+                        open={
+                          popoverData.open &&
+                          popoverData.selectedRowId === data.id
+                        } // Verificar si el popover corresponde a esta fila
+                        anchorEl={popoverData.anchorEl}
+                        onClose={handlePopoverClose}
+                        clienteEstados={clienteEstados}
+                        estadoColores={estadoColores}
+                      />
+                    </div>
+                  </TableCell>
+
+                  {/* terrenales */}
+                  <TableCell align="center" className="cursor-pointer">
+                    <div>
+                      <span>
+                        <IconButton
+                          onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
+                          disabled={
+                            data.idEstadoVerificacionSolicitud === 1 ||
+                            data.idEstadoVerificacionTerrena === 1
+                          }
+                        >
+                          <HouseIcon sx={{ color: "gray" }} />
+                        </IconButton>
+
+                        {/* InfoIcon al lado del IconButton */}
+
+                        <MoreVertIcon
+                          onClick={(event) => handlePopoverOpen(event, 4, data)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </span>
 
 
                   <TableCell align="center">
@@ -821,6 +822,20 @@ export function ListadoSolicitud() {
 					}>
                       <HouseIcon sx={{ color: 'gray' }} />
                     </Tooltip>
+
+
+                      <DocumentStatusPopover
+                        open={
+                          popoverData.open &&
+                          popoverData.selectedRowId === data.id
+                        } // Verificar si el popover corresponde a esta fila
+                        anchorEl={popoverData.anchorEl}
+                        onClose={handlePopoverClose}
+                        clienteEstados={clienteEstados}
+                        estadoColores={estadoColores}
+                      />
+                    </div>
+
                   </TableCell>
                 </TableRow>
               ))}
@@ -876,18 +891,19 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
-                        ? "text-green-500"
-                        : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${
+                        selectedRow.estado === "activo"
+                          ? "text-green-500"
+                          : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                            ? "text-gray-500"
-                            : selectedRow.estado === "aprobado"
-                              ? "text-blue-500"
-                              : selectedRow.estado === "rechazado"
-                                ? "text-red-500"
-                                : "text-gray-700"
-                        }`}
+                          ? "text-gray-500"
+                          : selectedRow.estado === "aprobado"
+                          ? "text-blue-500"
+                          : selectedRow.estado === "rechazado"
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
                     >
                       {selectedRow.estado}
                     </span>
@@ -955,13 +971,13 @@ export function ListadoSolicitud() {
           </button>
         </div>
       )}
-	  <LocationModal
-        isOpen={ () => handleOpenModal() }
-		openLocationModal = { openLocationModal }
+      <LocationModal
+        isOpen={() => handleOpenModal()}
+        openLocationModal={openLocationModal}
         locationType={null}
         locationData={null}
         onLocationChange={null}
-		userSolicitudData={userSolicitudData}
+        userSolicitudData={userSolicitudData}
       />
 	  <VerificacionTerrenaModal
         isOpen={ () => handleOpenModalVerificacion() }

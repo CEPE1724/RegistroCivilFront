@@ -355,6 +355,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.empresa}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
+						readOnly={data.NombreEmpresa !== 0 && data.NombreEmpresa !== null && data.NombreEmpresa !== undefined} // Deshabilitar el campo de empresa
 					/>
 					{errors.empresa && (
 						<span className="text-red-500 text-xs">{errors.empresa}</span>
@@ -420,6 +421,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.gastos}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
+						readOnly = {data.EgresosTrabajo !== 0 && data.EgresosTrabajo !== null && data.EgresosTrabajo !== undefined} // Deshabilitar el campo de gastos
 					/>
 					{errors.gastos && (
 						<span className="text-red-500 text-xs">{errors.gastos}</span>
@@ -526,6 +528,7 @@ const SeccionB = forwardRef((props, ref) => {
 					</label>
 					<select
 						name="provincia"
+						value ={formData.provincia}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
 					>
@@ -710,6 +713,7 @@ const SeccionB = forwardRef((props, ref) => {
 							value={formData.celular}
 							onChange={handleInputChange}
 							className="block w-full solcitudgrande-style"
+							readOnly={data.CelularTrabajo !== 0 && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
 						/>
 
 					</div>
@@ -729,6 +733,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.referenciaUbicacion}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
+						readOnly={data.ReferenciaUbicacionTrabajo !== 0 && data.ReferenciaUbicacionTrabajo !== null && data.ReferenciaUbicacionTrabajo !== undefined} // Deshabilitar el campo de referencia
 					/>
 					{errors.referenciaUbicacion && (
 						<span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>
