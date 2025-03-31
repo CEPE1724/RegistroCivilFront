@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useImperativeHandle } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios"; // Import axios
-
+import { useNavigate } from "react-router-dom";
 import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import CheckIcon from '@mui/icons-material/Check';
@@ -67,6 +67,10 @@ export function Cabecera() {
   const datosInformacionCredito = useRef(); // Referencia para el componente InformacionCredito
   console.log("idSolicitud", clienteData);
   const ref = useRef(); // Create ref for imperative handle
+  const navigate = useNavigate();
+ 
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -636,9 +640,40 @@ export function Cabecera() {
   // Función para manejar el cierre del modal
   const closeModal = () => setIsModalOpen(false);
 
+  ///patch que cambio el estado de la solicitud a 10 
+
+  const patchSolicitud = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          idEstadoVerificacionSolicitud: 10,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+
+
+
   // Función para confirmar la acción (enviar)
   const handleConfirm = () => {
-    alert("¡Enviado!"); // Aquí puedes hacer la acción de enviar los datos
+   patchSolicitud(idSolicitud);
+   
     closeModal(); // Cerrar el modal después de confirmar
   };
   const handleTabClick = (tab) => {

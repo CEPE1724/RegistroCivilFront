@@ -58,7 +58,7 @@ import LocationModal from "./LocationModal";
 
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 
-import SettingsPhoneIcon from '@mui/icons-material/SettingsPhone';
+import SettingsPhoneIcon from "@mui/icons-material/SettingsPhone";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // PENDIENTE
 import HomeIcon from "@mui/icons-material/Home"; // DATOS DOMICILIO
 import FavoriteIcon from "@mui/icons-material/Favorite"; // DATOS CÓNYUGE
@@ -66,10 +66,10 @@ import ContactsIcon from "@mui/icons-material/Contacts"; // DATOS REFERENCIAS
 import CreditScoreIcon from "@mui/icons-material/CreditScore"; // INFORMACIÓN DE CRÉDITO
 import AssessmentIcon from "@mui/icons-material/Assessment"; // FACTORES DE CRÉDITO
 
-
 import { Popover, Box, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert"; // Icono de tres puntos verticales
 import DocumentStatusPopover from "./DocumentStatusPopover";
+import Domicilio from "../SolicitudGrande/DatosCliente/Domicilio/Domicilio";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const [bodegass, setBodegass] = useState([]);
@@ -108,7 +108,13 @@ export function ListadoSolicitud() {
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
+  const estaDeshabilitado = (data) => {
+    return data.resultado === 0;
+  };
 
+ const verificacionSolicitud = (data) => {
+  return data.idEstadoVerificacionSolicitud !== 10;
+  };
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -141,7 +147,6 @@ export function ListadoSolicitud() {
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
 
-
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
@@ -170,10 +175,6 @@ export function ListadoSolicitud() {
         const data = response.data;
         console.log("imprimo la data a ver que pex", data);
         setClienteEstados(data);
-        console.log(
-          "voy a imprimir los estadossssssss de cliente estados porque no pasa ",
-          clienteEstados
-        );
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -215,8 +216,6 @@ export function ListadoSolicitud() {
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
     }
   };
-
-
 
   const getPhoneIconByEstado = (estado) => {
     switch (estado) {
@@ -261,7 +260,6 @@ export function ListadoSolicitud() {
         return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
     }
   };
-
 
   /* idEstadoVerificacionDocumental	Nombre
 1	PROCESO
@@ -389,14 +387,14 @@ export function ListadoSolicitud() {
                 item.Estado === 1
                   ? "PRE-APROBADO"
                   : item.Estado === 2
-                    ? "APROBADO"
-                    : item.Estado === 3
-                      ? "ANULADO"
-                      : item.Estado === 4
-                        ? "RECHAZADO"
-                        : item.Estado === 5
-                          ? "NO APLICA"
-                          : "Desconocido",
+                  ? "APROBADO"
+                  : item.Estado === 3
+                  ? "ANULADO"
+                  : item.Estado === 4
+                  ? "RECHAZADO"
+                  : item.Estado === 5
+                  ? "NO APLICA"
+                  : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -411,6 +409,10 @@ export function ListadoSolicitud() {
               idEstadoVerificacionTelefonica:
                 item.idEstadoVerificacionTelefonica,
               idEstadoVerificacionTerrena: item.idEstadoVerificacionTerrena,
+              resultado: item.Resultado,
+              entrada: item.Entrada,
+              Domicilio: item.TerrenoDomicilio,
+              Laboral: item.TerrenoLaboral,
             };
           })
         );
@@ -436,8 +438,9 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
-            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
+            vendedor.ApellidoPaterno || ""
+          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -528,17 +531,15 @@ export function ListadoSolicitud() {
   };
 
   const handleOpenModal = (data) => {
-
     setUserSolicitudData(data);
 
-    setOpenLocationModal(prevState => !prevState);
-  }
-
+    setOpenLocationModal((prevState) => !prevState);
+  };
 
   const handleOpenModalVerificacion = (data) => {
     setUserSolicitudData(data);
-    setOpenVerificacionModal(prevState => !prevState);
-  }
+    setOpenVerificacionModal((prevState) => !prevState);
+  };
 
   console.log("userSolicitudData", datos);
   return (
@@ -652,6 +653,12 @@ export function ListadoSolicitud() {
                   Tipo de Cliente
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Resultado
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Entradas
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Detalles
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
@@ -664,7 +671,10 @@ export function ListadoSolicitud() {
                   Telefonica
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Terrenales
+                  Domicilio
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Laborales
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -683,28 +693,55 @@ export function ListadoSolicitud() {
                   <TableCell align="center">{data.estado}</TableCell>
                   <TableCell align="center">{data.tipoCliente}</TableCell>
                   <TableCell align="center">
+                    {data.resultado === 0 ? (
+                      <HighlightOffIcon sx={{ color: "#DC3545" }} />
+                    ) : data.resultado === 1 ? (
+                      <CheckCircleIcon sx={{ color: "#28A745" }} />
+                    ) : null}
+                  </TableCell>
+                  <TableCell align="center">{data.entrada}</TableCell>
+
+                  <TableCell align="center">
                     <Tooltip title="Ver más" arrow placement="top">
-                      <IconButton onClick={() => handleOpenDialog(data)}>
-                        <VisibilityIcon sx={{ color: "gray" }} />
+                      <IconButton
+                        onClick={() => handleOpenDialog(data)}
+                  
+                      >
+                        <VisibilityIcon
+                        />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
-
-                  {/* solicitud */}
                   <TableCell align="center">
                     <div>
                       <span>
                         <IconButton
                           onClick={() => handlesolicitud(data)}
-                          disabled={data.Estado === 5}
+                          disabled={
+                           estaDeshabilitado(data) 
+                          }
+                          sx={{ opacity: estaDeshabilitado(data) }}
+
                         >
-                          {getSolicitudIconByEstado(data.idEstadoVerificacionDocumental)}
+                          {getSolicitudIconByEstado(
+                            data.idEstadoVerificacionSolicitud
+                          )}
                         </IconButton>
 
-                        <MoreVertIcon
-                          onClick={(event) => handlePopoverOpen(event, 1, data)}
-                          style={{ cursor: "pointer" }}
-                        />
+                        {/* MoreVertIcon deshabilitado cuando resultado es "No aplica" */}
+                        <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                        >
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 1, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
                       </span>
 
                       <DocumentStatusPopover
@@ -727,19 +764,28 @@ export function ListadoSolicitud() {
                         <IconButton
                           onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
                           disabled={
-                            data.Estado === 5 || data.idEstadoVerificacionDocumental === 2
+                            data.idEstadoVerificacionDocumental === 2
+                            || estaDeshabilitado(data)
                           }
+                          sx={{ opacity: estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
+
                         >
                           {getIconByEstado(data.idEstadoVerificacionDocumental)}
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
-
+                        <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                        >
                         <MoreVertIcon
                           onClick={(event) => handlePopoverOpen(event, 3, data)}
                           style={{ cursor: "pointer" }}
                         />
                       </span>
+                    </span>
 
 
                       <DocumentStatusPopover
@@ -755,25 +801,34 @@ export function ListadoSolicitud() {
                     </div>
                   </TableCell>
 
-
                   {/* telefonica */}
                   <TableCell align="center">
                     <div>
                       <span>
                         <IconButton
                           onClick={() => handleTelefonica(data)} // Aquí va la lógica para manejar el clic
-                          disabled={data.idEstadoVerificacionTelefonica === 1}
-                        >
-                          {getPhoneIconByEstado(data.idEstadoVerificacionDocumental)}
+                          disabled={data.idEstadoVerificacionTelefonica === 1 || estaDeshabilitado(data) || verificacionSolicitud(data)} 
+                          sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
+
+                   >
+                          {getPhoneIconByEstado(
+                            data.idEstadoVerificacionTelefonica
+                          )}
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
-
+                        <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                        >
                         <MoreVertIcon
                           onClick={(event) => handlePopoverOpen(event, 2, data)}
                           style={{ cursor: "pointer" }}
                         />
                       </span>
+                    </span>
 
                       <DocumentStatusPopover
                         open={
@@ -795,21 +850,73 @@ export function ListadoSolicitud() {
                         <IconButton
                           onClick={() => handleOpenModalVerificacion(data)} // Aquí va la lógica para manejar el clic
                           disabled={
-                            data.idEstadoVerificacionSolicitud === 1 ||
-                            data.idEstadoVerificacionTerrena === 1
+                            verificacionSolicitud(data) ||
+                            data.Domicilio === false
                           }
+                          sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
+
                         >
                           <HouseIcon sx={{ color: "gray" }} />
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
 
+                        <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                        >
+
                         <MoreVertIcon
                           onClick={(event) => handlePopoverOpen(event, 4, data)}
                           style={{ cursor: "pointer" }}
                         />
                       </span>
+                    </span>
 
+                      <DocumentStatusPopover
+                        open={
+                          popoverData.open &&
+                          popoverData.selectedRowId === data.id
+                        } // Verificar si el popover corresponde a esta fila
+                        anchorEl={popoverData.anchorEl}
+                        onClose={handlePopoverClose}
+                        clienteEstados={clienteEstados}
+                        estadoColores={estadoColores}
+                      />
+                    </div>
+                  </TableCell>
+
+                  <TableCell align="center" className="cursor-pointer">
+                    <div>
+                      <span>
+                        <IconButton
+                          onClick={() => handleOpenModalVerificacion(data)} // Aquí va la lógica para manejar el clic
+                          disabled={
+                            verificacionSolicitud(data)||
+                            data.Laboral === false
+                          }
+                          sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
+
+                        >
+                          <StoreIcon sx={{ color: "gray" }} />
+                        </IconButton>
+
+                        {/* InfoIcon al lado del IconButton */}
+                        <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                        >
+
+                        <MoreVertIcon
+                          onClick={(event) => handlePopoverOpen(event, 4, data)}
+                          style={{ cursor: "pointer" }}
+                        />
+                      </span>
+                    </span>
 
                       <DocumentStatusPopover
                         open={
@@ -877,18 +984,19 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
-                        ? "text-green-500"
-                        : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${
+                        selectedRow.estado === "activo"
+                          ? "text-green-500"
+                          : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                            ? "text-gray-500"
-                            : selectedRow.estado === "aprobado"
-                              ? "text-blue-500"
-                              : selectedRow.estado === "rechazado"
-                                ? "text-red-500"
-                                : "text-gray-700"
-                        }`}
+                          ? "text-gray-500"
+                          : selectedRow.estado === "aprobado"
+                          ? "text-blue-500"
+                          : selectedRow.estado === "rechazado"
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
                     >
                       {selectedRow.estado}
                     </span>
