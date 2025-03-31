@@ -246,8 +246,13 @@ export default function CreditoForm() {
       name: "idProductos",
       type: "select",
       options: [
-        { value: 789, label: "CELULAR" },
-        { value: 2, label: "OTRO" },
+        { value: 1, label: "COMBOS" },
+        { value: 2, label: "LAVADORA" },
+        { value: 3, label: "MOVILIDAD" },
+        { value: 4, label: "PORTATIL" },
+        { value: 5, label: "REFRIGERADOR " },
+        { value: 6, label: "TELEVISOR" },
+
       ],
     },
 
