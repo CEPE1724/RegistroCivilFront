@@ -2,6 +2,19 @@ import React from "react";
 import { Popover, Box, Typography } from "@mui/material";
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados, estadoColores }) => {
+
+  const obtenerEstadoVerificacion = (estado) => {
+    // Definir los estados según el Tipo
+    const estadosPorTipo = {
+      1: { 1: "Pendiente", 2: "Cliente", 3: "Domicilio", 4: "Conyuge" , 5: "Referencias" , 6:"Negocios" , 7: "Dependiente" , 8:"Informacion De Credito" ,9: "Factores De Credito" , 10:"Completado" }, // Tipo 1: Documental
+      2: { 1: "Pendiente", 2: "En Revisión", 3: "Aprobado", 4: "Rechazado" }, // Tipo 2: Otra categoría
+      3: { 1: "Proceso", 2: "Revision", 3: "Correcion", 4: "Aprobacion" , 5:"Rechazar "}, // Tipo 3: Otro caso
+    };
+  
+    // Buscar el estado correspondiente según Tipo e idEstadoVerificacionDocumental
+    return estadosPorTipo[estado.Tipo]?.[estado.idEstadoVerificacionDocumental] || "Desconocido";
+  };
+  
   return (
     <Popover
       open={open}
@@ -69,10 +82,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados, estado
               />
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: "bold", color: "#333" }}>
-                  {estado.idEstadoVerificacionDocumental === 1 && "Revisión"}
-                  {estado.idEstadoVerificacionDocumental === 2 && "Corrección"}
-                  {estado.idEstadoVerificacionDocumental === 3 && "Aprobado"}
-                  {estado.idEstadoVerificacionDocumental === 4 && "Finalizado"}
+                  {obtenerEstadoVerificacion(estado)}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#777" }}>
                   <strong>Fecha:</strong> {new Date(estado.FechaSistema).toLocaleString()}
