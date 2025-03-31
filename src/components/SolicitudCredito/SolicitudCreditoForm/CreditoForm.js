@@ -9,6 +9,8 @@ import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
+  console.log("userData", userData);
+  console.log("userUsuario", userUsuario);
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
@@ -418,6 +420,7 @@ export default function CreditoForm() {
       idCompraEncuesta: Number(values.idCompraEncuesta),
       idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
       idEstadoVerificacionDocumental : 1,
+      Usuario: userData?.Nombre
     };
 
 
