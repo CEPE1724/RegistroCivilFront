@@ -4,25 +4,27 @@ import { useSnackbar } from "notistack";
 import axios from "axios";
 import { SelectField } from "../../Utils";
 import {
-	fetchTipoEmpresa, fetchTipoContrato, fecthTipoSueldo, fetchCargo, fetchCognoTrabajocargo,fetchBarrios, fetchParroquias, fetchCantones, fetchProvincias
+	fetchTipoEmpresa, fetchTipoContrato, fecthTipoSueldo, fetchCargo, fetchCognoTrabajocargo, fetchBarrios, fetchParroquias, fetchCantones, fetchProvincias
 } from "../DatosCliente/apisFetch";
 import {
 	FaCalendarAlt, FaMoneyCheckAlt, FaFileContract, FaCity, FaMapMarkerAlt, FaUserCheck,
 	FaPhoneAlt, FaDollarSign, FaClock, FaUserTie, FaMoneyBillWave, FaBriefcase, FaBuilding,
 	FaRoad, FaHouseUser, FaPhone, FaMobileAlt, FaMapPin,
 } from "react-icons/fa";
-
+import { LocationModal } from "../LocationModal";
+import { useAuth } from "../../AuthContext/AuthContext";
 
 const SeccionB = forwardRef((props, ref) => {
 	const { data } = props;
 
-  console.log("data dependiente", data);
+	console.log("data dependiente", data);
+	const { userData, userUsuario } = useAuth();
 	const { enqueueSnackbar } = useSnackbar();
 	const [tipoEmpresa, setTipoEmpresa] = useState([]);
 	const [tipoContrato, setTipoContrato] = useState([]);
 	const [tipoSueldo, setTipoSueldo] = useState([]);
 	const [cargo, setCargo] = useState([]);
-
+	const [openLocationModal, setOpenLocationModal] = useState(false);
 	const [provincia, setProvincia] = useState([]);
 	const [canton, setCanton] = useState([]);
 	const [parroquia, setParroquia] = useState([]);
@@ -139,6 +141,10 @@ const SeccionB = forwardRef((props, ref) => {
 		}
 	};
 
+	const handleOpenModal = (data) => {
+		console.log(data);
+		setOpenLocationModal(prevState => !prevState);
+	}
 	// Función de verificación para el teléfono o celular
 	const handleVerify = (fieldName) => {
 		console.log(`Verificando ${fieldName}: ${formData[fieldName]}`);
@@ -403,7 +409,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.ingresos}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
-						readOnly = {data.IngresosTrabajo !== 0 && data.IngresosTrabajo !== null && data.IngresosTrabajo !== undefined} // Deshabilitar el campo de ingresos
+						readOnly={data.IngresosTrabajo !== 0 && data.IngresosTrabajo !== null && data.IngresosTrabajo !== undefined} // Deshabilitar el campo de ingresos
 					/>
 					{errors.ingresos && (
 						<span className="text-red-500 text-xs">{errors.ingresos}</span>
@@ -421,7 +427,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.gastos}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
-						readOnly = {data.EgresosTrabajo !== 0 && data.EgresosTrabajo !== null && data.EgresosTrabajo !== undefined} // Deshabilitar el campo de gastos
+						readOnly={data.EgresosTrabajo !== 0 && data.EgresosTrabajo !== null && data.EgresosTrabajo !== undefined} // Deshabilitar el campo de gastos
 					/>
 					{errors.gastos && (
 						<span className="text-red-500 text-xs">{errors.gastos}</span>
@@ -512,7 +518,7 @@ const SeccionB = forwardRef((props, ref) => {
 							checked={formData.afiliado}
 							onChange={handleInputChange}
 							className="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-						    disabled={true} // Deshabilitar el checkbox
+							disabled={true} // Deshabilitar el checkbox
 						/>
 						<span className="text-sm">Sí</span>
 					</label>
@@ -528,7 +534,7 @@ const SeccionB = forwardRef((props, ref) => {
 					</label>
 					<select
 						name="provincia"
-						value ={formData.provincia}
+						value={formData.provincia}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
 					>
@@ -739,8 +745,32 @@ const SeccionB = forwardRef((props, ref) => {
 						<span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>
 					)}
 				</div>
+				<div className="col-span-1">
+					<label className="text-xs font-medium mb-1 flex items-center">
+						<FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+						Ubicacion Trabajo
+					</label>
+					<button
+						type="button"
+						className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
+						name="ubicacionDomicilio"
+						onClick={() => handleOpenModal('ubicacionDomicilio')}
+					>
+						Ubicacion Trabajo
+					</button>
+				</div>
 
 			</form>
+			<LocationModal
+				isOpen={() => handleOpenModal()}
+				openLocationModal={openLocationModal}
+				locationType={null}
+				locationData={null}
+				onLocationChange={null}
+				userSolicitudData={data}
+				tipo={2}
+				userData={userData}
+			/>
 		</div>
 	)
 });

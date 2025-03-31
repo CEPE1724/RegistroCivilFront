@@ -11,10 +11,15 @@ import {
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
 import { SelectField } from "../../../Utils";
 import { InputField } from "../../../Utils";
-import { LocationModal} from "../../LocationModal";
+import { LocationModal } from "../../LocationModal";
+import { useAuth } from "../../../AuthContext/AuthContext";
+import axios from "axios";
+import { APIURL } from "../../../../configApi/apiConfig";
 const Domicilio = forwardRef((props, ref) => {
+     const { userData, userUsuario } = useAuth();
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
+    console.log('data', userData);
     const [formErrors, setFormErrors] = useState({});
     const [provincia, setProvincia] = useState([]);
     const [cantones, setCantones] = useState([]);
@@ -23,7 +28,7 @@ const Domicilio = forwardRef((props, ref) => {
     const [tiempoVivienda, setTiempoVivienda] = useState([]);
     const [tipoVivienda, setTipoVivienda] = useState([]);
     const [openLocationModal, setOpenLocationModal] = useState(false);
-    
+
     const [inmueble, setInmueble] = useState([]);
     const [ciudadInmueble, setCiudadInmueble] = useState([]);
     const [formData, setFormData] = useState({
@@ -74,7 +79,7 @@ const Domicilio = forwardRef((props, ref) => {
             fetchBarrios(formData.parroquia, enqueueSnackbar, setBarrios);
         }
     }, [formData.parroquia, enqueueSnackbar]);
-    
+
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         // Expresión regular para detectar caracteres no permitidos
@@ -137,9 +142,32 @@ const Domicilio = forwardRef((props, ref) => {
     const handleOpenModal = (data) => {
         console.log(data);
         setOpenLocationModal(prevState => !prevState);
-      }
+    }
     console.log('vivienda', formData.tipoVivienda);
 
+    const fecthValidaDomicilio = async () => {
+        try {
+          
+          const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
+          const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
+          console.log("url dsds", url);
+          const response = await axios.get(url, {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          if (response.data) {
+            console.log("response.data", response.data);
+            return response.data; // Return the fetched data
+          } else {
+            console.error("No se encontraron datos para la solicitud.");
+            return null; // Return null if no data is found
+          }
+        } catch (error) {
+          console.error("Error al obtener los datos del cliente", error);
+          return null; // Return null in case of an error
+        }
+      };
     const validateForm = useCallback(() => {
         const requiredFieldMessages = {
             provincia: 'Provincia es requerida',
@@ -346,7 +374,7 @@ const Domicilio = forwardRef((props, ref) => {
                             type="button"
                             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
                             name="ubicacionDomicilio"
-                            onClick={handleFormChange}
+                            onClick={ () => handleOpenModal('ubicacionDomicilio')}
                         >
                             Ubicacion Domicilio
                         </button>
@@ -575,14 +603,16 @@ const Domicilio = forwardRef((props, ref) => {
                     )}
                 </div>
             </div>
-             <LocationModal
-                    isOpen={() => handleOpenModal()}
-                    openLocationModal={openLocationModal}
-                    locationType={null}
-                    locationData={null}
-                    onLocationChange={null}
-                    userSolicitudData={data}
-                  />
+            <LocationModal
+                isOpen={() => handleOpenModal()}
+                openLocationModal={openLocationModal}
+                locationType={null}
+                locationData={null}
+                onLocationChange={null}
+                userSolicitudData={data}
+                tipo ={1}
+                userData={userData}
+            />
         </div>
 
     );

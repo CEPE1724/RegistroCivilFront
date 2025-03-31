@@ -9,3 +9,4 @@ export * from './DatosConyuge';
 export * from './Verificacion';
 export * from './CabeceraDatosSolicitud';
 export * from './LocationModal';
+export * from './ModalConfirm';

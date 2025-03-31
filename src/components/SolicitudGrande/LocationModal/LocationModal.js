@@ -17,7 +17,11 @@ export function LocationModal({
   locationData,
   onLocationChange,
   userSolicitudData,
+  tipo,
+  userData
 }) {
+  console.log("userSolicitudData", userSolicitudData);
+  console.log("userData", userData);
   const defaultLocation = {
     address: "",
     latitude: "",
@@ -296,14 +300,19 @@ export function LocationModal({
     if (!uploadedUrls) return;
 
     const payload = {
-      id: userSolicitudData.id,
-      cedula: userSolicitudData.cedula,
+      id: userSolicitudData.idCre_SolicitudWeb,
+      cedula: userSolicitudData.Cedula,
       latitud: parseFloat(localLocation.latitude),
       longitud: parseFloat(localLocation.longitude),
       direccion: localLocation.address,
       ip: "192.168.2.183",
       UrlImagen: uploadedUrls,
+      Tipo: tipo,
+      Usuario: userData.Nombre,
+      web:1,
     };
+
+    console.log("Payload para guardar ubicación:", payload);
 
     try {
       await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);

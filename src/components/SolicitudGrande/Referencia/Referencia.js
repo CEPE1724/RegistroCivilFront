@@ -11,6 +11,7 @@ import { useAuth } from "../../AuthContext/AuthContext";
 const Referencias = forwardRef((props, ref) => {
   const { userData, userUsuario } = useAuth();
   const { data } = props;
+  console.log("data", data);
   const { enqueueSnackbar } = useSnackbar();
   const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
   const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
@@ -223,13 +224,7 @@ const Referencias = forwardRef((props, ref) => {
     });
   };
 
-  const handleLimpiarModal = () => {
-    setFormDataModal({
-      contactoEfectivo: "",
-      estado: "",
-      observaciones: "",
-    });
-  };
+
 
   const handleAgregar = () => {
     // Validar campos
@@ -257,16 +252,28 @@ const Referencias = forwardRef((props, ref) => {
       enqueueSnackbar("Celular debe tener 10 dígitos", { variant: "error" });
       return;
     }
-    const celularExistente = tablaDatos.some((row) => row.celular === formData.celular);
+    if (data.Celular === formData.celular) {
+      enqueueSnackbar("El celular no puede ser igual al del cliente", { variant: "error" });
+      return;
+    }
+  
+    // Verificar si el celular ya existe en la tabla
+    const celularExistente = referencias.some((referencia) => referencia.Celular === formData.celular);
     if (celularExistente) {
       enqueueSnackbar("El celular ya existe", { variant: "error" });
       return;
     }
+  
+    // Si no existe el celular, continuar con la inserción
     const newReferencia = { ...formData };
+  
+    // Guardar la nueva referencia
     fecthSave(newReferencia);
-    setTablaDatos(prevDatos => [...prevDatos, newReferencia]);
-    const currentCantonId = formData.canton;
-    const currentProvinciaId = formData.provincia;
+  
+    // Actualizar la tabla localmente
+    setReferencias([...referencias, newReferencia]);
+
+    // Limpiar el formulario
     setFormData({
       parentesco: "",
       apellidoPaterno: "",
@@ -276,17 +283,14 @@ const Referencias = forwardRef((props, ref) => {
       canton: "",
       celular: "",
     });
-    if (currentProvinciaId) {
-      fetchDatoCanton(currentProvinciaId);
-    }
-
-    fetchInsertarDatos(); // Llamar a la función para insertar datos
-
-    //setTablaDatos([...tablaDatos, formData]);
-    enqueueSnackbar("Datos Guardados", { variant: "success" });
+  
+    // Insertar en la base de datos
+    fetchInsertarDatos(); 
+    SearchData(data.idCre_SolicitudWeb); 
     
-    //handleLimpiar();  Limpia el formulario para agregar otro registro
+    enqueueSnackbar("Datos Guardados", { variant: "success" });
   };
+  
 
   const fetchInsertarDatos = async () => {
     try {
@@ -329,11 +333,8 @@ const Referencias = forwardRef((props, ref) => {
           },
         }
       );
-
-      console.log("Datos de nacimiento guardados correctamente:", response.data);
-
       // Si todo sale bien
-      enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
+      enqueueSnackbar("Datos de Referencia guardados correctamente.", { variant: "success" });
     } catch (error) {
       // Si ocurre algún error
       enqueueSnackbar("Error al guardar los datos de nacimiento.", { variant: "error" });
@@ -343,66 +344,7 @@ const Referencias = forwardRef((props, ref) => {
 
 
 
-  // Obtener fecha y hora actual
-  const getCurrentDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
 
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; // Formato YYYY-MM-DD HH:mm:ss
-  };
-
-  const handleGuardarModal = () => {
-    if (formDataModal.contactoEfectivo.length < 5) {
-      enqueueSnackbar("Contacto Efectivo es requerido", { variant: "error" });
-      return;
-    }
-    if (!formDataModal.estado) {
-      enqueueSnackbar("Estado es requerido", { variant: "error" });
-      return;
-    }
-    if (formDataModal.observaciones.length < 10) {
-      enqueueSnackbar("Observaciones son requeridas (Mínimo 10 caracteres)", { variant: "error" });
-      return;
-    }
-    //objeto de datos que se enviará a la API
-    const datosParaEnviar = {
-      Fecha: getCurrentDateTime(), // Fecha 
-      Telefono: selectedRow.celular, // Celular 
-      Contacto: formDataModal.contactoEfectivo, // Contacto efectivo
-      idParentesco: Number(selectedRow.parentesco), // parentesco/referencia
-      idEstadoGestns: Number(formDataModal.estado), // estado
-      Observaciones: formDataModal.observaciones, // Observaciones
-      ClienteGarante: false, // Valor por defecto
-      Origen: 1, // Valor por defecto
-      idCre_Solicitud: 1, // Valor por defecto 
-      Estado: true, // Valor por defecto
-      NotasDelSistema: "Notas del sistema", // Valor por defecto
-      Usuario: "Usuario", // Valor por defecto
-      Indice: 1, // Valor por defecto
-      Web: 1, // Valor por defecto
-    };
-    console.log("Datos a enviar:", datosParaEnviar);
-
-
-    // Guardar el registro para mostrar los datos en la tabla del modal
-    const nuevoRegistro = {
-      fecha: datosParaEnviar.Fecha,
-      celularMod: datosParaEnviar.Telefono,
-      contactoEfectivo: datosParaEnviar.Contacto,
-      referencia: idToTextMap[selectedRow.parentesco],
-      estado: datosParaEnviar.idEstadoGestns,
-      observaciones: formDataModal.observaciones,
-    };
-
-    setTablaModal([...tablaModal, nuevoRegistro]);
-    enqueueSnackbar("Registro Guardado", { variant: "success" });
-    handleLimpiarModal();
-  };
 
   return (
     <div>

@@ -15,7 +15,10 @@ import {
   FaRoad, FaHouseUser, FaMapPin, FaRulerCombined, FaIndustry, FaSlidersH, FaStore
 } from "react-icons/fa";
 import { SelectField } from "../../Utils";
+import { LocationModal } from "../LocationModal";
+import { useAuth } from "../../AuthContext/AuthContext";
 const SeccionA = forwardRef((props, ref) => {
+    const { userData, userUsuario } = useAuth();
   const { data } = props;
   const { enqueueSnackbar } = useSnackbar();
   console.log("negocios", data);
@@ -33,7 +36,7 @@ const SeccionA = forwardRef((props, ref) => {
   const [calleSecundaria, setCalleSecundaria] = useState("");
   const [referenciaUbicacion, setReferenciaUbicacion] = useState("");
   const [actividadNegocio, setActividadNegocio] = useState("");
-
+    const [openLocationModal, setOpenLocationModal] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
@@ -80,6 +83,10 @@ const SeccionA = forwardRef((props, ref) => {
     }
   }, [formData.parroquia, enqueueSnackbar]);
 
+  const handleOpenModal = (data) => {
+		console.log(data);
+		setOpenLocationModal(prevState => !prevState);
+	}
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -314,7 +321,7 @@ const SeccionA = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     validateForm,
-		getFormData: () => formData,
+    getFormData: () => formData,
   }));
 
   return (
@@ -449,6 +456,20 @@ const SeccionA = forwardRef((props, ref) => {
             error={errors.barrio}
           />
         </div>
+        <div className="col-span-1">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+            Ubicacion Trabajo
+          </label>
+          <button
+            type="button"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
+            name="ubicacionDomicilio"
+            onClick={() => handleOpenModal('ubicacionDomicilio')}
+          >
+            Ubicacion Trabajo
+          </button>
+        </div>
 
 
 
@@ -548,10 +569,6 @@ const SeccionA = forwardRef((props, ref) => {
 
         {/* Opciones */}
         <div className="lg:col-span-2 flex flex-col lg:flex-row lg:items-center lg:space-x-4 space-y-2 lg:space-y-0">
-          <label className="text-xs font-medium flex items-center">
-            <FaSlidersH className="mr-2 text-primaryBlue" />
-            Opciones:
-          </label>
           <label className="inline-flex items-center">
             <input type="checkbox" className="mr-2" />
             Afiliado Tributario
@@ -562,6 +579,16 @@ const SeccionA = forwardRef((props, ref) => {
           </label>
         </div>
       </div>
+        <LocationModal
+              isOpen={() => handleOpenModal()}
+              openLocationModal={openLocationModal}
+              locationType={null}
+              locationData={null}
+              onLocationChange={null}
+              userSolicitudData={data}
+              tipo={2}
+              userData={userData}
+            />
     </div>
   )
 });

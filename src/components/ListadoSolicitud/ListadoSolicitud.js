@@ -100,10 +100,11 @@ export function ListadoSolicitud() {
   const bodegas = data || []; // Safely access the bodegas data
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
-    { label: "Pendiente", value: 1 },
-    { label: "Aprobado", value: 2 },
-    { label: "Anulado", value: 3 },
-    { label: "Rechazado", value: 4 },
+    { label: "PRE-APROBADO", value: 1 },
+    { label: "APROBADO", value: 2 },
+    { label: "ANULADO", value: 3 },
+    { label: "RECHAZADO", value: 4 },
+    { label: "NO APLICA", value: 5 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -386,21 +387,24 @@ export function ListadoSolicitud() {
                   ?.descripcion || "CLIENTE NO APLICA",
               estado:
                 item.Estado === 1
-                  ? "PENDIENTE"
+                  ? "PRE-APROBADO"
                   : item.Estado === 2
                     ? "APROBADO"
                     : item.Estado === 3
                       ? "ANULADO"
                       : item.Estado === 4
                         ? "RECHAZADO"
-                        : "Desconocido",
+                        : item.Estado === 5
+                          ? "NO APLICA"
+                          : "Desconocido",
               imagen: item.Foto,
+              Estado: item.Estado,
               celular: item.Celular,
               email: item.Email,
               fecha: item.Fecha,
               afiliado: item.bAfiliado ? "Sí" : "No",
               tieneRuc: item.bTieneRuc ? "Sí" : "No",
-              tipoCliente: tipoClienteMap[item.idTipoCliente] || "Desconocido",
+              tipoCliente: tipoClienteMap[item.idTipoCliente] || "NO APLICA",
               idEstadoVerificacionDocumental:
                 item.idEstadoVerificacionDocumental,
               idEstadoVerificacionSolicitud: item.idEstadoVerificacionSolicitud,
@@ -535,6 +539,8 @@ export function ListadoSolicitud() {
     setUserSolicitudData(data);
     setOpenVerificacionModal(prevState => !prevState);
   }
+
+  console.log("userSolicitudData", datos);
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
@@ -690,7 +696,7 @@ export function ListadoSolicitud() {
                       <span>
                         <IconButton
                           onClick={() => handlesolicitud(data)}
-                          disabled={data.idEstadoVerificacionSolicitud === 10}
+                          disabled={data.Estado === 5}
                         >
                           {getSolicitudIconByEstado(data.idEstadoVerificacionDocumental)}
                         </IconButton>
@@ -721,9 +727,7 @@ export function ListadoSolicitud() {
                         <IconButton
                           onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
                           disabled={
-                            data.idEstadoVerificacionDocumental === 2 ||
-                            data.idEstadoVerificacionDocumental === 4 ||
-                            data.idEstadoVerificacionDocumental === 5
+                            data.Estado === 5 || data.idEstadoVerificacionDocumental === 2
                           }
                         >
                           {getIconByEstado(data.idEstadoVerificacionDocumental)}
@@ -874,16 +878,16 @@ export function ListadoSolicitud() {
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
                       className={`ml-2 font-semibold ${selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
-                            ? "text-yellow-500"
-                            : selectedRow.estado === "anulado"
-                              ? "text-gray-500"
-                              : selectedRow.estado === "aprobado"
-                                ? "text-blue-500"
-                                : selectedRow.estado === "rechazado"
-                                  ? "text-red-500"
-                                  : "text-gray-700"
+                        ? "text-green-500"
+                        : selectedRow.estado === "pendiente"
+                          ? "text-yellow-500"
+                          : selectedRow.estado === "anulado"
+                            ? "text-gray-500"
+                            : selectedRow.estado === "aprobado"
+                              ? "text-blue-500"
+                              : selectedRow.estado === "rechazado"
+                                ? "text-red-500"
+                                : "text-gray-700"
                         }`}
                     >
                       {selectedRow.estado}

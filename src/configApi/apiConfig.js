@@ -124,5 +124,6 @@ export const APIURL = {
 
   get_ingresoCobrador: () => `${API_BASE_URL}ingreso-cobrador`,
   post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
-
+  getCoordenadasprefacturaPorId : (id,Tipo) => `${API_BASE_URL}coordenadasprefactura/find/${id}/${Tipo}`,
+  get_cre_referenciasclientesweb_id_all: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/count/${id}`,
 };
