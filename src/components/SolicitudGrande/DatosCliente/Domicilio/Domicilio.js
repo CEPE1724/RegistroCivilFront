@@ -19,7 +19,8 @@ const Domicilio = forwardRef((props, ref) => {
      const { userData, userUsuario } = useAuth();
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
-    console.log('data', userData);
+    console.log('userData', userData);
+    console.log('data', data);
     const [formErrors, setFormErrors] = useState({});
     const [provincia, setProvincia] = useState([]);
     const [cantones, setCantones] = useState([]);
@@ -140,7 +141,37 @@ const Domicilio = forwardRef((props, ref) => {
     };
 
     const handleOpenModal = (data) => {
-        console.log(data);
+        // console.log(data);
+		const camposRequeridos = [
+			'idProvinciaDomicilio',
+			'idCantonDomicilio',
+			'idParroquiaDomicilio',
+			'idBarrioDomicilio',
+			'CallePrincipal',
+			'NumeroCasa',
+			'CalleSecundaria',
+			'ReferenciaUbicacion',
+			'Celular',
+			'idTipoVivienda',
+			'idCre_Tiempo'
+		];
+	
+		// Validaciones condicionales
+		if (data.idTipoVivienda == 1) {
+			camposRequeridos.push('NombreArrendador', 'TelefonoArrendador', 'CelularArrendador');
+		}
+		if (data.idTipoVivienda == 3 || data.idTipoVivienda == 4) {
+			camposRequeridos.push('idInmueble', 'idCantonInmueble', 'ValorInmmueble');
+		}
+	
+		const camposInvalidos = camposRequeridos.filter(
+			(campo) => data[campo] === null || data[campo] === undefined || data[campo] === '' || data[campo] === 0
+		);
+	
+		if (camposInvalidos.length > 0) {
+			enqueueSnackbar("Para seleccionar la ubicación, primero debes guardar los datos del domicilio.", { variant: 'warning' });
+			return;
+		}
         setOpenLocationModal(prevState => !prevState);
     }
     console.log('vivienda', formData.tipoVivienda);

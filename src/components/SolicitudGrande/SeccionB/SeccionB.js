@@ -143,6 +143,42 @@ const SeccionB = forwardRef((props, ref) => {
 
 	const handleOpenModal = (data) => {
 		console.log(data);
+		
+		const camposRequeridos = [
+			"NombreEmpresa",
+			"idTipoEmpresa",
+			"FechaIngresoEmpresa",
+			"IngresosTrabajo",
+			"EgresosTrabajo",
+			"idTipoContrato",
+			"idTipoSueldo",
+			"Departaento",
+			"idCargo",
+			"DiaPago",
+			"idProvinciaTrabajo",
+			"idCantonTrabajo",
+			"idParroquiaTrabajo",
+			"idBarrioTrabajo",
+			"CallePrincipalTrabajo",
+			"NumeroCasaTrabajo",
+			"CalleSecundariaTrabajo",
+			"ReferenciaUbicacionTrabajo",
+		];
+
+		const faltantes = camposRequeridos.filter((campo) => {
+			const valor = data?.[campo];
+			return valor === undefined || valor === null || valor === "" || valor === 0;
+		});
+	
+		if (faltantes.length > 0) {
+			enqueueSnackbar(
+				"Por favor, guarda correctamente todos los datos antes de seleccionar la ubicación del trabajo.",
+				{ variant: "warning" }
+			);
+			return;
+		}
+	
+	
 		setOpenLocationModal(prevState => !prevState);
 	}
 	// Función de verificación para el teléfono o celular
