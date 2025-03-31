@@ -20,8 +20,6 @@ export function LocationModal({
   tipo,
   userData
 }) {
-  console.log("userSolicitudData", userSolicitudData);
-  console.log("userData", userData);
   const defaultLocation = {
     address: "",
     latitude: "",
@@ -167,8 +165,8 @@ export function LocationModal({
   };
 
   const handleGetCurrentLocation = async () => {
-    const consent = window.confirm("¿Desea compartir su ubicación?");
-    if (!consent) return;
+    // const consent = window.confirm("¿Desea compartir su ubicación?");
+    // if (!consent) return;
 
     if (!navigator.geolocation) {
       return showSnackbar(
@@ -201,7 +199,7 @@ export function LocationModal({
     }
   };
 
-  const onMapClick = (event) => {
+  const onMapClick = async (event) => {
     const newLat = event.latLng.lat();
     const newLng = event.latLng.lng();
     setLocalLocation((prev) => ({
@@ -214,6 +212,20 @@ export function LocationModal({
     setErrors((prev) => ({ ...prev, latitude: latError, longitude: lngError }));
     if (latError) showSnackbar(latError, "error");
     if (lngError) showSnackbar(lngError, "error");
+
+	try {
+		const { data } = await axios.get(
+		  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${newLat},${newLng}&key=${googleMapsApiKey}`
+		);
+		if (data.results && data.results.length > 0) {
+		  setLocalLocation((prev) => ({
+			...prev,
+			address: data.results[0].formatted_address,
+		  }));
+		}
+	  } catch (error) {
+		console.error("Error obteniendo dirección desde coordenadas:", error);
+	  }
   };
 
   const handleAutocompleteLoad = (autocomplete) => {
@@ -300,19 +312,22 @@ export function LocationModal({
     if (!uploadedUrls) return;
 
     const payload = {
-      id: userSolicitudData.idCre_SolicitudWeb,
-      cedula: userSolicitudData.Cedula,
-      latitud: parseFloat(localLocation.latitude),
-      longitud: parseFloat(localLocation.longitude),
-      direccion: localLocation.address,
-      ip: "192.168.2.183",
-      UrlImagen: uploadedUrls,
-      Tipo: tipo,
-      Usuario: userData.Nombre,
-      web:1,
-    };
+		id: userSolicitudData.idCre_SolicitudWeb,
+		cedula: userSolicitudData.Cedula,
+		latitud: parseFloat(localLocation.latitude),
+		longitud: parseFloat(localLocation.longitude),
+		direccion: localLocation.address,
+		ip: "192.168.2.183",
+		UrlImagen: uploadedUrls,
+		Tipo: tipo,
+		Usuario: userData.Nombre,
+		web:1,
+	  };
 
-    console.log("Payload para guardar ubicación:", payload);
+	console.log({
+		userSolicitudData,
+		payload
+	});
 
     try {
       await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);
@@ -445,6 +460,7 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="latitude"
+			  disabled
               value={localLocation.latitude}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -462,6 +478,7 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="longitude"
+			  disabled
               value={localLocation.longitude}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -503,6 +520,7 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
               type="text"
               name="address"
+			  disabled
               value={localLocation.address}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -567,5 +585,3 @@ export function LocationModal({
     </div>
   );
 }
-
-

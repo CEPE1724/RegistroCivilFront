@@ -85,6 +85,33 @@ const SeccionA = forwardRef((props, ref) => {
 
   const handleOpenModal = (data) => {
 		console.log(data);
+		
+		const camposRequeridos = [
+			'NombreNegocio',
+			'idCre_TiempoNegocio',
+			'MetrosCuadrados',
+			'IngresosNegosio',
+			'EgresosNegocio',
+			'idProvinciaNegocio',
+			'idCantonNegocio',
+			'idParroquiaNegocio',
+			'idBarrioNegocio',
+			'CallePrincipalNegocio',
+			'NumeroCasaNegocio',
+			'CalleSecundariaNegocio',
+			'ReferenciaUbicacionNegocio',
+			'ActividadEconomicaNegocio'
+		  ];
+
+		  const camposInvalidos = camposRequeridos.filter(
+			(campo) => data[campo] === null || data[campo] === undefined || data[campo] === '' || data[campo] === 0
+		  );
+
+		  if (camposInvalidos.length > 0) {
+			enqueueSnackbar("Para seleccionar la ubicación, primero debes guardar correctamente los datos del negocio.", { variant: 'warning' });
+			return;
+		  }
+
 		setOpenLocationModal(prevState => !prevState);
 	}
 
