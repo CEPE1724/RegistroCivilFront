@@ -1,11 +1,15 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+
+
+=======
+const API_BASE_URL = "http://192.168.2.246:3025/api/v1/";
 
 
 
 
-const SOCKET_BASE_URL = "http://192.168.2.167:3008";
+
+const SOCKET_BASE_URL = "http://192.168.2.246:3025";
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {
@@ -65,6 +69,7 @@ export const APIURL = {
 	  get_cre_CiudadInmueble : () => `${API_BASE_URL}cre-ciudadinmueble`,
 	  get_cre_tipoVivienda : () => `${API_BASE_URL}cre-tipovivienda`,
 	  get_cre_tiempoVivienda : () => `${API_BASE_URL}cre-tiempovivienda`,
+    getNombreTipoConsulta : (id) => `${API_BASE_URL}compraencuesta/tipo/${id}`,
 
    post_creVerificacionTelefonica : () => `${API_BASE_URL}creverificaciontelefonica`,
    post_documentos : () => `${API_BASE_URL}documentos-solicitud`,
@@ -112,6 +117,7 @@ export const APIURL = {
   update_soliciutd_telefonica:(id, estado) => `${API_BASE_URL}cre-solicitud-web/updatetelefonica/${id}/${estado}`,
   update_solicitud:(id) => `${API_BASE_URL}cre-solicitud-web/updatetelefonicaEstados/${id}`,
 
+  getIdsTerrenas: (id) => `${API_BASE_URL}clientes-verificacion-terrena/${id}`,
 
 
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
@@ -130,4 +136,6 @@ export const APIURL = {
   post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
   getCoordenadasprefacturaPorId : (id,Tipo) => `${API_BASE_URL}coordenadasprefactura/find/${id}/${Tipo}`,
   get_cre_referenciasclientesweb_id_all: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/count/${id}`,
+
+
 };

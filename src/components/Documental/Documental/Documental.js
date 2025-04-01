@@ -55,9 +55,37 @@ export function Documental({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observaciones, setObservaciones] = useState([]);
 
+  const patchSolicitud = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          idEstadoVerificacionSolicitud: 10,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+
+
   const handleConfirm = async () => {
     setIsModalOpen(false); // Cierra el modal
-    patchsolicitudWeb(); // Llamada extra si la necesitas
+    patchsolicitudWeb(); 
+    patchSolicitud(clientInfo.id)// aqui llamo a la api que cambia el estado de idverificacion solicitud a 10
 
     if (showOnlyCorrections) {
       try {
@@ -195,6 +223,9 @@ export function Documental({
       9: "Acta",
       10: "Consentimiento",
       11: "Autorización",
+      12: "Servicio Basico",
+      13: "Foto del Cliente",
+      14: "Croquis"
     };
     return documentoIds[id] || null;
   };
@@ -269,7 +300,7 @@ export function Documental({
       return (completedCorrections / totalCorrections) * 100;
     } else {
       // Modo Normal: Progreso basado en los 11 campos totales
-      const totalFields = 11;
+      const totalFields = 14;
       const completedFieldsCount = completedFields2.length;
 
       return (completedFieldsCount / totalFields) * 100;
@@ -485,6 +516,9 @@ export function Documental({
       9: "Acta",
       10: "Consentimiento",
       11: "Autorización",
+      12: "Servicio Basico",
+      13: "Foto del Cliente",
+      14: "Croquis"
     };
 
     // Buscamos la clave (número) correspondiente al nombre
@@ -607,14 +641,18 @@ export function Documental({
         "Buro Credito": 1,
         "Copia De Cedula": 2,
         "Contrato de Compra": 3,
-        Declaracion: 4,
+        "Declaracion": 4,
         "Pagare a la Orden": 5,
         "Tabla de amortizacion": 6,
         "Gastos de cobranza": 7,
         "Compromiso Lugar de pago": 8,
-        Acta: 9,
-        Consentimiento: 10,
-        Autorización: 11,
+        "Acta": 9,
+        "Consentimiento": 10,
+        "Autorización": 11,
+        "Servicio Basico": 12,
+        "Foto del Cliente": 13,
+        "Croquis": 14
+        
       };
 
       const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
@@ -634,7 +672,7 @@ export function Documental({
         // Crear el payload con los datos para la API
         const payload = {
           idCre_SolicitudWeb: clientInfo.id,
-          idTipoDocumentoWEB: idTipoDocumentoWEB, // Cambié a 2, ya que en el ejemplo de Postman usas 2
+          idTipoDocumentoWEB: idTipoDocumentoWEB, // C
           RutaDocumento: urlArchivo, // URL del archivo subido
           Observacion: observacion[activeTab], // Observación recibida
           Usuario: userData.Nombre,
@@ -711,6 +749,9 @@ export function Documental({
     "Acta",
     "Consentimiento",
     "Autorización",
+    "Servicio Basico",
+    "Foto del Cliente",
+    "Croquis"
   ];
 
   const completedFields = menuItems.filter(
