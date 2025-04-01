@@ -1,6 +1,10 @@
 import { get } from "react-hook-form";
 
+
+
+=======
 const API_BASE_URL = "http://192.168.2.246:3025/api/v1/";
+
 
 
 
@@ -113,6 +117,7 @@ export const APIURL = {
   update_soliciutd_telefonica:(id, estado) => `${API_BASE_URL}cre-solicitud-web/updatetelefonica/${id}/${estado}`,
   update_solicitud:(id) => `${API_BASE_URL}cre-solicitud-web/updatetelefonicaEstados/${id}`,
 
+  getIdsTerrenas: (id) => `${API_BASE_URL}clientes-verificacion-terrena/${id}`,
 
 
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
@@ -131,4 +136,6 @@ export const APIURL = {
   post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
   getCoordenadasprefacturaPorId : (id,Tipo) => `${API_BASE_URL}coordenadasprefactura/find/${id}/${Tipo}`,
   get_cre_referenciasclientesweb_id_all: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/count/${id}`,
+
+
 };

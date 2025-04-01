@@ -3,7 +3,13 @@ import axios from "axios";
 import { APIURL } from "../../configApi/apiConfig";
 import { useSnackbar } from "notistack";
 
-export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal, userSolicitudData, userData }) {
+export default function VerificacionTerrenaModal({
+  isOpen,           // Booleano: ¿modal abierto?
+  onClose,          // Función para cerrar el modal
+  userSolicitudData,
+  userData,
+  tipoSeleccionado
+}) {
   const { enqueueSnackbar } = useSnackbar();
 
   const [verificador, setVerificador] = useState("");
@@ -11,6 +17,13 @@ export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal
   const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
 
   const isFormValid = tipoVerificacion && verificador;
+
+  useEffect(() => {
+    if (isOpen) {
+      setTipoVerificacion(tipoSeleccionado);
+      setVerificador("");
+    }
+  }, [isOpen, tipoSeleccionado]);
 
   const handleTipoVerificacion = (tipo) => {
     setTipoVerificacion((prev) => (prev === tipo ? null : tipo));
@@ -23,7 +36,7 @@ export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal
 
   const handleCancelar = () => {
     resetForm();
-    isOpen(); // cerrar modal
+    onClose(); // Cierra el modal
   };
 
   const handleAceptar = async () => {
@@ -38,10 +51,10 @@ export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal
     };
 
     try {
-      const response = await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
+      await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
       enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
       resetForm();
-      isOpen(); // cerrar modal
+      onClose(); // Cierra el modal
     } catch (error) {
       console.error("❌ Error al enviar verificación:", error);
       enqueueSnackbar("Error al registrar la verificación", { variant: "error" });
@@ -61,32 +74,43 @@ export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal
       }
     };
 
-    if (openVerificacionModal) fetchVerificadores();
-  }, [openVerificacionModal, enqueueSnackbar]);
+    if (isOpen) fetchVerificadores();
+  }, [isOpen, enqueueSnackbar]);
 
-  if (!openVerificacionModal) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-6">
+        
+        {/* Número de solicitud destacado */}
+        <div className="bg-gray-100 p-3 rounded-lg shadow-md text-center">
+          <h3 className="text-gray-700 text-sm">Número de Solicitud</h3>
+          <p className="text-xl font-bold text-gray-900">
+            {userSolicitudData?.NumeroSolicitud || "N/A"}
+          </p>
+        </div>
+
         <h2 className="text-xl font-semibold text-center text-red-600">
-          Selección el tipo de Verificación ?
+          Seleccione el tipo de Verificación
         </h2>
 
         <div className="flex justify-center gap-8">
-          <label className="flex items-center gap-2 text-sm">
+          <label className={`flex items-center gap-2 text-sm ${tipoVerificacion === "trabajo" ? "opacity-50" : ""}`}>
             <input
               type="checkbox"
               checked={tipoVerificacion === "domicilio"}
               onChange={() => handleTipoVerificacion("domicilio")}
+              disabled={tipoVerificacion === "trabajo"}
             />
             Domicilio
           </label>
-          <label className="flex items-center gap-2 text-sm">
+          <label className={`flex items-center gap-2 text-sm ${tipoVerificacion === "domicilio" ? "opacity-50" : ""}`}>
             <input
               type="checkbox"
               checked={tipoVerificacion === "trabajo"}
               onChange={() => handleTipoVerificacion("trabajo")}
+              disabled={tipoVerificacion === "domicilio"}
             />
             Trabajo
           </label>
@@ -125,6 +149,7 @@ export default function VerificacionTerrenaModal({ isOpen, openVerificacionModal
             Aceptar
           </button>
         </div>
+
       </div>
     </div>
   );
