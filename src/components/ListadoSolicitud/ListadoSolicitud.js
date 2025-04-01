@@ -70,6 +70,8 @@ import { Popover, Box, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert"; // Icono de tres puntos verticales
 import DocumentStatusPopover from "./DocumentStatusPopover";
 import Domicilio from "../SolicitudGrande/DatosCliente/Domicilio/Domicilio";
+import DomicilioModal from "./DomicilioModal";
+import TrabajoModal from "./TrabajoModal";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const [bodegass, setBodegass] = useState([]);
@@ -87,13 +89,26 @@ export function ListadoSolicitud() {
   const [searchDateTo, setSearchDateTo] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
+  const [closeVerificacionModal, setCloseVerificacionModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
+  const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] = useState(null);
 
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [fechaInicio, setFechaInicio] = useState(today);
   const [fechaFin, setFechaFin] = useState(today);
+
+  const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
+  const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
+
+  
+
+  const [isTrabajoModalOpen, setTrabajoModalOpen] = useState(false);
+  const handleCloseTrabajoModal = () => setTrabajoModalOpen(false);
+
+  const [domicilioData, setDomicilioData] = useState([]);
+  const [trabajoData, setTrabajoData] = useState([]);
 
   const navigate = useNavigate();
   const { userData } = useAuth();
@@ -182,6 +197,47 @@ export function ListadoSolicitud() {
       console.error("Error fetching tiemposolicitudesweb data:", error);
     }
   };
+
+
+
+  const handleOpenModalVerificacion = async (data, tipo) => {
+    try {
+      console.log("data", data);
+      const url = APIURL.getIdsTerrenas(data.id);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status !== 200) {
+        throw new Error("Error al obtener los IDs terrenas");
+      }
+
+      const idsTerrenas = response.data;
+      console.log("idsTerrenas", response.data);
+
+      if (!idsTerrenas || idsTerrenas.length === 0) {
+        console.log("entra aquiiiiiiiiiii")
+        // Si no hay datos, abre el modal de verificación terrena
+        setUserSolicitudData(data);
+        setTipoVerificacionSeleccionada(tipo);
+        setOpenVerificacionModal(true);
+
+      } else {
+        // Si hay datos, determina qué modal abrir en función del tipo y los datos recibidos
+        if (tipo === "domicilio") {
+          setDomicilioData(idsTerrenas); // Asigna los datos necesarios para el modal de domicilio
+          setDomicilioModalOpen(true);
+        } else if (tipo === "trabajo") {
+          setTrabajoData(idsTerrenas); // Asigna los datos necesarios para el modal de trabajo
+          setTrabajoModalOpen(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching data for verificación terrena:", error);
+    }
+  };
+  
 
   // Obtener bodegas
   const fetchBodega = async () => {
@@ -536,10 +592,7 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
-  const handleOpenModalVerificacion = (data) => {
-    setUserSolicitudData(data);
-    setOpenVerificacionModal((prevState) => !prevState);
-  };
+ 
 
   console.log("userSolicitudData", datos);
   return (
@@ -848,7 +901,7 @@ export function ListadoSolicitud() {
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handleOpenModalVerificacion(data)} // Aquí va la lógica para manejar el clic
+                          onClick={() => handleOpenModalVerificacion(data , "domicilio")} // Aquí va la lógica para manejar el clic
                           disabled={
                             verificacionSolicitud(data) ||
                             data.Domicilio === false
@@ -892,12 +945,12 @@ export function ListadoSolicitud() {
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handleOpenModalVerificacion(data)} // Aquí va la lógica para manejar el clic
+                          onClick={() => handleOpenModalVerificacion(data , "trabajo")  } // Aquí va la lógica para manejar el clic
                           disabled={
                             verificacionSolicitud(data)||
                             data.Laboral === false
                           }
-                          sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
+                          sx={{ opacity: estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
 
                         >
                           <StoreIcon sx={{ color: "gray" }} />
@@ -1072,12 +1125,33 @@ export function ListadoSolicitud() {
         onLocationChange={null}
         userSolicitudData={userSolicitudData}
       />
-      <VerificacionTerrenaModal
+      
+      
+     {/* <VerificacionTerrenaModal
         isOpen={() => handleOpenModalVerificacion()}
         openVerificacionModal={openVerificacionModal}
         userSolicitudData={userSolicitudData}
         userData={userData}
-      />
+        tipoSeleccionado={tipoVerificacionSeleccionada} // Pasamos el tipo al modal
+
+      />*/}
+      <VerificacionTerrenaModal
+  isOpen={openVerificacionModal}
+  onClose={() => setOpenVerificacionModal(false)}
+  userSolicitudData={userSolicitudData}
+  userData={userData}
+  tipoSeleccionado={tipoVerificacionSeleccionada}
+/>
+
+
+
+
+
+
+      <DomicilioModal openModal={isDomicilioModalOpen} closeModal={handleCloseDomicilioModal} />
+      <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal}/>
+
     </div>
+
   );
 }
