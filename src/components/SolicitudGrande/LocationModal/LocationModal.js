@@ -24,7 +24,6 @@ export function LocationModal({
     address: "",
     latitude: "",
     longitude: "",
-    files: "",
   };
   const initialLocation = locationData || defaultLocation;
 
@@ -33,14 +32,13 @@ export function LocationModal({
     address: "",
     latitude: "",
     longitude: "",
-    files: "",
   });
   const [snackbar, setSnackbar] = useState({
     message: "",
     type: "info",
     visible: false,
   });
-  const [files, setFiles] = useState([]);
+  
 
   const autocompleteRef = useRef(null);
 
@@ -57,8 +55,7 @@ export function LocationModal({
 
   useEffect(() => {
     setLocalLocation(initialLocation);
-    setErrors({ address: "", latitude: "", longitude: "", files: "" });
-    setFiles([]);
+    setErrors({ address: "", latitude: "", longitude: ""});
   }, [isOpen]);
 
   const validateField = (name, value) => {
@@ -91,16 +88,6 @@ export function LocationModal({
           error = "La longitud debe pertenecer a Ecuador (entre -81 y -75).";
         }
       }
-    } else if (name === "address") {
-      if (value.trim() === "") {
-        error = "La dirección es obligatoria.";
-      } else if (!/^[\w\s\u00C0-\u017F,.\-+#/]+$/.test(value)) {
-        error = "La dirección contiene caracteres no permitidos.";
-      }
-    } else if (name === "files") {
-      if (files.length === 0) {
-        error = "Debe subir al menos tres archivos.";
-      }
     }
     return error;
   };
@@ -118,50 +105,6 @@ export function LocationModal({
     if (error) {
       showSnackbar(error, "error");
     }
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    const validExtensions = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-
-    const validFiles = [];
-    let hasInvalid = false;
-
-    selectedFiles.forEach((file) => {
-      if (
-        file.type.startsWith("image/") ||
-        validExtensions.includes(file.type)
-      ) {
-        validFiles.push(file);
-      } else {
-        hasInvalid = true;
-        showSnackbar(
-          `El archivo ${file.name} no es un formato permitido.`,
-          "error"
-        );
-      }
-    });
-
-    if (validFiles.length > 0) {
-      setFiles((prev) => [...prev, ...validFiles]);
-      setErrors((prev) => ({ ...prev, files: "" })); // Limpia error si hay válidos
-    }
-
-    if (validFiles.length === 0 && hasInvalid) {
-      setErrors((prev) => ({
-        ...prev,
-        files: "Debe subir al menos un archivo válido.",
-      }));
-    }
-  };
-
-  const handleRemoveFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-    showSnackbar("Archivo eliminado.", "info");
   };
 
   const handleGetCurrentLocation = async () => {
@@ -246,49 +189,11 @@ export function LocationModal({
     }));
   };
 
-  // Función de subida de archivos: llama al backend y retorna las URLs públicas
-  const uploadFiles = async () => {
-    if (!files || files.length === 0) {
-      showSnackbar("Debe subir al menos un archivo.", "error");
-      return null;
-    }
-    if (files.length < 3) {
-      showSnackbar("Debe subir al menos 3 archivos.", "error");
-      return null;
-    }
-    const uploadEndpoint = APIURL.postFileupload();
-    try {
-      const uploadResults = await Promise.all(
-        files.map(async (file) => {
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("almacen", userSolicitudData.almacen);
-          formData.append("cedula", userSolicitudData.cedula);
-          formData.append("numerosolicitud", userSolicitudData.NumeroSolicitud);
-          formData.append("Tipo", userSolicitudData.Tipo || "DEFAULT");
-          const res = await fetch(uploadEndpoint, {
-            method: "POST",
-            body: formData,
-          });
-          const data = await res.json();
-          if (!res.ok || !data.url) throw new Error("Upload failed");
-          return data.url;
-        })
-      );
-      return uploadResults;
-    } catch (error) {
-      console.error("Error al subir archivos:", error);
-      showSnackbar("Error al subir algunos archivos.", "error");
-      return null;
-    }
-  };
-
   const handleSave = async () => {
     const newErrors = {
       address: validateField("address", localLocation.address),
       latitude: validateField("latitude", localLocation.latitude),
       longitude: validateField("longitude", localLocation.longitude),
-      files: validateField("files", files.length),
     };
     setErrors(newErrors);
     const errorMessages = Object.values(newErrors)
@@ -299,18 +204,6 @@ export function LocationModal({
       return;
     }
 
-    if (files.length < 3) {
-      setErrors((prev) => ({
-        ...prev,
-        files: "Debe subir al menos 3 archivos.",
-      }));
-      showSnackbar("Debe subir al menos 3 archivos.", "error");
-      return;
-    }
-
-    const uploadedUrls = await uploadFiles();
-    if (!uploadedUrls) return;
-
     const payload = {
 		id: userSolicitudData.idCre_SolicitudWeb,
 		cedula: userSolicitudData.Cedula,
@@ -318,7 +211,6 @@ export function LocationModal({
 		longitud: parseFloat(localLocation.longitude),
 		direccion: localLocation.address,
 		ip: "192.168.2.183",
-		UrlImagen: uploadedUrls,
 		Tipo: tipo,
 		Usuario: userData.Nombre,
 		web:1,
@@ -492,26 +384,7 @@ export function LocationModal({
 
         {/* Campos de Dirección y Subir Archivos (alineados en dos columnas) */}
         <div className="mb-4 grid grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1 text-xs font-medium text-gray-700">
-              Subir archivos
-            </label>
-            <input
-              type="file"
-              name="files"
-              multiple
-              onChange={handleFileChange}
-              className={`w-full text-xs p-1 border rounded-md focus:outline-none focus:ring-1 ${
-                errors.files
-                  ? "border-red-500 focus:ring-red-500"
-                  : "border-gray-200 focus:ring-blue-500"
-              }`}
-              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            />
-            {errors.files && (
-              <p className="text-red-500 text-xs mt-1">{errors.files}</p>
-            )}
-          </div>
+          
           <div>
             <label className="block mb-1 text-xs font-medium text-gray-700">
               Dirección
@@ -531,31 +404,6 @@ export function LocationModal({
             )}
           </div>
         </div>
-
-        {/* Lista de archivos seleccionados */}
-        {files.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs font-medium text-gray-700">
-              Archivos seleccionados:
-            </p>
-            <ul className="list-disc list-inside text-xs text-gray-600">
-              {files.map((file, index) => (
-                <li key={index} className="flex items-center justify-evenly">
-                  <span>{file.name}</span>
-                  <button
-                    className="text-white bg-red-500 text-[14px] font-bold p-1 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    onClick={() =>
-                      setFiles(files.filter((_, i) => i !== index))
-                    }
-                    title="Eliminar archivo"
-                  >
-                    X
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         {/* Botones de acción */}
         <div className="flex justify-end gap-3">

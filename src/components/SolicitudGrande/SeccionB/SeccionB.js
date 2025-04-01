@@ -141,46 +141,51 @@ const SeccionB = forwardRef((props, ref) => {
 		}
 	};
 
-	const handleOpenModal = (data) => {
-		console.log(data);
-		
-		const camposRequeridos = [
-			"NombreEmpresa",
-			"idTipoEmpresa",
-			"FechaIngresoEmpresa",
-			"IngresosTrabajo",
-			"EgresosTrabajo",
-			"idTipoContrato",
-			"idTipoSueldo",
-			"Departaento",
-			"idCargo",
-			"DiaPago",
-			"idProvinciaTrabajo",
-			"idCantonTrabajo",
-			"idParroquiaTrabajo",
-			"idBarrioTrabajo",
-			"CallePrincipalTrabajo",
-			"NumeroCasaTrabajo",
-			"CalleSecundariaTrabajo",
-			"ReferenciaUbicacionTrabajo",
+	const handleOpenModal = () => {
+		const camposBase = [
+			'NombreEmpresa',
+			'idTipoEmpresa',
+			'FechaIngresoEmpresa',
+			'IngresosTrabajo',
+			'EgresosTrabajo',
+			'idTipoContrato',
+			'idTipoSueldo',
+			'Departaento',
+			'idCargo',
+			'DiaPago',
+			'idProvinciaTrabajo',
+			'idCantonTrabajo',
+			'idParroquiaTrabajo',
+			'idBarrioTrabajo',
+			'CallePrincipalTrabajo',
+			'NumeroCasaTrabajo',
+			'CalleSecundariaTrabajo',
+			'ReferenciaUbicacionTrabajo',
 		];
-
-		const faltantes = camposRequeridos.filter((campo) => {
-			const valor = data?.[campo];
-			return valor === undefined || valor === null || valor === "" || valor === 0;
-		});
 	
-		if (faltantes.length > 0) {
-			enqueueSnackbar(
-				"Por favor, guarda correctamente todos los datos antes de seleccionar la ubicación del trabajo.",
-				{ variant: "warning" }
-			);
+		// Verificamos si los campos requeridos están guardados
+		const camposInvalidos = camposBase.filter(campo =>
+			data[campo] === null || data[campo] === undefined || data[campo] === '' || data[campo] === 0
+		);
+	
+		// Verificamos si los campos requeridos están llenados en el form
+		const camposNoLlenados = camposBase.filter(campo =>
+			formData[campo.replace('Trabajo', '')] === null ||
+			formData[campo.replace('Trabajo', '')] === undefined ||
+			formData[campo.replace('Trabajo', '')] === '' ||
+			formData[campo.replace('Trabajo', '')] === 0
+		);
+	
+		if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
+			enqueueSnackbar('Debes llenar y guardar todos los campos requeridos antes de abrir el mapa.', {
+				variant: 'warning',
+			});
 			return;
 		}
 	
+		setOpenLocationModal(prev => !prev);
+	};
 	
-		setOpenLocationModal(prevState => !prevState);
-	}
 	// Función de verificación para el teléfono o celular
 	const handleVerify = (fieldName) => {
 		console.log(`Verificando ${fieldName}: ${formData[fieldName]}`);
