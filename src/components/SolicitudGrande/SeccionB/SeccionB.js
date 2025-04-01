@@ -755,7 +755,7 @@ const SeccionB = forwardRef((props, ref) => {
 							value={formData.celular}
 							onChange={handleInputChange}
 							className="block w-full solcitudgrande-style"
-							readOnly={data.CelularTrabajo !== 0 && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
+							//readOnly={data.CelularTrabajo !== "" && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
 						/>
 
 					</div>
@@ -775,7 +775,7 @@ const SeccionB = forwardRef((props, ref) => {
 						value={formData.referenciaUbicacion}
 						onChange={handleInputChange}
 						className="block w-full solcitudgrande-style"
-						readOnly={data.ReferenciaUbicacionTrabajo !== 0 && data.ReferenciaUbicacionTrabajo !== null && data.ReferenciaUbicacionTrabajo !== undefined} // Deshabilitar el campo de referencia
+						//readOnly={data.ReferenciaUbicacionTrabajo !== 0 && data.ReferenciaUbicacionTrabajo !== null && data.ReferenciaUbicacionTrabajo !== undefined} // Deshabilitar el campo de referencia
 					/>
 					{errors.referenciaUbicacion && (
 						<span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>

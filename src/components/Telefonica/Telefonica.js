@@ -83,18 +83,16 @@ export function TelefonicaList({
 
   const EstadoMap = {
     0: "PENDIENTE",
-    1: "CONTESTADORA",
-    2: "OCUPADO",
-    3: "EQUIVOCADO",
-    4: "NO CONTACTO",
-    5: "CONTACTADO",
-    6: "AVERIADO",
-    7: "ASIGNADO",
+    11: "OK, TODO CONFIRMADO",
+    12: "NO CONTESTA",
+    13: "NÚMERO EQUIVOCADO",
+    14: "NO QUIERE SER REFERENCIA",
+    15: "MALAS REFERENCIAS",
   }
 
   const handleSubmit = async () => {
     const todosContactados = tablaDatos.filter(
-      (item) => item.idEstadoGestns === 5 // Suponiendo que "contactado" es un string o id del estado
+      (item) => item.idEstadoGestns === 10 // Suponiendo que "contactado" es un string o id del estado
     ).length;
 
     if (todosContactados >=2 ) {
@@ -129,8 +127,8 @@ export function TelefonicaList({
   const [idToTextMapEstado, setIdToTextMapEstado] = useState({}); //estado para mapear IDs a textos de api Estado
   const [datoParentesco, setDatoParentesco] = useState([]); //estado parentesco
   const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
-  const contactedDocs = tablaDatos.filter(doc => doc.idEstadoGestns === 5);
-
+  const contactedDocs = tablaDatos.filter(doc => doc.idEstadoGestns === 11);
+  const resultContactedDocs = contactedDocs.length >= 2 ? contactedDocs : [];
   useEffect(() => {
     if (clientInfo.id) {
       // Llamada a la API para obtener los datos
@@ -506,7 +504,7 @@ export function TelefonicaList({
                     </div>
                     
                   ))}
-                  {contactedDocs.length > 1 && (
+                  {resultContactedDocs.length >= 2 && (
                     <button onClick={handleSubmit} className=" px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
                       Validar
                     </button>
