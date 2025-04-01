@@ -84,40 +84,49 @@ const SeccionA = forwardRef((props, ref) => {
   }, [formData.parroquia, enqueueSnackbar]);
 
   const handleOpenModal = () => {
-		console.log(data);
-		
-		const camposRequeridos = [
-			'NombreNegocio',
-			'idCre_TiempoNegocio',
-			'MetrosCuadrados',
-			'IngresosNegosio',
-			'EgresosNegocio',
-			'idProvinciaNegocio',
-			'idCantonNegocio',
-			'idParroquiaNegocio',
-			'idBarrioNegocio',
-			'CallePrincipalNegocio',
-			'NumeroCasaNegocio',
-			'CalleSecundariaNegocio',
-			'ReferenciaUbicacionNegocio',
-			'ActividadEconomicaNegocio'
-		  ];
+	const camposBase = [
+		{ dataKey: 'NombreNegocio', formKey: 'nombreNegocio' },
+		{ dataKey: 'idCre_TiempoNegocio', formKey: 'tiempoNegocio' },
+		{ dataKey: 'MetrosCuadrados', formKey: 'metros' },
+		{ dataKey: 'IngresosNegosio', formKey: 'ingresos' },
+		{ dataKey: 'EgresosNegocio', formKey: 'gastos' },
+		{ dataKey: 'idProvinciaNegocio', formKey: 'provincia' },
+		{ dataKey: 'idCantonNegocio', formKey: 'canton' },
+		{ dataKey: 'idParroquiaNegocio', formKey: 'parroquia' },
+		{ dataKey: 'idBarrioNegocio', formKey: 'barrio' },
+		{ dataKey: 'CallePrincipalNegocio', formKey: 'callePrincipal' },
+		{ dataKey: 'NumeroCasaNegocio', formKey: 'numeroCasa' },
+		{ dataKey: 'CalleSecundariaNegocio', formKey: 'calleSecundaria' },
+		{ dataKey: 'ReferenciaUbicacionNegocio', formKey: 'referenciaUbicacion' },
+		{ dataKey: 'ActividadEconomicaNegocio', formKey: 'actividadNegocio' }
+	];
 
-		  const camposInvalidos = camposRequeridos.filter(
-			(campo) => data[campo] === null || data[campo] === undefined || data[campo] === '' || data[campo] === 0
-		  );
+	const camposInvalidos = camposBase.filter(
+		({ dataKey }) =>
+			data[dataKey] === null ||
+			data[dataKey] === undefined ||
+			data[dataKey] === '' ||
+			data[dataKey] === 0
+	);
 
-		  const camposNoLlenados = camposRequeridos.filter(campo =>
-			formData[campo] === null || formData[campo] === undefined || formData[campo] === '' || formData[campo] === 0
-		);
+	const camposNoLlenados = camposBase.filter(
+		({ formKey }) =>
+			formData[formKey] === null ||
+			formData[formKey] === undefined ||
+			formData[formKey] === '' ||
+			formData[formKey] === 0
+	);
 
-		  if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
-			enqueueSnackbar("Para seleccionar la ubicación, primero debes guardar correctamente los datos del negocio.", { variant: 'warning' });
-			return;
-		  }
-
-		setOpenLocationModal(prevState => !prevState);
+	if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
+		enqueueSnackbar("Para seleccionar la ubicación del negocio, primero debes llenar y guardar correctamente todos los campos requeridos.", {
+			variant: 'warning'
+		});
+		return;
 	}
+
+	setOpenLocationModal(prev => !prev);
+};
+
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
