@@ -140,40 +140,48 @@ const Domicilio = forwardRef((props, ref) => {
         }
     };
 
-    const handleOpenModal = (data) => {
-        // console.log(data);
-		const camposRequeridos = [
-			'idProvinciaDomicilio',
-			'idCantonDomicilio',
-			'idParroquiaDomicilio',
-			'idBarrioDomicilio',
-			'CallePrincipal',
-			'NumeroCasa',
-			'CalleSecundaria',
-			'ReferenciaUbicacion',
-			'Celular',
-			'idTipoVivienda',
-			'idCre_Tiempo'
+    const handleOpenModal = () => {
+		const camposBase = [
+			'provincia',
+			'canton',
+			'parroquia',
+			'barrio',
+			'callePrincipal',
+			'numeroCasa',
+			'calleSecundaria',
+			'referenciaUbicacion',
+			'celular',
+			'tipoVivienda',
+			'tiempoVivienda'
 		];
 	
-		// Validaciones condicionales
-		if (data.idTipoVivienda == 1) {
-			camposRequeridos.push('NombreArrendador', 'TelefonoArrendador', 'CelularArrendador');
-		}
-		if (data.idTipoVivienda == 3 || data.idTipoVivienda == 4) {
-			camposRequeridos.push('idInmueble', 'idCantonInmueble', 'ValorInmmueble');
+		// Campos condicionales
+		if (formData.tipoVivienda == 1) {
+			camposBase.push('nombreArrendador', 'telfArrendador', 'celularArrendador');
 		}
 	
-		const camposInvalidos = camposRequeridos.filter(
-			(campo) => data[campo] === null || data[campo] === undefined || data[campo] === '' || data[campo] === 0
+		if (formData.tipoVivienda == 3 || formData.tipoVivienda == 4) {
+			camposBase.push('inmueble', 'ciudadInmueble', 'valorInmueble');
+		}
+	
+		const camposInvalidos = camposBase.filter(
+			campo =>
+				formData[campo] === null ||
+				formData[campo] === undefined ||
+				formData[campo] === '' ||
+				formData[campo] === 0
 		);
 	
 		if (camposInvalidos.length > 0) {
-			enqueueSnackbar("Para seleccionar la ubicación, primero debes guardar los datos del domicilio.", { variant: 'warning' });
+			enqueueSnackbar("Para seleccionar la ubicación, primero debes completar y guardar correctamente los datos del domicilio.", {
+				variant: 'warning'
+			});
 			return;
 		}
-        setOpenLocationModal(prevState => !prevState);
-    }
+	
+		setOpenLocationModal(prev => !prev);
+	};
+	
     console.log('vivienda', formData.tipoVivienda);
 
     const fecthValidaDomicilio = async () => {
