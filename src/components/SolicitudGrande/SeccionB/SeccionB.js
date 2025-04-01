@@ -143,48 +143,50 @@ const SeccionB = forwardRef((props, ref) => {
 
 	const handleOpenModal = () => {
 		const camposBase = [
-			'NombreEmpresa',
-			'idTipoEmpresa',
-			'FechaIngresoEmpresa',
-			'IngresosTrabajo',
-			'EgresosTrabajo',
-			'idTipoContrato',
-			'idTipoSueldo',
-			'Departaento',
-			'idCargo',
-			'DiaPago',
-			'idProvinciaTrabajo',
-			'idCantonTrabajo',
-			'idParroquiaTrabajo',
-			'idBarrioTrabajo',
-			'CallePrincipalTrabajo',
-			'NumeroCasaTrabajo',
-			'CalleSecundariaTrabajo',
-			'ReferenciaUbicacionTrabajo',
+			{ dataKey: 'NombreEmpresa', formKey: 'empresa' },
+			{ dataKey: 'idTipoEmpresa', formKey: 'tipoEmpresa' },
+			{ dataKey: 'FechaIngresoEmpresa', formKey: 'fechaIngreso' },
+			{ dataKey: 'IngresosTrabajo', formKey: 'ingresos' },
+			{ dataKey: 'EgresosTrabajo', formKey: 'gastos' },
+			{ dataKey: 'idTipoContrato', formKey: 'tipoContrato' },
+			{ dataKey: 'idTipoSueldo', formKey: 'tipoSueldo' },
+			{ dataKey: 'Departaento', formKey: 'departamento' },
+			{ dataKey: 'idCargo', formKey: 'cargo' },
+			{ dataKey: 'DiaPago', formKey: 'diasPago' },
+			{ dataKey: 'idProvinciaTrabajo', formKey: 'provincia' },
+			{ dataKey: 'idCantonTrabajo', formKey: 'canton' },
+			{ dataKey: 'idParroquiaTrabajo', formKey: 'parroquia' },
+			{ dataKey: 'idBarrioTrabajo', formKey: 'barrio' },
+			{ dataKey: 'CallePrincipalTrabajo', formKey: 'callePrincipal' },
+			{ dataKey: 'NumeroCasaTrabajo', formKey: 'numeroCasa' },
+			{ dataKey: 'CalleSecundariaTrabajo', formKey: 'calleSecundaria' },
+			{ dataKey: 'ReferenciaUbicacionTrabajo', formKey: 'referenciaUbicacion' },
 		];
 	
-		// Verificamos si los campos requeridos están guardados
-		const camposInvalidos = camposBase.filter(campo =>
-			data[campo] === null || data[campo] === undefined || data[campo] === '' || data[campo] === 0
+		// Verifica que estén guardados (en data)
+		const camposInvalidos = camposBase.filter(
+			({ dataKey }) =>
+				data[dataKey] === null || data[dataKey] === undefined || data[dataKey] === '' || data[dataKey] === 0
 		);
 	
-		// Verificamos si los campos requeridos están llenados en el form
-		const camposNoLlenados = camposBase.filter(campo =>
-			formData[campo.replace('Trabajo', '')] === null ||
-			formData[campo.replace('Trabajo', '')] === undefined ||
-			formData[campo.replace('Trabajo', '')] === '' ||
-			formData[campo.replace('Trabajo', '')] === 0
+		// Verifica que estén llenos (en formData)
+		const camposNoLlenados = camposBase.filter(
+			({ formKey }) =>
+				formData[formKey] === null || formData[formKey] === undefined || formData[formKey] === '' || formData[formKey] === 0
 		);
 	
 		if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
-			enqueueSnackbar('Debes llenar y guardar todos los campos requeridos antes de abrir el mapa.', {
-				variant: 'warning',
-			});
+			enqueueSnackbar(
+				"Para seleccionar la ubicación del trabajo, primero debes llenar y guardar todos los campos requeridos.",
+				{ variant: "warning" }
+			);
 			return;
 		}
 	
 		setOpenLocationModal(prev => !prev);
 	};
+	
+	
 	
 	// Función de verificación para el teléfono o celular
 	const handleVerify = (fieldName) => {
