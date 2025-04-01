@@ -9,10 +9,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
 import { enqueueSnackbar } from "notistack";
-import {
-  FaListAlt, FaUser, FaBriefcase, FaMoneyBillWave, FaMoneyCheckAlt,
-  FaStarHalfAlt, FaCheckCircle, FaInfoCircle, FaCommentDots
-} from "react-icons/fa";
+import { FaListAlt, FaMoneyBillWave, FaMoneyCheckAlt,FaCommentDots } from "react-icons/fa";
 
 
 // Definir el componente con forwardRef correctamente
@@ -20,24 +17,10 @@ export const FactoresCredito = forwardRef((props, ref) => {
   const { data } = props;
   console.log('factores de credito', data);
   const [tipo, setTipo] = useState([]);
-  const [calificacion, setCalificacion] = useState([]);
-  const [estado, setEstado] = useState([]);
-  const [estadoSolicitud, setEstadoSolicitud] = useState([]);
-  const [idEstado, setIdEstado] = useState("");
   useEffect(() => {
     fetchTipoCliente();
-    fetchCalificacion();
-    fetchEstado();
   }, []);
 
-  useEffect(() => {
-    if (idEstado) {
-      setEstadoSolicitud([]); // Limpiar estado antes de realizar la solicitud
-      fetchEstadoSolicitud(idEstado); // Hacer la solicitud con el nuevo idEstado
-    } else {
-      setEstadoSolicitud([]); // Si no hay idEstado, limpiar el estado
-    }
-  }, [idEstado]);
   const fetchTipoCliente = async () => {
     try {
       const response = await axios.get(APIURL.getTipoCliente());
@@ -60,70 +43,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
     }
   };
 
-  const fetchEstado = async () => {
-    try {
-      const response = await axios.get(APIURL.getEstado());
-      if (response.status === 200) {
-        setEstado(
-          response.data.map((item) => ({
-            value: item.idEstado,
-            label: item.Estado,
-          }))
-        );
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      console.error("Error al obtener el estado:", error);
-      enqueueSnackbar("No se pudo cargar los estados", { variant: "error" });
-      // setEstado([]);
-    }
-  };
-
-  const fetchEstadoSolicitud = async (idEstado) => {
-    try {
-      const response = await axios.get(APIURL.getEstadoSolicitud(idEstado));
-      if (response.status === 200) {
-        setEstadoSolicitud(
-          response.data.map((item) => ({
-            value: item.idNegadoPendiente,
-            label: item.Nombre,
-          }))
-        );
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      console.error("Error al obtener el estado de la solicitud:", error);
-      enqueueSnackbar("No se pudo cargar los estados de la solicitud", {
-        variant: "error",
-      });
-      // setEstadoSolicitud([]);
-    }
-  };
-
-  const fetchCalificacion = async () => {
-    try {
-      const response = await axios.get(APIURL.getCalificacion());
-      if (response.status === 200) {
-        setCalificacion(
-          response.data.map((item) => ({
-            value: item.idTipoCalificacion,
-            label: item.Nombre,
-          }))
-        );
-      } else {
-        throw new Error("Error en la respuesta del servidor");
-      }
-    } catch (error) {
-      console.error("Error al obtener la calificación:", error);
-      enqueueSnackbar("No se pudo cargar las calificaciones", {
-        variant: "error",
-      });
-      // setCalificacion([]);
-    }
-  };
-
   const [formData, setFormData] = useState({
     tipoCliente: data.idTipoCliente || 0,
     tipo: "",
@@ -132,7 +51,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
 
     cupo: "",
     calificacion: "",
-    tipoTrabajo: "",
     estadoSolicitud: "",
     observaciones: "",
   });
@@ -300,7 +218,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
           />
         </div>
 
-        <div className="flex justify-between items-center pl-8 mb-4 pt-6">
+        <div className="flex justify-between items-center pl-8 pt-6">
           <IconButton
             color="primary"
             aria-label="Imprimir"
@@ -309,76 +227,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
           >
             <PrintIcon />
           </IconButton>
-        </div>
-      </div>
-
-      {/* Segunda sección: Calificación, Estado y Estado Solicitud */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-        {/* Calificación */}
-        <div className="flex flex-col">
-          <label className="text-xs font-medium mb-1 flex items-center">
-            <FaStarHalfAlt className="mr-2 text-primaryBlue" />
-            Calificación
-          </label>
-          <select
-            name="calificacion"
-            className="solcitudgrande-style w-full"
-            value={formData.calificacion}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una opción</option>
-            {calificacion.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Estado */}
-        <div className="flex flex-col w-full">
-          <label className="text-xs font-medium mb-1 flex items-center">
-            <FaCheckCircle className="mr-2 text-primaryBlue" />
-            Estado
-          </label>
-          <select
-            name="estado"
-            className="solcitudgrande-style w-full"
-            value={formData.estado}
-            onChange={(e) => {
-              const idSeleccionada = e.target.value;
-              setFormData((prev) => ({ ...prev, estado: idSeleccionada }));
-              setIdEstado(idSeleccionada);
-            }}
-          >
-            <option value="">Seleccione una opción</option>
-            {estado.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Estado Solicitud */}
-        <div className="flex flex-col w-full">
-          <label className="text-xs font-medium mb-1 flex items-center">
-            <FaInfoCircle className="mr-2 text-primaryBlue" />
-            Estado Solicitud
-          </label>
-          <select
-            name="estadoSolicitud"
-            className="solcitudgrande-style w-full"
-            value={formData.estadoSolicitud}
-            onChange={handleChange}
-          >
-            <option value="">Seleccione una opción</option>
-            {estadoSolicitud.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
         </div>
       </div>
 

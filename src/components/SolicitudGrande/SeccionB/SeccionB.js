@@ -141,46 +141,53 @@ const SeccionB = forwardRef((props, ref) => {
 		}
 	};
 
-	const handleOpenModal = (data) => {
-		console.log(data);
-		
-		const camposRequeridos = [
-			"NombreEmpresa",
-			"idTipoEmpresa",
-			"FechaIngresoEmpresa",
-			"IngresosTrabajo",
-			"EgresosTrabajo",
-			"idTipoContrato",
-			"idTipoSueldo",
-			"Departaento",
-			"idCargo",
-			"DiaPago",
-			"idProvinciaTrabajo",
-			"idCantonTrabajo",
-			"idParroquiaTrabajo",
-			"idBarrioTrabajo",
-			"CallePrincipalTrabajo",
-			"NumeroCasaTrabajo",
-			"CalleSecundariaTrabajo",
-			"ReferenciaUbicacionTrabajo",
+	const handleOpenModal = () => {
+		const camposBase = [
+			{ dataKey: 'NombreEmpresa', formKey: 'empresa' },
+			{ dataKey: 'idTipoEmpresa', formKey: 'tipoEmpresa' },
+			{ dataKey: 'FechaIngresoEmpresa', formKey: 'fechaIngreso' },
+			{ dataKey: 'IngresosTrabajo', formKey: 'ingresos' },
+			{ dataKey: 'EgresosTrabajo', formKey: 'gastos' },
+			{ dataKey: 'idTipoContrato', formKey: 'tipoContrato' },
+			{ dataKey: 'idTipoSueldo', formKey: 'tipoSueldo' },
+			{ dataKey: 'Departaento', formKey: 'departamento' },
+			{ dataKey: 'idCargo', formKey: 'cargo' },
+			{ dataKey: 'DiaPago', formKey: 'diasPago' },
+			{ dataKey: 'idProvinciaTrabajo', formKey: 'provincia' },
+			{ dataKey: 'idCantonTrabajo', formKey: 'canton' },
+			{ dataKey: 'idParroquiaTrabajo', formKey: 'parroquia' },
+			{ dataKey: 'idBarrioTrabajo', formKey: 'barrio' },
+			{ dataKey: 'CallePrincipalTrabajo', formKey: 'callePrincipal' },
+			{ dataKey: 'NumeroCasaTrabajo', formKey: 'numeroCasa' },
+			{ dataKey: 'CalleSecundariaTrabajo', formKey: 'calleSecundaria' },
+			{ dataKey: 'ReferenciaUbicacionTrabajo', formKey: 'referenciaUbicacion' },
 		];
-
-		const faltantes = camposRequeridos.filter((campo) => {
-			const valor = data?.[campo];
-			return valor === undefined || valor === null || valor === "" || valor === 0;
-		});
 	
-		if (faltantes.length > 0) {
+		// Verifica que estén guardados (en data)
+		const camposInvalidos = camposBase.filter(
+			({ dataKey }) =>
+				data[dataKey] === null || data[dataKey] === undefined || data[dataKey] === '' || data[dataKey] === 0
+		);
+	
+		// Verifica que estén llenos (en formData)
+		const camposNoLlenados = camposBase.filter(
+			({ formKey }) =>
+				formData[formKey] === null || formData[formKey] === undefined || formData[formKey] === '' || formData[formKey] === 0
+		);
+	
+		if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
 			enqueueSnackbar(
-				"Por favor, guarda correctamente todos los datos antes de seleccionar la ubicación del trabajo.",
+				"Para seleccionar la ubicación del trabajo, primero debes llenar y guardar todos los campos requeridos.",
 				{ variant: "warning" }
 			);
 			return;
 		}
 	
+		setOpenLocationModal(prev => !prev);
+	};
 	
-		setOpenLocationModal(prevState => !prevState);
-	}
+	
+	
 	// Función de verificación para el teléfono o celular
 	const handleVerify = (fieldName) => {
 		console.log(`Verificando ${fieldName}: ${formData[fieldName]}`);
