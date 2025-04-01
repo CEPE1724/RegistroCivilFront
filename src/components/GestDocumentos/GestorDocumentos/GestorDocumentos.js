@@ -41,6 +41,8 @@ export function GestorDocumentos({
     const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
     const [showApproveAllButton, setShowApproveAllButton] = useState(false); // Mostrar botón de aprobar 
     const [showRevisionButton, setShowRevisionButton] = useState(false); // Mostrar botón de revisión
+    const [vendedorNombre, setVendedorNombre] = useState("Cargando..."); //nombre vendedor
+    const [tipoConsultaDescripcion, setTipoConsultaDescripcion] = useState("Cargando...");  //nombre almacen
     // estados para el modal global
     const [showGlobalConfirmModal, setShowGlobalConfirmModal] = useState(false);
     const [globalConfirmAction, setGlobalConfirmAction] = useState(null);
@@ -49,6 +51,7 @@ export function GestorDocumentos({
     const [clientInfo, setClientInfo] = useState({
         id: "",
         nombre: "",
+        apellido: "",
         cedula: "",
         fecha: "",
         almacen: "",
@@ -229,16 +232,16 @@ export function GestorDocumentos({
                     Authorization: `Bearer ${token}`,
                 },
             });
-/*
-            const url_estado = APIURL.post_createtiemposolicitudeswebDto();
-            await axios.post(url_estado, {
-
-                idCre_SolicitudWeb: idDocumentosSolicitudWeb,
-                Tipo: 3,
-                idEstadoVerificacionDocumental: idEstadoDocumento,
-                Usuario: 'ECEPEDA',
-            });
-*/
+            /*
+                        const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+                        await axios.post(url_estado, {
+            
+                            idCre_SolicitudWeb: idDocumentosSolicitudWeb,
+                            Tipo: 3,
+                            idEstadoVerificacionDocumental: idEstadoDocumento,
+                            Usuario: 'ECEPEDA',
+                        });
+            */
             if (response.status === 200) {
                 // Guardamos la observación
                 const updatedObservaciones = { ...observaciones };
@@ -282,7 +285,7 @@ export function GestorDocumentos({
                 // Mensaje de éxito con el estado actualizado
                 const url_estado = APIURL.post_createtiemposolicitudeswebDto();
                 await axios.post(url_estado, {
-    
+
                     idCre_SolicitudWeb: clientInfo.id,
                     Tipo: 3,
                     idEstadoVerificacionDocumental: idEstadoVerificacionDocumental,
@@ -334,6 +337,64 @@ export function GestorDocumentos({
             enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
         }
     };
+
+    //api nombre del vendedor 
+    const fetchVendedor = async (idVendedor) => {
+        try {
+            const response = await axios.get(APIURL.getVendedor(idVendedor), {
+                headers: { method: "GET", cache: "no-store" },
+            });
+            if (response.status === 200) {
+                const vendedor = response.data;
+                return (
+                    `${vendedor.PrimerNombre || ""} ${vendedor.ApellidoPaterno || ""}`.trim() || "No disponible"
+                );
+            }
+            return "No disponible";
+        } catch (error) {
+            console.error("Error fetching vendedor data:", error);
+            return "No disponible";
+        }
+    };
+
+    useEffect(() => {
+        const getVendedorInfo = async () => {
+            if (clientInfo.vendedor) {
+                const nombre = await fetchVendedor(clientInfo.vendedor);
+                setVendedorNombre(nombre);
+            }
+        };
+
+        getVendedorInfo();
+    }, [clientInfo.vendedor]);
+
+    //api nombre consulta 
+    const fetchTipoConsulta = async (consulta) => {
+        try {
+            const response = await axios.get(APIURL.getNombreTipoConsulta(consulta), {
+                headers: { method: "GET", cache: "no-store" },
+            });
+            if (response.status === 200) {
+                const tipoConsulta = Array.isArray(response.data) ? response.data[0] : response.data;
+                return tipoConsulta?.Descripcion?.trim() || "No disponible";
+            }
+            return "No disponible";
+        } catch (error) {
+            console.error("Error fetching tipo consulta data:", error);
+            return "No disponible";
+        }
+    };
+
+    useEffect(() => {
+        const getTipoConsultaInfo = async () => {
+            if (clientInfo.consulta) {
+                const descripcion = await fetchTipoConsulta(clientInfo.consulta);
+                setTipoConsultaDescripcion(descripcion);
+            }
+        };
+
+        getTipoConsultaInfo();
+    }, [clientInfo.consulta]);
 
     const handleEnviarObservacion = () => {
         //objeto que se enviara a la api  
@@ -413,6 +474,9 @@ export function GestorDocumentos({
             9: "Acta",
             10: "Consentimiento",
             11: "Autorización",
+            12: "Foto del cliente",
+            13: "Croquis",
+            14: "Servicios Básicos",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };
@@ -722,12 +786,12 @@ export function GestorDocumentos({
                             <div className="flex-1 mt-4 md:mt-6 px-2 md:px-4 bg-white shadow-lg rounded-lg p-4 md:p-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 text-sm md:text-base leading-relaxed">
                                     {[
-                                        ["Número de Solicitud", clientInfo.NumeroSolicitud],
-                                        ["Nombre", clientInfo.nombre],
+                                        ["Número Solicitud", clientInfo.NumeroSolicitud],
+                                        ["Nombre", clientInfo.nombre + " " + clientInfo.apellido],
                                         ["Cédula", clientInfo.cedula],
                                         ["Fecha", clientInfo.fecha],
-                                        ["Vendedor", clientInfo.vendedor],
-                                        ["Tipo de consulta", clientInfo.consulta],
+                                        ["Vendedor", vendedorNombre],
+                                        ["Tipo de consulta", tipoConsultaDescripcion],
                                         ["Almacén", clientInfo.almacen],
                                     ].map(([label, value], idx) => (
                                         <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 md:gap-4">

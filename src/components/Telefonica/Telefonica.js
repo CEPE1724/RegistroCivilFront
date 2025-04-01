@@ -4,8 +4,6 @@ import { useLocation } from "react-router-dom";
 import CallIcon from "@mui/icons-material/Call";
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
-import PhoneIcon from "@mui/icons-material/Phone";
-import ArticleIcon from "@mui/icons-material/Article";
 import EventIcon from "@mui/icons-material/Event";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import axios from "axios";
@@ -65,10 +63,7 @@ export function TelefonicaList({
   const [selectedRow, setSelectedRow] = useState(null);
   const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
 
-
   console.log("clientInfo", clientInfo);
-
-
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -92,7 +87,7 @@ export function TelefonicaList({
 
   const handleSubmit = async () => {
     const todosContactados = tablaDatos.filter(
-      (item) => item.idEstadoGestns === 10 // Suponiendo que "contactado" es un string o id del estado
+      (item) => item.idEstadoGestns === 11
     ).length;
 
     if (todosContactados >=2 ) {
@@ -106,9 +101,6 @@ export function TelefonicaList({
               Usuario: userData.Nombre,
               Telefono: ``, 
             });
-            // enqueueSnackbar(`TiempoSolicitudesWeb actualizada :D`, {
-            //   variant: "success",
-            // });
     } else {
       enqueueSnackbar("No todos los registros están en estado 'Contactado'.", { variant: "error" });
     }
@@ -141,9 +133,7 @@ export function TelefonicaList({
 
           // Aquí asumimos que los datos que devuelve la API son un array
           // y lo asignamos a tablaDatos para mostrarlo en la tabla.
-          setTablaDatos(response.data);
- 
-          
+          setTablaDatos(response.data);    
         } catch (error) {
           console.error("Error al obtener los datos de la API", error);
         }
@@ -207,11 +197,6 @@ export function TelefonicaList({
     }
   };
 
- 
-    
-
-
-
   //Cerrar modal
   const handleCloseDialog = () => {
     setShouldReload(true); // Establece que el componente debe recargarse
@@ -219,9 +204,6 @@ export function TelefonicaList({
     setSelectedRow(null);
 
   };
-
-
-
 
   const handleChangeModal = (e) => {
     const { name, value } = e.target;
@@ -323,14 +305,12 @@ export function TelefonicaList({
               Usuario: userData.Nombre,
               Telefono: `${selectedRow.Telefono}-${idToTextMapEstado[nuevoRegistro.estado]}`, //selectedRow.Telefono+"-"+selectedRow.Contacto,
             });
-            // enqueueSnackbar(`TiempoSolicitudesWeb actualizada :D`, {
-            //   variant: "success",
-            // });
           }
         })
         .catch(error => console.error("Error al actualizar datos:", error));
   
       handleLimpiarModal(); // Limpiar el modal después de guardar
+      handleCloseDialog(); // Cerrar el modal después de guardar
   
     } catch (error) {
       console.error("Error al guardar los datos:", error);
@@ -406,10 +386,6 @@ export function TelefonicaList({
       });
     }
   };
-
-
-
-
 
   //api referencias
   useEffect(() => {
@@ -586,19 +562,6 @@ export function TelefonicaList({
               {clientInfo && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Primera columna */}
-                  {/* <div className="space-y-4 text-base">
-        <div className="flex items-center gap-2">
-          <PersonIcon className="text-blue-500" fontSize="medium" />
-          <p>{clientInfo.nombre}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ArticleIcon className="text-blue-500" fontSize="medium" />
-          <p className="font-semibold">Cédula:</p>
-          <p>{clientInfo.cedula}</p>
-        </div>
-      </div> */}
-
-                  {/* Segunda fila con los dos select y el input en la misma línea */}
                   <div className="col-span-3">
                     <div className="flex flex-col md:flex-row gap-4">
                       {/* Referencia */}
@@ -640,7 +603,6 @@ export function TelefonicaList({
               )}
 
               {/* Tabla Modal */}
-              {/* Tabla Modal */}
               <div className="mt-6">
                 <h3 className="text-lg font-bold mb-3 text-gray-700">Registros Guardados</h3>
                 <div className="overflow-x-auto">
@@ -678,8 +640,6 @@ export function TelefonicaList({
                   </TableContainer>
                 </div>
               </div>
-
-
 
             </DialogContent>
 
