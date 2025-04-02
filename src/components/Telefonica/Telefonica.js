@@ -90,17 +90,17 @@ export function TelefonicaList({
       (item) => item.idEstadoGestns === 11
     ).length;
 
-    if (todosContactados >=2 ) {
+    if (todosContactados >= 2) {
       enqueueSnackbar("Enviado para validar", { variant: "success" });
 
       const url_estado = APIURL.post_createtiemposolicitudeswebDto();
-            await axios.post(url_estado, {
-              idCre_SolicitudWeb: clientInfo.id,
-              Tipo: 3,
-              idEstadoVerificacionDocumental: 4,
-              Usuario: userData.Nombre,
-              Telefono: ``, 
-            });
+      await axios.post(url_estado, {
+        idCre_SolicitudWeb: clientInfo.id,
+        Tipo: 3,
+        idEstadoVerificacionDocumental: 4,
+        Usuario: userData.Nombre,
+        Telefono: ``,
+      });
     } else {
       enqueueSnackbar("No todos los registros están en estado 'Contactado'.", { variant: "error" });
     }
@@ -133,7 +133,7 @@ export function TelefonicaList({
 
           // Aquí asumimos que los datos que devuelve la API son un array
           // y lo asignamos a tablaDatos para mostrarlo en la tabla.
-          setTablaDatos(response.data);    
+          setTablaDatos(response.data);
         } catch (error) {
           console.error("Error al obtener los datos de la API", error);
         }
@@ -141,7 +141,7 @@ export function TelefonicaList({
 
       fetchData();
     }
-  }, [clientInfo.id , shouldReload]);
+  }, [clientInfo.id, shouldReload]);
 
   //Abrir modal
   const handleOpenDialog = async (index, item) => {
@@ -150,23 +150,23 @@ export function TelefonicaList({
     setSelectedRow(item);
     console.log("Item seleccionado:", selectedItem);
     const idCre_VerificacionTelefonicaMaestro = selectedItem.idCre_VerificacionTelefonicaMaestro;
-  
+
     // Validación del ID
     if (!idCre_VerificacionTelefonicaMaestro || isNaN(idCre_VerificacionTelefonicaMaestro) || idCre_VerificacionTelefonicaMaestro <= 0) {
       console.error("El idCre_VerificacionTelefonicaMaestro no es válido:", idCre_VerificacionTelefonicaMaestro);
       return;
     }
-  
-    setIdCre_VerificacionTelefonicaMaestro(idCre_VerificacionTelefonicaMaestro); 
-  
+
+    setIdCre_VerificacionTelefonicaMaestro(idCre_VerificacionTelefonicaMaestro);
+
     try {
       // Llamada a la API
       const response = await fetchSearchCreSolicitudVerificacionTelefonica(clientInfo.id, idCre_VerificacionTelefonicaMaestro);
-  
+
       if (response.status === 200) { // Mejor que solo `response.ok`
         const data = response.data; // Axios devuelve la data en `response.data`
         console.log("Datos de la API:", data);
-  
+
         setApiResponseData(data); // Almacena los datos en el estado correctamente
       } else {
         console.error("Error en la API, código de estado:", response.status);
@@ -174,22 +174,22 @@ export function TelefonicaList({
     } catch (error) {
       console.error("Error al llamar la API:", error);
     }
-  
+
     setView(true); // Abre el modal
   };
-  
+
   const fetchSearchCreSolicitudVerificacionTelefonica = async (id, idCre_VerificacionTelefonicaMaestro) => {
     try {
       const token = localStorage.getItem("token");
       const url = APIURL.getSearchCreSolicitudVerificacionTelefonica(id, idCre_VerificacionTelefonicaMaestro);
-      
+
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       return response; // Retorna directamente la respuesta de Axios
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -250,7 +250,7 @@ export function TelefonicaList({
       });
       return;
     }
-  
+
     const datosParaEnviar = {
       Fecha: clientInfo.fecha.toUpperCase(),
       Telefono: selectedRow.Telefono.toUpperCase(),
@@ -269,13 +269,13 @@ export function TelefonicaList({
       Nuevo: true,
       idCre_VerificacionTelefonicaMaestro: idCre_VerificacionTelefonicaMaestro,
     };
-  
+
     console.log("Datos a enviar:", datosParaEnviar);
-  
+
     try {
       // Llamada para guardar los datos
       await enviarDatosModal(datosParaEnviar);
-  
+
       setShouldReload(prevState => !prevState);
       // Crear nuevo registro para mostrar en la tabla
       const nuevoRegistro = {
@@ -286,10 +286,10 @@ export function TelefonicaList({
         estado: datosParaEnviar.idEstadoGestns,
         observaciones: datosParaEnviar.Observaciones,
       };
-  
+
       setTablaModal([...tablaModal, nuevoRegistro]);
       enqueueSnackbar("Registro Guardado", { variant: "success" });
-  
+
       // **Recargar datos de la API** después de guardar
       await fetchSearchCreSolicitudVerificacionTelefonica(clientInfo.id, idCre_VerificacionTelefonicaMaestro)
         .then(async response => {
@@ -308,10 +308,10 @@ export function TelefonicaList({
           }
         })
         .catch(error => console.error("Error al actualizar datos:", error));
-  
+
       handleLimpiarModal(); // Limpiar el modal después de guardar
       handleCloseDialog(); // Cerrar el modal después de guardar
-  
+
     } catch (error) {
       console.error("Error al guardar los datos:", error);
       enqueueSnackbar("Error al guardar los datos", { variant: "error" });
@@ -458,13 +458,13 @@ export function TelefonicaList({
                   <img
                     src={clientInfo.foto}
                     alt="Foto del cliente"
-                    className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                    className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-in-out"
                   />
                 </div>
               )}
 
-              <div className="md:w-3/4 mt-6 pl-4 bg-white shadow-lg rounded-lg p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base leading-relaxed pl-10">
+              <div className="md:w-3/4 mt-6 pl-4 bg-white shadow-xl rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base leading-relaxed">
                   {[
                     ["Número de Solicitud", clientInfo.NumeroSolicitud],
                     ["Nombre", clientInfo.nombre],
@@ -475,21 +475,24 @@ export function TelefonicaList({
                     ["Almacén", clientInfo.almacen],
                   ].map(([label, value], idx) => (
                     <div key={idx} className="flex items-center gap-4">
-                      <p className="font-semibold text-gray-700">{label}:</p>
-                      <p className="text-gray-500">{value}</p>
+                      <p className="font-semibold text-gray-800">{label}:</p>
+                      <p className="text-gray-600">{value}</p>
                     </div>
-                    
                   ))}
+
                   {resultContactedDocs.length >= 2 && (
-                    <button onClick={handleSubmit} className=" px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+                    <button
+                      onClick={handleSubmit}
+                      className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
+                    >
                       Validar
                     </button>
                   )}
                 </div>
-               
               </div>
             </div>
           </div>
+
           {/* Tabla */}
           <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
             <div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
