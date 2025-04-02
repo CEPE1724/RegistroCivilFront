@@ -72,6 +72,7 @@ import DocumentStatusPopover from "./DocumentStatusPopover";
 import Domicilio from "../SolicitudGrande/DatosCliente/Domicilio/Domicilio";
 import DomicilioModal from "./DomicilioModal";
 import TrabajoModal from "./TrabajoModal";
+import { set } from "react-hook-form";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const [bodegass, setBodegass] = useState([]);
@@ -109,6 +110,8 @@ export function ListadoSolicitud() {
 
   const [domicilioData, setDomicilioData] = useState([]);
   const [trabajoData, setTrabajoData] = useState([]);
+
+  const [idsTerrenas, setIdsTerrenas] = useState([]);
 
   const navigate = useNavigate();
   const { userData } = useAuth();
@@ -219,6 +222,7 @@ export function ListadoSolicitud() {
 
       const idsTerrenas = response.data;
       console.log("idsTerrenas", response.data);
+	  setIdsTerrenas(idsTerrenas);
 
       if (!idsTerrenas || idsTerrenas.length === 0) {
         console.log("entra aquiiiiiiiiiii")
@@ -1152,8 +1156,8 @@ export function ListadoSolicitud() {
 
 
 
-      <DomicilioModal openModal={isDomicilioModalOpen} closeModal={handleCloseDomicilioModal} />
-      <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal}/>
+      <DomicilioModal openModal={isDomicilioModalOpen} closeModal={handleCloseDomicilioModal} idsTerrenas={idsTerrenas}/>
+      <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal} idsTerrenas={idsTerrenas}/>
 
     </div>
 

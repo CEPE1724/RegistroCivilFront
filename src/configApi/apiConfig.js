@@ -1,7 +1,7 @@
 import { get } from "react-hook-form";
 
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+const API_BASE_URL = "http://192.168.137.169:3025/api/v1/";
 
 
 
@@ -116,6 +116,7 @@ export const APIURL = {
   update_solicitud:(id) => `${API_BASE_URL}cre-solicitud-web/updatetelefonicaEstados/${id}`,
 
   getIdsTerrenas: (id, tipo) => `${API_BASE_URL}clientes-verificacion-terrena/${id}/${tipo}`,
+  get_info_trabajo: (id) => `${API_BASE_URL}terrena-gestion-trabajo/${id}`,
 
 
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
