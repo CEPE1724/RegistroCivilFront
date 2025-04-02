@@ -1157,7 +1157,9 @@ export function ListadoSolicitud() {
 
 
       <DomicilioModal openModal={isDomicilioModalOpen} closeModal={handleCloseDomicilioModal} idsTerrenas={idsTerrenas}/>
-      <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal}/>
+
+      <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal} idsTerrenas={idsTerrenas}/>
+
 
     </div>
 
