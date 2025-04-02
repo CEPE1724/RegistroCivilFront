@@ -641,7 +641,7 @@ export function Cabecera() {
   const closeModal = () => setIsModalOpen(false);
 
   ///patch que cambio el estado de la solicitud a 10 (ya no va aqui)
-/*
+
   const patchSolicitud = async (idSolicitud) => {
     try {
       const response = await axios.patch(
@@ -667,12 +667,12 @@ export function Cabecera() {
       enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
     }
   };
-*/
+
 
 
   // Función para confirmar la acción (enviar)
   const handleConfirm = () => {
-  //// patchSolicitud(idSolicitud);
+   patchSolicitud(idSolicitud);
    
     closeModal(); // Cerrar el modal después de confirmar
   };

@@ -48,6 +48,7 @@ export default function VerificacionTerrenaModal({
       bDomicilio: tipoVerificacion === "domicilio",
       bTrabajo: tipoVerificacion === "trabajo",
       Usuario: userData?.Usuario,
+      Web: 1
     };
 
     try {

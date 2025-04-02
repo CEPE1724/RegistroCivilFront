@@ -202,8 +202,12 @@ export function ListadoSolicitud() {
 
   const handleOpenModalVerificacion = async (data, tipo) => {
     try {
-      console.log("data", data);
-      const url = APIURL.getIdsTerrenas(data.id);
+      let idtipo = 0;
+      if ( tipo === "domicilio")  idtipo = 1;
+      else if ( tipo === "trabajo") idtipo = 2;
+      console.log("data edison", data);
+      const url = APIURL.getIdsTerrenas(data.id, idtipo);
+      console.log("url", url);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
