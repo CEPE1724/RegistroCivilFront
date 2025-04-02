@@ -1,7 +1,7 @@
 import { get } from "react-hook-form";
 
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
+const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
 
 
 
@@ -134,6 +134,8 @@ export const APIURL = {
   post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
   getCoordenadasprefacturaPorId : (id,Tipo) => `${API_BASE_URL}coordenadasprefactura/find/${id}/${Tipo}`,
   get_cre_referenciasclientesweb_id_all: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/count/${id}`,
+
+  getTerrenaGestionDomicilio : (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}`,
 
 
 };
