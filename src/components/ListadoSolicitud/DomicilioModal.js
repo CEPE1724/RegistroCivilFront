@@ -1,342 +1,227 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { APIURL } from "../../configApi/apiConfig";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
-const DomicilioModal = ({ openModal, closeModal }) => {
-  if (!openModal) return null;
+const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
+  const center = { lat, lng };
+  const mapContainerStyle = {
+    width: "100%",
+    height: "100%",
+    borderRadius: "1rem",
+  };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-7xl p-8 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-semibold mb-6">Domicilio</h2>
-        <div className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div>
-              <label className="font-semibold">Tipo de Vivienda (Meses)</label>
-              <input
-                type="text"
-                placeholder="Tipo de Vivienda (Meses)"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-              />
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl h-[500px] relative animate-fade-in">
 
-            <div>
-              <label className="font-semibold">Tipo de Vivienda</label>
-              <div className="flex flex-col mt-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="dependiente"
-                    className="form-radio"
-                  />
-                  <span>Casa</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="independiente"
-                    className="form-radio"
-                  />
-                  <span>Mixta</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="informal"
-                    className="form-radio"
-                  />
-                  <span>Media agua</span>
-                </label>
-				<label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="informal"
-                    className="form-radio"
-                  />
-                  <span>Villa</span>
-                </label>
-				<label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="informal"
-                    className="form-radio"
-                  />
-                  <span>Departamento</span>
-                </label>
-              </div>
-            </div>
+        {/* Botón de cerrar tipo X fuera del área del mapa */}
+        <button
+          onClick={onClose}
+          className="absolute -top-3 -left-4 bg-white text-primaryBlue border border-primaryBlue rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold shadow-lg hover:bg-primaryBlue hover:text-white transition z-50"
+        >
+          X
+        </button>
 
-            <div>
-              <label className="font-semibold">Estado Vivienda</label>
-              <div className="flex flex-col mt-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="dependiente"
-                    className="form-radio"
-                  />
-                  <span>Bueno</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="independiente"
-                    className="form-radio"
-                  />
-                  <span>Muy Bueno</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="informal"
-                    className="form-radio"
-                  />
-                  <span>Malo</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="font-semibold">Zona Vivienda</label>
-              <div className="flex flex-col mt-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="dependiente"
-                    className="form-radio"
-                  />
-                  <span>Urbano</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="independiente"
-                    className="form-radio"
-                  />
-                  <span>Rural</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="font-semibold">Propiedad</label>
-              <div className="flex flex-col mt-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="dependiente"
-                    className="form-radio"
-                  />
-                  <span>Propio</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="independiente"
-                    className="form-radio"
-                  />
-                  <span>Familiar</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="informal"
-                    className="form-radio"
-                  />
-                  <span>Arrendado</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label className="font-semibold">Acceso</label>
-              <div className="flex flex-col mt-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="dependiente"
-                    className="form-radio"
-                  />
-                  <span>Facil</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="independiente"
-                    className="form-radio"
-                  />
-                  <span>Dificil</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="informal"
-                    className="form-radio"
-                  />
-                  <span>Informal</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div>
-              <label className="font-semibold">Cobertura de señal</label>
-              <div className="flex flex-col mt-2">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="llammadaMovil"
-                    className="form-radio"
-                  />
-                  <span>Llamada Movil</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="housing"
-                    value="WhatsApp"
-                    className="form-radio"
-                  />
-                  <span>WhatsAp</span>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <div>
-                <label className="font-semibold">Teléfono Laboral</label>
-                <input
-                  type="number"
-                  placeholder="Teléfono Laboral"
-                  className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-4">
-            <div>
-              <label className="font-semibold">Punto de Referencia</label>
-              <textarea
-                placeholder="Punto de Referencia"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                rows="4"
-              />
-            </div>
-
-            <div>
-              <label className="font-semibold">Persona Entrevistada</label>
-              <textarea
-                placeholder="Persona entrevistada"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                rows="4"
-              />
-            </div>
-
-            <div>
-              <label className="font-semibold">Obserbacion</label>
-              <textarea
-                placeholder="Punto de Referencia"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                rows="4"
-              />
-            </div>
-
-            <div>
-              <label className="font-semibold">Vecino Entrevistado</label>
-              <textarea
-                placeholder="Vecino Enrevistado"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                rows="4"
-              />
-            </div>
-
-			<div>
-              <label className="font-semibold">Calle Principal</label>
-              <textarea
-                placeholder="Calle Principal"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                rows="4"
-              />
-            </div>
-
-			<div>
-              <label className="font-semibold">Calle Secundaria</label>
-              <textarea
-                placeholder="Calle Secundaria"
-                className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                rows="4"
-              />
-            </div>
-
-			<div>
-                <label className="font-semibold">GPS</label>
-                <input
-                  type="number"
-                  placeholder="GPS"
-                  className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                />
-            </div>
-
-			<div>
-                <label className="font-semibold">Latitud</label>
-                <input
-                  type="number"
-                  placeholder="Latitudl"
-                  className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                />
-            </div>
-
-			<div>
-                <label className="font-semibold">Longitud</label>
-                <input
-                  type="number"
-                  placeholder="Longitud"
-                  className="block bg-[#F9FAFB] w-full rounded-md border-2 border-blue-500 px-4 py-2 shadow-sm"
-                />
-              </div>
-
-          </div>
-
-          {/* <div className="grid grid-cols-2 gap-4">
-          </div> */}
-
-        </div>
-
-        <div className="flex justify-end space-x-4 mt-8">
-          <button
-            onClick={closeModal}
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5 mb-4"
+        <LoadScript googleMapsApiKey={apiKey}>
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={center}
+            zoom={18}
+            options={{
+              streetViewControl: true,
+              mapTypeControl: false,
+              fullscreenControl: true,
+            }}
           >
-            Salir
-          </button>
-          <button
-            onClick={closeModal}
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
-          >
-            Aceptar
-          </button>
-        </div>
+            <Marker position={center} />
+          </GoogleMap>
+        </LoadScript>
       </div>
     </div>
   );
-  
+};
+
+
+const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
+  const [verificacionData, setVerificacionData] = useState(null);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+
+  useEffect(() => {
+    const fetchVerificacionData = async () => {
+      try {
+        const id = idsTerrenas.idTerrenaGestionDomicilio;
+        if (!id) return;
+        const response = await axios.get(APIURL.getTerrenaGestionDomicilio(id));
+        setVerificacionData(response.data);
+      } catch (error) {
+        console.error("Error al obtener los datos de verificación:", error);
+      }
+    };
+
+    if (openModal) {
+      fetchVerificacionData();
+    }
+  }, [openModal, idsTerrenas]);
+
+  if (!openModal || !verificacionData) return null;
+
+  // Mapeos legibles
+  const tipoViviendaMap = {
+    1: "Casa",
+    3: "Villa",
+    4: "Mixta",
+    2: "Departamento",
+    5: "Media agua",
+  };
+
+  const estadoViviendaMap = {
+    1: "Bueno",
+    2: "Muy Bueno",
+    3: "Malo",
+  };
+
+  const zonaViviendaMap = {
+    1: "Urbano",
+    2: "Rural",
+  };
+
+  const propiedadMap = {
+    1: "Propio",
+    2: "Arrendado",
+    3: "Familiar",
+  };
+
+  const accesoMap = {
+    1: "Fácil",
+    2: "Difícil",
+  };
+
+  const coberturaMap = {
+    1: "Llamada Móvil",
+    2: "WhatsApp",
+  };
+
+  const tipoClienteMap = {
+    1: "Cliente",
+    2: "Garante",
+  };
+
+  const {
+    // idTerrenaGestionDomicilio,
+    // idClienteVerificacion,
+    idTerrenaTipoCliente,
+    iTiempoVivienda,
+    idTerrenaTipoVivienda,
+    idTerrenaEstadoVivienda,
+    idTerrenaZonaVivienda,
+    idTerrenaPropiedad,
+    idTerrenaAcceso,
+    idTerrenaCobertura,
+    PuntoReferencia,
+    PersonaEntrevistada,
+    Observaciones,
+    VecinoEntreVisto,
+    DireccionesVisitada,
+    CallePrincipal,
+    CalleSecundaria,
+    // FechaSistema,
+    ValorArrendado,
+    Latitud,
+    Longitud,
+  } = verificacionData;
+
+  const renderField = (label, value) =>
+    value !== null && value !== "" ? (
+      <div>
+        <p className="text-sm font-semibold">{label}</p>
+        <p className="text-sm text-gray-700">{value}</p>
+      </div>
+    ) : null;
+
+  return (
+    <>
+      {/* MAIN MODAL */}
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-40">
+        <div className="bg-white rounded-2xl shadow-lg w-full max-w-5xl p-8 max-h-[90vh] overflow-y-auto animate-fade-in">
+          <h2 className="text-2xl font-semibold mb-6">Domicilio</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-4 gap-4">
+            {/* {renderField("ID Terreno", idTerrenaGestionDomicilio)} */}
+            {/* {renderField("ID Cliente Verificación", idClienteVerificacion)} */}
+            {renderField(
+              "Tipo de Cliente",
+              tipoClienteMap[idTerrenaTipoCliente]
+            )}
+            {renderField(
+              "Tiempo en Vivienda",
+              iTiempoVivienda && `${iTiempoVivienda} años`
+            )}
+            {renderField(
+              "Tipo de Vivienda",
+              tipoViviendaMap[idTerrenaTipoVivienda]
+            )}
+            {renderField(
+              "Estado de la Vivienda",
+              estadoViviendaMap[idTerrenaEstadoVivienda]
+            )}
+            {renderField(
+              "Zona de la Vivienda",
+              zonaViviendaMap[idTerrenaZonaVivienda]
+            )}
+            {renderField("Propiedad", propiedadMap[idTerrenaPropiedad])}
+            {renderField("Acceso", accesoMap[idTerrenaAcceso])}
+            {renderField("Cobertura", coberturaMap[idTerrenaCobertura])}
+            {renderField("Punto de Referencia", PuntoReferencia)}
+            {renderField("Persona Entrevistada", PersonaEntrevistada)}
+            {renderField("Vecino entrevistado", VecinoEntreVisto)}
+            {renderField("Dirección Visitada", DireccionesVisitada)}
+            {renderField("Calle Principal", CallePrincipal)}
+            {renderField("Calle Secundaria", CalleSecundaria)}
+            {renderField("Observaciones", Observaciones)}
+            {/* {renderField("Fecha", FechaSistema?.slice(0, 19).replace("T", " "))} */}
+            {renderField("Valor Arrendado", ValorArrendado)}
+
+            {Latitud && Longitud && (
+              <div>
+                <button
+                  className="mt-1 px-4 py-2 text-sm rounded-full bg-primaryBlue text-white hover:bg-white hover:text-primaryBlue border hover:border-primaryBlue transition"
+                  onClick={() => setShowMapModal(true)}
+                >
+                  Ver ubicación en el mapa
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end mt-8 space-x-4">
+            <button
+              onClick={closeModal}
+              className="rounded-full bg-gray-400 text-white px-6 py-2 text-sm hover:bg-gray-500 transition"
+            >
+              Salir
+            </button>
+            <button
+              onClick={closeModal}
+              className="rounded-full bg-primaryBlue text-white px-6 py-2 text-sm hover:bg-blue-700 transition"
+            >
+              Aceptar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MAP MODAL */}
+      {showMapModal && Latitud && Longitud && (
+        <GoogleMapModal
+          lat={Latitud}
+          lng={Longitud}
+          apiKey={GOOGLE_MAPS_API_KEY}
+          onClose={() => setShowMapModal(false)}
+        />
+      )}
+    </>
+  );
 };
 
 export default DomicilioModal;

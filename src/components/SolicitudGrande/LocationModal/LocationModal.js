@@ -42,6 +42,9 @@ export function LocationModal({
 
   const autocompleteRef = useRef(null);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+
   const showSnackbar = (message, type = "info") => {
     setSnackbar({ message, type, visible: true });
     setTimeout(() => {
@@ -190,6 +193,9 @@ export function LocationModal({
   };
 
   const handleSave = async () => {
+	if (isSubmitting) return;
+	setIsSubmitting(true);
+
     const newErrors = {
       address: validateField("address", localLocation.address),
       latitude: validateField("latitude", localLocation.latitude),
@@ -231,6 +237,7 @@ export function LocationModal({
         if (isOpen) {
           isOpen();
         }
+		setIsSubmitting(false);
       }, 3000);
     } catch (error) {
       console.error("Error al guardar la ubicación:", error);
@@ -238,6 +245,7 @@ export function LocationModal({
         "Error al guardar la ubicación. Por favor, intente más tarde.",
         "error"
       );
+		setIsSubmitting(false);
     }
   };
 
@@ -352,7 +360,7 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="latitude"
-			  disabled
+              disabled
               value={localLocation.latitude}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -370,7 +378,7 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="longitude"
-			  disabled
+              disabled
               value={localLocation.longitude}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -384,7 +392,6 @@ export function LocationModal({
 
         {/* Campos de Dirección y Subir Archivos (alineados en dos columnas) */}
         <div className="mb-4 grid grid-cols-2 gap-4">
-          
           <div>
             <label className="block mb-1 text-xs font-medium text-gray-700">
               Dirección
@@ -393,7 +400,7 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-xs"
               type="text"
               name="address"
-			  disabled
+              disabled
               value={localLocation.address}
               onChange={handleChange}
               onBlur={handleBlur}
@@ -414,10 +421,15 @@ export function LocationModal({
             Cancelar
           </button>
           <button
-            className="px-3 py-1 text-[10px] bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 shadow-md"
+            className={`px-3 py-1 text-[10px] bg-blue-600 text-white rounded-md transition duration-200 shadow-md ${
+              isSubmitting
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-blue-700"
+            }`}
             onClick={handleSave}
+            disabled={isSubmitting}
           >
-            Guardar
+            {isSubmitting ? "Guardando..." : "Guardar"}
           </button>
         </div>
 
