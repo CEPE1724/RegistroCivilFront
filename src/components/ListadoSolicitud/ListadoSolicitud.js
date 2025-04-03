@@ -117,7 +117,6 @@ export function ListadoSolicitud() {
 
   const navigate = useNavigate();
   const { userData, idMenu } = useAuth();
-  console.log("idMenu", idMenu);
   const bodegas = data || []; // Safely access the bodegas data
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
@@ -618,7 +617,6 @@ export function ListadoSolicitud() {
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
-        <label className="text-gray-700 font-semibold"> Buscar por nombre{idMenu}</label>
         <TextField
           label="Fecha Desde"
           type="date"
