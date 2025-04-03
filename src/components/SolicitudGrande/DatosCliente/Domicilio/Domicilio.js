@@ -52,7 +52,7 @@ const Domicilio = forwardRef((props, ref) => {
         celularArrendador: data.CelularArrendador || '',
         inmueble: data.idInmueble || 0,
         ciudadInmueble: data.idCantonInmueble || 0,
-        valorInmueble: data.ValorInmmueble || 0
+        valorInmueble: data.ValorInmmueble || 0,
     });
 
     useEffect(() => {
@@ -298,8 +298,18 @@ const Domicilio = forwardRef((props, ref) => {
     useImperativeHandle(ref, () => ({
 
         validateForm,
-        getFormData: () => formData,
+        // getFormData: () => formData,
+		getFormData: () => ({
+			...formData,
+			valorInmueble:
+			  formData.valorInmueble != null
+				? Number(formData.valorInmueble).toFixed(2)
+				: undefined,
+		  }),
+		  
     }));
+
+	
 
 
     return (
