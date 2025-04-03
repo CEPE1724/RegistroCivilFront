@@ -1,20 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'; // Iconos de react-icons
-
-// Datos quemados (simulando lo que se recibiría de la API)
-const rolesData = [
-  { id: 1, name: 'Admin' },
-  { id: 2, name: 'User' },
-  { id: 3, name: 'Gestor' },
-];
-
-const usersData = [
-  { id: 1, name: 'Juan Pérez', roleId: 1 },
-  { id: 2, name: 'Ana García', roleId: 1 },
-  { id: 3, name: 'Carlos Sánchez', roleId: 2 },
-  { id: 4, name: 'María López', roleId: 3 },
-  { id: 5, name: 'Luis Rodríguez', roleId: 2 },
-];
+import axios from 'axios';
+import { FaEdit, FaCheckCircle } from 'react-icons/fa';
+import { APIURL } from '../../../configApi/apiConfig';
 
 const menuItemsData = [
   { id: 1, name: 'Ciudadanos', route: '/ciudadanos' },
@@ -27,51 +14,64 @@ const menuItemsData = [
 ];
 
 export function AdministrableForm() {
-  const [roles, setRoles] = useState(rolesData);
-  const [users, setUsers] = useState(usersData);
-  const [menuItems, setMenuItems] = useState(menuItemsData);
+  const [roles, setRoles] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [menuItems] = useState(menuItemsData);
   const [selectedRole, setSelectedRole] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
-  // Filtrar los usuarios por el rol seleccionado
-  const filteredUsers = users.filter(user => user.roleId === selectedRole?.id);
+  // Obtener roles al montar
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(APIURL.getRolesWeb());
+        setRoles(response.data);
+      } catch (error) {
+        console.error('Error al obtener roles:', error);
+      }
+    };
 
-  // Manejar el cambio de rol
-  const handleRoleChange = (role) => {
+    fetchRoles();
+  }, []);
+
+  // Obtener usuarios por ID de rol
+  const handleRoleChange = async (role) => {
     setSelectedRole(role);
-    setSelectedUser(null); // Resetear el usuario seleccionado
-    setSelectedPermissions([]); // Resetear permisos
+    setSelectedUser(null);
+    setSelectedPermissions([]);
+
+    try {
+      const response = await axios.get(APIURL.getUsuarioPorROL(role.idRolesWeb));
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error al obtener usuarios por rol:', error);
+      setUsers([]);
+    }
   };
 
-  // Manejar el cambio de usuario
   const handleUserChange = (user) => {
     setSelectedUser(user);
-    setSelectedPermissions([]); // Resetear permisos al seleccionar un nuevo usuario
+    setSelectedPermissions([]);
   };
 
-  // Manejar el cambio de permisos
   const handlePermissionChange = (menuId) => {
-    setSelectedPermissions((prevPermissions) =>
-      prevPermissions.includes(menuId)
-        ? prevPermissions.filter((id) => id !== menuId)
-        : [...prevPermissions, menuId]
+    setSelectedPermissions((prev) =>
+      prev.includes(menuId)
+        ? prev.filter((id) => id !== menuId)
+        : [...prev, menuId]
     );
   };
 
-  // Guardar los permisos (simulación)
   const savePermissions = () => {
-    
-    alert('Permissions saved!');
+    alert('Permisos guardados correctamente');
   };
 
   return (
     <div className="p-6 space-y-6">
-
-      {/* Contenedor Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Sección de Roles */}
+        {/* Roles */}
         <div className="shadow-lg rounded-lg p-4 bg-white">
           <h2 className="text-xl font-semibold mb-4">Roles</h2>
           <table className="min-w-full table-auto">
@@ -83,8 +83,8 @@ export function AdministrableForm() {
             </thead>
             <tbody>
               {roles.map((role) => (
-                <tr key={role.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{role.name}</td>
+                <tr key={role.idRolesWeb} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-2">{role.Nombre}</td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => handleRoleChange(role)}
@@ -99,10 +99,10 @@ export function AdministrableForm() {
           </table>
         </div>
 
-        {/* Sección de Usuarios */}
+        {/* Usuarios */}
         {selectedRole && (
           <div className="shadow-lg rounded-lg p-4 bg-white">
-            <h2 className="text-xl font-semibold mb-4">Usuarios en el Rol {selectedRole.name}</h2>
+            <h2 className="text-xl font-semibold mb-4">Usuarios en el Rol {selectedRole.Nombre}</h2>
             <table className="min-w-full table-auto">
               <thead>
                 <tr className="bg-gray-100">
@@ -111,9 +111,9 @@ export function AdministrableForm() {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                   <tr key={user.id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-2">{user.name}</td>
+                    <td className="px-4 py-2">{user.Nombre}</td>
                     <td className="px-4 py-2">
                       <button
                         onClick={() => handleUserChange(user)}
@@ -129,7 +129,7 @@ export function AdministrableForm() {
           </div>
         )}
 
-        {/* Sección de Permisos */}
+        {/* Permisos */}
         {selectedUser && (
           <div className="shadow-lg rounded-lg p-4 bg-white col-span-1 lg:col-span-3">
             <h2 className="text-xl font-semibold mb-4">Asignar Permisos a {selectedUser.name}</h2>
@@ -157,7 +157,6 @@ export function AdministrableForm() {
               </tbody>
             </table>
 
-            {/* Botón para guardar permisos */}
             <button
               onClick={savePermissions}
               className="mt-4 bg-blue-500 text-white p-2 rounded-md w-full hover:bg-blue-600 transition-all"
@@ -167,7 +166,6 @@ export function AdministrableForm() {
             </button>
           </div>
         )}
-
       </div>
     </div>
   );
