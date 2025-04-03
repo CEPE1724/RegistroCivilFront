@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileCopy, CameraAlt } from '@mui/icons-material'; // Iconos de MUI
 import { Button, TextField, Grid, Typography } from '@mui/material'; // Componentes de MUI
 import * as XLSX from 'xlsx'; // Importar la librería xlsx para exportar a Excel
+import { useAuth } from "./AuthContext/AuthContext";
 
 const DataProtectionTable = () => {
   // Estado para manejar los filtros y los resultados
@@ -13,7 +14,8 @@ const DataProtectionTable = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-
+    const { userData, idMenu } = useAuth();
+  
   // Función para realizar la solicitud a la API
   const fetchData = async (page = 1) => {
     setLoading(true);
