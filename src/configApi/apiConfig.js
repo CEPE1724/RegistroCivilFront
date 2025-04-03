@@ -2,7 +2,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.137.169:3025/api/v1/";
+const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
 
 
 
@@ -141,5 +141,8 @@ export const APIURL = {
   getTerrenaGestionDomicilio : (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}`,
 
   getacces: (idMenu,idUsuario) => `${API_BASE_URL}menu-item-role/permissionscomponents/${idMenu}/${idUsuario}`,
+
+  getRolesWeb : () => `${API_BASE_URL}rolesweb`,
+  getUsuarioPorROL : (idRol) => `${API_BASE_URL}usuarios/rol/${idRol}`
 
 };
