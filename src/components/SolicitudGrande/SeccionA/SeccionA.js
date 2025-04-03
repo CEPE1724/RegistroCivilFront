@@ -1,25 +1,53 @@
-import React, { useState, useEffect, forwardRef, useCallback, useImperativeHandle } from "react";
+import React, {
+  useState,
+  useEffect,
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+} from "react";
 import { useSnackbar } from "notistack";
 import {
-  fetchNacionalidad, fecthGenero, fecthEstadoCivil, fetchNivelEducacion, fetchProfesion, fetchSituacionLaboral,
-  fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina,
+  fetchNacionalidad,
+  fecthGenero,
+  fecthEstadoCivil,
+  fetchNivelEducacion,
+  fetchProfesion,
+  fetchSituacionLaboral,
+  fetchProvincias,
+  fetchCantones,
+  fetchParroquias,
+  fetchBarrios,
+  fetchActividadEconomina,
   fetchTiempoVivienda,
   fecthTipoVivienda,
   fecthInmueble,
-  fecthCiudadInmueble
+  fecthCiudadInmueble,
 } from "../DatosCliente/apisFetch";
 import { APIURL } from "../../../configApi/apiConfig";
 import axios from "axios";
 import {
-  FaStoreAlt, FaMoneyCheckAlt, FaMapMarkerAlt, FaClock, FaMoneyBillWave,
-  FaRoad, FaHouseUser, FaMapPin, FaRulerCombined, FaIndustry, FaSlidersH, FaStore
+  FaStoreAlt,
+  FaMoneyCheckAlt,
+  FaMapMarkerAlt,
+  FaClock,
+  FaMoneyBillWave,
+  FaRoad,
+  FaHouseUser,
+  FaMapPin,
+  FaRulerCombined,
+  FaIndustry,
+  FaPhoneAlt,
+  FaStore,
+  FaMobileAlt,
 } from "react-icons/fa";
 import { SelectField } from "../../Utils";
 import { LocationModal } from "../LocationModal";
 import { useAuth } from "../../AuthContext/AuthContext";
 const SeccionA = forwardRef((props, ref) => {
-    const { userData, userUsuario } = useAuth();
+  const { userData, userUsuario } = useAuth();
   const { data } = props;
+  console.log('data')
+  console.log(data)
   const { enqueueSnackbar } = useSnackbar();
   console.log("negocios", data);
   const [nombreNegocio, setNombreNegocio] = useState("");
@@ -36,7 +64,7 @@ const SeccionA = forwardRef((props, ref) => {
   const [calleSecundaria, setCalleSecundaria] = useState("");
   const [referenciaUbicacion, setReferenciaUbicacion] = useState("");
   const [actividadNegocio, setActividadNegocio] = useState("");
-    const [openLocationModal, setOpenLocationModal] = useState(false);
+  const [openLocationModal, setOpenLocationModal] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
@@ -56,13 +84,13 @@ const SeccionA = forwardRef((props, ref) => {
     actividadNegocio: data.ActividadEconomicaNegocio || "",
     AfiliadoTributario: data.AfiliadoTributario || false,
     ObligadoContabilidad: data.ObligadoContabilidad || false,
+    telefono: data.TelefonoNegocio || "",
+    celular: data.CelularNegocio || "",
   });
 
   useEffect(() => {
-
     fetchTiempoVivienda(enqueueSnackbar, setTiempoNegocio);
     fetchProvincias(enqueueSnackbar, setProvincia);
-
   }, []);
 
   useEffect(() => {
@@ -84,49 +112,51 @@ const SeccionA = forwardRef((props, ref) => {
   }, [formData.parroquia, enqueueSnackbar]);
 
   const handleOpenModal = () => {
-	const camposBase = [
-		{ dataKey: 'NombreNegocio', formKey: 'nombreNegocio' },
-		{ dataKey: 'idCre_TiempoNegocio', formKey: 'tiempoNegocio' },
-		{ dataKey: 'MetrosCuadrados', formKey: 'metros' },
-		{ dataKey: 'IngresosNegosio', formKey: 'ingresos' },
-		{ dataKey: 'EgresosNegocio', formKey: 'gastos' },
-		{ dataKey: 'idProvinciaNegocio', formKey: 'provincia' },
-		{ dataKey: 'idCantonNegocio', formKey: 'canton' },
-		{ dataKey: 'idParroquiaNegocio', formKey: 'parroquia' },
-		{ dataKey: 'idBarrioNegocio', formKey: 'barrio' },
-		{ dataKey: 'CallePrincipalNegocio', formKey: 'callePrincipal' },
-		{ dataKey: 'NumeroCasaNegocio', formKey: 'numeroCasa' },
-		{ dataKey: 'CalleSecundariaNegocio', formKey: 'calleSecundaria' },
-		{ dataKey: 'ReferenciaUbicacionNegocio', formKey: 'referenciaUbicacion' },
-		{ dataKey: 'ActividadEconomicaNegocio', formKey: 'actividadNegocio' }
-	];
+    const camposBase = [
+      { dataKey: "NombreNegocio", formKey: "nombreNegocio" },
+      { dataKey: "idCre_TiempoNegocio", formKey: "tiempoNegocio" },
+      { dataKey: "MetrosCuadrados", formKey: "metros" },
+      { dataKey: "IngresosNegosio", formKey: "ingresos" },
+      { dataKey: "EgresosNegocio", formKey: "gastos" },
+      { dataKey: "idProvinciaNegocio", formKey: "provincia" },
+      { dataKey: "idCantonNegocio", formKey: "canton" },
+      { dataKey: "idParroquiaNegocio", formKey: "parroquia" },
+      { dataKey: "idBarrioNegocio", formKey: "barrio" },
+      { dataKey: "CallePrincipalNegocio", formKey: "callePrincipal" },
+      { dataKey: "NumeroCasaNegocio", formKey: "numeroCasa" },
+      { dataKey: "CalleSecundariaNegocio", formKey: "calleSecundaria" },
+      { dataKey: "ReferenciaUbicacionNegocio", formKey: "referenciaUbicacion" },
+      { dataKey: "ActividadEconomicaNegocio", formKey: "actividadNegocio" },
+    ];
 
-	const camposInvalidos = camposBase.filter(
-		({ dataKey }) =>
-			data[dataKey] === null ||
-			data[dataKey] === undefined ||
-			data[dataKey] === '' ||
-			data[dataKey] === 0
-	);
+    const camposInvalidos = camposBase.filter(
+      ({ dataKey }) =>
+        data[dataKey] === null ||
+        data[dataKey] === undefined ||
+        data[dataKey] === "" ||
+        data[dataKey] === 0
+    );
 
-	const camposNoLlenados = camposBase.filter(
-		({ formKey }) =>
-			formData[formKey] === null ||
-			formData[formKey] === undefined ||
-			formData[formKey] === '' ||
-			formData[formKey] === 0
-	);
+    const camposNoLlenados = camposBase.filter(
+      ({ formKey }) =>
+        formData[formKey] === null ||
+        formData[formKey] === undefined ||
+        formData[formKey] === "" ||
+        formData[formKey] === 0
+    );
 
-	if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
-		enqueueSnackbar("Para seleccionar la ubicación del negocio, primero debes llenar y guardar correctamente todos los campos requeridos.", {
-			variant: 'warning'
-		});
-		return;
-	}
+    if (camposInvalidos.length > 0 || camposNoLlenados.length > 0) {
+      enqueueSnackbar(
+        "Para seleccionar la ubicación del negocio, primero debes llenar y guardar correctamente todos los campos requeridos.",
+        {
+          variant: "warning",
+        }
+      );
+      return;
+    }
 
-	setOpenLocationModal(prev => !prev);
-};
-
+    setOpenLocationModal((prev) => !prev);
+  };
 
   const handleFormChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -135,7 +165,7 @@ const SeccionA = forwardRef((props, ref) => {
 
     if (invalidCharsRegex.test(value)) {
       // Si hay caracteres no permitidos, los eliminamos y actualizamos formData y formErrors
-      const cleanedValue = value.replace(invalidCharsRegex, '');
+      const cleanedValue = value.replace(invalidCharsRegex, "");
 
       setFormData((prevState) => ({
         ...prevState,
@@ -144,7 +174,7 @@ const SeccionA = forwardRef((props, ref) => {
 
       setErrors((prevErrors) => ({
         ...prevErrors,
-        [name]: 'Este campo contiene caracteres no permitidos',
+        [name]: "Este campo contiene caracteres no permitidos",
       }));
 
       return;
@@ -165,25 +195,30 @@ const SeccionA = forwardRef((props, ref) => {
       });
     }
 
-    if (name === 'provincia' && value) {
+    if (name === "provincia" && value) {
       fetchCantones(value, enqueueSnackbar, setCanton);
       setCanton([]);
       setParroquia([]);
       setBarrio([]);
-      setFormData((prev) => ({ ...prev, canton: '', parroquia: '', barrio: '' }));
+      setFormData((prev) => ({
+        ...prev,
+        canton: "",
+        parroquia: "",
+        barrio: "",
+      }));
     }
 
-    if (name === 'canton' && value) {
+    if (name === "canton" && value) {
       fetchParroquias(value, enqueueSnackbar, setParroquia);
       setParroquia([]);
       setBarrio([]);
-      setFormData((prev) => ({ ...prev, parroquia: '', barrio: '' }));
+      setFormData((prev) => ({ ...prev, parroquia: "", barrio: "" }));
     }
 
-    if (name === 'parroquia' && value) {
+    if (name === "parroquia" && value) {
       fetchBarrios(value, enqueueSnackbar, setBarrio);
       setBarrio([]);
-      setFormData((prev) => ({ ...prev, barrio: '' }));
+      setFormData((prev) => ({ ...prev, barrio: "" }));
     }
   };
 
@@ -192,40 +227,68 @@ const SeccionA = forwardRef((props, ref) => {
     let showSnackbar = false; // Esta variable controla si mostramos un snackbar
     if (!formData.nombreNegocio || formData.nombreNegocio.length <= 3) {
       newErrors.nombreNegocio = "Este campo es obligatorio";
-      if (!showSnackbar) { // Solo mostrar el snackbar si aún no se ha mostrado uno
-        enqueueSnackbar("El nombre del negocio debe tener más de 3 caracteres", { variant: "error" });
+      if (!showSnackbar) {
+        // Solo mostrar el snackbar si aún no se ha mostrado uno
+        enqueueSnackbar(
+          "El nombre del negocio debe tener más de 3 caracteres",
+          { variant: "error" }
+        );
         showSnackbar = true; // Asegura que solo se muestre un snackbar
       }
     }
 
-    if (!formData.tiempoNegocio || formData.tiempoNegocio <= 0 || formData.tiempoNegocio > 100000000000) {
+    if (
+      !formData.tiempoNegocio ||
+      formData.tiempoNegocio <= 0 ||
+      formData.tiempoNegocio > 100000000000
+    ) {
       newErrors.tiempoNegocio = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("El tiempo del negocio debe ser un número mayor a 0", { variant: "error" });
+        enqueueSnackbar("El tiempo del negocio debe ser un número mayor a 0", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
-    if (!formData.metros || formData.metros <= 0 || formData.metros > 100000000000) {
+    if (
+      !formData.metros ||
+      formData.metros <= 0 ||
+      formData.metros > 100000000000
+    ) {
       newErrors.metros = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("Los metros deben ser un número mayor a 0", { variant: "error" });
+        enqueueSnackbar("Los metros deben ser un número mayor a 0", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
-    if (!formData.ingresos || formData.ingresos <= 0 || formData.ingresos > 100000000000) {
+    if (
+      !formData.ingresos ||
+      formData.ingresos <= 0 ||
+      formData.ingresos > 100000000000
+    ) {
       newErrors.ingresos = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("Los ingresos deben ser un número mayor a 0", { variant: "error" });
+        enqueueSnackbar("Los ingresos deben ser un número mayor a 0", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
-    if (!formData.gastos || formData.gastos <= 0 || formData.gastos > 100000000000) {
+    if (
+      !formData.gastos ||
+      formData.gastos <= 0 ||
+      formData.gastos > 100000000000
+    ) {
       newErrors.gastos = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("Los gastos deben ser un número mayor a 0", { variant: "error" });
+        enqueueSnackbar("Los gastos deben ser un número mayor a 0", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
@@ -233,7 +296,9 @@ const SeccionA = forwardRef((props, ref) => {
     if (formData.gastos > formData.ingresos) {
       newErrors.gastos = "Los gastos no pueden ser mayores a los ingresos";
       if (!showSnackbar) {
-        enqueueSnackbar("Los gastos no pueden ser mayores a los ingresos", { variant: "error" });
+        enqueueSnackbar("Los gastos no pueden ser mayores a los ingresos", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
@@ -273,7 +338,9 @@ const SeccionA = forwardRef((props, ref) => {
     if (formData.barrio.length > 100) {
       newErrors.barrio = "El barrio no debe exceder los 100 caracteres";
       if (!showSnackbar) {
-        enqueueSnackbar("El barrio no debe exceder los 100 caracteres", { variant: "error" });
+        enqueueSnackbar("El barrio no debe exceder los 100 caracteres", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
@@ -281,15 +348,21 @@ const SeccionA = forwardRef((props, ref) => {
     if (!formData.callePrincipal) {
       newErrors.callePrincipal = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("La calle principal es obligatoria", { variant: "error" });
+        enqueueSnackbar("La calle principal es obligatoria", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
     if (formData.callePrincipal.length > 100) {
-      newErrors.callePrincipal = "La calle principal no debe exceder los 100 caracteres";
+      newErrors.callePrincipal =
+        "La calle principal no debe exceder los 100 caracteres";
       if (!showSnackbar) {
-        enqueueSnackbar("La calle principal no debe exceder los 100 caracteres", { variant: "error" });
+        enqueueSnackbar(
+          "La calle principal no debe exceder los 100 caracteres",
+          { variant: "error" }
+        );
         showSnackbar = true;
       }
     }
@@ -297,7 +370,9 @@ const SeccionA = forwardRef((props, ref) => {
     if (!formData.numeroCasa) {
       newErrors.numeroCasa = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("El número de casa es obligatorio", { variant: "error" });
+        enqueueSnackbar("El número de casa es obligatorio", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
@@ -305,15 +380,21 @@ const SeccionA = forwardRef((props, ref) => {
     if (!formData.calleSecundaria) {
       newErrors.calleSecundaria = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("La calle secundaria es obligatoria", { variant: "error" });
+        enqueueSnackbar("La calle secundaria es obligatoria", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
     if (formData.calleSecundaria.length > 100) {
-      newErrors.calleSecundaria = "La calle secundaria no debe exceder los 100 caracteres";
+      newErrors.calleSecundaria =
+        "La calle secundaria no debe exceder los 100 caracteres";
       if (!showSnackbar) {
-        enqueueSnackbar("La calle secundaria no debe exceder los 100 caracteres", { variant: "error" });
+        enqueueSnackbar(
+          "La calle secundaria no debe exceder los 100 caracteres",
+          { variant: "error" }
+        );
         showSnackbar = true;
       }
     }
@@ -321,15 +402,21 @@ const SeccionA = forwardRef((props, ref) => {
     if (!formData.referenciaUbicacion) {
       newErrors.referenciaUbicacion = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("La referencia de ubicación es obligatoria", { variant: "error" });
+        enqueueSnackbar("La referencia de ubicación es obligatoria", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
     if (formData.referenciaUbicacion.length > 300) {
-      newErrors.referenciaUbicacion = "La referencia de ubicación no debe exceder los 300 caracteres";
+      newErrors.referenciaUbicacion =
+        "La referencia de ubicación no debe exceder los 300 caracteres";
       if (!showSnackbar) {
-        enqueueSnackbar("La referencia de ubicación no debe exceder los 300 caracteres", { variant: "error" });
+        enqueueSnackbar(
+          "La referencia de ubicación no debe exceder los 300 caracteres",
+          { variant: "error" }
+        );
         showSnackbar = true;
       }
     }
@@ -337,32 +424,50 @@ const SeccionA = forwardRef((props, ref) => {
     if (!formData.actividadNegocio) {
       newErrors.actividadNegocio = "Este campo es obligatorio";
       if (!showSnackbar) {
-        enqueueSnackbar("La actividad del negocio es obligatoria", { variant: "error" });
+        enqueueSnackbar("La actividad del negocio es obligatoria", {
+          variant: "error",
+        });
         showSnackbar = true;
       }
     }
 
     if (formData.actividadNegocio.length > 300) {
-      newErrors.actividadNegocio = "La actividad del negocio no debe exceder los 300 caracteres";
+      newErrors.actividadNegocio =
+        "La actividad del negocio no debe exceder los 300 caracteres";
       if (!showSnackbar) {
-        enqueueSnackbar("La actividad del negocio no debe exceder los 300 caracteres", { variant: "error" });
+        enqueueSnackbar(
+          "La actividad del negocio no debe exceder los 300 caracteres",
+          { variant: "error" }
+        );
         showSnackbar = true;
       }
     }
+
+		// if (!formData.telefono && !formData.celular) {
+
+		// 	newErrors.telefono = "Debes proporcionar al menos un teléfono o celular";
+		// 	newErrors.celular = "Debes proporcionar al menos un teléfono o celular";
+
+		// 	if (!showSnackbar) {
+		// 		enqueueSnackbar("Por favor, proporciona al menos un teléfono o celular", { variant: "error" });
+		// 		showSnackbar = true;
+		// 	}
+		// }
+
 
     // Actualizamos los errores en el estado
     setErrors(newErrors);
 
     // Retorna si no hay errores en el formulario
     return Object.keys(newErrors).length === 0;
-
-
   };
 
   useImperativeHandle(ref, () => ({
     validateForm,
     getFormData: () => formData,
   }));
+
+  console.log("Form data:", formData)
 
   return (
     <div className="p-6">
@@ -460,7 +565,6 @@ const SeccionA = forwardRef((props, ref) => {
             name="provincia"
             error={errors.provincia}
           />
-
         </div>
 
         <div className="col-span-1">
@@ -505,15 +609,45 @@ const SeccionA = forwardRef((props, ref) => {
             type="button"
             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
             name="ubicacionDomicilio"
-            onClick={() => handleOpenModal('ubicacionDomicilio')}
+            onClick={() => handleOpenModal("ubicacionDomicilio")}
           >
             Ubicacion Trabajo
           </button>
         </div>
 
+        <div className="lg:col-span-1">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaPhoneAlt className="mr-2 text-primaryBlue" />
+            Teléfono
+          </label>
+          <input
+            type="text"
+            name="telefono"
+            value={formData.telefono}
+            onChange={handleFormChange}
+            className="solcitudgrande-style"
+          />
+          {errors.telefono && (
+            <span className="text-red-500 text-xs">{errors.telefono}</span>
+          )}
+        </div>
 
-
-        <div className="lg:col-span-1"></div>
+        <div className="lg:col-span-1">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMobileAlt className="mr-2 text-primaryBlue" />
+            Celular
+          </label>
+          <input
+            type="text"
+            name="celular"
+            value={formData.celular}
+            onChange={handleFormChange}
+            className="solcitudgrande-style"
+          />
+          {errors.celular && (
+            <span className="text-red-500 text-xs">{errors.celular}</span>
+          )}
+        </div>
 
         {/* Tercera fila: Calle Principal, Número Casa, Calle Secundaria, Referencia Ubicación */}
         <div className="flex flex-col">
@@ -530,7 +664,9 @@ const SeccionA = forwardRef((props, ref) => {
             name="callePrincipal"
           />
           {errors.callePrincipal && (
-            <span className="text-red-500 text-xs">{errors.callePrincipal}</span>
+            <span className="text-red-500 text-xs">
+              {errors.callePrincipal}
+            </span>
           )}
         </div>
 
@@ -583,7 +719,9 @@ const SeccionA = forwardRef((props, ref) => {
             required
           />
           {errors.referenciaUbicacion && (
-            <span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>
+            <span className="text-red-500 text-xs">
+              {errors.referenciaUbicacion}
+            </span>
           )}
         </div>
 
@@ -599,12 +737,12 @@ const SeccionA = forwardRef((props, ref) => {
             onChange={handleFormChange}
             name="actividadNegocio"
             required
-
           />
           {errors.actividadNegocio && (
-            <span className="text-red-500 text-xs">{errors.actividadNegocio}</span>
+            <span className="text-red-500 text-xs">
+              {errors.actividadNegocio}
+            </span>
           )}
-
         </div>
 
         {/* Opciones */}
@@ -619,18 +757,18 @@ const SeccionA = forwardRef((props, ref) => {
           </label>
         </div>
       </div>
-        <LocationModal
-              isOpen={() => handleOpenModal()}
-              openLocationModal={openLocationModal}
-              locationType={null}
-              locationData={null}
-              onLocationChange={null}
-              userSolicitudData={data}
-              tipo={2}
-              userData={userData}
-            />
+      <LocationModal
+        isOpen={() => handleOpenModal()}
+        openLocationModal={openLocationModal}
+        locationType={null}
+        locationData={null}
+        onLocationChange={null}
+        userSolicitudData={data}
+        tipo={2}
+        userData={userData}
+      />
     </div>
-  )
+  );
 });
 
 export default SeccionA;

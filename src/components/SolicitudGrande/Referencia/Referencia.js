@@ -321,6 +321,7 @@ const Referencias = forwardRef((props, ref) => {
           idParentesco: getParsedValue(formData.parentesco),
           ApellidoPaterno: formData.apellidoPaterno,
           PrimerNombre: formData.primerNombre,
+		  SegundoNombre: formData.segundoNombre,
           idProvincia: getParsedValue(formData.provincia),
           idCanton: getParsedValue(formData.canton),
           Celular: formData.celular,
@@ -341,9 +342,6 @@ const Referencias = forwardRef((props, ref) => {
       console.error("Error al guardar los datos de nacimiento", error);
     }
   };
-
-
-
 
 
   return (

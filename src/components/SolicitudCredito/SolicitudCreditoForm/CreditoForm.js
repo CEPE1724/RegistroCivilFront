@@ -347,7 +347,7 @@ export default function CreditoForm() {
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-      Foto: Yup.string().min(5, "Debe tener al menos 5 caracteres").required("Por favor sube una foto"),
+      Foto: Yup.string(),
 
       bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
 
