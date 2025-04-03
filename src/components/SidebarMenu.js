@@ -19,11 +19,13 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; // Flecha
 import Collapse from "@mui/material/Collapse";
 import axios from "axios"; // Importando axios
 import { APIURL } from "../configApi/apiConfig";
-
+import { useAuth } from "./AuthContext/AuthContext"; // Importando el contexto de autenticación
 export function SwipeableTemporaryDrawer({ userDataToken }) {
   const [open, setOpen] = useState(false);
   const [openSubMenus, setOpenSubMenus] = useState({});
   const [userData, setUserData] = useState([]);
+  const { setMenuId } = useAuth();  // Obtener la función de actualización
+ 
 
   // Fetching data from the API with axios
   useEffect(() => {
@@ -75,14 +77,21 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
     }
   };
 
+  const handleMenuClick = ( id, children) => {
+   
+    setMenuId(id); // Actualizamos el id del menú al hacer clic
+    if (children) {
+      handleSubMenuToggle(id); // Gestionamos el toggle del submenú si hay hijos
+    }
+  };
   // Componente de Item de Menú
-  const MenuItem = ({ to, icon, text, id, children }) => (
+  const MenuItem = ({  to, icon, text, id, children }) => (
     <div>
       <ListItem disablePadding>
         <ListItemButton
           component={to ? Link : 'button'} // Usamos Link solo si `to` está definido
           to={to}  // Usamos la ruta si existe
-          onClick={() => children && handleSubMenuToggle(id)} // Solo gestionamos el click si hay submenú
+          onClick={ () => handleMenuClick( id, children)} // Manejo de clics
         >
           <ListItemIcon>{icon}</ListItemIcon>
           <ListItemText primary={text} />
@@ -99,7 +108,7 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
             {children.map((subMenu) => (
               <MenuItem
                 key={subMenu.i_idmenu_items}
-                to={subMenu.i_route} // Aquí ahora se usa la ruta correcta para submenú
+                to={subMenu.i_route} // Aquí ahora se usa la ruta correcta para submenú//
                 icon={getIcon(subMenu.i_icon)}
                 text={subMenu.i_name}
                 id={subMenu.i_idmenu_items}
@@ -117,10 +126,8 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
     const { i_idmenu_items, i_name, i_route, i_icon } = menuItem;
     const icon = getIcon(i_icon);
     const subMenu = createSubMenu(i_idmenu_items); // Creando los submenús automáticamente
-
     return (
       <MenuItem
-        key={i_idmenu_items}
         to={i_route || '#'} // Ahora los menús principales también tienen su ruta
         icon={icon}
         text={i_name}

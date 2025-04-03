@@ -13,6 +13,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null); // Para almacenar los datos del usuario
   const [userUsuario, setUserUsuario] = useState(null); // Para almacenar los datos de la API 'get_nomina'
+  const [idMenu, setIdMenu] = useState(null);
+
   const navigate = useNavigate();
 
   // Effect para revisar la expiración del token
@@ -91,7 +93,9 @@ export const AuthProvider = ({ children }) => {
     setIsLoggedIn(true);
     setIsSessionExpired(false);
   };
-
+  const setMenuId = (id) => {
+    setIdMenu(id);
+  };
   // Función de logout
   const logout = () => {
     localStorage.removeItem("token");
@@ -115,6 +119,8 @@ export const AuthProvider = ({ children }) => {
         userUsuario, // Datos obtenidos de 'get_nomina'
         login,
         logout,
+        idMenu,
+         setMenuId,
       }}
     >
       {children}

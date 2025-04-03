@@ -75,6 +75,7 @@ import TrabajoModal from "./TrabajoModal";
 import { set } from "react-hook-form";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+ 
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const [dataBodega, setDataBodega] = useState([]);
@@ -115,7 +116,8 @@ export function ListadoSolicitud() {
   const [idsTerrenas, setIdsTerrenas] = useState([]);
 
   const navigate = useNavigate();
-  const { userData } = useAuth();
+  const { userData, idMenu } = useAuth();
+  console.log("idMenu", idMenu);
   const bodegas = data || []; // Safely access the bodegas data
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
@@ -616,6 +618,7 @@ export function ListadoSolicitud() {
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
+        <label className="text-gray-700 font-semibold"> Buscar por nombre{idMenu}</label>
         <TextField
           label="Fecha Desde"
           type="date"
