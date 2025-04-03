@@ -9,6 +9,7 @@ export default function Layout({ children }) {
   const { userData, isLoggedIn } = useAuth();
 
  console.log(userData);
+ 
 
   return (
     <>

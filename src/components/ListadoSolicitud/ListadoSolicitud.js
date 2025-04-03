@@ -90,6 +90,7 @@ export function ListadoSolicitud() {
   const [searchDateTo, setSearchDateTo] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
+  const [openModalPendiente, setOpenModalPendiente] = useState(false);
   const [closeVerificacionModal, setCloseVerificacionModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
@@ -233,12 +234,21 @@ export function ListadoSolicitud() {
 
       } else {
         // Si hay datos, determina qué modal abrir en función del tipo y los datos recibidos
-        if (tipo === "domicilio") {
+        if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio> 0) {
           setDomicilioData(idsTerrenas); // Asigna los datos necesarios para el modal de domicilio
           setDomicilioModalOpen(true);
-        } else if (tipo === "trabajo") {
+          
+        } 
+         if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo> 0) {
           setTrabajoData(idsTerrenas); // Asigna los datos necesarios para el modal de trabajo
           setTrabajoModalOpen(true);
+        }
+
+        if ( tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio== 0 ){
+          setOpenModalPendiente(true);
+        }
+        if ( tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo== 0 ){
+          setOpenModalPendiente(true);
         }
       }
     } catch (error) {
@@ -1160,6 +1170,17 @@ export function ListadoSolicitud() {
 
       <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal} idsTerrenas={idsTerrenas}/>
 
+      <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
+        <DialogTitle>Verificación Pendiente</DialogTitle>
+        <DialogContent>
+          <Typography>Verificación pendiente por el personal asignado.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModalPendiente(false)} color="primary">
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </div>
 

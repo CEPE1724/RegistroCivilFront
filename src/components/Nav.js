@@ -5,7 +5,7 @@ import DropDown from "./DropDows";
 
 const Nav = ({ showButton, userData }) => {
   const LogoIco = "/img/logo.webp"; // Ruta relativa desde la carpeta public
-
+  console.log("userData cepeda", userData);
   return (
     <nav className="lg:px-12 w-full h-20 bg-morado px-4 py-3 text-white flex items-center justify-between static">
       <div className="flex items-center">
