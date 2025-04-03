@@ -27,10 +27,11 @@ import EditIcon from "@mui/icons-material/Edit";
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
-	const obtenerEstadoVerificacion = (estado) => {
-		const estadosPorTipo = {
-		  1: { // Documental
-			1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
+  const obtenerEstadoVerificacion = (estado) => {
+    // Definir los estados según el Tipo de solicitud de crédito
+    const estadosPorTipo = {
+      1: { // Documental
+        1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
 			2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
 			3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
 			4: { label: "Conyuge", icon: <FavoriteIcon />, color: yellow[500] },
@@ -40,28 +41,35 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 			8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[600] },
 			9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[600] },
 			10: { label: "Completado", icon: <CheckCircleIcon />, color: green[500] },
-		  },
-		  2: { // Verificación
-			1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
+        11: { label: "Corrección", icon: <EventIcon />, color: red[500] },
+        12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
+        13: { label: "Rechazado", icon: <InfoIcon />, color: red[500] },
+        
+        
+        
+        /*11: "CORRECIÓN",
+        12: "APROBADO",
+        13: "RECHAZADO",*/
+      },
+      2: { // Verificación
+        1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
 			2: { label: "En Revisión", icon: <SearchIcon />, color: green[500] },
 			3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
 			4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
-		  },
-		  3: { // Procesos
-			1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
+      },
+      3: { // Procesos
+        1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
 			2: { label: "Revisión", icon: <VisibilityIcon />, color: grey[500] },
 			3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
 			4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
 			5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
-		  }
-		};
-	
-		return estadosPorTipo[estado.Tipo]?.[estado.idEstadoVerificacionDocumental] || {
-		  label: "Desconocido",
-		  icon: null,
-		  color: grey[500]
-		};
-	  };
+      }
+    };
+
+    // Buscar el estado correspondiente según el tipo de solicitud y estado
+    return estadosPorTipo[estado.Tipo]?.[estado.idEstadoVerificacionDocumental] || { label: "Desconocido", icon: null, color: grey[500] };
+  };
+
 
   return (
     <Popover

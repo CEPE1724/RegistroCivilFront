@@ -23,6 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { useAuth } from "./AuthContext/AuthContext";
 
 const CiudadanosTable = () => {
   const [ciudadanos, setCiudadanos] = useState([]);
@@ -36,6 +37,8 @@ const CiudadanosTable = () => {
   const [selectedCiudadano, setSelectedCiudadano] = useState(null); // Estado para el ciudadano seleccionado
   const [totalRecords, setTotalRecords] = useState(0); // Total de registros de la API
   const [totalPages, setTotalPages] = useState(0); // Total de páginas
+    const { userData, idMenu } = useAuth();
+  
 
   // Función para obtener ciudadanos con filtros y paginación
   const fetchCiudadanos = async () => {

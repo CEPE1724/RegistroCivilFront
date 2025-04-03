@@ -73,6 +73,7 @@ import Domicilio from "../SolicitudGrande/DatosCliente/Domicilio/Domicilio";
 import DomicilioModal from "./DomicilioModal";
 import TrabajoModal from "./TrabajoModal";
 import { set } from "react-hook-form";
+import { Api } from "@mui/icons-material";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
  
@@ -117,6 +118,9 @@ export function ListadoSolicitud() {
 
   const navigate = useNavigate();
   const { userData, idMenu } = useAuth();
+
+
+  console.log("userDataaaaaaa", userData);
   const bodegas = data || []; // Safely access the bodegas data
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
@@ -128,13 +132,39 @@ export function ListadoSolicitud() {
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
-  const estaDeshabilitado = (data) => {
-    return data.resultado === 0;
-  };
-
+  
  const verificacionSolicitud = (data) => {
   return data.idEstadoVerificacionSolicitud !== 10;
   };
+
+
+  const estaDeshabilitado = (data) => {
+    return data.resultado === 0; 
+  };
+
+
+  const estadoMap = {
+    1: "PENDIENTE",
+    10: "REVISIÓN",
+    11: "CORRECIÓN",
+    12: "APROBADO",
+    13: "RECHAZADO",
+  };
+  const estadoDeshabilitadoporPermisos = (data) => 
+    {
+       
+      // Obtener el estado correspondiente al ID
+  const estado = estadoMap[data.idEstadoVerificacionSolicitud];
+
+  if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
+
+  // Buscar el permiso correspondiente en la lista de permisos
+  const permiso = permisos.find(p => p.Permisos === `EDITAR SOLICITUD ${estado}`);
+
+  // Retornar true si no existe el permiso o si no está activo
+  return !permiso || !permiso.Activo;
+
+    }
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -175,13 +205,43 @@ export function ListadoSolicitud() {
           fetchTipoConsulta(),
           fetchBodega(),
           fetchTipoCliente(),
+          permissionscomponents(idMenu, userData.idUsuario)
+
         ]);
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
       }
     };
+    ///permissionscomponents(idMenu, userData.idUsuario);
     fetchData();
   }, []);
+
+  const [permisos, setPermisos] = useState([]);
+
+  const permissionscomponents = async (idMenu, idUsuario) => {
+    try {
+      const url = APIURL.getacces(idMenu, idUsuario);
+      console.log("url permisos", url);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setPermisos(data);
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching permissions components:", error);
+    }
+  };
+
+
+  console.log("permisos", permisos);
+
+
 
   const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
     try {
@@ -329,8 +389,15 @@ export function ListadoSolicitud() {
         return <CreditScoreIcon sx={{ color: "gray" }} />;
       case 9: // FACTORES DE CRÉDITO
         return <AssessmentIcon sx={{ color: "gray" }} />;
-      case 10: // COMPLETADO
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />; // Verde para COMPLETADO
+      case 10: // verificaciomn
+       return <VerifiedIcon sx={{ color: "gray" }} />;
+      case 11: 
+      return <SettingsPhoneIcon sx={{ color: "#FFC107" }} />; // Amarillo para GESTIONANDO
+      case 12:
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />; 
+      case 13:
+        return <PendingActionsIcon sx={{ color: "#DC3545" }} />; // Rojo para RECHAZADO
+ // Verde para COMPLETADO
       default: // Default icon si el estado es desconocido
         return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
     }
@@ -790,7 +857,7 @@ export function ListadoSolicitud() {
                         <IconButton
                           onClick={() => handlesolicitud(data)}
                           disabled={
-                           estaDeshabilitado(data) 
+                           estaDeshabilitado(data) || estadoDeshabilitadoporPermisos(data)
                           }
                           sx={{ opacity: estaDeshabilitado(data) }}
 
