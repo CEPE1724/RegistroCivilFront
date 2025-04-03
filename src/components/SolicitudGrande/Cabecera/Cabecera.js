@@ -68,6 +68,8 @@ export function Cabecera() {
   console.log("idSolicitud", clienteData);
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
+
+  
  
 
 
@@ -131,6 +133,9 @@ export function Cabecera() {
       (clienteData.idSituacionLaboral === 1 || checkNegocio)  // Verificar que el negocio se validó solo si corresponde
     ) {
       setCheckCompletado(true);  // Todo se completó correctamente
+    }
+    if (data.idEstadoVerificacionSolicitud === 10) {
+      setCheckCompletado(false);
     }
   }, [clienteData, checkDatos, checkDomicilio, checkConyuge, checkReferencias, checkTrabajo, checkNegocio]);
 
@@ -600,7 +605,9 @@ export function Cabecera() {
     { name: "Dependiente", icon: <LogoutIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkTrabajo },
     { name: "Información de Crédito", icon: <SaveIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkInformacionCredito },
     { name: "Factores de Crédito", icon: <PrintIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkFactoresCredito },
-    { name: "Completado", icon: <CheckIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: false },
+    { name: "Enviar a Verificar", icon: <CheckIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: false },
+
+
     // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
   ];
 
@@ -625,7 +632,7 @@ export function Cabecera() {
         return clienteData.idSituacionLaboral != 1 ? <SeccionA ref={datosNegocio} data={clienteData} /> : null;
       case "Factores de Crédito":
         return <FactoresCredito ref={datosInformacionCredito} data={clienteData} />;
-      case "Completado":
+      case "Enviar a Verificar":
         {/*} case "Verificación":
         return <Verificacion />;*/}
       case "Información de Crédito":
@@ -668,17 +675,98 @@ export function Cabecera() {
     }
   };
 
+  const patchSolicitudCorrecion = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          idEstadoVerificacionSolicitud: 11,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+
+
+  const patchSolicitudAceptar = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          idEstadoVerificacionSolicitud: 12,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+
+
+  const patchSolicitudRechazar = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          idEstadoVerificacionSolicitud: 13,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+
 
 
   // Función para confirmar la acción (enviar)
   const handleConfirm = () => {
    patchSolicitud(idSolicitud);
+   fetchInsertarDatos(10);
    
     closeModal(); // Cerrar el modal después de confirmar
   };
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-    if (tab === "Completado") {
+    if (tab === "Enviar a Verificar") {
       openModal();
     }
   };
@@ -722,12 +810,14 @@ export function Cabecera() {
   };
   const handleSave = () => {
     let tipoDato = 0;
+    let isValidSumit = false;
     // Obtenemos los datos del formulario de acuerdo a su tab 
     if (activeTab === "Datos Cliente") {
       tipoDato = 2;
       const formData = datosRef.current.getFormData();
       const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
+        isValidSumit = true;
         fetchSaveDatosNacimiento(formData);
         setActiveTab("Domicilio");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
@@ -741,6 +831,8 @@ export function Cabecera() {
       const isValid = datosDomicilioRef.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
+        isValidSumit = true;
+
         fetchSaveDatosDomicilio(formData);
         setActiveTab("Datos Conyuge");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
@@ -754,6 +846,8 @@ export function Cabecera() {
       const isValid = datosConyuge.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
+        isValidSumit = true;
+
         fetchSaveDatosConyuge(formData);
         setActiveTab("Referencias");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
@@ -768,6 +862,8 @@ export function Cabecera() {
       const isValid = datosTrabajo.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
+        isValidSumit = true;
+
         fetchSaveDatosTrabajo(formData);
         setActiveTab("Domicilio");
       }
@@ -779,11 +875,15 @@ export function Cabecera() {
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       console.log("datos negocio", formData);
       if (isValid) {
+        isValidSumit = true;
+
         fetchSaveDatosNegocio(formData);
         setActiveTab("Domicilio");
       }
     }
-    fetchInsertarDatos(tipoDato); // Llamar a la función para insertar datos
+    if (isValidSumit) {
+    fetchInsertarDatos(tipoDato);
+    } // Llamar a la función para insertar datos
   };
 
   const fetchInsertarDatos = async (tipo) => {
@@ -1049,6 +1149,52 @@ export function Cabecera() {
     handleValidate
   }));
 
+
+
+  const handleAceptar = () => {
+    // Lógica para aceptar la solicitud
+    enqueueSnackbar("Solicitud aceptada.", { variant: "success" });
+    patchSolicitudAceptar(idSolicitud);
+    fetchInsertarDatos(12);
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+
+  };
+  
+  const handleRechazar = () => {
+    patchSolicitudRechazar(idSolicitud);
+    fetchInsertarDatos(13);
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+
+    // Lógica para rechazar la solicitud
+  };
+  
+  const handleCorreccion = () => {
+patchSolicitudCorrecion(idSolicitud);
+    fetchInsertarDatos(11);
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+    // Lógica para enviar la solicitud a corrección
+  };
+
+
+  const handleReconfirm = () => {
+    patchSolicitud(idSolicitud);
+    fetchInsertarDatos(10);
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+    // Lógica para enviar la solicitud a corrección
+  }
+  
+
+
+  
+
   return (
     <>
       {loading ? (
@@ -1059,7 +1205,8 @@ export function Cabecera() {
 
             {tabs.map(({ name, icon, icons_2, check }) => (
               // Verificamos si el nombre es 'Completado' y si checkCompletado es true
-              (name === "Completado" ? checkCompeletado : true) && (
+              (name === "Enviar a Verificar" ? checkCompeletado :true) && 
+             (
                 <button
                   key={name}
                   onClick={() => handleTabClick(name)}
@@ -1074,6 +1221,49 @@ export function Cabecera() {
                 </button>
               )
             ))}
+              {/* Botones adicionales si idEstadoVerificacionSolicitud es 10 */}
+ 
+              {data?.idEstadoVerificacionSolicitud === 10 && (
+  <>
+    <button
+      onClick={() => handleAceptar()}
+      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                 hover:bg-green-600 hover:text-white transition duration-200"
+    >
+      ✅ Aceptar
+    </button>
+
+    <button
+      onClick={() => handleRechazar()}
+      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                 hover:bg-red-600 hover:text-white transition duration-200"
+    >
+      ❌ Rechazar
+    </button>
+
+    <button
+      onClick={() => handleCorreccion()}
+      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                 hover:bg-yellow-500 hover:text-white transition duration-200"
+    >
+      ✏️ Corrección
+    </button>
+  </>
+)}
+
+
+{data?.idEstadoVerificacionSolicitud === 11 && (
+  <>
+    
+    <button
+      onClick={() => handleReconfirm()}
+      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                 hover:bg-yellow-500 hover:text-white transition duration-200"
+    >
+  Volver a enviar a revision 
+    </button>
+  </>
+)}
 
           </div>
 

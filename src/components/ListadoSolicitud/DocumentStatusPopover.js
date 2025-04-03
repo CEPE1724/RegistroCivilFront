@@ -32,7 +32,16 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         7: { label: "Dependiente", icon: <EventIcon />, color: blue[600] },
         8: { label: "Información De Crédito", icon: <EventIcon />, color: green[600] },
         9: { label: "Factores De Crédito", icon: <PhoneIcon />, color: yellow[600] },
-        10: { label: "Completado", icon: <PhoneIcon />, color: green[500] },
+        10: { label: "Revision", icon: <PhoneIcon />, color: green[500] },
+        11: { label: "Corrección", icon: <EventIcon />, color: red[500] },
+        12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
+        13: { label: "Rechazado", icon: <InfoIcon />, color: red[500] },
+        
+        
+        
+        /*11: "CORRECIÓN",
+        12: "APROBADO",
+        13: "RECHAZADO",*/
       },
       2: { // Verificación
         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },

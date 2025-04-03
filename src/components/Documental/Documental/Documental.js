@@ -19,6 +19,8 @@ import {
 } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
 import { get, set } from "react-hook-form";
 
+
+
 export function Documental({
   id,
   NumeroSolicitud,
@@ -30,7 +32,7 @@ export function Documental({
   vendedor,
   consulta,
 }) {
-  const { userData, userUsuario } = useAuth();
+  const { userData, userUsuario , idMenu } = useAuth();
   const navigate = useNavigate();
   console.log("userData", userData);
   const { state } = useLocation();
