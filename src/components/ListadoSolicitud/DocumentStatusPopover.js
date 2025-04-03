@@ -7,15 +7,23 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
-import InfoIcon from "@mui/icons-material/Info";
 import VerifiedIcon from "@mui/icons-material/Verified";
-import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import BusinessIcon from "@mui/icons-material/Business";
-import FolderIcon from "@mui/icons-material/Folder";
-import PhoneIcon from "@mui/icons-material/Phone";
 import { green, blue, red, yellow, grey } from '@mui/material/colors';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
+import PersonIcon from "@mui/icons-material/Person";
+import HomeIcon from "@mui/icons-material/Home";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import ContactsIcon from "@mui/icons-material/Contacts";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import ChildCareIcon from "@mui/icons-material/ChildCare";
+import CreditScoreIcon from "@mui/icons-material/CreditScore";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import SearchIcon from "@mui/icons-material/Search";
+import CancelIcon from "@mui/icons-material/Cancel";
+import SettingsIcon from "@mui/icons-material/Settings";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
@@ -24,15 +32,15 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
     const estadosPorTipo = {
       1: { // Documental
         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
-        2: { label: "Datos Cliente", icon: <BusinessIcon />, color: blue[500] },
-        3: { label: "Domicilio", icon: <FolderIcon />, color: green[500] },
-        4: { label: "Conyuge", icon: <PhoneIcon />, color: yellow[500] },
-        5: { label: "Referencias", icon: <EventIcon />, color: red[500] },
-        6: { label: "Negocios", icon: <EventIcon />, color: grey[600] },
-        7: { label: "Dependiente", icon: <EventIcon />, color: blue[600] },
-        8: { label: "Información De Crédito", icon: <EventIcon />, color: green[600] },
-        9: { label: "Factores De Crédito", icon: <PhoneIcon />, color: yellow[600] },
-        10: { label: "Revision", icon: <PhoneIcon />, color: green[500] },
+			2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
+			3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
+			4: { label: "Conyuge", icon: <FavoriteIcon />, color: yellow[500] },
+			5: { label: "Referencias", icon: <ContactsIcon />, color: red[500] },
+			6: { label: "Negocios", icon: <StorefrontIcon />, color: grey[600] },
+			7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[600] },
+			8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[600] },
+			9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[600] },
+			10: { label: "Completado", icon: <CheckCircleIcon />, color: green[500] },
         11: { label: "Corrección", icon: <EventIcon />, color: red[500] },
         12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
         13: { label: "Rechazado", icon: <InfoIcon />, color: red[500] },
@@ -45,22 +53,23 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       },
       2: { // Verificación
         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
-        2: { label: "En Revisión", icon: <CheckCircleIcon />, color: green[500] },
-        3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-        4: { label: "Rechazado", icon: <InfoIcon />, color: red[500] },
+			2: { label: "En Revisión", icon: <SearchIcon />, color: green[500] },
+			3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
+			4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
       },
       3: { // Procesos
-        1: { label: "Procesos", icon: <SupervisorAccountIcon />, color: grey[500] },
-        2: { label: "Revisión", icon: <SupervisorAccountIcon />, color: grey[500] },
-        3: { label: "Corrección", icon: <SupervisorAccountIcon />, color: grey[500] },
-        4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
-        5: { label: "Rechazo", icon: <InfoIcon />, color: red[500] },
+        1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
+			2: { label: "Revisión", icon: <VisibilityIcon />, color: grey[500] },
+			3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
+			4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
+			5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
       }
     };
 
     // Buscar el estado correspondiente según el tipo de solicitud y estado
     return estadosPorTipo[estado.Tipo]?.[estado.idEstadoVerificacionDocumental] || { label: "Desconocido", icon: null, color: grey[500] };
   };
+
 
   return (
     <Popover
