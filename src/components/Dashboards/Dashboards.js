@@ -64,7 +64,7 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
   const [fechaFin, setFechaFin] = useState(today);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
-  const { userData } = useAuth();
+  const { userData , idMenu} = useAuth();
   console.log("EDIOSN", userData);
   const [bodegass, setBodegass] = useState([]);
 

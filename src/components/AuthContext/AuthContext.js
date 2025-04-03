@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null); // Para almacenar los datos del usuario
   const [userUsuario, setUserUsuario] = useState(null); // Para almacenar los datos de la API 'get_nomina'
-  const [idMenu, setIdMenu] = useState(null);
+  const [idMenu, setIdMenu] = useState(localStorage.getItem("rutaUsuario") || null); // Leer idMenu desde localStorage
 
   const navigate = useNavigate();
 
@@ -95,11 +95,13 @@ export const AuthProvider = ({ children }) => {
   };
   const setMenuId = (id) => {
     setIdMenu(id);
+    localStorage.setItem("rutaUsuario", id); // Guardar el idMenu en localStorage
   };
   // Función de logout
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
+    localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
     setToken(null);
     setIsSessionExpired(false);
     setIsLoggedIn(false);
