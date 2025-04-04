@@ -69,7 +69,8 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 			3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
 			4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
 			5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
-      }
+      },
+
     };
 
     // Buscar el estado correspondiente según el tipo de solicitud y estado
