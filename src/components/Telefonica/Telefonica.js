@@ -9,6 +9,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import axios from "axios";
 import { useAuth } from "../AuthContext/AuthContext";
 
+
 import { APIURL } from "../../configApi/apiConfig";
 import {
   IconButton,
@@ -38,8 +39,7 @@ export function TelefonicaList({
   vendedor,
   consulta,
 }) {
-
-  const { userData, userUsuario } = useAuth();
+  const { userData, idMenu } = useAuth();
   const [files, setFiles] = useState({});
   const [apiResponseData, setApiResponseData] = useState([]); // Nuevo estado para almacenar la respuesta de la API
 
@@ -56,14 +56,21 @@ export function TelefonicaList({
     NumeroSolicitud: "",
     vendedor: "",
     consulta: "",
+    idEstadoVerificacionTelefonica: "",
+    permisos: [],
   });
-  const [idCre_VerificacionTelefonicaMaestro, setIdCre_VerificacionTelefonicaMaestro] = useState(null);
+  const [
+    idCre_VerificacionTelefonicaMaestro,
+    setIdCre_VerificacionTelefonicaMaestro,
+  ] = useState(null);
+
+  console.log("asdasdasdasda el id de telfeonia", clientInfo.idEstadoVerificacionTelefonica);
 
   const [filePreviews, setFilePreviews] = useState({});
   const [selectedRow, setSelectedRow] = useState(null);
   const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
 
-  console.log("clientInfo", clientInfo);
+  console.log("clientInfo los permisos papa", clientInfo.permisos);
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -83,7 +90,23 @@ export function TelefonicaList({
     13: "NÚMERO EQUIVOCADO",
     14: "NO QUIERE SER REFERENCIA",
     15: "MALAS REFERENCIAS",
-  }
+  };
+
+
+ 
+
+  const tienePermisoDenegar = clientInfo.permisos.some(
+    (permiso) => permiso.Permisos === 'EDITAR TELEFONICA DENEGAR' && permiso.Activo
+  );
+
+  const tienePermisoValidar = clientInfo.permisos.some(
+    (permiso) => permiso.Permisos === 'EDITAR TELEFONICA VERIFICAR ' && permiso.Activo
+  );
+
+  const tienePermisoGuardar = clientInfo.permisos.some(
+    (permiso) => permiso.Permisos === 'EDITAR TELEFONICA GUARDAR' && permiso.Activo
+  );
+
 
   const handleSubmit = async () => {
     const todosContactados = tablaDatos.filter(
@@ -96,15 +119,40 @@ export function TelefonicaList({
       const url_estado = APIURL.post_createtiemposolicitudeswebDto();
       await axios.post(url_estado, {
         idCre_SolicitudWeb: clientInfo.id,
-        Tipo: 3,
-        idEstadoVerificacionDocumental: 4,
+        Tipo: 2,
+        idEstadoVerificacionDocumental: 3,
         Usuario: userData.Nombre,
         Telefono: ``,
       });
+     
+      patchSolicitud(
+        clientInfo.id,
+        3 // Cambia el estado a "En Validación"
+      );
+      navigate("/ListadoSolicitud", {
+        replace: true,
+      });
+
     } else {
-      enqueueSnackbar("No todos los registros están en estado 'Contactado'.", { variant: "error" });
+      enqueueSnackbar("No todos los registros están en estado 'Contactado'.", {
+        variant: "error",
+      });
     }
   };
+
+  const handleRemove = async () => {
+    rechazar();
+    patchSolicitud(
+      clientInfo.id,
+      4 // Cambia el estado a "rechazado"
+    );
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+  }
+
+
+
   //almacenar datos modal
   const [formDataModal, setFormDataModal] = useState({
     contactoEfectivo: "",
@@ -119,7 +167,7 @@ export function TelefonicaList({
   const [idToTextMapEstado, setIdToTextMapEstado] = useState({}); //estado para mapear IDs a textos de api Estado
   const [datoParentesco, setDatoParentesco] = useState([]); //estado parentesco
   const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
-  const contactedDocs = tablaDatos.filter(doc => doc.idEstadoGestns === 11);
+  const contactedDocs = tablaDatos.filter((doc) => doc.idEstadoGestns === 11);
   const resultContactedDocs = contactedDocs.length >= 2 ? contactedDocs : [];
   useEffect(() => {
     if (clientInfo.id) {
@@ -138,22 +186,31 @@ export function TelefonicaList({
           console.error("Error al obtener los datos de la API", error);
         }
       };
-
+      
+      
       fetchData();
+
     }
   }, [clientInfo.id, shouldReload]);
 
   //Abrir modal
   const handleOpenDialog = async (index, item) => {
-
     const selectedItem = tablaDatos[index];
     setSelectedRow(item);
     console.log("Item seleccionado:", selectedItem);
-    const idCre_VerificacionTelefonicaMaestro = selectedItem.idCre_VerificacionTelefonicaMaestro;
+    const idCre_VerificacionTelefonicaMaestro =
+      selectedItem.idCre_VerificacionTelefonicaMaestro;
 
     // Validación del ID
-    if (!idCre_VerificacionTelefonicaMaestro || isNaN(idCre_VerificacionTelefonicaMaestro) || idCre_VerificacionTelefonicaMaestro <= 0) {
-      console.error("El idCre_VerificacionTelefonicaMaestro no es válido:", idCre_VerificacionTelefonicaMaestro);
+    if (
+      !idCre_VerificacionTelefonicaMaestro ||
+      isNaN(idCre_VerificacionTelefonicaMaestro) ||
+      idCre_VerificacionTelefonicaMaestro <= 0
+    ) {
+      console.error(
+        "El idCre_VerificacionTelefonicaMaestro no es válido:",
+        idCre_VerificacionTelefonicaMaestro
+      );
       return;
     }
 
@@ -161,9 +218,13 @@ export function TelefonicaList({
 
     try {
       // Llamada a la API
-      const response = await fetchSearchCreSolicitudVerificacionTelefonica(clientInfo.id, idCre_VerificacionTelefonicaMaestro);
+      const response = await fetchSearchCreSolicitudVerificacionTelefonica(
+        clientInfo.id,
+        idCre_VerificacionTelefonicaMaestro
+      );
 
-      if (response.status === 200) { // Mejor que solo `response.ok`
+      if (response.status === 200) {
+        // Mejor que solo `response.ok`
         const data = response.data; // Axios devuelve la data en `response.data`
         console.log("Datos de la API:", data);
 
@@ -178,10 +239,16 @@ export function TelefonicaList({
     setView(true); // Abre el modal
   };
 
-  const fetchSearchCreSolicitudVerificacionTelefonica = async (id, idCre_VerificacionTelefonicaMaestro) => {
+  const fetchSearchCreSolicitudVerificacionTelefonica = async (
+    id,
+    idCre_VerificacionTelefonicaMaestro
+  ) => {
     try {
       const token = localStorage.getItem("token");
-      const url = APIURL.getSearchCreSolicitudVerificacionTelefonica(id, idCre_VerificacionTelefonicaMaestro);
+      const url = APIURL.getSearchCreSolicitudVerificacionTelefonica(
+        id,
+        idCre_VerificacionTelefonicaMaestro
+      );
 
       const response = await axios.get(url, {
         headers: {
@@ -202,7 +269,6 @@ export function TelefonicaList({
     setShouldReload(true); // Establece que el componente debe recargarse
     setView(false);
     setSelectedRow(null);
-
   };
 
   const handleChangeModal = (e) => {
@@ -230,6 +296,47 @@ export function TelefonicaList({
       observaciones: "",
     });
   };
+
+
+  const patchSolicitud = async (idSolicitud, estado) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          idEstadoVerificacionTelefonica: estado,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+
+  const rechazar = async () => {
+    if (clientInfo.id) {
+      const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+      await axios.post(url_estado, {
+        idCre_SolicitudWeb: clientInfo.id,
+        Tipo: 2,
+        idEstadoVerificacionDocumental: 4,
+        Usuario: userData.Nombre,
+         //selectedRow.Telefono+"-"+selectedRow.Contacto,
+      }
+      );
+    }
+  }
 
   const handleGuardarModal = async () => {
     if (!formDataModal.referencia) {
@@ -276,7 +383,7 @@ export function TelefonicaList({
       // Llamada para guardar los datos
       await enviarDatosModal(datosParaEnviar);
 
-      setShouldReload(prevState => !prevState);
+      setShouldReload((prevState) => !prevState);
       // Crear nuevo registro para mostrar en la tabla
       const nuevoRegistro = {
         fecha: datosParaEnviar.Fecha,
@@ -290,9 +397,15 @@ export function TelefonicaList({
       setTablaModal([...tablaModal, nuevoRegistro]);
       enqueueSnackbar("Registro Guardado", { variant: "success" });
 
+
+      
+
       // **Recargar datos de la API** después de guardar
-      await fetchSearchCreSolicitudVerificacionTelefonica(clientInfo.id, idCre_VerificacionTelefonicaMaestro)
-        .then(async response => {
+      await fetchSearchCreSolicitudVerificacionTelefonica(
+        clientInfo.id,
+        idCre_VerificacionTelefonicaMaestro
+      )
+        .then(async (response) => {
           if (response.status === 200) {
             setApiResponseData(response.data); // Actualizar los datos con los nuevos datos desde la API
             console.log("Datos actualizados desde la API:", response.data);
@@ -300,24 +413,24 @@ export function TelefonicaList({
             const url_estado = APIURL.post_createtiemposolicitudeswebDto();
             await axios.post(url_estado, {
               idCre_SolicitudWeb: clientInfo.id,
-              Tipo: 3,
-              idEstadoVerificacionDocumental: 3,
+              Tipo: 2,
+              idEstadoVerificacionDocumental: 5,
               Usuario: userData.Nombre,
-              Telefono: `${selectedRow.Telefono}-${idToTextMapEstado[nuevoRegistro.estado]}`, //selectedRow.Telefono+"-"+selectedRow.Contacto,
+              Telefono: `${selectedRow.Telefono}-${
+                idToTextMapEstado[nuevoRegistro.estado]
+              }`, //selectedRow.Telefono+"-"+selectedRow.Contacto,
             });
           }
         })
-        .catch(error => console.error("Error al actualizar datos:", error));
+        .catch((error) => console.error("Error al actualizar datos:", error));
 
       handleLimpiarModal(); // Limpiar el modal después de guardar
       handleCloseDialog(); // Cerrar el modal después de guardar
-
     } catch (error) {
       console.error("Error al guardar los datos:", error);
       enqueueSnackbar("Error al guardar los datos", { variant: "error" });
     }
   };
-
 
   useEffect(() => {
     if (location.state) {
@@ -439,7 +552,7 @@ export function TelefonicaList({
       console.error("Error al enviar los datos 2:", error.response?.data);
       enqueueSnackbar(
         "Error al enviar los datos: " + error.response?.data?.message ||
-        error.message,
+          error.message,
         { variant: "error" }
       );
     }
@@ -480,13 +593,23 @@ export function TelefonicaList({
                     </div>
                   ))}
 
-                  {resultContactedDocs.length >= 2 && (
+                  {resultContactedDocs.length >= 2 && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !==3 && (
                     <button
                       onClick={handleSubmit}
                       className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
                     >
                       Validar
                     </button>
+                  )}
+
+                  {tienePermisoDenegar &&  clientInfo.idEstadoVerificacionTelefonica !==4 && (
+                  <button
+                    onClick={handleRemove
+                    }
+                    className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 transition duration-300 ease-in-out"
+                  >
+                    Rechazar
+                  </button>
                   )}
                 </div>
               </div>
@@ -505,9 +628,7 @@ export function TelefonicaList({
                     <th className="px-4 py-2 text-center font-bold">
                       Telefono
                     </th>
-                    <th className="px-4 py-2 text-center font-bold">
-                      Estado
-                    </th>
+                    <th className="px-4 py-2 text-center font-bold">Estado</th>
 
                     <th className="px-4 py-2 text-center font-bold">....</th>
                   </tr>
@@ -518,17 +639,19 @@ export function TelefonicaList({
                       <td className="px-4 py-2 text-center">{index + 1}</td>
                       {/* Mostrar origen como Estacion */}
                       <td className="px-4 py-2 text-center">
-                        {origenMap[item.idEstadoOrigenTelefonica] || "Desconocido"}
-                      </td>                      {/* Formatear la fecha para que se muestre de forma legible */}
+                        {origenMap[item.idEstadoOrigenTelefonica] ||
+                          "Desconocido"}
+                      </td>{" "}
+                      {/* Formatear la fecha para que se muestre de forma legible */}
                       <td className="px-4 py-2 text-center">
                         {new Date(item.Fecha).toLocaleString()}{" "}
                         {/* Formatea la fecha */}
                       </td>
                       {/* Mostrar teléfono */}
                       <td className="px-4 py-2 text-center">{item.Telefono}</td>
-                      <td className="px-4 py-2 text-center">{EstadoMap[item.idEstadoGestns] || "Desconocido"
-                      }</td>
-
+                      <td className="px-4 py-2 text-center">
+                        {EstadoMap[item.idEstadoGestns] || "Desconocido"}
+                      </td>
                       <td className="px-4 py-2 text-center">
                         <IconButton
                           color="primary"
@@ -538,7 +661,6 @@ export function TelefonicaList({
                           <CallIcon />
                         </IconButton>
                       </td>
-
                     </tr>
                   ))}
                 </tbody>
@@ -546,20 +668,27 @@ export function TelefonicaList({
             </div>
           </div>
           {/* Modal */}
-          <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-
-
+          <Dialog
+            open={view}
+            onClose={handleCloseDialog}
+            maxWidth="md"
+            fullWidth
+          >
             <DialogTitle className="text-lg font-semibold border-b py-4 px-6 bg-gray-100 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <PersonIcon className="text-blue-500" fontSize="medium" />
-                <span>Verificación Telefónica de {clientInfo?.nombre} {selectedRow?.Telefono} </span>
+                <span>
+                  Verificación Telefónica de {clientInfo?.nombre}{" "}
+                  {selectedRow?.Telefono} {selectedRow?.idEstadoGestns}{" "}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <EventIcon className="text-blue-500" fontSize="medium" />
-                <span className="text-sm">{new Date(clientInfo.fecha).toLocaleDateString()}</span>
+                <span className="text-sm">
+                  {new Date(clientInfo.fecha).toLocaleDateString()}
+                </span>
               </div>
             </DialogTitle>
-
 
             <DialogContent dividers className="p-6 bg-white">
               {clientInfo && (
@@ -569,86 +698,169 @@ export function TelefonicaList({
                     <div className="flex flex-col md:flex-row gap-4">
                       {/* Referencia */}
                       <div className="flex-1">
-                        <label class="text-xs font-medium mb-1 flex items-center">Referencia (*)</label>
-                        <select class="solcitudgrande-style" name="referencia" value={formDataModal.referencia} onChange={handleChangeModal}>
+                        <label class="text-xs font-medium mb-1 flex items-center">
+                          Referencia (*)
+                        </label>
+                        <select
+                          class="solcitudgrande-style"
+                          name="referencia"
+                          value={formDataModal.referencia}
+                          onChange={handleChangeModal}
+                        >
                           <option value="">Seleccione una opción</option>
                           {datoParentesco.map((opcion) => (
-                            <option key={opcion.idParentesco} value={opcion.idParentesco}>{opcion.Nombre}</option>
+                            <option
+                              key={opcion.idParentesco}
+                              value={opcion.idParentesco}
+                            >
+                              {opcion.Nombre}
+                            </option>
                           ))}
                         </select>
                       </div>
 
                       {/* Estado */}
                       <div className="flex-1">
-                        <label class="text-xs font-medium mb-1 flex items-center">Estado (*)</label>
-                        <select class="solcitudgrande-style" name="estado" value={formDataModal.estado} onChange={handleChangeModal}>
+                        <label class="text-xs font-medium mb-1 flex items-center">
+                          Estado (*)
+                        </label>
+                        <select
+                          class="solcitudgrande-style"
+                          name="estado"
+                          value={formDataModal.estado}
+                          onChange={handleChangeModal}
+                        >
                           <option value="">Seleccione una opción</option>
                           {datoEstado.map((opcion) => (
-                            <option key={opcion.idEstadoGestns} value={opcion.idEstadoGestns}>{opcion.DESCRIPCION}</option>
+                            <option
+                              key={opcion.idEstadoGestns}
+                              value={opcion.idEstadoGestns}
+                            >
+                              {opcion.DESCRIPCION}
+                            </option>
                           ))}
                         </select>
                       </div>
 
                       {/* Contacto Efectivo */}
                       <div className="flex-1">
-                        <label class="text-xs font-medium mb-1 flex items-center">Contacto Efectivo (*)</label>
-                        <input class="solcitudgrande-style" type="text" name="contactoEfectivo" placeholder="Contacto Efectivo" value={formDataModal.contactoEfectivo} onChange={handleChangeModal} pattern="[A-Za-z]+" title="Solo se permiten letras" />
+                        <label class="text-xs font-medium mb-1 flex items-center">
+                          Contacto Efectivo (*)
+                        </label>
+                        <input
+                          class="solcitudgrande-style"
+                          type="text"
+                          name="contactoEfectivo"
+                          placeholder="Contacto Efectivo"
+                          value={formDataModal.contactoEfectivo}
+                          onChange={handleChangeModal}
+                          pattern="[A-Za-z]+"
+                          title="Solo se permiten letras"
+                        />
                       </div>
                     </div>
                   </div>
 
                   {/* Observaciones */}
                   <div className="col-span-3">
-                    <label class="text-xs font-medium mb-1 flex items-center">Observaciones (*)</label>
-                    <textarea class="solcitudgrande-style" name="observaciones" rows="3" placeholder="Ingrese observaciones" value={formDataModal.observaciones} onChange={handleChangeModal}></textarea>
+                    <label class="text-xs font-medium mb-1 flex items-center">
+                      Observaciones (*)
+                    </label>
+                    <textarea
+                      class="solcitudgrande-style"
+                      name="observaciones"
+                      rows="3"
+                      placeholder="Ingrese observaciones"
+                      value={formDataModal.observaciones}
+                      onChange={handleChangeModal}
+                    ></textarea>
                   </div>
                 </div>
               )}
 
               {/* Tabla Modal */}
               <div className="mt-6">
-                <h3 className="text-lg font-bold mb-3 text-gray-700">Registros Guardados</h3>
+                <h3 className="text-lg font-bold mb-3 text-gray-700">
+                  Registros Guardados
+                </h3>
                 <div className="overflow-x-auto">
-                  <TableContainer component={Paper} className="shadow-md rounded-md border border-gray-300">
+                  <TableContainer
+                    component={Paper}
+                    className="shadow-md rounded-md border border-gray-300"
+                  >
                     <Table className="table-fixed">
                       <TableHead>
                         <TableRow className="bg-gray-200 text-white h-12">
-                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-32">Fecha</TableCell>
-                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-40">Celular</TableCell>
-                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-40">Contacto</TableCell>
-                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-32">Referencia</TableCell>
-                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-28">Estado</TableCell>
-                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-60">Observaciones</TableCell>
+                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-32">
+                            Fecha
+                          </TableCell>
+                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-40">
+                            Celular
+                          </TableCell>
+                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-40">
+                            Contacto
+                          </TableCell>
+                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-32">
+                            Referencia
+                          </TableCell>
+                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-28">
+                            Estado
+                          </TableCell>
+                          <TableCell className="text-white font-semibold text-sm px-4 py-2 w-60">
+                            Observaciones
+                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
                         {apiResponseData.map((registro, index) => (
                           <TableRow key={index} className="hover:bg-gray-100">
-                            <TableCell className="text-sm px-4 py-2">{new Date(registro.Fecha).toLocaleString()}</TableCell>
-                            <TableCell className="text-sm px-4 py-2">{registro.Telefono}</TableCell>
-                            <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">{registro.Contacto}</TableCell>
-                            <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">{idToTextMap[registro.idParentesco]}</TableCell>
-                            <TableCell className="text-sm px-4 py-2">{idToTextMapEstado[registro.idEstadoGestns]}</TableCell>
+                            <TableCell className="text-sm px-4 py-2">
+                              {new Date(registro.Fecha).toLocaleString()}
+                            </TableCell>
+                            <TableCell className="text-sm px-4 py-2">
+                              {registro.Telefono}
+                            </TableCell>
+                            <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">
+                              {registro.Contacto}
+                            </TableCell>
+                            <TableCell className="text-sm px-4 py-2 whitespace-normal break-words ">
+                              {idToTextMap[registro.idParentesco]}
+                            </TableCell>
+                            <TableCell className="text-sm px-4 py-2">
+                              {idToTextMapEstado[registro.idEstadoGestns]}
+                            </TableCell>
 
                             {/* Aquí está el ajuste */}
                             <TableCell className="text-sm px-4 py-2 max-w-[200px] whitespace-normal break-words">
                               {registro.Observaciones}
                             </TableCell>
-
                           </TableRow>
                         ))}
                       </TableBody>
-
                     </Table>
                   </TableContainer>
                 </div>
               </div>
-
             </DialogContent>
 
             <DialogActions className="bg-gray-100 py-3 px-6">
-              <Button onClick={handleGuardarModal} color="primary" variant="contained">Guardar</Button>
-              <Button onClick={handleCloseDialog} color="secondary" variant="outlined">Cerrar</Button>
+              {selectedRow?.idEstadoGestns !== 11 && tienePermisoGuardar
+               && (
+                <Button
+                  onClick={handleGuardarModal}
+                  color="primary"
+                  variant="contained"
+                >
+                  Guardar
+                </Button>
+              )}
+              <Button
+                onClick={handleCloseDialog}
+                color="secondary"
+                variant="outlined"
+              >
+                Cerrar
+              </Button>
             </DialogActions>
           </Dialog>
         </div>

@@ -40,24 +40,7 @@ export function CabeceraDatosSolicitud({ datosConsulta, data, setData, handleInp
         readOnly={isReadOnly(datosConsulta?.almacen)}
       />
 
-      <div className="flex items-center mt-2 justify-center space-x-6">
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            value={data.bGarante}
-            onChange={handleInputChange(setData.setBGarante)}
-            className="text-primaryBlue"
-          />
-          <label htmlFor="garante" className="text-sm font-semibold">Garante</label>
-        </div>
-
-        <button
-          className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none"
-        >
-          Garante
-        </button>
-      </div>
-
+      
       {/* Apellido Paterno */}
       <InputField
         label="Apellido Paterno"
