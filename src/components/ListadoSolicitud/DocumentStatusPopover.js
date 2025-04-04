@@ -27,6 +27,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 import EventIcon from "@mui/icons-material/Event";
 import InfoIcon from "@mui/icons-material/Info";
+import { PhoneCallback } from "@mui/icons-material";
 
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
@@ -56,10 +57,11 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         13: "RECHAZADO",*/
       },
       2: { // Verificación
-        1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
-			2: { label: "En Revisión", icon: <SearchIcon />, color: green[500] },
+      1: { label: "No asginado", icon: <SupervisorAccountIcon />, color: grey[500] },
+			2: { label: "Asignado", icon: <SearchIcon />, color: green[500] },
 			3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
 			4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
+      5: { label: "Gestionado", icon: <PhoneCallback />, color: grey[500] },
       },
       3: { // Procesos
         1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
