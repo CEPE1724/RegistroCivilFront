@@ -613,6 +613,7 @@ export function ListadoSolicitud() {
               entrada: item.Entrada,
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
+
             };
           })
         );
@@ -729,7 +730,7 @@ export function ListadoSolicitud() {
   };
 
   const handlesolicitud = (registro) => {
-    console.log("Registro:", registro);
+    console.log("Registro: edison", registro);
     navigate("/solicitudgrande", {
       replace: true,
       state: {

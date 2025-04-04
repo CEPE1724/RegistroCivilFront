@@ -15,12 +15,35 @@ import { LocationModal } from "../../LocationModal";
 import { useAuth } from "../../../AuthContext/AuthContext";
 import axios from "axios";
 import { APIURL } from "../../../../configApi/apiConfig";
+import { useLocation } from "react-router-dom";
 const Domicilio = forwardRef((props, ref) => {
      const { userData, userUsuario } = useAuth();
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
+    const location = useLocation();
+      const [clientInfo, setClientInfo] = useState(null);
+    
+      console.log("clientInfo", clientInfo);
+      useEffect(() => {
+        if (location.state) {
+          // Si hay datos en `location.state`, los guardamos en localStorage
+          localStorage.setItem("clientInfo", JSON.stringify(location.state));
+          setClientInfo(location.state);
+        } else {
+          // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+          const savedClientInfo = localStorage.getItem("clientInfo");
+          if (savedClientInfo) {
+            setClientInfo(JSON.parse(savedClientInfo));
+          }
+        }
+      }, [location.state]);
+    
+
+    
+
+    console.log(data , "kasbdajsdkjaskdasldjalskjdalkj")
     console.log('userData', userData);
-    console.log('data', data);
+    console.log('data domicilio', data);
     const [formErrors, setFormErrors] = useState({});
     const [provincia, setProvincia] = useState([]);
     const [cantones, setCantones] = useState([]);
@@ -309,13 +332,14 @@ const Domicilio = forwardRef((props, ref) => {
 		  
     }));
 
-	
 
+	
 
     return (
 
         <div className="py-2 w-full">
             <div className="mb-6">
+               
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <SelectField
                         label="Provincia"
@@ -414,7 +438,9 @@ const Domicilio = forwardRef((props, ref) => {
                             </p>
                         )}
                     </div>
-                    <div className="col-span-1">
+
+
+                    {clientInfo?.data.Domicilio && ( <div className="col-span-1">
                         <label className="text-xs font-medium mb-1 flex items-center">
                             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
                             Ubicacion Domicilio
@@ -432,7 +458,8 @@ const Domicilio = forwardRef((props, ref) => {
                                 {formErrors.ubicacionDomicilio}
                             </p>
                         )}
-                    </div>
+                    </div> )}
+                    
                     <div className="col-span-1">
                         <label className="text-xs font-medium mb-1 flex items-center">
                             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
