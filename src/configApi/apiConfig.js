@@ -145,6 +145,7 @@ export const APIURL = {
   getacces: (idMenu,idUsuario) => `${API_BASE_URL}menu-item-role/permissionscomponents/${idMenu}/${idUsuario}`,
 
   getRolesWeb : () => `${API_BASE_URL}rolesweb`,
-  getUsuarioPorROL : (idRol) => `${API_BASE_URL}usuarios/rol/${idRol}`
+  getUsuarioPorROL : (idRol) => `${API_BASE_URL}usuarios/rol/${idRol}`,
+  getMenuPorusuario : (idUsuario) => `${API_BASE_URL}menu-item-role/permissionsmenu/${idUsuario}`,
 
 };
