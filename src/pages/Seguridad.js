@@ -7,7 +7,7 @@ const Seguridad = () => {
     return (
         <>
             <Layout />
-            <div className="w-full min-h-screen flex justify-center bg-[#ffffff] p-8 flex-col items-center">
+            <div className="w-full flex justify-center bg-[#ffffff] p-8 flex-col items-center">
                 <AdministrableForm />
             </div>
         </>

@@ -3,8 +3,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
-
+const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
 
 
 
@@ -147,5 +146,11 @@ export const APIURL = {
   getRolesWeb : () => `${API_BASE_URL}rolesweb`,
   getUsuarioPorROL : (idRol) => `${API_BASE_URL}usuarios/rol/${idRol}`,
   getMenuPorusuario : (idUsuario) => `${API_BASE_URL}menu-item-role/permissionsmenu/${idUsuario}`,
+  deletePermisoUsuario : (idUsuario, idmenuItemRoles) => `${API_BASE_URL}menu-item-role/permisos/delete/${idUsuario}/${idmenuItemRoles}`,
+  createPermisoUsuario : (idUsuario, mIdmenuItems ) => `${API_BASE_URL}menu-item-role/permisos/create/${idUsuario}/${mIdmenuItems}`,
+  getTodosLosAccesos : () => `${API_BASE_URL}menu-item-role/permissionscomponents`,
+  getRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/${idUsuario}/${idmenu_items}`,
+  deleteRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/delete/${idUsuario}/${idmenu_items}`,
+  createRolesAccesos : (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
 
 };
