@@ -28,7 +28,6 @@ export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
   const { data } = state || {};
-  console.log("data cabecera", data);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
  
   const [activeTab, setActiveTab] = useState("Datos Cliente");
@@ -68,10 +67,6 @@ export function Cabecera() {
   console.log("idSolicitud", clienteData);
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
-
-  
- 
-
 
 
   useEffect(() => {
@@ -611,6 +606,8 @@ export function Cabecera() {
 
     // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
   ];
+
+  console.log(clienteData , "aqui llega o no ") /// este no tiene
 
   const renderTabContent = (clienteData) => {
     /* if (clienteData.idEdoCivil === 1 && activeTab !== "Datos Conyuge") {

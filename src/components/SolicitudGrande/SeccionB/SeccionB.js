@@ -13,8 +13,31 @@ import {
 } from "react-icons/fa";
 import { LocationModal } from "../LocationModal";
 import { useAuth } from "../../AuthContext/AuthContext";
+import { useLocation } from "react-router-dom";
+
+
 
 const SeccionB = forwardRef((props, ref) => {
+
+
+
+	 const location = useLocation();
+		  const [clientInfo, setClientInfo] = useState(null);
+		
+		  console.log("clientInfo", clientInfo);
+		  useEffect(() => {
+			if (location.state) {
+			  // Si hay datos en `location.state`, los guardamos en localStorage
+			  localStorage.setItem("clientInfo", JSON.stringify(location.state));
+			  setClientInfo(location.state);
+			} else {
+			  // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+			  const savedClientInfo = localStorage.getItem("clientInfo");
+			  if (savedClientInfo) {
+				setClientInfo(JSON.parse(savedClientInfo));
+			  }
+			}
+		  }, [location.state]);
 	const { data } = props;
 
 	console.log("data dependiente", data);
@@ -788,7 +811,8 @@ const SeccionB = forwardRef((props, ref) => {
 						<span className="text-red-500 text-xs">{errors.referenciaUbicacion}</span>
 					)}
 				</div>
-				<div className="col-span-1">
+
+				{clientInfo?.data.Laboral && (<div className="col-span-1">
 					<label className="text-xs font-medium mb-1 flex items-center">
 						<FaMapMarkerAlt className="mr-2 text-primaryBlue" />
 						Ubicacion Trabajo
@@ -801,7 +825,8 @@ const SeccionB = forwardRef((props, ref) => {
 					>
 						Ubicacion Trabajo
 					</button>
-				</div>
+				</div> )   }
+				
 
 			</form>
 			<LocationModal
