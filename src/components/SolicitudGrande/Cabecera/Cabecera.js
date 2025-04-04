@@ -28,7 +28,6 @@ export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
   const { data } = state || {};
-  console.log("data cabecera", data);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
  
   const [activeTab, setActiveTab] = useState("Datos Cliente");
@@ -68,10 +67,6 @@ export function Cabecera() {
   console.log("idSolicitud", clienteData);
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
-
-  
- 
-
 
 
   useEffect(() => {
@@ -134,9 +129,10 @@ export function Cabecera() {
     ) {
       setCheckCompletado(true);  // Todo se completó correctamente
     }
-    if (data.idEstadoVerificacionSolicitud === 10) {
+    if (data.idEstadoVerificacionSolicitud === 10 || data.idEstadoVerificacionSolicitud === 11 || data.idEstadoVerificacionSolicitud === 12 || data.idEstadoVerificacionSolicitud === 13) {
       setCheckCompletado(false);
     }
+
   }, [clienteData, checkDatos, checkDomicilio, checkConyuge, checkReferencias, checkTrabajo, checkNegocio]);
 
 
@@ -610,6 +606,8 @@ export function Cabecera() {
 
     // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
   ];
+
+  console.log(clienteData , "aqui llega o no ") /// este no tiene
 
   const renderTabContent = (clienteData) => {
     /* if (clienteData.idEdoCivil === 1 && activeTab !== "Datos Conyuge") {
@@ -1204,7 +1202,7 @@ patchSolicitudCorrecion(idSolicitud);
 
             {tabs.map(({ name, icon, icons_2, check }) => (
               // Verificamos si el nombre es 'Completado' y si checkCompletado es true
-              (name === "Enviar a Verificar" ? checkCompeletado :true) && 
+              (name === "Enviar a Verificar" ? checkCompeletado :true ) && 
              (
                 <button
                   key={name}
@@ -1220,7 +1218,7 @@ patchSolicitudCorrecion(idSolicitud);
                 </button>
               )
             ))}
-              {/* Botones adicionales si idEstadoVerificacionSolicitud es 10 */}
+              {/* Botones adicionales si idEstadoVerificacionSolicitud es 10  a revision*/}
  
               {data?.idEstadoVerificacionSolicitud === 10 && (
   <>
@@ -1243,7 +1241,7 @@ patchSolicitudCorrecion(idSolicitud);
     <button
       onClick={() => handleCorreccion()}
       className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
-                 hover:bg-yellow-500 hover:text-white transition duration-200"
+                 hover:bg-yellow-50 hover:text-white transition duration-200"
     >
       ✏️ Corrección
     </button>
@@ -1251,6 +1249,15 @@ patchSolicitudCorrecion(idSolicitud);
 )}
 
 
+ {/*  const estadoMap = {
+    1: "PENDIENTE",
+    10: "REVISIÓN",
+    11: "CORRECIÓN",
+    12: "APROBADO",
+    13: "RECHAZADO",
+  };?*/}
+
+{/* Botón para volver a enviar a revisión si idEstadoVerificacionSolicitud es 11 */}
 {data?.idEstadoVerificacionSolicitud === 11 && (
   <>
     
@@ -1279,15 +1286,17 @@ patchSolicitudCorrecion(idSolicitud);
               {renderTabContent(clienteData)}
             </div>
             <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-              <div className="flex items-center">
-                <button
-                  onClick={handleSubmit}
-                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-                >
-                  <SaveIcon className="text-lg" />
-                  <span className="text-xs">Guardar</span>
-                </button>
-              </div>
+                {(data?.idEstadoVerificacionSolicitud < 12 ) && (
+                  <div className="flex items-center">
+                    <button
+                      onClick={handleSubmit}
+                      className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                    >
+                      <SaveIcon className="text-lg" />
+                      <span className="text-xs">Guardar</span>
+                    </button>
+                  </div>
+                )}
 
               <div className="flex items-center">
                 <button

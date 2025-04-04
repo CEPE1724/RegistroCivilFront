@@ -134,7 +134,7 @@ export function ListadoSolicitud() {
 
   
  const verificacionSolicitud = (data) => {
-  return data.idEstadoVerificacionSolicitud !== 10;
+  return data.idEstadoVerificacionSolicitud !== 12;
   };
 
 
@@ -150,6 +150,40 @@ export function ListadoSolicitud() {
     12: "APROBADO",
     13: "RECHAZADO",
   };
+
+  const estadoDocumentalMap = {
+    1: "PROCESO",
+    2: "REVISIÓN",
+    3: "CORRECIÓN",
+    4: "APROBACION",
+  }
+
+  const estadoDeshabilitadoDocumental = (data) => {
+
+
+    console.log("data", data.idEstadoVerificacionDocumental);
+    // Obtener el estado correspondiente al ID
+    const estado = estadoDocumentalMap[data.idEstadoVerificacionDocumental];
+    
+   console.log("estadoDocumentalMapjgjfhfchf", estado);
+
+
+    if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
+    // Buscar el permiso correspondiente en la lista de permisos
+    console.log("permisos", permisos);
+    console.log("estado", estado);
+    console.log(permisos.find(p => p.Permisos === `EDITAR DOCUMENTAL ${estado}`));
+    const permiso = permisos.find(p => p.Permisos === `EDITAR DOCUMENTAL ${estado}`);
+    // Retornar true si no existe el permiso o si no está activo
+
+  console.log("estado", permiso);
+    return !permiso || !permiso.Activo;
+
+  
+  }
+
+
+
   const estadoDeshabilitadoporPermisos = (data) => 
     {
        
@@ -165,6 +199,29 @@ export function ListadoSolicitud() {
   return !permiso || !permiso.Activo;
 
     }
+
+  const estadoTelefonicaMap = {
+    2: "ASIGNADO",
+    3: "APROBADO",
+    4: "RECHAZADO",
+  }
+
+
+  const estadoDeshabilitadotelefonica = (data) => {
+    // Obtener el estado correspondiente al ID 
+    const estado = estadoTelefonicaMap[data.idEstadoVerificacionTelefonica];
+
+    console.log(estado, "aqui sale el estado que esta saliendo ")
+    if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
+    // Buscar el permiso correspondiente en la lista de permisos
+    const permiso = permisos.find(p => p.Permisos === `EDITAR TELEFONICA ${estado}`);
+
+
+    console.log("estasdasdassdo", estado);
+    console.log("pasdasdasermisos", permisos);
+    // Retornar true si no existe el permiso o si no está activo
+    return !permiso || !permiso.Activo;
+  }
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -229,6 +286,7 @@ export function ListadoSolicitud() {
       });
       if (response.status === 200) {
         const data = response.data;
+        console.log("quieor ver que me devuelve la api" ,data);
         setPermisos(data);
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -358,11 +416,11 @@ export function ListadoSolicitud() {
         return <PhoneDisabledIcon />;
       case 2: // ASIGNADO
         return <PhoneInTalkIcon sx={{ color: "#6C757D" }} />;
-      case 3: // GESTIONANDO
-        return <SettingsPhoneIcon sx={{ color: "#FFC107" }} />;
-      case 4: // APROBADO
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      case 5: // RECHAZADO
+      case 3: // Aprobado
+        return <CheckCircleIcon sx={{ color: "#28A745" }}  />;
+      case 4: // rechazado
+        return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+      case 5: 
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
       default: // Estado no especificado
         return <PhoneIcon />;
@@ -555,6 +613,7 @@ export function ListadoSolicitud() {
               entrada: item.Entrada,
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
+
             };
           })
         );
@@ -608,6 +667,29 @@ export function ListadoSolicitud() {
   }, [data]);
 
   const handledocumentos = (registro) => {
+
+    console.log(
+      "Registro:",
+      registro
+    )
+   
+    if (registro.idEstadoVerificacionDocumental == 4) {
+      navigate("/gestorDocumentos", {
+        replace: true,
+        state: {
+          id: registro.id,
+          NumeroSolicitud: registro.NumeroSolicitud,
+          nombre: registro.nombre,
+          cedula: registro.cedula,
+          fecha: registro.fecha,
+          almacen: registro.almacen,
+          foto: registro.imagen,
+          vendedor: registro.vendedor,
+          consulta: registro.consulta,
+        },
+      }); 
+    }
+    else {
     navigate("/documental", {
       replace: true,
       state: {
@@ -623,6 +705,7 @@ export function ListadoSolicitud() {
         idEstadoVerificacionDocumental: registro.idEstadoVerificacionDocumental,
       },
     });
+    }
   };
 
   const handleTelefonica = (registro) => {
@@ -639,12 +722,15 @@ export function ListadoSolicitud() {
         foto: registro.imagen,
         vendedor: registro.vendedor,
         consulta: registro.consulta,
+        idEstadoVerificacionTelefonica: registro.idEstadoVerificacionTelefonica,
+        permisos: permisos,
+        
       },
     });
   };
 
   const handlesolicitud = (registro) => {
-    console.log("Registro:", registro);
+    console.log("Registro: edison", registro);
     navigate("/solicitudgrande", {
       replace: true,
       state: {
@@ -851,6 +937,8 @@ export function ListadoSolicitud() {
                       </IconButton>
                     </Tooltip>
                   </TableCell>
+
+                  {/* Solicitudes */}
                   <TableCell align="center">
                     <div>
                       <span>
@@ -903,8 +991,8 @@ export function ListadoSolicitud() {
                         <IconButton
                           onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
                           disabled={
-                            data.idEstadoVerificacionDocumental === 2
-                            || estaDeshabilitado(data)
+                            data.idEstadoVerificacionDocumental === 2 
+                            || estaDeshabilitado(data) || estadoDeshabilitadoDocumental(data) || verificacionSolicitud(data)
                           }
                           sx={{ opacity: estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
 
@@ -940,13 +1028,13 @@ export function ListadoSolicitud() {
                     </div>
                   </TableCell>
 
-                  {/* telefonica */}
+                  {/* telefonica */}  
                   <TableCell align="center">
                     <div>
                       <span>
                         <IconButton
                           onClick={() => handleTelefonica(data)} // Aquí va la lógica para manejar el clic
-                          disabled={data.idEstadoVerificacionTelefonica === 1 || estaDeshabilitado(data) || verificacionSolicitud(data)} 
+                          disabled={data.idEstadoVerificacionTelefonica === 1 || estaDeshabilitado(data) || verificacionSolicitud(data) || estadoDeshabilitadotelefonica(data)} 
                           sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
 
                    >
@@ -989,7 +1077,7 @@ export function ListadoSolicitud() {
                         <IconButton
                           onClick={() => handleOpenModalVerificacion(data , "domicilio")} // Aquí va la lógica para manejar el clic
                           disabled={
-                            verificacionSolicitud(data) ||
+                            data.idEstadoVerificacionDocumental !== 4||  ///cuando documental este aporbado hablito domicilio y laboral
                             data.Domicilio === false
                           }
                           sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}

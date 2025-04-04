@@ -87,7 +87,7 @@ export function Documental({
   const handleConfirm = async () => {
     setIsModalOpen(false); // Cierra el modal
     patchsolicitudWeb(); 
-    patchSolicitud(clientInfo.id)// aqui llamo a la api que cambia el estado de idverificacion solicitud a 10
+    //patchSolicitud(clientInfo.id)// aqui llamo a la api que cambia el estado de idverificacion solicitud a 10
 
     if (showOnlyCorrections) {
       try {

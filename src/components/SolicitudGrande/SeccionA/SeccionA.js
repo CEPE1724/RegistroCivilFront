@@ -43,7 +43,29 @@ import {
 import { SelectField } from "../../Utils";
 import { LocationModal } from "../LocationModal";
 import { useAuth } from "../../AuthContext/AuthContext";
+import { useLocation } from "react-router-dom";
 const SeccionA = forwardRef((props, ref) => {
+
+ const location = useLocation();
+      const [clientInfo, setClientInfo] = useState(null);
+    
+      console.log("clientInfo", clientInfo);
+      useEffect(() => {
+      if (location.state) {
+        // Si hay datos en `location.state`, los guardamos en localStorage
+        localStorage.setItem("clientInfo", JSON.stringify(location.state));
+        setClientInfo(location.state);
+      } else {
+        // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+        const savedClientInfo = localStorage.getItem("clientInfo");
+        if (savedClientInfo) {
+        setClientInfo(JSON.parse(savedClientInfo));
+        }
+      }
+      }, [location.state]);
+
+
+
   const { userData, userUsuario } = useAuth();
   const { data } = props;
   console.log('data')
@@ -600,7 +622,8 @@ const SeccionA = forwardRef((props, ref) => {
             error={errors.barrio}
           />
         </div>
-        <div className="col-span-1">
+
+        {clientInfo?.data.Laboral && (<div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
             Ubicacion Trabajo
@@ -613,7 +636,8 @@ const SeccionA = forwardRef((props, ref) => {
           >
             Ubicacion Trabajo
           </button>
-        </div>
+        </div>)}
+        
 
         <div className="lg:col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
