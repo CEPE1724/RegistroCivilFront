@@ -975,8 +975,7 @@ export function Documental({
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],
-                    ["idEstadoVerificacionDOcumental", clientInfo.idEstadoVerificacionDocumental],
-                    ["idcresolcitudweb", clientInfo.id],
+                    
                   ].map(([label, value], idx) => (
                     <div key={idx} className="flex items-center gap-4">
                       <p className="font-semibold text-gray-700">{label}:</p>

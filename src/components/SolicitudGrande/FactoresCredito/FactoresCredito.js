@@ -47,9 +47,9 @@ export const FactoresCredito = forwardRef((props, ref) => {
     tipoCliente: data.idTipoCliente || 0,
     tipo: "",
     tipoTrabajo: "",
-    cuotaAsignada: "",
+    cuotaAsignada: data.CuotaAsignada || 0,
 
-    cupo: "",
+    cupo: data.Cupo || 0,
     calificacion: "",
     estadoSolicitud: "",
     observaciones: "",
@@ -230,7 +230,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
         </div>
       </div>
 
-      {/* Observaciones */}
+      {/* 
       <div className="flex flex-col">
         <label className="text-xs font-medium mb-1 flex items-center">
           <FaCommentDots className="mr-2 text-primaryBlue" />
@@ -244,6 +244,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
           onChange={handleChange}
         />
       </div>
+      Observaciones */}
     </div>
   );
 
