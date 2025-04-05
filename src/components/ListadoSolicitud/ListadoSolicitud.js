@@ -77,6 +77,8 @@ import { Api } from "@mui/icons-material";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor, analista, listadoAnalista } = useBodegaUsuario();
  
+
+
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
@@ -126,6 +128,7 @@ export function ListadoSolicitud() {
   const bodegas = data || []; // Safely access the bodegas data
   const vendedores = vendedor || []; // Safely access the vendedores data
   const analistas = analista || []; // Safely access the analistas data
+
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
     { label: "PRE-APROBADO", value: 1 },
@@ -572,6 +575,8 @@ export function ListadoSolicitud() {
     estado,
     fechaInicio,
     fechaFin,
+    selectedVendedor,
+    analistaSelected,
   ]);
 
   const fetchSolicitudes = async () => {
@@ -594,6 +599,10 @@ export function ListadoSolicitud() {
           fechaFin: fechaFin,
           bodega: selectedBodega === "todos" ? 0 : selectedBodega,
           estado: estado === "todos" ? 0 : estado,
+          vendedor:
+            selectedVendedor === "todos" ? 0 : selectedVendedor,
+          analista:
+            analistaSelected === "todos" ? 0 : analistaSelected,
         },
       });
 
@@ -700,6 +709,8 @@ export function ListadoSolicitud() {
   const handleAnalistaChange = (event) => {
     setAnalistaSelected(event.target.value);
   };
+
+
   useEffect(() => {
     if (data && data.length > 0) {
       setDataBodega(
@@ -809,6 +820,9 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
+
+console.log("analistaassassasasasaasas", analista);
+
  
 
   console.log("userSolicitudData", datos);
@@ -846,7 +860,8 @@ export function ListadoSolicitud() {
             onChange={handleBodegaChange}
             label="Buscar por nombre"
           >
-            <MenuItem value="todos">Todos</MenuItem>
+       
+
             {bodegas.map((bodega) => (
               <MenuItem key={bodega.b_Bodega} value={bodega.b_Bodega}>
                 {bodega.b_Nombre}
@@ -880,7 +895,7 @@ export function ListadoSolicitud() {
           >
             <MenuItem value="todos">Todos</MenuItem>
             {analistas.map((vendedor) => (
-              <MenuItem key={vendedor.idUsuario} value={vendedor.Nombre}>
+              <MenuItem key={vendedor.idUsuario} value={vendedor.idUsuario}>
                 {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
               </MenuItem>
             ))}
