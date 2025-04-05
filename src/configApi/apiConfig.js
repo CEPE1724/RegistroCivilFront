@@ -3,7 +3,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.2.181:3025/api/v1/";
+const API_BASE_URL = "http://192.168.2.167:3008/api/v1/";
 
 
 
@@ -152,5 +152,5 @@ export const APIURL = {
   getRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/${idUsuario}/${idmenu_items}`,
   deleteRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/delete/${idUsuario}/${idmenu_items}`,
   createRolesAccesos : (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
-
+  listaVendedoresporBodega : (Fecha,idBodega, inivel ) => `${API_BASE_URL}exec-sp/FacturacionListaVendedoresWeb/${Fecha}/${idBodega}/${inivel}`,
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   Table,
   TableBody,
@@ -75,10 +75,12 @@ import TrabajoModal from "./TrabajoModal";
 import { set } from "react-hook-form";
 import { Api } from "@mui/icons-material";
 export function ListadoSolicitud() {
-  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+  const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor, analista, listadoAnalista } = useBodegaUsuario();
  
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
+  const [selectedVendedor, setSelectedVendedor] = useState("todos");
+  const [analistaSelected, setAnalistaSelected] = useState("todos");
   const [dataBodega, setDataBodega] = useState([]);
   const [estado, setEstado] = useState("todos");
   const [datos, setDatos] = useState([]);
@@ -122,6 +124,8 @@ export function ListadoSolicitud() {
 
   console.log("userDataaaaaaa", userData);
   const bodegas = data || []; // Safely access the bodegas data
+  const vendedores = vendedor || []; // Safely access the vendedores data
+  const analistas = analista || []; // Safely access the analistas data
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
     { label: "PRE-APROBADO", value: 1 },
@@ -137,6 +141,7 @@ export function ListadoSolicitud() {
   return data.idEstadoVerificacionSolicitud !== 12;
   };
 
+  
 
   const estaDeshabilitado = (data) => {
     return data.resultado === 0; 
@@ -262,8 +267,8 @@ export function ListadoSolicitud() {
           fetchTipoConsulta(),
           fetchBodega(),
           fetchTipoCliente(),
-          permissionscomponents(idMenu, userData.idUsuario)
-
+          permissionscomponents(idMenu, userData.idUsuario),
+          fecthAnalista(),
         ]);
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
@@ -394,6 +399,39 @@ export function ListadoSolicitud() {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
+
+  // si cambia la bodega llamae a fecthUsuariobodega
+   
+  useEffect(() => {
+    if (selectedBodega !== "todos") {
+      fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
+      console.log("selectedBodega", selectedBodega);
+      console.log("fechaInicio", fechaInicio);
+      console.log("vendedor", vendedor);
+
+    } else {
+      fetchSolicitudes();
+    }
+  }, [selectedBodega, fechaInicio]);
+
+
+
+  const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
+    try {
+       await listaVendedoresporBodega(fecha, bodega, nivel);
+    }catch (err) {
+      console.error("Error al obtener datos de la bodega:", err);
+    }
+  };
+
+  const fecthAnalista = async () => {
+    try {
+      await listadoAnalista();
+    } catch (err) {
+      console.error("Error al obtener datos de la bodega:", err);
+    }
+  };
+      
 
   const getIconByEstado = (estadoId) => {
     switch (estadoId) {
@@ -655,6 +693,13 @@ export function ListadoSolicitud() {
     setSelectedBodega(event.target.value);
   };
 
+  const handleVendedorChange = (event) => {
+    setSelectedVendedor(event.target.value);
+  };
+
+  const handleAnalistaChange = (event) => {
+    setAnalistaSelected(event.target.value);
+  };
   useEffect(() => {
     if (data && data.length > 0) {
       setDataBodega(
@@ -809,6 +854,39 @@ export function ListadoSolicitud() {
             ))}
           </Select>
         </FormControl>
+        <FormControl size="small" fullWidth>
+          <InputLabel>Buscar por Vendedor</InputLabel>
+          
+          <Select
+            value={selectedVendedor}
+            onChange={handleVendedorChange}
+            label="Buscar por nombre"
+          >
+            <MenuItem value="todos">Todos</MenuItem>
+            {vendedores.map((vendedor) => (
+              <MenuItem key={vendedor.idPersonal} value={vendedor.idPersonal}>
+                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <InputLabel>Analista</InputLabel>
+          <Select
+            value={analistaSelected}
+            onChange={handleAnalistaChange}
+            label="Analista"
+          >
+            <MenuItem value="todos">Todos</MenuItem>
+            {analistas.map((vendedor) => (
+              <MenuItem key={vendedor.idUsuario} value={vendedor.Nombre}>
+                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         <FormControl size="small" fullWidth>
           <InputLabel>Estado</InputLabel>
           <Select
