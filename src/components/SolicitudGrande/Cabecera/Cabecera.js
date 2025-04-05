@@ -1192,6 +1192,12 @@ patchSolicitudCorrecion(idSolicitud);
 
   
 
+  const navigateToListadoSolicitud = () => {
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+  };
+
   return (
     <>
       {loading ? (
@@ -1219,7 +1225,7 @@ patchSolicitudCorrecion(idSolicitud);
               )
             ))}
               {/* Botones adicionales si idEstadoVerificacionSolicitud es 10  a revision*/}
- 
+
               {data?.idEstadoVerificacionSolicitud === 10 && (
   <>
     <button
@@ -1309,7 +1315,7 @@ patchSolicitudCorrecion(idSolicitud);
               </div>
               <div className="flex items-center">
                 <button
-                  onClick={() => { }}
+                  onClick={navigateToListadoSolicitud}
                   className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
                 >
                   <LogoutIcon className="text-lg" />

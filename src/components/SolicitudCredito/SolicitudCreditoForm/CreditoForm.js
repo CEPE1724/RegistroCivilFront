@@ -23,7 +23,7 @@ export default function CreditoForm() {
   const [formStatus, setFormStatus] = useState(null);
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
   const [dataRecibir, setDataRecibir] = useState(null);
-  const IdVendedor = userData?.idUsuario;
+  const IdVendedor = userUsuario?.idPersonal;
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
     const idTipoFactura = 43;

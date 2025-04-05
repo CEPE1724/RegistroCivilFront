@@ -77,8 +77,7 @@ import { Api } from "@mui/icons-material";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor, analista, listadoAnalista } = useBodegaUsuario();
  
-
-
+ 
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
@@ -261,7 +260,7 @@ export function ListadoSolicitud() {
   };
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
-
+  
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
@@ -418,7 +417,7 @@ export function ListadoSolicitud() {
   }, [selectedBodega, fechaInicio]);
 
 
-
+console.log("selectedBodega", data);
   const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
     try {
        await listaVendedoresporBodega(fecha, bodega, nivel);
@@ -508,7 +507,7 @@ export function ListadoSolicitud() {
 3	CORRECIÓN
 4	APROBACION
 5	RECHAZAR */
-
+ const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
   // Obtener tipo de consulta
   const fetchTipoConsulta = async () => {
     try {
@@ -580,13 +579,27 @@ export function ListadoSolicitud() {
   ]);
 
   const fetchSolicitudes = async () => {
-    console.log(selectedBodega);
+    // Primero se obtiene el array de bodegas
+ let bodegasId = [];
+    // Verificar que tipoConsulta y dataBodega no estén vacíos
     if (tipoConsulta.length === 0 || dataBodega.length === 0) return;
-
+  
     try {
       const token = localStorage.getItem("token");
       const offset = (currentPage - 1) * itemsPerPage;
-
+  
+      // Si selectedBodega es "todos", pasar un array vacío (esto también se puede ajustar según el comportamiento deseado)
+      if (selectedBodega !== "todos") {
+        // Si selectedBodega tiene un valor específico, tomarlo como un array
+        bodegasId = [selectedBodega];
+      } else {
+        // Si es "todos", se puede pasar un array vacío o la lógica que desees
+        bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
+      }
+  
+      console.log("bodegasIds", bodegasId);
+      
+      // Realizar la consulta con los parámetros ajustados
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
           "Content-Type": "application/json",
@@ -597,19 +610,17 @@ export function ListadoSolicitud() {
           offset: offset,
           fechaInicio: fechaInicio,
           fechaFin: fechaFin,
-          bodega: selectedBodega === "todos" ? 0 : selectedBodega,
+          bodega: bodegasId,  // Pasar el array de bodegas al backend
           estado: estado === "todos" ? 0 : estado,
-          vendedor:
-            selectedVendedor === "todos" ? 0 : selectedVendedor,
-          analista:
-            analistaSelected === "todos" ? 0 : analistaSelected,
+          vendedor: selectedVendedor === "todos" ? 0 : selectedVendedor,
+          analista: analistaSelected === "todos" ? 0 : analistaSelected,
         },
       });
-
+  
       if (response.status === 200) {
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
-
+  
         // Mapeo de datos con fetchVendedor
         const datos = await Promise.all(
           response.data.data.map(async (item) => {
@@ -650,21 +661,18 @@ export function ListadoSolicitud() {
               afiliado: item.bAfiliado ? "Sí" : "No",
               tieneRuc: item.bTieneRuc ? "Sí" : "No",
               tipoCliente: tipoClienteMap[item.idTipoCliente] || "NO APLICA",
-              idEstadoVerificacionDocumental:
-                item.idEstadoVerificacionDocumental,
+              idEstadoVerificacionDocumental: item.idEstadoVerificacionDocumental,
               idEstadoVerificacionSolicitud: item.idEstadoVerificacionSolicitud,
-              idEstadoVerificacionTelefonica:
-                item.idEstadoVerificacionTelefonica,
+              idEstadoVerificacionTelefonica: item.idEstadoVerificacionTelefonica,
               idEstadoVerificacionTerrena: item.idEstadoVerificacionTerrena,
               resultado: item.Resultado,
               entrada: item.Entrada,
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
-
             };
           })
         );
-
+  
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
@@ -675,6 +683,7 @@ export function ListadoSolicitud() {
       console.error("Error fetching data:", error);
     }
   };
+  
 
   // Obtener vendedor
   const fetchVendedor = async (idVendedor) => {
@@ -860,7 +869,7 @@ console.log("analistaassassasasasaasas", analista);
             onChange={handleBodegaChange}
             label="Buscar por nombre"
           >
-       
+            <MenuItem value="todos">Todos</MenuItem>
 
             {bodegas.map((bodega) => (
               <MenuItem key={bodega.b_Bodega} value={bodega.b_Bodega}>

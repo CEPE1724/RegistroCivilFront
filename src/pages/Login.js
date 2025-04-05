@@ -40,7 +40,7 @@ const Login = () => {
         const expirationTime = new Date().getTime() + 3 * 60 * 60 * 1000; // 3 horas
         login(data.token, expirationTime);
         enqueueSnackbar("Acceso correcto!", { variant: "success" });
-        navigate("/ciudadanos", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
