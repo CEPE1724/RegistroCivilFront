@@ -8,6 +8,7 @@ import { useSnackbar } from "notistack";
 import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
+import crediPointLogo from "../img/credipoint_digital2.png";
 
 const Login = () => {
   const { login, isLoggedIn, isSessionExpired, token } = useAuth();
@@ -54,24 +55,22 @@ const Login = () => {
   };
 
   return (
-    <section className="flex items-center justify-center min-h-screen bg-red-600" style={{ background: 'linear-gradient(to bottom, #1965F2, #D9E6FF)' }}>
+    <section className="flex items-center justify-center min-h-screen bg-red-600" style={{ background: '#1453C8' }}>
       <div className="container max-w-4xl p-4 sm:p-6 md:p-10">
         <div className="flex flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
           <div className="w-full" style={{ borderRadius: '20px' }}>
             <div className="block rounded-lg bg-white shadow-lg dark:bg-neutral-800" style={{ borderRadius: '20px' }}>
-              <div className="flex flex-col lg:flex-row relative rounded-lg" style={{ background: 'linear-gradient(90deg, #5592F3 0%, #A6C8FF 50%, #ffffff 100%)', borderRadius: '20px' }}>
+              <div className="flex flex-col lg:flex-row relative rounded-lg" style={{ background: 'linear-gradient(to bottom, #1965F2, #D9E6FF)', borderRadius: '20px' }}>
                 <div className="w-full lg:w-6/12 px-4 py-8 md:px-6 relative">
-                  <img className="mx-auto w-[80px] sm:w-[100px] md:w-[120px] lg:w-2/3 mb-6 pb-2" src="/img/Point.png" alt="logo" />
+                  <img className="mx-auto w-[150px] sm:w-[180px] md:w-[200px] lg:w-5/6 mb-2" src={crediPointLogo} alt="logo" />
                   <div className="md:mx-6 p-8 rounded-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.50)' }}>
-                    <div className="text-center">
-                      <h5 className="pt-4 pb-6 text-xl font-semibold">Iniciar Sesión</h5>
-                    </div>
+                    
                     {messageError && <div className="text-red-500 text-start mb-4 text-sm">*{messageError}</div>}
                     <form className="space-y-4" onSubmit={handleSubmit}>
                       <Box>
-                        <Typography sx={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#000', mb: 0.5, letterSpacing: '0.1em' }}>Usuario POINT</Typography>
+                        
                         <TextField
-                          placeholder="username@gmail.com"
+                          placeholder="Usuario"
                           fullWidth
                           required
                           value={userName}
@@ -88,8 +87,9 @@ const Login = () => {
                       </Box>
 
                       <Box sx={{ width: '100%' }}>
-                        <Typography sx={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#000', mb: 0.5, letterSpacing: '0.1em' }}>Contraseña</Typography>
+                        
                         <TextField
+                        placeholder="Contraseña"
                           fullWidth
                           required
                           value={password}
