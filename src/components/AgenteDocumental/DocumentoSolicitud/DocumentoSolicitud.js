@@ -7,7 +7,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { useNavigate } from "react-router-dom";
-
+import { APIURL } from "../../../configApi/apiConfig";
 export function DocumentoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const { userData } = useAuth();
@@ -57,9 +57,10 @@ export function DocumentoSolicitud() {
     };
 
     try {
-      const response = await fetch(
-        `http://192.168.2.167:3008/api/v1/cre-solicitud-web/documentosanalista?${new URLSearchParams(filterParams)}`
-      );
+      const url = APIURL.getdocumentosanalista(filterParams);
+    
+      const response = await fetch(url);
+    
       const result = await response.json();
       if (result.data) {
         // Filtrar los clientes con idEstadoVerificacionDocumental mayor a 1

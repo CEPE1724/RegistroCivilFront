@@ -162,13 +162,13 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
           <List sx={{ padding: 0 }}>
             {/* Logo */}
             <div className="bg-morado py-2 h-20 flex justify-center items-center">
-             
+            <Link to="/dashboard" className="ml-4">
                 <img
                   className="sm:w-24 w-24 lg:w-36 mx-auto cursor-pointer"
                   src="/img/logo.webp"
                   alt="Logo Point"
                 />
-             
+             </Link>
             </div>
             {/* Render de los elementos del menú principal */}
             {structuredMenuItems}

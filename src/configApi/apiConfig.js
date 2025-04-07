@@ -154,4 +154,5 @@ export const APIURL = {
   deleteRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/delete/${idUsuario}/${idmenu_items}`,
   createRolesAccesos : (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
   listaVendedoresporBodega : (Fecha,idBodega, inivel ) => `${API_BASE_URL}exec-sp/FacturacionListaVendedoresWeb/${Fecha}/${idBodega}/${inivel}`,
+  getdocumentosanalista: () => `${API_BASE_URL}cre-solicitud-web/documentosanalista`,
 };

@@ -463,7 +463,7 @@ export function GestorDocumentos({
 
     const getTipoDocumento = (id) => {
         const documentoIds = {
-            1: "Buro Credito",
+         //   1: "Buro Credito",
             2: "Copia De Cedula",
             3: "Contrato de Compra",
             4: "Declaracion",
