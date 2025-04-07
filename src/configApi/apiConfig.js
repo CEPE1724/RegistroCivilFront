@@ -3,14 +3,15 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.137.169:3025/api/v1/";
+
+const API_BASE_URL = "http://192.168.2.28:3008/api/v1/";
 
 
 
 
 
 
-const SOCKET_BASE_URL = "http://192.168.2.167:3008";
+const SOCKET_BASE_URL = "http://192.168.2.28:3008";
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {
@@ -153,4 +154,5 @@ export const APIURL = {
   deleteRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/delete/${idUsuario}/${idmenu_items}`,
   createRolesAccesos : (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
   listaVendedoresporBodega : (Fecha,idBodega, inivel ) => `${API_BASE_URL}exec-sp/FacturacionListaVendedoresWeb/${Fecha}/${idBodega}/${inivel}`,
+  getdocumentosanalista: () => `${API_BASE_URL}cre-solicitud-web/documentosanalista`,
 };
