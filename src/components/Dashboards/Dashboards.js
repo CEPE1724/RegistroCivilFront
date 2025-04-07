@@ -74,9 +74,14 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
   useEffect(() => {
     if (userData && userData.idUsuario) {
     fetchBodega(); // Llamar a la API para obtener las bodegas
-    fetchSolicitudes();
     } // Llamar a la API para obtener las solicitudes
   }, [userData]);
+
+  useEffect(() => {
+    if (bodegas.length > 0) {
+      fetchSolicitudes()
+    }
+  }, [bodegas]);
 
   const handleBodegaChange = (event) => {
     setSelectedBodega(event.target.value);
@@ -98,9 +103,22 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
   };
 
 
+  const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
 
   const fetchSolicitudes = async (fechaInicio, fechaFin, bodega) => {
+  
+  let bodegasId = [];
+
     try {
+
+  // Si selectedBodega es "todos", pasar un array vacío (esto también se puede ajustar según el comportamiento deseado)
+  if (selectedBodega !== "todos") {
+    // Si selectedBodega tiene un valor específico, tomarlo como un array
+    bodegasId = [selectedBodega];
+  } else {
+    // Si es "todos", se puede pasar un array vacío o la lógica que desees
+    bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
+  }
 
 
       const token = localStorage.getItem("token");
@@ -113,9 +131,8 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
           limit: 100,
           fechaInicio,
           fechaFin,
-          bodega: selectedBodega === "todos" ? 0 : selectedBodega, // Si es "todos", no se envía el parámetro
+          bodega: bodegasId, // Si es "todos", no se envía el parámetro
           estado: estadoFiltro === "todos" ? 0 : estadoFiltro,
-
         },
 
 
@@ -321,42 +338,18 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded shadow-md">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-500">ORDERS</p>
-              <h2 className="text-xl font-semibold">45,021</h2>
-              <p className="text-green-500">+3.1%</p>
-            </div>
-            <div className="text-4xl text-orange-500">
-              <ShoppingCart />
-            </div>
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded shadow-md">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-gray-500">TICKETS</p>
-              <h2 className="text-xl font-semibold">20,516</h2>
-              <p className="text-green-500">+3.1%</p>
-            </div>
-            <div className="text-4xl text-red-500">
-              <ConfirmationNumber />
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Sección de gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Bar Chart</h3>
+          <h3 className="text-xl font-semibold mb-4">Detalles grafico de barras</h3>
           
               <Bar data={barData} />
           
         </div>
         <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Doughnut Chart</h3>
+          <h3 className="text-xl font-semibold mb-4">Detallaes diagrama de pastel</h3>
           <Doughnut data={doughnutData} />
         </div>
       </div>

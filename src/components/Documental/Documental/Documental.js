@@ -40,7 +40,7 @@ export function Documental({
 
   console.log("userUsuario", userUsuario);
   const [files, setFiles] = useState({});
-  const [activeTab, setActiveTab] = useState("Buro Credito");
+  const [activeTab, setActiveTab] = useState("Copia De Cedula");
   const [showFileInput, setShowFileInput] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -214,7 +214,6 @@ export function Documental({
 
   const getTipoDocumento = (id) => {
     const documentoIds = {
-      1: "Buro Credito",
       2: "Copia De Cedula",
       3: "Contrato de Compra",
       4: "Declaracion",
@@ -302,7 +301,7 @@ export function Documental({
       return (completedCorrections / totalCorrections) * 100;
     } else {
       // Modo Normal: Progreso basado en los 11 campos totales
-      const totalFields = 14;
+      const totalFields = 13;
       const completedFieldsCount = completedFields2.length;
 
       return (completedFieldsCount / totalFields) * 100;
@@ -507,7 +506,6 @@ export function Documental({
 
   const getNumeroDocumento = (nombre) => {
     const documentoIds = {
-      1: "Buro Credito",
       2: "Copia De Cedula",
       3: "Contrato de Compra",
       4: "Declaracion",
@@ -640,7 +638,6 @@ export function Documental({
 
 
       const documentoIds = {
-        "Buro Credito": 1,
         "Copia De Cedula": 2,
         "Contrato de Compra": 3,
         "Declaracion": 4,
@@ -740,7 +737,6 @@ export function Documental({
   };
 
   const menuItems = [
-    "Buro Credito",
     "Copia De Cedula",
     "Contrato de Compra",
     "Declaracion",
