@@ -65,7 +65,6 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import CancelIcon from "@mui/icons-material/Cancel";
 import LocationModal from "./LocationModal";
 
-
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 
 import SettingsPhoneIcon from "@mui/icons-material/SettingsPhone";
@@ -85,10 +84,20 @@ import TrabajoModal from "./TrabajoModal";
 import { set } from "react-hook-form";
 import { Api } from "@mui/icons-material";
 import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
+import uploadFile from "../../hooks/uploadFile";
+
 export function ListadoSolicitud() {
-  const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor, analista, listadoAnalista } = useBodegaUsuario();
- 
- 
+  const {
+    data,
+    loading,
+    error,
+    fetchBodegaUsuario,
+    listaVendedoresporBodega,
+    vendedor,
+    analista,
+    listadoAnalista,
+  } = useBodegaUsuario();
+
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
@@ -111,7 +120,8 @@ export function ListadoSolicitud() {
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
-  const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] = useState(null);
+  const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] =
+    useState(null);
 
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [fechaInicio, setFechaInicio] = useState(today);
@@ -120,8 +130,6 @@ export function ListadoSolicitud() {
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
   const [openRegistroCivil, setOpenRegistroCivil] = useState(false);
-
-  
 
   const [isTrabajoModalOpen, setTrabajoModalOpen] = useState(false);
   const handleCloseTrabajoModal = () => setTrabajoModalOpen(false);
@@ -134,9 +142,87 @@ export function ListadoSolicitud() {
   const navigate = useNavigate();
   const { userData, idMenu } = useAuth();
 
+  const [cedula, setCedula] = useState("");
+  const [dactilar, setDactilar] = useState("");
 
-  const [cedula, setCedula] = useState('');
-  const [dactilar, setDactilar] = useState('');
+  const [fileToUpload, setFileToUpload] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+
+    const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+
+
+  const handleFileChange = (event) => {
+    const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!SUPPORTED_FORMATS.includes(file.type)) {
+      alert("El archivo debe ser una imagen (JPG o PNG)");
+      return;
+    }
+
+    setFileToUpload(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleUploadClick = async () => {
+    if (!fileToUpload) {
+      alert("Primero selecciona una imagen");
+      return;
+    }
+
+    try {
+      const fileUploadResponse = await uploadFile(
+        fileToUpload,
+        selectedRow.almacen,
+        selectedRow.cedula,
+        selectedRow.NumeroSolicitud,
+        "Foto"
+      );
+
+      if (fileUploadResponse) {
+        setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
+
+        // 6. Actualizar la solicitud con la URL de la foto
+        const updatedData = {
+          Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
+        };
+        const updatedSolicitud = await fetchActualizaSolicitud(selectedRow.id, updatedData);
+         setUrlCloudstorage()
+      }
+
+     
+      // Si deseas refrescar la imagen desde la URL real del servidor, podrías usar:
+      // setPreviewUrl(APIURL.getImagenURL(res.nombreArchivo));
+      alert("Imagen subida exitosamente");
+
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const fetchActualizaSolicitud = async (idSolicitud, data) => {
+    try {
+      console.log("Actualizando solicitud con ID:", idSolicitud, "con los datos:", data);
+      const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
+      const response = await axios.put(url, data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log("Solicitud actualizada con éxito:", response.data);
+      return response.data;  // Retornar datos actualizados si es necesario
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error.message);
+      throw error;  // Re-lanzar error para manejarlo más tarde
+    }
+  };
+
+
+
+
 
 
 
@@ -156,17 +242,13 @@ export function ListadoSolicitud() {
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
-  
- const verificacionSolicitud = (data) => {
-  return data.idEstadoVerificacionSolicitud !== 12;
+  const verificacionSolicitud = (data) => {
+    return data.idEstadoVerificacionSolicitud !== 12;
   };
-
-  
 
   const estaDeshabilitado = (data) => {
-    return data.resultado === 0; 
+    return data.resultado === 0;
   };
-
 
   const estadoMap = {
     1: "PENDIENTE",
@@ -181,72 +263,68 @@ export function ListadoSolicitud() {
     2: "REVISIÓN",
     3: "CORRECIÓN",
     4: "APROBACION",
-  }
+  };
 
   const estadoDeshabilitadoDocumental = (data) => {
-
-
     console.log("data", data.idEstadoVerificacionDocumental);
     // Obtener el estado correspondiente al ID
     const estado = estadoDocumentalMap[data.idEstadoVerificacionDocumental];
-    
-   console.log("estadoDocumentalMapjgjfhfchf", estado);
 
+    console.log("estadoDocumentalMapjgjfhfchf", estado);
 
     if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
     // Buscar el permiso correspondiente en la lista de permisos
     console.log("permisos", permisos);
     console.log("estado", estado);
-    console.log(permisos.find(p => p.Permisos === `EDITAR DOCUMENTAL ${estado}`));
-    const permiso = permisos.find(p => p.Permisos === `EDITAR DOCUMENTAL ${estado}`);
+    console.log(
+      permisos.find((p) => p.Permisos === `EDITAR DOCUMENTAL ${estado}`)
+    );
+    const permiso = permisos.find(
+      (p) => p.Permisos === `EDITAR DOCUMENTAL ${estado}`
+    );
     // Retornar true si no existe el permiso o si no está activo
 
-  console.log("estado", permiso);
+    console.log("estado", permiso);
     return !permiso || !permiso.Activo;
+  };
 
-  
-  }
+  const estadoDeshabilitadoporPermisos = (data) => {
+    // Obtener el estado correspondiente al ID
+    const estado = estadoMap[data.idEstadoVerificacionSolicitud];
 
+    if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
 
+    // Buscar el permiso correspondiente en la lista de permisos
+    const permiso = permisos.find(
+      (p) => p.Permisos === `EDITAR SOLICITUD ${estado}`
+    );
 
-  const estadoDeshabilitadoporPermisos = (data) => 
-    {
-       
-      // Obtener el estado correspondiente al ID
-  const estado = estadoMap[data.idEstadoVerificacionSolicitud];
-
-  if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
-
-  // Buscar el permiso correspondiente en la lista de permisos
-  const permiso = permisos.find(p => p.Permisos === `EDITAR SOLICITUD ${estado}`);
-
-  // Retornar true si no existe el permiso o si no está activo
-  return !permiso || !permiso.Activo;
-
-    }
+    // Retornar true si no existe el permiso o si no está activo
+    return !permiso || !permiso.Activo;
+  };
 
   const estadoTelefonicaMap = {
     2: "ASIGNADO",
     3: "APROBADO",
     4: "RECHAZADO",
-  }
-
+  };
 
   const estadoDeshabilitadotelefonica = (data) => {
-    // Obtener el estado correspondiente al ID 
+    // Obtener el estado correspondiente al ID
     const estado = estadoTelefonicaMap[data.idEstadoVerificacionTelefonica];
 
-    console.log(estado, "aqui sale el estado que esta saliendo ")
+    console.log(estado, "aqui sale el estado que esta saliendo ");
     if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
     // Buscar el permiso correspondiente en la lista de permisos
-    const permiso = permisos.find(p => p.Permisos === `EDITAR TELEFONICA ${estado}`);
-
+    const permiso = permisos.find(
+      (p) => p.Permisos === `EDITAR TELEFONICA ${estado}`
+    );
 
     console.log("estasdasdassdo", estado);
     console.log("pasdasdasermisos", permisos);
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
-  }
+  };
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -278,7 +356,7 @@ export function ListadoSolicitud() {
   };
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
-  
+
   // Cargar datos iniciales
   useEffect(() => {
     const fetchData = async () => {
@@ -311,7 +389,7 @@ export function ListadoSolicitud() {
       });
       if (response.status === 200) {
         const data = response.data;
-        console.log("quieor ver que me devuelve la api" ,data);
+        console.log("quieor ver que me devuelve la api", data);
         setPermisos(data);
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -321,10 +399,7 @@ export function ListadoSolicitud() {
     }
   };
 
-
   console.log("permisos", permisos);
-
-
 
   const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
     try {
@@ -346,13 +421,11 @@ export function ListadoSolicitud() {
     }
   };
 
-
-
   const handleOpenModalVerificacion = async (data, tipo) => {
     try {
       let idtipo = 0;
-      if ( tipo === "domicilio")  idtipo = 1;
-      else if ( tipo === "trabajo") idtipo = 2;
+      if (tipo === "domicilio") idtipo = 1;
+      else if (tipo === "trabajo") idtipo = 2;
       console.log("data edison", data);
       const url = APIURL.getIdsTerrenas(data.id, idtipo);
       console.log("url", url);
@@ -367,31 +440,32 @@ export function ListadoSolicitud() {
 
       const idsTerrenas = response.data;
       console.log("idsTerrenas", response.data);
-	  setIdsTerrenas(idsTerrenas);
+      setIdsTerrenas(idsTerrenas);
 
       if (!idsTerrenas || idsTerrenas.length === 0) {
-        console.log("entra aquiiiiiiiiiii")
+        console.log("entra aquiiiiiiiiiii");
         // Si no hay datos, abre el modal de verificación terrena
         setUserSolicitudData(data);
         setTipoVerificacionSeleccionada(tipo);
         setOpenVerificacionModal(true);
-
       } else {
         // Si hay datos, determina qué modal abrir en función del tipo y los datos recibidos
-        if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio> 0) {
+        if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio > 0) {
           setDomicilioData(idsTerrenas); // Asigna los datos necesarios para el modal de domicilio
           setDomicilioModalOpen(true);
-          
-        } 
-         if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo> 0) {
+        }
+        if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo > 0) {
           setTrabajoData(idsTerrenas); // Asigna los datos necesarios para el modal de trabajo
           setTrabajoModalOpen(true);
         }
 
-        if ( tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio== 0 ){
+        if (
+          tipo === "domicilio" &&
+          idsTerrenas.idTerrenaGestionDomicilio == 0
+        ) {
           setOpenModalPendiente(true);
         }
-        if ( tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo== 0 ){
+        if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo == 0) {
           setOpenModalPendiente(true);
         }
       }
@@ -399,7 +473,6 @@ export function ListadoSolicitud() {
       console.error("Error fetching data for verificación terrena:", error);
     }
   };
-  
 
   // Obtener bodegas
   const fetchBodega = async () => {
@@ -421,25 +494,23 @@ export function ListadoSolicitud() {
   };
 
   // si cambia la bodega llamae a fecthUsuariobodega
-   
+
   useEffect(() => {
     if (selectedBodega !== "todos") {
       fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
       console.log("selectedBodega", selectedBodega);
       console.log("fechaInicio", fechaInicio);
       console.log("vendedor", vendedor);
-
     } else {
       fetchSolicitudes();
     }
   }, [selectedBodega, fechaInicio]);
 
-
-console.log("selectedBodega", data);
+  console.log("selectedBodega", data);
   const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
     try {
-       await listaVendedoresporBodega(fecha, bodega, nivel);
-    }catch (err) {
+      await listaVendedoresporBodega(fecha, bodega, nivel);
+    } catch (err) {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
@@ -451,7 +522,6 @@ console.log("selectedBodega", data);
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
-      
 
   const getIconByEstado = (estadoId) => {
     switch (estadoId) {
@@ -475,10 +545,10 @@ console.log("selectedBodega", data);
       case 2: // ASIGNADO
         return <PhoneInTalkIcon sx={{ color: "#6C757D" }} />;
       case 3: // Aprobado
-        return <CheckCircleIcon sx={{ color: "#28A745" }}  />;
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       case 4: // rechazado
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
-      case 5: 
+      case 5:
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
       default: // Estado no especificado
         return <PhoneIcon />;
@@ -506,14 +576,14 @@ console.log("selectedBodega", data);
       case 9: // FACTORES DE CRÉDITO
         return <AssessmentIcon sx={{ color: "gray" }} />;
       case 10: // verificaciomn
-       return <VerifiedIcon sx={{ color: "gray" }} />;
-      case 11: 
-      return <SettingsPhoneIcon sx={{ color: "#FFC107" }} />; // Amarillo para GESTIONANDO
+        return <VerifiedIcon sx={{ color: "gray" }} />;
+      case 11:
+        return <SettingsPhoneIcon sx={{ color: "#FFC107" }} />; // Amarillo para GESTIONANDO
       case 12:
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />; 
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       case 13:
         return <PendingActionsIcon sx={{ color: "#DC3545" }} />; // Rojo para RECHAZADO
- // Verde para COMPLETADO
+      // Verde para COMPLETADO
       default: // Default icon si el estado es desconocido
         return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
     }
@@ -525,7 +595,7 @@ console.log("selectedBodega", data);
 3	CORRECIÓN
 4	APROBACION
 5	RECHAZAR */
- const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
+  const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
   // Obtener tipo de consulta
   const fetchTipoConsulta = async () => {
     try {
@@ -598,14 +668,14 @@ console.log("selectedBodega", data);
 
   const fetchSolicitudes = async () => {
     // Primero se obtiene el array de bodegas
- let bodegasId = [];
+    let bodegasId = [];
     // Verificar que tipoConsulta y dataBodega no estén vacíos
     if (tipoConsulta.length === 0 || dataBodega.length === 0) return;
-  
+
     try {
       const token = localStorage.getItem("token");
       const offset = (currentPage - 1) * itemsPerPage;
-  
+
       // Si selectedBodega es "todos", pasar un array vacío (esto también se puede ajustar según el comportamiento deseado)
       if (selectedBodega !== "todos") {
         // Si selectedBodega tiene un valor específico, tomarlo como un array
@@ -614,9 +684,9 @@ console.log("selectedBodega", data);
         // Si es "todos", se puede pasar un array vacío o la lógica que desees
         bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
       }
-  
+
       console.log("bodegasIds", bodegasId);
-      
+
       // Realizar la consulta con los parámetros ajustados
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
@@ -628,17 +698,17 @@ console.log("selectedBodega", data);
           offset: offset,
           fechaInicio: fechaInicio,
           fechaFin: fechaFin,
-          bodega: bodegasId,  // Pasar el array de bodegas al backend
+          bodega: bodegasId, // Pasar el array de bodegas al backend
           estado: estado === "todos" ? 0 : estado,
           vendedor: selectedVendedor === "todos" ? 0 : selectedVendedor,
           analista: analistaSelected === "todos" ? 0 : analistaSelected,
         },
       });
-  
+
       if (response.status === 200) {
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
-  
+
         // Mapeo de datos con fetchVendedor
         const datos = await Promise.all(
           response.data.data.map(async (item) => {
@@ -679,19 +749,21 @@ console.log("selectedBodega", data);
               afiliado: item.bAfiliado ? "Sí" : "No",
               tieneRuc: item.bTieneRuc ? "Sí" : "No",
               tipoCliente: tipoClienteMap[item.idTipoCliente] || "NO APLICA",
-              idEstadoVerificacionDocumental: item.idEstadoVerificacionDocumental,
+              idEstadoVerificacionDocumental:
+                item.idEstadoVerificacionDocumental,
               idEstadoVerificacionSolicitud: item.idEstadoVerificacionSolicitud,
-              idEstadoVerificacionTelefonica: item.idEstadoVerificacionTelefonica,
+              idEstadoVerificacionTelefonica:
+                item.idEstadoVerificacionTelefonica,
               idEstadoVerificacionTerrena: item.idEstadoVerificacionTerrena,
               resultado: item.Resultado,
               entrada: item.Entrada,
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
-              CodigoDactilar : item.CodDactilar,
+              CodigoDactilar: item.CodDactilar,
             };
           })
         );
-  
+
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
@@ -702,7 +774,6 @@ console.log("selectedBodega", data);
       console.error("Error fetching data:", error);
     }
   };
-  
 
   // Obtener vendedor
   const fetchVendedor = async (idVendedor) => {
@@ -738,7 +809,6 @@ console.log("selectedBodega", data);
     setAnalistaSelected(event.target.value);
   };
 
-
   useEffect(() => {
     if (data && data.length > 0) {
       setDataBodega(
@@ -751,12 +821,8 @@ console.log("selectedBodega", data);
   }, [data]);
 
   const handledocumentos = (registro) => {
+    console.log("Registro:", registro);
 
-    console.log(
-      "Registro:",
-      registro
-    )
-   
     if (registro.idEstadoVerificacionDocumental == 4) {
       navigate("/gestorDocumentos", {
         replace: true,
@@ -771,24 +837,24 @@ console.log("selectedBodega", data);
           vendedor: registro.vendedor,
           consulta: registro.consulta,
         },
-      }); 
-    }
-    else {
-    navigate("/documental", {
-      replace: true,
-      state: {
-        id: registro.id,
-        NumeroSolicitud: registro.NumeroSolicitud,
-        nombre: registro.nombre,
-        cedula: registro.cedula,
-        fecha: registro.fecha,
-        almacen: registro.almacen,
-        foto: registro.imagen,
-        vendedor: registro.vendedor,
-        consulta: registro.consulta,
-        idEstadoVerificacionDocumental: registro.idEstadoVerificacionDocumental,
-      },
-    });
+      });
+    } else {
+      navigate("/documental", {
+        replace: true,
+        state: {
+          id: registro.id,
+          NumeroSolicitud: registro.NumeroSolicitud,
+          nombre: registro.nombre,
+          cedula: registro.cedula,
+          fecha: registro.fecha,
+          almacen: registro.almacen,
+          foto: registro.imagen,
+          vendedor: registro.vendedor,
+          consulta: registro.consulta,
+          idEstadoVerificacionDocumental:
+            registro.idEstadoVerificacionDocumental,
+        },
+      });
     }
   };
 
@@ -808,7 +874,6 @@ console.log("selectedBodega", data);
         consulta: registro.consulta,
         idEstadoVerificacionTelefonica: registro.idEstadoVerificacionTelefonica,
         permisos: permisos,
-        
       },
     });
   };
@@ -848,12 +913,11 @@ console.log("selectedBodega", data);
     setOpenLocationModal((prevState) => !prevState);
   };
 
-
-console.log("analistaassassasasasaasas", analista);
+  console.log("analistaassassasasasaasas", analista);
 
   const handleRegistroVisualizacion = (data) => {
-    console.log("Registro:", data);}
- 
+    console.log("Registro:", data);
+  };
 
   console.log("userSolicitudData", datos);
   return (
@@ -901,7 +965,7 @@ console.log("analistaassassasasasaasas", analista);
         </FormControl>
         <FormControl size="small" fullWidth>
           <InputLabel>Buscar por Vendedor</InputLabel>
-          
+
           <Select
             value={selectedVendedor}
             onChange={handleVendedorChange}
@@ -1050,12 +1114,8 @@ console.log("analistaassassasasasaasas", analista);
                   <TableCell align="center">{data.entrada}</TableCell>
                   <TableCell align="center">
                     <Tooltip title="Ver más" arrow placement="top">
-                      <IconButton
-                        onClick={() => handleOpenDialog(data)}
-                  
-                      >
-                        <VisibilityIcon
-                        />
+                      <IconButton onClick={() => handleOpenDialog(data)}>
+                        <VisibilityIcon />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
@@ -1067,10 +1127,10 @@ console.log("analistaassassasasasaasas", analista);
                         <IconButton
                           onClick={() => handlesolicitud(data)}
                           disabled={
-                           estaDeshabilitado(data) || estadoDeshabilitadoporPermisos(data)
+                            estaDeshabilitado(data) ||
+                            estadoDeshabilitadoporPermisos(data)
                           }
                           sx={{ opacity: estaDeshabilitado(data) }}
-
                         >
                           {getSolicitudIconByEstado(
                             data.idEstadoVerificacionSolicitud
@@ -1079,10 +1139,12 @@ console.log("analistaassassasasasaasas", analista);
 
                         {/* MoreVertIcon deshabilitado cuando resultado es "No aplica" */}
                         <span
-                            style={{
-                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                            }}
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
                         >
                           <MoreVertIcon
                             onClick={(event) =>
@@ -1113,29 +1175,39 @@ console.log("analistaassassasasasaasas", analista);
                         <IconButton
                           onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
                           disabled={
-                            data.idEstadoVerificacionDocumental === 2 
-                            || estaDeshabilitado(data) || estadoDeshabilitadoDocumental(data) || verificacionSolicitud(data)
+                            data.idEstadoVerificacionDocumental === 2 ||
+                            estaDeshabilitado(data) ||
+                            estadoDeshabilitadoDocumental(data) ||
+                            verificacionSolicitud(data)
                           }
-                          sx={{ opacity: estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
-
+                          sx={{
+                            opacity:
+                              estaDeshabilitado(data) ||
+                              verificacionSolicitud(data)
+                                ? 0.5
+                                : 1,
+                          }}
                         >
                           {getIconByEstado(data.idEstadoVerificacionDocumental)}
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
                         <span
-                            style={{
-                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                            }}
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
                         >
-                        <MoreVertIcon
-                          onClick={(event) => handlePopoverOpen(event, 3, data)}
-                          style={{ cursor: "pointer" }}
-                        />
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 3, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
                       </span>
-                    </span>
-
 
                       <DocumentStatusPopover
                         open={
@@ -1150,16 +1222,27 @@ console.log("analistaassassasasasaasas", analista);
                     </div>
                   </TableCell>
 
-                  {/* telefonica */}  
+                  {/* telefonica */}
                   <TableCell align="center">
                     <div>
                       <span>
                         <IconButton
                           onClick={() => handleTelefonica(data)} // Aquí va la lógica para manejar el clic
-                          disabled={data.idEstadoVerificacionTelefonica === 1 || estaDeshabilitado(data) || verificacionSolicitud(data) || estadoDeshabilitadotelefonica(data)} 
-                          sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
-
-                   >
+                          disabled={
+                            data.idEstadoVerificacionTelefonica === 1 ||
+                            estaDeshabilitado(data) ||
+                            verificacionSolicitud(data) ||
+                            estadoDeshabilitadotelefonica(data)
+                          }
+                          sx={{
+                            opacity:
+                              data.Estado === 5 ||
+                              estaDeshabilitado(data) ||
+                              verificacionSolicitud(data)
+                                ? 0.5
+                                : 1,
+                          }}
+                        >
                           {getPhoneIconByEstado(
                             data.idEstadoVerificacionTelefonica
                           )}
@@ -1167,17 +1250,21 @@ console.log("analistaassassasasasaasas", analista);
 
                         {/* InfoIcon al lado del IconButton */}
                         <span
-                            style={{
-                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                            }}
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
                         >
-                        <MoreVertIcon
-                          onClick={(event) => handlePopoverOpen(event, 2, data)}
-                          style={{ cursor: "pointer" }}
-                        />
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 2, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
                       </span>
-                    </span>
 
                       <DocumentStatusPopover
                         open={
@@ -1197,13 +1284,21 @@ console.log("analistaassassasasasaasas", analista);
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handleOpenModalVerificacion(data , "domicilio")} // Aquí va la lógica para manejar el clic
+                          onClick={() =>
+                            handleOpenModalVerificacion(data, "domicilio")
+                          } // Aquí va la lógica para manejar el clic
                           disabled={
-                            data.idEstadoVerificacionDocumental !== 4||  ///cuando documental este aporbado hablito domicilio y laboral
+                            data.idEstadoVerificacionDocumental !== 4 || ///cuando documental este aporbado hablito domicilio y laboral
                             data.Domicilio === false
                           }
-                          sx={{ opacity: data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
-
+                          sx={{
+                            opacity:
+                              data.Estado === 5 ||
+                              estaDeshabilitado(data) ||
+                              verificacionSolicitud(data)
+                                ? 0.5
+                                : 1,
+                          }}
                         >
                           <HouseIcon sx={{ color: "gray" }} />
                         </IconButton>
@@ -1211,18 +1306,21 @@ console.log("analistaassassasasasaasas", analista);
                         {/* InfoIcon al lado del IconButton */}
 
                         <span
-                            style={{
-                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                            }}
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
                         >
-
-                        <MoreVertIcon
-                          onClick={(event) => handlePopoverOpen(event, 4, data)}
-                          style={{ cursor: "pointer" }}
-                        />
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 4, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
                       </span>
-                    </span>
 
                       <DocumentStatusPopover
                         open={
@@ -1241,31 +1339,41 @@ console.log("analistaassassasasasaasas", analista);
                     <div>
                       <span>
                         <IconButton
-                          onClick={() => handleOpenModalVerificacion(data , "trabajo")  } // Aquí va la lógica para manejar el clic
+                          onClick={() =>
+                            handleOpenModalVerificacion(data, "trabajo")
+                          } // Aquí va la lógica para manejar el clic
                           disabled={
-                            verificacionSolicitud(data)||
+                            verificacionSolicitud(data) ||
                             data.Laboral === false
                           }
-                          sx={{ opacity: estaDeshabilitado(data) || verificacionSolicitud(data) ? 0.5 : 1 }}
-
+                          sx={{
+                            opacity:
+                              estaDeshabilitado(data) ||
+                              verificacionSolicitud(data)
+                                ? 0.5
+                                : 1,
+                          }}
                         >
                           <StoreIcon sx={{ color: "gray" }} />
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
                         <span
-                            style={{
-                              pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                            }}
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
                         >
-
-                        <MoreVertIcon
-                          onClick={(event) => handlePopoverOpen(event, 4, data)}
-                          style={{ cursor: "pointer" }}
-                        />
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 4, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
                       </span>
-                    </span>
 
                       <DocumentStatusPopover
                         open={
@@ -1288,81 +1396,122 @@ console.log("analistaassassasasasaasas", analista);
 
       {/* Cuadro de diálogo para ver detalles */}
       <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-      <DialogTitle className="text-xl font-bold flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-  <Timeline
-    position="bottom"
-    sx={{
-      display: "flex",
-      flexDirection: "row",
-      padding: 0,
-      overflowX: "auto",
-      maxWidth: "100%",
-      "& .MuiTimelineItem-root": {
-        minWidth: "80px",
-        padding: "0 8px",
-        alignItems: "center",
-      },
-      "& .MuiTimelineSeparator-root": {
-        flexDirection: "column",
-        alignItems: "center",
-      },
-      "& .MuiTimelineDot-root": {
-        backgroundColor: "white",
-        border: "2px solid #ccc",
-        margin: "4px 0",
-        zIndex: 1,
-      },
-      "& .MuiTimelineConnector-root": {
-        backgroundColor: "#ccc",
-        height: 2,
-        width: "100%",
-        position: "absolute",
-        top: "50%",
-        left: 0,
-        transform: "translateY(-50%)",
-        zIndex: 0,
-      },
-    }}
-  >
-    {[
-      { icon: <PendingActionsIcon sx={{ color: "gray" }} />, label: "Pendiente" },
-      { icon: <FolderIcon sx={{ color: "#6C757D" }} />, label: "Inicio" },
-      { icon: <PhoneInTalkIcon sx={{ color: "#6C757D" }} />, label: "Contacto" },
-      { icon: <StoreIcon sx={{ color: "gray" }} />, label: "Tienda" },
-      { icon: <HouseIcon sx={{ color: "gray" }} />, label: "Casa" },
-      { icon: <PersonIcon sx={{ color: "#6C757D" }} />, label: "Trabajo" },
-     /// { icon: <CheckCircleIcon sx={{ color: "#28A745" }} />, label: "Trabajo" },
-    ].map((item, index, array) => (
-      <TimelineItem key={index} sx={{ position: "relative" }}>
-        <TimelineSeparator>
-          {index !== 0 && <TimelineConnector />}
-          <TimelineDot>{item.icon}</TimelineDot>
-          {index < array.length - 1 && <TimelineConnector />}
-        </TimelineSeparator>
-        <TimelineContent
-          sx={{
-            fontSize: "0.75rem",
-            textAlign: "center",
-            paddingTop: 1,
-          }}
-        >
-        </TimelineContent>
-      </TimelineItem>
-    ))}
-  </Timeline>
-</DialogTitle>
+        <DialogTitle className="text-xl font-bold flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <Timeline
+            position="bottom"
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              padding: 0,
+              overflowX: "auto",
+              maxWidth: "100%",
+              "& .MuiTimelineItem-root": {
+                minWidth: "80px",
+                padding: "0 8px",
+                alignItems: "center",
+              },
+              "& .MuiTimelineSeparator-root": {
+                flexDirection: "column",
+                alignItems: "center",
+              },
+              "& .MuiTimelineDot-root": {
+                backgroundColor: "white",
+                border: "2px solid #ccc",
+                margin: "4px 0",
+                zIndex: 1,
+              },
+              "& .MuiTimelineConnector-root": {
+                backgroundColor: "#ccc",
+                height: 2,
+                width: "100%",
+                position: "absolute",
+                top: "50%",
+                left: 0,
+                transform: "translateY(-50%)",
+                zIndex: 0,
+              },
+            }}
+          >
+            {[
+              {
+                icon: <PendingActionsIcon sx={{ color: "gray" }} />,
+                label: "Pendiente",
+              },
+              {
+                icon: <FolderIcon sx={{ color: "#6C757D" }} />,
+                label: "Inicio",
+              },
+              {
+                icon: <PhoneInTalkIcon sx={{ color: "#6C757D" }} />,
+                label: "Contacto",
+              },
+              { icon: <StoreIcon sx={{ color: "gray" }} />, label: "Tienda" },
+              { icon: <HouseIcon sx={{ color: "gray" }} />, label: "Casa" },
+              {
+                icon: <PersonIcon sx={{ color: "#6C757D" }} />,
+                label: "Trabajo",
+              },
+              /// { icon: <CheckCircleIcon sx={{ color: "#28A745" }} />, label: "Trabajo" },
+            ].map((item, index, array) => (
+              <TimelineItem key={index} sx={{ position: "relative" }}>
+                <TimelineSeparator>
+                  {index !== 0 && <TimelineConnector />}
+                  <TimelineDot>{item.icon}</TimelineDot>
+                  {index < array.length - 1 && <TimelineConnector />}
+                </TimelineSeparator>
+                <TimelineContent
+                  sx={{
+                    fontSize: "0.75rem",
+                    textAlign: "center",
+                    paddingTop: 1,
+                  }}
+                ></TimelineContent>
+              </TimelineItem>
+            ))}
+          </Timeline>
+        </DialogTitle>
 
         <DialogContent dividers>
           {selectedRow && (
             <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-              <div className="flex justify-center items-center md:w-1/3">
-                <img
-                  src={selectedRow.imagen}
-                  alt="Imagen"
-                  className="w-64 h-64 object-cover rounded-md"
-                />
-              </div>
+              <div className="w-64 h-64 flex flex-col justify-center items-center border-2 border-dashed border-gray-400 rounded-md text-center text-sm text-gray-500 p-4">
+      { selectedRow.imagen === "prueba" ?(
+        <>
+          <p className="mb-2">No hay imagen disponible</p>
+        </>
+      ) : (
+        <img
+          src={selectedRow.imagen}
+          alt="Vista previa"
+          className="w-full h-full object-cover rounded-md"
+        />
+      )}
+
+      <label
+        htmlFor="upload-image"
+        className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-4 py-2 mt-2 cursor-pointer"
+      >
+        Seleccionar archivo
+        <input
+          id="upload-image"
+          type="file"
+          className="hidden"
+          accept="image/png,image/jpeg"
+          onChange={handleFileChange}
+        />
+      </label>
+
+      <Button
+        variant="outlined"
+        color="primary"
+        className="mt-2 text-xs font-semibold"
+        onClick={handleUploadClick}
+        disabled={!fileToUpload}
+      >
+        SUBIR FOTO
+      </Button>
+    </div>
+
               <div className="md:w-2/3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
                   <div className="flex items-center gap-2">
@@ -1453,17 +1602,16 @@ console.log("analistaassassasasasaasas", analista);
           </Button>
 
           <Button
-  onClick={() => {
-    setCedula(selectedRow?.cedula);
-    setDactilar(selectedRow?.CodigoDactilar); // o el campo correcto que contenga el código dactilar
-    setOpenRegistroCivil(true);
-  }}
-  color="primary"
-  className="text-base font-semibold"
->
-  Aprobar
-</Button>
-
+            onClick={() => {
+              setCedula(selectedRow?.cedula);
+              setDactilar(selectedRow?.CodigoDactilar); // o el campo correcto que contenga el código dactilar
+              setOpenRegistroCivil(true);
+            }}
+            color="primary"
+            className="text-base font-semibold"
+          >
+            Aprobar
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -1496,9 +1644,8 @@ console.log("analistaassassasasasaasas", analista);
         onLocationChange={null}
         userSolicitudData={userSolicitudData}
       />
-      
-      
-     {/* <VerificacionTerrenaModal
+
+      {/* <VerificacionTerrenaModal
         isOpen={() => handleOpenModalVerificacion()}
         openVerificacionModal={openVerificacionModal}
         userSolicitudData={userSolicitudData}
@@ -1507,26 +1654,34 @@ console.log("analistaassassasasasaasas", analista);
 
       />*/}
       <VerificacionTerrenaModal
-  isOpen={openVerificacionModal}
-  onClose={() => setOpenVerificacionModal(false)}
-  userSolicitudData={userSolicitudData}
-  userData={userData}
-  tipoSeleccionado={tipoVerificacionSeleccionada}
-/>
+        isOpen={openVerificacionModal}
+        onClose={() => setOpenVerificacionModal(false)}
+        userSolicitudData={userSolicitudData}
+        userData={userData}
+        tipoSeleccionado={tipoVerificacionSeleccionada}
+      />
 
+      <DomicilioModal
+        openModal={isDomicilioModalOpen}
+        closeModal={handleCloseDomicilioModal}
+        idsTerrenas={idsTerrenas}
+      />
 
+      <TrabajoModal
+        openModal={isTrabajoModalOpen}
+        closeModal={handleCloseTrabajoModal}
+        idsTerrenas={idsTerrenas}
+      />
 
-
-
-
-      <DomicilioModal openModal={isDomicilioModalOpen} closeModal={handleCloseDomicilioModal} idsTerrenas={idsTerrenas}/>
-
-      <TrabajoModal openModal={isTrabajoModalOpen} closeModal= {handleCloseTrabajoModal} idsTerrenas={idsTerrenas}/>
-
-      <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
+      <Dialog
+        open={openModalPendiente}
+        onClose={() => setOpenModalPendiente(false)}
+      >
         <DialogTitle>Verificación Pendiente</DialogTitle>
         <DialogContent>
-          <Typography>Verificación pendiente por el personal asignado.</Typography>
+          <Typography>
+            Verificación pendiente por el personal asignado.
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenModalPendiente(false)} color="primary">
@@ -1535,17 +1690,30 @@ console.log("analistaassassasasasaasas", analista);
         </DialogActions>
       </Dialog>
 
-  {/* Modal para Registro Civil */}
-<Dialog
+      {/* Modal para Registro Civil */}
+      <Dialog
   open={openRegistroCivil}
   onClose={() => setOpenRegistroCivil(false)}
   maxWidth="md"
   fullWidth
 >
-  <RegistroCivil cedula={cedula} dactilar={dactilar} />
+  <RegistroCivil
+    cedula={cedula}
+    dactilar={dactilar}
+    imagenSubida={selectedRow?.imagen}
+    onAceptar={() => {
+      // Acción al aceptar
+      console.log("Aceptado");
+      setOpenRegistroCivil(false);
+    }}
+    onRechazar={() => {
+      // Acción al rechazar
+      console.log("Rechazado");
+      setOpenRegistroCivil(false);
+    }}
+  />
 </Dialog>
 
     </div>
-
   );
 }
