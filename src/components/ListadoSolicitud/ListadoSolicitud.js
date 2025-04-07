@@ -22,6 +22,15 @@ import {
   Alert,
   Icon,
 } from "@mui/material";
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineDot,
+  TimelineConnector,
+  TimelineContent,
+} from "@mui/lab";
+
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import { APIURL } from "../../configApi/apiConfig";
@@ -56,6 +65,7 @@ import SmartphoneIcon from "@mui/icons-material/Smartphone";
 import CancelIcon from "@mui/icons-material/Cancel";
 import LocationModal from "./LocationModal";
 
+
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 
 import SettingsPhoneIcon from "@mui/icons-material/SettingsPhone";
@@ -74,6 +84,7 @@ import DomicilioModal from "./DomicilioModal";
 import TrabajoModal from "./TrabajoModal";
 import { set } from "react-hook-form";
 import { Api } from "@mui/icons-material";
+import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 export function ListadoSolicitud() {
   const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor, analista, listadoAnalista } = useBodegaUsuario();
  
@@ -108,6 +119,7 @@ export function ListadoSolicitud() {
 
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
+  const [openRegistroCivil, setOpenRegistroCivil] = useState(false);
 
   
 
@@ -121,6 +133,12 @@ export function ListadoSolicitud() {
 
   const navigate = useNavigate();
   const { userData, idMenu } = useAuth();
+
+
+  const [cedula, setCedula] = useState('');
+  const [dactilar, setDactilar] = useState('');
+
+
 
 
   console.log("userDataaaaaaa", userData);
@@ -669,6 +687,7 @@ console.log("selectedBodega", data);
               entrada: item.Entrada,
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
+              CodigoDactilar : item.CodDactilar,
             };
           })
         );
@@ -832,6 +851,8 @@ console.log("selectedBodega", data);
 
 console.log("analistaassassasasasaasas", analista);
 
+  const handleRegistroVisualizacion = (data) => {
+    console.log("Registro:", data);}
  
 
   console.log("userSolicitudData", datos);
@@ -1027,7 +1048,6 @@ console.log("analistaassassasasasaasas", analista);
                     ) : null}
                   </TableCell>
                   <TableCell align="center">{data.entrada}</TableCell>
-
                   <TableCell align="center">
                     <Tooltip title="Ver más" arrow placement="top">
                       <IconButton
@@ -1268,9 +1288,71 @@ console.log("analistaassassasasasaasas", analista);
 
       {/* Cuadro de diálogo para ver detalles */}
       <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle className="text-xl font-bold">
-          Detalles de la Solicitud
-        </DialogTitle>
+      <DialogTitle className="text-xl font-bold flex flex-col md:flex-row md:items-center justify-between gap-4">
+
+  <Timeline
+    position="bottom"
+    sx={{
+      display: "flex",
+      flexDirection: "row",
+      padding: 0,
+      overflowX: "auto",
+      maxWidth: "100%",
+      "& .MuiTimelineItem-root": {
+        minWidth: "80px",
+        padding: "0 8px",
+        alignItems: "center",
+      },
+      "& .MuiTimelineSeparator-root": {
+        flexDirection: "column",
+        alignItems: "center",
+      },
+      "& .MuiTimelineDot-root": {
+        backgroundColor: "white",
+        border: "2px solid #ccc",
+        margin: "4px 0",
+        zIndex: 1,
+      },
+      "& .MuiTimelineConnector-root": {
+        backgroundColor: "#ccc",
+        height: 2,
+        width: "100%",
+        position: "absolute",
+        top: "50%",
+        left: 0,
+        transform: "translateY(-50%)",
+        zIndex: 0,
+      },
+    }}
+  >
+    {[
+      { icon: <PendingActionsIcon sx={{ color: "gray" }} />, label: "Pendiente" },
+      { icon: <FolderIcon sx={{ color: "#6C757D" }} />, label: "Inicio" },
+      { icon: <PhoneInTalkIcon sx={{ color: "#6C757D" }} />, label: "Contacto" },
+      { icon: <StoreIcon sx={{ color: "gray" }} />, label: "Tienda" },
+      { icon: <HouseIcon sx={{ color: "gray" }} />, label: "Casa" },
+      { icon: <PersonIcon sx={{ color: "#6C757D" }} />, label: "Trabajo" },
+     /// { icon: <CheckCircleIcon sx={{ color: "#28A745" }} />, label: "Trabajo" },
+    ].map((item, index, array) => (
+      <TimelineItem key={index} sx={{ position: "relative" }}>
+        <TimelineSeparator>
+          {index !== 0 && <TimelineConnector />}
+          <TimelineDot>{item.icon}</TimelineDot>
+          {index < array.length - 1 && <TimelineConnector />}
+        </TimelineSeparator>
+        <TimelineContent
+          sx={{
+            fontSize: "0.75rem",
+            textAlign: "center",
+            paddingTop: 1,
+          }}
+        >
+        </TimelineContent>
+      </TimelineItem>
+    ))}
+  </Timeline>
+</DialogTitle>
+
         <DialogContent dividers>
           {selectedRow && (
             <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
@@ -1369,6 +1451,19 @@ console.log("analistaassassasasasaasas", analista);
           >
             Cerrar
           </Button>
+
+          <Button
+  onClick={() => {
+    setCedula(selectedRow?.cedula);
+    setDactilar(selectedRow?.CodigoDactilar); // o el campo correcto que contenga el código dactilar
+    setOpenRegistroCivil(true);
+  }}
+  color="primary"
+  className="text-base font-semibold"
+>
+  Aprobar
+</Button>
+
         </DialogActions>
       </Dialog>
 
@@ -1439,6 +1534,16 @@ console.log("analistaassassasasasaasas", analista);
           </Button>
         </DialogActions>
       </Dialog>
+
+  {/* Modal para Registro Civil */}
+<Dialog
+  open={openRegistroCivil}
+  onClose={() => setOpenRegistroCivil(false)}
+  maxWidth="md"
+  fullWidth
+>
+  <RegistroCivil cedula={cedula} dactilar={dactilar} />
+</Dialog>
 
     </div>
 
