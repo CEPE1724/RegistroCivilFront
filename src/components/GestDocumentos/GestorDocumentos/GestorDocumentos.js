@@ -463,7 +463,7 @@ export function GestorDocumentos({
 
     const getTipoDocumento = (id) => {
         const documentoIds = {
-         //   1: "Buro Credito",
+            //   1: "Buro Credito",
             2: "Copia De Cedula",
             3: "Contrato de Compra",
             4: "Declaracion",
@@ -763,7 +763,7 @@ export function GestorDocumentos({
             {/* Menu Toggle Button */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="fixed top-7 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
+                className="fixed top-15 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
             >
                 {isMenuOpen ? "❌" : "☰"}
             </button>

@@ -64,13 +64,9 @@ export function TelefonicaList({
     setIdCre_VerificacionTelefonicaMaestro,
   ] = useState(null);
 
-  console.log("asdasdasdasda el id de telfeonia", clientInfo.idEstadoVerificacionTelefonica);
-
   const [filePreviews, setFilePreviews] = useState({});
   const [selectedRow, setSelectedRow] = useState(null);
   const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
-
-  console.log("clientInfo los permisos papa", clientInfo.permisos);
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -177,10 +173,6 @@ export function TelefonicaList({
           const response = await axios.get(
             APIURL.getCreVerificacionTelefonicaMaestro(clientInfo.id)
           );
-          console.log("Datos de la API:", response.data);
-
-          // Aquí asumimos que los datos que devuelve la API son un array
-          // y lo asignamos a tablaDatos para mostrarlo en la tabla.
           setTablaDatos(response.data);
         } catch (error) {
           console.error("Error al obtener los datos de la API", error);
@@ -197,7 +189,6 @@ export function TelefonicaList({
   const handleOpenDialog = async (index, item) => {
     const selectedItem = tablaDatos[index];
     setSelectedRow(item);
-    console.log("Item seleccionado:", selectedItem);
     const idCre_VerificacionTelefonicaMaestro =
       selectedItem.idCre_VerificacionTelefonicaMaestro;
 
@@ -226,7 +217,6 @@ export function TelefonicaList({
       if (response.status === 200) {
         // Mejor que solo `response.ok`
         const data = response.data; // Axios devuelve la data en `response.data`
-        console.log("Datos de la API:", data);
 
         setApiResponseData(data); // Almacena los datos en el estado correctamente
       } else {
@@ -376,8 +366,6 @@ export function TelefonicaList({
       Nuevo: true,
       idCre_VerificacionTelefonicaMaestro: idCre_VerificacionTelefonicaMaestro,
     };
-
-    console.log("Datos a enviar:", datosParaEnviar);
 
     try {
       // Llamada para guardar los datos
@@ -592,7 +580,7 @@ export function TelefonicaList({
                       <p className="text-gray-600">{value}</p>
                     </div>
                   ))}
-
+                  <div className="flex flex-wrap gap-4 items-center">
                   {resultContactedDocs.length >= 2 && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !==3 && (
                     <button
                       onClick={handleSubmit}
@@ -611,6 +599,7 @@ export function TelefonicaList({
                     Rechazar
                   </button>
                   )}
+                  </div>
                 </div>
               </div>
             </div>

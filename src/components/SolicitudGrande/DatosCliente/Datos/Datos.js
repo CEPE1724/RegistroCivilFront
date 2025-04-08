@@ -10,7 +10,6 @@ import { SelectField } from "../../../Utils";
 const Datos = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
     const { data } = props;
-    console.log('datos cabecera', data);
     const [formErrors, setFormErrors] = useState({});
     const [nacionalidad, setNacionalidad] = useState([]);
     const [genero, setGenero] = useState([]);
