@@ -29,7 +29,7 @@ export function Cabecera() {
   const { state } = useLocation();
   const { data } = state || {};
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
- 
+
   const [activeTab, setActiveTab] = useState("Datos Cliente");
   const [fecha, setFecha] = useState(data?.fecha ? new Date(data.fecha).toISOString().split('T')[0] : "");
   const [cedula, setCedula] = useState(data?.cedula || "");
@@ -64,7 +64,6 @@ export function Cabecera() {
   const datosTrabajo = useRef(); // Referencia para el componente Trabajo
   const datosNegocio = useRef(); // Referencia para el componente Negocio
   const datosInformacionCredito = useRef(); // Referencia para el componente InformacionCredito
-  console.log("idSolicitud", clienteData);
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
 
@@ -89,7 +88,6 @@ export function Cabecera() {
 
   useEffect(() => {
     if (clienteData && clienteData.idCre_SolicitudWeb) {
-      console.log("clienteData ID Cre Solicitud Web:", clienteData.idCre_SolicitudWeb);
       SearchData(clienteData.idCre_SolicitudWeb);
     } else {
       console.log("El ID Cre Solicitud Web no está disponible aún");
@@ -138,10 +136,8 @@ export function Cabecera() {
 
   const SearchData = async (id) => {
     try {
-      console.log("Buscando con el ID:", id);
       const url = APIURL.get_cre_referenciasclientesweb_id_all(id);
       const response = await axios.get(url);
-      console.log("Response data refrencias:", response.data); // Log the response data
       if (response.data && response.data > 1) {
         setCheckReferencias(true);
       } else {
@@ -607,8 +603,6 @@ export function Cabecera() {
     // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
   ];
 
-  console.log(clienteData , "aqui llega o no ") /// este no tiene
-
   const renderTabContent = (clienteData) => {
     /* if (clienteData.idEdoCivil === 1 && activeTab !== "Datos Conyuge") {
        setActiveTab("Datos Conyuge");
@@ -641,7 +635,7 @@ export function Cabecera() {
   };
 
   const openModal = () => setIsModalOpen(true);
-  
+
   // Función para manejar el cierre del modal
   const closeModal = () => setIsModalOpen(false);
 
@@ -757,9 +751,9 @@ export function Cabecera() {
 
   // Función para confirmar la acción (enviar)
   const handleConfirm = () => {
-   patchSolicitud(idSolicitud);
-   fetchInsertarDatos(10);
-   
+    patchSolicitud(idSolicitud);
+    fetchInsertarDatos(10);
+
     closeModal(); // Cerrar el modal después de confirmar
   };
   const handleTabClick = (tab) => {
@@ -871,7 +865,6 @@ export function Cabecera() {
       tipoDato = 6;
       const formData = datosNegocio.current.getFormData();
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
-      console.log("datos negocio", formData);
       if (isValid) {
         isValidSumit = true;
 
@@ -880,7 +873,7 @@ export function Cabecera() {
       }
     }
     if (isValidSumit) {
-    fetchInsertarDatos(tipoDato);
+      fetchInsertarDatos(tipoDato);
     } // Llamar a la función para insertar datos
   };
 
@@ -1134,8 +1127,6 @@ export function Cabecera() {
     }
   };
 
-  console.log("checkDatos", checkDatos);
-
   const handleValidate = () => {
     const isDatosValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
 
@@ -1158,7 +1149,7 @@ export function Cabecera() {
     });
 
   };
-  
+
   const handleRechazar = () => {
     patchSolicitudRechazar(idSolicitud);
     fetchInsertarDatos(13);
@@ -1168,9 +1159,9 @@ export function Cabecera() {
 
     // Lógica para rechazar la solicitud
   };
-  
+
   const handleCorreccion = () => {
-patchSolicitudCorrecion(idSolicitud);
+    patchSolicitudCorrecion(idSolicitud);
     fetchInsertarDatos(11);
     navigate("/ListadoSolicitud", {
       replace: true,
@@ -1187,10 +1178,10 @@ patchSolicitudCorrecion(idSolicitud);
     });
     // Lógica para enviar la solicitud a corrección
   }
-  
 
 
-  
+
+
 
   const navigateToListadoSolicitud = () => {
     navigate("/ListadoSolicitud", {
@@ -1208,8 +1199,8 @@ patchSolicitudCorrecion(idSolicitud);
 
             {tabs.map(({ name, icon, icons_2, check }) => (
               // Verificamos si el nombre es 'Completado' y si checkCompletado es true
-              (name === "Enviar a Verificar" ? checkCompeletado :true ) && 
-             (
+              (name === "Enviar a Verificar" ? checkCompeletado : true) &&
+              (
                 <button
                   key={name}
                   onClick={() => handleTabClick(name)}
@@ -1224,58 +1215,49 @@ patchSolicitudCorrecion(idSolicitud);
                 </button>
               )
             ))}
-              {/* Botones adicionales si idEstadoVerificacionSolicitud es 10  a revision*/}
+            {/* Botones adicionales si idEstadoVerificacionSolicitud es 10  a revision*/}
 
-              {data?.idEstadoVerificacionSolicitud === 10 && (
-  <>
-    <button
-      onClick={() => handleAceptar()}
-      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+            {data?.idEstadoVerificacionSolicitud === 10 && (
+              <>
+                <button
+                  onClick={() => handleAceptar()}
+                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-green-600 hover:text-white transition duration-200"
-    >
-      ✅ Aceptar
-    </button>
+                >
+                  ✅ Aceptar
+                </button>
 
-    <button
-      onClick={() => handleRechazar()}
-      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                <button
+                  onClick={() => handleRechazar()}
+                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-red-600 hover:text-white transition duration-200"
-    >
-      ❌ Rechazar
-    </button>
+                >
+                  ❌ Rechazar
+                </button>
 
-    <button
-      onClick={() => handleCorreccion()}
-      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                <button
+                  onClick={() => handleCorreccion()}
+                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-yellow-50 hover:text-white transition duration-200"
-    >
-      ✏️ Corrección
-    </button>
-  </>
-)}
+                >
+                  ✏️ Corrección
+                </button>
+              </>
+            )}
 
+            {/* Botón para volver a enviar a revisión si idEstadoVerificacionSolicitud es 11 */}
+            {data?.idEstadoVerificacionSolicitud === 11 && (
+              <>
 
- {/*  const estadoMap = {
-    1: "PENDIENTE",
-    10: "REVISIÓN",
-    11: "CORRECIÓN",
-    12: "APROBADO",
-    13: "RECHAZADO",
-  };?*/}
-
-{/* Botón para volver a enviar a revisión si idEstadoVerificacionSolicitud es 11 */}
-{data?.idEstadoVerificacionSolicitud === 11 && (
-  <>
-    
-    <button
-      onClick={() => handleReconfirm()}
-      className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                <button
+                  onClick={() => handleReconfirm()}
+                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-yellow-500 hover:text-white transition duration-200"
-    >
-  Volver a enviar a revision 
-    </button>
-  </>
-)}
+                >
+                  Volver a enviar a revision
+                </button>
+              </>
+            )}
 
           </div>
 
@@ -1292,22 +1274,22 @@ patchSolicitudCorrecion(idSolicitud);
               {renderTabContent(clienteData)}
             </div>
             <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-                {(data?.idEstadoVerificacionSolicitud < 12 ) && (
-                  <div className="flex items-center">
-                    <button
-                      onClick={handleSubmit}
-                      className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-                    >
-                      <SaveIcon className="text-lg" />
-                      <span className="text-xs">Guardar</span>
-                    </button>
-                  </div>
-                )}
+              {(data?.idEstadoVerificacionSolicitud < 12) && (
+                <div className="flex items-center">
+                  <button
+                    onClick={handleSubmit}
+                    className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                  >
+                    <SaveIcon className="text-lg" />
+                    <span className="text-xs">Guardar</span>
+                  </button>
+                </div>
+              )}
 
               <div className="flex items-center">
                 <button
                   onClick={() => { }}
-                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
                 >
                   <PrintIcon className="text-lg" />
                   <span className="text-xs">Imprimir</span>
@@ -1316,7 +1298,7 @@ patchSolicitudCorrecion(idSolicitud);
               <div className="flex items-center">
                 <button
                   onClick={navigateToListadoSolicitud}
-                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
                 >
                   <LogoutIcon className="text-lg" />
                   <span className="text-xs">Salir</span>
@@ -1325,10 +1307,10 @@ patchSolicitudCorrecion(idSolicitud);
             </div>
           </div>
           <ModalConfirm
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        onConfirm={handleConfirm}
-      />
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            onConfirm={handleConfirm}
+          />
         </div>
       )}
     </>

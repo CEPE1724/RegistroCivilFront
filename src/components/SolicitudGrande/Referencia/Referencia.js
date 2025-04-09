@@ -1,6 +1,5 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import { useSnackbar } from "notistack";
-
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
 import {
@@ -11,7 +10,6 @@ import { useAuth } from "../../AuthContext/AuthContext";
 const Referencias = forwardRef((props, ref) => {
   const { userData, userUsuario } = useAuth();
   const { data } = props;
-  console.log("data", data);
   const { enqueueSnackbar } = useSnackbar();
   const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
   const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
@@ -19,11 +17,11 @@ const Referencias = forwardRef((props, ref) => {
   const [idToTextMap, setIdToTextMap] = useState({});   //estado para mapear IDs a textos de api parentesco
   const [idToTextMapProvincia, setIdToTextMapProvincia] = useState({});   //IDs a textos provincias
   const [idToTextMapCanton, setIdToTextMapCanton] = useState({});   //IDs a textos cantones
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [tablaModal, setTablaModal] = useState([]);   //estado datos tabla modal
   const [datoEstado, setDatoEstado] = useState([]);  //estado para api estado
   const [idToTextMapEstado, setIdToTextMapEstado] = useState({});   //estado para mapear IDs a textos de api estado
   const [referencias, setReferencias] = useState([]);  //estado para almacenar referencias
+  const [isLoading, setIsLoading] = useState(false);  // Loading state to prevent multiple submissions
+
   //almacenar datos del formulario
   const [formData, setFormData] = useState({
     parentesco: "",
@@ -33,13 +31,6 @@ const Referencias = forwardRef((props, ref) => {
     provincia: "",
     canton: "",
     celular: "",
-  });
-
-  //almacenar datos modal
-  const [formDataModal, setFormDataModal] = useState({
-    contactoEfectivo: "",
-    estado: "",
-    observaciones: "",
   });
 
   const SearchData = async (id) => {
@@ -60,6 +51,19 @@ const Referencias = forwardRef((props, ref) => {
     fetchDatoProvincia();
 
   }, [data.idCre_SolicitudWeb]);
+
+  useEffect(() => {
+    const provinciasUnicas = new Set();
+    referencias.forEach(referencia => {
+      if (referencia.idProvincia) {
+        provinciasUnicas.add(referencia.idProvincia);
+      }
+    });
+
+    provinciasUnicas.forEach(idProvincia => {
+      fetchDatoCanton(idProvincia);
+    });
+  }, [referencias]);
 
   const fetchDato = async () => {
     try {
@@ -87,8 +91,6 @@ const Referencias = forwardRef((props, ref) => {
       });
     }
   };
-
-
 
   const fetchDatoProvincia = async () => {
     try {
@@ -137,17 +139,19 @@ const Referencias = forwardRef((props, ref) => {
       );
       setDatoCanton(response.data);
       //objeto para mapear IDs a textos
-      const newMapping = { ...idToTextMapCanton };
-      response.data.forEach(item => {
-        newMapping[item.idCanton] = item.Nombre;
+      setIdToTextMapCanton(prevMapping => {
+        const newMapping = { ...prevMapping };
+        response.data.forEach(item => {
+          newMapping[item.idCanton] = item.Nombre;
+        });
+        return newMapping;
       });
-      setIdToTextMapCanton(newMapping); // Guardar el objeto en el estado
     } catch (error) {
       enqueueSnackbar("Error fetching Dato: " + error.message, {
         variant: "error",
       });
     }
-  }
+  };
 
   //api estado
   useEffect(() => {
@@ -180,12 +184,6 @@ const Referencias = forwardRef((props, ref) => {
     }
   }
 
-  //api enviar datos modal
-
-
-  //almacenar datos tabla
-  const [tablaDatos, setTablaDatos] = useState([]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -211,7 +209,6 @@ const Referencias = forwardRef((props, ref) => {
     }
   };
 
-
   const handleLimpiar = () => {
     setFormData({
       parentesco: "",
@@ -224,9 +221,10 @@ const Referencias = forwardRef((props, ref) => {
     });
   };
 
+  const handleAgregar = async () => {
+    //evitar multiples envios 
+    if (isLoading) return;
 
-
-  const handleAgregar = () => {
     // Validar campos
     if (formData.parentesco === "") {
       enqueueSnackbar("Parentesco es requerido", { variant: "error" });
@@ -256,41 +254,34 @@ const Referencias = forwardRef((props, ref) => {
       enqueueSnackbar("El celular no puede ser igual al del cliente", { variant: "error" });
       return;
     }
-  
+
     // Verificar si el celular ya existe en la tabla
     const celularExistente = referencias.some((referencia) => referencia.Celular === formData.celular);
     if (celularExistente) {
       enqueueSnackbar("El celular ya existe", { variant: "error" });
       return;
     }
-  
-    // Si no existe el celular, continuar con la inserción
-    const newReferencia = { ...formData };
-  
-    // Guardar la nueva referencia
-    fecthSave(newReferencia);
-  
-    // Actualizar la tabla localmente
-    setReferencias([...referencias, newReferencia]);
 
-    // Limpiar el formulario
-    setFormData({
-      parentesco: "",
-      apellidoPaterno: "",
-      primerNombre: "",
-      segundoNombre: "",
-      provincia: "",
-      canton: "",
-      celular: "",
-    });
-  
-    // Insertar en la base de datos
-    fetchInsertarDatos(); 
-    SearchData(data.idCre_SolicitudWeb); 
-    
-    enqueueSnackbar("Datos Guardados", { variant: "success" });
+    try {
+      setIsLoading(true);
+      // 1. Guardar referencia en la API
+      await fecthSave(formData);
+      // 2. Actualizar tiempos de solicitud
+      await fetchInsertarDatos();
+      // 3. Refrescar datos desde la API después de guardar
+      await SearchData(data.idCre_SolicitudWeb);
+      // 4. Limpiar el formulario
+      handleLimpiar();
+
+      enqueueSnackbar("Datos Guardados", { variant: "success" });
+    } catch (error) {
+      console.error("Error al guardar la referencia:", error);
+      enqueueSnackbar("Error al guardar la referencia", { variant: "error" });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
+
 
   const fetchInsertarDatos = async () => {
     try {
@@ -311,7 +302,6 @@ const Referencias = forwardRef((props, ref) => {
   const fecthSave = async (formData) => {
     try {
       const url = APIURL.post_cre_referenciasclientesweb();
-      console.log("URL:", url);
       const getParsedValue = (value) => (value ? parseInt(value) : null);
 
       const response = await axios.post(
@@ -321,7 +311,7 @@ const Referencias = forwardRef((props, ref) => {
           idParentesco: getParsedValue(formData.parentesco),
           ApellidoPaterno: formData.apellidoPaterno,
           PrimerNombre: formData.primerNombre,
-		  SegundoNombre: formData.segundoNombre,
+          SegundoNombre: formData.segundoNombre,
           idProvincia: getParsedValue(formData.provincia),
           idCanton: getParsedValue(formData.canton),
           Celular: formData.celular,
@@ -481,11 +471,11 @@ const Referencias = forwardRef((props, ref) => {
         </div>
         {/* Botones */}
         <div className="flex items-center justify-center space-x-2">
-          <button onClick={handleAgregar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex intems-center">
+          <button onClick={handleAgregar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex items-center">
             <FaPlus className="mr-1" />
             Agregar
           </button>
-          <button onClick={handleLimpiar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex intems-center">
+          <button onClick={handleLimpiar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex items-center">
             <FaTimes className="mr-1" />
             Limpiar
           </button>
