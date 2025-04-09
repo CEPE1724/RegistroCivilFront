@@ -8,7 +8,8 @@ export default function VerificacionTerrenaModal({
   onClose,          // Función para cerrar el modal
   userSolicitudData,
   userData,
-  tipoSeleccionado
+  tipoSeleccionado,
+  data
 }) {
   const { enqueueSnackbar } = useSnackbar();
 
@@ -19,7 +20,7 @@ export default function VerificacionTerrenaModal({
 
   const isFormValid = tipoVerificacion && verificador;
 
-
+console.log(userSolicitudData.id, "es el id de la solicutd ")
 
   useEffect(() => {
     if (isOpen) {
@@ -63,7 +64,45 @@ export default function VerificacionTerrenaModal({
       console.error("❌ Error al enviar verificación:", error);
       enqueueSnackbar("Error al registrar la verificación", { variant: "error" });
     }
+
+
+    if (tipoVerificacion === "domicilio") {
+      patchSolicitud(userSolicitudData.id, "domicilio");
+    } else if (tipoVerificacion === "trabajo") {
+      patchSolicitud(userSolicitudData.id, "trabajo");
+    }
+
+    
   };
+
+
+
+  const patchSolicitud = async (idSolicitud, tipo) => {
+    try {
+      const estado = tipo === "domicilio"
+        ? { idEstadoVerificacionDomicilio: 1 } // Actualiza para "domicilio"
+        : { idEstadoVerificacionTrabajo: 1 };  // Actualiza para "trabajo"
+  
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        estado,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+    }
+  };
+  
 
   useEffect(() => {
     const fetchVerificadores = async () => {
