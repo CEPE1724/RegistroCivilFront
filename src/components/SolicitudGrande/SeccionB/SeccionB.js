@@ -164,7 +164,43 @@ const SeccionB = forwardRef((props, ref) => {
 		}
 	};
 
+	const fecthValidaDomicilio = async () => {
+		try {
+		  
+		  const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
+		  const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
+		  console.log("url dsds", url);
+		  const response = await axios.get(url, {
+			headers: {
+			  "Content-Type": "application/json",
+			},
+		  });
+		  if (response.data) {
+			console.log("response.data", response.data);
+			return response.data; // Return the fetched data
+		  } else {
+			console.error("No se encontraron datos para la solicitud.");
+			return null; // Return null if no data is found
+		  }
+		} catch (error) {
+		  console.error("Error al obtener los datos del cliente", error);
+		  return null; // Return null in case of an error
+		}
+	  };
+
 	const handleOpenModal = () => {
+
+		const validation = fecthValidaDomicilio(data.idCre_SolicitudWeb, 1);
+	console.log(validation)
+		if (validation && validation.exists && validation.count > 0) {
+			setOpenLocationModal(true);
+		} else {
+			enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
+				variant: 'error'
+			});
+			return;
+		}
+
 		const camposBase = [
 			{ dataKey: 'NombreEmpresa', formKey: 'empresa' },
 			{ dataKey: 'idTipoEmpresa', formKey: 'tipoEmpresa' },
