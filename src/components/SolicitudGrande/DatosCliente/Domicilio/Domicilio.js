@@ -164,6 +164,16 @@ const Domicilio = forwardRef((props, ref) => {
     };
 
     const handleOpenModal = () => {
+		const validation = fecthValidaDomicilio(data.idCre_SolicitudWeb, 1);
+		if (validation && validation.exists && validation.count > 0) {
+			setOpenLocationModal(true);
+		} else {
+			enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
+				variant: 'error'
+			});
+			return;
+		}
+		
 		const camposBase = [
 			'provincia',
 			'canton',
@@ -201,7 +211,7 @@ const Domicilio = forwardRef((props, ref) => {
 			});
 			return;
 		}
-	
+
 		setOpenLocationModal(prev => !prev);
 	};
 	
