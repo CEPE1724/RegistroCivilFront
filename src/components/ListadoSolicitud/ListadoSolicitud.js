@@ -30,7 +30,7 @@ import {
   TimelineConnector,
   TimelineContent,
 } from "@mui/lab";
-
+import { FaCheckCircle}  from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import { APIURL } from "../../configApi/apiConfig";
@@ -242,6 +242,9 @@ export function ListadoSolicitud() {
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
+
+  
+
   const verificacionSolicitud = (data) => {
     return data.idEstadoVerificacionSolicitud !== 12;
   };
@@ -399,6 +402,8 @@ export function ListadoSolicitud() {
     }
   };
 
+
+  
   console.log("permisos", permisos);
 
   const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
@@ -421,6 +426,9 @@ export function ListadoSolicitud() {
     }
   };
 
+
+  const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
+
   const handleOpenModalVerificacion = async (data, tipo) => {
     try {
       let idtipo = 0;
@@ -436,10 +444,19 @@ export function ListadoSolicitud() {
       });
       if (response.status !== 200) {
         throw new Error("Error al obtener los IDs terrenas");
+        
       }
 
       const idsTerrenas = response.data;
-      console.log("idsTerrenas", response.data);
+ 
+      setIdsTerrenasMap((prev) => ({
+        ...prev,
+        [data.id]: idsTerrenas,
+      }));
+
+
+
+      console.log("idsTerrenasdsdsds", response.data);
       setIdsTerrenas(idsTerrenas);
 
       if (!idsTerrenas || idsTerrenas.length === 0) {
@@ -473,6 +490,8 @@ export function ListadoSolicitud() {
       console.error("Error fetching data for verificación terrena:", error);
     }
   };
+
+
 
   // Obtener bodegas
   const fetchBodega = async () => {
@@ -588,6 +607,62 @@ export function ListadoSolicitud() {
         return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
     }
   };
+
+
+
+  const getIconDomicilio = (estadoId) => {
+    switch (estadoId) {
+      case 0: 
+      return <HomeIcon sx={{ color: "gray" }} />;
+      case 1: 
+      return <PendingIcon sx={{ color: "#FFC107" }} />;
+      case 2: 
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      default: 
+      return <HomeIcon sx={{ color: "gray" }} />;
+
+      
+    }
+  };
+
+
+  const  getIconLaboral = (estadoId) => {
+    switch (estadoId) {
+      case 0: 
+      return <StoreIcon sx={{ color: "gray" }} />;
+      case 1: 
+      return <PendingIcon sx={{ color: "#FFC107" }} />;
+      case 2: 
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      default: 
+      return <StoreIcon sx={{ color: "gray" }} />;
+
+      
+    }
+  };
+
+
+  const puedeAprobar = (data) => {
+    if (!data) return false;
+  
+    const condicionesBase =
+      data.idEstadoVerificacionDocumental === 4 &&
+      data.idEstadoVerificacionSolicitud === 12 &&
+      data.idEstadoVerificacionTelefonica === 3;
+  
+    const verificacionDomicilioOk =
+      !data.Domicilio || data.idEstadoVerificacionDomicilio === 2;
+  
+    const verificacionLaboralOk =
+      !data.Laboral || data.idEstadoVerificacionTerrena === 2;
+  
+    return condicionesBase && verificacionDomicilioOk && verificacionLaboralOk;
+  };
+  
+  
+
+
+
 
   /* idEstadoVerificacionDocumental	Nombre
 1	PROCESO
@@ -760,6 +835,7 @@ export function ListadoSolicitud() {
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
               CodigoDactilar: item.CodDactilar,
+              idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio
             };
           })
         );
@@ -1300,7 +1376,8 @@ export function ListadoSolicitud() {
                                 : 1,
                           }}
                         >
-                          <HouseIcon sx={{ color: "gray" }} />
+{getIconDomicilio(data.idEstadoVerificacionDomicilio)}
+
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
@@ -1349,12 +1426,14 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
-                                ? 0.5
+                              verificacionSolicitud(data) || data.Laboral === false
+                                ? 0.1
                                 : 1,
+                                
                           }}
                         >
-                          <StoreIcon sx={{ color: "gray" }} />
+{getIconLaboral(data.idEstadoVerificacionTerrena)}
+
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
@@ -1601,17 +1680,20 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-          <Button
-            onClick={() => {
-              setCedula(selectedRow?.cedula);
-              setDactilar(selectedRow?.CodigoDactilar); // o el campo correcto que contenga el código dactilar
-              setOpenRegistroCivil(true);
-            }}
-            color="primary"
-            className="text-base font-semibold"
-          >
-            Aprobar
-          </Button>
+          {selectedRow && puedeAprobar(selectedRow) && (
+  <Button
+    onClick={() => {
+      setCedula(selectedRow?.cedula);
+      setDactilar(selectedRow?.CodigoDactilar);
+      setOpenRegistroCivil(true);
+    }}
+    color="primary"
+    className="text-base font-semibold"
+  >
+    Aprobar
+  </Button>
+)}
+
         </DialogActions>
       </Dialog>
 
