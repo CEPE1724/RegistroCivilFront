@@ -20,7 +20,7 @@ export default function VerificacionTerrenaModal({
 
   const isFormValid = tipoVerificacion && verificador;
 
-console.log(userSolicitudData.id, "es el id de la solicutd ")
+  console.log(userSolicitudData.id, "es el id de la solicutd ")
 
   useEffect(() => {
     if (isOpen) {
@@ -72,7 +72,7 @@ console.log(userSolicitudData.id, "es el id de la solicutd ")
       patchSolicitud(userSolicitudData.id, "trabajo");
     }
 
-    
+
   };
 
 
@@ -82,7 +82,7 @@ console.log(userSolicitudData.id, "es el id de la solicutd ")
       const estado = tipo === "domicilio"
         ? { idEstadoVerificacionDomicilio: 1 } // Actualiza para "domicilio"
         : { idEstadoVerificacionTrabajo: 1 };  // Actualiza para "trabajo"
-  
+
       const response = await axios.patch(
         APIURL.update_solicitud(idSolicitud),
         estado,
@@ -92,7 +92,7 @@ console.log(userSolicitudData.id, "es el id de la solicutd ")
           },
         }
       );
-  
+
       console.log("Response data:", response.data); // Log the response data
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
@@ -102,7 +102,7 @@ console.log(userSolicitudData.id, "es el id de la solicutd ")
       enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
     }
   };
-  
+
 
   useEffect(() => {
     const fetchVerificadores = async () => {
@@ -125,7 +125,7 @@ console.log(userSolicitudData.id, "es el id de la solicutd ")
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-6">
-        
+
         {/* Número de solicitud destacado */}
         <div className="bg-gray-100 p-3 rounded-lg shadow-md text-center">
           <h3 className="text-gray-700 text-sm">Número de Solicitud</h3>
@@ -183,9 +183,8 @@ console.log(userSolicitudData.id, "es el id de la solicutd ")
             Cancelar
           </button>
           <button
-            className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${
-              !isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
-            }`}
+            className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${!isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+              }`}
             onClick={handleAceptar}
             disabled={!isFormValid}
           >

@@ -30,7 +30,7 @@ import {
   TimelineConnector,
   TimelineContent,
 } from "@mui/lab";
-import { FaCheckCircle}  from "react-icons/fa";
+import { FaCheckCircle } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import { APIURL } from "../../configApi/apiConfig";
@@ -146,10 +146,12 @@ export function ListadoSolicitud() {
   const [dactilar, setDactilar] = useState("");
 
   const [fileToUpload, setFileToUpload] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
 
-    const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+
+  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+
 
 
   const handleFileChange = (event) => {
@@ -183,21 +185,29 @@ export function ListadoSolicitud() {
       );
 
       if (fileUploadResponse) {
-        setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
+        setUrlCloudstorage(fileUploadResponse.url); // Guardar URL del archivo subido
 
         // 6. Actualizar la solicitud con la URL de la foto
         const updatedData = {
-          Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
+          Foto: fileUploadResponse.url, // Usamos la URL obtenida del archivo subido
         };
-        const updatedSolicitud = await fetchActualizaSolicitud(selectedRow.id, updatedData);
-         setUrlCloudstorage()
-      }
 
-     
+        const updatedSolicitud = await fetchActualizaSolicitud(selectedRow.id, updatedData);
+        setUrlCloudstorage()
+
+      }
+      fetchSolicitudes();
+
+
       // Si deseas refrescar la imagen desde la URL real del servidor, podrías usar:
       // setPreviewUrl(APIURL.getImagenURL(res.nombreArchivo));
-      alert("Imagen subida exitosamente");
+      handleCloseDialog();
+      setFileToUpload(null);
 
+
+      enqueueSnackbar("foto subida correctamente", {
+        variant: "success",
+      });
     } catch (error) {
       alert(error.message);
     }
@@ -205,29 +215,21 @@ export function ListadoSolicitud() {
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
     try {
-      console.log("Actualizando solicitud con ID:", idSolicitud, "con los datos:", data);
-      const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
+
+      const url = APIURL.putUpdatesolicitud(idSolicitud); // URL para actualizar la solicitud
       const response = await axios.put(url, data, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       console.log("Solicitud actualizada con éxito:", response.data);
-      return response.data;  // Retornar datos actualizados si es necesario
+      return response.data; // Retornar datos actualizados si es necesario
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error.message);
-      throw error;  // Re-lanzar error para manejarlo más tarde
+      throw error; // Re-lanzar error para manejarlo más tarde
     }
   };
 
-
-
-
-
-
-
-
-  console.log("userDataaaaaaa", userData);
   const bodegas = data || []; // Safely access the bodegas data
   const vendedores = vendedor || []; // Safely access the vendedores data
   const analistas = analista || []; // Safely access the analistas data
@@ -241,9 +243,6 @@ export function ListadoSolicitud() {
     { label: "NO APLICA", value: 5 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
-
-
-  
 
   const verificacionSolicitud = (data) => {
     return data.idEstadoVerificacionSolicitud !== 12;
@@ -269,25 +268,15 @@ export function ListadoSolicitud() {
   };
 
   const estadoDeshabilitadoDocumental = (data) => {
-    console.log("data", data.idEstadoVerificacionDocumental);
     // Obtener el estado correspondiente al ID
     const estado = estadoDocumentalMap[data.idEstadoVerificacionDocumental];
 
-    console.log("estadoDocumentalMapjgjfhfchf", estado);
-
     if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
     // Buscar el permiso correspondiente en la lista de permisos
-    console.log("permisos", permisos);
-    console.log("estado", estado);
-    console.log(
-      permisos.find((p) => p.Permisos === `EDITAR DOCUMENTAL ${estado}`)
-    );
     const permiso = permisos.find(
       (p) => p.Permisos === `EDITAR DOCUMENTAL ${estado}`
     );
     // Retornar true si no existe el permiso o si no está activo
-
-    console.log("estado", permiso);
     return !permiso || !permiso.Activo;
   };
 
@@ -316,15 +305,12 @@ export function ListadoSolicitud() {
     // Obtener el estado correspondiente al ID
     const estado = estadoTelefonicaMap[data.idEstadoVerificacionTelefonica];
 
-    console.log(estado, "aqui sale el estado que esta saliendo ");
     if (!estado) return true; // Si el estado no está mapeado, deshabilitar por seguridad
     // Buscar el permiso correspondiente en la lista de permisos
     const permiso = permisos.find(
       (p) => p.Permisos === `EDITAR TELEFONICA ${estado}`
     );
 
-    console.log("estasdasdassdo", estado);
-    console.log("pasdasdasermisos", permisos);
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
   };
@@ -337,7 +323,6 @@ export function ListadoSolicitud() {
   };
 
   // Abre el Popover cuando el InfoIcon es clickeado
-
   const handlePopoverOpen = (event, tipo, data) => {
     fetchtiemposolicitudesweb(data.id, tipo);
     setPopoverData({
@@ -384,7 +369,6 @@ export function ListadoSolicitud() {
   const permissionscomponents = async (idMenu, idUsuario) => {
     try {
       const url = APIURL.getacces(idMenu, idUsuario);
-      console.log("url permisos", url);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
@@ -392,7 +376,6 @@ export function ListadoSolicitud() {
       });
       if (response.status === 200) {
         const data = response.data;
-        console.log("quieor ver que me devuelve la api", data);
         setPermisos(data);
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -402,9 +385,6 @@ export function ListadoSolicitud() {
     }
   };
 
-
-  
-  console.log("permisos", permisos);
 
   const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
     try {
@@ -416,13 +396,71 @@ export function ListadoSolicitud() {
       });
       if (response.status === 200) {
         const data = response.data;
-        console.log("imprimo la data a ver que pex", data);
         setClienteEstados(data);
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
       console.error("Error fetching tiemposolicitudesweb data:", error);
+    }
+  };
+
+
+  const [fechaTiempos, setfechaTiempos] = useState([]);
+  const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
+    try {
+      const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setfechaTiempos(data);
+        console.log(fechaTiempos, "aqui sale la data de tiemposolicitudweb");
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching tiemposolicitudesweb data:", error);
+    }
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  //función para calcular la diferencia de tiempo
+  const calcularTiempoTranscurrido = (fechaInicial, fechaFinal) => {
+    if (!fechaInicial || !fechaFinal) return "N/A";
+
+    const inicio = new Date(fechaInicial);
+    const fin = new Date(fechaFinal);
+
+    // Si las fechas son inválidas
+    if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) return "N/A";
+
+    const diferencia = fin - inicio;
+
+    // Convertir milisegundos a días, horas, minutos
+    const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+    const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (dias > 0) {
+      return `${dias}d ${horas}h ${minutos}m`;
+    } else if (horas > 0) {
+      return `${horas}h ${minutos}m`;
+    } else {
+      return `${minutos}m`;
     }
   };
 
@@ -434,9 +472,7 @@ export function ListadoSolicitud() {
       let idtipo = 0;
       if (tipo === "domicilio") idtipo = 1;
       else if (tipo === "trabajo") idtipo = 2;
-      console.log("data edison", data);
       const url = APIURL.getIdsTerrenas(data.id, idtipo);
-      console.log("url", url);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
@@ -444,23 +480,19 @@ export function ListadoSolicitud() {
       });
       if (response.status !== 200) {
         throw new Error("Error al obtener los IDs terrenas");
-        
+
       }
 
       const idsTerrenas = response.data;
- 
+
       setIdsTerrenasMap((prev) => ({
         ...prev,
         [data.id]: idsTerrenas,
       }));
 
-
-
-      console.log("idsTerrenasdsdsds", response.data);
       setIdsTerrenas(idsTerrenas);
 
       if (!idsTerrenas || idsTerrenas.length === 0) {
-        console.log("entra aquiiiiiiiiiii");
         // Si no hay datos, abre el modal de verificación terrena
         setUserSolicitudData(data);
         setTipoVerificacionSeleccionada(tipo);
@@ -491,7 +523,42 @@ export function ListadoSolicitud() {
     }
   };
 
+  /// variable y useffect para que se stere el nombre de usuario
 
+  const [selectDeshabilitado, setSelectDeshabilitado] = useState(false);
+
+  /*
+  useEffect(() => {
+    if (userData?.Nombre && analistas?.length > 0) {
+      const analistaCoincidente = analistas.find((a) => {
+        const nombreAnalista = a.Nombre?.toLowerCase().trim();
+        const nombreUser = userData.Nombre?.toLowerCase().trim();
+        return nombreAnalista === nombreUser;
+      });
+  
+      if (analistaCoincidente) {
+        setAnalistaSelected(analistaCoincidente.idUsuario);
+      }
+    }
+  }, [userData?.Nombre, analistas]);
+  */
+
+  useEffect(() => {
+    if (userData?.Nombre && analistas?.length > 0) {
+      const analistaCoincidente = analistas.find((a) => {
+        const nombreAnalista = a.Nombre?.toLowerCase().trim();
+        const nombreUser = userData.Nombre?.toLowerCase().trim();
+        return nombreAnalista === nombreUser;
+      });
+
+      if (analistaCoincidente) {
+        setAnalistaSelected(analistaCoincidente.idUsuario);
+        setSelectDeshabilitado(true); // 👈 desactiva edición
+      } else {
+        setSelectDeshabilitado(false); // por si no hay coincidencia
+      }
+    }
+  }, [userData?.Nombre, analistas]);
 
   // Obtener bodegas
   const fetchBodega = async () => {
@@ -517,15 +584,11 @@ export function ListadoSolicitud() {
   useEffect(() => {
     if (selectedBodega !== "todos") {
       fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
-      console.log("selectedBodega", selectedBodega);
-      console.log("fechaInicio", fechaInicio);
-      console.log("vendedor", vendedor);
     } else {
       fetchSolicitudes();
     }
   }, [selectedBodega, fechaInicio]);
 
-  console.log("selectedBodega", data);
   const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
     try {
       await listaVendedoresporBodega(fecha, bodega, nivel);
@@ -608,60 +671,50 @@ export function ListadoSolicitud() {
     }
   };
 
-
-
   const getIconDomicilio = (estadoId) => {
     switch (estadoId) {
-      case 0: 
-      return <HomeIcon sx={{ color: "gray" }} />;
-      case 1: 
-      return <PendingIcon sx={{ color: "#FFC107" }} />;
-      case 2: 
-      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      default: 
-      return <HomeIcon sx={{ color: "gray" }} />;
+      case 0:
+        return <HomeIcon sx={{ color: "gray" }} />;
+      case 1:
+        return <PendingIcon sx={{ color: "#FFC107" }} />;
+      case 2:
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      default:
+        return <HomeIcon sx={{ color: "gray" }} />;
 
-      
-    }
+    };
   };
 
-
-  const  getIconLaboral = (estadoId) => {
+  const getIconLaboral = (estadoId) => {
     switch (estadoId) {
-      case 0: 
-      return <StoreIcon sx={{ color: "gray" }} />;
-      case 1: 
-      return <PendingIcon sx={{ color: "#FFC107" }} />;
-      case 2: 
-      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      default: 
-      return <StoreIcon sx={{ color: "gray" }} />;
+      case 0:
+        return <StoreIcon sx={{ color: "gray" }} />;
+      case 1:
+        return <PendingIcon sx={{ color: "#FFC107" }} />;
+      case 2:
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      default:
+        return <StoreIcon sx={{ color: "gray" }} />;
 
-      
     }
   };
-
 
   const puedeAprobar = (data) => {
     if (!data) return false;
-  
+
     const condicionesBase =
       data.idEstadoVerificacionDocumental === 4 &&
       data.idEstadoVerificacionSolicitud === 12 &&
       data.idEstadoVerificacionTelefonica === 3;
-  
+
     const verificacionDomicilioOk =
       !data.Domicilio || data.idEstadoVerificacionDomicilio === 2;
-  
+
     const verificacionLaboralOk =
       !data.Laboral || data.idEstadoVerificacionTerrena === 2;
-  
+
     return condicionesBase && verificacionDomicilioOk && verificacionLaboralOk;
   };
-  
-  
-
-
 
 
   /* idEstadoVerificacionDocumental	Nombre
@@ -670,6 +723,7 @@ export function ListadoSolicitud() {
 3	CORRECIÓN
 4	APROBACION
 5	RECHAZAR */
+
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
   // Obtener tipo de consulta
   const fetchTipoConsulta = async () => {
@@ -760,8 +814,6 @@ export function ListadoSolicitud() {
         bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
       }
 
-      console.log("bodegasIds", bodegasId);
-
       // Realizar la consulta con los parámetros ajustados
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
@@ -808,14 +860,14 @@ export function ListadoSolicitud() {
                 item.Estado === 1
                   ? "PRE-APROBADO"
                   : item.Estado === 2
-                  ? "APROBADO"
-                  : item.Estado === 3
-                  ? "ANULADO"
-                  : item.Estado === 4
-                  ? "RECHAZADO"
-                  : item.Estado === 5
-                  ? "NO APLICA"
-                  : "Desconocido",
+                    ? "APROBADO"
+                    : item.Estado === 3
+                      ? "ANULADO"
+                      : item.Estado === 4
+                        ? "RECHAZADO"
+                        : item.Estado === 5
+                          ? "NO APLICA"
+                          : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -835,7 +887,8 @@ export function ListadoSolicitud() {
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
               CodigoDactilar: item.CodDactilar,
-              idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio
+              idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio,
+              idAnalista: item.idAnalista,
             };
           })
         );
@@ -861,9 +914,8 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
-            vendedor.ApellidoPaterno || ""
-          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
+            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -897,7 +949,6 @@ export function ListadoSolicitud() {
   }, [data]);
 
   const handledocumentos = (registro) => {
-    console.log("Registro:", registro);
 
     if (registro.idEstadoVerificacionDocumental == 4) {
       navigate("/gestorDocumentos", {
@@ -935,7 +986,6 @@ export function ListadoSolicitud() {
   };
 
   const handleTelefonica = (registro) => {
-    console.log("registro", registro);
     navigate("/telefonicaList", {
       replace: true,
       state: {
@@ -955,7 +1005,6 @@ export function ListadoSolicitud() {
   };
 
   const handlesolicitud = (registro) => {
-    console.log("Registro: edison", registro);
     navigate("/solicitudgrande", {
       replace: true,
       state: {
@@ -964,9 +1013,10 @@ export function ListadoSolicitud() {
     });
   };
 
-  const handleOpenDialog = (row) => {
+  const handleOpenDialog = async (row) => {
     setSelectedRow(row);
     setView(true);
+    await fetchTiempSolicweb(1, row.id, "1,12");
   };
 
   const handleCloseDialog = () => {
@@ -989,13 +1039,10 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
-  console.log("analistaassassasasasaasas", analista);
-
   const handleRegistroVisualizacion = (data) => {
     console.log("Registro:", data);
   };
 
-  console.log("userSolicitudData", datos);
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex gap-6 mb-4">
@@ -1062,11 +1109,12 @@ export function ListadoSolicitud() {
             value={analistaSelected}
             onChange={handleAnalistaChange}
             label="Analista"
+            disabled={selectDeshabilitado} //  solo si hubo match
           >
             <MenuItem value="todos">Todos</MenuItem>
             {analistas.map((vendedor) => (
               <MenuItem key={vendedor.idUsuario} value={vendedor.idUsuario}>
-                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+                {vendedor.Nombre?.trim() || "No disponible"}
               </MenuItem>
             ))}
           </Select>
@@ -1164,6 +1212,10 @@ export function ListadoSolicitud() {
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Laborales
                 </TableCell>
+
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Analista
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -1259,7 +1311,7 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
+                                verificacionSolicitud(data)
                                 ? 0.5
                                 : 1,
                           }}
@@ -1313,8 +1365,8 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               data.Estado === 5 ||
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
+                                estaDeshabilitado(data) ||
+                                verificacionSolicitud(data)
                                 ? 0.5
                                 : 1,
                           }}
@@ -1370,13 +1422,13 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               data.Estado === 5 ||
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
+                                estaDeshabilitado(data) ||
+                                verificacionSolicitud(data)
                                 ? 0.5
                                 : 1,
                           }}
                         >
-{getIconDomicilio(data.idEstadoVerificacionDomicilio)}
+                          {getIconDomicilio(data.idEstadoVerificacionDomicilio)}
 
                         </IconButton>
 
@@ -1426,14 +1478,13 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               estaDeshabilitado(data) ||
-                              verificacionSolicitud(data) || data.Laboral === false
+                                verificacionSolicitud(data) ||
+                                data.Laboral === false
                                 ? 0.1
                                 : 1,
-                                
                           }}
                         >
-{getIconLaboral(data.idEstadoVerificacionTerrena)}
-
+                          {getIconLaboral(data.idEstadoVerificacionTerrena)}
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
@@ -1466,6 +1517,17 @@ export function ListadoSolicitud() {
                       />
                     </div>
                   </TableCell>
+
+                  <TableCell align="center">
+                    {data.idAnalista ? (
+                      <span>
+                        {analistas.find((a) => a.idUsuario === data.idAnalista)
+                          ?.Nombre || "No disponible"}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Sin asignar</span>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1484,112 +1546,252 @@ export function ListadoSolicitud() {
               padding: 0,
               overflowX: "auto",
               maxWidth: "100%",
-              "& .MuiTimelineItem-root": {
-                minWidth: "80px",
-                padding: "0 8px",
-                alignItems: "center",
-              },
-              "& .MuiTimelineSeparator-root": {
-                flexDirection: "column",
-                alignItems: "center",
-              },
-              "& .MuiTimelineDot-root": {
-                backgroundColor: "white",
-                border: "2px solid #ccc",
-                margin: "4px 0",
-                zIndex: 1,
-              },
-              "& .MuiTimelineConnector-root": {
-                backgroundColor: "#ccc",
-                height: 2,
-                width: "100%",
+              position: "relative",
+              "&::before": {
+                content: '""',
                 position: "absolute",
                 top: "50%",
                 left: 0,
+                right: 0,
+                height: "2px",
+                backgroundColor: "#ccc",
                 transform: "translateY(-50%)",
                 zIndex: 0,
               },
+              "& .MuiTimelineItem-root": {
+                minWidth: "100px",
+                padding: "0 8px",
+                minHeight: "180px",
+                display: "flex",
+                alignItems: "center",
+                zIndex: 1,
+              },
+              "& .MuiTimelineSeparator-root": {
+                height: "100%",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+              },
+              "& .MuiTimelineDot-root": {
+                position: "relative",
+                margin: "10px 0",
+                backgroundColor: "white",
+                border: "2px solid #2d3689",
+                width: "40px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2,
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+              }, "& .MuiTimelineConnector-root": {
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                height: "2px",
+                width: "calc(100% - 16px)",
+                backgroundColor: "transparent"
+              }
             }}
           >
-            {[
-              {
-                icon: <PendingActionsIcon sx={{ color: "gray" }} />,
-                label: "Pendiente",
-              },
-              {
-                icon: <FolderIcon sx={{ color: "#6C757D" }} />,
-                label: "Inicio",
-              },
-              {
-                icon: <PhoneInTalkIcon sx={{ color: "#6C757D" }} />,
-                label: "Contacto",
-              },
-              { icon: <StoreIcon sx={{ color: "gray" }} />, label: "Tienda" },
-              { icon: <HouseIcon sx={{ color: "gray" }} />, label: "Casa" },
-              {
-                icon: <PersonIcon sx={{ color: "#6C757D" }} />,
-                label: "Trabajo",
-              },
-              /// { icon: <CheckCircleIcon sx={{ color: "#28A745" }} />, label: "Trabajo" },
-            ].map((item, index, array) => (
-              <TimelineItem key={index} sx={{ position: "relative" }}>
-                <TimelineSeparator>
-                  {index !== 0 && <TimelineConnector />}
-                  <TimelineDot>{item.icon}</TimelineDot>
-                  {index < array.length - 1 && <TimelineConnector />}
-                </TimelineSeparator>
-                <TimelineContent
-                  sx={{
-                    fontSize: "0.75rem",
-                    textAlign: "center",
-                    paddingTop: 1,
-                  }}
-                ></TimelineContent>
-              </TimelineItem>
-            ))}
+            {/* Primer ítem con fechas */}
+            <TimelineItem>
+              <TimelineSeparator>
+                {/* Contenedor fecha superior */}
+                <Box sx={{
+                  textAlign: "center",
+                  width: "100%",
+                  marginBottom: 1,
+                }}>
+                  {fechaTiempos[0] && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: "block",
+                        color: "text.primary",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        backgroundColor: "#f0f4f8",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {formatDateTime(fechaTiempos[0].FechaSistema)}
+                    </Typography>
+                  )}
+                </Box>
+
+                {/* Icono con su círculo */}
+                <TimelineDot sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}>
+                  <PendingActionsIcon sx={{ color: "#2d3689", fontSize: "1.2rem" }} />
+                </TimelineDot>
+
+                {/* Contenedor fecha inferior */}
+                <Box sx={{
+                  textAlign: "center",
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  marginTop: 1,
+                }}>
+                  {fechaTiempos[1] && (
+                    <>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          color: "text.primary",
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos[1].FechaSistema)}
+                      </Typography>
+                      {/* Tiempo transcurrido */}
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          color: "#2d3689",
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          border: "1px solid #2d3689",
+                          backgroundColor: "#e8eaf6",
+                          padding: "1px 6px",
+                          borderRadius: "12px",
+                          marginTop: "2px",
+                        }}
+                      >
+                        {calcularTiempoTranscurrido(
+                          fechaTiempos[0]?.FechaSistema,
+                          fechaTiempos[1]?.FechaSistema
+                        )}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+                <TimelineConnector />
+              </TimelineSeparator>
+            </TimelineItem>
+
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDot sx={{ mx: "auto" }}>
+                  <FolderIcon sx={{ color: "#6C757D" }} />
+                </TimelineDot>
+                <TimelineConnector />
+              </TimelineSeparator>
+            </TimelineItem>
+
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDot sx={{ mx: "auto" }}>
+                  <PhoneInTalkIcon sx={{ color: "#6C757D" }} />
+                </TimelineDot>
+                <TimelineConnector />
+              </TimelineSeparator>
+            </TimelineItem>
+
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDot sx={{ mx: "auto" }}>
+                  <StoreIcon sx={{ color: "gray" }} />
+                </TimelineDot>
+                <TimelineConnector />
+              </TimelineSeparator>
+            </TimelineItem>
+
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDot sx={{ mx: "auto" }}>
+                  <HouseIcon sx={{ color: "gray" }} />
+                </TimelineDot>
+                <TimelineConnector />
+              </TimelineSeparator>
+            </TimelineItem>
+
+            <TimelineItem>
+              <TimelineSeparator>
+                <TimelineDot sx={{ mx: "auto" }}>
+                  <PersonIcon sx={{ color: "#6C757D" }} />
+                </TimelineDot>
+              </TimelineSeparator>
+            </TimelineItem>
           </Timeline>
         </DialogTitle>
 
         <DialogContent dividers>
           {selectedRow && (
             <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-              <div className="w-64 h-64 flex flex-col justify-center items-center border-2 border-dashed border-gray-400 rounded-md text-center text-sm text-gray-500 p-4">
-      { selectedRow.imagen === "prueba" ?(
-        <>
-          <p className="mb-2">No hay imagen disponible</p>
-        </>
-      ) : (
-        <img
-          src={selectedRow.imagen}
-          alt="Vista previa"
-          className="w-full h-full object-cover rounded-md"
-        />
-      )}
 
-      <label
-        htmlFor="upload-image"
-        className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-4 py-2 mt-2 cursor-pointer"
-      >
-        Seleccionar archivo
-        <input
-          id="upload-image"
-          type="file"
-          className="hidden"
-          accept="image/png,image/jpeg"
-          onChange={handleFileChange}
-        />
-      </label>
 
-      <Button
-        variant="outlined"
-        color="primary"
-        className="mt-2 text-xs font-semibold"
-        onClick={handleUploadClick}
-        disabled={!fileToUpload}
-      >
-        SUBIR FOTO
-      </Button>
-    </div>
+              <div className="w-64 flex flex-col items-center space-y-4">
+                {/* Contenedor de la imagen */}
+                <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
+                  {!previewUrl &&
+                    (!selectedRow.imagen || selectedRow.imagen === "prueba") ? (
+                    <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-24 w-24 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                  ) : (
+                    <img
+                      src={previewUrl || selectedRow.imagen}
+                      alt="Foto del cliente"
+                      className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                    />
+                  )}
+                </div>
+
+                {/* Botones debajo de la imagen */}
+                <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
+                  {/* Botón seleccionar imagen */}
+                  <label
+                    htmlFor="upload-image"
+                    className="flex-1 w-full md:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 cursor-pointer"
+                  >
+                    Seleccionar imagen
+                    <input
+                      id="upload-image"
+                      type="file"
+                      className="hidden"
+                      accept="image/png,image/jpeg"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+
+                  {/* Botón subir imagen */}
+                  <button
+                    onClick={handleUploadClick}
+                    disabled={!fileToUpload}
+                    className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      }`}
+                  >
+                    Subir imagen
+                  </button>
+                </div>
+              </div>
 
               <div className="md:w-2/3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
@@ -1623,19 +1825,18 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
+                        ? "text-green-500"
+                        : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-gray-500"
+                            : selectedRow.estado === "aprobado"
+                              ? "text-blue-500"
+                              : selectedRow.estado === "rechazado"
+                                ? "text-red-500"
+                                : "text-gray-700"
+                        }`}
                     >
                       {selectedRow.estado}
                     </span>
@@ -1680,20 +1881,25 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-          {selectedRow && puedeAprobar(selectedRow) && (
-  <Button
-    onClick={() => {
-      setCedula(selectedRow?.cedula);
-      setDactilar(selectedRow?.CodigoDactilar);
-      setOpenRegistroCivil(true);
-    }}
-    color="primary"
-    className="text-base font-semibold"
-  >
-    Aprobar
-  </Button>
-)}
 
+
+
+          {selectedRow &&
+            selectedRow.imagen &&
+            selectedRow.imagen !== "prueba" &&
+            puedeAprobar(selectedRow) && (
+              <Button
+                onClick={() => {
+                  setCedula(selectedRow?.cedula);
+                  setDactilar(selectedRow?.CodigoDactilar);
+                  setOpenRegistroCivil(true);
+                }}
+                color="primary"
+                className="text-base font-semibold"
+              >
+                Aprobar
+              </Button>
+            )}
         </DialogActions>
       </Dialog>
 
@@ -1727,14 +1933,6 @@ export function ListadoSolicitud() {
         userSolicitudData={userSolicitudData}
       />
 
-      {/* <VerificacionTerrenaModal
-        isOpen={() => handleOpenModalVerificacion()}
-        openVerificacionModal={openVerificacionModal}
-        userSolicitudData={userSolicitudData}
-        userData={userData}
-        tipoSeleccionado={tipoVerificacionSeleccionada} // Pasamos el tipo al modal
-
-      />*/}
       <VerificacionTerrenaModal
         isOpen={openVerificacionModal}
         onClose={() => setOpenVerificacionModal(false)}
@@ -1774,28 +1972,28 @@ export function ListadoSolicitud() {
 
       {/* Modal para Registro Civil */}
       <Dialog
-  open={openRegistroCivil}
-  onClose={() => setOpenRegistroCivil(false)}
-  maxWidth="md"
-  fullWidth
->
-  <RegistroCivil
-    cedula={cedula}
-    dactilar={dactilar}
-    imagenSubida={selectedRow?.imagen}
-    onAceptar={() => {
-      // Acción al aceptar
-      console.log("Aceptado");
-      setOpenRegistroCivil(false);
-    }}
-    onRechazar={() => {
-      // Acción al rechazar
-      console.log("Rechazado");
-      setOpenRegistroCivil(false);
-    }}
-  />
-</Dialog>
-
+        open={openRegistroCivil}
+        onClose={() => setOpenRegistroCivil(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <RegistroCivil
+          cedula={cedula}
+          dactilar={dactilar}
+          imagenSubida={selectedRow?.imagen}
+          onAceptar={() => {
+            // Acción al aceptar
+            console.log("Aceptado");
+            setOpenRegistroCivil(false);
+          }}
+          onRechazar={() => {
+            // Acción al rechazar
+            console.log("Rechazado");
+            setOpenRegistroCivil(false);
+          }}
+        />
+      </Dialog>
     </div>
   );
 }
+

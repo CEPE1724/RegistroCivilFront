@@ -45,6 +45,7 @@ import { useAuth } from "../../AuthContext/AuthContext";
 import { useLocation } from "react-router-dom";
 
 const SeccionB = forwardRef((props, ref) => {
+
   const location = useLocation();
   const [clientInfo, setClientInfo] = useState(null);
   const [ubicacionError, setUbicacionError] = useState(false);
@@ -986,6 +987,7 @@ const SeccionB = forwardRef((props, ref) => {
       />
     </div>
   );
+
 });
 
 export default SeccionB;

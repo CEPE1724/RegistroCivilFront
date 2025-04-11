@@ -19,8 +19,6 @@ import {
 } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
 import { get, set } from "react-hook-form";
 
-
-
 export function Documental({
   id,
   NumeroSolicitud,
@@ -32,7 +30,7 @@ export function Documental({
   vendedor,
   consulta,
 }) {
-  const { userData, userUsuario , idMenu } = useAuth();
+  const { userData, userUsuario, idMenu } = useAuth();
   const navigate = useNavigate();
   console.log("userData", userData);
   const { state } = useLocation();
@@ -72,21 +70,24 @@ export function Documental({
       );
       console.log("Response data:", response.data); // Log the response data
       if (response.data) {
-        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
         navigate("/ListadoSolicitud", {
           replace: true,
         });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
-      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
     }
   };
 
-
   const handleConfirm = async () => {
     setIsModalOpen(false); // Cierra el modal
-    patchsolicitudWeb(); 
+    patchsolicitudWeb();
     //patchSolicitud(clientInfo.id)// aqui llamo a la api que cambia el estado de idverificacion solicitud a 10
 
     if (showOnlyCorrections) {
@@ -135,7 +136,12 @@ export function Documental({
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
-        const response = await axios.get(APIURL.get_documentos(clientInfo.id, clientInfo.idEstadoVerificacionDocumental));
+        const response = await axios.get(
+          APIURL.get_documentos(
+            clientInfo.id,
+            clientInfo.idEstadoVerificacionDocumental
+          )
+        );
 
         console.log("Respuesta API Documentos:", response.data);
         if (response.status === 200 && Array.isArray(response.data)) {
@@ -143,7 +149,6 @@ export function Documental({
           const previews = {};
           const completed = new Set();
           const corrections = new Set(); // Para almacenar las secciones con documentos con idEstadoDocumento === 4
-
 
           response.data.forEach((file) => {
             console.log("Archivo recibido:", file); // ✅ Verificar estructura de cada archivo
@@ -187,8 +192,6 @@ export function Documental({
           setCompletedFields2([...completed]);
           setFilesToCorrect([...corrections]); // Actualizamos los campos a corregir
 
-
-
           const newCompletedFields = Object.keys(uploadedFiles);
           setCompletedFields(newCompletedFields);
 
@@ -226,7 +229,7 @@ export function Documental({
       11: "Autorización",
       12: "Servicio Basico",
       13: "Foto del Cliente",
-      14: "Croquis"
+      14: "Croquis",
     };
     return documentoIds[id] || null;
   };
@@ -296,7 +299,9 @@ export function Documental({
       if (!filesToCorrect.length) return 0; // Evita dividir por 0
 
       const totalCorrections = filesToCorrect.length; // Secciones a corregir
-      const completedCorrections = completedFields2.filter(field => filesToCorrect.includes(field)).length;
+      const completedCorrections = completedFields2.filter((field) =>
+        filesToCorrect.includes(field)
+      ).length;
 
       return (completedCorrections / totalCorrections) * 100;
     } else {
@@ -316,7 +321,6 @@ export function Documental({
       );
       await axios.patch(APIURL.update_soliciutd_telefonica(clientInfo.id, 2));
       await axios.post(url, {
-
         idCre_SolicitudWeb: clientInfo.id,
         Tipo: 3,
         idEstadoVerificacionDocumental: 2,
@@ -367,9 +371,12 @@ export function Documental({
       return;
     }
 
-
     // Verifica si ya hay un archivo cargado en el campo activo
-    if (files[field] && files[field].length > 0 && clientInfo.idEstadoVerificacionDocumental === 1) {
+    if (
+      files[field] &&
+      files[field].length > 0 &&
+      clientInfo.idEstadoVerificacionDocumental === 1
+    ) {
       // Si ya hay un archivo, muestra un mensaje de error
       enqueueSnackbar(
         `Ya tienes un archivo cargado en el campo "${field}". Primero debes eliminarlo antes de cargar uno nuevo.`,
@@ -380,9 +387,9 @@ export function Documental({
 
     if (showOnlyCorrections) {
       // Verifica si la sección está en los campos a corregir y si ya existen archivos con estado 5 cargados en esa sección
-      const filesWithState5 = files[activeTab]?.some(file => file.estado !== 5);
-
-
+      const filesWithState5 = files[activeTab]?.some(
+        (file) => file.estado !== 5
+      );
 
       ///alert (filesWithState5)// Verifica si hay archivos con estado 5
 
@@ -482,8 +489,6 @@ export function Documental({
       return updatedPreviews;
     });
 
-
-
     closeDeleteConfirmation(); // Cerrar el modal después de la eliminación
   };
 
@@ -518,7 +523,7 @@ export function Documental({
       11: "Autorización",
       12: "Servicio Basico",
       13: "Foto del Cliente",
-      14: "Croquis"
+      14: "Croquis",
     };
 
     // Buscamos la clave (número) correspondiente al nombre
@@ -572,12 +577,9 @@ export function Documental({
     }
     if (showOnlyCorrections) {
       // Verificar que exista al menos un archivo físico (sin URL) en el campo activo
-      const hasPhysicalFile = files[activeTab]?.some(file => !file?.url);
+      const hasPhysicalFile = files[activeTab]?.some((file) => !file?.url);
       if (!hasPhysicalFile) {
-        enqueueSnackbar(
-          "Por favor sube un archivo .",
-          { variant: "error" }
-        );
+        enqueueSnackbar("Por favor sube un archivo .", { variant: "error" });
         setIsUploading(false); // Detener el proceso de subida
         return;
       }
@@ -599,13 +601,12 @@ export function Documental({
 
     try {
       // Subir archivo y obtener la URL
-      console.log("asdasdasdasdasdasdasdasdasas estoy aquiiii", files)
+      console.log("asdasdasdasdasdasdasdasdasas estoy aquiiii", files);
       let response;
-
 
       const getFile = (tab) => {
         // Busca el archivo físico (sin URL)
-        return files[tab]?.find(file => !file?.url); // Si no tiene URL, es un archivo físico
+        return files[tab]?.find((file) => !file?.url); // Si no tiene URL, es un archivo físico
       };
 
       if (clientInfo.idEstadoVerificacionDocumental === 1) {
@@ -636,22 +637,20 @@ export function Documental({
         }
       }
 
-
       const documentoIds = {
         "Copia De Cedula": 2,
         "Contrato de Compra": 3,
-        "Declaracion": 4,
+        Declaracion: 4,
         "Pagare a la Orden": 5,
         "Tabla de amortizacion": 6,
         "Gastos de cobranza": 7,
         "Compromiso Lugar de pago": 8,
-        "Acta": 9,
-        "Consentimiento": 10,
-        "Autorización": 11,
+        Acta: 9,
+        Consentimiento: 10,
+        Autorización: 11,
         "Servicio Basico": 12,
         "Foto del Cliente": 13,
-        "Croquis": 14
-        
+        Croquis: 14,
       };
 
       const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
@@ -702,7 +701,7 @@ export function Documental({
         } else {
           enqueueSnackbar(
             "Error al guardar el documento en la BD. " +
-            apiResponse.data?.message || "",
+              apiResponse.data?.message || "",
             { variant: "error" }
           );
         }
@@ -749,7 +748,7 @@ export function Documental({
     "Autorización",
     "Servicio Basico",
     "Foto del Cliente",
-    "Croquis"
+    "Croquis",
   ];
 
   const completedFields = menuItems.filter(
@@ -765,8 +764,9 @@ export function Documental({
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`w-64 bg-white text-gray-800 shadow-lg ${isMenuOpen ? "block" : "hidden"
-          } md:block transition-all duration-300 ease-in-out`}
+        className={`w-64 bg-white text-gray-800 shadow-lg ${
+          isMenuOpen ? "block" : "hidden"
+        } md:block transition-all duration-300 ease-in-out`}
       >
         <div className="p-4 space-y-6">
           {/* Progreso de Archivos */}
@@ -775,7 +775,9 @@ export function Documental({
               Progreso de Archivos
             </label>
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-sm text-gray-600">{Math.round(calculateProgress())}%</span>
+              <span className="text-sm text-gray-600">
+                {Math.round(calculateProgress())}%
+              </span>
             </div>
 
             <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
@@ -800,14 +802,16 @@ export function Documental({
             )}
           </div>
 
-
           {showOnlyCorrections ? (
             // Mostrar solo los tabs con documentos en estado 4
             <div>
-              <h3 className="text-sm font-medium text-red-500">Campos a Corregir</h3>
+              <h3 className="text-sm font-medium text-red-500">
+                Campos a Corregir
+              </h3>
               <ul className="mt-2 space-y-1">
                 {filesToCorrect.map((item) => {
-                  const fileCount = files[item]?.filter(file => !file?.url).length || 0;
+                  const fileCount =
+                    files[item]?.filter((file) => !file?.url).length || 0;
                   const isSelected = activeTab === item;
 
                   return (
@@ -819,22 +823,28 @@ export function Documental({
                           setActiveTab(item);
                         }}
                         className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                ${isSelected
-                            ? "bg-red-600 text-white shadow-lg"
-                            : "text-red-600 hover:bg-red-100 hover:text-red-800"
-                          }`}
+                ${
+                  isSelected
+                    ? "bg-red-600 text-white shadow-lg"
+                    : "text-red-600 hover:bg-red-100 hover:text-red-800"
+                }`}
                       >
                         {item}
                         {fileCount > 0 && (
                           <span
-                            className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-white text-red-600" : "bg-red-500 text-white"
-                              }`}
+                            className={`text-xs font-bold px-2 py-1 rounded-full ${
+                              isSelected
+                                ? "bg-white text-red-600"
+                                : "bg-red-500 text-white"
+                            }`}
                           >
                             {`+${fileCount}`}
                           </span>
                         )}
                         {completedFields2.includes(item) && (
-                          <span className="ml-2 text-green-500 font-bold">✓</span>
+                          <span className="ml-2 text-green-500 font-bold">
+                            ✓
+                          </span>
                         )}
                       </a>
                     </li>
@@ -846,7 +856,9 @@ export function Documental({
             <>
               {/* Campos Pendientes */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Campos Pendientes</h3>
+                <h3 className="text-sm font-medium text-gray-500">
+                  Campos Pendientes
+                </h3>
                 <ul className="mt-2 space-y-1">
                   {pendingFields.map((item) => {
                     const fileCount = files[item]?.length || 0;
@@ -861,21 +873,24 @@ export function Documental({
                             setActiveTab(item);
                           }}
                           className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                  ${isSelected
-                              ? "bg-blue-600 text-white shadow-lg"
-                              : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                            }`}
+                  ${
+                    isSelected
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                  }`}
                         >
                           {item}
                           {fileCount > 0 && (
                             <span
-                              className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
-                                }`}
+                              className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                isSelected
+                                  ? "bg-white text-blue-600"
+                                  : "bg-green-500 text-white"
+                              }`}
                             >
                               {`+${fileCount}`}
                             </span>
                           )}
-
                         </a>
                       </li>
                     );
@@ -886,7 +901,9 @@ export function Documental({
               {/* Campos Completados */}
               {completedFields.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-500">Campos Completados</h3>
+                  <h3 className="text-sm font-medium text-gray-500">
+                    Campos Completados
+                  </h3>
                   <ul className="mt-2 space-y-1">
                     {completedFields.map((item) => {
                       const fileCount = files[item]?.length || 0;
@@ -901,23 +918,29 @@ export function Documental({
                               setActiveTab(item);
                             }}
                             className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                    ${isSelected
-                                ? "bg-blue-600 text-white shadow-lg"
-                                : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                              }`}
+                    ${
+                      isSelected
+                        ? "bg-blue-600 text-white shadow-lg"
+                        : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                    }`}
                           >
                             {item}
                             <div className="flex items-center">
                               {fileCount > 0 && (
                                 <span
-                                  className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-white text-blue-600" : "bg-green-500 text-white"
-                                    }`}
+                                  className={`text-xs font-bold px-2 py-1 rounded-full ${
+                                    isSelected
+                                      ? "bg-white text-blue-600"
+                                      : "bg-green-500 text-white"
+                                  }`}
                                 >
                                   {`+${fileCount}`}
                                 </span>
                               )}
                               {completedFields2.includes(item) && (
-                                <span className="ml-2 text-green-500 font-bold">✓</span>
+                                <span className="ml-2 text-green-500 font-bold">
+                                  ✓
+                                </span>
                               )}
                             </div>
                           </a>
@@ -929,11 +952,6 @@ export function Documental({
               )}
             </>
           )}
-
-
-
-
-
         </div>
       </div>
       {/* Menu Toggle Button */}
@@ -949,17 +967,30 @@ export function Documental({
         <div className="w-full bg-white p-6 rounded-lg shadow-lg">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-6">
-              {clientInfo.foto && (
-                <div className="flex justify-center items-center md:w-1/4">
-                  <img
-                    src={clientInfo.foto}
-                    alt="Foto del cliente"
-                    className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
-                  />
+              {clientInfo.foto !== null ? (
+                <img
+                  src={clientInfo.foto}
+                  alt="Foto del cliente"
+                  className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                />
+              ) : (
+                <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-24 w-24 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
                 </div>
               )}
-
-
 
               <div className="md:w-3/4 mt-2 pl-4 bg-white shadow-lg rounded-lg p-1 ">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-base leading-relaxed pl-10">
@@ -971,7 +1002,6 @@ export function Documental({
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],
-                    
                   ].map(([label, value], idx) => (
                     <div key={idx} className="flex items-center gap-4">
                       <p className="font-semibold text-gray-700">{label}:</p>
@@ -985,7 +1015,6 @@ export function Documental({
 
           <div className="flex justify-center items-center mt-8 w-full">
             {/* Documentos Subidos */}
-
 
             <div className=" pb-4 pt-5 md:absolute md:right-11 ">
               <button
@@ -1001,7 +1030,8 @@ export function Documental({
             {filePreviews[activeTab]?.length > 0 &&
               filePreviews[activeTab]?.map((previewUrl, index) => {
                 const file = files[activeTab]?.[index];
-                if (file?.estado !== 5) { // Verifica si el estado es diferente de 5
+                if (file?.estado !== 5) {
+                  // Verifica si el estado es diferente de 5
                   return (
                     <div
                       key={index}

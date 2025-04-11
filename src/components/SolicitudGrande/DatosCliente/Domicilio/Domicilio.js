@@ -291,6 +291,7 @@ const Domicilio = forwardRef((props, ref) => {
       tiempoVivienda: "Tiempo Vivienda es requerido",
     };
 
+
     // Validación condicional para arrendador (si tipoVivienda es 1)
     if (formData.tipoVivienda == 1) {
       requiredFieldMessages.nombreArrendador = "Nombre Arrendador es requerido";

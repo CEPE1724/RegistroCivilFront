@@ -158,7 +158,9 @@ const SeccionA = forwardRef((props, ref) => {
 	}
   };
 
+
   const handleOpenModal = async() => {
+
 
     const camposBase = [
       { dataKey: "NombreNegocio", formKey: "nombreNegocio" },

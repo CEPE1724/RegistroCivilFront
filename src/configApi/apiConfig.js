@@ -4,14 +4,16 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.137.37:3025/api/v1/";
+
+const API_BASE_URL = "http://192.168.2.22:3008/api/v1/";
 
 
 
 
 
 
-const SOCKET_BASE_URL = "http://192.168.2.28:3008";
+
+const SOCKET_BASE_URL = "http://192.168.2.14:3025";
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {
@@ -134,6 +136,7 @@ export const APIURL = {
   /*   @Get('all/estado/:idCre_SolicitudWeb/:tipo')
  */
   get_tiemposolicitudesweb : (id ,estado) => `${API_BASE_URL}tiemposolicitudesweb/all/estado/${id}/${estado}`,
+  get_TiempSolicWeb : (tipo, id, estado, ) => `${API_BASE_URL}tiemposolicitudesweb/tiempo/${tipo}/${id}/${estado}`,
 
   get_ingresoCobrador: () => `${API_BASE_URL}ingreso-cobrador`,
   post_clientesVerificacionTerrenaBasica: () => `${API_BASE_URL}clientes-verificacion-terrena/basica`,
