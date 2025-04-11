@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { APIURL } from "../../configApi/apiConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
-const GoogleMapModal = ({ lat, lng, onClose, apiKey , data }) => {
+const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
     width: "100%",

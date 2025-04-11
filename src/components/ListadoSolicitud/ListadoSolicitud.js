@@ -948,6 +948,39 @@ export function ListadoSolicitud() {
     }
   }, [data]);
 
+
+  //// patch solicitud cuando se aprueba la solicitud de credito 
+
+  const patchSolicitud = async (idSolicitud , numero) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          Estado: numero,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response data:", response.data); // Log the response data
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
+        navigate("/ListadoSolicitud", {
+          replace: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+    }
+  };
+
   const handledocumentos = (registro) => {
 
     if (registro.idEstadoVerificacionDocumental == 4) {
@@ -2009,10 +2042,16 @@ export function ListadoSolicitud() {
           imagenSubida={selectedRow?.imagen}
           onAceptar={() => {
             // Acción al aceptar
+
+            patchSolicitud(selectedRow?.id , 2);
+
             setOpenRegistroCivil(false);
           }}
           onRechazar={() => {
             // Acción al rechazar
+
+            patchSolicitud(selectedRow?.id , 4);
+
             setOpenRegistroCivil(false);
           }}
         />
