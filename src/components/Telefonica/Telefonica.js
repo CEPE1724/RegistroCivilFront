@@ -301,7 +301,6 @@ export function TelefonicaList({
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
         navigate("/ListadoSolicitud", {
@@ -396,7 +395,6 @@ export function TelefonicaList({
         .then(async (response) => {
           if (response.status === 200) {
             setApiResponseData(response.data); // Actualizar los datos con los nuevos datos desde la API
-            console.log("Datos actualizados desde la API:", response.data);
 
             const url_estado = APIURL.post_createtiemposolicitudeswebDto();
             await axios.post(url_estado, {

@@ -20,7 +20,7 @@ export default function VerificacionTerrenaModal({
 
   const isFormValid = tipoVerificacion && verificador;
 
-  console.log(userSolicitudData.id, "es el id de la solicutd ")
+
 
   useEffect(() => {
     if (isOpen) {
@@ -93,7 +93,7 @@ export default function VerificacionTerrenaModal({
         }
       );
 
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
       }

@@ -82,8 +82,6 @@ export function DatosCliente() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Campo: ${name}, Valor: ${value}`);
-
     // Expresión regular para detectar caracteres no permitidos
     const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
 
@@ -269,9 +267,6 @@ export function DatosCliente() {
 
       return;
     }
-
-    console.log('Formulario válido:', formData);
-
   }
 
   return (

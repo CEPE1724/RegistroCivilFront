@@ -52,7 +52,6 @@ const Domicilio = forwardRef((props, ref) => {
   const [clientInfo, setClientInfo] = useState(null);
   const [ubicacionError, setUbicacionError] = useState(false);
 
-  console.log("clientInfo", clientInfo);
   useEffect(() => {
     if (location.state) {
       // Si hay datos en `location.state`, los guardamos en localStorage
@@ -67,9 +66,6 @@ const Domicilio = forwardRef((props, ref) => {
     }
   }, [location.state]);
 
-  console.log(data, "kasbdajsdkjaskdasldjalskjdalkj");
-  console.log("userData", userData);
-  console.log("data domicilio", data);
   const [formErrors, setFormErrors] = useState({});
   const [provincia, setProvincia] = useState([]);
   const [cantones, setCantones] = useState([]);
@@ -250,20 +246,18 @@ const Domicilio = forwardRef((props, ref) => {
     setOpenLocationModal((prev) => !prev);
   };
 
-  console.log("vivienda", formData.tipoVivienda);
+
 
   const fecthValidaDomicilio = async () => {
     try {
       const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
       const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
-      console.log("url dsds", url);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data) {
-        console.log("response.data", response.data);
         return response.data; // Return the fetched data
       } else {
         console.error("No se encontraron datos para la solicitud.");
@@ -312,12 +306,10 @@ const Domicilio = forwardRef((props, ref) => {
 
     // Verificamos todos los campos requeridos en formData
     for (const [key, value] of Object.entries(formData)) {
-      console.log("key", key, value);
       if (
         (value === "" || value === null || value == 0) &&
         requiredFieldMessages[key]
       ) {
-        console.log("key000111", key, requiredFieldMessages[key], value);
         newFormErrors[key] = requiredFieldMessages[key];
         isValid = false;
       }
@@ -339,7 +331,6 @@ const Domicilio = forwardRef((props, ref) => {
     }
 
     if (formData.celular && formData.celular.length !== 10) {
-      console.log("celular", formData.celular);
       newFormErrors.celular = "El celular debe tener 10 digitos";
       isValid = false;
     }
@@ -368,7 +359,6 @@ const Domicilio = forwardRef((props, ref) => {
         isValid = false;
       }
     }
-    console.log("formData", formData);
     setFormErrors(newFormErrors);
     return isValid;
   }, [formData]);

@@ -76,7 +76,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
     }
   };
 
-  console.log(trabajoInfo, "   haasdasda");
+
 
   // Si el modal no está abierto, retornamos null
   if (!openModal) return null;

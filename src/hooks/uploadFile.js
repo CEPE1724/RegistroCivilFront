@@ -1,10 +1,7 @@
 import axios from "axios";
 import { APIURL } from "../configApi/apiConfig";
 const uploadFile = async (file, almacen, cedula, numeroSolicitud, Tipo) => {
-  console.log("file", file);
-  console.log("almacen", almacen);
-  console.log("cedula", cedula);
-  console.log("numeroSolicitud", numeroSolicitud);
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("almacen", almacen);
@@ -15,7 +12,6 @@ const uploadFile = async (file, almacen, cedula, numeroSolicitud, Tipo) => {
   try {
     // Realizar la solicitud POST
     const url = APIURL.postFileupload();
-    console.log("url", url);
     const response = await axios.post(url, formData, {
       headers: {
         "Content-Type": "multipart/form-data",

@@ -158,7 +158,6 @@ export const fetchSituacionLaboral = async (enqueueSnackbar, setSituacionLaboral
 
 export const fetchActividadEconomina = async (enqueueSnackbar, idSituacionLaboral, setActividadLaboral,) => {
   try {
-    console.log(idSituacionLaboral);
     const response = await axios.get(APIURL.get_cre_actividadeconomina(idSituacionLaboral), {
       headers: { method: "GET", cache: "no-store" },
     });
@@ -427,7 +426,6 @@ export const fetchTipoContrato = async (enqueueSnackbar, setTipoContrato) => {
     const response = await axios.get(APIURL.get_tipocontrato(), {
       headers: { method: "GET", cache: "no-store" },
     });
-    console.log('tipo Trabajao', response);
     setTipoContrato(
       response.data.map((item) => ({
         value: item.idTipoContrato,

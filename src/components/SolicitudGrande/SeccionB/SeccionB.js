@@ -50,7 +50,6 @@ const SeccionB = forwardRef((props, ref) => {
   const [clientInfo, setClientInfo] = useState(null);
   const [ubicacionError, setUbicacionError] = useState(false);
 
-  console.log("clientInfo", clientInfo);
   useEffect(() => {
     if (location.state) {
       // Si hay datos en `location.state`, los guardamos en localStorage
@@ -66,7 +65,6 @@ const SeccionB = forwardRef((props, ref) => {
   }, [location.state]);
   const { data } = props;
 
-  console.log("data dependiente", data);
   const { userData, userUsuario } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [tipoEmpresa, setTipoEmpresa] = useState([]);
@@ -190,14 +188,12 @@ const SeccionB = forwardRef((props, ref) => {
     try {
       const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
       const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
-      console.log("url dsds", url);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
         },
       });
       if (response.data) {
-        console.log("response.data", response.data);
         return response.data; // Return the fetched data
       } else {
         console.error("No se encontraron datos para la solicitud.");
@@ -259,7 +255,6 @@ const SeccionB = forwardRef((props, ref) => {
     }
 
 	const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
-	console.log(validation);
 	if (!validation || !validation.exists || validation.count === 0) {
 		enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
 			variant: 'error'
@@ -536,7 +531,7 @@ const SeccionB = forwardRef((props, ref) => {
     validateForm,
     getFormData: () => formData,
   }));
-  console.log("tipoempresa", tipoEmpresa);
+
   return (
     <div className="py-2 w-full">
       <form

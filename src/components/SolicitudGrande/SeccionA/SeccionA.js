@@ -48,8 +48,6 @@ const SeccionA = forwardRef((props, ref) => {
 
  const location = useLocation();
       const [clientInfo, setClientInfo] = useState(null);
-    
-      console.log("clientInfo", clientInfo);
       useEffect(() => {
       if (location.state) {
         // Si hay datos en `location.state`, los guardamos en localStorage
@@ -68,10 +66,7 @@ const SeccionA = forwardRef((props, ref) => {
 
   const { userData, userUsuario } = useAuth();
   const { data } = props;
-  console.log('data')
-  console.log(data)
   const { enqueueSnackbar } = useSnackbar();
-  console.log("negocios", data);
   const [nombreNegocio, setNombreNegocio] = useState("");
   const [tiempoNegocio, setTiempoNegocio] = useState([]);
   const [metros, setMetros] = useState("");
@@ -139,14 +134,12 @@ const SeccionA = forwardRef((props, ref) => {
 	  
 	  const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
 	  const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
-	  console.log("url dsds", url);
 	  const response = await axios.get(url, {
 		headers: {
 		  "Content-Type": "application/json",
 		},
 	  });
 	  if (response.data) {
-		console.log("response.data", response.data);
 		return response.data; // Return the fetched data
 	  } else {
 		console.error("No se encontraron datos para la solicitud.");
@@ -196,7 +189,6 @@ const SeccionA = forwardRef((props, ref) => {
     );
 
     if ( camposNoLlenados.length > 0) {
-		console.log(camposInvalidos);
       enqueueSnackbar(
         "Para seleccionar la ubicación del negocio, primero debes llenar y guardar correctamente todos los campos requeridos.",
         {
@@ -207,7 +199,6 @@ const SeccionA = forwardRef((props, ref) => {
     }
 
 	const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
-	console.log(validation);
 	if (!validation || !validation.exists || validation.count === 0) {
 		enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
 			variant: 'error'
@@ -528,7 +519,7 @@ const SeccionA = forwardRef((props, ref) => {
     getFormData: () => formData,
   }));
 
-  console.log("Form data:", formData)
+
 
   return (
     <div className="p-6">

@@ -41,7 +41,6 @@ export function DocumentoSolicitud() {
 
     try {
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
-      console.log("Datos de la bodega obtenidos correctamente.", data);
     } catch (err) {
       console.error("Error al obtener los datos de la bodega:", err);
     }
@@ -101,7 +100,6 @@ export function DocumentoSolicitud() {
   // Función que muestra un alert al hacer clic en el ícono de ojo
   const handleEyeClick = (cliente) => {
     //alert(`Detalles de cliente: ${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`);
-    console.log("cliente", cliente)
     navigate('/gestorDocumentos', {
       replace: true,
       state: {

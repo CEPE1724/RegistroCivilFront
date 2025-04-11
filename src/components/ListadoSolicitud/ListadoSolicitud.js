@@ -222,7 +222,7 @@ export function ListadoSolicitud() {
           "Content-Type": "application/json",
         },
       });
-      console.log("Solicitud actualizada con éxito:", response.data);
+
       return response.data; // Retornar datos actualizados si es necesario
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error.message);
@@ -418,7 +418,7 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const data = response.data;
         setfechaTiempos(data);
-        console.log(fechaTiempos, "aqui sale la data de tiemposolicitudweb");
+
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -1039,9 +1039,6 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
-  const handleRegistroVisualizacion = (data) => {
-    console.log("Registro:", data);
-  };
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -2012,12 +2009,10 @@ export function ListadoSolicitud() {
           imagenSubida={selectedRow?.imagen}
           onAceptar={() => {
             // Acción al aceptar
-            console.log("Aceptado");
             setOpenRegistroCivil(false);
           }}
           onRechazar={() => {
             // Acción al rechazar
-            console.log("Rechazado");
             setOpenRegistroCivil(false);
           }}
         />

@@ -15,7 +15,6 @@ import { FaListAlt, FaMoneyBillWave, FaMoneyCheckAlt,FaCommentDots } from "react
 // Definir el componente con forwardRef correctamente
 export const FactoresCredito = forwardRef((props, ref) => {
   const { data } = props;
-  console.log('factores de credito', data);
   const [tipo, setTipo] = useState([]);
   useEffect(() => {
     fetchTipoCliente();

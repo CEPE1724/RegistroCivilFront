@@ -32,11 +32,10 @@ export function Documental({
 }) {
   const { userData, userUsuario, idMenu } = useAuth();
   const navigate = useNavigate();
-  console.log("userData", userData);
-  const { state } = useLocation();
-  console.log("state", state);
 
-  console.log("userUsuario", userUsuario);
+  const { state } = useLocation();
+
+
   const [files, setFiles] = useState({});
   const [activeTab, setActiveTab] = useState("Copia De Cedula");
   const [showFileInput, setShowFileInput] = useState(false);
@@ -68,7 +67,7 @@ export function Documental({
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -143,7 +142,7 @@ export function Documental({
           )
         );
 
-        console.log("Respuesta API Documentos:", response.data);
+
         if (response.status === 200 && Array.isArray(response.data)) {
           const uploadedFiles = {};
           const previews = {};
@@ -151,10 +150,10 @@ export function Documental({
           const corrections = new Set(); // Para almacenar las secciones con documentos con idEstadoDocumento === 4
 
           response.data.forEach((file) => {
-            console.log("Archivo recibido:", file); // ✅ Verificar estructura de cada archivo
+
 
             const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
-            console.log("aaaaaaaaaaaaa", sectionName);
+
             if (!uploadedFiles[sectionName]) {
               uploadedFiles[sectionName] = [];
               previews[sectionName] = [];
@@ -173,12 +172,12 @@ export function Documental({
               estado: file.idEstadoDocumento,
             });
 
-            console.log("uploadedFiles", uploadedFiles);
+
 
             previews[sectionName].push(fileUrl);
 
             if (file.idEstadoDocumento >= 4) {
-              console.log("Sección a corregir:", sectionName);
+
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
             } else {
               completed.add(sectionName); // Se considera campo completado si no está en corrección
@@ -355,7 +354,6 @@ export function Documental({
 
   /*useEffect(() => {
     if (calculateProgress() === 100) {
-      console.log("✅ Todos los archivos han sido subidos correctamente.");
       // 
       patchsolicitudWeb();
       ///
@@ -412,8 +410,7 @@ export function Documental({
 
   const handleOpenDeleteConfirmation = (field, index) => {
     const file = files[field][index]; // Obtenemos el archivo seleccionado
-    console.log("Archivo seleccionado para eliminar:", file); // ✅ Verificar que tiene idDocumentoSolicitudWeb
-
+   
     setFileToDelete({
       field,
       index,
@@ -434,7 +431,7 @@ export function Documental({
     if (!fileToDelete) return;
 
     const { field, index, id } = fileToDelete; // ✅ Extraemos el ID
-    console.log(fileToDelete);
+
 
     if (id) {
       try {
@@ -501,7 +498,6 @@ export function Documental({
       const response = await axios.get(
         APIURL.getCheckDocumento(idCreSolicitudWeb, tipoDocumento)
       );
-      console.log("Respuesta del backend:", response.data);
       return response.data; // Devolverá `true` o `false`
     } catch (error) {
       console.error("Error al verificar el documento:", error);
@@ -540,7 +536,6 @@ export function Documental({
       const response = await axios.get(
         APIURL.get_observaciones(clientInfo.id, numeroActivetab)
       );
-      console.log("Observaciones recibidas:", response.data);
       setObservaciones(response.data);
       setHistory(true);
     } catch (error) {
@@ -557,7 +552,7 @@ export function Documental({
       clientInfo.id,
       tipoDocumento
     );
-    console.log(documentoExiste);
+
 
     if (documentoExiste.exists) {
       enqueueSnackbar("Ya existe un documento cargado para este campo.", {
@@ -601,7 +596,7 @@ export function Documental({
 
     try {
       // Subir archivo y obtener la URL
-      console.log("asdasdasdasdasdasdasdasdasas estoy aquiiii", files);
+
       let response;
 
       const getFile = (tab) => {
@@ -658,7 +653,7 @@ export function Documental({
       // Verifica que la respuesta contenga la URL del archivo
       if (response && response.url) {
         const urlArchivo = response.url;
-        console.log("URL del archivo subido:", urlArchivo);
+
         // validar que lso campso esten llenos
         if (!idTipoDocumentoWEB) {
           enqueueSnackbar("Error al obtener el ID del tipo de documento.", {
@@ -678,7 +673,7 @@ export function Documental({
         };
 
         // Verifica el payload antes de enviarlo
-        console.log("Payload a enviar:", payload);
+
         const apiResponse = await axios.post(
           APIURL.post_documentos(),
           payload,
@@ -755,7 +750,7 @@ export function Documental({
     (field) => files[field] && files[field].length > 0
   );
 
-  console.log("filePreviews", filePreviews);
+
 
   const pendingFields = menuItems.filter(
     (field) => !(files[field] && files[field].length > 0)

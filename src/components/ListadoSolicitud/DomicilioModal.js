@@ -11,7 +11,7 @@ const GoogleMapModal = ({ lat, lng, onClose, apiKey , data }) => {
     borderRadius: "1rem",
   };
 
-  console.log(data)
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -230,34 +230,3 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
 
 export default DomicilioModal;
 
-
-/* 
-
-
-
-const patchSolicitud = async (idSolicitud) => {
-  try {
-    const response = await axios.patch(
-      APIURL.update_solicitud(idSolicitud),
-      {
-        idEstadoVerificacionSolicitud: 10,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("Response data:", response.data); // Log the response data
-    if (response.data) {
-      enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
-      navigate("/ListadoSolicitud", {
-        replace: true,
-      });
-    }
-  } catch (error) {
-    console.error("Error al actualizar la solicitud:", error);
-    enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
-  }
-};
-*/

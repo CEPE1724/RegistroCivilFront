@@ -95,9 +95,7 @@ export function Cabecera() {
   useEffect(() => {
     if (clienteData && clienteData.idCre_SolicitudWeb) {
       SearchData(clienteData.idCre_SolicitudWeb);
-    } else {
-      console.log("El ID Cre Solicitud Web no está disponible aún");
-    }
+    } 
   }, [clienteData]); // Dependencia de clienteData
   // Monitorear cambios en clienteData y ejecutar la validación
   useEffect(() => {
@@ -830,7 +828,7 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -860,7 +858,7 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -890,7 +888,7 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -920,7 +918,6 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",

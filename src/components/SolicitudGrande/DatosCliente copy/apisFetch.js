@@ -7,7 +7,6 @@ export const fetchNacionalidad = async (enqueueSnackbar, setNacionalidad) => {
     const response = await axios.get(APIURL.get_creNacionalidad(), {
       headers: { method: "GET", cache: "no-store" },
     });
-    console.log(response);
     setNacionalidad(
       response.data.map((item) => ({
         value: item.idNacionalidad,
@@ -135,7 +134,6 @@ export const fetchSituacionLaboral = async (enqueueSnackbar, setSituacionLaboral
 
 export const fetchActividadEconomina = async (enqueueSnackbar, idSituacionLaboral, setActividadLaboral, ) => {
     try {
-		console.log(idSituacionLaboral);
       const response = await axios.get(APIURL.get_cre_actividadeconomina(idSituacionLaboral), {
         headers: { method: "GET", cache: "no-store" },
       });

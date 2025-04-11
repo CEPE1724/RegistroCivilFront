@@ -12,7 +12,6 @@ import {
 
 const DatosConyuge = forwardRef((props, ref) => {
     const { data } = props;
-    console.log("conyuge data", data);
     const { enqueueSnackbar } = useSnackbar();
     const [dato, setDato] = useState([]);  //estados de nacionalidad
     const [datoDocumento, setDatoDocumento] = useState([]);  //estado tipo documento

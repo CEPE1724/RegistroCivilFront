@@ -90,7 +90,7 @@ export const RepositorioComponent = () => {
           const diasFolders = Object.keys(agrupadoPorDia).map(dia => {
             // Dentro de cada día, agrupar por NumeroSolicitud
             const agrupadoPorNumeroSolicitud = agrupadoPorDia[dia].reduce((acc, item) => {
-              console.log('cepeda',item);
+
               const numero = item.NumeroSolicitud;
               if (!acc[numero]) {
                 acc[numero] = [];
@@ -163,7 +163,6 @@ export const RepositorioComponent = () => {
         });
         const apiData = response.data;
         const transformedData = transformData(apiData);
-        console.log("Data transformada:", transformedData);
         setRepositorios(transformedData);
       } catch (error) {
         console.error("Error al obtener los repositorios", error);
