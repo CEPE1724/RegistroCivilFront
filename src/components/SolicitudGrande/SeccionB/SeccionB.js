@@ -257,7 +257,7 @@ const SeccionB = forwardRef((props, ref) => {
       return;
     }
 
-	const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 1);
+	const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
 	console.log(validation);
 	if (!validation || !validation.exists || validation.count === 0) {
 		enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {

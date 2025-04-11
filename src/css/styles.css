@@ -775,10 +775,6 @@ body {
   top: 1.5rem;
 }
 
-.top-7 {
-  top: 1.75rem;
-}
-
 .top-\[11px\] {
   top: 11px;
 }
@@ -2541,6 +2537,11 @@ body {
   padding-bottom: 2.5rem;
 }
 
+.py-12 {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -2579,11 +2580,6 @@ body {
 .py-\[0\.33rem\] {
   padding-top: 0.33rem;
   padding-bottom: 0.33rem;
-}
-
-.py-12 {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
 }
 
 .pb-2 {
