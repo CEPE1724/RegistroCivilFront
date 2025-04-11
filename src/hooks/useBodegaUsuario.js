@@ -28,7 +28,6 @@ const useBodegaUsuario = () => {
   };
 
   const listaVendedoresporBodega = async (fecha, bodega, nivel) => {
-    console.log("fecha", fecha);
     setLoading(true);  
     setError(null);    
     try {

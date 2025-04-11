@@ -8,8 +8,6 @@ export default function Layout({ children }) {
   // Usamos el hook `useAuth` para obtener `userData` y otros valores del contexto
   const { userData, isLoggedIn } = useAuth();
 
- console.log(userData);
- 
 
   return (
     <>

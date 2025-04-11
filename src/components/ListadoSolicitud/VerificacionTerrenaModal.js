@@ -20,7 +20,7 @@ export default function VerificacionTerrenaModal({
 
   const isFormValid = tipoVerificacion && verificador;
 
-  console.log(userSolicitudData.id, "es el id de la solicutd ")
+
 
   useEffect(() => {
     if (isOpen) {
@@ -81,7 +81,7 @@ export default function VerificacionTerrenaModal({
     try {
       const estado = tipo === "domicilio"
         ? { idEstadoVerificacionDomicilio: 1 } // Actualiza para "domicilio"
-        : { idEstadoVerificacionTrabajo: 1 };  // Actualiza para "trabajo"
+        : { idEstadoVerificacionTerrena: 1 };  // Actualiza para "trabajo"
 
       const response = await axios.patch(
         APIURL.update_solicitud(idSolicitud),
@@ -93,7 +93,7 @@ export default function VerificacionTerrenaModal({
         }
       );
 
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
       }

@@ -57,7 +57,6 @@ export function CalendarPerson(props) {
         date: currentDate.getDate(),
         fullDate: new Date(currentDate), // representa el día a medianoche
       });
-      console.log("[getWeekDates] pushing day =>", currentDate.toString());
       start.setDate(start.getDate() + 1);
     }
     return weekDates;
@@ -67,10 +66,6 @@ export function CalendarPerson(props) {
   const fechaDias = useMemo(() => {
     if (!selectedDate) return [];
 
-    console.log("fechaAnalista");
-    console.log(fechaAnalista);
-    console.log("selectedDate");
-    console.log(selectedDate);
 
     const selectedRange = fechaAnalista.find(
       (range) => range.value === selectedDate
@@ -79,9 +74,9 @@ export function CalendarPerson(props) {
     if (!selectedRange) return [];
 
     const { Desde, Hasta } = selectedRange;
-    console.log("[useMemo] Rango seleccionado =>", selectedRange);
+
     const result = getWeekDates(selectedRange.desde, selectedRange.hasta);
-    console.log("[useMemo] resultado getWeekDates =>", result);
+
     return result;
   }, [selectedDate, fechaAnalista]);
 
@@ -93,7 +88,7 @@ export function CalendarPerson(props) {
   // Función que determina si una celda es editable.
   const isEditableCell = (fullDate, hour) => {
     if (!fullDate) {
-      console.log("[isEditableCell] Sin fullDate, retorna false");
+
       return false;
     }
     const now = new Date();
@@ -108,27 +103,27 @@ export function CalendarPerson(props) {
 
     // Comparación a nivel de fecha
     if (cellYear < nowYear) {
-      console.log("[isEditableCell] Año pasado, retorna false");
+
       return false;
     }
     if (cellYear > nowYear) {
-      console.log("[isEditableCell] Año futuro, retorna true");
+
       return true;
     }
     if (cellMonth < nowMonth) {
-      console.log("[isEditableCell] Mes pasado, retorna false");
+
       return false;
     }
     if (cellMonth > nowMonth) {
-      console.log("[isEditableCell] Mes futuro, retorna true");
+
       return true;
     }
     if (cellDay < nowDay) {
-      console.log("[isEditableCell] Día pasado, retorna false");
+
       return false;
     }
     if (cellDay > nowDay) {
-      console.log("[isEditableCell] Día futuro, retorna true");
+
       return true;
     }
 
@@ -144,10 +139,10 @@ export function CalendarPerson(props) {
 	const fetchHorariosAPI = async () => {
 	  if (selectedAnalista && selectedDate) {
 		const url = `${APIURL.get_horariosanalistas()}/analista/${selectedAnalista}/fecha/${selectedDate}`;
-		console.log("[fetchHorariosAPI] URL:", url);
+
 		try {
 		  const { data: horarios } = await axios.get(url);
-		  console.log("[fetchHorariosAPI] Data:", horarios);
+
 		  if (!horarios || horarios.length === 0) {
 			setSchedule({});
 			enqueueSnackbar("No hay datos disponibles para este analista", { variant: "info", preventDuplicate: true });
@@ -197,15 +192,15 @@ export function CalendarPerson(props) {
         validRows.forEach((row) => {
           const { Day, Hour, Status } = row;
           if (!days.includes(Day) || !hours.includes(Hour)) {
-            console.log("[handleFileUpload] Day u Hour no válidos =>", row);
+
             return;
           }
-          console.log(fechaDias);
+
           const fechaDia = fechaDias.find((fd) => fd.day === Day);
 
           // Solo importamos la celda si es editable
           if (fechaDia && !isEditableCell(fechaDia.fullDate, Hour)) {
-            console.log("[handleFileUpload] No editable => se omite");
+
             return;
           }
 

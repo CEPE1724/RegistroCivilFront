@@ -129,7 +129,6 @@ const Datos = forwardRef((props, ref) => {
 
         // Validación de campos obligatorios
         for (const field in formData) {
-            console.log('datos cabecera', field);
             if (field === 'provinciaNacimiento' && formData.nacionalidad !== 54) {
                 continue;
             }
@@ -140,7 +139,6 @@ const Datos = forwardRef((props, ref) => {
                 continue;
             }
             if (!formData[field]) {
-                console.log('datos cabeceraed', field);
                 errors[field] = requiredFieldMessages[field] || `Este campo es obligatorio`;
             }
         }

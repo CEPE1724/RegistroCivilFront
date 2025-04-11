@@ -4,8 +4,8 @@ import axios from "axios"; // Import axios
 import { useNavigate } from "react-router-dom";
 import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
-import CheckIcon from '@mui/icons-material/Check';
-import CircleIcon from '@mui/icons-material/Circle';
+import CheckIcon from "@mui/icons-material/Check";
+import CircleIcon from "@mui/icons-material/Circle";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DatosCliente from "../DatosCliente/DatosCliente";
@@ -13,7 +13,7 @@ import DatosConyuge from "../DatosConyuge/DatosConyuge";
 import SeccionB from "../../SolicitudGrande/SeccionB/SeccionB";
 import SeccionA from "../../SolicitudGrande/SeccionA/SeccionA";
 import { FactoresCredito } from "../FactoresCredito";
-import { useSnackbar } from 'notistack';
+import { useSnackbar } from "notistack";
 import { Verificacion } from "../Verificacion/Verificacion";
 import InformacionCredito from "../InformacionCredito/InformacionCredito";
 import { APIURL } from "../../../configApi/apiConfig";
@@ -31,11 +31,17 @@ export function Cabecera() {
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
 
   const [activeTab, setActiveTab] = useState("Datos Cliente");
-  const [fecha, setFecha] = useState(data?.fecha ? new Date(data.fecha).toISOString().split('T')[0] : "");
+  const [fecha, setFecha] = useState(
+    data?.fecha ? new Date(data.fecha).toISOString().split("T")[0] : ""
+  );
   const [cedula, setCedula] = useState(data?.cedula || "");
   const [local, setLocal] = useState(data?.almacen || "");
-  const [apellidoPaterno, setApellidoPaterno] = useState(data?.ApellidoPaterno || "");
-  const [segundoApellido, setSegundoApellido] = useState(data?.ApellidoMaterno || "");
+  const [apellidoPaterno, setApellidoPaterno] = useState(
+    data?.ApellidoPaterno || ""
+  );
+  const [segundoApellido, setSegundoApellido] = useState(
+    data?.ApellidoMaterno || ""
+  );
   const [primerNombre, setPrimerNombre] = useState(data?.PrimerNombre || "");
   const [segundoNombre, setSegundoNombre] = useState(data?.SegundoNombre || "");
   const [email, setEmail] = useState(data?.email || "");
@@ -43,7 +49,9 @@ export function Cabecera() {
   const [estado, setEstado] = useState(data?.estado || "");
   const [bGarante, setBGarante] = useState(false);
   const [idSolicitud, setIdSolicitud] = useState(data?.id || "");
-  const [numeroSolicitud, setNumeroSolicitud] = useState(data?.NumeroSolicitud || "");
+  const [numeroSolicitud, setNumeroSolicitud] = useState(
+    data?.NumeroSolicitud || ""
+  );
   const [clienteData, setClienteData] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
   const [checkDatos, setCheckDatos] = useState(false); // Loading state
@@ -67,7 +75,6 @@ export function Cabecera() {
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -83,16 +90,13 @@ export function Cabecera() {
     };
 
     fetchData();
-
   }, [idSolicitud, numeroSolicitud, activeTab]);
 
   useEffect(() => {
     if (clienteData && clienteData.idCre_SolicitudWeb) {
       SearchData(clienteData.idCre_SolicitudWeb);
-    } else {
-      console.log("El ID Cre Solicitud Web no está disponible aún");
-    }
-  }, [clienteData]);  // Dependencia de clienteData
+    } 
+  }, [clienteData]); // Dependencia de clienteData
   // Monitorear cambios en clienteData y ejecutar la validación
   useEffect(() => {
     if (clienteData) {
@@ -120,19 +124,30 @@ export function Cabecera() {
     if (
       checkDatos &&
       checkDomicilio &&
-      (clienteData.idEdoCivil !== 1 || checkConyuge) &&  // Verificar que el conyuge se validó solo si corresponde
+      (clienteData.idEdoCivil !== 1 || checkConyuge) && // Verificar que el conyuge se validó solo si corresponde
       checkReferencias &&
-      (clienteData.idSituacionLaboral !== 1 || checkTrabajo) &&  // Verificar que el trabajo se validó solo si corresponde
-      (clienteData.idSituacionLaboral === 1 || checkNegocio)  // Verificar que el negocio se validó solo si corresponde
+      (clienteData.idSituacionLaboral !== 1 || checkTrabajo) && // Verificar que el trabajo se validó solo si corresponde
+      (clienteData.idSituacionLaboral === 1 || checkNegocio) // Verificar que el negocio se validó solo si corresponde
     ) {
-      setCheckCompletado(true);  // Todo se completó correctamente
+      setCheckCompletado(true); // Todo se completó correctamente
     }
-    if (data.idEstadoVerificacionSolicitud === 10 || data.idEstadoVerificacionSolicitud === 11 || data.idEstadoVerificacionSolicitud === 12 || data.idEstadoVerificacionSolicitud === 13) {
+    if (
+      data.idEstadoVerificacionSolicitud === 10 ||
+      data.idEstadoVerificacionSolicitud === 11 ||
+      data.idEstadoVerificacionSolicitud === 12 ||
+      data.idEstadoVerificacionSolicitud === 13
+    ) {
       setCheckCompletado(false);
     }
-
-  }, [clienteData, checkDatos, checkDomicilio, checkConyuge, checkReferencias, checkTrabajo, checkNegocio]);
-
+  }, [
+    clienteData,
+    checkDatos,
+    checkDomicilio,
+    checkConyuge,
+    checkReferencias,
+    checkTrabajo,
+    checkNegocio,
+  ]);
 
   const SearchData = async (id) => {
     try {
@@ -245,7 +260,6 @@ export function Cabecera() {
     setCheckDatos(valid);
   };
 
-
   const validarcaposdataDomicilio = () => {
     let valid = true;
 
@@ -274,19 +288,45 @@ export function Cabecera() {
 
     // Validaciones comunes para todos los casos
     if (
-      isValidaData.idProvinciaDomicilio == 0 || isValidaData.idProvinciaDomicilio == null || isValidaData.idProvinciaDomicilio == undefined ||
-      isValidaData.idCantonDomicilio == 0 || isValidaData.idCantonDomicilio == null || isValidaData.idCantonDomicilio == undefined ||
-      isValidaData.idParroquiaDomicilio == 0 || isValidaData.idParroquiaDomicilio == null || isValidaData.idParroquiaDomicilio == undefined ||
-      isValidaData.idBarrioDomicilio == 0 || isValidaData.idBarrioDomicilio == null || isValidaData.idBarrioDomicilio == undefined ||
-      isValidaData.CallePrincipal == 0 || isValidaData.CallePrincipal == null || isValidaData.CallePrincipal == undefined ||
-      isValidaData.NumeroCasa == 0 || isValidaData.NumeroCasa == null || isValidaData.NumeroCasa == undefined ||
-      isValidaData.CalleSecundaria == 0 || isValidaData.CalleSecundaria == null || isValidaData.CalleSecundaria == undefined ||
-      isValidaData.ReferenciaUbicacion == 0 || isValidaData.ReferenciaUbicacion == null || isValidaData.ReferenciaUbicacion == undefined ||
-      (isValidaData.TelefonoDomicilio == 0 || isValidaData.TelefonoDomicilio == null || isValidaData.TelefonoDomicilio == undefined) &&
-      (isValidaData.TelefonoDomiliarDos == 0 || isValidaData.TelefonoDomiliarDos == null || isValidaData.TelefonoDomiliarDos == undefined) &&
-      (isValidaData.Celular == 0 || isValidaData.Celular == null || isValidaData.Celular == undefined) ||
-      isValidaData.idTipoVivienda == 0 || isValidaData.idTipoVivienda == null || isValidaData.idTipoVivienda == undefined ||
-      isValidaData.idCre_Tiempo == 0 || isValidaData.idCre_Tiempo == null || isValidaData.idCre_Tiempo == undefined
+      isValidaData.idProvinciaDomicilio == 0 ||
+      isValidaData.idProvinciaDomicilio == null ||
+      isValidaData.idProvinciaDomicilio == undefined ||
+      isValidaData.idCantonDomicilio == 0 ||
+      isValidaData.idCantonDomicilio == null ||
+      isValidaData.idCantonDomicilio == undefined ||
+      isValidaData.idParroquiaDomicilio == 0 ||
+      isValidaData.idParroquiaDomicilio == null ||
+      isValidaData.idParroquiaDomicilio == undefined ||
+      isValidaData.idBarrioDomicilio == 0 ||
+      isValidaData.idBarrioDomicilio == null ||
+      isValidaData.idBarrioDomicilio == undefined ||
+      isValidaData.CallePrincipal == 0 ||
+      isValidaData.CallePrincipal == null ||
+      isValidaData.CallePrincipal == undefined ||
+      isValidaData.NumeroCasa == 0 ||
+      isValidaData.NumeroCasa == null ||
+      isValidaData.NumeroCasa == undefined ||
+      isValidaData.CalleSecundaria == 0 ||
+      isValidaData.CalleSecundaria == null ||
+      isValidaData.CalleSecundaria == undefined ||
+      isValidaData.ReferenciaUbicacion == 0 ||
+      isValidaData.ReferenciaUbicacion == null ||
+      isValidaData.ReferenciaUbicacion == undefined ||
+      ((isValidaData.TelefonoDomicilio == 0 ||
+        isValidaData.TelefonoDomicilio == null ||
+        isValidaData.TelefonoDomicilio == undefined) &&
+        (isValidaData.TelefonoDomiliarDos == 0 ||
+          isValidaData.TelefonoDomiliarDos == null ||
+          isValidaData.TelefonoDomiliarDos == undefined) &&
+        (isValidaData.Celular == 0 ||
+          isValidaData.Celular == null ||
+          isValidaData.Celular == undefined)) ||
+      isValidaData.idTipoVivienda == 0 ||
+      isValidaData.idTipoVivienda == null ||
+      isValidaData.idTipoVivienda == undefined ||
+      isValidaData.idCre_Tiempo == 0 ||
+      isValidaData.idCre_Tiempo == null ||
+      isValidaData.idCre_Tiempo == undefined
     ) {
       valid = false; // Si algún campo obligatorio no es válido, cambiamos valid a false
     }
@@ -294,9 +334,15 @@ export function Cabecera() {
     // Validación adicional si tipoVivienda es 1 (Requiere campos de arrendador)
     if (isValidaData.idTipoVivienda == 1) {
       if (
-        isValidaData.NombreArrendador == 0 || isValidaData.NombreArrendador == null || isValidaData.NombreArrendador == undefined ||
-        isValidaData.TelefonoArrendador == 0 || isValidaData.TelefonoArrendador == null || isValidaData.TelefonoArrendador == undefined ||
-        isValidaData.CelularArrendador == 0 || isValidaData.CelularArrendador == null || isValidaData.CelularArrendador == undefined
+        isValidaData.NombreArrendador == 0 ||
+        isValidaData.NombreArrendador == null ||
+        isValidaData.NombreArrendador == undefined ||
+        isValidaData.TelefonoArrendador == 0 ||
+        isValidaData.TelefonoArrendador == null ||
+        isValidaData.TelefonoArrendador == undefined ||
+        isValidaData.CelularArrendador == 0 ||
+        isValidaData.CelularArrendador == null ||
+        isValidaData.CelularArrendador == undefined
       ) {
         valid = false; // Si los campos de arrendador no están completos, cambiamos valid a false
       }
@@ -305,9 +351,15 @@ export function Cabecera() {
     // Validación adicional si tipoVivienda es 3 o 4 (Requiere campos de inmueble)
     if (isValidaData.idTipoVivienda == 3 || isValidaData.idTipoVivienda == 4) {
       if (
-        isValidaData.idInmueble == 0 || isValidaData.idInmueble == null || isValidaData.idInmueble == undefined ||
-        isValidaData.idCantonInmueble == 0 || isValidaData.idCantonInmueble == null || isValidaData.idCantonInmueble == undefined ||
-        isValidaData.ValorInmmueble == 0 || isValidaData.ValorInmmueble == null || isValidaData.ValorInmmueble == undefined
+        isValidaData.idInmueble == 0 ||
+        isValidaData.idInmueble == null ||
+        isValidaData.idInmueble == undefined ||
+        isValidaData.idCantonInmueble == 0 ||
+        isValidaData.idCantonInmueble == null ||
+        isValidaData.idCantonInmueble == undefined ||
+        isValidaData.ValorInmmueble == 0 ||
+        isValidaData.ValorInmmueble == null ||
+        isValidaData.ValorInmmueble == undefined
       ) {
         valid = false; // Si los campos de inmueble no están completos, cambiamos valid a false
       }
@@ -344,7 +396,6 @@ export function Cabecera() {
     ) {
       valid = false;
     }
-
 
     if (
       !clienteData.CedulaConyuge ||
@@ -428,16 +479,28 @@ export function Cabecera() {
     if (clienteData.idTipoEmpresa === 0 || clienteData.idTipoEmpresa == null) {
       valid = false;
     }
-    if (clienteData.FechaIngresoEmpresa === 0 || clienteData.FechaIngresoEmpresa == null) {
+    if (
+      clienteData.FechaIngresoEmpresa === 0 ||
+      clienteData.FechaIngresoEmpresa == null
+    ) {
       valid = false;
     }
-    if (clienteData.IngresosTrabajo === 0 || clienteData.IngresosTrabajo == null) {
+    if (
+      clienteData.IngresosTrabajo === 0 ||
+      clienteData.IngresosTrabajo == null
+    ) {
       valid = false;
     }
-    if (clienteData.EgresosTrabajo === 0 || clienteData.EgresosTrabajo == null) {
+    if (
+      clienteData.EgresosTrabajo === 0 ||
+      clienteData.EgresosTrabajo == null
+    ) {
       valid = false;
     }
-    if (clienteData.idTipoContrato === 0 || clienteData.idTipoContrato == null) {
+    if (
+      clienteData.idTipoContrato === 0 ||
+      clienteData.idTipoContrato == null
+    ) {
       valid = false;
     }
     if (clienteData.idTipoSueldo === 0 || clienteData.idTipoSueldo == null) {
@@ -455,34 +518,59 @@ export function Cabecera() {
     if (clienteData.AfiliadoIESS === 0 || clienteData.AfiliadoIESS == null) {
       valid = false;
     }
-    if (clienteData.idProvinciaTrabajo === 0 || clienteData.idProvinciaTrabajo == null) {
-      valid = false;
-    }
-    if (clienteData.idCantonTrabajo === 0 || clienteData.idCantonTrabajo == null) {
-      valid = false;
-    }
-    if (clienteData.idParroquiaTrabajo === 0 || clienteData.idParroquiaTrabajo == null) {
-      valid = false;
-    }
-    if (clienteData.idBarrioTrabajo === 0 || clienteData.idBarrioTrabajo == null) {
-      valid = false;
-    }
-    if (clienteData.CallePrincipalTrabajo === 0 || clienteData.CallePrincipalTrabajo == null) {
-      valid = false;
-    }
-    if (clienteData.NumeroCasaTrabajo === 0 || clienteData.NumeroCasaTrabajo == null) {
-      valid = false;
-    }
-    if (clienteData.CalleSecundariaTrabajo === 0 || clienteData.CalleSecundariaTrabajo == null) {
+    if (
+      clienteData.idProvinciaTrabajo === 0 ||
+      clienteData.idProvinciaTrabajo == null
+    ) {
       valid = false;
     }
     if (
-      (clienteData.TelefonoTrabajo === 0 || clienteData.TelefonoTrabajo == null) &&
+      clienteData.idCantonTrabajo === 0 ||
+      clienteData.idCantonTrabajo == null
+    ) {
+      valid = false;
+    }
+    if (
+      clienteData.idParroquiaTrabajo === 0 ||
+      clienteData.idParroquiaTrabajo == null
+    ) {
+      valid = false;
+    }
+    if (
+      clienteData.idBarrioTrabajo === 0 ||
+      clienteData.idBarrioTrabajo == null
+    ) {
+      valid = false;
+    }
+    if (
+      clienteData.CallePrincipalTrabajo === 0 ||
+      clienteData.CallePrincipalTrabajo == null
+    ) {
+      valid = false;
+    }
+    if (
+      clienteData.NumeroCasaTrabajo === 0 ||
+      clienteData.NumeroCasaTrabajo == null
+    ) {
+      valid = false;
+    }
+    if (
+      clienteData.CalleSecundariaTrabajo === 0 ||
+      clienteData.CalleSecundariaTrabajo == null
+    ) {
+      valid = false;
+    }
+    if (
+      (clienteData.TelefonoTrabajo === 0 ||
+        clienteData.TelefonoTrabajo == null) &&
       (clienteData.CelularTrabajo === 0 || clienteData.CelularTrabajo == null)
     ) {
       valid = false;
     }
-    if (clienteData.ReferenciaUbicacionTrabajo === 0 || clienteData.ReferenciaUbicacionTrabajo == null) {
+    if (
+      clienteData.ReferenciaUbicacionTrabajo === 0 ||
+      clienteData.ReferenciaUbicacionTrabajo == null
+    ) {
       valid = false;
     }
 
@@ -513,54 +601,89 @@ export function Cabecera() {
     if (clienteData.NombreNegocio === 0 || clienteData.NombreNegocio == null) {
       valid = false;
     }
-    if (clienteData.idCre_TiempoNegocio === 0 || clienteData.idCre_TiempoNegocio == null) {
+    if (
+      clienteData.idCre_TiempoNegocio === 0 ||
+      clienteData.idCre_TiempoNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.MetrosCuadrados === 0 || clienteData.MetrosCuadrados == null) {
+    if (
+      clienteData.MetrosCuadrados === 0 ||
+      clienteData.MetrosCuadrados == null
+    ) {
       valid = false;
     }
-    if (clienteData.idProvinciaNegocio === 0 || clienteData.idProvinciaNegocio == null) {
+    if (
+      clienteData.idProvinciaNegocio === 0 ||
+      clienteData.idProvinciaNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.idCantonNegocio === 0 || clienteData.idCantonNegocio == null) {
+    if (
+      clienteData.idCantonNegocio === 0 ||
+      clienteData.idCantonNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.idParroquiaNegocio === 0 || clienteData.idParroquiaNegocio == null) {
+    if (
+      clienteData.idParroquiaNegocio === 0 ||
+      clienteData.idParroquiaNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.idBarrioNegocio === 0 || clienteData.idBarrioNegocio == null) {
+    if (
+      clienteData.idBarrioNegocio === 0 ||
+      clienteData.idBarrioNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.CallePrincipalNegocio === 0 || clienteData.CallePrincipalNegocio == null) {
+    if (
+      clienteData.CallePrincipalNegocio === 0 ||
+      clienteData.CallePrincipalNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.NumeroCasaNegocio === 0 || clienteData.NumeroCasaNegocio == null) {
+    if (
+      clienteData.NumeroCasaNegocio === 0 ||
+      clienteData.NumeroCasaNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.CalleSecundariaNegocio === 0 || clienteData.CalleSecundariaNegocio == null) {
+    if (
+      clienteData.CalleSecundariaNegocio === 0 ||
+      clienteData.CalleSecundariaNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.ReferenciaUbicacionNegocio === 0 || clienteData.ReferenciaUbicacionNegocio == null) {
+    if (
+      clienteData.ReferenciaUbicacionNegocio === 0 ||
+      clienteData.ReferenciaUbicacionNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.IngresosNegosio === 0 || clienteData.IngresosNegosio == null) {
+    if (
+      clienteData.IngresosNegosio === 0 ||
+      clienteData.IngresosNegosio == null
+    ) {
       valid = false;
     }
-    if (clienteData.EgresosNegocio === 0 || clienteData.EgresosNegocio == null) {
+    if (
+      clienteData.EgresosNegocio === 0 ||
+      clienteData.EgresosNegocio == null
+    ) {
       valid = false;
     }
-    if (clienteData.ActividadEconomicaNegocio === 0 || clienteData.ActividadEconomicaNegocio == null) {
+    if (
+      clienteData.ActividadEconomicaNegocio === 0 ||
+      clienteData.ActividadEconomicaNegocio == null
+    ) {
       valid = false;
     }
     // Actualizamos el estado de checkNegocio con el resultado de la validación
     setCheckNegocio(valid);
   };
 
-
-
   // Si todos los campos son válidos, actualizamos el estado
-
-
 
   const fetchDatosCliente = async () => {
     try {
@@ -581,7 +704,6 @@ export function Cabecera() {
       // Call the validation function after fetching data
 
       setLoading(false); // Set loading to false once data is fetched
-
     } catch (error) {
       console.error("Error al obtener los datos del cliente", error);
       setLoading(false); // Set loading to false if an error occurs
@@ -589,16 +711,60 @@ export function Cabecera() {
   };
 
   const tabs = [
-    { name: "Datos Cliente", icon: <ManageSearchIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkDatos },
-    { name: "Domicilio", icon: <PrintIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkDomicilio },
-    { name: "Datos Conyuge", icon: <SaveIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkConyuge },
-    { name: "Referencias", icon: <PrintIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkReferencias },
-    { name: "Negocio", icon: <ManageSearchIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkNegocio },
-    { name: "Dependiente", icon: <LogoutIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkTrabajo },
-    { name: "Información de Crédito", icon: <SaveIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkInformacionCredito },
-    { name: "Factores de Crédito", icon: <PrintIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: checkFactoresCredito },
-    { name: "Enviar a Verificar", icon: <CheckIcon fontSize="small" />, icons_2: <CircleIcon fontSize="small" />, check: false },
-
+    {
+      name: "Datos Cliente",
+      icon: <ManageSearchIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkDatos,
+    },
+    {
+      name: "Domicilio",
+      icon: <PrintIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkDomicilio,
+    },
+    {
+      name: "Datos Conyuge",
+      icon: <SaveIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkConyuge,
+    },
+    {
+      name: "Referencias",
+      icon: <PrintIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkReferencias,
+    },
+    {
+      name: "Negocio",
+      icon: <ManageSearchIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkNegocio,
+    },
+    {
+      name: "Dependiente",
+      icon: <LogoutIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkTrabajo,
+    },
+    {
+      name: "Información de Crédito",
+      icon: <SaveIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkInformacionCredito,
+    },
+    {
+      name: "Factores de Crédito",
+      icon: <PrintIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: checkFactoresCredito,
+    },
+    {
+      name: "Enviar a Verificar",
+      icon: <CheckIcon fontSize="small" />,
+      icons_2: <CircleIcon fontSize="small" />,
+      check: false,
+    },
 
     // { name: "Verificación", icon: <ManageSearchIcon fontSize="small" /> },
   ];
@@ -609,24 +775,32 @@ export function Cabecera() {
      }*/
 
     switch (activeTab) {
-
       case "Datos Cliente":
         return <Datos ref={datosRef} data={clienteData} />;
       case "Domicilio":
         return <Domicilio ref={datosDomicilioRef} data={clienteData} />;
       case "Datos Conyuge":
-        return clienteData.idEdoCivil === 1 ? <DatosConyuge ref={datosConyuge} data={clienteData} /> : null;
+        return clienteData.idEdoCivil === 1 ? (
+          <DatosConyuge ref={datosConyuge} data={clienteData} />
+        ) : null;
       case "Referencias":
         return <Referencias data={clienteData} />;
       case "Dependiente":
-        return clienteData.idSituacionLaboral === 1 ? <SeccionB ref={datosTrabajo} data={clienteData} /> : null;
+        return clienteData.idSituacionLaboral === 1 ? (
+          <SeccionB ref={datosTrabajo} data={clienteData} />
+        ) : null;
       case "Negocio":
-        return clienteData.idSituacionLaboral != 1 ? <SeccionA ref={datosNegocio} data={clienteData} /> : null;
+        return clienteData.idSituacionLaboral != 1 ? (
+          <SeccionA ref={datosNegocio} data={clienteData} />
+        ) : null;
       case "Factores de Crédito":
-        return <FactoresCredito ref={datosInformacionCredito} data={clienteData} />;
-      case "Enviar a Verificar":
-        {/*} case "Verificación":
-        return <Verificacion />;*/}
+        return (
+          <FactoresCredito ref={datosInformacionCredito} data={clienteData} />
+        );
+      case "Enviar a Verificar": {
+        /*} case "Verificación":
+        return <Verificacion />;*/
+      }
       case "Información de Crédito":
         return <InformacionCredito data={clienteData} />;
       default:
@@ -654,16 +828,20 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
-        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
         navigate("/ListadoSolicitud", {
           replace: true,
         });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
-      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
     }
   };
 
@@ -680,19 +858,22 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
-        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
         navigate("/ListadoSolicitud", {
           replace: true,
         });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
-      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
     }
   };
-
 
   const patchSolicitudAceptar = async (idSolicitud) => {
     try {
@@ -707,19 +888,22 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
+
       if (response.data) {
-        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
         navigate("/ListadoSolicitud", {
           replace: true,
         });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
-      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
     }
   };
-
 
   const patchSolicitudRechazar = async (idSolicitud) => {
     try {
@@ -734,20 +918,21 @@ export function Cabecera() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
       if (response.data) {
-        enqueueSnackbar("Solicitud actualizada correctamente.", { variant: "success" });
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
         navigate("/ListadoSolicitud", {
           replace: true,
         });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
-      enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
     }
   };
-
-
 
   // Función para confirmar la acción (enviar)
   const handleConfirm = () => {
@@ -768,18 +953,19 @@ export function Cabecera() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      enqueueSnackbar("Por favor corrige los errores en el formulario..", { variant: "error" });
+      enqueueSnackbar("Por favor corrige los errores en el formulario..", {
+        variant: "error",
+      });
       return;
     }
     handleSave();
-
   };
-
-
 
   const validateForm = () => {
     if (!/^\d{10}$/.test(cedula)) {
-      enqueueSnackbar("La cédula debe ser un número de 10 dígitos.", { variant: "error" });
+      enqueueSnackbar("La cédula debe ser un número de 10 dígitos.", {
+        variant: "error",
+      });
       return false;
     }
     if (!local) {
@@ -787,23 +973,30 @@ export function Cabecera() {
       return false;
     }
     if (apellidoPaterno.length < 2 || primerNombre.length < 2) {
-      enqueueSnackbar("El apellido paterno y el primer nombre deben tener al menos 5 caracteres.", { variant: "error" });
+      enqueueSnackbar(
+        "El apellido paterno y el primer nombre deben tener al menos 5 caracteres.",
+        { variant: "error" }
+      );
       return false;
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      enqueueSnackbar("El email no tiene un formato válido.", { variant: "error" });
+      enqueueSnackbar("El email no tiene un formato válido.", {
+        variant: "error",
+      });
       return false;
     }
     if (!/^\d{10}$/.test(celular)) {
-      enqueueSnackbar("El celular debe ser un número de 10 dígitos.", { variant: "error" });
+      enqueueSnackbar("El celular debe ser un número de 10 dígitos.", {
+        variant: "error",
+      });
       return false;
     }
     return true;
   };
-  const handleSave = () => {
+  const handleSave = async () => {
     let tipoDato = 0;
     let isValidSumit = false;
-    // Obtenemos los datos del formulario de acuerdo a su tab 
+    // Obtenemos los datos del formulario de acuerdo a su tab
     if (activeTab === "Datos Cliente") {
       tipoDato = 2;
       const formData = datosRef.current.getFormData();
@@ -814,7 +1007,9 @@ export function Cabecera() {
         setActiveTab("Domicilio");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
       } else {
-        enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+        enqueueSnackbar("Por favor corrige los errores en el formulario.", {
+          variant: "error",
+        });
       }
     }
     if (activeTab === "Domicilio") {
@@ -823,13 +1018,27 @@ export function Cabecera() {
       const isValid = datosDomicilioRef.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
+        const coordenadas = await fetchValidaDomicilio(1);
+        if (!coordenadas.exists) {
+          enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" } );
+          return;
+        }
+
+		if (datosDomicilioRef.current.setUbicacionError) {
+			datosDomicilioRef.current.setUbicacionError(""); // Limpiar si hay coordenadas
+		  }
+
+		  
+
         isValidSumit = true;
 
         fetchSaveDatosDomicilio(formData);
         setActiveTab("Datos Conyuge");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
       } else {
-        enqueueSnackbar("Por favor corrige los errores en el formulario.", { variant: "error" });
+        enqueueSnackbar("Por favor corrige los errores en el formulario.", {
+          variant: "error",
+        });
       }
     }
     if (activeTab === "Datos Conyuge" && clienteData.idEdoCivil === 1) {
@@ -854,6 +1063,23 @@ export function Cabecera() {
       const isValid = datosTrabajo.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
+		const coordenadas = await fetchValidaDomicilio(2);
+		if (!coordenadas.exists || coordenadas.count === 0) {
+			enqueueSnackbar(
+			  "Para guardar el negocio, primero debes registrar la ubicación.",
+			  { variant: "error" }
+			);
+	  
+			if (datosTrabajo.current.setUbicacionError) {
+				datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
+			}
+	  
+			return;
+		  }
+		  if (datosTrabajo.current.setUbicacionError) {
+			datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
+		  }
+
         isValidSumit = true;
 
         fetchSaveDatosTrabajo(formData);
@@ -866,6 +1092,22 @@ export function Cabecera() {
       const formData = datosNegocio.current.getFormData();
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
+		const coordenadas = await fetchValidaDomicilio(2);
+		if (!coordenadas.exists || coordenadas.count === 0) {
+			enqueueSnackbar(
+			  "Para guardar el negocio, primero debes registrar la ubicación.",
+			  { variant: "error" }
+			);
+	  
+			if (datosNegocio.current.setUbicacionError) {
+			  datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
+			}
+	  
+			return;
+		  }
+		  if (datosNegocio.current.setUbicacionError) {
+			datosNegocio.current.setUbicacionError(""); // Limpiar si hay coordenadas
+		  }
         isValidSumit = true;
 
         fetchSaveDatosNegocio(formData);
@@ -882,7 +1124,6 @@ export function Cabecera() {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
       await axios.post(url, {
-
         idCre_SolicitudWeb: clienteData.idCre_SolicitudWeb,
         Tipo: 1,
         idEstadoVerificacionDocumental: tipo,
@@ -893,15 +1134,36 @@ export function Cabecera() {
     }
   };
 
+  const fetchValidaDomicilio = async (tipo) => {
+    try {
+      const url = APIURL.getCoordenadasprefacturaPorId(
+        clienteData.idCre_SolicitudWeb,
+        tipo
+      );
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data; // { exists, count }
+    } catch (error) {
+      console.error("Error al validar coordenadas del domicilio", error);
+      return { exists: false, count: 0 };
+    }
+  };
+
   const fetchSaveDatosNegocio = async (formData) => {
     try {
-      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(
+        clienteData.idWeb_SolicitudGrande
+      );
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
-      const getParsedDecimalValue = (value) => (value ? parseFloat(value) : null);
+      const getParsedDecimalValue = (value) =>
+        value ? parseFloat(value) : null;
       const gestString = (value) => (value ? value : null);
-      const IngresosTrabajoString = String(formData.ingresos);  // Convierte a string
-      const EgresosTrabajoString = String(formData.gastos);     // Convierte a string
+      const IngresosTrabajoString = String(formData.ingresos); // Convierte a string
+      const EgresosTrabajoString = String(formData.gastos); // Convierte a string
 
       const response = await axios.patch(
         url,
@@ -921,7 +1183,7 @@ export function Cabecera() {
           EgresosNegocio: EgresosTrabajoString,
           ActividadEconomicaNegocio: formData.actividadNegocio,
           AfiliadoTributario: formData.AfiliadoTributario,
-          OblidagoLlevarContabilidad: formData.ObligadoContabilidad
+          OblidagoLlevarContabilidad: formData.ObligadoContabilidad,
         },
         {
           headers: {
@@ -930,10 +1192,14 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
+      enqueueSnackbar("Datos del conyuge guardados correctamente.", {
+        variant: "success",
+      });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos del conyuge.", { variant: "error" });
+      enqueueSnackbar("Error al guardar los datos del conyuge.", {
+        variant: "error",
+      });
       console.error("Error al guardar los datos del conyuge", error);
     }
   };
@@ -941,7 +1207,7 @@ export function Cabecera() {
   const getParsedDecimalValue = (value) => {
     if (value) {
       // Remove any non-numeric characters (e.g., commas) and ensure it's a valid decimal
-      const sanitizedValue = value.replace(/[^0-9.-]+/g, '');
+      const sanitizedValue = value.replace(/[^0-9.-]+/g, "");
       let parsedValue = parseFloat(sanitizedValue);
 
       // If parsed value is an integer, ensure it has decimals (e.g., 500 => 500.00)
@@ -956,13 +1222,16 @@ export function Cabecera() {
 
   const fetchSaveDatosTrabajo = async (formData) => {
     try {
-      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(
+        clienteData.idWeb_SolicitudGrande
+      );
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
-      const getParsedDecimalValue = (value) => (value ? parseFloat(value) : null);
+      const getParsedDecimalValue = (value) =>
+        value ? parseFloat(value) : null;
       const gestString = (value) => (value ? value : null);
-      const IngresosTrabajoString = String(formData.ingresos);  // Convierte a string
-      const EgresosTrabajoString = String(formData.gastos);     // Convierte a string
+      const IngresosTrabajoString = String(formData.ingresos); // Convierte a string
+      const EgresosTrabajoString = String(formData.gastos); // Convierte a string
 
       const response = await axios.patch(
         url,
@@ -989,7 +1258,6 @@ export function Cabecera() {
           Ext: formData.ext,
           CelularTrabajo: formData.celular,
           ReferenciaUbicacionTrabajo: formData.referenciaUbicacion,
-
         },
         {
           headers: {
@@ -998,18 +1266,23 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
+      enqueueSnackbar("Datos del conyuge guardados correctamente.", {
+        variant: "success",
+      });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos del conyuge.", { variant: "error" });
+      enqueueSnackbar("Error al guardar los datos del conyuge.", {
+        variant: "error",
+      });
       console.error("Error al guardar los datos del conyuge", error);
     }
   };
 
-
   const fetchSaveDatosConyuge = async (formData) => {
     try {
-      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(
+        clienteData.idWeb_SolicitudGrande
+      );
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
 
@@ -1026,7 +1299,6 @@ export function Cabecera() {
           idGeneroConyuge: getParsedValue(formData.sexo),
           idNivelEducacionConyuge: getParsedValue(formData.nivelEducacion),
           idProfesionConyuge: getParsedValue(formData.profesion),
-
         },
         {
           headers: {
@@ -1035,20 +1307,25 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos del conyuge guardados correctamente.", { variant: "success" });
+      enqueueSnackbar("Datos del conyuge guardados correctamente.", {
+        variant: "success",
+      });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos del conyuge.", { variant: "error" });
+      enqueueSnackbar("Error al guardar los datos del conyuge.", {
+        variant: "error",
+      });
       console.error("Error al guardar los datos del conyuge", error);
     }
   };
 
   const fetchSaveDatosDomicilio = async (formData) => {
     try {
-      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(
+        clienteData.idWeb_SolicitudGrande
+      );
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
-
 
       const response = await axios.patch(
         url,
@@ -1080,19 +1357,23 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
+      enqueueSnackbar("Datos de nacimiento guardados correctamente.", {
+        variant: "success",
+      });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos de nacimiento.", { variant: "error" });
+      enqueueSnackbar("Error al guardar los datos de nacimiento.", {
+        variant: "error",
+      });
       console.error("Error al guardar los datos de nacimiento", error);
     }
   };
 
-
-
   const fetchSaveDatosNacimiento = async (formData) => {
     try {
-      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(clienteData.idWeb_SolicitudGrande);
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(
+        clienteData.idWeb_SolicitudGrande
+      );
       // Función para asegurar que los valores sean válidos y numéricos
       const getParsedValue = (value) => (value ? parseInt(value) : null);
 
@@ -1110,7 +1391,8 @@ export function Cabecera() {
           idProfesion: getParsedValue(formData.profesion),
           idSituacionLaboral: getParsedValue(formData.situacionLaboral),
           idActEconomica: getParsedValue(formData.actividadEconomica),
-          ObservacionesActividadEconomica: formData.observacionActividadEconomica
+          ObservacionesActividadEconomica:
+            formData.observacionActividadEconomica,
         },
         {
           headers: {
@@ -1119,10 +1401,14 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos de nacimiento guardados correctamente.", { variant: "success" });
+      enqueueSnackbar("Datos de nacimiento guardados correctamente.", {
+        variant: "success",
+      });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos de nacimiento.", { variant: "error" });
+      enqueueSnackbar("Error al guardar los datos de nacimiento.", {
+        variant: "error",
+      });
       console.error("Error al guardar los datos de nacimiento", error);
     }
   };
@@ -1134,10 +1420,8 @@ export function Cabecera() {
   };
 
   useImperativeHandle(ref, () => ({
-    handleValidate
+    handleValidate,
   }));
-
-
 
   const handleAceptar = () => {
     // Lógica para aceptar la solicitud
@@ -1147,7 +1431,6 @@ export function Cabecera() {
     navigate("/ListadoSolicitud", {
       replace: true,
     });
-
   };
 
   const handleRechazar = () => {
@@ -1169,7 +1452,6 @@ export function Cabecera() {
     // Lógica para enviar la solicitud a corrección
   };
 
-
   const handleReconfirm = () => {
     patchSolicitud(idSolicitud);
     fetchInsertarDatos(10);
@@ -1177,11 +1459,7 @@ export function Cabecera() {
       replace: true,
     });
     // Lógica para enviar la solicitud a corrección
-  }
-
-
-
-
+  };
 
   const navigateToListadoSolicitud = () => {
     navigate("/ListadoSolicitud", {
@@ -1196,25 +1474,26 @@ export function Cabecera() {
       ) : (
         <div className="md:flex">
           <div className="flex flex-col space-y-4 text-xs font-medium">
-
-            {tabs.map(({ name, icon, icons_2, check }) => (
-              // Verificamos si el nombre es 'Completado' y si checkCompletado es true
-              (name === "Enviar a Verificar" ? checkCompeletado : true) &&
-              (
-                <button
-                  key={name}
-                  onClick={() => handleTabClick(name)}
-                  className={`inline-flex items-center px-2 py-2 rounded-lg w-full ${activeTab === name ? 'bg-blue-700 text-white' : 'bg-gray-50 text-gray-500'} hover:text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
-                >
-                  {icon}
-                  <span className="ml-1">{name}</span>
-                  <div className="flex-grow" />
-                  {check && (
-                    <span className="text-green-500">{icons_2}</span>
-                  )}
-                </button>
-              )
-            ))}
+            {tabs.map(
+              ({ name, icon, icons_2, check }) =>
+                // Verificamos si el nombre es 'Completado' y si checkCompletado es true
+                (name === "Enviar a Verificar" ? checkCompeletado : true) && (
+                  <button
+                    key={name}
+                    onClick={() => handleTabClick(name)}
+                    className={`inline-flex items-center px-2 py-2 rounded-lg w-full ${
+                      activeTab === name
+                        ? "bg-blue-700 text-white"
+                        : "bg-gray-50 text-gray-500"
+                    } hover:text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
+                  >
+                    {icon}
+                    <span className="ml-1">{name}</span>
+                    <div className="flex-grow" />
+                    {check && <span className="text-green-500">{icons_2}</span>}
+                  </button>
+                )
+            )}
             {/* Botones adicionales si idEstadoVerificacionSolicitud es 10  a revision*/}
 
             {data?.idEstadoVerificacionSolicitud === 10 && (
@@ -1248,7 +1527,6 @@ export function Cabecera() {
             {/* Botón para volver a enviar a revisión si idEstadoVerificacionSolicitud es 11 */}
             {data?.idEstadoVerificacionSolicitud === 11 && (
               <>
-
                 <button
                   onClick={() => handleReconfirm()}
                   className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
@@ -1258,15 +1536,38 @@ export function Cabecera() {
                 </button>
               </>
             )}
-
           </div>
 
           <div className="p-6 bg-gray-50 text-medium text-gray-500 dark:text-gray-400 dark:bg-gray-800 rounded-lg w-full">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <CabeceraDatosSolicitud
                 datosConsulta={data}
-                data={{ fecha, cedula, local, apellidoPaterno, segundoApellido, primerNombre, segundoNombre, email, celular, estado, bGarante }}
-                setData={{ setFecha, setCedula, setLocal, setApellidoPaterno, setSegundoApellido, setPrimerNombre, setSegundoNombre, setEmail, setCelular, setEstado, setBGarante }}
+                data={{
+                  fecha,
+                  cedula,
+                  local,
+                  apellidoPaterno,
+                  segundoApellido,
+                  primerNombre,
+                  segundoNombre,
+                  email,
+                  celular,
+                  estado,
+                  bGarante,
+                }}
+                setData={{
+                  setFecha,
+                  setCedula,
+                  setLocal,
+                  setApellidoPaterno,
+                  setSegundoApellido,
+                  setPrimerNombre,
+                  setSegundoNombre,
+                  setEmail,
+                  setCelular,
+                  setEstado,
+                  setBGarante,
+                }}
                 handleInputChange={handleInputChange}
               />
             </div>
@@ -1274,7 +1575,7 @@ export function Cabecera() {
               {renderTabContent(clienteData)}
             </div>
             <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-              {(data?.idEstadoVerificacionSolicitud < 12) && (
+              {data?.idEstadoVerificacionSolicitud < 12 && (
                 <div className="flex items-center">
                   <button
                     onClick={handleSubmit}
@@ -1288,7 +1589,7 @@ export function Cabecera() {
 
               <div className="flex items-center">
                 <button
-                  onClick={() => { }}
+                  onClick={() => {}}
                   className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
                 >
                   <PrintIcon className="text-lg" />

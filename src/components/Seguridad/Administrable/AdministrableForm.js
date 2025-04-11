@@ -44,8 +44,6 @@ export function AdministrableForm() {
             APIURL.getMenuPorusuario(selectedUser.idUsuario)
           );
           setMenuItems(response.data); // Aquí llenamos los menús con los datos de la API
-          console.log("menu items");
-          console.log(response.data);
           setMenuItemsOriginal(response.data);
         } catch (error) {
           console.error("Error al obtener menús:", error);
@@ -73,7 +71,6 @@ export function AdministrableForm() {
   };
 
   const handleUserChange = (user) => {
-    console.log(user);
     setSelectedUser(user);
   };
 
@@ -87,7 +84,6 @@ export function AdministrableForm() {
 
       //  eliminar
       if (originalId > 0 && item.idmenu_item_roles === 0) {
-		console.log(menuItems)
         try {
           await axios.delete(
             APIURL.deletePermisoUsuario(selectedUser.idUsuario, originalId)
@@ -172,8 +168,6 @@ export function AdministrableForm() {
   };
 
   const openModal = async (menuItem) => {
-    console.log("menuItem");
-    console.log(menuItem);
     try {
       const response = await axios.get(
         APIURL.getRolesAccesos(selectedUser.idUsuario, menuItem.m_idmenu_items)
@@ -203,20 +197,13 @@ export function AdministrableForm() {
 			  selectedUser.idUsuario,
 			  accessItem.m_idmenu_items_access
 			));
-			console.log("Acceso eliminado:", {
-			  idUsuario: selectedUser.idUsuario,
-			  m_idmenu_items_access: accessItem.m_idmenu_items_access,
-			});
+
 		  } else {
 			// Crear acceso
 			await axios.post(APIURL.createRolesAccesos(
 			  selectedUser.idUsuario,
 			  accessItem.m_idmenu_items_access
 			));
-			console.log("Acceso creado:", {
-			  idUsuario: selectedUser.idUsuario,
-			  m_idmenu_items_access: accessItem.m_idmenu_items_access,
-			});
 		  }
 		} catch (error) {
 		  console.error("Error al actualizar acceso:", error);
@@ -332,10 +319,6 @@ export function AdministrableForm() {
               </thead>
               <tbody>
                 {menuItems?.map((item) => {
-                  console.log(
-                    `menu ${item.menu_name} → estado:`,
-                    item.idmenu_item_roles
-                  );
                   return (
                     <tr
                       key={item.m_idmenu_items}

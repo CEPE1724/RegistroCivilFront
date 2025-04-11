@@ -7,7 +7,6 @@ import {
 const InformacionCredito = forwardRef((props, ref) => {
 	const { data } = props;
 
-	console.log('data creditoshlkfhhsdf', data);
 	const { enqueueSnackbar } = useSnackbar();
 	//almacenar datos del formulario
 	const [formData, setFormData] = useState({

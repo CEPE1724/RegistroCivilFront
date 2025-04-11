@@ -65,7 +65,7 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const { userData , idMenu} = useAuth();
-  console.log("EDIOSN", userData);
+
   const [bodegass, setBodegass] = useState([]);
 
   const bodegas = data || [];  // Safely access the bodegas data
@@ -95,7 +95,6 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
 
     try {
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
-      console.log("Datos de la bodega obtenidos correctamente.", data);
       setBodegass(data);
     } catch (err) {
       console.error("Error al obtener los datos de la bodega:", err);

@@ -9,8 +9,6 @@ import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
-  console.log("userData", userData);
-  console.log("userUsuario", userUsuario);
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
@@ -373,14 +371,12 @@ export default function CreditoForm() {
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
     try {
-      console.log("Actualizando solicitud con ID:", idSolicitud, "con los datos:", data);
       const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
       const response = await axios.put(url, data, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-      console.log("Solicitud actualizada con éxito:", response.data);
       return response.data;  // Retornar datos actualizados si es necesario
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error.message);
@@ -396,7 +392,6 @@ export default function CreditoForm() {
           'Content-Type': 'application/json',
         },
       });
-      console.log("Solicitud consultada con éxito:", response.data);
       setDataRecibir(response.data);  // Almacenar los datos de la solicitud
       return response.data;  // Devolver los datos consultados
     } catch (error) {

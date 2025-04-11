@@ -239,12 +239,10 @@ const ReusableForm = ({
     initialValues: initialValues,
     validationSchema,
     onSubmit: async (values) => {
-		console.log(values);
     //   if (isOtpVerified) {
         // setIsSubmitting(true);
         // try {
         //   await onSubmit(values);
-		//   console.log(values);
         // } catch (error) {
         //   enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
         //   console.error("Error en envío:", error);

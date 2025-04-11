@@ -222,10 +222,6 @@ export function LocationModal({
 		web:1,
 	  };
 
-	console.log({
-		userSolicitudData,
-		payload
-	});
 
     try {
       await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);
