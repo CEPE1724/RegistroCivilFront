@@ -81,7 +81,7 @@ export default function VerificacionTerrenaModal({
     try {
       const estado = tipo === "domicilio"
         ? { idEstadoVerificacionDomicilio: 1 } // Actualiza para "domicilio"
-        : { idEstadoVerificacionTrabajo: 1 };  // Actualiza para "trabajo"
+        : { idEstadoVerificacionTerrena: 1 };  // Actualiza para "trabajo"
 
       const response = await axios.patch(
         APIURL.update_solicitud(idSolicitud),
