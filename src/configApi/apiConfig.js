@@ -5,7 +5,7 @@ import { get } from "react-hook-form";
 
 
 
-const API_BASE_URL = "http://192.168.2.22:3008/api/v1/";
+const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
 
 
@@ -13,7 +13,7 @@ const API_BASE_URL = "http://192.168.2.22:3008/api/v1/";
 
 
 
-const SOCKET_BASE_URL = "http://192.168.2.14:3025";
+const SOCKET_BASE_URL = "https://backregistrocivil.appservices.com.ec"
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {

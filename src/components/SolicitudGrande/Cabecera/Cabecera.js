@@ -95,7 +95,7 @@ export function Cabecera() {
   useEffect(() => {
     if (clienteData && clienteData.idCre_SolicitudWeb) {
       SearchData(clienteData.idCre_SolicitudWeb);
-    } 
+    }
   }, [clienteData]); // Dependencia de clienteData
   // Monitorear cambios en clienteData y ejecutar la validación
   useEffect(() => {
@@ -1020,15 +1020,15 @@ export function Cabecera() {
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(1);
         if (!coordenadas.exists) {
-          enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" } );
+          enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" });
           return;
         }
 
-		if (datosDomicilioRef.current.setUbicacionError) {
-			datosDomicilioRef.current.setUbicacionError(""); // Limpiar si hay coordenadas
-		  }
+        if (datosDomicilioRef.current.setUbicacionError) {
+          datosDomicilioRef.current.setUbicacionError(""); // Limpiar si hay coordenadas
+        }
 
-		  
+
 
         isValidSumit = true;
 
@@ -1063,22 +1063,22 @@ export function Cabecera() {
       const isValid = datosTrabajo.current.validateForm(); // Llamamos a validateForm del componente Datos
 
       if (isValid) {
-		const coordenadas = await fetchValidaDomicilio(2);
-		if (!coordenadas.exists || coordenadas.count === 0) {
-			enqueueSnackbar(
-			  "Para guardar el negocio, primero debes registrar la ubicación.",
-			  { variant: "error" }
-			);
-	  
-			if (datosTrabajo.current.setUbicacionError) {
-				datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
-			}
-	  
-			return;
-		  }
-		  if (datosTrabajo.current.setUbicacionError) {
-			datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
-		  }
+        const coordenadas = await fetchValidaDomicilio(2);
+        if (!coordenadas.exists || coordenadas.count === 0) {
+          enqueueSnackbar(
+            "Para guardar datos Dependiente, primero debes registrar la ubicación.",
+            { variant: "error" }
+          );
+
+          if (datosTrabajo.current.setUbicacionError) {
+            datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
+          }
+
+          return;
+        }
+        if (datosTrabajo.current.setUbicacionError) {
+          datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
+        }
 
         isValidSumit = true;
 
@@ -1092,22 +1092,22 @@ export function Cabecera() {
       const formData = datosNegocio.current.getFormData();
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
-		const coordenadas = await fetchValidaDomicilio(2);
-		if (!coordenadas.exists || coordenadas.count === 0) {
-			enqueueSnackbar(
-			  "Para guardar el negocio, primero debes registrar la ubicación.",
-			  { variant: "error" }
-			);
-	  
-			if (datosNegocio.current.setUbicacionError) {
-			  datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
-			}
-	  
-			return;
-		  }
-		  if (datosNegocio.current.setUbicacionError) {
-			datosNegocio.current.setUbicacionError(""); // Limpiar si hay coordenadas
-		  }
+        const coordenadas = await fetchValidaDomicilio(2);
+        if (!coordenadas.exists || coordenadas.count === 0) {
+          enqueueSnackbar(
+            "Para guardar datos del  negocio, primero debes registrar la ubicación.",
+            { variant: "error" }
+          );
+
+          if (datosNegocio.current.setUbicacionError) {
+            datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
+          }
+
+          return;
+        }
+        if (datosNegocio.current.setUbicacionError) {
+          datosNegocio.current.setUbicacionError(""); // Limpiar si hay coordenadas
+        }
         isValidSumit = true;
 
         fetchSaveDatosNegocio(formData);
@@ -1481,11 +1481,10 @@ export function Cabecera() {
                   <button
                     key={name}
                     onClick={() => handleTabClick(name)}
-                    className={`inline-flex items-center px-2 py-2 rounded-lg w-full ${
-                      activeTab === name
+                    className={`inline-flex items-center px-2 py-2 rounded-lg w-full ${activeTab === name
                         ? "bg-blue-700 text-white"
                         : "bg-gray-50 text-gray-500"
-                    } hover:text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
+                      } hover:text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
                   >
                     {icon}
                     <span className="ml-1">{name}</span>
@@ -1589,7 +1588,7 @@ export function Cabecera() {
 
               <div className="flex items-center">
                 <button
-                  onClick={() => {}}
+                  onClick={() => { }}
                   className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
                 >
                   <PrintIcon className="text-lg" />
