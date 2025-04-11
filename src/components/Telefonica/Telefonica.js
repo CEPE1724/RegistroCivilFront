@@ -565,14 +565,29 @@ export function TelefonicaList({
         <div className="w-full bg-white p-6 rounded-lg shadow-lg">
           {/* Información del cliente */}
           <div className="mb-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              {clientInfo.foto && (
-                <div className="flex justify-center items-center md:w-1/4">
+            <div className="flex flex-col md:flex-row gap-6 Pr-6">
+              {clientInfo.foto !== null ? (
                   <img
                     src={clientInfo.foto}
                     alt="Foto del cliente"
                     className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-in-out"
                   />
+              ):(
+                <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-24 w-24 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
                 </div>
               )}
 
