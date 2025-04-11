@@ -456,11 +456,11 @@ export function ListadoSolicitud() {
     const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
 
     if (dias > 0) {
-      return `${dias}d ${horas}h ${minutos}m`;
+      return `${dias}d ${horas}h ${minutos}min`;
     } else if (horas > 0) {
-      return `${horas}h ${minutos}m`;
+      return `${horas}h ${minutos}min`;
     } else {
-      return `${minutos}m`;
+      return `${minutos}min`;
     }
   };
 
@@ -1547,6 +1547,8 @@ export function ListadoSolicitud() {
               overflowX: "auto",
               maxWidth: "100%",
               position: "relative",
+              width: "100%",
+              justifyContent: "space-between",
               "&::before": {
                 content: '""',
                 position: "absolute",
@@ -1559,12 +1561,13 @@ export function ListadoSolicitud() {
                 zIndex: 0,
               },
               "& .MuiTimelineItem-root": {
-                minWidth: "100px",
-                padding: "0 8px",
+                minWidth: "130px",
+                padding: "0 16px",
                 minHeight: "180px",
                 display: "flex",
                 alignItems: "center",
                 zIndex: 1,
+                flex: "1 1 0",
               },
               "& .MuiTimelineSeparator-root": {
                 height: "100%",
@@ -1572,10 +1575,9 @@ export function ListadoSolicitud() {
                 alignItems: "center",
                 justifyContent: "center",
                 position: "relative",
+                width: "100%",
               },
               "& .MuiTimelineDot-root": {
-                position: "relative",
-                margin: "10px 0",
                 backgroundColor: "white",
                 border: "2px solid #2d3689",
                 width: "40px",
@@ -1584,65 +1586,52 @@ export function ListadoSolicitud() {
                 alignItems: "center",
                 justifyContent: "center",
                 zIndex: 2,
-                boxShadow: "0 2px 4px rgba(0,0,0,0.2)"
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                margin: 0,
               }, "& .MuiTimelineConnector-root": {
                 position: "absolute",
                 top: "50%",
                 left: "50%",
                 transform: "translateX(-50%)",
                 height: "2px",
-                width: "calc(100% - 16px)",
+                width: "calc(100% - 32px)",
                 backgroundColor: "transparent"
               }
             }}
           >
             {/* Primer ítem con fechas */}
             <TimelineItem>
-              <TimelineSeparator>
-                {/* Contenedor fecha superior */}
+              <TimelineSeparator sx={{
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative",
+                height: "100%",
+              }}>
+                {/* Estructura con posicionamiento absoluto para centrar el icono y permitir fechas arriba/abajo */}
                 <Box sx={{
-                  textAlign: "center",
-                  width: "100%",
-                  marginBottom: 1,
-                }}>
-                  {fechaTiempos[0] && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        display: "block",
-                        color: "text.primary",
-                        fontSize: "0.8rem",
-                        fontWeight: 600,
-                        backgroundColor: "#f0f4f8",
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {formatDateTime(fechaTiempos[0].FechaSistema)}
-                    </Typography>
-                  )}
-                </Box>
-
-                {/* Icono con su círculo */}
-                <TimelineDot sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}>
-                  <PendingActionsIcon sx={{ color: "#2d3689", fontSize: "1.2rem" }} />
-                </TimelineDot>
-
-                {/* Contenedor fecha inferior */}
-                <Box sx={{
-                  textAlign: "center",
+                  position: "relative",
+                  height: "40px", // Altura del icono 
                   width: "100%",
                   display: "flex",
-                  flexDirection: "column",
                   alignItems: "center",
-                  marginTop: 1,
+                  justifyContent: "center",
                 }}>
-                  {fechaTiempos[1] && (
-                    <>
+                  {/* Contenedor fecha superior */}
+                  <Box sx={{
+                    position: "absolute",
+                    bottom: "100%", 
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "auto",
+                    textAlign: "center",
+                    marginBottom: "8px",
+                    whiteSpace: "nowrap",
+                  }}>
+                    {fechaTiempos[0] && (
                       <Typography
                         variant="caption"
                         sx={{
-                          display: "block",
+                          display: "inline-block",
                           color: "text.primary",
                           fontSize: "0.8rem",
                           fontWeight: 600,
@@ -1650,32 +1639,72 @@ export function ListadoSolicitud() {
                           padding: "2px 6px",
                           borderRadius: "4px",
 
+
                         }}
                       >
-                        {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        {formatDateTime(fechaTiempos[0].FechaSistema)}
                       </Typography>
-                      {/* Tiempo transcurrido */}
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: "block",
-                          color: "#2d3689",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          border: "1px solid #2d3689",
-                          backgroundColor: "#e8eaf6",
-                          padding: "1px 6px",
-                          borderRadius: "12px",
-                          marginTop: "2px",
-                        }}
-                      >
-                        {calcularTiempoTranscurrido(
-                          fechaTiempos[0]?.FechaSistema,
-                          fechaTiempos[1]?.FechaSistema
-                        )}
-                      </Typography>
-                    </>
-                  )}
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}>
+                    <PendingActionsIcon sx={{ color: "#2d3689", fontSize: "1.2rem" }} />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box sx={{
+                    position: "absolute",
+                    top: "100%", 
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "auto",
+                    textAlign: "center",
+                    marginTop: "8px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                  }}>
+                    {fechaTiempos[1] && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.8rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos[0]?.FechaSistema,
+                            fechaTiempos[1]?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
                 </Box>
                 <TimelineConnector />
               </TimelineSeparator>
@@ -1683,7 +1712,7 @@ export function ListadoSolicitud() {
 
             <TimelineItem>
               <TimelineSeparator>
-                <TimelineDot sx={{ mx: "auto" }}>
+                <TimelineDot>
                   <FolderIcon sx={{ color: "#6C757D" }} />
                 </TimelineDot>
                 <TimelineConnector />
@@ -1692,7 +1721,7 @@ export function ListadoSolicitud() {
 
             <TimelineItem>
               <TimelineSeparator>
-                <TimelineDot sx={{ mx: "auto" }}>
+                <TimelineDot>
                   <PhoneInTalkIcon sx={{ color: "#6C757D" }} />
                 </TimelineDot>
                 <TimelineConnector />
@@ -1701,7 +1730,7 @@ export function ListadoSolicitud() {
 
             <TimelineItem>
               <TimelineSeparator>
-                <TimelineDot sx={{ mx: "auto" }}>
+                <TimelineDot>
                   <StoreIcon sx={{ color: "gray" }} />
                 </TimelineDot>
                 <TimelineConnector />
@@ -1710,7 +1739,7 @@ export function ListadoSolicitud() {
 
             <TimelineItem>
               <TimelineSeparator>
-                <TimelineDot sx={{ mx: "auto" }}>
+                <TimelineDot>
                   <HouseIcon sx={{ color: "gray" }} />
                 </TimelineDot>
                 <TimelineConnector />
@@ -1719,7 +1748,7 @@ export function ListadoSolicitud() {
 
             <TimelineItem>
               <TimelineSeparator>
-                <TimelineDot sx={{ mx: "auto" }}>
+                <TimelineDot>
                   <PersonIcon sx={{ color: "#6C757D" }} />
                 </TimelineDot>
               </TimelineSeparator>
