@@ -149,8 +149,11 @@ export function ListadoSolicitud() {
   const [previewUrl, setPreviewUrl] = useState(null);
 
 
+
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
+
+  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
@@ -183,20 +186,29 @@ export function ListadoSolicitud() {
       );
 
       if (fileUploadResponse) {
-        setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
+        setUrlCloudstorage(fileUploadResponse.url); // Guardar URL del archivo subido
 
         // 6. Actualizar la solicitud con la URL de la foto
         const updatedData = {
-          Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
+          Foto: fileUploadResponse.url, // Usamos la URL obtenida del archivo subido
         };
+
         const updatedSolicitud = await fetchActualizaSolicitud(selectedRow.id, updatedData);
         setUrlCloudstorage()
+
       }
+      fetchSolicitudes();
 
 
       // Si deseas refrescar la imagen desde la URL real del servidor, podrías usar:
-      alert("Imagen subida exitosamente");
+      // setPreviewUrl(APIURL.getImagenURL(res.nombreArchivo));
+      handleCloseDialog();
+      setFileToUpload(null);
 
+
+      enqueueSnackbar("foto subida correctamente", {
+        variant: "success",
+      });
     } catch (error) {
       alert(error.message);
     }
@@ -204,17 +216,18 @@ export function ListadoSolicitud() {
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
     try {
-      const url = APIURL.putUpdatesolicitud(idSolicitud);  // URL para actualizar la solicitud
+
+      const url = APIURL.putUpdatesolicitud(idSolicitud); // URL para actualizar la solicitud
       const response = await axios.put(url, data, {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
       console.log("Solicitud actualizada con éxito:", response.data);
-      return response.data;  // Retornar datos actualizados si es necesario
+      return response.data; // Retornar datos actualizados si es necesario
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error.message);
-      throw error;  // Re-lanzar error para manejarlo más tarde
+      throw error; // Re-lanzar error para manejarlo más tarde
     }
   };
 
@@ -373,6 +386,7 @@ export function ListadoSolicitud() {
     }
   };
 
+
   const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
@@ -391,6 +405,7 @@ export function ListadoSolicitud() {
       console.error("Error fetching tiemposolicitudesweb data:", error);
     }
   };
+
 
   const [fechaTiempos, setfechaTiempos] = useState([]);
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
@@ -450,6 +465,7 @@ export function ListadoSolicitud() {
     }
   };
 
+
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
   const handleOpenModalVerificacion = async (data, tipo) => {
@@ -508,7 +524,42 @@ export function ListadoSolicitud() {
     }
   };
 
+  /// variable y useffect para que se stere el nombre de usuario
 
+  const [selectDeshabilitado, setSelectDeshabilitado] = useState(false);
+
+  /*
+  useEffect(() => {
+    if (userData?.Nombre && analistas?.length > 0) {
+      const analistaCoincidente = analistas.find((a) => {
+        const nombreAnalista = a.Nombre?.toLowerCase().trim();
+        const nombreUser = userData.Nombre?.toLowerCase().trim();
+        return nombreAnalista === nombreUser;
+      });
+  
+      if (analistaCoincidente) {
+        setAnalistaSelected(analistaCoincidente.idUsuario);
+      }
+    }
+  }, [userData?.Nombre, analistas]);
+  */
+
+  useEffect(() => {
+    if (userData?.Nombre && analistas?.length > 0) {
+      const analistaCoincidente = analistas.find((a) => {
+        const nombreAnalista = a.Nombre?.toLowerCase().trim();
+        const nombreUser = userData.Nombre?.toLowerCase().trim();
+        return nombreAnalista === nombreUser;
+      });
+
+      if (analistaCoincidente) {
+        setAnalistaSelected(analistaCoincidente.idUsuario);
+        setSelectDeshabilitado(true); // 👈 desactiva edición
+      } else {
+        setSelectDeshabilitado(false); // por si no hay coincidencia
+      }
+    }
+  }, [userData?.Nombre, analistas]);
 
   // Obtener bodegas
   const fetchBodega = async () => {
@@ -632,8 +683,6 @@ export function ListadoSolicitud() {
       default:
         return <HomeIcon sx={{ color: "gray" }} />;
 
-
-    }
   };
 
   const getIconLaboral = (estadoId) => {
@@ -646,7 +695,6 @@ export function ListadoSolicitud() {
         return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       default:
         return <StoreIcon sx={{ color: "gray" }} />;
-
 
     }
   };
@@ -667,6 +715,14 @@ export function ListadoSolicitud() {
 
     return condicionesBase && verificacionDomicilioOk && verificacionLaboralOk;
   };
+
+
+  /* idEstadoVerificacionDocumental	Nombre
+1	PROCESO
+2	REVISIÓN
+3	CORRECIÓN
+4	APROBACION
+5	RECHAZAR */
 
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
   // Obtener tipo de consulta
@@ -831,7 +887,8 @@ export function ListadoSolicitud() {
               Domicilio: item.TerrenoDomicilio,
               Laboral: item.TerrenoLaboral,
               CodigoDactilar: item.CodDactilar,
-              idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio
+              idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio,
+              idAnalista: item.idAnalista,
             };
           })
         );
@@ -1052,11 +1109,12 @@ export function ListadoSolicitud() {
             value={analistaSelected}
             onChange={handleAnalistaChange}
             label="Analista"
+            disabled={selectDeshabilitado} //  solo si hubo match
           >
             <MenuItem value="todos">Todos</MenuItem>
             {analistas.map((vendedor) => (
               <MenuItem key={vendedor.idUsuario} value={vendedor.idUsuario}>
-                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+                {vendedor.Nombre?.trim() || "No disponible"}
               </MenuItem>
             ))}
           </Select>
@@ -1153,6 +1211,10 @@ export function ListadoSolicitud() {
                 </TableCell>
                 <TableCell align="center" sx={{ fontWeight: "bold" }}>
                   Laborales
+                </TableCell>
+
+                <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                  Analista
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -1416,14 +1478,13 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               estaDeshabilitado(data) ||
-                                verificacionSolicitud(data) || data.Laboral === false
+                              verificacionSolicitud(data) ||
+                              data.Laboral === false
                                 ? 0.1
                                 : 1,
-
                           }}
                         >
                           {getIconLaboral(data.idEstadoVerificacionTerrena)}
-
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
@@ -1455,6 +1516,17 @@ export function ListadoSolicitud() {
                         estadoColores={estadoColores}
                       />
                     </div>
+                  </TableCell>
+
+                  <TableCell align="center">
+                    {data.idAnalista ? (
+                      <span>
+                        {analistas.find((a) => a.idUsuario === data.idAnalista)
+                          ?.Nombre || "No disponible"}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500">Sin asignar</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -1685,42 +1757,68 @@ export function ListadoSolicitud() {
         <DialogContent dividers>
           {selectedRow && (
             <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-              <div className="w-64 h-64 flex flex-col justify-center items-center border-2 border-dashed border-gray-400 rounded-md text-center text-sm text-gray-500 p-4">
-                {selectedRow.imagen === "prueba" ? (
-                  <>
-                    <p className="mb-2">No hay imagen disponible</p>
-                  </>
-                ) : (
-                  <img
-                    src={selectedRow.imagen}
-                    alt="Vista previa"
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                )}
 
-                <label
-                  htmlFor="upload-image"
-                  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-4 py-2 mt-2 cursor-pointer"
-                >
-                  Seleccionar archivo
-                  <input
-                    id="upload-image"
-                    type="file"
-                    className="hidden"
-                    accept="image/png,image/jpeg"
-                    onChange={handleFileChange}
-                  />
-                </label>
 
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  className="mt-2 text-xs font-semibold"
-                  onClick={handleUploadClick}
-                  disabled={!fileToUpload}
-                >
-                  SUBIR FOTO
-                </Button>
+              <div className="w-64 flex flex-col items-center space-y-4">
+                {/* Contenedor de la imagen */}
+                <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
+                  {!previewUrl &&
+                  (!selectedRow.imagen || selectedRow.imagen === "prueba") ? (
+                    <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-24 w-24 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                    </div>
+                  ) : (
+                    <img
+                      src={previewUrl || selectedRow.imagen}
+                      alt="Foto del cliente"
+                      className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                    />
+                  )}
+                </div>
+
+                {/* Botones debajo de la imagen */}
+                <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
+                  {/* Botón seleccionar imagen */}
+                  <label
+                    htmlFor="upload-image"
+                    className="flex-1 w-full md:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 cursor-pointer"
+                  >
+                    Seleccionar imagen
+                    <input
+                      id="upload-image"
+                      type="file"
+                      className="hidden"
+                      accept="image/png,image/jpeg"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+
+                  {/* Botón subir imagen */}
+                  <button
+                    onClick={handleUploadClick}
+                    disabled={!fileToUpload}
+                    className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${
+                      fileToUpload
+                        ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    Subir imagen
+                  </button>
+                </div>
               </div>
 
               <div className="md:w-2/3">
@@ -1811,20 +1909,25 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-          {selectedRow && puedeAprobar(selectedRow) && (
-            <Button
-              onClick={() => {
-                setCedula(selectedRow?.cedula);
-                setDactilar(selectedRow?.CodigoDactilar);
-                setOpenRegistroCivil(true);
-              }}
-              color="primary"
-              className="text-base font-semibold"
-            >
-              Aprobar
-            </Button>
-          )}
 
+
+
+          {selectedRow &&
+            selectedRow.imagen &&
+            selectedRow.imagen !== "prueba" &&
+            puedeAprobar(selectedRow) && (
+              <Button
+                onClick={() => {
+                  setCedula(selectedRow?.cedula);
+                  setDactilar(selectedRow?.CodigoDactilar);
+                  setOpenRegistroCivil(true);
+                }}
+                color="primary"
+                className="text-base font-semibold"
+              >
+                Aprobar
+              </Button>
+            )}
         </DialogActions>
       </Dialog>
 
@@ -1918,7 +2021,6 @@ export function ListadoSolicitud() {
           }}
         />
       </Dialog>
-
     </div>
   );
 }
