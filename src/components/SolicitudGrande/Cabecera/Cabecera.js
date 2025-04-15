@@ -1082,6 +1082,7 @@ export function Cabecera() {
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
 
+
         if (clientInfo?.data.Laboral=== 0)
         { if (!coordenadas.exists || coordenadas.count === 0) {
           enqueueSnackbar(

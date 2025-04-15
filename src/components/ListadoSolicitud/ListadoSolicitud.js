@@ -1,3 +1,4 @@
+// Listado Solicitud 2
 import React, { useState, useEffect, use } from "react";
 import {
   Table,
@@ -32,7 +33,7 @@ import {
 } from "@mui/lab";
 import { FaCheckCircle } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import { APIURL } from "../../configApi/apiConfig";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
@@ -85,6 +86,9 @@ import { set } from "react-hook-form";
 import { Api } from "@mui/icons-material";
 import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
+import { Loader } from "../Utils/Loader/Loader";
+
+import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
 export function ListadoSolicitud() {
   const {
@@ -150,6 +154,103 @@ export function ListadoSolicitud() {
 
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
+
+  const [resultadoVerificacion, setResultadoVerificacion] = useState([]);
+  const [loadingVerificacion, setLoadingVerificacion] = useState(false);
+
+  const [openCameraModal, setOpenCameraModal] = useState(false);
+  const [imagenCapturada, setImagenCapturada] = useState(null);
+
+  const fetchImagenRegistroCivil = async (cedula, dactilar) => {
+    try {
+      const token = localStorage.getItem("token");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      // Intentar GET primero
+      try {
+        console.log();
+        const getResponse = await axios.get(`dactilar/${cedula}`, config);
+        if (getResponse.data.statusCode === 200 && getResponse.data.data) {
+          return getResponse.data.data.FOTO;
+        }
+      } catch (err) {
+        if (err.response && err.response.status === 500) {
+          // Si falla GET, intentar POST
+          const postResponse = await axios.post(
+            "dactilar/consulta",
+            { cedula, dactilar },
+            config
+          );
+          if (postResponse.data.data) {
+            return postResponse.data.data.FOTO;
+          }
+        }
+        throw new Error("No se pudo obtener imagen del Registro Civil.");
+      }
+    } catch (error) {
+      enqueueSnackbar("Error al obtener la imagen del Registro Civil.", {
+        variant: "error",
+      });
+      console.error(error);
+      return null;
+    }
+  };
+
+  const handleVerificarIdentidad = async (imagenSubida, fotoRegistroCivil) => {
+    try {
+      setLoadingVerificacion(true);
+      if (!imagenSubida || !fotoRegistroCivil) {
+        enqueueSnackbar("Faltan imágenes para comparar.", { variant: "error" });
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
+      const body = {
+        image1_url: imagenSubida,
+        image2_base64: fotoRegistroCivil,
+      };
+
+      const response = await axios.post(
+        APIURL.postCompareFaces(),
+        body,
+        config
+      );
+      const { verified, distance } = response.data;
+      setResultadoVerificacion(response.data);
+      setOpenRegistroCivil(true);
+
+      if (verified) {
+        await patchSolicitud(selectedRow?.id, 2);
+        setView(false);
+        enqueueSnackbar("Identidad verificada correctamente.", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(
+          `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
+          {
+            variant: "error",
+          }
+        );
+      }
+    } catch (err) {
+      console.error("Error durante la verificación facial:", err);
+      enqueueSnackbar("Error durante la verificación facial.", {
+        variant: "error",
+      });
+    } finally {
+      setLoadingVerificacion(false);
+    }
+  };
+
+
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
     const file = event.target.files?.[0];
@@ -193,11 +294,13 @@ export function ListadoSolicitud() {
           updatedData
         );
 
+
         // Actualiza visualmente la imagen del selectedRow directamente
 setSelectedRow((prevRow) => ({
   ...prevRow,
   imagen: fileUploadResponse.url, // Actualiza el campo de imagen
 }));
+
         setUrlCloudstorage();
       }
       fetchSolicitudes();
@@ -1004,9 +1107,9 @@ const DomicilioLaboralMap = {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
         });
-        navigate("/ListadoSolicitud", {
-          replace: true,
-        });
+        // navigate("/ListadoSolicitud", {
+        //   replace: true,
+        // });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
@@ -1302,6 +1405,7 @@ const DomicilioLaboralMap = {
         </button>
       </div>
 
+
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
 
        {/* Busqueda por cedula */}
@@ -1572,6 +1676,7 @@ const DomicilioLaboralMap = {
                     {getPhoneIconByEstado(data.idEstadoVerificacionTelefonica)}
                   </IconButton>
 
+
                   <Tooltip title="Ver historial" arrow placement="top">
                     <span
                       style={{
@@ -1622,6 +1727,7 @@ const DomicilioLaboralMap = {
                         style={{ cursor: "pointer", color: '#64748b' }}
                         fontSize="small"
                       />
+
                     </span>
                   </Tooltip>
                 </div>
@@ -1656,6 +1762,7 @@ const DomicilioLaboralMap = {
                         onClick={(event) => handlePopoverOpen(event, 4, data)}
                         style={{ cursor: "pointer", color: '#64748b' }}
                         fontSize="small"
+
                       />
                     </span>
                   </Tooltip>
@@ -1948,7 +2055,7 @@ const DomicilioLaboralMap = {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
                   {/* Botón seleccionar imagen */}
-                  <label
+                  {/* <label
                     htmlFor="upload-image"
                     className="flex-1 w-full md:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 cursor-pointer"
                   >
@@ -1960,9 +2067,16 @@ const DomicilioLaboralMap = {
                       accept="image/png,image/jpeg"
                       onChange={handleFileChange}
                     />
-                  </label>
+                  </label> */}
 
                   {/* Botón subir imagen */}
+                  <Button
+                    onClick={() => setOpenCameraModal(true)}
+                    onChange={handleFileChange}
+                  >
+                    Tomar Foto
+                  </Button>
+
                   <button
                     onClick={handleUploadClick}
                     disabled={!fileToUpload}
@@ -1976,6 +2090,34 @@ const DomicilioLaboralMap = {
                   </button>
                 </div>
               </div>
+
+              <Dialog
+                open={openCameraModal}
+                onClose={() => setOpenCameraModal(false)}
+                maxWidth="sm"
+                fullWidth
+              >
+                <DialogTitle>Tomar Foto con Cámara</DialogTitle>
+                <DialogContent>
+                  <CapturarCamara
+                    onCapture={(imgBase64) => {
+                      setImagenCapturada(imgBase64);
+                      setPreviewUrl(imgBase64);
+                      setOpenCameraModal(false);
+
+                      // Convertir base64 a objeto File para permitir subir
+                      const blob = fetch(imgBase64)
+                        .then((res) => res.blob())
+                        .then((blobData) => {
+                          const file = new File([blobData], "captura.jpg", {
+                            type: "image/jpeg",
+                          });
+                          setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
+                        });
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
 
               <div className="md:w-2/3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
@@ -2071,10 +2213,19 @@ const DomicilioLaboralMap = {
             selectedRow.imagen !== "prueba" &&
             puedeAprobar(selectedRow) && (
               <Button
-                onClick={() => {
+                onClick={async () => {
                   setCedula(selectedRow?.cedula);
                   setDactilar(selectedRow?.CodigoDactilar);
-                  setOpenRegistroCivil(true);
+                  const dataFOTO = await fetchImagenRegistroCivil(
+                    selectedRow?.cedula,
+                    selectedRow?.CodigoDactilar
+                  );
+                  if (dataFOTO) {
+                    await handleVerificarIdentidad(
+                      selectedRow.imagen,
+                      dataFOTO
+                    );
+                  }
                 }}
                 color="primary"
                 className="text-base font-semibold"
@@ -2083,6 +2234,7 @@ const DomicilioLaboralMap = {
               </Button>
             )}
         </DialogActions>
+        {loadingVerificacion && <Loader />}
       </Dialog>
 
       {totalPages > 1 && (
@@ -2177,6 +2329,7 @@ const DomicilioLaboralMap = {
 
             setOpenRegistroCivil(false);
           }}
+          resultadoVerificacion={resultadoVerificacion}
         />
       </Dialog>
     </div>
