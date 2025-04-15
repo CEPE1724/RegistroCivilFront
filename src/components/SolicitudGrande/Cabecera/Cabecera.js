@@ -72,6 +72,7 @@ export function Cabecera() {
   const datosTrabajo = useRef(); // Referencia para el componente Trabajo
   const datosNegocio = useRef(); // Referencia para el componente Negocio
   const datosInformacionCredito = useRef(); // Referencia para el componente InformacionCredito
+  const factoresCreditoRef = useRef(null); // Referencia para el componente FactoresCredito
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
 
@@ -187,9 +188,6 @@ export function Cabecera() {
         valid = false;
       }
     }
-
-    // Si idNacionalidad no es 54, no validamos los campos idProvinciaNacimiento e idCantonNacimiento
-    // Si fuera necesario, aquí podrías agregar alguna validación alternativa para otros valores de idNacionalidad
 
     // Validaciones para otros campos
     if (
@@ -795,7 +793,7 @@ export function Cabecera() {
         ) : null;
       case "Factores de Crédito":
         return (
-          <FactoresCredito ref={datosInformacionCredito} data={clienteData} />
+          <FactoresCredito ref={factoresCreditoRef} data={clienteData} />
         );
       case "Enviar a Verificar": {
         /*} case "Verificación":
@@ -1114,6 +1112,47 @@ export function Cabecera() {
         setActiveTab("Domicilio");
       }
     }
+    if (activeTab === "Factores de Crédito") {
+      try {
+        if (!factoresCreditoRef?.current) {
+          console.error("Referencia a FactoresCredito no está disponible");
+          enqueueSnackbar("Error interno: formulario no disponible", {
+            variant: "error",
+          });
+          return;
+        }
+        // Espera para asegurar que el componente esté montado
+        await new Promise(resolve => setTimeout(resolve, 50));
+        // Verifica nuevamente después del timeout
+        if (!factoresCreditoRef?.current) {
+          throw new Error("Referencia al formulario sigue sin estar disponible");
+        }
+        tipoDato = 8;
+        // Valida el formulario
+        if (!factoresCreditoRef.current.validateForm()) {
+          enqueueSnackbar("Por favor complete todos los campos requeridos", {
+            variant: "error",
+          });
+          return;
+        }
+  
+        // Obtiene los datos
+        const formData = factoresCreditoRef.current.getFormData();  
+        // Envía a la API
+        await fetchCuotaCupo(formData);
+        
+        enqueueSnackbar("Datos de crédito guardados correctamente", {
+          variant: "success",
+        });
+        
+        isValidSumit = true;
+      } catch (error) {
+        console.error("Error detallado al guardar factores de crédito:", error);
+        enqueueSnackbar(`Error al guardar: ${error.message}`, {
+          variant: "error",
+        });
+      }
+    }     
     if (isValidSumit) {
       fetchInsertarDatos(tipoDato);
     } // Llamar a la función para insertar datos
@@ -1410,6 +1449,28 @@ export function Cabecera() {
         variant: "error",
       });
       console.error("Error al guardar los datos de nacimiento", error);
+    }
+  };
+
+  const fetchCuotaCupo = async (formData) => {
+    try {
+      if (!clienteData?.idWeb_SolicitudGrande) {
+        throw new Error("ID de solicitud no disponible");
+      }
+      const cuotaCupo = {
+        CuotaAsignada: Number(formData.cuotaAsignada),
+        Cupo: Number(formData.cupo)
+      };
+      const url = APIURL.patch_CuotayCupo(clienteData.idWeb_SolicitudGrande);
+      const response = await axios.patch(url,cuotaCupo, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener la cuota y el cupo", error);
+      return null;
     }
   };
 
