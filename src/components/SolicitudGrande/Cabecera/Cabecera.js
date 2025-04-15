@@ -1064,18 +1064,19 @@ export function Cabecera() {
 
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-        if (!coordenadas.exists || coordenadas.count === 0) {
-          enqueueSnackbar(
-            "Para guardar datos Dependiente, primero debes registrar la ubicación.",
-            { variant: "error" }
-          );
+		console.log(coordenadas)
+        // if (!coordenadas.exists || coordenadas.count === 0) {
+        //   enqueueSnackbar(
+        //     "Para guardar datos Dependiente, primero debes registrar la ubicación.",
+        //     { variant: "error" }
+        //   );
 
-          if (datosTrabajo.current.setUbicacionError) {
-            datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
-          }
+        //   if (datosTrabajo.current.setUbicacionError) {
+        //     datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
+        //   }
 
-          return;
-        }
+        //   return;
+        // }
         if (datosTrabajo.current.setUbicacionError) {
           datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
         }

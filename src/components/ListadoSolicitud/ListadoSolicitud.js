@@ -1,3 +1,4 @@
+// Listado Solicitud 2
 import React, { useState, useEffect, use } from "react";
 import {
   Table,
@@ -32,7 +33,7 @@ import {
 } from "@mui/lab";
 import { FaCheckCircle } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import { APIURL } from "../../configApi/apiConfig";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
@@ -85,6 +86,9 @@ import { set } from "react-hook-form";
 import { Api } from "@mui/icons-material";
 import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
+import { Loader } from "../Utils/Loader/Loader";
+
+import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
 export function ListadoSolicitud() {
   const {
@@ -148,11 +152,102 @@ export function ListadoSolicitud() {
   const [fileToUpload, setFileToUpload] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-
-
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
+  const [resultadoVerificacion, setResultadoVerificacion] = useState([]);
+  const [loadingVerificacion, setLoadingVerificacion] = useState(false);
 
+  const [openCameraModal, setOpenCameraModal] = useState(false);
+  const [imagenCapturada, setImagenCapturada] = useState(null);
+
+  const fetchImagenRegistroCivil = async (cedula, dactilar) => {
+    try {
+      const token = localStorage.getItem("token");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      // Intentar GET primero
+      try {
+        console.log();
+        const getResponse = await axios.get(`dactilar/${cedula}`, config);
+        if (getResponse.data.statusCode === 200 && getResponse.data.data) {
+          return getResponse.data.data.FOTO;
+        }
+      } catch (err) {
+        if (err.response && err.response.status === 500) {
+          // Si falla GET, intentar POST
+          const postResponse = await axios.post(
+            "dactilar/consulta",
+            { cedula, dactilar },
+            config
+          );
+          if (postResponse.data.data) {
+            return postResponse.data.data.FOTO;
+          }
+        }
+        throw new Error("No se pudo obtener imagen del Registro Civil.");
+      }
+    } catch (error) {
+      enqueueSnackbar("Error al obtener la imagen del Registro Civil.", {
+        variant: "error",
+      });
+      console.error(error);
+      return null;
+    }
+  };
+
+  const handleVerificarIdentidad = async (imagenSubida, fotoRegistroCivil) => {
+    try {
+      setLoadingVerificacion(true);
+      if (!imagenSubida || !fotoRegistroCivil) {
+        enqueueSnackbar("Faltan imágenes para comparar.", { variant: "error" });
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
+      const body = {
+        image1_url: imagenSubida,
+        image2_base64: fotoRegistroCivil,
+      };
+
+      const response = await axios.post(
+        APIURL.postCompareFaces(),
+        body,
+        config
+      );
+      const { verified, distance } = response.data;
+      setResultadoVerificacion(response.data);
+      setOpenRegistroCivil(true);
+
+      if (verified) {
+        await patchSolicitud(selectedRow?.id, 2);
+        setView(false);
+        enqueueSnackbar("Identidad verificada correctamente.", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(
+          `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
+          {
+            variant: "error",
+          }
+        );
+      }
+    } catch (err) {
+      console.error("Error durante la verificación facial:", err);
+      enqueueSnackbar("Error durante la verificación facial.", {
+        variant: "error",
+      });
+    } finally {
+      setLoadingVerificacion(false);
+    }
+  };
 
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
@@ -192,18 +287,18 @@ export function ListadoSolicitud() {
           Foto: fileUploadResponse.url, // Usamos la URL obtenida del archivo subido
         };
 
-        const updatedSolicitud = await fetchActualizaSolicitud(selectedRow.id, updatedData);
-        setUrlCloudstorage()
-
+        const updatedSolicitud = await fetchActualizaSolicitud(
+          selectedRow.id,
+          updatedData
+        );
+        setUrlCloudstorage();
       }
       fetchSolicitudes();
-
 
       // Si deseas refrescar la imagen desde la URL real del servidor, podrías usar:
       // setPreviewUrl(APIURL.getImagenURL(res.nombreArchivo));
       handleCloseDialog();
       setFileToUpload(null);
-
 
       enqueueSnackbar("foto subida correctamente", {
         variant: "success",
@@ -215,7 +310,6 @@ export function ListadoSolicitud() {
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
     try {
-
       const url = APIURL.putUpdatesolicitud(idSolicitud); // URL para actualizar la solicitud
       const response = await axios.put(url, data, {
         headers: {
@@ -385,7 +479,6 @@ export function ListadoSolicitud() {
     }
   };
 
-
   const fetchtiemposolicitudesweb = async (idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
@@ -405,7 +498,6 @@ export function ListadoSolicitud() {
     }
   };
 
-
   const [fechaTiempos, setfechaTiempos] = useState([]);
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
@@ -418,7 +510,6 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const data = response.data;
         setfechaTiempos(data);
-
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -429,12 +520,12 @@ export function ListadoSolicitud() {
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -452,7 +543,9 @@ export function ListadoSolicitud() {
 
     // Convertir milisegundos a días, horas, minutos
     const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-    const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const horas = Math.floor(
+      (diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
 
     if (dias > 0) {
@@ -463,7 +556,6 @@ export function ListadoSolicitud() {
       return `${minutos}min`;
     }
   };
-
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
@@ -480,7 +572,6 @@ export function ListadoSolicitud() {
       });
       if (response.status !== 200) {
         throw new Error("Error al obtener los IDs terrenas");
-
       }
 
       const idsTerrenas = response.data;
@@ -681,8 +772,7 @@ export function ListadoSolicitud() {
         return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       default:
         return <HomeIcon sx={{ color: "gray" }} />;
-
-    };
+    }
   };
 
   const getIconLaboral = (estadoId) => {
@@ -695,7 +785,6 @@ export function ListadoSolicitud() {
         return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       default:
         return <StoreIcon sx={{ color: "gray" }} />;
-
     }
   };
 
@@ -715,7 +804,6 @@ export function ListadoSolicitud() {
 
     return condicionesBase && verificacionDomicilioOk && verificacionLaboralOk;
   };
-
 
   /* idEstadoVerificacionDocumental	Nombre
 1	PROCESO
@@ -860,14 +948,14 @@ export function ListadoSolicitud() {
                 item.Estado === 1
                   ? "PRE-APROBADO"
                   : item.Estado === 2
-                    ? "APROBADO"
-                    : item.Estado === 3
-                      ? "ANULADO"
-                      : item.Estado === 4
-                        ? "RECHAZADO"
-                        : item.Estado === 5
-                          ? "NO APLICA"
-                          : "Desconocido",
+                  ? "APROBADO"
+                  : item.Estado === 3
+                  ? "ANULADO"
+                  : item.Estado === 4
+                  ? "RECHAZADO"
+                  : item.Estado === 5
+                  ? "NO APLICA"
+                  : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -914,8 +1002,9 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
-            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
+            vendedor.ApellidoPaterno || ""
+          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -948,10 +1037,9 @@ export function ListadoSolicitud() {
     }
   }, [data]);
 
+  //// patch solicitud cuando se aprueba la solicitud de credito
 
-  //// patch solicitud cuando se aprueba la solicitud de credito 
-
-  const patchSolicitud = async (idSolicitud , numero) => {
+  const patchSolicitud = async (idSolicitud, numero) => {
     try {
       const response = await axios.patch(
         APIURL.update_solicitud(idSolicitud),
@@ -969,9 +1057,9 @@ export function ListadoSolicitud() {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
         });
-        navigate("/ListadoSolicitud", {
-          replace: true,
-        });
+        // navigate("/ListadoSolicitud", {
+        //   replace: true,
+        // });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
@@ -982,7 +1070,6 @@ export function ListadoSolicitud() {
   };
 
   const handledocumentos = (registro) => {
-
     if (registro.idEstadoVerificacionDocumental == 4) {
       navigate("/gestorDocumentos", {
         replace: true,
@@ -1071,7 +1158,6 @@ export function ListadoSolicitud() {
 
     setOpenLocationModal((prevState) => !prevState);
   };
-
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -1341,7 +1427,7 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               estaDeshabilitado(data) ||
-                                verificacionSolicitud(data)
+                              verificacionSolicitud(data)
                                 ? 0.5
                                 : 1,
                           }}
@@ -1395,8 +1481,8 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               data.Estado === 5 ||
-                                estaDeshabilitado(data) ||
-                                verificacionSolicitud(data)
+                              estaDeshabilitado(data) ||
+                              verificacionSolicitud(data)
                                 ? 0.5
                                 : 1,
                           }}
@@ -1452,14 +1538,13 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               data.Estado === 5 ||
-                                estaDeshabilitado(data) ||
-                                verificacionSolicitud(data)
+                              estaDeshabilitado(data) ||
+                              verificacionSolicitud(data)
                                 ? 0.5
                                 : 1,
                           }}
                         >
                           {getIconDomicilio(data.idEstadoVerificacionDomicilio)}
-
                         </IconButton>
 
                         {/* InfoIcon al lado del IconButton */}
@@ -1508,8 +1593,8 @@ export function ListadoSolicitud() {
                           sx={{
                             opacity:
                               estaDeshabilitado(data) ||
-                                verificacionSolicitud(data) ||
-                                data.Laboral === false
+                              verificacionSolicitud(data) ||
+                              data.Laboral === false
                                 ? 0.1
                                 : 1,
                           }}
@@ -1618,45 +1703,52 @@ export function ListadoSolicitud() {
                 zIndex: 2,
                 boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                 margin: 0,
-              }, "& .MuiTimelineConnector-root": {
+              },
+              "& .MuiTimelineConnector-root": {
                 position: "absolute",
                 top: "50%",
                 left: "50%",
                 transform: "translateX(-50%)",
                 height: "2px",
                 width: "calc(100% - 32px)",
-                backgroundColor: "transparent"
-              }
+                backgroundColor: "transparent",
+              },
             }}
           >
             {/* Primer ítem con fechas */}
             <TimelineItem>
-              <TimelineSeparator sx={{
-                justifyContent: "center",
-                alignItems: "center",
-                position: "relative",
-                height: "100%",
-              }}>
-                {/* Estructura con posicionamiento absoluto para centrar el icono y permitir fechas arriba/abajo */}
-                <Box sx={{
-                  position: "relative",
-                  height: "40px", // Altura del icono 
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
+              <TimelineSeparator
+                sx={{
                   justifyContent: "center",
-                }}>
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                {/* Estructura con posicionamiento absoluto para centrar el icono y permitir fechas arriba/abajo */}
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", // Altura del icono
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   {/* Contenedor fecha superior */}
-                  <Box sx={{
-                    position: "absolute",
-                    bottom: "100%", 
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: "auto",
-                    textAlign: "center",
-                    marginBottom: "8px",
-                    whiteSpace: "nowrap",
-                  }}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {fechaTiempos[0] && (
                       <Typography
                         variant="caption"
@@ -1668,8 +1760,6 @@ export function ListadoSolicitud() {
                           backgroundColor: "#f0f4f8",
                           padding: "2px 6px",
                           borderRadius: "4px",
-
-
                         }}
                       >
                         {formatDateTime(fechaTiempos[0].FechaSistema)}
@@ -1678,23 +1768,29 @@ export function ListadoSolicitud() {
                   </Box>
 
                   {/* Icono */}
-                  <TimelineDot sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}>
-                    <PendingActionsIcon sx={{ color: "#2d3689", fontSize: "1.2rem" }} />
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <PendingActionsIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
                   </TimelineDot>
 
                   {/* Contenedor fecha inferior */}
-                  <Box sx={{
-                    position: "absolute",
-                    top: "100%", 
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: "auto",
-                    textAlign: "center",
-                    marginTop: "8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
                     {fechaTiempos[1] && (
                       <>
                         <Typography
@@ -1789,13 +1885,11 @@ export function ListadoSolicitud() {
         <DialogContent dividers>
           {selectedRow && (
             <div className="flex flex-col md:flex-row md:space-x-6 gap-6">
-
-
               <div className="w-64 flex flex-col items-center space-y-4">
                 {/* Contenedor de la imagen */}
                 <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
                   {!previewUrl &&
-                    (!selectedRow.imagen || selectedRow.imagen === "prueba") ? (
+                  (!selectedRow.imagen || selectedRow.imagen === "prueba") ? (
                     <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -1824,7 +1918,7 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
                   {/* Botón seleccionar imagen */}
-                  <label
+                  {/* <label
                     htmlFor="upload-image"
                     className="flex-1 w-full md:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 cursor-pointer"
                   >
@@ -1836,21 +1930,57 @@ export function ListadoSolicitud() {
                       accept="image/png,image/jpeg"
                       onChange={handleFileChange}
                     />
-                  </label>
+                  </label> */}
 
                   {/* Botón subir imagen */}
+                  <Button
+                    onClick={() => setOpenCameraModal(true)}
+                    onChange={handleFileChange}
+                  >
+                    Tomar Foto
+                  </Button>
+
                   <button
                     onClick={handleUploadClick}
                     disabled={!fileToUpload}
-                    className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                    className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${
+                      fileToUpload
                         ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      }`}
+                    }`}
                   >
                     Subir imagen
                   </button>
                 </div>
               </div>
+
+              <Dialog
+                open={openCameraModal}
+                onClose={() => setOpenCameraModal(false)}
+                maxWidth="sm"
+                fullWidth
+              >
+                <DialogTitle>Tomar Foto con Cámara</DialogTitle>
+                <DialogContent>
+                  <CapturarCamara
+                    onCapture={(imgBase64) => {
+                      setImagenCapturada(imgBase64);
+                      setPreviewUrl(imgBase64);
+                      setOpenCameraModal(false);
+
+                      // Convertir base64 a objeto File para permitir subir
+                      const blob = fetch(imgBase64)
+                        .then((res) => res.blob())
+                        .then((blobData) => {
+                          const file = new File([blobData], "captura.jpg", {
+                            type: "image/jpeg",
+                          });
+                          setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
+                        });
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
 
               <div className="md:w-2/3">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-base leading-relaxed">
@@ -1884,18 +2014,19 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
-                        ? "text-green-500"
-                        : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${
+                        selectedRow.estado === "activo"
+                          ? "text-green-500"
+                          : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                            ? "text-gray-500"
-                            : selectedRow.estado === "aprobado"
-                              ? "text-blue-500"
-                              : selectedRow.estado === "rechazado"
-                                ? "text-red-500"
-                                : "text-gray-700"
-                        }`}
+                          ? "text-gray-500"
+                          : selectedRow.estado === "aprobado"
+                          ? "text-blue-500"
+                          : selectedRow.estado === "rechazado"
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
                     >
                       {selectedRow.estado}
                     </span>
@@ -1940,18 +2071,24 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-
-
-
           {selectedRow &&
             selectedRow.imagen &&
             selectedRow.imagen !== "prueba" &&
             puedeAprobar(selectedRow) && (
               <Button
-                onClick={() => {
+                onClick={async () => {
                   setCedula(selectedRow?.cedula);
                   setDactilar(selectedRow?.CodigoDactilar);
-                  setOpenRegistroCivil(true);
+                  const dataFOTO = await fetchImagenRegistroCivil(
+                    selectedRow?.cedula,
+                    selectedRow?.CodigoDactilar
+                  );
+                  if (dataFOTO) {
+                    await handleVerificarIdentidad(
+                      selectedRow.imagen,
+                      dataFOTO
+                    );
+                  }
                 }}
                 color="primary"
                 className="text-base font-semibold"
@@ -1960,6 +2097,7 @@ export function ListadoSolicitud() {
               </Button>
             )}
         </DialogActions>
+        {loadingVerificacion && <Loader />}
       </Dialog>
 
       {totalPages > 1 && (
@@ -2043,20 +2181,20 @@ export function ListadoSolicitud() {
           onAceptar={() => {
             // Acción al aceptar
 
-            patchSolicitud(selectedRow?.id , 2);
+            patchSolicitud(selectedRow?.id, 2);
 
             setOpenRegistroCivil(false);
           }}
           onRechazar={() => {
             // Acción al rechazar
 
-            patchSolicitud(selectedRow?.id , 4);
+            patchSolicitud(selectedRow?.id, 4);
 
             setOpenRegistroCivil(false);
           }}
+          resultadoVerificacion={resultadoVerificacion}
         />
       </Dialog>
     </div>
   );
 }
-
