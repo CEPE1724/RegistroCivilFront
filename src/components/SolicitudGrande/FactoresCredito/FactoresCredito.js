@@ -16,6 +16,39 @@ import { FaListAlt, FaMoneyBillWave, FaMoneyCheckAlt,FaCommentDots } from "react
 export const FactoresCredito = forwardRef((props, ref) => {
   const { data } = props;
   const [tipo, setTipo] = useState([]);
+  const [formData, setFormData] = useState({
+    tipoCliente: data.idTipoCliente || 0,
+    tipo: "",
+    tipoTrabajo: "",
+    cuotaAsignada: data.CuotaAsignada || 0,
+    cupo: data.Cupo || 0,
+    calificacion: "",
+    estadoSolicitud: "",
+    observaciones: "",
+  });
+  // obtener los datos del formulario
+  const getFormData = () => {
+    return {
+      cuotaAsignada: formData.cuotaAsignada,
+      cupo: formData.cupo,
+    };
+  };
+
+  // Función para validar el formulario
+  const validateForm = () => {
+    if (!formData.cuotaAsignada || formData.cuotaAsignada <= 0) return false;
+    if (!formData.cupo || formData.cupo <= 0) return false;
+    return true;
+  };
+
+  // Expone las funciones al componente padre
+  useImperativeHandle(ref, () => ({
+    getFormData: () => ({
+      cuotaAsignada: Number(formData.cuotaAsignada), 
+      cupo: Number(formData.cupo)
+    }),
+    validateForm,
+  }));
   useEffect(() => {
     fetchTipoCliente();
   }, []);
@@ -42,17 +75,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
     }
   };
 
-  const [formData, setFormData] = useState({
-    tipoCliente: data.idTipoCliente || 0,
-    tipo: "",
-    tipoTrabajo: "",
-    cuotaAsignada: data.CuotaAsignada || 0,
-
-    cupo: data.Cupo || 0,
-    calificacion: "",
-    estadoSolicitud: "",
-    observaciones: "",
-  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,6 +82,41 @@ export const FactoresCredito = forwardRef((props, ref) => {
       ...formData,
       [name]: value,
     });
+
+    if (name === "cupo" && value > 2500) {
+      enqueueSnackbar("El cupo no puede ser mayor a 2500", { variant: "error" });
+      setFormData({
+      ...formData,
+      [name]: 2500,
+      });
+      return;
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    
+    if (name === "cuotaAsignada") {
+      const numValue = Number(value);
+      
+      if (numValue < 90) {
+        enqueueSnackbar("La cuota asignada debe ser mínimo 90", { variant: "error" });
+        setFormData(prevData => ({
+          ...prevData,
+          [name]: 90,
+        }));
+        return;
+      }
+      
+      if (numValue > 850) {
+        enqueueSnackbar("La cuota asignada no puede ser mayor a 850", { variant: "error" });
+        setFormData(prevData => ({
+          ...prevData,
+          [name]: 850,
+        }));
+        return;
+      }
+    }
   };
 
   const handleSubmit = (e) => {
@@ -70,7 +127,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
       enqueueSnackbar("El tipo de actividad laboral es obligatorio", {
         variant: "error",
       });
-      return;
+      return false;
     }
 
     if (!formData.tipoCliente) {
@@ -144,9 +201,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
       return;
     }
 
-
-
-
     // Si todas las validaciones pasan, mostramos el mensaje de éxito
     enqueueSnackbar("Formulario enviado con éxito", { variant: "success" });
   };
@@ -154,6 +208,21 @@ export const FactoresCredito = forwardRef((props, ref) => {
   // Exponer la función handleSubmit al padre
   useImperativeHandle(ref, () => ({
     handleSubmit,
+    getFormData: () => ({
+      cuotaAsignada: formData.cuotaAsignada,
+      cupo: formData.cupo,
+    }),
+    validateForm: () => {
+      if (formData.cuotaAsignada === undefined || formData.cuotaAsignada <= 0) {
+        console.error("Validación fallida: cuotaAsignada inválida");
+        return false;
+      }
+      if (formData.cupo === undefined || formData.cupo <= 0) {
+        console.error("Validación fallida: cupo inválido");
+        return false;
+      }
+      return true;
+    }
   }));
 
   return (
@@ -182,9 +251,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
           </select>
         </div>
 
-
-
-
         {/* Cuota Asignada */}
         <div className="flex flex-col w-full">
           <label className="text-xs font-medium mb-1 flex items-center">
@@ -198,6 +264,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
             className="solcitudgrande-style"
             value={formData.cuotaAsignada}
             onChange={handleChange}
+            onBlur={handleBlur}
           />
         </div>
 
@@ -228,22 +295,6 @@ export const FactoresCredito = forwardRef((props, ref) => {
           </IconButton>
         </div>
       </div>
-
-      {/* 
-      <div className="flex flex-col">
-        <label className="text-xs font-medium mb-1 flex items-center">
-          <FaCommentDots className="mr-2 text-primaryBlue" />
-          Observaciones
-        </label>
-        <textarea
-          name="observaciones"
-          placeholder="Observaciones"
-          className="solcitudgrande-style w-full"
-          value={formData.observaciones}
-          onChange={handleChange}
-        />
-      </div>
-      Observaciones */}
     </div>
   );
 
