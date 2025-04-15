@@ -30,6 +30,25 @@ export function Cabecera() {
   const { data } = state || {};
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
 
+   const location = useLocation();
+        const [clientInfo, setClientInfo] = useState(null);
+        useEffect(() => {
+        if (location.state) {
+          // Si hay datos en `location.state`, los guardamos en localStorage
+          localStorage.setItem("clientInfo", JSON.stringify(location.state));
+          setClientInfo(location.state);
+        } else {
+          // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+          const savedClientInfo = localStorage.getItem("clientInfo");
+          if (savedClientInfo) {
+          setClientInfo(JSON.parse(savedClientInfo));
+          }
+        }
+        }, [location.state]);
+  
+  
+  
+
   const [activeTab, setActiveTab] = useState("Datos Cliente");
   const [fecha, setFecha] = useState(
     data?.fecha ? new Date(data.fecha).toISOString().split("T")[0] : ""
@@ -1064,7 +1083,9 @@ export function Cabecera() {
 
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-        if (!coordenadas.exists || coordenadas.count === 0) {
+
+        if (clientInfo?.data.Laboral=== 0)
+        { if (!coordenadas.exists || coordenadas.count === 0) {
           enqueueSnackbar(
             "Para guardar datos Dependiente, primero debes registrar la ubicación.",
             { variant: "error" }
@@ -1075,7 +1096,8 @@ export function Cabecera() {
           }
 
           return;
-        }
+        }}
+       
         if (datosTrabajo.current.setUbicacionError) {
           datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
         }

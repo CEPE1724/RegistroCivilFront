@@ -962,7 +962,7 @@ export function Documental({
         <div className="w-full bg-white p-6 rounded-lg shadow-lg">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-6">
-              {clientInfo.foto !== null ? (
+              {clientInfo.foto !== null && clientInfo.foto !== "prueba" ? (
                 <img
                   src={clientInfo.foto}
                   alt="Foto del cliente"
