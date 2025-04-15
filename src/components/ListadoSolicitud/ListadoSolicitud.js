@@ -154,6 +154,7 @@ export function ListadoSolicitud() {
 
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
+
   const [resultadoVerificacion, setResultadoVerificacion] = useState([]);
   const [loadingVerificacion, setLoadingVerificacion] = useState(false);
 
@@ -249,6 +250,7 @@ export function ListadoSolicitud() {
     }
   };
 
+
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
     const file = event.target.files?.[0];
@@ -291,6 +293,14 @@ export function ListadoSolicitud() {
           selectedRow.id,
           updatedData
         );
+
+
+        // Actualiza visualmente la imagen del selectedRow directamente
+setSelectedRow((prevRow) => ({
+  ...prevRow,
+  imagen: fileUploadResponse.url, // Actualiza el campo de imagen
+}));
+
         setUrlCloudstorage();
       }
       fetchSolicitudes();
@@ -346,6 +356,9 @@ export function ListadoSolicitud() {
     return data.resultado === 0;
   };
 
+  const [solicitud, setSolicitud] = useState("Todos");
+
+  /// estado solicitudes
   const estadoMap = {
     1: "PENDIENTE",
     10: "REVISIÓN",
@@ -354,12 +367,39 @@ export function ListadoSolicitud() {
     13: "RECHAZADO",
   };
 
+  const [documental, setDocumental] = useState("Todos");
   const estadoDocumentalMap = {
     1: "PROCESO",
     2: "REVISIÓN",
     3: "CORRECIÓN",
     4: "APROBACION",
   };
+
+  const [telefonica, setTelefonica] = useState("Todos");
+  const estadoTelefonicaMap = {
+    1: "NO ASIGNADO",
+    2: "ASIGNADO",
+    3: "APROBADO",
+    4: "RECHAZADO",
+  };
+
+const [domicilio , setDomicilio] = useState("Todos");
+const [laboral , setLaboral] = useState("Todos");
+
+const [nombre, setNombre] = useState("");
+const [numeroSolicitud, setNumeroSolicitud] = useState("");
+
+const DomicilioLaboralMap = {
+  1: "ASIGNADO",
+  2: "DATOS VERIFICADOR",
+  3: "RECHAZA VERIFICADOR",
+  4: "APROBADO ANALISTA",
+  5: "RECHAZA ANALISTA",
+};
+
+
+
+
 
   const estadoDeshabilitadoDocumental = (data) => {
     // Obtener el estado correspondiente al ID
@@ -387,12 +427,6 @@ export function ListadoSolicitud() {
 
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
-  };
-
-  const estadoTelefonicaMap = {
-    2: "ASIGNADO",
-    3: "APROBADO",
-    4: "RECHAZADO",
   };
 
   const estadoDeshabilitadotelefonica = (data) => {
@@ -881,6 +915,14 @@ export function ListadoSolicitud() {
     fechaFin,
     selectedVendedor,
     analistaSelected,
+    solicitud,
+    documental,
+    telefonica,
+    domicilio,
+    laboral,
+    nombre,
+    numeroSolicitud,
+    cedula,
   ]);
 
   const fetchSolicitudes = async () => {
@@ -917,6 +959,14 @@ export function ListadoSolicitud() {
           estado: estado === "todos" ? 0 : estado,
           vendedor: selectedVendedor === "todos" ? 0 : selectedVendedor,
           analista: analistaSelected === "todos" ? 0 : analistaSelected,
+          EstadoSolicitud: solicitud == "Todos" ? 0 : solicitud,
+          EstadoDocumental: documental == "Todos" ? 0 : documental,
+          EstadoTelefonica: telefonica == "Todos" ? 0 : telefonica,
+          EstadoDomicilio : domicilio == "Todos" ? 0 : domicilio,
+          EstadoLaboral : laboral == "Todos" ? 0 : laboral,
+          nombres: nombre?.trim() || undefined,
+          numeroSolicitud: numeroSolicitud?.trim() || undefined,
+          cedula: cedula?.trim() || undefined,
         },
       });
 
@@ -1142,6 +1192,8 @@ export function ListadoSolicitud() {
   const handleCloseDialog = () => {
     setView(false);
     setSelectedRow(null);
+    setPreviewUrl(null); // Limpiar imagen temporal
+  setFileToUpload(null);
   };
 
   const handleSolictud = () => {
@@ -1161,8 +1213,8 @@ export function ListadoSolicitud() {
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
-      <div className="flex gap-6 mb-4">
-        <TextField
+<div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
+<TextField
           label="Fecha Desde"
           type="date"
           variant="outlined"
@@ -1250,6 +1302,87 @@ export function ListadoSolicitud() {
             ))}
           </Select>
         </FormControl>
+      </div>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
+      
+      <FormControl size="small" fullWidth>
+          <InputLabel>Solicitud</InputLabel>
+          <Select
+            value={solicitud}
+            onChange={(e) => setSolicitud(e.target.value)}
+            label="Solicitud"
+          >
+            <MenuItem value="Todos">Todos</MenuItem>
+            {Object.entries(estadoMap).map(([key, label]) => (
+              <MenuItem key={key} value={key}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" fullWidth>
+          <InputLabel>Documental</InputLabel>
+          <Select
+            value={documental}
+            onChange={(e) => setDocumental(e.target.value)}
+            label="Documental"
+          >
+            <MenuItem value="Todos">Todos</MenuItem>
+            {Object.entries(estadoDocumentalMap).map(([key, label]) => (
+              <MenuItem key={key} value={key}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <InputLabel>Telefonica</InputLabel>
+          <Select
+            value={telefonica}
+            onChange={(e) => setTelefonica(e.target.value)}
+            label="Telefonica"
+          >
+            <MenuItem value="Todos">Todos</MenuItem>
+            {Object.entries(estadoTelefonicaMap).map(([key, label]) => (
+              <MenuItem key={key} value={key}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <InputLabel>Domicilio</InputLabel>
+          <Select
+            value={domicilio}
+            onChange={(e) => setDomicilio(e.target.value)}
+            label="Domicilio"
+          >
+            <MenuItem value="Todos">Todos</MenuItem>
+            {Object.entries(DomicilioLaboralMap).map(([key, label]) => (
+              <MenuItem key={key} value={key}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <InputLabel>Laboral</InputLabel>
+          <Select
+            value={laboral}
+            onChange={(e) => setLaboral(e.target.value)}
+            label="Laboral"
+          >
+            <MenuItem value="Todos">Todos</MenuItem>
+            {Object.entries(DomicilioLaboralMap).map(([key, label]) => (
+              <MenuItem key={key} value={key}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <button
           title="Nueva Solicitud"
           className="group cursor-pointer outline-none hover:rotate-90 duration-300"
@@ -1272,383 +1405,387 @@ export function ListadoSolicitud() {
         </button>
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg border border-gray-300">
-        <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
-          <Table>
-            <TableHead sx={{ backgroundColor: "#f2f2f2" }}>
-              <TableRow>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  N° Solicitud
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Cliente
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Cédula
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Fecha
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Almacén
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Vendedor
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Tipo de Consulta
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Estado
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Tipo de Cliente
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Resultado
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Entradas
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Detalles
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Solicitudes
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Documental
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Telefonica
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Domicilio
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Laborales
-                </TableCell>
 
-                <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                  Analista
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {datos.map((data) => (
-                <TableRow key={data.id}>
-                  <TableCell align="center">{data.NumeroSolicitud}</TableCell>
-                  <TableCell align="center">{data.nombre}</TableCell>
-                  <TableCell align="center">{data.cedula}</TableCell>
-                  <TableCell align="center">
-                    {new Date(data.fecha).toLocaleString()}
-                  </TableCell>
-                  <TableCell align="center">{data.almacen}</TableCell>
-                  <TableCell align="center">{data.vendedor}</TableCell>
-                  <TableCell align="center">{data.consulta}</TableCell>
-                  <TableCell align="center">{data.estado}</TableCell>
-                  <TableCell align="center">{data.tipoCliente}</TableCell>
-                  <TableCell align="center">
-                    {data.resultado === 0 ? (
-                      <HighlightOffIcon sx={{ color: "#DC3545" }} />
-                    ) : data.resultado === 1 ? (
-                      <CheckCircleIcon sx={{ color: "#28A745" }} />
-                    ) : null}
-                  </TableCell>
-                  <TableCell align="center">{data.entrada}</TableCell>
-                  <TableCell align="center">
-                    <Tooltip title="Ver más" arrow placement="top">
-                      <IconButton onClick={() => handleOpenDialog(data)}>
-                        <VisibilityIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+      <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
 
-                  {/* Solicitudes */}
-                  <TableCell align="center">
-                    <div>
-                      <span>
-                        <IconButton
-                          onClick={() => handlesolicitud(data)}
-                          disabled={
-                            estaDeshabilitado(data) ||
-                            estadoDeshabilitadoporPermisos(data)
-                          }
-                          sx={{ opacity: estaDeshabilitado(data) }}
-                        >
-                          {getSolicitudIconByEstado(
-                            data.idEstadoVerificacionSolicitud
-                          )}
-                        </IconButton>
+       {/* Busqueda por cedula */}
 
-                        {/* MoreVertIcon deshabilitado cuando resultado es "No aplica" */}
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 1, data)
-                            }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </span>
+        <TextField
+          label="Buscar por cédula"
+          variant="outlined"
+          value={cedula}
+          onChange={(e) => setCedula(e.target.value)}
+          fullWidth
+          size="small"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          InputProps={{
+            endAdornment: (
+              <IconButton>
+              </IconButton>
+            ),
+          }}
+        />
 
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
+
+       {/* Busqueda por nombre cliente  */}
+
+        <TextField
+          label="Buscar por nombre cliente"
+          variant="outlined"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          fullWidth
+          size="small"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          InputProps={{
+            endAdornment: (
+              <IconButton>
+              </IconButton>
+            ),
+          }}
+        />
+
+        
+
+
+       {/* Busqueda por numero de solicitud */}
+        <TextField
+          label="Buscar por número de solicitud"
+          variant="outlined"
+          value={numeroSolicitud}
+          onChange={(e) => setNumeroSolicitud(e.target.value)}
+          fullWidth
+          size="small"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          InputProps={{
+            endAdornment: (
+              <IconButton>
+              </IconButton>
+            ),
+          }}
+        />
+        
+
+        </div>
+
+   
+      <div className="p-6 bg-gray-50 rounded-xl">
+  <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+    <TableContainer component={Paper} sx={{ maxHeight: 600, boxShadow: 'none' }}>
+      <Table>
+        {/* Encabezado de la tabla con estilo mejorado */}
+        <TableHead>
+          <TableRow sx={{ 
+            background: 'linear-gradient(90deg, #f6f9fc 0%, #edf2f7 100%)',
+            '& th': {
+              color: '#334155',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              padding: '14px 10px',
+              borderBottom: '2px solid #e2e8f0'
+            }
+          }}>
+            <TableCell align="center">N° Solicitud</TableCell>
+            <TableCell align="center">Cliente</TableCell>
+            <TableCell align="center">Cédula</TableCell>
+            <TableCell align="center">Fecha</TableCell>
+            <TableCell align="center">Almacén</TableCell>
+            <TableCell align="center">Vendedor</TableCell>
+            <TableCell align="center">Tipo de Consulta</TableCell>
+            <TableCell align="center">Estado</TableCell>
+            <TableCell align="center">Tipo de Cliente</TableCell>
+            <TableCell align="center">Resultado</TableCell>
+            <TableCell align="center">Entradas</TableCell>
+            <TableCell align="center">Detalles</TableCell>
+            <TableCell align="center">Solicitudes</TableCell>
+            <TableCell align="center">Documental</TableCell>
+            <TableCell align="center">Telefonica</TableCell>
+            <TableCell align="center">Domicilio</TableCell>
+            <TableCell align="center">Laborales</TableCell>
+            <TableCell align="center">Analista</TableCell>
+          </TableRow>
+        </TableHead>
+        
+        {/* Cuerpo de la tabla con estilos mejorados */}
+        <TableBody>
+          {datos.map((data, index) => (
+            <TableRow 
+              key={data.id}
+              sx={{ 
+                '&:nth-of-type(odd)': { backgroundColor: '#f8fafc' },
+                '&:hover': { backgroundColor: '#f1f5f9' },
+                transition: 'background-color 0.2s ease',
+                '& td': { 
+                  padding: '12px 10px',
+                  fontSize: '0.875rem',
+                  borderBottom: '1px solid #e2e8f0'
+                }
+              }}
+            >
+              <TableCell align="center" sx={{ fontWeight: 500 }}>{data.NumeroSolicitud}</TableCell>
+              <TableCell align="center">{data.nombre}</TableCell>
+              <TableCell align="center">{data.cedula}</TableCell>
+              <TableCell align="center">
+                {new Date(data.fecha).toLocaleString()}
+              </TableCell>
+              <TableCell align="center">{data.almacen}</TableCell>
+              <TableCell align="center">{data.vendedor}</TableCell>
+              <TableCell align="center">{data.consulta}</TableCell>
+               {/* Estado con colores dinámicos según el valor */}
+               <TableCell align="center">
+                <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                  data.estado === 'APROBADO' ? 'bg-green-100 text-green-800' :
+                  data.estado === 'PRE-APROBADO' ? 'bg-blue-100 text-blue-800' :
+                  data.estado === 'RECHAZADO' ? 'bg-red-100 text-red-800' :
+                  data.estado === 'ANULADO' ? 'bg-gray-100 text-gray-800' :
+                  data.estado === 'N0 APLICA' ? 'bg-purple-100 text-purple-800' :
+                  'bg-yellow-100 text-yellow-800' // Estado predeterminado (pendiente u otros)
+                }`}>
+                  {data.estado}
+                </span>
+              </TableCell>
+              <TableCell align="center">{data.tipoCliente}</TableCell>
+              <TableCell align="center">
+                {data.resultado === 0 ? (
+                  <HighlightOffIcon sx={{ color: "#DC3545", filter: 'drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.2))' }} />
+                ) : data.resultado === 1 ? (
+                  <CheckCircleIcon sx={{ color: "#28A745", filter: 'drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.2))' }} />
+                ) : null}
+              </TableCell>
+              <TableCell align="center">{data.entrada}</TableCell>
+              
+              {/* Botón de detalles mejorado */}
+              <TableCell align="center">
+                <Tooltip title="Ver más" arrow placement="top">
+                  <IconButton 
+                    onClick={() => handleOpenDialog(data)}
+                    sx={{
+                      bgcolor: '#f1f5f9',
+                      '&:hover': {
+                        bgcolor: '#e2e8f0'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" sx={{ color: '#475569' }} />
+                  </IconButton>
+                </Tooltip>
+              </TableCell>
+
+              {/* Columna Solicitudes */}
+              <TableCell align="center">
+                <div className="flex items-center justify-center space-x-1">
+                  <IconButton
+                    onClick={() => handlesolicitud(data)}
+                    disabled={estaDeshabilitado(data) || estadoDeshabilitadoporPermisos(data)}
+                    sx={{ 
+                      opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: !estaDeshabilitado(data) && '#e2e8f0'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {getSolicitudIconByEstado(data.idEstadoVerificacionSolicitud)}
+                  </IconButton>
+
+                  <Tooltip title="Ver historial" arrow placement="top">
+                    <span
+                      style={{
+                        pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                        opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                      }}
+                    >
+                      <MoreVertIcon
+                        onClick={(event) => handlePopoverOpen(event, 1, data)}
+                        style={{ cursor: "pointer", color: '#64748b' }}
+                        fontSize="small"
                       />
-                    </div>
-                  </TableCell>
+                    </span>
+                  </Tooltip>
+                </div>
+              </TableCell>
 
-                  {/* documental */}
-                  <TableCell align="center">
-                    <div>
-                      <span>
-                        <IconButton
-                          onClick={() => handledocumentos(data)} // Aquí va la lógica para manejar el clic
-                          disabled={
-                            data.idEstadoVerificacionDocumental === 2 ||
-                            estaDeshabilitado(data) ||
-                            estadoDeshabilitadoDocumental(data) ||
-                            verificacionSolicitud(data)
-                          }
-                          sx={{
-                            opacity:
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
-                                ? 0.5
-                                : 1,
-                          }}
-                        >
-                          {getIconByEstado(data.idEstadoVerificacionDocumental)}
-                        </IconButton>
+              {/* Columna Documental */}
+              <TableCell align="center">
+                <div className="flex items-center justify-center space-x-1">
+                  <IconButton
+                    onClick={() => handledocumentos(data)}
+                    disabled={
+                      data.idEstadoVerificacionDocumental === 2 ||
+                      estaDeshabilitado(data) ||
+                      estadoDeshabilitadoDocumental(data) ||
+                      verificacionSolicitud(data)
+                    }
+                    sx={{ 
+                      opacity: (estaDeshabilitado(data) || verificacionSolicitud(data)) ? 0.5 : 1,
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: !(estaDeshabilitado(data) || verificacionSolicitud(data)) && '#e2e8f0'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {getIconByEstado(data.idEstadoVerificacionDocumental)}
+                  </IconButton>
 
-                        {/* InfoIcon al lado del IconButton */}
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 3, data)
-                            }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </span>
-
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
+                  <Tooltip title="Ver historial" arrow placement="top">
+                    <span
+                      style={{
+                        pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                        opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                      }}
+                    >
+                      <MoreVertIcon
+                        onClick={(event) => handlePopoverOpen(event, 3, data)}
+                        style={{ cursor: "pointer", color: '#64748b' }}
+                        fontSize="small"
                       />
-                    </div>
-                  </TableCell>
+                    </span>
+                  </Tooltip>
+                </div>
+              </TableCell>
 
-                  {/* telefonica */}
-                  <TableCell align="center">
-                    <div>
-                      <span>
-                        <IconButton
-                          onClick={() => handleTelefonica(data)} // Aquí va la lógica para manejar el clic
-                          disabled={
-                            data.idEstadoVerificacionTelefonica === 1 ||
-                            estaDeshabilitado(data) ||
-                            verificacionSolicitud(data) ||
-                            estadoDeshabilitadotelefonica(data)
-                          }
-                          sx={{
-                            opacity:
-                              data.Estado === 5 ||
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
-                                ? 0.5
-                                : 1,
-                          }}
-                        >
-                          {getPhoneIconByEstado(
-                            data.idEstadoVerificacionTelefonica
-                          )}
-                        </IconButton>
+              {/* Columna Telefónica */}
+              <TableCell align="center">
+                <div className="flex items-center justify-center space-x-1">
+                  <IconButton
+                    onClick={() => handleTelefonica(data)}
+                    disabled={
+                      data.idEstadoVerificacionTelefonica === 1 ||
+                      estaDeshabilitado(data) ||
+                      verificacionSolicitud(data) ||
+                      estadoDeshabilitadotelefonica(data)
+                    }
+                    sx={{ 
+                      opacity: (data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data)) ? 0.5 : 1,
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: !(data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data)) && '#e2e8f0'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {getPhoneIconByEstado(data.idEstadoVerificacionTelefonica)}
+                  </IconButton>
 
-                        {/* InfoIcon al lado del IconButton */}
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 2, data)
-                            }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </span>
 
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
+                  <Tooltip title="Ver historial" arrow placement="top">
+                    <span
+                      style={{
+                        pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                        opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                      }}
+                    >
+                      <MoreVertIcon
+                        onClick={(event) => handlePopoverOpen(event, 2, data)}
+                        style={{ cursor: "pointer", color: '#64748b' }}
+                        fontSize="small"
                       />
-                    </div>
-                  </TableCell>
+                    </span>
+                  </Tooltip>
+                </div>
+              </TableCell>
 
-                  {/* terrenales */}
-                  <TableCell align="center" className="cursor-pointer">
-                    <div>
-                      <span>
-                        <IconButton
-                          onClick={() =>
-                            handleOpenModalVerificacion(data, "domicilio")
-                          } // Aquí va la lógica para manejar el clic
-                          disabled={
-                            data.idEstadoVerificacionDocumental !== 4 || ///cuando documental este aporbado hablito domicilio y laboral
-                            data.Domicilio === false
-                          }
-                          sx={{
-                            opacity:
-                              data.Estado === 5 ||
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
-                                ? 0.5
-                                : 1,
-                          }}
-                        >
-                          {getIconDomicilio(data.idEstadoVerificacionDomicilio)}
-                        </IconButton>
+              {/* Columna Domicilio */}
+              <TableCell align="center">
+                <div className="flex items-center justify-center space-x-1">
+                  <IconButton
+                    onClick={() => handleOpenModalVerificacion(data, "domicilio")}
+                    disabled={
+                      data.idEstadoVerificacionDocumental !== 4 ||
+                      data.Domicilio === false
+                    }
+                    sx={{ 
+                      opacity: (data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data)) ? 0.5 : 1,
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: !(data.Estado === 5 || estaDeshabilitado(data) || verificacionSolicitud(data)) && '#e2e8f0'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {getIconDomicilio(data.idEstadoVerificacionDomicilio)}
+                  </IconButton>
 
-                        {/* InfoIcon al lado del IconButton */}
-
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 4, data)
-                            }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </span>
-
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
+                  <Tooltip title="Ver historial" arrow placement="top">
+                    <span
+                      style={{
+                        pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                        opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                      }}
+                    >
+                      <MoreVertIcon
+                        onClick={(event) => handlePopoverOpen(event, 4, data)}
+                        style={{ cursor: "pointer", color: '#64748b' }}
+                        fontSize="small"
                       />
-                    </div>
-                  </TableCell>
 
-                  <TableCell align="center" className="cursor-pointer">
-                    <div>
-                      <span>
-                        <IconButton
-                          onClick={() =>
-                            handleOpenModalVerificacion(data, "trabajo")
-                          } // Aquí va la lógica para manejar el clic
-                          disabled={
-                            verificacionSolicitud(data) ||
-                            data.Laboral === false
-                          }
-                          sx={{
-                            opacity:
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data) ||
-                              data.Laboral === false
-                                ? 0.1
-                                : 1,
-                          }}
-                        >
-                          {getIconLaboral(data.idEstadoVerificacionTerrena)}
-                        </IconButton>
+                    </span>
+                  </Tooltip>
+                </div>
+              </TableCell>
 
-                        {/* InfoIcon al lado del IconButton */}
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 4, data)
-                            }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </span>
+              {/* Columna Laborales */}
+              <TableCell align="center">
+                <div className="flex items-center justify-center space-x-1">
+                  <IconButton
+                    onClick={() => handleOpenModalVerificacion(data, "trabajo")}
+                    disabled={verificacionSolicitud(data) || data.Laboral === false}
+                    sx={{ 
+                      opacity: (estaDeshabilitado(data) || verificacionSolicitud(data) || data.Laboral === false) ? 0.1 : 1,
+                      bgcolor: '#f8fafc',
+                      '&:hover': {
+                        bgcolor: !(estaDeshabilitado(data) || verificacionSolicitud(data) || data.Laboral === false) && '#e2e8f0'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {getIconLaboral(data.idEstadoVerificacionTerrena)}
+                  </IconButton>
 
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
+                  <Tooltip title="Ver historial" arrow placement="top">
+                    <span
+                      style={{
+                        pointerEvents: estaDeshabilitado(data) ? "none" : "auto",
+                        opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                      }}
+                    >
+                      <MoreVertIcon
+                        onClick={(event) => handlePopoverOpen(event, 4, data)}
+                        style={{ cursor: "pointer", color: '#64748b' }}
+                        fontSize="small"
+
                       />
-                    </div>
-                  </TableCell>
+                    </span>
+                  </Tooltip>
+                </div>
+              </TableCell>
 
-                  <TableCell align="center">
-                    {data.idAnalista ? (
-                      <span>
-                        {analistas.find((a) => a.idUsuario === data.idAnalista)
-                          ?.Nombre || "No disponible"}
-                      </span>
-                    ) : (
-                      <span className="text-gray-500">Sin asignar</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </div>
+              {/* Columna Analista */}
+              <TableCell align="center">
+                {data.idAnalista ? (
+                  <span className="text-gray-800 font-medium">
+                    {analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"}
+                  </span>
+                ) : (
+                  <span className="text-gray-400 italic text-sm">Sin asignar</span>
+                )}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </div>
+</div>
 
       {/* Cuadro de diálogo para ver detalles */}
       <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>

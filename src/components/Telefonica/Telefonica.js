@@ -552,7 +552,7 @@ export function TelefonicaList({
           {/* Información del cliente */}
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-6 Pr-6">
-              {clientInfo.foto !== null ? (
+              {clientInfo.foto !== null && clientInfo.foto!== "prueba"? (
                   <img
                     src={clientInfo.foto}
                     alt="Foto del cliente"
