@@ -259,7 +259,7 @@ export default function CreditoForm() {
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
 
-    { label: "Subir foto", name: "Foto", type: "file" },
+    // { label: "Subir foto", name: "Foto", type: "file" },
 
 
 
@@ -345,7 +345,6 @@ export default function CreditoForm() {
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-      Foto: Yup.string(),
 
       bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
 
@@ -487,7 +486,7 @@ export default function CreditoForm() {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         includeButtons={true}
-        columns={3}
+        columns={4}
         includeTermsAndConditions={true}
         formStatus={formStatus}
       />
