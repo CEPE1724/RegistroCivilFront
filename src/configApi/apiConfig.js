@@ -9,7 +9,9 @@ import { get } from "react-hook-form";
 const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 //const API_BASE_URL = "http://192.168.1.95:3008/api/v1/"
 
-const API_PYTHON_BASE_URL = "http://192.168.2.181:5000/"
+const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
+
+
 
 
 
