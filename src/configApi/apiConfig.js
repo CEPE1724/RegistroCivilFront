@@ -1,7 +1,9 @@
 import { get } from "react-hook-form";
 
+
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 const API_BASE_URL = "http://192.168.2.22:3008/api/v1/"
+
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -154,4 +156,10 @@ export const APIURL = {
 
   postCompareFaces : () => `${API_PYTHON_BASE_URL}verify-faces`,
 
+
+  //// LISTA NEGRA TELEFONOS 
+  getTelefonos : () => `${API_BASE_URL}lista-negra-cell`,
+  //// getTelefonoById     : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
+  postTelefono : () => `${API_BASE_URL}lista-negra-cell`,
+  updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`
 };
