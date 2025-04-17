@@ -20,15 +20,6 @@ export function RegistroCivil({
 
   const hanldeResetInputs = () => setError(null);
 
-  console.log({
-	cedula,
-  dactilar,
-  imagenSubida,
-  onAceptar,
-  onRechazar,
-  resultadoVerificacion,
-  })
-
   const handleQuery = async () => {
     try {
       const token = localStorage.getItem("token");
