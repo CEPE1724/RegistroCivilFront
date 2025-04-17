@@ -16,14 +16,17 @@ export const connectToServer = () => {
 
 function addListener(socket) {
     socket.on("connect", () => {
-        
-        console.log("Connected to server");
+                console.log("Connected to server");
         
     });
 
     socket.on("disconnect", () => {
         console.log("Disconnected from server");
     });
+
+    socket.on('clients-updated', (clients) => {
+        console.log("Clients updated:", clients);
+    })
 }
 
 

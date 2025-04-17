@@ -18,14 +18,25 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [connectedClients, setConnectedClients] = useState  ([]);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   useEffect(() => {
-    const socket = connectToServer(
-      () => setIsConnected(true),
-      () => setIsConnected(false)
-    );
+    const socket = connectToServer();
 
+    // Escuchamos eventos directamente desde aquí
+    socket.on("connect", () => {
+      setIsConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      setIsConnected(false);
+    });
+    socket.on("clients-updated", (clients) => {
+      console.log("Clients updated:", clients); // ✅ Aquí verás los IDs
+      setConnectedClients(clients);
+    });
+    // Limpieza al desmontar el componente
     return () => {
       socket.disconnect();
     };
@@ -75,6 +86,15 @@ const Login = () => {
               <span className="text-red-500">🔴 Desconectado</span>
             )}
           </Typography>
+          <Typography variant="body2" className="text-white text-sm mt-2">
+            Clientes conectados: {connectedClients.length}
+          </Typography>
+
+          <ul className="text-white text-xs">
+            {connectedClients.map((id) => (
+              <li key={id}>🟢 {id}</li>
+            ))}
+          </ul>
 
         </div>
         <div className="flex flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
