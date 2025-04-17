@@ -197,55 +197,59 @@ export function ListadoSolicitud() {
   };
 
   const handleVerificarIdentidad = async (imagenSubida, fotoRegistroCivil) => {
-	try {
-	  setLoadingVerificacion(true);
-  
-	  if (!imagenSubida || !fotoRegistroCivil) {
-		enqueueSnackbar("Faltan imágenes para comparar.", { variant: "error" });
-		return;
-	  }
-  
-	  const token = localStorage.getItem("token");
-	  const config = {
-		headers: {
-		  Authorization: `Bearer ${token}`,
-		  "Content-Type": "application/json",
-		},
-	  };
-  
-	  const body = {
-		image1_url: imagenSubida,
-		image2_base64: fotoRegistroCivil,
-	  };
-  
-	  const response = await axios.post(APIURL.postCompareFaces(), body, config);
-	  const { verified, distance } = response.data;
-  
-	  // ✅ Guarda los datos de verificación
-	  setResultadoVerificacion(response.data);
-  
-	  if (verified) {
-		await patchSolicitud(selectedRow?.id, 2);
-		enqueueSnackbar("Identidad verificada correctamente.", {
-		  variant: "success",
-		});
-	  } else {
-		enqueueSnackbar(
-		  `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
-		  { variant: "error" }
-		);
-	  }
-  
-	  setOpenRegistroCivil(true);
-	} catch (err) {
-	  console.error("Error durante la verificación facial:", err);
-	  enqueueSnackbar("Error durante la verificación facial.", {
-		variant: "error",
-	  });
-	} finally {
-	  setLoadingVerificacion(false);
-	}
+    try {
+      setLoadingVerificacion(true);
+      if (!imagenSubida || !fotoRegistroCivil) {
+        enqueueSnackbar("Faltan imágenes para comparar.", { variant: "error" });
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
+      const body = {
+        image1_url: imagenSubida,
+        image2_base64: fotoRegistroCivil,
+      };
+
+      const response = await axios.post(
+        APIURL.postCompareFaces(),
+        body,
+        config
+      );
+      const { verified, distance } = response.data;
+      setResultadoVerificacion(response.data);
+      setOpenRegistroCivil(true);
+
+      if (verified) {
+        await patchSolicitud(selectedRow?.id, 2);
+        setView(false);
+        enqueueSnackbar("Identidad verificada correctamente.", {
+          variant: "success",
+        });
+      } else {
+        enqueueSnackbar(
+          `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
+          {
+            variant: "error",
+          }
+        );
+      }
+    } catch (err) {
+      console.error("Error durante la verificación facial:", err);
+      enqueueSnackbar("Error durante la verificación facial.", {
+        variant: "error",
+      });
+    } finally {
+      setLoadingVerificacion(false);
+    }
   };
+
 
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
@@ -263,74 +267,56 @@ export function ListadoSolicitud() {
   };
 
   const handleUploadClick = async () => {
-	
-	if (!fileToUpload) {
-	  alert("Primero selecciona una imagen");
-	  return;
-	}
-  
-	try {
-	  let updatedUrl = ""; // ✅ lo declaramos aquí arriba
-  
-	  const fileUploadResponse = await uploadFile(
-		fileToUpload,
-		selectedRow.almacen,
-		selectedRow.cedula,
-		selectedRow.NumeroSolicitud,
-		"Foto"
-	  );
-  
-	  if (fileUploadResponse) {
-		updatedUrl = fileUploadResponse.url;
-  
-		// 1. Actualizar la imagen localmente
-		setSelectedRow((prevRow) => ({
-		  ...prevRow,
-		  imagen: updatedUrl,
-		}));
-  
-		// 2. Actualizar también la tabla
-		setDatos((prevDatos) =>
-		  prevDatos.map((item) =>
-			item.id === selectedRow.id ? { ...item, imagen: updatedUrl } : item
-		  )
-		);
-  
-		// 3. Actualizar en backend
-		const updatedData = { Foto: updatedUrl };
-		await fetchActualizaSolicitud(selectedRow.id, updatedData);
-  
-		setUrlCloudstorage();
-		setFileToUpload(null);
-  
-		enqueueSnackbar("Foto subida correctamente", {
-		  variant: "success",
-		});
-	  }
-  
-	  // 4. Ejecutar verificación automáticamente (fuera del if, usando updatedUrl declarado arriba)
-	  if (updatedUrl) {
-		const cedula = selectedRow?.cedula;
-		const dactilar = selectedRow?.CodigoDactilar;
-  
-		if (cedula && dactilar) {
-			setCedula(cedula);              // <== AÑADIR ESTO
-  			setDactilar(dactilar); 
-		  const dataFOTO = await fetchImagenRegistroCivil(cedula, dactilar);
-		  if (dataFOTO) {
-			await handleVerificarIdentidad(updatedUrl, dataFOTO);
-		  } else {
-			enqueueSnackbar("No se pudo obtener imagen del Registro Civil.", {
-			  variant: "error",
-			});
-		  }
-		}
-	  }
-	} catch (error) {
-	  alert(error.message);
-	}
+    if (!fileToUpload) {
+      alert("Primero selecciona una imagen");
+      return;
+    }
+
+    try {
+      const fileUploadResponse = await uploadFile(
+        fileToUpload,
+        selectedRow.almacen,
+        selectedRow.cedula,
+        selectedRow.NumeroSolicitud,
+        "Foto"
+      );
+
+      if (fileUploadResponse) {
+        setUrlCloudstorage(fileUploadResponse.url); // Guardar URL del archivo subido
+
+        // 6. Actualizar la solicitud con la URL de la foto
+        const updatedData = {
+          Foto: fileUploadResponse.url, // Usamos la URL obtenida del archivo subido
+        };
+
+        const updatedSolicitud = await fetchActualizaSolicitud(
+          selectedRow.id,
+          updatedData
+        );
+
+
+        // Actualiza visualmente la imagen del selectedRow directamente
+setSelectedRow((prevRow) => ({
+  ...prevRow,
+  imagen: fileUploadResponse.url, // Actualiza el campo de imagen
+}));
+
+        setUrlCloudstorage();
+      }
+      fetchSolicitudes();
+
+      // Si deseas refrescar la imagen desde la URL real del servidor, podrías usar:
+      // setPreviewUrl(APIURL.getImagenURL(res.nombreArchivo));
+      handleCloseDialog();
+      setFileToUpload(null);
+
+      enqueueSnackbar("foto subida correctamente", {
+        variant: "success",
+      });
+    } catch (error) {
+      alert(error.message);
+    }
   };
-  
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
     try {
@@ -2222,7 +2208,7 @@ const DomicilioLaboralMap = {
             Cerrar
           </Button>
 
-          {/* {selectedRow &&
+          {selectedRow &&
             selectedRow.imagen &&
             selectedRow.imagen !== "prueba" &&
             puedeAprobar(selectedRow) && (
@@ -2246,7 +2232,7 @@ const DomicilioLaboralMap = {
               >
                 Aprobar
               </Button>
-            )} */}
+            )}
         </DialogActions>
         {loadingVerificacion && <Loader />}
       </Dialog>
