@@ -21,6 +21,7 @@ export function GestorDocumentos({
     consulta,
     estadoVerifD,
 }) {
+    const { userData, userUsuario, idMenu } = useAuth();
     const [files, setFiles] = useState({});
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
@@ -404,7 +405,7 @@ export function GestorDocumentos({
             idUsuario: null,
             Observacion: String(observacion),
             TipoUsuario: 1,
-            Usuario: "Dan",
+            Usuario: userData.Nombre,
             idTipoDocumentoWEB: currentDocId.idTipoDocumento,
             Fecha: new Date(),
         };
@@ -434,7 +435,7 @@ export function GestorDocumentos({
                 handleEnviarObservacion();
             }
         } else if (confirmAction === 'rechazar') {
-            if (observacion.length < 10) {
+            if (observacion.length < 1) {
                 enqueueSnackbar("La observación debe tener al menos 10 caracteres", { variant: "error" });
                 return;
             }
@@ -916,15 +917,15 @@ export function GestorDocumentos({
                             <p className="text-sm text-gray-500 mt-2">
                                 {confirmAction === 'aprobar'
                                     ? ''
-                                    : 'Explique el motivo del rechazo.'}
+                                    : 'Seleccione el motivo del rechazo.'}
                             </p>
                         </div>
 
                         <div className="mb-4">
-                            <label htmlFor="observacion" className="block text-sm font-medium text-gray-700 mb-1">
+                            {confirmAction === 'rechazar' && (<label htmlFor="observacion" className="block text-sm font-medium text-gray-700 mb-1">
                                 Observación {confirmAction === 'rechazar' && <span className="text-red-500">*</span>}
-                            </label>
-                            <textarea
+                            </label>)}
+                            {/* <textarea
                                 id="observacion"
                                 rows="4"
                                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
@@ -948,7 +949,14 @@ export function GestorDocumentos({
                                         setObservacion(trimmedText);
                                     }
                                 }}
-                            ></textarea>
+                            ></textarea> */}
+                            {confirmAction === 'rechazar' && (<select id="observacion" value={observacion} onChange={(e) => setObservacion(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Seleccione un motivo</option>
+                                <option value="Firmas Inconformes">Firmas Inconformes</option>
+                                <option value="Documento Errado">Documento Errado</option>
+                                <option value="Documento Sin Firmas">Documento sin Firmas</option>
+                                <option value="Documento con Datos Incorrectos">Documento con Datos Incorrectos</option>
+                            </select>)}
                         </div>
 
                         <div className="flex justify-end gap-2">
