@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { TextField, InputAdornment, CircularProgress, IconButton } from "@mui/material";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "../configApi/axiosConfig";
@@ -9,7 +9,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
 import crediPointLogo from "../img/credipoint_digital2.png";
-
+import { connectToServer } from "../socket/socket-client";
 const Login = () => {
   const { login, isLoggedIn, isSessionExpired, token } = useAuth();
   const [userName, setUserName] = useState("");
@@ -17,9 +17,19 @@ const Login = () => {
   const [messageError, setMessageError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  useEffect(() => {
+    const socket = connectToServer(
+      () => setIsConnected(true),
+      () => setIsConnected(false)
+    );
 
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
   if (isLoggedIn) {
     navigate("/ciudadanos", { replace: true });
   }
@@ -29,7 +39,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       // Llama a tu API para hacer login
-  
+
       const response = await axios.post("auth/login", {
         Nombre: userName,
         Clave: password,
@@ -57,6 +67,16 @@ const Login = () => {
   return (
     <section className="flex items-center justify-center min-h-screen bg-red-600" style={{ background: '#1453C8' }}>
       <div className="container max-w-4xl p-4 sm:p-6 md:p-10">
+        <div className="flex flex-col items-center justify-center mb-6 text-white">
+          <Typography variant="subtitle1" className="text-center font-light">
+            {isConnected ? (
+              <span className="text-green-500">🟢 Conectado</span>
+            ) : (
+              <span className="text-red-500">🔴 Desconectado</span>
+            )}
+          </Typography>
+
+        </div>
         <div className="flex flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
           <div className="w-full" style={{ borderRadius: '20px' }}>
             <div className="block rounded-lg bg-white shadow-lg dark:bg-neutral-800" style={{ borderRadius: '20px' }}>
@@ -64,11 +84,11 @@ const Login = () => {
                 <div className="w-full lg:w-6/12 px-4 py-8 md:px-6 relative">
                   <img className="mx-auto w-[150px] sm:w-[180px] md:w-[200px] lg:w-5/6 mb-2" src={crediPointLogo} alt="logo" />
                   <div className="md:mx-6 p-8 rounded-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.50)' }}>
-                    
+
                     {messageError && <div className="text-red-500 text-start mb-4 text-sm">*{messageError}</div>}
                     <form className="space-y-4" onSubmit={handleSubmit}>
                       <Box>
-                        
+
                         <TextField
                           placeholder="Usuario"
                           fullWidth
@@ -87,9 +107,9 @@ const Login = () => {
                       </Box>
 
                       <Box sx={{ width: '100%' }}>
-                        
+
                         <TextField
-                        placeholder="Contraseña"
+                          placeholder="Contraseña"
                           fullWidth
                           required
                           value={password}
