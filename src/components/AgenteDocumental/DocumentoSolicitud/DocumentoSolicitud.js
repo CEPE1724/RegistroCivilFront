@@ -192,7 +192,6 @@ const [fechaInicio, setFechaInicio] = useState(today);
     }
   };*/
 
-  console.log("que imprima todas las bodegas" , bodegasIds)
 
 
   const fetchSolicitudes = async () => {
