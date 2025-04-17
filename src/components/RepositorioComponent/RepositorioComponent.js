@@ -694,7 +694,7 @@ export const RepositorioComponent = () => {
                 )}
                 {searchMode && item.pathNames && (
                   <div className="text-xs text-gray-500 mt-1">
-                    <div className="truncate">Ruta: {item.pathNames.join(" / ")}</div>
+                    <div className="truncate text-success" href={item.pathNames.join(" / ")}>Ir al archivo</div>
                   </div>
                 )}
                 <div className={`${view === "grid" ? "text-center" : ""} truncate`}>
