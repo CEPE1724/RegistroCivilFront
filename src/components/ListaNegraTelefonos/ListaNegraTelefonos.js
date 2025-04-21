@@ -62,17 +62,7 @@ export  function ListaNegraTelefonos() {
         }
     };
 
-    const eliminarTelefono = async (id) => {
-        if (!confirm("¿Está seguro que desea eliminar este teléfono?")) return;
-
-        try {
-            await axios.delete(APIURL.updateTelefono(id));
-            setTelefonos(telefonos.filter(tel => tel.id !== id));
-        } catch (err) {
-            console.error("Error al eliminar teléfono:", err);
-            alert("No se pudo eliminar el teléfono.");
-        }
-    };
+   
 
     const agregarTelefono = async () => {
         const numero = nuevoNumero.trim();
