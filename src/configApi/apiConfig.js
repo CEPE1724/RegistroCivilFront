@@ -85,10 +85,15 @@ export const APIURL = {
    getCheckDocumento: (idCreSolicitudWeb, tipoDocumento) =>`${API_BASE_URL}documentos-solicitud/check?idCreSolicitudWeb=${idCreSolicitudWeb}&tipoDocumento=${tipoDocumento}`,
 
   get_analis_cogno: (ci) => `${API_BASE_URL}usuarios/analistas/?Filtro=${ci}`,
+  get_verif_cogno: (ci) => `${API_BASE_URL}usuarios/verificadores/?Filtro=${ci}`,
   post_analista: () => `${API_BASE_URL}analistacredito`,
+  post_verificador: () => `${API_BASE_URL}verificadorcredito`,
   getFechaAnalista: () => `${API_BASE_URL}fecha-analista`,
+  getFechaVerificador: () => `${API_BASE_URL}fecha-verificador`,
   analistacredito: () => `${API_BASE_URL}analistacredito`,
+  verificadorcredito: () => `${API_BASE_URL}verificadorcredito`,
   posthorarioanalista: () => `${API_BASE_URL}horariosanalistas`,
+  posthorarioverificador: () => `${API_BASE_URL}horariosverificadores`,
 
   get_repositorios: (anio, mes) => {
     let url = API_BASE_URL + 'cre-solicitud-web/repositorios';
@@ -118,6 +123,7 @@ export const APIURL = {
 
 
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
+  get_horariosverificadores: () => `${API_BASE_URL}horariosverificadores`,
 
 
   postInsertarCoordenadasprefactura: () => `${API_BASE_URL}coordenadasprefactura/insert`,

@@ -5,8 +5,8 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import Papa from "papaparse";
-import { ModalAnalista } from "./ModalAnalista";
-import { fetchFechaAnalista } from "../../components/SolicitudGrande/DatosCliente/apisFetch";
+import { ModalVerificador } from "./ModalVerificador";
+import { fetchFechaVerificador } from "../../components/SolicitudGrande/DatosCliente/apisFetch";
 import { useSnackbar } from "notistack";
 import { SelectField } from "../../components/Utils";
 import { APIURL } from "../../configApi/apiConfig";
@@ -27,14 +27,14 @@ const days = [
   "Domingo",
 ];
 
-export function CalendarPerson(props) {
+export function CalendarVerificador(props) {
   const { enqueueSnackbar } = useSnackbar();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuData, setMenuData] = useState([]);
-  const [fechaAnalista, setFechaAnalista] = useState([]);
+  const [fechaVerificador, setFechaVerificador] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTitle, setSelectedTitle] = useState("");
-  const [selectedAnalista, setSelectedAnalista] = useState("");
+  const [selectedVerificador, setSelectedVerificador] = useState("");
   const [schedule, setSchedule] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [fileInputLabel, setFileInputLabel] = useState(
@@ -46,7 +46,7 @@ export function CalendarPerson(props) {
 
   // Se obtiene el rango de fechas desde la API (por ejemplo, [ { idFechaAnalista, DesdeHasta, Desde, Hasta }, ... ])
   useEffect(() => {
-    fetchFechaAnalista(enqueueSnackbar, setFechaAnalista);
+    fetchFechaVerificador(enqueueSnackbar, setFechaVerificador);
   }, [enqueueSnackbar]);
 
   // A partir de la fecha "Desde" y "Hasta" de la API se genera la grilla semanal.
@@ -76,7 +76,7 @@ export function CalendarPerson(props) {
   const fechaDias = useMemo(() => {
     if (!selectedDate) return [];
 
-    const selectedRange = fechaAnalista.find(
+    const selectedRange = fechaVerificador.find(
       (range) => range.value === selectedDate
     );
 
@@ -87,11 +87,11 @@ export function CalendarPerson(props) {
     const result = getWeekDates(selectedRange.desde, selectedRange.hasta);
 
     return result;
-  }, [selectedDate, fechaAnalista]);
+  }, [selectedDate, fechaVerificador]);
 
   const handleMenuClick = (title, item) => {
     setSelectedTitle(title);
-    setSelectedAnalista(item.idAnalistaCredito);
+    setSelectedVerificador(item.idVerificadorCredito);
   };
 
   // Función que determina si una celda es editable.
@@ -139,15 +139,15 @@ export function CalendarPerson(props) {
 
   useEffect(() => {
     const fetchHorariosAPI = async () => {
-      if (selectedAnalista && selectedDate) {
-        const url = `${APIURL.get_horariosanalistas()}/analista/${selectedAnalista}/fecha/${selectedDate}`;
+      if (selectedVerificador && selectedDate) {
+        const url = `${APIURL.get_horariosverificadores()}/verificador/${selectedVerificador}/fecha/${selectedDate}`; // 1
 
         try {
           const { data: horarios } = await axios.get(url);
 
           if (!horarios || horarios.length === 0) {
             setSchedule({});
-            enqueueSnackbar("No hay datos disponibles para este analista", {
+            enqueueSnackbar("No hay datos disponibles para este verificador", {
               variant: "info",
               preventDuplicate: true,
             });
@@ -164,11 +164,11 @@ export function CalendarPerson(props) {
           console.error("[fetchHorariosAPI] Error:", error);
           if (error.response && error.response.status === 404) {
             setSchedule({});
-            enqueueSnackbar("No hay datos disponibles para este analista", {
+            enqueueSnackbar("No hay datos disponibles para este verificador", {
               variant: "info",
             });
           } else {
-            enqueueSnackbar("Error al cargar los horarios del analista", {
+            enqueueSnackbar("Error al cargar los horarios del verificador", {
               variant: "error",
             });
           }
@@ -176,7 +176,7 @@ export function CalendarPerson(props) {
       }
     };
     fetchHorariosAPI();
-  }, [selectedAnalista, selectedDate]);
+  }, [selectedVerificador, selectedDate]);
 
   // Manejo de carga del archivo CSV
   const handleFileUpload = (event) => {
@@ -266,14 +266,14 @@ export function CalendarPerson(props) {
           : "Active");
       const iEstadoValue = currentStatus === "Active" ? 1 : 0;
 
-      const url = APIURL.posthorarioanalista();
+      const url = APIURL.posthorarioverificador(); // 2
       await axios.post(url, {
-        idAnalistaCredito: selectedAnalista,
-        Hora: hourInt,
+        idVerificadorCredito: selectedVerificador,
+        hora: hourInt,
         Dia: day,
         Estado: currentStatus,
         iEstado: iEstadoValue,
-        idFechaAnalista: parseInt(selectedDate, 10),
+        idFechaVerificador: parseInt(selectedDate, 10),
       });
 
       if (!status) {
@@ -291,7 +291,7 @@ export function CalendarPerson(props) {
   // Carga la lista de analistas para el menú lateral
   const fetchMenuData = async () => {
     try {
-      const url = APIURL.analistacredito();
+      const url = APIURL.verificadorcredito(); // 3
       const response = await axios.get(url);
       setMenuData(response.data);
     } catch (error) {
@@ -355,11 +355,11 @@ export function CalendarPerson(props) {
         {/* Panel lateral de analistas */}
         <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg m-4 overflow-hidden">
           <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
-            <h2 className="font-bold text-lg text-gray-800">Analistas</h2>
+            <h2 className="font-bold text-lg text-gray-800">Verificadores</h2>
             <button
               className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors shadow-md"
               onClick={openModal}
-              title="Agregar analista"
+              title="Agregar verificador"
             >
               <PersonAddIcon />
             </button>
@@ -370,7 +370,7 @@ export function CalendarPerson(props) {
                 <div
                   key={index}
                   className={`mb-2 rounded-md ${
-                    selectedAnalista === item.idAnalistaCredito
+                    selectedVerificador === item.idVerificadorCredito
                       ? "bg-blue-50 border-l-4 border-blue-600"
                       : "hover:bg-gray-50"
                   }`}
@@ -381,7 +381,7 @@ export function CalendarPerson(props) {
                   >
                     <span
                       className={`${
-                        selectedAnalista === item.idAnalistaCredito
+                        selectedVerificador === item.idVerificadorCredito
                           ? "font-medium text-blue-800"
                           : "text-gray-700"
                       }`}
@@ -408,14 +408,14 @@ export function CalendarPerson(props) {
                 <h2 className="text-xl font-semibold text-gray-800">
                   {selectedTitle ? (
                     <>
-                      <span className="text-blue-700">Analista:</span>{" "}
+                      <span className="text-blue-700">Verificador:</span>{" "}
                       {selectedTitle}
                       {/* <span className="text-sm text-gray-500 ml-2">
-                        ID: {selectedAnalista}
-                      </span> */}
+						ID: {selectedVerificador}
+					  </span> */}
                     </>
                   ) : (
-                    "Seleccione un analista"
+                    "Seleccione un verificador"
                   )}
                 </h2>
               </div>
@@ -427,7 +427,7 @@ export function CalendarPerson(props) {
                     onChange={(e) =>
                       setSelectedDate(parseInt(e.target.value, 10))
                     }
-                    options={fechaAnalista.map((item) => ({
+                    options={fechaVerificador.map((item) => ({
                       label: item.label,
                       value: item.value,
                     }))}
@@ -579,13 +579,13 @@ export function CalendarPerson(props) {
                 <CalendarIcon />
               </div>
               <p className="text-gray-500">
-                Seleccione un analista y una fecha para configurar el horario
+                Seleccione un verificador y una fecha para configurar el horario
               </p>
             </div>
           )}
         </div>
       </div>
-      <ModalAnalista isOpen={isModalOpen} onClose={closeModal} />
+      <ModalVerificador isOpen={isModalOpen} onClose={closeModal} />
     </div>
   );
 }
