@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import { APIURL } from '../../../configApi/apiConfig';
+
 export function ModalAnalista({ isOpen, onClose }) {
     const [usuarios, setUsuarios] = useState([]);
     const [search, setSearch] = useState('');
