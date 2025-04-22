@@ -27,6 +27,7 @@ import CalendarioOperador from "./pages/CalendarioOperador";
 import CalendarioVerificador from "./pages/CalendarioVerificador";
 import AgenteDocumental from "./pages/AgenteDocumental";
 import Dashboard from "./pages/Dashboard";
+import ListaNegra from "./pages/ListaNegra";
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -73,6 +74,7 @@ function App() {
         <Route path="/gestorDocumentos" element={<PrivateRouteWrapper title="Gestor Documentos" element={<GestorDocumentosCli />} />} />
         <Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
         <Route path="/agentedocumental" element={<PrivateRouteWrapper title="Repositorio" element={<AgenteDocumental />} />} />
+        <Route path="/listaNegra" element={<PrivateRouteWrapper title="ListaNegra" element={<ListaNegra />} />} />
       </Routes>
 
       {isSessionExpired && (

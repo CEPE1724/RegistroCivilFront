@@ -3,3 +3,5 @@ export * from './Seguridad';
 export * from './CalendarPerson';
 export * from './AgenteDocumental';
 export * from './CalendarVerificador';
+export * from './ListaNegraTelefonos';
+

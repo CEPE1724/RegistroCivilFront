@@ -581,7 +581,9 @@ export function Documental({
     }
 
     // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
+    const observacionElement = document.querySelector('textarea[name="observacion"]');
     if (
+      observacionElement &&
       observacion[activeTab] &&
       observacion[activeTab].length > 0 &&
       observacion[activeTab].length < 10
@@ -607,13 +609,14 @@ export function Documental({
       if (clientInfo.idEstadoVerificacionDocumental === 1) {
         const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
         if (fileToUpload) {
+          const observacionText = observacionElement ? (observacion[activeTab] || "") : "";
           response = await uploadFile(
             fileToUpload,
             clientInfo.almacen,
             clientInfo.cedula,
             clientInfo.NumeroSolicitud,
             activeTab, // Mandamos el texto del tab
-            observacion[activeTab]
+            observacionText
           );
         }
       }
@@ -621,13 +624,14 @@ export function Documental({
       if (clientInfo.idEstadoVerificacionDocumental === 3) {
         const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
         if (fileToUpload) {
+          const observacionText = observacionElement ? (observacion[activeTab] || "") : "";
           response = await uploadFile(
             fileToUpload,
             clientInfo.almacen,
             clientInfo.cedula,
             clientInfo.NumeroSolicitud,
             activeTab, // Mandamos el texto del tab
-            observacion[activeTab]
+            observacionText
           );
         }
       }
@@ -663,14 +667,16 @@ export function Documental({
         }
 
         // Crear el payload con los datos para la API
+        const observacionText = observacionElement ? (observacion[activeTab] || "") : "";
         const payload = {
           idCre_SolicitudWeb: clientInfo.id,
           idTipoDocumentoWEB: idTipoDocumentoWEB, // C
           RutaDocumento: urlArchivo, // URL del archivo subido
-          Observacion: observacion[activeTab], // Observación recibida
+          Observacion: observacionText, // Observación recibida
           Usuario: userData.Nombre,
           IdUsuario: userData.idUsuario,
         };
+        console.log("usuario", userData.Nombre);
 
         // Verifica el payload antes de enviarlo
 
@@ -1008,7 +1014,7 @@ export function Documental({
             </div>
           </div>
 
-          <div className="flex justify-center items-center mt-8 w-full">
+          {clientInfo.idEstadoVerificacionDocumental === 3 &&(<div className="flex justify-center items-center mt-8 w-full">
             {/* Documentos Subidos */}
 
             <div className=" pb-4 pt-5 md:absolute md:right-11 ">
@@ -1019,7 +1025,7 @@ export function Documental({
                 Historial Observaciones
               </button>
             </div>
-          </div>
+          </div>)}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {filePreviews[activeTab]?.length > 0 &&
@@ -1041,8 +1047,6 @@ export function Documental({
                           <IconButton onClick={toggleView}>
                             <VisibilityIcon />
                           </IconButton>
-                          {/* Mostrar el estado del archivo */}
-                          <h1>{file?.estado}</h1>
                           <button
                             type="button"
                             onClick={() =>
@@ -1056,7 +1060,6 @@ export function Documental({
                       </div>
 
                       <div className="mt-4">
-                        {file?.type === "application/pdf" ? (
                           <object
                             data={previewUrl}
                             type="application/pdf"
@@ -1067,13 +1070,6 @@ export function Documental({
                           >
                             <p>Vista previa no disponible</p>
                           </object>
-                        ) : (
-                          <img
-                            src={previewUrl}
-                            alt="Vista previa archivo"
-                            className="w-full h-auto rounded-md"
-                          />
-                        )}
                       </div>
                     </div>
                   );
@@ -1083,7 +1079,7 @@ export function Documental({
           </div>
 
           {/* Observación */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <label className="text-lg font-medium text-gray-700">
               Observación
             </label>
@@ -1105,7 +1101,7 @@ export function Documental({
                 La observación debe tener al menos 10 caracteres.
               </p>
             )}
-          </div>
+          </div> */}
 
           <div className="flex justify-center items-center mt-6 w-full">
             <button
