@@ -17,7 +17,7 @@ const Nav = ({ showButton, userData }) => {
 
 
    // Notificaciones
-  const [notificationCount, setNotificationCount] = useState(5);
+  const [notificationCount, setNotificationCount] = useState(6);
   const [showToast, setShowToast] = useState(false);
   const [latestNotification, setLatestNotification] = useState("tienes una nueva solicitud que te llego");
   
