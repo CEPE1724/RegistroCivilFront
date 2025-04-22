@@ -6,7 +6,7 @@ let socket;
 export const connectToServer = (token) => {
 
 
-    const manager = new Manager("http://localhost:3008/socket.io/socket.io.js",
+    const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
         {
             extraHeaders: {
                 hola: "mundo",

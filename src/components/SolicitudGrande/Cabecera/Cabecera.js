@@ -468,30 +468,6 @@ export function Cabecera() {
   const validarcaposdataTrabajo = () => {
     let valid = true; // Inicializamos la validación como verdadera
 
-    /*
-    NombreEmpresa: formData.empresa,
-          idTipoEmpresa: getParsedValue(formData.tipoEmpresa),
-          FechaIngresoEmpresa: formData.fechaIngreso,
-          IngresosTrabajo: IngresosTrabajoString,
-          EgresosTrabajo: EgresosTrabajoString,
-          idTipoContrato: getParsedValue(formData.tipoContrato),
-          idTipoSueldo: getParsedValue(formData.tipoSueldo),
-          Departaento: formData.departamento,
-          idCargo: getParsedValue(formData.cargo),
-          DiaPago: getParsedValue(formData.diasPago),
-          AfiliadoIESS: formData.afiliado,
-          idProvinciaTrabajo: getParsedValue(formData.provincia),
-          idCantonTrabajo: getParsedValue(formData.canton),
-          idParroquiaTrabajo: getParsedValue(formData.parroquia),
-          idBarrioTrabajo: getParsedValue(formData.barrio),
-          CallePrincipalTrabajo: formData.callePrincipal,
-          NumeroCasaTrabajo: formData.numeroCasa,
-          CalleSecundariaTrabajo: formData.calleSecundaria,
-          TelefonoTrabajo: formData.telefono,
-          Ext: formData.ext,
-          CelularTrabajo: formData.celular,
-          ReferenciaUbicacionTrabajo: formData.referenciaUbicacion,
-*/
     // Validación de cada campo en clienteData según la estructura solicitada
     if (clienteData.idTipoEmpresa === 0 || clienteData.idTipoEmpresa == null) {
       valid = false;
@@ -596,22 +572,6 @@ export function Cabecera() {
   };
 
   const validarcaposdataNegocio = () => {
-    /* NombreNegocio: formData.nombreNegocio,
-          idCre_TiempoNegocio: getParsedValue(formData.tiempoNegocio),
-          MetrosCuadrados: getParsedValue(formData.metros),
-          idProvinciaNegocio: getParsedValue(formData.provincia),
-          idCantonNegocio: getParsedValue(formData.canton),
-          idParroquiaNegocio: getParsedValue(formData.parroquia),
-          idBarrioNegocio: getParsedValue(formData.barrio),
-          CallePrincipalNegocio: formData.callePrincipal,
-          NumeroCasaNegocio: formData.numeroCasa,
-          CalleSecundariaNegocio: formData.calleSecundaria,
-          ReferenciaUbicacionNegocio: formData.referenciaUbicacion,
-          IngresosNegosio: IngresosTrabajoString,
-          EgresosNegocio: EgresosTrabajoString,
-          ActividadEconomicaNegocio: formData.actividadNegocio,
-          AfiliadoTributario: formData.AfiliadoTributario,
-          OblidagoLlevarContabilidad: formData.ObligadoContabilidad*/
     let valid = true; // Inicializamos la validación como verdadera
 
     // Validación de cada campo en clienteData según la estructura solicitada
@@ -699,6 +659,17 @@ export function Cabecera() {
     // Actualizamos el estado de checkNegocio con el resultado de la validación
     setCheckNegocio(valid);
   };
+
+  const comprobTelf = async (telefono) => {
+      try {
+        const url = APIURL.validarTelefono(telefono);
+        const response = await axios.get(url);
+        return response.data;
+      } catch (error) {
+        console.error("Error al validar el teléfono:", error);
+        return false;
+      }
+    };
 
   // Si todos los campos son válidos, actualizamos el estado
 
@@ -795,7 +766,7 @@ export function Cabecera() {
       case "Datos Cliente":
         return <Datos ref={datosRef} data={clienteData} />;
       case "Domicilio":
-        return <Domicilio ref={datosDomicilioRef} data={clienteData} />;
+        return <Domicilio ref={datosDomicilioRef} data={clienteData} comprobTelf={comprobTelf} />;
       case "Datos Conyuge":
         return clienteData.idEdoCivil === 1 ? (
           <DatosConyuge ref={datosConyuge} data={clienteData} />
@@ -804,11 +775,11 @@ export function Cabecera() {
         return (<Referencias data={clienteData} estadoVerificacion={data?.idEstadoVerificacionSolicitud} />);
       case "Dependiente":
         return clienteData.idSituacionLaboral === 1 ? (
-          <SeccionB ref={datosTrabajo} data={clienteData} />
+          <SeccionB ref={datosTrabajo} data={clienteData} comprobTelf={comprobTelf} />
         ) : null;
       case "Negocio":
         return clienteData.idSituacionLaboral != 1 ? (
-          <SeccionA ref={datosNegocio} data={clienteData} />
+          <SeccionA ref={datosNegocio} data={clienteData} comprobTelf={comprobTelf} />
         ) : null;
       case "Factores de Crédito":
         return (

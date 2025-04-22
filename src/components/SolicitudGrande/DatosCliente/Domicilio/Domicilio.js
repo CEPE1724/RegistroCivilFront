@@ -126,8 +126,28 @@ const Domicilio = forwardRef((props, ref) => {
     }
   }, [formData.parroquia, enqueueSnackbar]);
 
-  const handleFormChange = (e) => {
+  const handleFormChange = async (e) => {
     const { name, value } = e.target;
+
+    // Validación para campos de teléfono
+  if (name === 'telefonoCasa' || name === 'telefonoCasa2' || name === 'celular' || 
+    name === 'telfArrendador' || name === 'celularArrendador') {
+  // Solo validar si el campo tiene valor y tiene la longitud correcta
+  if (value && (value.length === 9 || value.length === 10)) {
+    const existe = await props.comprobTelf(value); 
+    if (existe === 1) {
+      enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
+        variant: 'warning'
+      });
+      // Puedes decidir si quieres limpiar el campo o marcar como error
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: `El número ${value} se encuentra en la lista negra`
+      }));
+      return;
+    }
+  }
+}
     // Expresión regular para detectar caracteres no permitidos
     const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
 

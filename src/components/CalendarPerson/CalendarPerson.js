@@ -10,7 +10,7 @@ import { fetchFechaAnalista } from "../../components/SolicitudGrande/DatosClient
 import { useSnackbar } from "notistack";
 import { SelectField } from "../../components/Utils";
 import { APIURL } from "../../configApi/apiConfig";
-
+import { useAuth } from "../AuthContext/AuthContext";
 // Horas de 8:00 a 21:00
 const hours = [];
 for (let i = 8; i <= 21; i++) {
@@ -40,6 +40,7 @@ export function CalendarPerson(props) {
   const [fileInputLabel, setFileInputLabel] = useState(
     "Importar horarios (CSV)"
   );
+  const { userData } = useAuth();
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -291,7 +292,8 @@ export function CalendarPerson(props) {
   // Carga la lista de analistas para el menú lateral
   const fetchMenuData = async () => {
     try {
-      const url = APIURL.analistacredito();
+      if (!userData) return;
+      const url = APIURL.analistacreditoUsuarioRol(userData.idGrupo, userData.Nombre);
       const response = await axios.get(url);
       setMenuData(response.data);
     } catch (error) {
@@ -305,44 +307,44 @@ export function CalendarPerson(props) {
   }, [isModalOpen]);
 
   const handleDayBulkChange = (day, action) => {
-	const fechaDia = fechaDias.find((fd) => fd.day === day);
-	if (!fechaDia) return;
-  
-	const updatedSchedule = { ...schedule };
-	let cambios = 0;
-  
-	hours.forEach((hour) => {
-	  if (!isEditableCell(fechaDia.fullDate, hour)) return;
-  
-	  if (!updatedSchedule[day]) updatedSchedule[day] = {};
-  
-	  const currentStatus = updatedSchedule[day][hour];
-  
-	  if (action === "available" && currentStatus !== "Active") {
-		updatedSchedule[day][hour] = "Active";
-		fetchsaveHorario(day, hour, "Active");
-		cambios++;
-	  } else if (action === "reset" && currentStatus !== "Inactive") {
-		updatedSchedule[day][hour] = "Inactive";
-		fetchsaveHorario(day, hour, "Inactive");
-		cambios++;
-	  }
-	});
-  
-	setSchedule(updatedSchedule);
-  
-	if (cambios > 0) {
-	  enqueueSnackbar(`Se aplicaron ${cambios} cambios al día ${day}`, {
-		variant: "info",
-	  });
-	} else {
-	  enqueueSnackbar(
-		`No se aplicaron cambios en ${day}. Todas las horas están bloqueadas o ya están en el estado solicitado.`,
-		{ variant: "warning" }
-	  );
-	}
+    const fechaDia = fechaDias.find((fd) => fd.day === day);
+    if (!fechaDia) return;
+
+    const updatedSchedule = { ...schedule };
+    let cambios = 0;
+
+    hours.forEach((hour) => {
+      if (!isEditableCell(fechaDia.fullDate, hour)) return;
+
+      if (!updatedSchedule[day]) updatedSchedule[day] = {};
+
+      const currentStatus = updatedSchedule[day][hour];
+
+      if (action === "available" && currentStatus !== "Active") {
+        updatedSchedule[day][hour] = "Active";
+        fetchsaveHorario(day, hour, "Active");
+        cambios++;
+      } else if (action === "reset" && currentStatus !== "Inactive") {
+        updatedSchedule[day][hour] = "Inactive";
+        fetchsaveHorario(day, hour, "Inactive");
+        cambios++;
+      }
+    });
+
+    setSchedule(updatedSchedule);
+
+    if (cambios > 0) {
+      enqueueSnackbar(`Se aplicaron ${cambios} cambios al día ${day}`, {
+        variant: "info",
+      });
+    } else {
+      enqueueSnackbar(
+        `No se aplicaron cambios en ${day}. Todas las horas están bloqueadas o ya están en el estado solicitado.`,
+        { variant: "warning" }
+      );
+    }
   };
-  
+
 
   return (
     <div className="flex flex-col bg-gray-100 min-h-screen">
@@ -352,39 +354,39 @@ export function CalendarPerson(props) {
       </h1>
 
       <div className="flex flex-col md:flex-row flex-1">
-        {/* Panel lateral de analistas */}
         <div className="w-full md:w-1/4 bg-white rounded-lg shadow-lg m-4 overflow-hidden">
           <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
             <h2 className="font-bold text-lg text-gray-800">Analistas</h2>
-            <button
-              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors shadow-md"
-              onClick={openModal}
-              title="Agregar analista"
-            >
-              <PersonAddIcon />
-            </button>
+            {(userData?.idGrupo === 1 ||
+              userData?.idGrupo === 18) && (
+                <button
+                  className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors shadow-md"
+                  onClick={openModal}
+                  title="Agregar analista"
+                >
+                  <PersonAddIcon />
+                </button>
+              )}
           </div>
           <div className="overflow-y-auto max-h-96 p-2">
             {menuData.length > 0 ? (
               menuData.map((item, index) => (
                 <div
                   key={index}
-                  className={`mb-2 rounded-md ${
-                    selectedAnalista === item.idAnalistaCredito
-                      ? "bg-blue-50 border-l-4 border-blue-600"
-                      : "hover:bg-gray-50"
-                  }`}
+                  className={`mb-2 rounded-md ${selectedAnalista === item.idAnalistaCredito
+                    ? "bg-blue-50 border-l-4 border-blue-600"
+                    : "hover:bg-gray-50"
+                    }`}
                 >
                   <button
                     className="flex items-center w-full text-left py-3 px-4 rounded-md transition-colors"
                     onClick={() => handleMenuClick(item.Nombre, item)}
                   >
                     <span
-                      className={`${
-                        selectedAnalista === item.idAnalistaCredito
-                          ? "font-medium text-blue-800"
-                          : "text-gray-700"
-                      }`}
+                      className={`${selectedAnalista === item.idAnalistaCredito
+                        ? "font-medium text-blue-800"
+                        : "text-gray-700"
+                        }`}
                     >
                       {item.Nombre}
                     </span>
@@ -393,7 +395,7 @@ export function CalendarPerson(props) {
               ))
             ) : (
               <p className="text-center py-4 text-gray-500">
-                No se encontraron analistas
+                {isLoading ? "Cargando analistas..." : "No se encontraron analistas"}
               </p>
             )}
           </div>
@@ -487,11 +489,10 @@ export function CalendarPerson(props) {
                         return (
                           <div
                             key={index}
-                            className={`p-2 text-center font-semibold rounded-t-md flex flex-col items-center justify-start gap-1 ${
-                              !dayEditable
-                                ? "bg-gray-200 text-gray-500"
-                                : "bg-blue-50 text-blue-800"
-                            }`}
+                            className={`p-2 text-center font-semibold rounded-t-md flex flex-col items-center justify-start gap-1 ${!dayEditable
+                              ? "bg-gray-200 text-gray-500"
+                              : "bg-blue-50 text-blue-800"
+                              }`}
                           >
                             {/* Selector de acciones */}
                             {dayEditable && (
@@ -538,23 +539,22 @@ export function CalendarPerson(props) {
                             return (
                               <div key={dayIndex} className="text-center p-1">
                                 <button
-                                  className={`w-full h-10 rounded-md transition-all duration-200 flex items-center justify-center ${
-                                    isActive
-                                      ? editable
-                                        ? "bg-green-500 hover:bg-green-600 shadow-sm"
-                                        : "bg-green-400 cursor-not-allowed"
-                                      : !editable
+                                  className={`w-full h-10 rounded-md transition-all duration-200 flex items-center justify-center ${isActive
+                                    ? editable
+                                      ? "bg-green-500 hover:bg-green-600 shadow-sm"
+                                      : "bg-green-400 cursor-not-allowed"
+                                    : !editable
                                       ? "bg-gray-100 cursor-not-allowed opacity-50"
                                       : "bg-gray-200 hover:bg-gray-300"
-                                  }`}
+                                    }`}
                                   onClick={() => handleButtonClick(day, hour)}
                                   disabled={!editable}
                                   title={
                                     !editable
                                       ? "Horario pasado"
                                       : isActive
-                                      ? "Disponible"
-                                      : "No disponible"
+                                        ? "Disponible"
+                                        : "No disponible"
                                   }
                                 >
                                   {isActive ? (

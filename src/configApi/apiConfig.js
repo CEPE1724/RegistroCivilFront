@@ -1,8 +1,11 @@
 import { get } from "react-hook-form";
 
 
-//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
-const API_BASE_URL = "http://192.168.5.94:3025/api/v1/"
+
+const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "http://192.168.2.22:3008/api/v1/"
+
+
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -169,4 +172,5 @@ export const APIURL = {
   updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
   validarTelefono : (telefono) => `${API_BASE_URL}lista-negra-cell/telefono/${telefono}`,
   validarCedulaCognos : (cedula) => `${API_BASE_URL}cre-solicitud-web/solicitud-Cogno/${cedula}`,
+  analistacreditoUsuarioRol: (igrupo, analista) => `${API_BASE_URL}analistacredito/usuario/${igrupo}/${analista}`,
 };
