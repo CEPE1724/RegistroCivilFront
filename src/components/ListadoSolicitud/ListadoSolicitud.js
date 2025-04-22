@@ -224,26 +224,22 @@ export function ListadoSolicitud() {
       );
       const { verified, distance } = response.data;
 
-
       // ✅ Guarda los datos de verificación
       setResultadoVerificacion(response.data);
 
       if (verified) {
         await patchSolicitud(selectedRow?.id, 2);
-
         enqueueSnackbar("Identidad verificada correctamente.", {
           variant: "success",
         });
       } else {
         enqueueSnackbar(
           `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
-
           { variant: "error" }
         );
       }
 
       setOpenRegistroCivil(true);
-
     } catch (err) {
       console.error("Error durante la verificación facial:", err);
       enqueueSnackbar("Error durante la verificación facial.", {
@@ -253,7 +249,6 @@ export function ListadoSolicitud() {
       setLoadingVerificacion(false);
     }
   };
-
 
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
@@ -277,9 +272,7 @@ export function ListadoSolicitud() {
     }
 
     try {
-
       let updatedUrl = ""; // ✅ lo declaramos aquí arriba
-
 
       const fileUploadResponse = await uploadFile(
         fileToUpload,
@@ -290,7 +283,6 @@ export function ListadoSolicitud() {
       );
 
       if (fileUploadResponse) {
-
         updatedUrl = fileUploadResponse.url;
 
         // 1. Actualizar la imagen localmente
@@ -327,19 +319,24 @@ export function ListadoSolicitud() {
           setCedula(cedula); // <== AÑADIR ESTO
           setDactilar(dactilar);
           const dataFOTO = await fetchImagenRegistroCivil(cedula, dactilar);
-          if (dataFOTO && typeof dataFOTO === "string" && dataFOTO.trim() !== "" ) {
+          if (
+            dataFOTO &&
+            typeof dataFOTO === "string" &&
+            dataFOTO.trim() !== ""
+          ) {
             await handleVerificarIdentidad(updatedUrl, dataFOTO);
           } else {
-            enqueueSnackbar("No se pudo obtener imagen del Registro Civil. Se continuara manualmente ", {
-              variant: "error",
-            });
+            enqueueSnackbar(
+              "No se pudo obtener imagen del Registro Civil. Se continuara manualmente ",
+              {
+                variant: "error",
+              }
+            );
 
             setOpenRegistroCivil(true);
-
           }
         }
       }
-
     } catch (error) {
       alert(error.message);
     }
@@ -433,6 +430,90 @@ export function ListadoSolicitud() {
     const permiso = permisos.find(
       (p) => p.Permisos === `EDITAR DOCUMENTAL ${estado}`
     );
+    // Retornar true si no existe el permiso o si no está activo
+    return !permiso || !permiso.Activo;
+  };
+
+  const [openDialog2, setOpenDialog2] = useState(false);
+  const [currentAction, setCurrentAction] = useState(null); // Estado para saber qué acción se va a realizar
+  const [currentData, setCurrentData] = useState([]);
+
+  const handleConfirm = () => {
+    if (currentAction === "estado") {
+      handleApproveEstado(currentData);
+    } else if (currentAction === "resultado") {
+      handleApproveResultado(currentData);
+    }
+    setOpenDialog2(false); // Cierra el diálogo
+  };
+
+
+  const fetchInsertarDatos = async (tipo , data , estado) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+        idCre_SolicitudWeb: data,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+
+
+  const handleApproveEstado = (data) => {
+    patchSolicitudEstadoyResultado(data.id, { Estado: 2 });
+    fetchInsertarDatos(6 , data.id , 2) ;
+    fetchSolicitudes();
+    
+  };
+
+  const handleApproveResultado = (data) => {
+    patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    fetchInsertarDatos(7 , data.id , 1);
+    fetchSolicitudes();
+  };
+
+  const patchSolicitudEstadoyResultado = async (
+    idSolicitud,
+    camposActualizar
+  ) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        camposActualizar, // Esto puede ser { Estado: 2 } o { Resultado: 1 }
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+    }
+  };
+
+  const permisoAprobarResultado = (data) => {
+    const permiso = permisos.find((p) => p.Permisos === `EDITAR RESULTADO`);
+    // Retornar true si no existe el permiso o si no está activo
+    return !permiso || !permiso.Activo;
+  };
+
+  const permisoAprobarEstado = (data) => {
+    const permiso = permisos.find((p) => p.Permisos === `EDITAR ESTADO`);
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
   };
@@ -1156,8 +1237,11 @@ export function ListadoSolicitud() {
       idEstadoVerificacionDocumental: registro.idEstadoVerificacionDocumental,
       estadoVerifD: registro.idEstadoVerificacionDocumental,
     };
-  
-    if (registro.idEstadoVerificacionDocumental === 2 || registro.idEstadoVerificacionDocumental === 4) {
+
+    if (
+      registro.idEstadoVerificacionDocumental === 2 ||
+      registro.idEstadoVerificacionDocumental === 4
+    ) {
       navigate("/gestorDocumentos", {
         replace: true,
         state: stateData,
@@ -1169,7 +1253,7 @@ export function ListadoSolicitud() {
       });
     }
   };
-  
+
   const handleTelefonica = (registro) => {
     navigate("/telefonicaList", {
       replace: true,
@@ -1584,8 +1668,8 @@ export function ListadoSolicitud() {
                       }}
                     >
                       <TableCell align="center">
-              
-                      {data.NumeroSolicitud}</TableCell>
+                        {data.NumeroSolicitud}
+                      </TableCell>
                       <TableCell align="center">{data.nombre}</TableCell>
                       <TableCell align="center">{data.cedula}</TableCell>
                       <TableCell align="center">
@@ -1600,14 +1684,16 @@ export function ListadoSolicitud() {
                             sx={{
                               position: "relative",
                               display: "inline-block",
-                              // Cuando el usuario haga hover sobre este contenedor:
-                              "&:hover .approveOverlay": {
-                                transform: "translateY(0)",
-                                opacity: 1,
-                              },
+                              ...(permisoAprobarEstado(data)
+                                ? {}
+                                : {
+                                    "&:hover .approveOverlay": {
+                                      transform: "translateY(0)",
+                                      opacity: 1,
+                                    },
+                                  }),
                             }}
                           >
-                            {/* El badge rojo */}
                             <Box
                               component="span"
                               sx={{
@@ -1624,47 +1710,49 @@ export function ListadoSolicitud() {
                             >
                               {data.estado}
                             </Box>
-
-                            {/* Overlay oculto que aparece con la animación */}
-                            <Box
-                              className="approveOverlay"
-                              onClick={() => handleApprove(data)}
-                              sx={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                width: "100%",
-                                height: "100%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                bgcolor: "#22c55e",
-                                borderRadius: "9999px",
-                                cursor: "pointer",
-                                // Iniciamos oculto y abajo
-                                transform: "translateY(100%)",
-                                opacity: 0,
-                                transition:
-                                  "transform 0.3s ease, opacity 0.3s ease",
-                              }}
-                            >
-                              <Typography
+                            {!permisoAprobarEstado(data) && (
+                              <Box
+                                className="approveOverlay"
+                                onClick={() => {
+                                  setCurrentAction("estado");
+                                  setCurrentData(data); // Guarda la fila actual
+                                  setOpenDialog2(true); // Abrir el diálogo para confirmar
+                                }}
                                 sx={{
-                                  color: "#ffffff",
-                                  fontSize: "0.75rem",
-                                  fontWeight: 600,
+                                  position: "absolute",
+                                  top: 0,
+                                  left: 0,
+                                  width: "100%",
+                                  height: "100%",
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: 0.5,
+                                  justifyContent: "center",
+                                  bgcolor: "#22c55e",
+                                  borderRadius: "9999px",
+                                  cursor: "pointer",
+                                  transform: "translateY(100%)",
+                                  opacity: 0,
+                                  transition:
+                                    "transform 0.3s ease, opacity 0.3s ease",
                                 }}
                               >
-                                <CheckCircleIcon fontSize="small" />
-                                APROBAR?
-                              </Typography>
-                            </Box>
+                                <Typography
+                                  sx={{
+                                    color: "#ffffff",
+                                    fontSize: "0.75rem",
+                                    fontWeight: 600,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 0.5,
+                                  }}
+                                >
+                                  <CheckCircleIcon fontSize="small" />
+                                  APROBAR?
+                                </Typography>
+                              </Box>
+                            )}
                           </Box>
                         ) : (
-                          // Aquí tu renderizado normal para otros estados...
                           <Box
                             component="span"
                             sx={{
@@ -1695,66 +1783,133 @@ export function ListadoSolicitud() {
                             {data.estado}
                           </Box>
                         )}
+
+                        {/* Ícono de los tres puntos y llamada al popover */}
+                        <span
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
+                        >
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 6, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
+
+                        {/* Popover */}
+                        <DocumentStatusPopover
+                          open={
+                            popoverData.open &&
+                            popoverData.selectedRowId === data.id
+                          }
+                          anchorEl={popoverData.anchorEl}
+                          onClose={handlePopoverClose}
+                          clienteEstados={clienteEstados}
+                          estadoColores={estadoColores}
+                        />
                       </TableCell>
                       <TableCell align="center">{data.tipoCliente}</TableCell>
                       <TableCell align="center">
-  {data.resultado === 0 ? (
-    <Box
-      sx={{
-        position: "relative",
-        width: 24,
-        height: 24,
-        display: "inline-block",
-        "&:hover .approveOverlay": {
-          opacity: 1,
-          transform: "translateY(0)",
-        },
-      }}
-    >
-      {/* Ícono ❌ de fondo */}
-      <HighlightOffIcon
-        sx={{
-          color: "#DC3545",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: 24,
-          height: 24,
-        }}
-      />
+                        {data.resultado === 0 ? (
+                          <Box
+                            sx={{
+                              position: "relative",
+                              width: 24,
+                              height: 24,
+                              display: "inline-block",
+                              ...(permisoAprobarResultado(data)
+                                ? {} // Sin efectos si no tiene permiso
+                                : {
+                                    "&:hover .approveOverlay": {
+                                      opacity: 1,
+                                      transform: "translateY(0)",
+                                    },
+                                  }),
+                            }}
+                          >
+                            {/* Ícono ❌ */}
+                            <HighlightOffIcon
+                              sx={{
+                                color: "#DC3545",
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: 24,
+                                height: 24,
+                              }}
+                            />
 
-      {/* Ícono ✅ encima (oculto por defecto) */}
-      <Box
-        className="approveOverlay"
-        onClick={() => handleApprove(data)}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: 24,
-          height: 24,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "50%",
-          backgroundColor: "#28A745",
-          color: "#fff",
-          cursor: "pointer",
-          opacity: 0,
-          transform: "translateY(100%)",
-          transition: "opacity 0.3s ease, transform 0.3s ease",
-        }}
-      >
-        <CheckCircleIcon sx={{ fontSize: 20 }} />
-      </Box>
-    </Box>
-  ) : data.resultado === 1 ? (
-    <CheckCircleIcon sx={{ color: "#28A745" }} />
-  ) : null}
-</TableCell>
+                            {/* Overlay solo si tiene permiso */}
+                            {!permisoAprobarResultado(data) && (
+                              <Box
+                                className="approveOverlay"
+                                onClick={() => {
+                                  setCurrentAction("resultado");
+                                  setCurrentData(data); // Guarda la fila actual
+                                  setOpenDialog2(true); // Abrir el diálogo para confirmar
+                                }}
+                                sx={{
+                                  position: "absolute",
+                                  top: 0,
+                                  left: 0,
+                                  width: 24,
+                                  height: 24,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#28A745",
+                                  color: "#fff",
+                                  cursor: "pointer",
+                                  opacity: 0,
+                                  transform: "translateY(100%)",
+                                  transition:
+                                    "opacity 0.3s ease, transform 0.3s ease",
+                                }}
+                              >
+                                <CheckCircleIcon sx={{ fontSize: 20 }} />
+                              </Box>
+                            )}
+                          </Box>
+                        ) : data.resultado === 1 ? (
+                          <CheckCircleIcon sx={{ color: "#28A745" }} />
+                        ) : null}
+
+                        {/* Ícono de acciones y popover */}
+                        <span
+                          style={{
+                            pointerEvents: estaDeshabilitado(data)
+                              ? "none"
+                              : "auto",
+                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          }}
+                        >
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 7, data)
+                            } // identificador para "resultado"
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
+
+                        <DocumentStatusPopover
+                          open={
+                            popoverData.open &&
+                            popoverData.selectedRowId === data.id
+                          }
+                          anchorEl={popoverData.anchorEl}
+                          onClose={handlePopoverClose}
+                          clienteEstados={clienteEstados}
+                          estadoColores={estadoColores}
+                        />
+                      </TableCell>
+
                       <TableCell align="center">{data.entrada}</TableCell>
-
-     
 
                       {/* Detalles */}
                       <TableCell align="center">
@@ -1781,297 +1936,299 @@ export function ListadoSolicitud() {
 
                       {/* Solicitudes */}
                       <TableCell align="center">
-                      <div>
-                        <span>
-                        <IconButton
-                          onClick={() => handlesolicitud(data)}
-                          disabled={
-                            estaDeshabilitado(data) ||
-                            estadoDeshabilitadoporPermisos(data)
-                          }
-                          size="small"
-                          sx={{
-                            opacity: estaDeshabilitado(data) ? 0.4 : 1,
-                            bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                            "&:hover": {
-                              bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          {getSolicitudIconByEstado(
-                            data.idEstadoVerificacionSolicitud
-                          )}
-                        </IconButton>
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 1, data)
-                            }
-                            style={{ cursor: "pointer" }}
+                        <div>
+                          <span>
+                            <IconButton
+                              onClick={() => handlesolicitud(data)}
+                              disabled={
+                                estaDeshabilitado(data) ||
+                                estadoDeshabilitadoporPermisos(data)
+                              }
+                              size="small"
+                              sx={{
+                                opacity: estaDeshabilitado(data) ? 0.4 : 1,
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {getSolicitudIconByEstado(
+                                data.idEstadoVerificacionSolicitud
+                              )}
+                            </IconButton>
+                            <span
+                              style={{
+                                pointerEvents: estaDeshabilitado(data)
+                                  ? "none"
+                                  : "auto",
+                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              }}
+                            >
+                              <MoreVertIcon
+                                onClick={(event) =>
+                                  handlePopoverOpen(event, 1, data)
+                                }
+                                style={{ cursor: "pointer" }}
+                              />
+                            </span>
+                          </span>
+
+                          <DocumentStatusPopover
+                            open={
+                              popoverData.open &&
+                              popoverData.selectedRowId === data.id
+                            } // Verificar si el popover corresponde a esta fila
+                            anchorEl={popoverData.anchorEl}
+                            onClose={handlePopoverClose}
+                            clienteEstados={clienteEstados}
+                            estadoColores={estadoColores}
                           />
-                        </span>
-                      </span>
-
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
-                      />
-                    </div>
-                        
-
+                        </div>
                       </TableCell>
 
                       {/* Documental */}
                       <TableCell align="center">
                         <div>
                           <span>
-                        <IconButton
-                          onClick={() => handledocumentos(data)}
-                          disabled={
-                           //// data.idEstadoVerificacionDocumental === 2 ||
-                            estaDeshabilitado(data) ||
-                            estadoDeshabilitadoDocumental(data) ||
-                            verificacionSolicitud(data)
-                          }
-                          size="small"
-                          sx={{
-                            opacity: estaDeshabilitado(data) ? 0.4 : 1,
-                            bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                            "&:hover": {
-                              bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          {getIconByEstado(data.idEstadoVerificacionDocumental)}
-                        </IconButton>
+                            <IconButton
+                              onClick={() => handledocumentos(data)}
+                              disabled={
+                                //// data.idEstadoVerificacionDocumental === 2 ||
+                                estaDeshabilitado(data) ||
+                                estadoDeshabilitadoDocumental(data) ||
+                                verificacionSolicitud(data)
+                              }
+                              size="small"
+                              sx={{
+                                opacity: estaDeshabilitado(data) ? 0.4 : 1,
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {getIconByEstado(
+                                data.idEstadoVerificacionDocumental
+                              )}
+                            </IconButton>
 
-                           {/* InfoIcon al lado del IconButton */}
-                           <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 3, data)
-                            }
-                            style={{ cursor: "pointer" }}
+                            {/* InfoIcon al lado del IconButton */}
+                            <span
+                              style={{
+                                pointerEvents: estaDeshabilitado(data)
+                                  ? "none"
+                                  : "auto",
+                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              }}
+                            >
+                              <MoreVertIcon
+                                onClick={(event) =>
+                                  handlePopoverOpen(event, 3, data)
+                                }
+                                style={{ cursor: "pointer" }}
+                              />
+                            </span>
+                          </span>
+
+                          <DocumentStatusPopover
+                            open={
+                              popoverData.open &&
+                              popoverData.selectedRowId === data.id
+                            } // Verificar si el popover corresponde a esta fila
+                            anchorEl={popoverData.anchorEl}
+                            onClose={handlePopoverClose}
+                            clienteEstados={clienteEstados}
+                            estadoColores={estadoColores}
                           />
-                        </span>
-                      </span>
-
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
-                      />
-                    </div>
+                        </div>
                       </TableCell>
 
                       {/* Telefónica */}
                       <TableCell align="center">
                         <div>
                           <span>
-                        <IconButton
-                          onClick={() => handleTelefonica(data)}
-                          disabled={
-                            data.idEstadoVerificacionTelefonica === 1 ||
-                            estaDeshabilitado(data) ||
-                            verificacionSolicitud(data) ||
-                            estadoDeshabilitadotelefonica(data)
-                          }
-                          size="small"
-                          sx={{
-                            opacity: estaDeshabilitado(data) ? 0.4 : 1,
-                            bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                            "&:hover": {
-                              bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          {getPhoneIconByEstado(
-                            data.idEstadoVerificacionTelefonica
-                          )}
-                        </IconButton>
+                            <IconButton
+                              onClick={() => handleTelefonica(data)}
+                              disabled={
+                                data.idEstadoVerificacionTelefonica === 1 ||
+                                estaDeshabilitado(data) ||
+                                verificacionSolicitud(data) ||
+                                estadoDeshabilitadotelefonica(data)
+                              }
+                              size="small"
+                              sx={{
+                                opacity: estaDeshabilitado(data) ? 0.4 : 1,
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {getPhoneIconByEstado(
+                                data.idEstadoVerificacionTelefonica
+                              )}
+                            </IconButton>
                             {/* InfoIcon al lado del IconButton */}
                             <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 2, data)
-                            }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
-                      </span>
+                              style={{
+                                pointerEvents: estaDeshabilitado(data)
+                                  ? "none"
+                                  : "auto",
+                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              }}
+                            >
+                              <MoreVertIcon
+                                onClick={(event) =>
+                                  handlePopoverOpen(event, 2, data)
+                                }
+                                style={{ cursor: "pointer" }}
+                              />
+                            </span>
+                          </span>
 
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
-                      />
-                    </div>
+                          <DocumentStatusPopover
+                            open={
+                              popoverData.open &&
+                              popoverData.selectedRowId === data.id
+                            } // Verificar si el popover corresponde a esta fila
+                            anchorEl={popoverData.anchorEl}
+                            onClose={handlePopoverClose}
+                            clienteEstados={clienteEstados}
+                            estadoColores={estadoColores}
+                          />
+                        </div>
                       </TableCell>
 
                       {/* Domicilio */}
                       <TableCell align="center">
                         <div>
                           <span>
-                        <IconButton
-                          onClick={() =>
-                            handleOpenModalVerificacion(data, "domicilio")
-                          }
-                          disabled={
-                            data.idEstadoVerificacionDocumental !== 4 ||
-                            data.Domicilio === false
-                          }
-                          size="small"
-                          sx={{
-                            opacity:
-                              estaDeshabilitado(data) ||
-                              verificacionSolicitud(data)
-                                ? 0.4
-                                : 1,
-                            bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                            "&:hover": {
-                              bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          {getIconDomicilio(data.idEstadoVerificacionDomicilio)}
-                        </IconButton>
+                            <IconButton
+                              onClick={() =>
+                                handleOpenModalVerificacion(data, "domicilio")
+                              }
+                              disabled={
+                                data.idEstadoVerificacionDocumental !== 4 ||
+                                data.Domicilio === false
+                              }
+                              size="small"
+                              sx={{
+                                opacity:
+                                  estaDeshabilitado(data) ||
+                                  verificacionSolicitud(data)
+                                    ? 0.4
+                                    : 1,
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {getIconDomicilio(
+                                data.idEstadoVerificacionDomicilio
+                              )}
+                            </IconButton>
 
-                         {/* InfoIcon al lado del IconButton */}
+                            {/* InfoIcon al lado del IconButton */}
 
-                         <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 4, data)
-                            }
-                            style={{ cursor: "pointer" }}
+                            <span
+                              style={{
+                                pointerEvents: estaDeshabilitado(data)
+                                  ? "none"
+                                  : "auto",
+                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              }}
+                            >
+                              <MoreVertIcon
+                                onClick={(event) =>
+                                  handlePopoverOpen(event, 4, data)
+                                }
+                                style={{ cursor: "pointer" }}
+                              />
+                            </span>
+                          </span>
+
+                          <DocumentStatusPopover
+                            open={
+                              popoverData.open &&
+                              popoverData.selectedRowId === data.id
+                            } // Verificar si el popover corresponde a esta fila
+                            anchorEl={popoverData.anchorEl}
+                            onClose={handlePopoverClose}
+                            clienteEstados={clienteEstados}
+                            estadoColores={estadoColores}
                           />
-                        </span>
-                      </span>
-
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
-                      />
-                    </div>
+                        </div>
                       </TableCell>
 
                       {/* Laborales */}
                       <TableCell align="center">
                         <div>
                           <span>
-                        <IconButton
-                          onClick={() =>
-                            handleOpenModalVerificacion(data, "trabajo")
-                          }
-                          disabled={
-                            verificacionSolicitud(data) ||
-                            data.Laboral === false
-                          }
-                          size="small"
-                          sx={{
-                            opacity:
-                              verificacionSolicitud(data) ||
-                              data.Laboral === false
-                                ? 0.2
-                                : 1,
-                            bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                            "&:hover": {
-                              bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                              transform: "scale(1.1)",
-                            },
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          {getIconLaboral(data.idEstadoVerificacionTerrena)}
-                        </IconButton>
+                            <IconButton
+                              onClick={() =>
+                                handleOpenModalVerificacion(data, "trabajo")
+                              }
+                              disabled={
+                                verificacionSolicitud(data) ||
+                                data.Laboral === false
+                              }
+                              size="small"
+                              sx={{
+                                opacity:
+                                  verificacionSolicitud(data) ||
+                                  data.Laboral === false
+                                    ? 0.2
+                                    : 1,
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              {getIconLaboral(data.idEstadoVerificacionTerrena)}
+                            </IconButton>
 
-                        {/* InfoIcon al lado del IconButton */}
-                        <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
-                        >
-                          <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 4, data)
-                            }
-                            style={{ cursor: "pointer" }}
+                            {/* InfoIcon al lado del IconButton */}
+                            <span
+                              style={{
+                                pointerEvents: estaDeshabilitado(data)
+                                  ? "none"
+                                  : "auto",
+                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              }}
+                            >
+                              <MoreVertIcon
+                                onClick={(event) =>
+                                  handlePopoverOpen(event, 4, data)
+                                }
+                                style={{ cursor: "pointer" }}
+                              />
+                            </span>
+                          </span>
+
+                          <DocumentStatusPopover
+                            open={
+                              popoverData.open &&
+                              popoverData.selectedRowId === data.id
+                            } // Verificar si el popover corresponde a esta fila
+                            anchorEl={popoverData.anchorEl}
+                            onClose={handlePopoverClose}
+                            clienteEstados={clienteEstados}
+                            estadoColores={estadoColores}
                           />
-                        </span>
-                      </span>
-
-                      <DocumentStatusPopover
-                        open={
-                          popoverData.open &&
-                          popoverData.selectedRowId === data.id
-                        } // Verificar si el popover corresponde a esta fila
-                        anchorEl={popoverData.anchorEl}
-                        onClose={handlePopoverClose}
-                        clienteEstados={clienteEstados}
-                        estadoColores={estadoColores}
-                      />
-                    </div>
+                        </div>
                       </TableCell>
 
                       {/* Analista */}
@@ -2526,7 +2683,7 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-          {selectedRow &&
+          {/* {selectedRow &&
             selectedRow.imagen &&
             selectedRow.imagen !== "prueba" &&
             puedeAprobar(selectedRow) && (
@@ -2550,7 +2707,7 @@ export function ListadoSolicitud() {
               >
                 Aprobar
               </Button>
-            )}
+            )} */}
         </DialogActions>
         {loadingVerificacion && <Loader />}
       </Dialog>
@@ -2649,6 +2806,25 @@ export function ListadoSolicitud() {
           }}
           resultadoVerificacion={resultadoVerificacion}
         />
+      </Dialog>
+
+      {/* Dialog de confirmación */}
+      <Dialog open={openDialog2} onClose={() => setOpenDialog2(false)}>
+        <DialogTitle>Confirmar acción</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de cambiar el{" "}
+            {currentAction === "estado" ? "estado" : "resultado"}?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog2(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirm} color="primary">
+            Confirmar
+          </Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

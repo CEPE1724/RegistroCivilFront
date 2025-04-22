@@ -71,6 +71,22 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 			5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
       },
 
+      6: { //// ESTADo
+        2 : { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
+        4:{label: "REchazado" , icon: <CancelIcon/> , color: red[500]},
+  
+
+       },
+
+
+
+      7: /// Resultado
+      {
+        0: { label: "No aplica", icon: <CancelIcon />, color: red[500] },
+        1: { label: "APlica", icon: <VerifiedIcon />, color: blue[500] }
+
+      } 
+
     };
 
     // Buscar el estado correspondiente según el tipo de solicitud y estado
