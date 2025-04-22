@@ -170,4 +170,5 @@ export const APIURL = {
   updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
   validarTelefono : (telefono) => `${API_BASE_URL}lista-negra-cell/telefono/${telefono}`,
   validarCedulaCognos : (cedula) => `${API_BASE_URL}cre-solicitud-web/solicitud-Cogno/${cedula}`,
+  analistacreditoUsuarioRol: (igrupo, analista) => `${API_BASE_URL}analistacredito/usuario/${igrupo}/${analista}`,
 };

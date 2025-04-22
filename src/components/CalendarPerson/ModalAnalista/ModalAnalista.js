@@ -34,7 +34,6 @@ export function ModalAnalista({ isOpen, onClose }) {
     // Función para manejar el click en Agregar
     const handleAgregar = async (usuario) => {
 
-
         const data = {
             idUsuario: usuario.idUsuario, // Asegúrate de que 'usuario.id' esté correctamente asignado según el objeto
             Nombre: usuario.Nombre,
