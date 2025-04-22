@@ -235,9 +235,13 @@ console.log("initialValues", initialValues);
       .map((field) => [field.name, ""])
   );
 
+  useEffect(() => {
+    console.log('initialValues updated:', initialValues);
+  }, [initialValues]);
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema,
+    enableReinitialize: true, 
     onSubmit: async (values) => {
     //   if (isOtpVerified) {
         // setIsSubmitting(true);

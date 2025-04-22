@@ -130,21 +130,43 @@ export default function CreditoForm() {
   }, []);
 
   useEffect(() => {
-    // Cuando dataCogno esté disponible, actualizamos los valores iniciales
     if (dataRecibir) {
-      setInitialValues({
-        PrimerNombre: dataRecibir.primerNombre || '',
-        SegundoNombre: dataRecibir.segundoNombre || '',
-        ApellidoPaterno: dataRecibir.apellidoPaterno || '',
-        ApellidoMaterno: dataRecibir.apellidoMaterno || '',
-        FechaNacimeinto: dataRecibir.fechaNacimiento || '', // Asumiendo que también lo llenas
-        Edad: dataRecibir.edad || '', // Edad
-        // Agregar otros campos según la estructura de dataCogno
-      });
+      console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
+  
+      setInitialValues((prevValues) => ({
+        // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
+        PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
+        SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
+        ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
+        ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
+        FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
+        Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
+        Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
+        // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
+        NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
+        Bodega: prevValues.Bodega || '',  // Mantener el valor previo
+  
+        // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
+        idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
+        idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
+        CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
+        Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
+        Email: prevValues.Email || '',  // Siempre tomar el valor previo
+        idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
+        idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
+        idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
+        bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
+        bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
+        Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
+        bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
+        bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
+        idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
+        idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
+        otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
+      }));
     }
-    console.log("Data Recibir:", dataRecibir);  // Solo para depuración
-  }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que dataCogno cambia
-
+  }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
+  
   const handleSituacionLaboralChange = (selectedOption) => {
     fetchActEconomina(selectedOption);  // Realizamos la llamada para obtener la actividad económica
   };
@@ -164,22 +186,26 @@ export default function CreditoForm() {
     const cedula = event.target.value.trim();
     if (cedula.length === 10) {
       setLoading(true);  // Activamos el loading
+  
       try {
         const datosCogno = await fecthDatosCogno(cedula);
-       
-
+        
         if (datosCogno.codigo === "OK") {
-          setDataRecibir(datosCogno);
+          setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
+        } else {
+          enqueueSnackbar("Datos no encontrados o error en la respuesta", { variant: "warning" });
         }
-
       } catch (error) {
         console.error("Error al obtener datos de Cogno:", error);
         enqueueSnackbar("Error al obtener datos de Cogno", { variant: "error" });
       } finally {
         setLoading(false);  // Desactivamos el loading después de la llamada
       }
+    } else {
+      setDataRecibir(null);  // Limpiamos el estado si la cédula no tiene el formato correcto
     }
   };
+  
 
   const [initialValues, setInitialValues] = useState({
     // Estado inicial para los valores del formulario
@@ -205,7 +231,9 @@ export default function CreditoForm() {
     bPoliticas: false,
     idProductos: null,
     idCre_TiempoVivienda: null,
-    otp_code: ""
+    otp_code: "",
+    FechaNacimeinto: "",
+    Edad:"",
   });
 
 
@@ -218,12 +246,7 @@ export default function CreditoForm() {
       disabled: true,
       hidden: true,
     },
-    {
-      label: "Bodega",
-      name: "Bodega",
-      type: "select",
-      options: dataBodega,
-    },
+    
     {
       label: "ID Vendedor",
       name: "idVendedor",
@@ -232,20 +255,27 @@ export default function CreditoForm() {
       hidden: true,
     },
     {
+      label: "Cédula", name: "Cedula", type: "text",
+      onBlur: handleCedulaChange, // Llama a la función al perder el foco
+    },
+
+    { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
+    { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
+    { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
+    { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
+    { label: "Código Dactilar", name: "CodDactilar", type: "text" },
+    {
+      label: "Bodega",
+      name: "Bodega",
+      type: "select",
+      options: dataBodega,
+    },
+    {
       label: "Tipo de Consulta",
       name: "idCompraEncuesta",
       type: "select",
       options: tipoConsulta,
     },
-    {
-      label: "Cédula", name: "Cedula", type: "text",
-      onBlur: handleCedulaChange, // Llama a la función al perder el foco
-    },
-    { label: "Código Dactilar", name: "CodDactilar", type: "text" },
-    { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
-    { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
-    { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
-    { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
     { label: "Fecha Nacimiento", name: "FechaNacimeinto", type: "text", disabled: true },
     { label: "Edad", name: "Edad", type: "text", disabled: true },
     { label: "Celular", name: "Celular", type: "text" },
@@ -415,13 +445,16 @@ export default function CreditoForm() {
     try {
       const url = APIURL.validarCedulaCognos(cedula);  // URL para obtener datos de Cogno
       const response = await axios.get(url);
-      console.log("Datos Cogno:", response);  // Solo para depuración
-      return response.data;  // Retornar datos obtenidos
+      if (response.data) {
+        return response.data;  // Devuelve los datos si la respuesta es exitosa
+      }
+      throw new Error("No se encontraron datos para la cédula proporcionada");
     } catch (error) {
       console.error("Error al obtener datos de Cogno:", error.message);
-      throw error;  // Re-lanzar error para manejarlo más tarde
+      throw error;  // Lanzar el error para manejarlo más tarde
     }
   };
+  
 
 
 
@@ -463,6 +496,9 @@ export default function CreditoForm() {
       idEstadoVerificacionDocumental: 1,
       Usuario: userData?.Nombre
     };
+    delete formattedValues.FechaNacimeinto;
+    delete formattedValues.Edad;
+
     try {
       // 1. Crear la solicitud
       const url = APIURL.post_cre_solicitud_web();
@@ -538,6 +574,7 @@ export default function CreditoForm() {
         columns={4}
         includeTermsAndConditions={true}
         formStatus={formStatus}
+        enableReinitialize={true}
       />
     </div>
   );
