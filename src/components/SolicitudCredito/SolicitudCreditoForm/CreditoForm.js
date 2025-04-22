@@ -7,27 +7,30 @@ import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
+
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
-  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+  const { data, fetchBodegaUsuario } = useBodegaUsuario();
+  const { enqueueSnackbar } = useSnackbar();
+  const [formStatus, setFormStatus] = useState(null);
+  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+  const [dataRecibir, setDataRecibir] = useState(null);
+  const [loading, setLoading] = useState(false);  // Estado para mostrar el loading
+  const [cedula, setCedula] = useState("");  // Estado para la cédula
+
+  const IdVendedor = userUsuario?.idPersonal;
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
   const [tiempoVivienda, setTiempoVivienda] = useState([]);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [dataBodega, setDataBodega] = useState([]);
-  const { enqueueSnackbar } = useSnackbar();
-  const [ActEconomina , setActEconomina] = useState([]);
-  const [prevErrors, setPrevErrors] = useState({});
-  const [formStatus, setFormStatus] = useState(null);
-  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
-  const [dataRecibir, setDataRecibir] = useState(null);
-  const IdVendedor = userUsuario?.idPersonal;
+  const [ActEconomina, setActEconomina] = useState([]);
+
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
     const idTipoFactura = 43;
     const fecha = new Date().toISOString();
     const recibeConsignacion = true;
-
     try {
       // Llamada a la función del hook que obtiene los datos
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
@@ -126,11 +129,23 @@ export default function CreditoForm() {
     fetchBodega();
   }, []);
 
-
+  useEffect(() => {
+    // Cuando dataCogno esté disponible, actualizamos los valores iniciales
+    if (dataRecibir) {
+      setInitialValues({
+        PrimerNombre: dataRecibir.primerNombre || '',
+        SegundoNombre: dataRecibir.segundoNombre || '',
+        ApellidoPaterno: dataRecibir.apellidoPaterno || '',
+        ApellidoMaterno: dataRecibir.apellidoMaterno || '',
+        FechaNacimeinto: dataRecibir.fechaNacimiento || '', // Asumiendo que también lo llenas
+        Edad: dataRecibir.edad || '', // Edad
+        // Agregar otros campos según la estructura de dataCogno
+      });
+    }
+    console.log("Data Recibir:", dataRecibir);  // Solo para depuración
+  }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que dataCogno cambia
 
   const handleSituacionLaboralChange = (selectedOption) => {
-   // alert(selectedOption);
-    //setActividadLaboral([selectedOption]);  // Aseguramos que se actualiza el estado con un solo valor
     fetchActEconomina(selectedOption);  // Realizamos la llamada para obtener la actividad económica
   };
 
@@ -145,13 +160,29 @@ export default function CreditoForm() {
     }
   }, [data]);
 
+  const handleCedulaChange = async (event) => {
+    const cedula = event.target.value.trim();
+    if (cedula.length === 10) {
+      setLoading(true);  // Activamos el loading
+      try {
+        const datosCogno = await fecthDatosCogno(cedula);
+       
 
-  if (!actividadLaboral || actividadLaboral.length === 0) {
-    return <p>No se pudo cargar la actividad laboral...</p>;
-  }
+        if (datosCogno.codigo === "OK") {
+          setDataRecibir(datosCogno);
+        }
 
+      } catch (error) {
+        console.error("Error al obtener datos de Cogno:", error);
+        enqueueSnackbar("Error al obtener datos de Cogno", { variant: "error" });
+      } finally {
+        setLoading(false);  // Desactivamos el loading después de la llamada
+      }
+    }
+  };
 
-  const initialValues = {
+  const [initialValues, setInitialValues] = useState({
+    // Estado inicial para los valores del formulario
     NumeroSolicitud: "12345",
     Bodega: null,
     idVendedor: IdVendedor || null,
@@ -174,8 +205,10 @@ export default function CreditoForm() {
     bPoliticas: false,
     idProductos: null,
     idCre_TiempoVivienda: null,
-	otp_code : ""
-  };
+    otp_code: ""
+  });
+
+
 
   const formConfig = [
     {
@@ -190,7 +223,6 @@ export default function CreditoForm() {
       name: "Bodega",
       type: "select",
       options: dataBodega,
-
     },
     {
       label: "ID Vendedor",
@@ -205,22 +237,25 @@ export default function CreditoForm() {
       type: "select",
       options: tipoConsulta,
     },
-
-    { label: "Cédula", name: "Cedula", type: "text" },
+    {
+      label: "Cédula", name: "Cedula", type: "text",
+      onBlur: handleCedulaChange, // Llama a la función al perder el foco
+    },
     { label: "Código Dactilar", name: "CodDactilar", type: "text" },
     { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
     { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
     { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
     { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
+    { label: "Fecha Nacimiento", name: "FechaNacimeinto", type: "text", disabled: true },
+    { label: "Edad", name: "Edad", type: "text", disabled: true },
     { label: "Celular", name: "Celular", type: "text" },
     { label: "Email", name: "Email", type: "email" },
-
     {
       label: "Situacion Laboral",
       name: "idSituacionLaboral",
       type: "select",
       options: actividadLaboral,
-      onchange: handleSituacionLaboralChange , 
+      onchange: handleSituacionLaboralChange,
     },
     {
       label: "Actividad Economica",
@@ -239,7 +274,6 @@ export default function CreditoForm() {
       name: "idCre_TiempoVivienda",
       type: "select",
       options: tiempoVivienda,
-
     },
     {
       label: "Producto",
@@ -252,17 +286,11 @@ export default function CreditoForm() {
         { value: 4, label: "PORTATIL" },
         { value: 5, label: "REFRIGERADOR " },
         { value: 6, label: "TELEVISOR" },
-
       ],
     },
-
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
-
     // { label: "Subir foto", name: "Foto", type: "file" },
-
-
-
   ];
 
   const validationSchema = Yup.object()
@@ -383,6 +411,21 @@ export default function CreditoForm() {
     }
   };
 
+  const fecthDatosCogno = async (cedula) => {
+    try {
+      const url = APIURL.validarCedulaCognos(cedula);  // URL para obtener datos de Cogno
+      const response = await axios.get(url);
+      console.log("Datos Cogno:", response);  // Solo para depuración
+      return response.data;  // Retornar datos obtenidos
+    } catch (error) {
+      console.error("Error al obtener datos de Cogno:", error.message);
+      throw error;  // Re-lanzar error para manejarlo más tarde
+    }
+  };
+
+
+
+
   const fetchConsultaSolicitud = async (idSolicitud) => {
     try {
       const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
@@ -401,7 +444,6 @@ export default function CreditoForm() {
 
   const handleSubmit = async (values) => {
     const fotourl = values.Foto; // URL de la foto que deseas cargar
-
     // Formatear los valores para la API, con conversiones necesarias
     const formattedValues = {
       ...values,
@@ -418,12 +460,9 @@ export default function CreditoForm() {
       CodDactilar: values.CodDactilar?.toUpperCase(),
       idCompraEncuesta: Number(values.idCompraEncuesta),
       idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
-      idEstadoVerificacionDocumental : 1,
+      idEstadoVerificacionDocumental: 1,
       Usuario: userData?.Nombre
     };
-
-
-
     try {
       // 1. Crear la solicitud
       const url = APIURL.post_cre_solicitud_web();
@@ -479,6 +518,16 @@ export default function CreditoForm() {
 
   return (
     <div>
+      {loading && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div className="mr-4">
+              <div className="animate-spin rounded-full border-t-4 border-blue-500 w-12 h-12"></div>
+            </div>
+            <span className="text-lg font-semibold">Consultando cédula...</span>
+          </div>
+        </div>
+      )}
       <ReusableForm
         formConfig={formConfig}
         initialValues={initialValues}
