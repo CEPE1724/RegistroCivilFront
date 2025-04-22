@@ -375,6 +375,31 @@ export const fetchFechaAnalista = async (enqueueSnackbar, setFechaAnalista) => {
 };
 
 
+export const fetchFechaVerificador = async (enqueueSnackbar, setFechaAnalista) => {
+  try {
+    const response = await axios.get(APIURL.getFechaVerificador(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+    setFechaAnalista(
+      response.data.map((item) => ({
+        value: item.idFechaVerificador,
+        label: item.DesdeHasta,
+        desde: item.Desde,
+        hasta: item.Hasta,
+
+      }))
+    );
+  } catch (error) {
+    console.error("Error al obtener fecha verificador", error);
+    enqueueSnackbar("Error al cargar fecha verificador", {
+      variant: "error",
+      preventDuplicate: true,
+    });
+    setFechaAnalista([]);
+  }
+};
+
+
 
 /* select de tipo docuemto */
 export const fetchTipoDocumento = async (enqueueSnackbar, setTipoDocumento) => {

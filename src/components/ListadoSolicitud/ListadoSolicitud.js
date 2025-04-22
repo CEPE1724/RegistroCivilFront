@@ -224,22 +224,26 @@ export function ListadoSolicitud() {
       );
       const { verified, distance } = response.data;
 
+
       // ✅ Guarda los datos de verificación
       setResultadoVerificacion(response.data);
 
       if (verified) {
         await patchSolicitud(selectedRow?.id, 2);
+
         enqueueSnackbar("Identidad verificada correctamente.", {
           variant: "success",
         });
       } else {
         enqueueSnackbar(
           `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
+
           { variant: "error" }
         );
       }
 
       setOpenRegistroCivil(true);
+
     } catch (err) {
       console.error("Error durante la verificación facial:", err);
       enqueueSnackbar("Error durante la verificación facial.", {
@@ -249,6 +253,7 @@ export function ListadoSolicitud() {
       setLoadingVerificacion(false);
     }
   };
+
 
   const handleFileChange = (event) => {
     const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
@@ -272,7 +277,9 @@ export function ListadoSolicitud() {
     }
 
     try {
+
       let updatedUrl = ""; // ✅ lo declaramos aquí arriba
+
 
       const fileUploadResponse = await uploadFile(
         fileToUpload,
@@ -283,6 +290,7 @@ export function ListadoSolicitud() {
       );
 
       if (fileUploadResponse) {
+
         updatedUrl = fileUploadResponse.url;
 
         // 1. Actualizar la imagen localmente
@@ -331,6 +339,7 @@ export function ListadoSolicitud() {
           }
         }
       }
+
     } catch (error) {
       alert(error.message);
     }
@@ -2517,7 +2526,7 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-          {/* {selectedRow &&
+          {selectedRow &&
             selectedRow.imagen &&
             selectedRow.imagen !== "prueba" &&
             puedeAprobar(selectedRow) && (
@@ -2541,7 +2550,7 @@ export function ListadoSolicitud() {
               >
                 Aprobar
               </Button>
-            )} */}
+            )}
         </DialogActions>
         {loadingVerificacion && <Loader />}
       </Dialog>

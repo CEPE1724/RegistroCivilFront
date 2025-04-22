@@ -1,27 +1,12 @@
 import { get } from "react-hook-form";
 
 
-
-
-
-
-
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 const API_BASE_URL = "http://192.168.5.94:3025/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
-
-
-
-
-
-
-
-
-
-
-const SOCKET_BASE_URL = "http://192.168.2.14:3025";
+const SOCKET_BASE_URL = "http://192.168.2.22:3008";
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {
@@ -101,10 +86,15 @@ export const APIURL = {
    getCheckDocumento: (idCreSolicitudWeb, tipoDocumento) =>`${API_BASE_URL}documentos-solicitud/check?idCreSolicitudWeb=${idCreSolicitudWeb}&tipoDocumento=${tipoDocumento}`,
 
   get_analis_cogno: (ci) => `${API_BASE_URL}usuarios/analistas/?Filtro=${ci}`,
+  get_verif_cogno: (ci) => `${API_BASE_URL}usuarios/verificadores/?Filtro=${ci}`,
   post_analista: () => `${API_BASE_URL}analistacredito`,
+  post_verificador: () => `${API_BASE_URL}verificadorcredito`,
   getFechaAnalista: () => `${API_BASE_URL}fecha-analista`,
+  getFechaVerificador: () => `${API_BASE_URL}fecha-verificador`,
   analistacredito: () => `${API_BASE_URL}analistacredito`,
+  verificadorcredito: () => `${API_BASE_URL}verificadorcredito`,
   posthorarioanalista: () => `${API_BASE_URL}horariosanalistas`,
+  posthorarioverificador: () => `${API_BASE_URL}horariosverificadores`,
 
   get_repositorios: (anio, mes) => {
     let url = API_BASE_URL + 'cre-solicitud-web/repositorios';
@@ -134,6 +124,7 @@ export const APIURL = {
 
 
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
+  get_horariosverificadores: () => `${API_BASE_URL}horariosverificadores`,
 
 
   postInsertarCoordenadasprefactura: () => `${API_BASE_URL}coordenadasprefactura/insert`,
@@ -166,7 +157,7 @@ export const APIURL = {
   createRolesAccesos : (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
   listaVendedoresporBodega : (Fecha,idBodega, inivel ) => `${API_BASE_URL}exec-sp/FacturacionListaVendedoresWeb/${Fecha}/${idBodega}/${inivel}`,
   getdocumentosanalista: () => `${API_BASE_URL}cre-solicitud-web/documentosanalista`,
-
+  post_VerificacionTelefonicaMaestro: () => `${API_BASE_URL}cre-verificacion-telefonica-maestro`,
 
   postCompareFaces : () => `${API_PYTHON_BASE_URL}verify-faces`,
 
@@ -175,5 +166,7 @@ export const APIURL = {
   getTelefonos : () => `${API_BASE_URL}lista-negra-cell`,
   //// getTelefonoById     : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
   postTelefono : () => `${API_BASE_URL}lista-negra-cell`,
-  updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`
+  updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
+  validarTelefono : (telefono) => `${API_BASE_URL}lista-negra-cell/telefono/${telefono}`,
+  validarCedulaCognos : (cedula) => `${API_BASE_URL}cre-solicitud-web/solicitud-Cogno/${cedula}`,
 };

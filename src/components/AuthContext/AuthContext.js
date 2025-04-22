@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext, useRef  } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchPerfil } from "../../actions/fetchPerfil"; // Asegúrate de que esta función esté correctamente exportada
 import { APIURL } from "../../configApi/apiConfig";
-
+import { connectToServer } from "../../socket/socket-client"; // Asegúrate de que esta función esté correctamente exportada
 // Crear el contexto
 const AuthContext = createContext();
 
@@ -15,7 +15,22 @@ export const AuthProvider = ({ children }) => {
   const [userUsuario, setUserUsuario] = useState(null); // Para almacenar los datos de la API 'get_nomina'
   const [idMenu, setIdMenu] = useState(localStorage.getItem("rutaUsuario") || null); // Leer idMenu desde localStorage
 
+  const [isConnected, setIsConnected] = useState(false);  // Estado de conexión WebSocket
+  const [connectedClients, setConnectedClients] = useState([]); // Almacena los clientes conectados
+  const socketRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const socket = connectToServer(token); // Conéctate usando el token
+    socketRef.current = socket;
+
+    socket.on("connect", () => setIsConnected(true));
+    socket.on("disconnect", () => setIsConnected(false));
+    socket.on("clients-updated", (clients) => setConnectedClients(clients));
+
+
+    return () => socket.disconnect();
+  }, [token]);
 
   // Effect para revisar la expiración del token
   useEffect(() => {
@@ -123,6 +138,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         idMenu,
          setMenuId,
+         isConnected,
+         connectedClients,
       }}
     >
       {children}

@@ -7,27 +7,30 @@ import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
+
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
-  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+  const { data, fetchBodegaUsuario } = useBodegaUsuario();
+  const { enqueueSnackbar } = useSnackbar();
+  const [formStatus, setFormStatus] = useState(null);
+  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+  const [dataRecibir, setDataRecibir] = useState(null);
+  const [loading, setLoading] = useState(false);  // Estado para mostrar el loading
+  const [cedula, setCedula] = useState("");  // Estado para la cédula
+
+  const IdVendedor = userUsuario?.idPersonal;
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
   const [tiempoVivienda, setTiempoVivienda] = useState([]);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [dataBodega, setDataBodega] = useState([]);
-  const { enqueueSnackbar } = useSnackbar();
-  const [ActEconomina , setActEconomina] = useState([]);
-  const [prevErrors, setPrevErrors] = useState({});
-  const [formStatus, setFormStatus] = useState(null);
-  const [urlCloudstorage, setUrlCloudstorage] = useState(null);
-  const [dataRecibir, setDataRecibir] = useState(null);
-  const IdVendedor = userUsuario?.idPersonal;
+  const [ActEconomina, setActEconomina] = useState([]);
+
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
     const idTipoFactura = 43;
     const fecha = new Date().toISOString();
     const recibeConsignacion = true;
-
     try {
       // Llamada a la función del hook que obtiene los datos
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
@@ -126,11 +129,45 @@ export default function CreditoForm() {
     fetchBodega();
   }, []);
 
-
-
+  useEffect(() => {
+    if (dataRecibir) {
+      console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
+  
+      setInitialValues((prevValues) => ({
+        // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
+        PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
+        SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
+        ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
+        ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
+        FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
+        Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
+        Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
+        // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
+        NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
+        Bodega: prevValues.Bodega || '',  // Mantener el valor previo
+  
+        // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
+        idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
+        idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
+        CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
+        Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
+        Email: prevValues.Email || '',  // Siempre tomar el valor previo
+        idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
+        idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
+        idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
+        bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
+        bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
+        Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
+        bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
+        bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
+        idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
+        idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
+        otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
+      }));
+    }
+  }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
+  
   const handleSituacionLaboralChange = (selectedOption) => {
-   // alert(selectedOption);
-    //setActividadLaboral([selectedOption]);  // Aseguramos que se actualiza el estado con un solo valor
     fetchActEconomina(selectedOption);  // Realizamos la llamada para obtener la actividad económica
   };
 
@@ -145,13 +182,33 @@ export default function CreditoForm() {
     }
   }, [data]);
 
+  const handleCedulaChange = async (event) => {
+    const cedula = event.target.value.trim();
+    if (cedula.length === 10) {
+      setLoading(true);  // Activamos el loading
+  
+      try {
+        const datosCogno = await fecthDatosCogno(cedula);
+        
+        if (datosCogno.codigo === "OK") {
+          setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
+        } else {
+          enqueueSnackbar("Datos no encontrados o error en la respuesta", { variant: "warning" });
+        }
+      } catch (error) {
+        console.error("Error al obtener datos de Cogno:", error);
+        enqueueSnackbar("Error al obtener datos de Cogno", { variant: "error" });
+      } finally {
+        setLoading(false);  // Desactivamos el loading después de la llamada
+      }
+    } else {
+      setDataRecibir(null);  // Limpiamos el estado si la cédula no tiene el formato correcto
+    }
+  };
+  
 
-  if (!actividadLaboral || actividadLaboral.length === 0) {
-    return <p>No se pudo cargar la actividad laboral...</p>;
-  }
-
-
-  const initialValues = {
+  const [initialValues, setInitialValues] = useState({
+    // Estado inicial para los valores del formulario
     NumeroSolicitud: "12345",
     Bodega: null,
     idVendedor: IdVendedor || null,
@@ -174,8 +231,12 @@ export default function CreditoForm() {
     bPoliticas: false,
     idProductos: null,
     idCre_TiempoVivienda: null,
-	otp_code : ""
-  };
+    otp_code: "",
+    FechaNacimeinto: "",
+    Edad:"",
+  });
+
+
 
   const formConfig = [
     {
@@ -185,13 +246,7 @@ export default function CreditoForm() {
       disabled: true,
       hidden: true,
     },
-    {
-      label: "Bodega",
-      name: "Bodega",
-      type: "select",
-      options: dataBodega,
-
-    },
+    
     {
       label: "ID Vendedor",
       name: "idVendedor",
@@ -200,27 +255,37 @@ export default function CreditoForm() {
       hidden: true,
     },
     {
+      label: "Cédula", name: "Cedula", type: "text",
+      onBlur: handleCedulaChange, // Llama a la función al perder el foco
+    },
+
+    { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
+    { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
+    { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
+    { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
+    { label: "Código Dactilar", name: "CodDactilar", type: "text" },
+    {
+      label: "Bodega",
+      name: "Bodega",
+      type: "select",
+      options: dataBodega,
+    },
+    {
       label: "Tipo de Consulta",
       name: "idCompraEncuesta",
       type: "select",
       options: tipoConsulta,
     },
-
-    { label: "Cédula", name: "Cedula", type: "text" },
-    { label: "Código Dactilar", name: "CodDactilar", type: "text" },
-    { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
-    { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
-    { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
-    { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
+    { label: "Fecha Nacimiento", name: "FechaNacimeinto", type: "text", disabled: true },
+    { label: "Edad", name: "Edad", type: "text", disabled: true },
     { label: "Celular", name: "Celular", type: "text" },
     { label: "Email", name: "Email", type: "email" },
-
     {
       label: "Situacion Laboral",
       name: "idSituacionLaboral",
       type: "select",
       options: actividadLaboral,
-      onchange: handleSituacionLaboralChange , 
+      onchange: handleSituacionLaboralChange,
     },
     {
       label: "Actividad Economica",
@@ -239,7 +304,6 @@ export default function CreditoForm() {
       name: "idCre_TiempoVivienda",
       type: "select",
       options: tiempoVivienda,
-
     },
     {
       label: "Producto",
@@ -252,17 +316,11 @@ export default function CreditoForm() {
         { value: 4, label: "PORTATIL" },
         { value: 5, label: "REFRIGERADOR " },
         { value: 6, label: "TELEVISOR" },
-
       ],
     },
-
     { label: "Afiliado", name: "bAfiliado", type: "switch" },
     { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
-
-    { label: "Subir foto", name: "Foto", type: "file" },
-
-
-
+    // { label: "Subir foto", name: "Foto", type: "file" },
   ];
 
   const validationSchema = Yup.object()
@@ -345,7 +403,6 @@ export default function CreditoForm() {
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-      Foto: Yup.string(),
 
       bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
 
@@ -384,6 +441,24 @@ export default function CreditoForm() {
     }
   };
 
+  const fecthDatosCogno = async (cedula) => {
+    try {
+      const url = APIURL.validarCedulaCognos(cedula);  // URL para obtener datos de Cogno
+      const response = await axios.get(url);
+      if (response.data) {
+        return response.data;  // Devuelve los datos si la respuesta es exitosa
+      }
+      throw new Error("No se encontraron datos para la cédula proporcionada");
+    } catch (error) {
+      console.error("Error al obtener datos de Cogno:", error.message);
+      throw error;  // Lanzar el error para manejarlo más tarde
+    }
+  };
+  
+
+
+
+
   const fetchConsultaSolicitud = async (idSolicitud) => {
     try {
       const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
@@ -402,7 +477,6 @@ export default function CreditoForm() {
 
   const handleSubmit = async (values) => {
     const fotourl = values.Foto; // URL de la foto que deseas cargar
-
     // Formatear los valores para la API, con conversiones necesarias
     const formattedValues = {
       ...values,
@@ -419,11 +493,11 @@ export default function CreditoForm() {
       CodDactilar: values.CodDactilar?.toUpperCase(),
       idCompraEncuesta: Number(values.idCompraEncuesta),
       idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
-      idEstadoVerificacionDocumental : 1,
+      idEstadoVerificacionDocumental: 1,
       Usuario: userData?.Nombre
     };
-
-
+    delete formattedValues.FechaNacimeinto;
+    delete formattedValues.Edad;
 
     try {
       // 1. Crear la solicitud
@@ -480,6 +554,16 @@ export default function CreditoForm() {
 
   return (
     <div>
+      {loading && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div className="mr-4">
+              <div className="animate-spin rounded-full border-t-4 border-blue-500 w-12 h-12"></div>
+            </div>
+            <span className="text-lg font-semibold">Consultando cédula...</span>
+          </div>
+        </div>
+      )}
       <ReusableForm
         formConfig={formConfig}
         initialValues={initialValues}
@@ -487,9 +571,10 @@ export default function CreditoForm() {
         onSubmit={handleSubmit}
         onCancel={handleCancel}
         includeButtons={true}
-        columns={3}
+        columns={4}
         includeTermsAndConditions={true}
         formStatus={formStatus}
+        enableReinitialize={true}
       />
     </div>
   );
