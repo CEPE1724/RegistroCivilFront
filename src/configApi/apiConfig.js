@@ -2,12 +2,12 @@ import { get } from "react-hook-form";
 
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
-const API_BASE_URL = "http://192.168.2.22:3008/api/v1/"
+const API_BASE_URL = "http://192.168.2.14:3025/api/v1/"
 
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
-const SOCKET_BASE_URL = "http://192.168.2.22:3008";
+const SOCKET_BASE_URL = "http://192.168.2.14:3025";
 //const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
 export const APIURL = {
@@ -152,7 +152,7 @@ export const APIURL = {
   createRolesAccesos : (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
   listaVendedoresporBodega : (Fecha,idBodega, inivel ) => `${API_BASE_URL}exec-sp/FacturacionListaVendedoresWeb/${Fecha}/${idBodega}/${inivel}`,
   getdocumentosanalista: () => `${API_BASE_URL}cre-solicitud-web/documentosanalista`,
-
+  post_VerificacionTelefonicaMaestro: () => `${API_BASE_URL}cre-verificacion-telefonica-maestro`,
 
   postCompareFaces : () => `${API_PYTHON_BASE_URL}verify-faces`,
 

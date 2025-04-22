@@ -9,7 +9,7 @@ import {
 import { useAuth } from "../../AuthContext/AuthContext";
 const Referencias = forwardRef((props, ref) => {
   const { userData, userUsuario } = useAuth();
-  const { data } = props;
+  const { data, estadoVerificacion } = props;
   const { enqueueSnackbar } = useSnackbar();
   const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
   const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
@@ -266,6 +266,10 @@ const Referencias = forwardRef((props, ref) => {
       setIsLoading(true);
       // 1. Guardar referencia en la API
       await fecthSave(formData);
+      //  agregar tambien a telefonica
+      if (estadoVerificacion === 12) {
+        await fecthVerifTelfMaestr();
+      }
       // 2. Actualizar tiempos de solicitud
       await fetchInsertarDatos();
       // 3. Refrescar datos desde la API después de guardar
@@ -296,6 +300,36 @@ const Referencias = forwardRef((props, ref) => {
       });
     } catch (error) {
       console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+  //api guardar referencias en VerificacionTelefonicaMaestro
+  const fecthVerifTelfMaestr = async () => {
+    try {
+    if (!data.Fecha) {
+      throw new Error("La fecha no está definida");
+    }
+      const fechaFormateada = data.Fecha.split('T')[0];
+      const url = APIURL.post_VerificacionTelefonicaMaestro();
+      await axios.post(url, {
+        Fecha: fechaFormateada,
+        Telefono: formData.celular.toString(),
+        idEstadoOrigenTelefonica: 4,
+        idCre_SolicitudWeb: data.idCre_SolicitudWeb,
+        idWeb_SolicitudGrande: data.idWeb_SolicitudGrande,
+        Observacion: data.PrimerNombre + " " + data.ApellidoPaterno,
+        },{
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente:",{
+      errorResponse: error.response?.data,
+      status: error.response?.status,
+      config: error.config
+      } );
+      throw new Error(`Error al guardar en VerificacionTelefonicaMaestro: ${error.message}`);
     }
   };
 
