@@ -4,7 +4,7 @@ import { APIURL } from "../../configApi/apiConfig";
 import { useSnackbar } from 'notistack';
 import { useAuth } from "../AuthContext/AuthContext";
 
-export  function ListaNegraTelefonos() {
+export function ListaNegraTelefonos() {
     const [telefonos, setTelefonos] = useState([]);
     const [filtro, setFiltro] = useState('');
     const [nuevoNumero, setNuevoNumero] = useState('');
@@ -27,7 +27,9 @@ export  function ListaNegraTelefonos() {
                 id: tel.idListaNegraCell,
                 numero: tel.Telefono,
                 descripcion: tel.Observacion,
-                activo: tel.Activo
+                activo: tel.Activo,
+                Usuario: tel.Usuario,
+                FechaSistema: tel.FechaSistema,
             }));
             setTelefonos(telefonosMapeados);
             setError(null);
@@ -39,8 +41,8 @@ export  function ListaNegraTelefonos() {
         }
     };
 
-    const telefonosFiltrados = telefonos.filter(tel => 
-        tel.numero?.includes(filtro) || 
+    const telefonosFiltrados = telefonos.filter(tel =>
+        tel.numero?.includes(filtro) ||
         tel.descripcion?.toLowerCase().includes(filtro.toLowerCase())
     );
 
@@ -48,11 +50,11 @@ export  function ListaNegraTelefonos() {
         try {
             const telefonoToUpdate = telefonos.find(tel => tel.id === id);
             if (!telefonoToUpdate) return;
-    
+
             const nuevoEstado = !telefonoToUpdate.activo;
-    
+
             await axios.patch(`${APIURL.updateTelefono(id)}`, { activo: nuevoEstado });
-    
+
             setTelefonos(telefonos.map(tel =>
                 tel.id === id ? { ...tel, activo: nuevoEstado } : tel
             ));
@@ -62,37 +64,37 @@ export  function ListaNegraTelefonos() {
         }
     };
 
-   
+
 
     const agregarTelefono = async () => {
         const numero = nuevoNumero.trim();
         const descripcion = nuevaDescripcion.trim();
-    
+
         if (!numero) {
             enqueueSnackbar("El número de teléfono es obligatorio.", { variant: 'warning' });
             return;
         }
-    
+
         if (!/^[0-9]+$/.test(numero)) {
             enqueueSnackbar("El número solo debe contener dígitos numéricos.", { variant: 'warning' });
             return;
         }
-    
+
         if (numero.length !== 10) {
             enqueueSnackbar("El número de teléfono debe tener exactamente 10 dígitos.", { variant: 'warning' });
             return;
         }
-    
+
         if (!descripcion) {
             enqueueSnackbar("La descripción es obligatoria.", { variant: 'warning' });
             return;
         }
-    
+
         if (descripcion.length < 5) {
             enqueueSnackbar("La descripción debe tener al menos 5 caracteres.", { variant: 'warning' });
             return;
         }
-    
+
         try {
             await axios.post(APIURL.postTelefono(), {
                 NumeroCell: numero,
@@ -100,14 +102,14 @@ export  function ListaNegraTelefonos() {
                 Activo: true,
                 Usuario: userData.Nombre,
             });
-    
+
             await fetchTelefonos();
             setNuevoNumero('');
             setNuevaDescripcion('');
             setMostrarFormulario(false);
-    
+
             enqueueSnackbar("Número agregado exitosamente a la lista negra.", { variant: 'success' });
-    
+
         } catch (err) {
             console.error("❌ Error al agregar teléfono:", err.response?.data || err);
             const mensaje = err.response?.data?.message || "No se pudo agregar el teléfono a la lista negra.";
@@ -174,7 +176,7 @@ export  function ListaNegraTelefonos() {
                         </div>
                         <h1 className="text-3xl font-bold text-white">Lista Negra de Teléfonos</h1>
                     </div>
-                    <button 
+                    <button
                         onClick={() => setMostrarFormulario(!mostrarFormulario)}
                         className="flex items-center bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105"
                     >
@@ -217,13 +219,13 @@ export  function ListaNegraTelefonos() {
                             </div>
                         </div>
                         <div className="flex justify-end space-x-3">
-                            <button 
+                            <button
                                 onClick={cancelarFormulario}
                                 className="py-2 px-4 border border-gray-500 rounded-md text-gray-300 hover:bg-gray-600 transition-colors"
                             >
                                 Cancelar
                             </button>
-                            <button 
+                            <button
                                 onClick={agregarTelefono}
                                 className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center"
                             >
@@ -256,8 +258,8 @@ export  function ListaNegraTelefonos() {
                     <div className="text-center py-12 bg-gray-700 rounded-lg">
                         <div className="text-red-500 text-5xl mb-4">⚠️</div>
                         <p className="text-xl text-red-400">{error}</p>
-                        <button 
-                            onClick={fetchTelefonos} 
+                        <button
+                            onClick={fetchTelefonos}
                             className="mt-4 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md"
                         >
                             Reintentar
@@ -268,11 +270,13 @@ export  function ListaNegraTelefonos() {
                         <table className="min-w-full divide-y divide-gray-700">
                             <thead className="bg-gray-700">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
                                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Teléfono</th>
                                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Motivo del Bloqueo</th>
                                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Estado</th>
-                                {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th> */}
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Usuario</th>
+                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fecha</th>
+                                    {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th> */}
                                 </tr>
                             </thead>
                             <tbody className="bg-gray-800 divide-y divide-gray-700">
@@ -290,13 +294,12 @@ export  function ListaNegraTelefonos() {
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-300">{telefono.descripcion}</td>
                                             <td className="px-6 py-4 text-sm">
-                                                <button 
-                                                    onClick={() => toggleActivo(telefono.id)} 
-                                                    className={`inline-flex items-center px-3 py-1 rounded-full ${
-                                                        telefono.activo 
-                                                            ? 'bg-red-900 text-red-200' 
+                                                <button
+                                                    onClick={() => toggleActivo(telefono.id)}
+                                                    className={`inline-flex items-center px-3 py-1 rounded-full ${telefono.activo
+                                                            ? 'bg-red-900 text-red-200'
                                                             : 'bg-gray-700 text-gray-400'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {telefono.activo ? (
                                                         <>
@@ -311,7 +314,9 @@ export  function ListaNegraTelefonos() {
                                                     )}
                                                 </button>
                                             </td>
-                                        {/*    <td className="px-6 py-4 text-sm font-medium">
+                                            <td className="px-6 py-4 text-sm text-gray-300">{telefono.Usuario}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-300">{new Date(telefono.FechaSistema).toLocaleDateString()}</td>
+                                            {/*    <td className="px-6 py-4 text-sm font-medium">
                                                 <button 
                                                     onClick={() => eliminarTelefono(telefono.id)}
                                                     className="text-red-400 hover:text-red-600 transition-colors"

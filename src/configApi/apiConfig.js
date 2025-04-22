@@ -167,5 +167,6 @@ export const APIURL = {
   getTelefonos : () => `${API_BASE_URL}lista-negra-cell`,
   //// getTelefonoById     : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
   postTelefono : () => `${API_BASE_URL}lista-negra-cell`,
-  updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`
+  updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
+  validarTelefono : (telefono) => `${API_BASE_URL}lista-negra-cell/telefono/${telefono}`,
 };
