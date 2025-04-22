@@ -184,6 +184,17 @@ const Referencias = forwardRef((props, ref) => {
     }
   }
 
+  const comprobTelf = async (telefono) => {
+    try {
+      const url = APIURL.validarTelefono(telefono);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el teléfono:", error);
+      return false;
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -264,6 +275,13 @@ const Referencias = forwardRef((props, ref) => {
 
     try {
       setIsLoading(true);
+      const isValid = await comprobTelf(formData.celular);
+      if (isValid === 1) { 
+      enqueueSnackbar(`El número ${formData.celular} se encuentra en la lista negra`, { variant: "error" });
+      setIsLoading(false);
+      
+      return;
+    }
       // 1. Guardar referencia en la API
       await fecthSave(formData);
       //  agregar tambien a telefonica

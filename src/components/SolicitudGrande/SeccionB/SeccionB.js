@@ -134,8 +134,22 @@ const SeccionB = forwardRef((props, ref) => {
   const [errors, setErrors] = useState({});
 
   // Maneja el cambio de valor de los campos
-  const handleInputChange = (e) => {
+  const handleInputChange = async (e) => {
     const { name, value, type, checked } = e.target;
+
+    // Validación para campos de teléfono
+  if (name === 'telefono' || name === 'celular') {
+  // Solo validar si el campo tiene valor y tiene la longitud correcta
+  if (value && (value.length === 9 || value.length === 10)) {
+    const existe = await props.comprobTelf(value); 
+    if (existe === 1) {
+      enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
+        variant: 'warning'
+      });
+      return;
+    }
+  }
+}
 
     if (name === "provincia") {
       setFormData((prev) => ({
@@ -884,7 +898,7 @@ const SeccionB = forwardRef((props, ref) => {
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input
-              type="text"
+              type="number"
               name="telefono"
               value={formData.telefono}
               onChange={handleInputChange}
@@ -920,7 +934,7 @@ const SeccionB = forwardRef((props, ref) => {
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input
-              type="text"
+              type="number"
               name="celular"
               value={formData.celular}
               onChange={handleInputChange}
