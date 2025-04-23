@@ -124,9 +124,7 @@ export function ListadoSolicitud() {
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
-  const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] =
-    useState(null);
-
+  const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] = useState(null);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [fechaInicio, setFechaInicio] = useState(today);
   const [fechaFin, setFechaFin] = useState(today);
@@ -167,7 +165,6 @@ export function ListadoSolicitud() {
 
       // Intentar GET primero
       try {
-        console.log();
         const getResponse = await axios.get(`dactilar/${cedula}`, config);
         if (getResponse.data.statusCode === 200 && getResponse.data.data) {
           return getResponse.data.data.FOTO;
@@ -448,7 +445,7 @@ export function ListadoSolicitud() {
   };
 
 
-  const fetchInsertarDatos = async (tipo , data , estado) => {
+  const fetchInsertarDatos = async (tipo, data, estado) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
@@ -467,14 +464,14 @@ export function ListadoSolicitud() {
 
   const handleApproveEstado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Estado: 2 });
-    fetchInsertarDatos(6 , data.id , 2) ;
+    fetchInsertarDatos(6, data.id, 2);
     fetchSolicitudes();
-    
+
   };
 
   const handleApproveResultado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    fetchInsertarDatos(7 , data.id , 1);
+    fetchInsertarDatos(7, data.id, 1);
     fetchSolicitudes();
   };
 
@@ -694,6 +691,78 @@ export function ListadoSolicitud() {
       return `${minutos}min`;
     }
   };
+
+  const convertirTiempoASegundos = (tiempoStr) => {
+    if (tiempoStr === "N/A") return 0;
+    
+    let segundos = 0;
+    
+    // Extraer días
+    const diasMatch = tiempoStr.match(/(\d+)d/);
+    if (diasMatch) {
+      segundos += parseInt(diasMatch[1]) * 86400; // 1 día = 86400 segundos
+    }
+    
+    // Extraer horas
+    const horasMatch = tiempoStr.match(/(\d+)h/);
+    if (horasMatch) {
+      segundos += parseInt(horasMatch[1]) * 3600; // 1 hora = 3600 segundos
+    }
+    
+    // Extraer minutos
+    const minutosMatch = tiempoStr.match(/(\d+)min/);
+    if (minutosMatch) {
+      segundos += parseInt(minutosMatch[1]) * 60; // 1 minuto = 60 segundos
+    }
+    
+    return segundos;
+  };
+
+  const convertirSegundosATuFormato = (totalSegundos) => {
+    if (totalSegundos === 0) return "0min";
+    
+    const dias = Math.floor(totalSegundos / 86400);
+    const horas = Math.floor((totalSegundos % 86400) / 3600);
+    const minutos = Math.floor((totalSegundos % 3600) / 60);
+    
+    let resultado = [];
+    
+    if (dias > 0) resultado.push(`${dias}d`);
+    if (horas > 0) resultado.push(`${horas}h`);
+    if (minutos > 0) resultado.push(`${minutos}min`);
+    
+    return resultado.join(" ") || "0min";
+  };
+
+  const sumarTodosLosTiempos = () => {
+    // Obtener todos los elementos con la clase 'tiempo-transcurrido'
+    const elementosTiempo = Array.from(document.querySelectorAll('.tiempo-transcurrido'));
+    
+    let totalSegundos = 0;
+    let tiemposValidos = 0;
+  
+    elementosTiempo.forEach(elemento => {
+      const tiempoTexto = elemento.textContent.trim();
+      if (tiempoTexto && tiempoTexto !== "N/A") {
+        totalSegundos += convertirTiempoASegundos(tiempoTexto);
+        tiemposValidos++;
+      }
+    });
+  
+    if (tiemposValidos === 0) return "N/A";
+    
+    return convertirSegundosATuFormato(totalSegundos);
+  };
+
+  const [tiempoTotal, setTiempoTotal] = useState("N/A");
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setTiempoTotal(sumarTodosLosTiempos());
+  }, 100);
+  
+  return () => clearTimeout(timer);
+}, [fechaTiempos]); 
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
@@ -943,13 +1012,6 @@ export function ListadoSolicitud() {
     return condicionesBase && verificacionDomicilioOk && verificacionLaboralOk;
   };
 
-  /* idEstadoVerificacionDocumental	Nombre
-1	PROCESO
-2	REVISIÓN
-3	CORRECIÓN
-4	APROBACION
-5	RECHAZAR */
-
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
   // Obtener tipo de consulta
   const fetchTipoConsulta = async () => {
@@ -1102,14 +1164,14 @@ export function ListadoSolicitud() {
                 item.Estado === 1
                   ? "PRE-APROBADO"
                   : item.Estado === 2
-                  ? "APROBADO"
-                  : item.Estado === 3
-                  ? "ANULADO"
-                  : item.Estado === 4
-                  ? "RECHAZADO"
-                  : item.Estado === 5
-                  ? "NO APLICA"
-                  : "Desconocido",
+                    ? "APROBADO"
+                    : item.Estado === 3
+                      ? "ANULADO"
+                      : item.Estado === 4
+                        ? "RECHAZADO"
+                        : item.Estado === 5
+                          ? "NO APLICA"
+                          : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1156,9 +1218,8 @@ export function ListadoSolicitud() {
       if (response.status === 200) {
         const vendedor = response.data;
         return (
-          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${
-            vendedor.ApellidoPaterno || ""
-          } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
+          `${vendedor.PrimerNombre || ""} ${vendedor.SegundoNombre || ""} ${vendedor.ApellidoPaterno || ""
+            } ${vendedor.ApellidoMaterno || ""}`.trim() || "No disponible"
         );
       }
     } catch (error) {
@@ -1211,9 +1272,6 @@ export function ListadoSolicitud() {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
         });
-        // navigate("/ListadoSolicitud", {
-        //   replace: true,
-        // });
       }
     } catch (error) {
       console.error("Error al actualizar la solicitud:", error);
@@ -1622,8 +1680,8 @@ export function ListadoSolicitud() {
                   const bgColor = isError
                     ? "#fee2e2"
                     : index % 2 === 0
-                    ? "#f9fafb"
-                    : "#ffffff";
+                      ? "#f9fafb"
+                      : "#ffffff";
                   const textColor = isError ? "#991b1b" : "#1f2937";
                   return (
                     <TableRow
@@ -1687,11 +1745,11 @@ export function ListadoSolicitud() {
                               ...(permisoAprobarEstado(data)
                                 ? {}
                                 : {
-                                    "&:hover .approveOverlay": {
-                                      transform: "translateY(0)",
-                                      opacity: 1,
-                                    },
-                                  }),
+                                  "&:hover .approveOverlay": {
+                                    transform: "translateY(0)",
+                                    opacity: 1,
+                                  },
+                                }),
                             }}
                           >
                             <Box
@@ -1766,18 +1824,18 @@ export function ListadoSolicitud() {
                                 data.estado === "APROBADO"
                                   ? "#dcfce7"
                                   : data.estado === "PRE-APROBADO"
-                                  ? "#dbeafe"
-                                  : data.estado === "ANULADO"
-                                  ? "#f3f4f6"
-                                  : "#fef9c3",
+                                    ? "#dbeafe"
+                                    : data.estado === "ANULADO"
+                                      ? "#f3f4f6"
+                                      : "#fef9c3",
                               color:
                                 data.estado === "APROBADO"
                                   ? "#166534"
                                   : data.estado === "PRE-APROBADO"
-                                  ? "#1e40af"
-                                  : data.estado === "ANULADO"
-                                  ? "#374151"
-                                  : "#854d0e",
+                                    ? "#1e40af"
+                                    : data.estado === "ANULADO"
+                                      ? "#374151"
+                                      : "#854d0e",
                             }}
                           >
                             {data.estado}
@@ -1825,11 +1883,11 @@ export function ListadoSolicitud() {
                               ...(permisoAprobarResultado(data)
                                 ? {} // Sin efectos si no tiene permiso
                                 : {
-                                    "&:hover .approveOverlay": {
-                                      opacity: 1,
-                                      transform: "translateY(0)",
-                                    },
-                                  }),
+                                  "&:hover .approveOverlay": {
+                                    opacity: 1,
+                                    transform: "translateY(0)",
+                                  },
+                                }),
                             }}
                           >
                             {/* Ícono ❌ */}
@@ -2122,7 +2180,7 @@ export function ListadoSolicitud() {
                               sx={{
                                 opacity:
                                   estaDeshabilitado(data) ||
-                                  verificacionSolicitud(data)
+                                    verificacionSolicitud(data)
                                     ? 0.4
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#f1f5f9",
@@ -2186,7 +2244,7 @@ export function ListadoSolicitud() {
                               sx={{
                                 opacity:
                                   verificacionSolicitud(data) ||
-                                  data.Laboral === false
+                                    data.Laboral === false
                                     ? 0.2
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#f1f5f9",
@@ -2263,6 +2321,49 @@ export function ListadoSolicitud() {
       {/* Cuadro de diálogo para ver detalles */}
       <Dialog open={view} onClose={handleCloseDialog} maxWidth="md" fullWidth>
         <DialogTitle className="text-xl font-bold flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <Box
+            sx={{
+              position: "absolute",
+              left: 0,
+              top: "20%",
+              width: "7%",
+              transform: "translateY(-50%)",
+              backgroundColor: "#e8eaf6",
+              borderRadius: "0 12px 12px 0",
+              border: "1px solid #2d3689",
+              borderLeft: "none",
+              padding: "8px 12px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+              boxShadow: "2px 0 5px rgba(0,0,0,0.1)",
+              minWidth: "20px",
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: "#2d3689",
+                fontWeight: 700,
+                marginBottom: "4px"
+              }}
+            >
+              Total:
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#2d3689",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center"
+              }}
+            >
+              {sumarTodosLosTiempos()}
+            </Typography>
+          </Box>
           <Timeline
             position="bottom"
             sx={{
@@ -2325,7 +2426,8 @@ export function ListadoSolicitud() {
               },
             }}
           >
-            {/* Primer ítem con fechas */}
+
+            {/* Primer ítem */}
             <TimelineItem>
               <TimelineSeparator
                 sx={{
@@ -2335,7 +2437,6 @@ export function ListadoSolicitud() {
                   height: "100%",
                 }}
               >
-                {/* Estructura con posicionamiento absoluto para centrar el icono y permitir fechas arriba/abajo */}
                 <Box
                   sx={{
                     position: "relative",
@@ -2365,7 +2466,7 @@ export function ListadoSolicitud() {
                         sx={{
                           display: "inline-block",
                           color: "text.primary",
-                          fontSize: "0.8rem",
+                          fontSize: "0.7rem",
                           fontWeight: 600,
                           backgroundColor: "#f0f4f8",
                           padding: "2px 6px",
@@ -2408,7 +2509,7 @@ export function ListadoSolicitud() {
                           sx={{
                             display: "inline-block",
                             color: "text.primary",
-                            fontSize: "0.8rem",
+                            fontSize: "0.7rem",
                             fontWeight: 600,
                             backgroundColor: "#f0f4f8",
                             padding: "2px 6px",
@@ -2422,6 +2523,7 @@ export function ListadoSolicitud() {
                         {/* Tiempo transcurrido */}
                         <Typography
                           variant="caption"
+                          className="tiempo-transcurrido"
                           sx={{
                             display: "block",
                             color: "#2d3689",
@@ -2447,46 +2549,602 @@ export function ListadoSolicitud() {
             </TimelineItem>
 
             <TimelineItem>
-              <TimelineSeparator>
-                <TimelineDot>
-                  <FolderIcon sx={{ color: "#6C757D" }} />
-                </TimelineDot>
+              <TimelineSeparator
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", 
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Contenedor fecha superior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fechaTiempos[0] && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "inline-block",
+                          color: "text.primary",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <FolderIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {fechaTiempos[1] && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          className="tiempo-transcurrido"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos[0]?.FechaSistema,
+                            fechaTiempos[1]?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
 
             <TimelineItem>
-              <TimelineSeparator>
-                <TimelineDot>
-                  <PhoneInTalkIcon sx={{ color: "#6C757D" }} />
-                </TimelineDot>
+              <TimelineSeparator
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", // Altura del icono
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Contenedor fecha superior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fechaTiempos[0] && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "inline-block",
+                          color: "text.primary",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <PhoneInTalkIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {fechaTiempos[1] && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          className="tiempo-transcurrido"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos[0]?.FechaSistema,
+                            fechaTiempos[1]?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
 
             <TimelineItem>
-              <TimelineSeparator>
-                <TimelineDot>
-                  <StoreIcon sx={{ color: "gray" }} />
-                </TimelineDot>
+              <TimelineSeparator
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", // Altura del icono
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Contenedor fecha superior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fechaTiempos[0] && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "inline-block",
+                          color: "text.primary",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <StoreIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {fechaTiempos[1] && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          className="tiempo-transcurrido"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos[0]?.FechaSistema,
+                            fechaTiempos[1]?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
 
             <TimelineItem>
-              <TimelineSeparator>
-                <TimelineDot>
-                  <HouseIcon sx={{ color: "gray" }} />
-                </TimelineDot>
+              <TimelineSeparator
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", // Altura del icono
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Contenedor fecha superior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fechaTiempos[0] && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "inline-block",
+                          color: "text.primary",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <HouseIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {fechaTiempos[1] && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          className="tiempo-transcurrido"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos[0]?.FechaSistema,
+                            fechaTiempos[1]?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
 
             <TimelineItem>
-              <TimelineSeparator>
-                <TimelineDot>
-                  <PersonIcon sx={{ color: "#6C757D" }} />
-                </TimelineDot>
+              <TimelineSeparator
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", // Altura del icono
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Contenedor fecha superior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {fechaTiempos[0] && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "inline-block",
+                          color: "text.primary",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <PersonIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {fechaTiempos[1] && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          className="tiempo-transcurrido"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos[0]?.FechaSistema,
+                            fechaTiempos[1]?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
+                <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
           </Timeline>
@@ -2499,7 +3157,7 @@ export function ListadoSolicitud() {
                 {/* Contenedor de la imagen */}
                 <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
                   {!previewUrl &&
-                  (!selectedRow.imagen || selectedRow.imagen === "prueba") ? (
+                    (!selectedRow.imagen || selectedRow.imagen === "prueba") ? (
                     <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -2527,24 +3185,10 @@ export function ListadoSolicitud() {
 
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
-                  {/* Botón seleccionar imagen */}
-                  {/* <label
-                    htmlFor="upload-image"
-                    className="flex-1 w-full md:w-auto text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 cursor-pointer"
-                  >
-                    Seleccionar imagen
-                    <input
-                      id="upload-image"
-                      type="file"
-                      className="hidden"
-                      accept="image/png,image/jpeg"
-                      onChange={handleFileChange}
-                    />
-                  </label> */}
 
                   {/* Botón subir imagen */}
 
-                  {puedeAprobar(selectedRow) && (
+                  {puedeAprobar(selectedRow) && (  //&& selectedRow.estado !== "APROBADO"
                     <div className="flex flex-col md:flex-row gap-2 mt-4">
                       <Button onClick={() => setOpenCameraModal(true)}>
                         Tomar Foto
@@ -2553,11 +3197,10 @@ export function ListadoSolicitud() {
                       <button
                         onClick={handleUploadClick}
                         disabled={!fileToUpload}
-                        className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${
-                          fileToUpload
-                            ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        }`}
+                        className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                          ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          }`}
                       >
                         Subir imagen
                       </button>
@@ -2626,19 +3269,18 @@ export function ListadoSolicitud() {
                   <div className="flex items-center">
                     <InfoIcon className="mr-2 text-blue-500" />
                     <span
-                      className={`ml-2 font-semibold ${
-                        selectedRow.estado === "activo"
-                          ? "text-green-500"
-                          : selectedRow.estado === "pendiente"
+                      className={`ml-2 font-semibold ${selectedRow.estado === "activo"
+                        ? "text-green-500"
+                        : selectedRow.estado === "pendiente"
                           ? "text-yellow-500"
                           : selectedRow.estado === "anulado"
-                          ? "text-gray-500"
-                          : selectedRow.estado === "aprobado"
-                          ? "text-blue-500"
-                          : selectedRow.estado === "rechazado"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
+                            ? "text-gray-500"
+                            : selectedRow.estado === "aprobado"
+                              ? "text-blue-500"
+                              : selectedRow.estado === "rechazado"
+                                ? "text-red-500"
+                                : "text-gray-700"
+                        }`}
                     >
                       {selectedRow.estado}
                     </span>

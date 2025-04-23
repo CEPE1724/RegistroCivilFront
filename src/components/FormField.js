@@ -227,7 +227,6 @@ const ReusableForm = ({
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false); // Estado para controlar la apertura del modal de OTP
   const [isOtpVerified, setIsOtpVerified] = useState(false); // Estado para verificar si el OTP es válido
   const { enqueueSnackbar } = useSnackbar();
-console.log("initialValues", initialValues);
   // Inicializar valores por defecto para campos select
   const selectDefaults = Object.fromEntries(
     formConfig

@@ -674,15 +674,15 @@ export function GestorDocumentos({
         switch (globalConfirmAction) {
             case 'rechTodo':
                 updateEstadoVerificacion(5);
-                navigate("/agentedocumental", { replace: true });
+                navigate("/ListadoSolicitud", { replace: true });
                 break;
             case 'aprobTodo':
                 updateEstadoVerificacion(4);
-                navigate("/agentedocumental", { replace: true });
+                navigate("/ListadoSolicitud", { replace: true });
                 break;
             case 'revTodo':
                 updateEstadoVerificacion(3);
-                navigate("/agentedocumental", { replace: true });
+                navigate("/ListadoSolicitud", { replace: true });
                 break;
             default:
                 break;
