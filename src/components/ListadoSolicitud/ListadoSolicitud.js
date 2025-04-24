@@ -1316,6 +1316,17 @@ export function ListadoSolicitud() {
     alert("aporbar ");
   };
 
+
+  const handleEquifax = (data) => 
+    {
+      navigate("/equifaxx", {
+        replace: true,
+        state: {
+          data: data,
+        },
+      });
+    }
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -2669,8 +2680,18 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Tiene RUC:</p>
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
-                </div>
+                  <div className="flex items-center gap-2">
+  <button
+   onClick={() => handleEquifax(data)}
+
+    className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
+  >
+    Consultar Equifax
+  </button>
+</div>
+                </div> 
               </div>
+              
             </div>
           )}
         </DialogContent>

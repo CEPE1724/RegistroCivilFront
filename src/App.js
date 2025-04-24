@@ -28,6 +28,7 @@ import CalendarioVerificador from "./pages/CalendarioVerificador";
 import AgenteDocumental from "./pages/AgenteDocumental";
 import Dashboard from "./pages/Dashboard";
 import ListaNegra from "./pages/ListaNegra";
+import Equifax from "./pages/Equifax";
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -75,6 +76,8 @@ function App() {
         <Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
         <Route path="/agentedocumental" element={<PrivateRouteWrapper title="Repositorio" element={<AgenteDocumental />} />} />
         <Route path="/listaNegra" element={<PrivateRouteWrapper title="ListaNegra" element={<ListaNegra />} />} />
+        <Route path="/equifaxx" element={<PrivateRouteWrapper title="Equifax" element={<Equifax />} />} />
+
       </Routes>
 
       {isSessionExpired && (

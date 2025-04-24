@@ -25,6 +25,12 @@ export default function CreditoForm() {
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [dataBodega, setDataBodega] = useState([]);
   const [ActEconomina, setActEconomina] = useState([]);
+  ///
+
+
+ 
+
+
 
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
@@ -323,6 +329,18 @@ export default function CreditoForm() {
     // { label: "Subir foto", name: "Foto", type: "file" },
   ];
 
+
+  const comprobTelf = async (telefono) => {
+    try {
+      const url = APIURL.validarTelefono(telefono);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el teléfono:", error);
+      return false;
+    }
+  };
+  
   const validationSchema = Yup.object()
     .shape({
       NumeroSolicitud: Yup.number()
@@ -377,9 +395,20 @@ export default function CreditoForm() {
       // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== ""),
       // .required("Revisa el nombre debe tener al menos 2 caracteres"),
       Celular: Yup.string()
-        .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
-        .required("El celular debe tener 10 dígitos")
-        .trim(),
+      .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
+      .required("El celular debe tener 10 dígitos")
+      .trim()
+      .test(
+        "not-blacklisted",
+        "El número ${value} se encuentra en la lista negra",
+        async (value) => {
+          if (!value) return false;            // ya cubierto por .required()
+          const res = await comprobTelf(value);
+          return res !== 1;                    // false → lanza el mensaje
+        }
+      ),
+
+
       Email: Yup.string().email("Correo inválido").required("Ingresa un correo válido"),
 
       idSituacionLaboral: Yup.number()
