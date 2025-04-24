@@ -475,9 +475,9 @@ export function GestorDocumentos({
             9: "Acta",
             10: "Consentimiento",
             11: "Autorización",
-            12: "Foto del cliente",
-            13: "Croquis",
-            14: "Servicios Básicos",
+            12: "Servicio Basico",
+            13: "Foto del Cliente",
+            14: "Croquis",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };
