@@ -35,7 +35,6 @@ export function Documental({
 
   const { state } = useLocation();
 
-
   const [files, setFiles] = useState({});
   const [activeTab, setActiveTab] = useState("Copia De Cedula");
   const [showFileInput, setShowFileInput] = useState(false);
@@ -131,6 +130,7 @@ export function Documental({
   });
   const [filePreviews, setFilePreviews] = useState({});
   const [filesToCorrect, setFilesToCorrect] = useState([]);
+  const [initialTabSet, setInitialTabSet] = useState(false);
 
   useEffect(() => {
     const fetchUploadedFiles = async () => {
@@ -142,7 +142,6 @@ export function Documental({
           )
         );
 
-
         if (response.status === 200 && Array.isArray(response.data)) {
           const uploadedFiles = {};
           const previews = {};
@@ -150,8 +149,6 @@ export function Documental({
           const corrections = new Set(); // Para almacenar las secciones con documentos con idEstadoDocumento === 4
 
           response.data.forEach((file) => {
-
-
             const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
 
             if (!uploadedFiles[sectionName]) {
@@ -172,12 +169,9 @@ export function Documental({
               estado: file.idEstadoDocumento,
             });
 
-
-
             previews[sectionName].push(fileUrl);
 
             if (file.idEstadoDocumento >= 4) {
-
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
             } else {
               completed.add(sectionName); // Se considera campo completado si no está en corrección
@@ -194,7 +188,15 @@ export function Documental({
           const newCompletedFields = Object.keys(uploadedFiles);
           setCompletedFields(newCompletedFields);
 
-          // Si hay documentos con estado 4, solo mostrar esos tabs
+          // Solo setear activeTab la primera vez
+
+          const [firstCorrection] = Array.from(corrections);
+
+          if (!initialTabSet && firstCorrection) {
+            setActiveTab(firstCorrection);
+            setInitialTabSet(true);
+          }
+
           if (corrections.size > 0) {
             setShowOnlyCorrections(true); // Mostrar solo las correcciones
           } else {
@@ -410,7 +412,7 @@ export function Documental({
 
   const handleOpenDeleteConfirmation = (field, index) => {
     const file = files[field][index]; // Obtenemos el archivo seleccionado
-   
+
     setFileToDelete({
       field,
       index,
@@ -431,7 +433,6 @@ export function Documental({
     if (!fileToDelete) return;
 
     const { field, index, id } = fileToDelete; // ✅ Extraemos el ID
-
 
     if (id) {
       try {
@@ -553,7 +554,6 @@ export function Documental({
       tipoDocumento
     );
 
-
     if (documentoExiste.exists) {
       enqueueSnackbar("Ya existe un documento cargado para este campo.", {
         variant: "error",
@@ -581,7 +581,9 @@ export function Documental({
     }
 
     // Verificar que la observación sea opcional, pero si está presente, debe tener al menos 10 caracteres
-    const observacionElement = document.querySelector('textarea[name="observacion"]');
+    const observacionElement = document.querySelector(
+      'textarea[name="observacion"]'
+    );
     if (
       observacionElement &&
       observacion[activeTab] &&
@@ -609,7 +611,9 @@ export function Documental({
       if (clientInfo.idEstadoVerificacionDocumental === 1) {
         const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
         if (fileToUpload) {
-          const observacionText = observacionElement ? (observacion[activeTab] || "") : "";
+          const observacionText = observacionElement
+            ? observacion[activeTab] || ""
+            : "";
           response = await uploadFile(
             fileToUpload,
             clientInfo.almacen,
@@ -624,7 +628,9 @@ export function Documental({
       if (clientInfo.idEstadoVerificacionDocumental === 3) {
         const fileToUpload = getFile(activeTab); // Obtén el archivo físico de la sección activa
         if (fileToUpload) {
-          const observacionText = observacionElement ? (observacion[activeTab] || "") : "";
+          const observacionText = observacionElement
+            ? observacion[activeTab] || ""
+            : "";
           response = await uploadFile(
             fileToUpload,
             clientInfo.almacen,
@@ -667,7 +673,9 @@ export function Documental({
         }
 
         // Crear el payload con los datos para la API
-        const observacionText = observacionElement ? (observacion[activeTab] || "") : "";
+        const observacionText = observacionElement
+          ? observacion[activeTab] || ""
+          : "";
         const payload = {
           idCre_SolicitudWeb: clientInfo.id,
           idTipoDocumentoWEB: idTipoDocumentoWEB, // C
@@ -755,8 +763,6 @@ export function Documental({
   const completedFields = menuItems.filter(
     (field) => files[field] && files[field].length > 0
   );
-
-
 
   const pendingFields = menuItems.filter(
     (field) => !(files[field] && files[field].length > 0)
@@ -1014,18 +1020,20 @@ export function Documental({
             </div>
           </div>
 
-          {clientInfo.idEstadoVerificacionDocumental === 3 &&(<div className="flex justify-center items-center mt-8 w-full">
-            {/* Documentos Subidos */}
+          {clientInfo.idEstadoVerificacionDocumental === 3 && (
+            <div className="flex justify-center items-center mt-8 w-full">
+              {/* Documentos Subidos */}
 
-            <div className=" pb-4 pt-5 md:absolute md:right-11 ">
-              <button
-                onClick={fetchObservaciones}
-                className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
-              >
-                Historial Observaciones
-              </button>
+              <div className=" pb-4 pt-5 md:absolute md:right-11 ">
+                <button
+                  onClick={fetchObservaciones}
+                  className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+                >
+                  Historial Observaciones
+                </button>
+              </div>
             </div>
-          </div>)}
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {filePreviews[activeTab]?.length > 0 &&
@@ -1060,16 +1068,16 @@ export function Documental({
                       </div>
 
                       <div className="mt-4">
-                          <object
-                            data={previewUrl}
-                            type="application/pdf"
-                            width="100%"
-                            height="200px"
-                            className="rounded-md"
-                            aria-label="Vista previa PDF"
-                          >
-                            <p>Vista previa no disponible</p>
-                          </object>
+                        <object
+                          data={previewUrl}
+                          type="application/pdf"
+                          width="100%"
+                          height="200px"
+                          className="rounded-md"
+                          aria-label="Vista previa PDF"
+                        >
+                          <p>Vista previa no disponible</p>
+                        </object>
                       </div>
                     </div>
                   );

@@ -12,8 +12,8 @@ export default function Layout({ children }) {
   return (
     <>
       {userData ? (
-        <div>
-          <Nav showButton={true} userData={userData} />
+        <div className="print:hidden">
+          <Nav  showButton={true} userData={userData} />
           <React.Fragment>
             <CssBaseline />
             <Container maxWidth="xl">

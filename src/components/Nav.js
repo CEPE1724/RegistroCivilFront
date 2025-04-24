@@ -9,7 +9,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Badge from "@mui/material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 
-const Nav = ({ showButton, userData }) => {
+const Nav = ({  showButton, userData }) => {
   const LogoIco = "/img/logo.webp";
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -19,9 +19,10 @@ const Nav = ({ showButton, userData }) => {
    // Notificaciones
   const [notificationCount, setNotificationCount] = useState(6);
   const [showToast, setShowToast] = useState(false);
-  const [latestNotification, setLatestNotification] = useState("tienes una nueva solicitud que te llego");
+   const [latestNotification, setLatestNotification] = useState("tienes una nueva solicitud que te llego");
   
   // Puede venir de props o estado dinámico
+  {/*}
   React.useEffect(() => {
     if (notificationCount > 0) {
       setShowToast(true);
@@ -32,7 +33,7 @@ const Nav = ({ showButton, userData }) => {
   
       return () => clearTimeout(timer);
     }
-  }, [notificationCount]);
+  }, [notificationCount]);*/}
 
   const handleClick = (event) => setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null)
@@ -111,7 +112,7 @@ const Nav = ({ showButton, userData }) => {
         </div>
       )}
     </nav>
-   {/* Toast flotante tipo chat */}
+   {/* Toast flotante tipo chat 
    {showToast && (
         <div className="fixed bottom-4 right-4 bg-white text-gray-800 shadow-lg rounded-xl px-4 py-3 flex items-start space-x-2 animate-fade-in-up z-50 max-w-xs">
           <div className="text-xl">🔔</div>
@@ -120,7 +121,7 @@ const Nav = ({ showButton, userData }) => {
             <CloseIcon fontSize="small" />
           </button>
         </div>
-      )}
+      )}*/}
     </>
   );
 };
