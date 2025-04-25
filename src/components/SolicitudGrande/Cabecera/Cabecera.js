@@ -783,7 +783,7 @@ export function Cabecera() {
         ) : null;
       case "Factores de Crédito":
         return (
-          <FactoresCredito ref={factoresCreditoRef} data={clienteData} />
+          <FactoresCredito ref={factoresCreditoRef} data={clienteData} fetchCuotaCupo={fetchCuotaCupo} estSol={data.idEstadoVerificacionSolicitud} />
         );
       case "Enviar a Verificar": {
         /*} case "Verificación":
@@ -1133,11 +1133,11 @@ export function Cabecera() {
         // Obtiene los datos
         const formData = factoresCreditoRef.current.getFormData();  
         // Envía a la API
-        await fetchCuotaCupo(formData);
+        //await fetchCuotaCupo(formData);
         
-        enqueueSnackbar("Datos de crédito guardados correctamente", {
-          variant: "success",
-        });
+        // enqueueSnackbar("Datos de crédito guardados correctamente", {
+        //   variant: "success",
+        // });
         
         isValidSumit = true;
       } catch (error) {
