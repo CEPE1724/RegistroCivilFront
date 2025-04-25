@@ -1,5 +1,6 @@
 import React from "react";
 import { FaCalendarAlt, FaIdCard, FaStore, FaUserAlt, FaEnvelope, FaPhoneAlt, FaCog, FaUser } from "react-icons/fa";
+import NumbersIcon from '@mui/icons-material/Numbers';
 import { InputField } from "../../Utils";
 
 
@@ -101,10 +102,11 @@ export function CabeceraDatosSolicitud({ datosConsulta, data, setData, handleInp
         onChange={handleInputChange(setData.setEstado)}
         readOnly={isReadOnly(datosConsulta?.estado)}
       />
-      <div className="flex items-center mt-2 justify-center space-x-6">
-        <text className="text-xs text-gray-400">{datosConsulta.NumeroSolicitud}</text>
-      </div>
-
+      <InputField
+        label="Numero de Solicitud"
+        icon={<NumbersIcon />}
+        value={datosConsulta.NumeroSolicitud}
+      />
     </div>
   );
 }

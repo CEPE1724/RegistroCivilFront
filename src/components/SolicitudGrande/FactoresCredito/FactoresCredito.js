@@ -5,6 +5,7 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { IconButton } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
 import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
@@ -14,7 +15,7 @@ import { FaListAlt, FaMoneyBillWave, FaMoneyCheckAlt,FaCommentDots } from "react
 
 // Definir el componente con forwardRef correctamente
 export const FactoresCredito = forwardRef((props, ref) => {
-  const { data } = props;
+  const { data, fetchCuotaCupo, estSol } = props;
   const [tipo, setTipo] = useState([]);
   const [formData, setFormData] = useState({
     tipoCliente: data.idTipoCliente || 0,
@@ -265,6 +266,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
             value={formData.cuotaAsignada}
             onChange={handleChange}
             onBlur={handleBlur}
+            readOnly={estSol !== 12}
           />
         </div>
 
@@ -281,6 +283,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
             className="solcitudgrande-style"
             value={formData.cupo}
             onChange={handleChange}
+            readOnly={estSol !== 12}
           />
         </div>
 
@@ -293,6 +296,27 @@ export const FactoresCredito = forwardRef((props, ref) => {
           >
             <PrintIcon />
           </IconButton>
+
+          {estSol === 12 &&(<div className="flex items-center">           
+            <button
+              onClick={async () => {
+                try {
+                  const formData = getFormData(); 
+                  if (!validateForm()) { 
+                   return;
+                  }
+                  await fetchCuotaCupo(formData);
+                  enqueueSnackbar("Datos guardados correctamente", { variant: "success" });
+                } catch (error) {
+                  enqueueSnackbar("Error al guardar los datos", { variant: "error" });
+                  console.error("Error al guardar:", error);
+                  }
+                  }}
+                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2">
+                    <SaveIcon className="text-lg" />
+                    <span className="text-xs">Actualizar</span>
+              </button>
+          </div>)}
         </div>
       </div>
     </div>

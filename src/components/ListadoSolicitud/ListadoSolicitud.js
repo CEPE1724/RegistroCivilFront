@@ -756,13 +756,31 @@ export function ListadoSolicitud() {
 
   const [tiempoTotal, setTiempoTotal] = useState("N/A");
 
-useEffect(() => {
-  const timer = setTimeout(() => {
+  useEffect(() => {
+    // Usar ResizeObserver para actualizar el tiempo total cuando cambia el tamaño
+    const observer = new ResizeObserver(() => {
+      const timer = setTimeout(() => {
+        setTiempoTotal(sumarTodosLosTiempos());
+      }, 100); 
+      return () => clearTimeout(timer);
+    });
+    
+    // Observar el contenedor principal
+    const dialogElement = document.querySelector('.MuiDialog-paper');
+    if (dialogElement) {
+      observer.observe(dialogElement);
+    }
+    
+    // También actualizar cuando cambian las fechas
     setTiempoTotal(sumarTodosLosTiempos());
-  }, 100);
-  
-  return () => clearTimeout(timer);
-}, [fechaTiempos]); 
+    
+    return () => {
+      if (dialogElement) {
+        observer.unobserve(dialogElement);
+      }
+      observer.disconnect();
+    };
+  }, [fechaTiempos]); 
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
@@ -824,22 +842,6 @@ useEffect(() => {
   /// variable y useffect para que se stere el nombre de usuario
 
   const [selectDeshabilitado, setSelectDeshabilitado] = useState(false);
-
-  /*
-  useEffect(() => {
-    if (userData?.Nombre && analistas?.length > 0) {
-      const analistaCoincidente = analistas.find((a) => {
-        const nombreAnalista = a.Nombre?.toLowerCase().trim();
-        const nombreUser = userData.Nombre?.toLowerCase().trim();
-        return nombreAnalista === nombreUser;
-      });
-  
-      if (analistaCoincidente) {
-        setAnalistaSelected(analistaCoincidente.idUsuario);
-      }
-    }
-  }, [userData?.Nombre, analistas]);
-  */
 
   useEffect(() => {
     if (userData?.Nombre && analistas?.length > 0) {
@@ -1343,7 +1345,7 @@ useEffect(() => {
   const handleOpenDialog = async (row) => {
     setSelectedRow(row);
     setView(true);
-    await fetchTiempSolicweb(1, row.id, "1,12");
+    await fetchTiempSolicweb(1, row.id, "1,12");  
   };
 
   const handleCloseDialog = () => {
@@ -2337,7 +2339,7 @@ useEffect(() => {
               position: "absolute",
               left: 0,
               top: "20%",
-              width: "7%",
+              width: "5%",
               transform: "translateY(-50%)",
               backgroundColor: "#e8eaf6",
               borderRadius: "0 12px 12px 0",
@@ -2358,6 +2360,7 @@ useEffect(() => {
               sx={{
                 color: "#2d3689",
                 fontWeight: 700,
+                fontSize: "0.75rem",
                 marginBottom: "4px"
               }}
             >
@@ -2368,6 +2371,7 @@ useEffect(() => {
               sx={{
                 color: "#2d3689",
                 fontWeight: 600,
+                fontSize: "0.75rem",
                 display: "flex",
                 alignItems: "center"
               }}
@@ -3199,7 +3203,7 @@ useEffect(() => {
 
                   {/* Botón subir imagen */}
 
-                  {puedeAprobar(selectedRow) && (  //&& selectedRow.estado !== "APROBADO"
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (  //&& selectedRow.estado !== "APROBADO"
                     <div className="flex flex-col md:flex-row gap-2 mt-4">
                       <Button onClick={() => setOpenCameraModal(true)}>
                         Tomar Foto
