@@ -23,6 +23,8 @@ const FormField = ({
 
   const { enqueueSnackbar } = useSnackbar();
 
+  const [isBlacklisted, setIsBlacklisted] = useState(false);
+
   if (hidden) {
     return null;
   }
@@ -47,8 +49,20 @@ const FormField = ({
     }
   };
 
-  const handleInputChange = (e) => {
+  const comprobTelf = async (telefono) => {
+    try {
+      const url = APIURL.validarTelefono(telefono);
+      const response = await axios.get(url);
+      return response.data;
+      } catch (error) {
+        console.error("Error al validar el teléfono:", error);
+        return false;
+        }        
+  };
+
+  const handleInputChange = async (e) => {
     let { name, value } = e.target;
+    let originalValue = value;
 
     if (name === "Cedula" || name === "Celular") {
       value = value.replace(/\D/g, "");
@@ -64,6 +78,19 @@ const FormField = ({
       value = value.slice(0, 10);
     }
 
+    if (name === "Celular" && value.length === 10) {
+      const existe = await comprobTelf(value);
+      if (existe === 1) {
+        enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
+          variant: 'warning'
+        });
+        setIsBlacklisted(true);
+        return;
+      } else {
+        setIsBlacklisted(false);
+      }
+    }
+    
     formik.setFieldValue(name, value);
   };
 
@@ -227,7 +254,6 @@ const ReusableForm = ({
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false); // Estado para controlar la apertura del modal de OTP
   const [isOtpVerified, setIsOtpVerified] = useState(false); // Estado para verificar si el OTP es válido
   const { enqueueSnackbar } = useSnackbar();
-console.log("initialValues", initialValues);
   // Inicializar valores por defecto para campos select
   const selectDefaults = Object.fromEntries(
     formConfig
@@ -422,7 +448,7 @@ const handleOtpVerification = async (isVerified, otpCode) => {
 			  <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
 				Acepto los{" "}
 				<a
-				  href="/terminos-y-condiciones"
+				  href="https://point.com.ec/terminos-y-condiciones"
 				  className="underline"
 				  target="_blank"
 				  rel="noopener noreferrer"
@@ -451,7 +477,7 @@ const handleOtpVerification = async (isVerified, otpCode) => {
 			  <label htmlFor="bPoliticas" className="text-lightGrey text-xs">
 				Acepto las{" "}
 				<a
-				  href="/politicas-de-privacidad"
+				  href="https://point.com.ec/politicas-de-privacidad"
 				  className="underline"
 				  target="_blank"
 				  rel="noopener noreferrer"

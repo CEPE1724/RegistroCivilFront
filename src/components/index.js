@@ -4,4 +4,5 @@ export * from './CalendarPerson';
 export * from './AgenteDocumental';
 export * from './CalendarVerificador';
 export * from './ListaNegraTelefonos';
+export * from './DepositosPendientes';
 
