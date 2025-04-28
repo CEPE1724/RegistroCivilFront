@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation } from "react-router-dom";
+import axios from "../../configApi/axiosConfig";
+import { APIURL } from "../../configApi/apiConfig";
 import { 
   LineChart, Line,
   RadialBarChart, RadialBar,
@@ -14,11 +17,11 @@ import { AlertTriangle, Check, X, FileText, Printer } from 'lucide-react';
 export function ReporteEquifax({ 
   setImprimiendo2, // Prop para manejar el estado de impresión
   // Props para datos dinámicos
-  datosPersonales = {
-    nombre: "GUALPA ALUCHO SEGUNDO MANUEL",
-    identificacion: "0200706745",
-    fechaConsulta: "23/04/2025"
-  },
+  // datosPersonales = {
+  //   nombre: "GUALPA ALUCHO SEGUNDO MANUEL",
+  //   identificacion: "0200706745",
+  //   fechaConsulta: "23/04/2025"
+  // },
   resultado = {
     segmentacion: "RECHAZAR",
     rangoIngresos: "751-1000",
@@ -37,6 +40,26 @@ export function ReporteEquifax({
   ]
 }) {
   const [imprimiendo, setImprimiendo] = useState(false);
+  const location = useLocation();
+  const { nombre, cedula, Fecha } = location.state || {};
+  const [clienteDatos, setClienteDatos] = useState([]);
+  console.log("cliente datos",clienteDatos);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-EC', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  const datosPersonales = {
+    nombre: nombre || "",
+    identificacion: cedula || "",
+    fechaConsulta: formatDate(Fecha)
+  };
 
   const handleImprimir = () => {
     if (setImprimiendo) {
@@ -58,15 +81,15 @@ export function ReporteEquifax({
   };
 
   // Porcentaje para visualización
-  const scoreV4Percentage = (scoreV4 / 999) * 100;
-  const sobreendudamientoPercentage = (scoreSobreendeudamiento / 999) * 100;
+  const scoreV4Percentage = (clienteDatos.scorev3?.Score / 999) * 100;
+  const sobreendudamientoPercentage = (parseInt(clienteDatos.segmentacion?.ScoreSobreendeudamiento)/ 999) * 100;
   
   // Datos para el gráfico radial de Score V4
   const scoreV4Data = [
     {
       name: 'Score V4',
       value: scoreV4Percentage,
-      fill: getScoreColor(scoreV4)
+      fill: getScoreColor(clienteDatos.scorev3?.Score)
     }
   ];
   
@@ -78,6 +101,104 @@ export function ReporteEquifax({
     { name: 'Bajo', value: 728, position: 73 },
     { name: 'Muy Bajo', value: 999, position: 100 }
   ];
+
+  const fetchEqfxInformacion = async (cedula) => {
+      try {
+        const url = APIURL.getEqfxIdentificacion(cedula);
+        const response = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.status === 200) {
+          const {data} = response.data;
+          setClienteDatos(prev => ({
+            ...prev,
+            informacion: data, 
+          }));
+          fetchEqfxSegmentacion(data.idEQFX_IdentificacionConsultada);
+          fetchEqfxPoliticas(data.idEQFX_IdentificacionConsultada);
+          fetchEqfxScorev3(data.idEQFX_IdentificacionConsultada);
+        } else {
+          console.error(`Error: ${response.status} - ${response.statusText}`);
+        }
+      } catch (error) {
+        console.error("Error fetching equifax data:", error);
+      }
+    };
+
+    useEffect(() => {
+      if (cedula) {
+        fetchEqfxInformacion(cedula);
+      }
+    }
+  , []);
+
+  const fetchEqfxSegmentacion = async (id) => {
+    try {
+      const url = APIURL.getEqfxResultSegment(id);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const {data} = response.data;
+        setClienteDatos(prev => ({
+          ...prev,
+          segmentacion: data,
+        }));
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching equifax data:", error);
+    }
+  };
+
+  const fetchEqfxPoliticas = async (id) => {
+    try {
+      const url = APIURL.getEqfxResultPliticas(id);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const {data} = response.data;
+        setClienteDatos(prev => ({
+          ...prev,
+          politicas: data,
+        }));
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching equifax data:", error);
+    }
+  };
+
+  const fetchEqfxScorev3 = async (id) => {
+    try {
+      const url = APIURL.getEqfxScorePuntaje(id);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const {data} = response.data;
+        setClienteDatos(prev => ({
+          ...prev,
+          scorev3: data,
+        }));
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching equifax data:", error);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-2">
@@ -116,8 +237,8 @@ export function ReporteEquifax({
       {/* Resultado mejorado con iconos */}
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <div className="flex items-center mb-6">
-          <div className={`p-2 rounded-full ${resultado.segmentacion === "RECHAZAR" ? "bg-red-100" : "bg-green-100"} mr-3`}>
-            {resultado.segmentacion === "RECHAZAR" ? 
+          <div className={`p-2 rounded-full ${clienteDatos.segmentacion?.SegmentacionCliente === "RECHAZAR" ? "bg-red-100" : "bg-green-100"} mr-3`}>
+            {clienteDatos.segmentacion?.SegmentacionCliente === "RECHAZAR" ? 
               <X className="w-6 h-6 text-red-600" /> : 
               <Check className="w-6 h-6 text-green-600" />
             }
@@ -130,17 +251,17 @@ export function ReporteEquifax({
             <div className="space-y-3">
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <span className="font-semibold">SEGMENTACIÓN:</span>
-                <span className={`font-bold ${resultado.segmentacion === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>
-                  {resultado.segmentacion}
+                <span className={`font-bold ${clienteDatos.segmentacion?.SegmentacionCliente === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>
+                  {clienteDatos.segmentacion?.SegmentacionCliente}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <span className="font-semibold">RANGO INGRESOS:</span>
-                <span>{resultado.rangoIngresos}</span>
+                <span>{clienteDatos.segmentacion?.RangoIngresos}</span>
               </div>
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <span className="font-semibold">CAPACIDAD DE PAGO:</span>
-                <span>{resultado.capacidadPago}</span>
+                <span>${clienteDatos.segmentacion?.CapacidaddePago}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold">EDAD:</span>
@@ -188,7 +309,7 @@ export function ReporteEquifax({
               </div>
               
               <div className="mt-12 text-center font-bold text-xl">
-                {scoreSobreendeudamiento} 
+                {clienteDatos.segmentacion?.ScoreSobreendeudamiento || 0} 
                 <span className="text-sm font-normal text-gray-600 ml-2">puntos</span>
               </div>
               
@@ -232,7 +353,7 @@ export function ReporteEquifax({
                       clockWise
                       dataKey="value"
                       cornerRadius={10}
-                      fill={getScoreColor(scoreV4)}
+                      fill={getScoreColor(clienteDatos.scorev3?.Score)}
                     />
                     <text
                       x="50%"
@@ -241,7 +362,7 @@ export function ReporteEquifax({
                       dominantBaseline="middle"
                       className="font-bold text-xl"
                     >
-                      {scoreV4}
+                      {clienteDatos.scorev3?.Score>0 ? clienteDatos.scorev3?.Score : 0}
                     </text>
                   </RadialBarChart>
                  
@@ -313,8 +434,8 @@ export function ReporteEquifax({
               {politicas.map((politica, index) => (
                 <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="p-3 text-xs">{politica.politica}</td>
-                  <td className="p-3 text-xs font-bold text-red-600">{politica.decision}</td>
-                  <td className="p-3 text-xs">{politica.valor}</td>
+                  <td className="p-3 text-xs font-bold text-red-600">{clienteDatos.segmentacion?.SegmentacionCliente}</td>
+                  <td className="p-3 text-xs">{clienteDatos.segmentacion?.RangoIngresos}</td>
                 </tr>
               ))}
             </tbody>
