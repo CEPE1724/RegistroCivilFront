@@ -376,6 +376,45 @@ export function ListadoSolicitud() {
     return data.idEstadoVerificacionSolicitud !== 12;
   };
 
+   
+  ///// METODO QUE VALIDE SI 3 TIPOS DE DOCUMENTO UNICAMENTE YA FUERON APROBADOS 
+  const [docAprobados, setDocAprobados] = useState({}); // <-- ahora es un objeto, no un solo booleano
+
+  // función para verificar documentos
+  const laboralYDomicilioAprobados = async (id) => {
+    try {
+      const response = await axios.get(APIURL.getVerificacionTresDocumentos(id));
+      return response.data.allThreeDocsApproved; // true o false
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return false; // si hay error, consideramos como no aprobado
+    }
+  };
+  
+  // ahora en el useEffect
+  useEffect(() => {
+    const verificarTodosDocumentos = async () => {
+      const resultados = {}; // objeto para guardar resultados por id
+  
+      for (const solicitud of datos) {
+        const aprobado = await laboralYDomicilioAprobados(solicitud.id);
+        resultados[solicitud.id] = aprobado;
+      }
+  
+      setDocAprobados(resultados); // guarda todo junto
+    };
+  
+    if (datos.length > 0) {
+      console.log("Imprimo los datos:", datos);
+      verificarTodosDocumentos();
+    }
+  }, [datos]);
+  
+  
+
+
+
+
   const estaDeshabilitado = (data) => {
     return data.resultado === 0;
   };
@@ -2126,8 +2165,11 @@ export function ListadoSolicitud() {
                                 handleOpenModalVerificacion(data, "domicilio")
                               }
                               disabled={
-                                data.idEstadoVerificacionDocumental !== 4 ||
-                                data.Domicilio === false
+                                verificacionSolicitud(data) ||
+                                data.Domicilio === false ||  !docAprobados[data.id]
+
+
+                                 
                               }
                               size="small"
                               sx={{
@@ -2191,7 +2233,9 @@ export function ListadoSolicitud() {
                               }
                               disabled={
                                 verificacionSolicitud(data) ||
-                                data.Laboral === false
+                                data.Laboral === false ||
+                                !!docAprobados[data.id]
+                                
                               }
                               size="small"
                               sx={{
