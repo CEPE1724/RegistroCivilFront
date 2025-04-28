@@ -634,6 +634,7 @@ export function ListadoSolicitud() {
   };
 
   const [fechaTiempos, setfechaTiempos] = useState([]);
+  console.log("fechaTiempos", fechaTiempos);
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
@@ -643,13 +644,13 @@ export function ListadoSolicitud() {
         },
       });
       if (response.status === 200) {
-        const data = response.data;
-        setfechaTiempos(data);
+        return response.data;
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
       console.error("Error fetching tiemposolicitudesweb data:", error);
+      return null;
     }
   };
 
@@ -1345,7 +1346,18 @@ export function ListadoSolicitud() {
   const handleOpenDialog = async (row) => {
     setSelectedRow(row);
     setView(true);
-    await fetchTiempSolicweb(1, row.id, "1,12");  
+    const [resultado1, resultado2, resultado3] = await Promise.all([
+      fetchTiempSolicweb(1, row.id, "1,12"),
+      fetchTiempSolicweb(2, row.id, "2,3"),
+      fetchTiempSolicweb(3, row.id, "1,4")
+    ]);
+
+    const todosLosResultados = [
+      ...(resultado1 || []),
+      ...(resultado2 || []),
+      ...(resultado3 || [])
+    ];
+    setfechaTiempos(todosLosResultados);
   };
 
   const handleCloseDialog = () => {
@@ -2595,7 +2607,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos[0] && (
+                    {fechaTiempos[4] && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -2608,7 +2620,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos[4].FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -2637,7 +2649,7 @@ export function ListadoSolicitud() {
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos[1] && (
+                    {fechaTiempos[5] && (
                       <>
                         <Typography
                           variant="caption"
@@ -2653,7 +2665,7 @@ export function ListadoSolicitud() {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                          {formatDateTime(fechaTiempos[5].FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -2671,8 +2683,8 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos[0]?.FechaSistema,
-                            fechaTiempos[1]?.FechaSistema
+                            fechaTiempos[4]?.FechaSistema,
+                            fechaTiempos[5]?.FechaSistema
                           )}
                         </Typography>
                       </>
@@ -2715,7 +2727,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos[0] && (
+                    {fechaTiempos[2] && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -2728,7 +2740,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos[2].FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -2757,7 +2769,7 @@ export function ListadoSolicitud() {
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos[1] && (
+                    {fechaTiempos[3] && (
                       <>
                         <Typography
                           variant="caption"
@@ -2773,7 +2785,7 @@ export function ListadoSolicitud() {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                          {formatDateTime(fechaTiempos[3].FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -2791,8 +2803,8 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos[0]?.FechaSistema,
-                            fechaTiempos[1]?.FechaSistema
+                            fechaTiempos[2]?.FechaSistema,
+                            fechaTiempos[3]?.FechaSistema
                           )}
                         </Typography>
                       </>
