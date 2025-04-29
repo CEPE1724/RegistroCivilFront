@@ -102,6 +102,8 @@ export function ListadoSolicitud() {
     listadoAnalista,
   } = useBodegaUsuario();
 
+
+const [recargar, setRecargar] = useState(false);
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
@@ -402,6 +404,7 @@ export function ListadoSolicitud() {
     };
   
     if (datos.length > 0) {
+      console.log("Imprimo los datos:", datos);
       verificarTodosDocumentos();
     }
   }, [datos]);
@@ -503,14 +506,15 @@ export function ListadoSolicitud() {
   const handleApproveEstado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Estado: 2 });
     fetchInsertarDatos(6, data.id, 2);
-    fetchSolicitudes();
+    setRecargar(true);
 
   };
 
   const handleApproveResultado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
     fetchInsertarDatos(7, data.id, 1);
-    fetchSolicitudes();
+    setRecargar(true);
   };
 
   const patchSolicitudEstadoyResultado = async (
@@ -672,6 +676,7 @@ export function ListadoSolicitud() {
   };
 
   const [fechaTiempos, setfechaTiempos] = useState([]);
+  console.log("fechaTiempos", fechaTiempos);
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
@@ -1043,13 +1048,13 @@ export function ListadoSolicitud() {
       data.idEstadoVerificacionSolicitud === 12 &&
       data.idEstadoVerificacionTelefonica === 3;
 
-    const verificacionDomicilioOk =
+    /*const verificacionDomicilioOk =
       !data.Domicilio || data.idEstadoVerificacionDomicilio === 2;
 
     const verificacionLaboralOk =
       !data.Laboral || data.idEstadoVerificacionTerrena === 2;
-
-    return condicionesBase && verificacionDomicilioOk && verificacionLaboralOk;
+*/
+    return condicionesBase
   };
 
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
@@ -1129,6 +1134,7 @@ export function ListadoSolicitud() {
     nombre,
     numeroSolicitud,
     cedula,
+    recargar
   ]);
 
   const fetchSolicitudes = async () => {
@@ -1426,14 +1432,12 @@ export function ListadoSolicitud() {
   };
 
 
-  const handleEquifax = () => 
+  const handleEquifax = (data) => 
     {
       navigate("/equifaxx", {
         replace: true,
         state: {
-          nombre: selectedRow.nombre,
-          cedula: selectedRow.cedula,
-          Fecha: selectedRow.fecha,
+          data: data,
         },
       });
     }

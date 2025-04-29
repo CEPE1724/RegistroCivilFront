@@ -11,12 +11,16 @@ import axios from "axios";
 import { APIURL } from "../../../configApi/apiConfig";
 import { enqueueSnackbar } from "notistack";
 import { FaListAlt, FaMoneyBillWave, FaMoneyCheckAlt,FaCommentDots } from "react-icons/fa";
+import {useAuth} from "../../AuthContext/AuthContext"
+
 
 
 // Definir el componente con forwardRef correctamente
 export const FactoresCredito = forwardRef((props, ref) => {
   const { data, fetchCuotaCupo, estSol } = props;
   const [tipo, setTipo] = useState([]);
+    const { userData, idMenu } = useAuth();
+  
   const [formData, setFormData] = useState({
     tipoCliente: data.idTipoCliente || 0,
     tipo: "",
@@ -35,12 +39,42 @@ export const FactoresCredito = forwardRef((props, ref) => {
     };
   };
 
+///// permisos 
+  const [permisos, setPermisos] = useState([]);
+
+  const permissionscomponents = async (idMenu, idUsuario) => {
+    try {
+      const url = APIURL.getacces(idMenu, idUsuario);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setPermisos(data);
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching permissions components:", error);
+    }
+  };
+
+  const permisoEditar = (data) => {
+    const permiso = permisos.find((p) => p.Permisos === `EDITAR VALORES DE CREDITO`);
+    // Retornar true si no existe el permiso o si no está activo
+    return !permiso || !permiso.Activo;
+  };
+
   // Función para validar el formulario
   const validateForm = () => {
     if (!formData.cuotaAsignada || formData.cuotaAsignada <= 0) return false;
     if (!formData.cupo || formData.cupo <= 0) return false;
     return true;
   };
+
+  
 
   // Expone las funciones al componente padre
   useImperativeHandle(ref, () => ({
@@ -52,6 +86,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
   }));
   useEffect(() => {
     fetchTipoCliente();
+    permissionscomponents(idMenu, userData.idUsuario);
   }, []);
 
   const fetchTipoCliente = async () => {
@@ -297,7 +332,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
             <PrintIcon />
           </IconButton>
 
-          {estSol === 12 &&(<div className="flex items-center">           
+          {(estSol === 12 || estSol===10) && !permisoEditar() && (<div className="flex items-center">           
             <button
               onClick={async () => {
                 try {
