@@ -1640,8 +1640,9 @@ export function Cabecera() {
                   </button>
                 </div>
               )}
+{/*
 
-              <div className="flex items-center">
+<div className="flex items-center">
                 <button
                   onClick={() => { }}
                   className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
@@ -1650,6 +1651,8 @@ export function Cabecera() {
                   <span className="text-xs">Imprimir</span>
                 </button>
               </div>
+*/}
+              
               <div className="flex items-center">
                 <button
                   onClick={navigateToListadoSolicitud}
