@@ -12,7 +12,6 @@ export function GestorDocumentos({
     id,
     NumeroSolicitud,
     nombre,
-    apellido,
     cedula,
     fecha,
     almacen,
@@ -52,7 +51,6 @@ export function GestorDocumentos({
     const [clientInfo, setClientInfo] = useState({
         id: "",
         nombre: "",
-        apellido: "",
         cedula: "",
         fecha: "",
         almacen: "",
@@ -62,6 +60,7 @@ export function GestorDocumentos({
         consulta: "",
         estadoVerifD: "",
     });
+    console.log("clientInfo", clientInfo);
 
     // mostrar botones
     useEffect(() => {
@@ -275,6 +274,16 @@ export function GestorDocumentos({
         }
     };
 
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleDateString('es-EC', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    };
+
     //api actualizar estado de solicitudWeb
     const updateEstadoVerificacion = async (idEstadoVerificacionDocumental) => {
         try {
@@ -339,35 +348,35 @@ export function GestorDocumentos({
         }
     };
 
-    //api nombre del vendedor 
-    const fetchVendedor = async (idVendedor) => {
-        try {
-            const response = await axios.get(APIURL.getVendedor(idVendedor), {
-                headers: { method: "GET", cache: "no-store" },
-            });
-            if (response.status === 200) {
-                const vendedor = response.data;
-                return (
-                    `${vendedor.PrimerNombre || ""} ${vendedor.ApellidoPaterno || ""}`.trim() || "No disponible"
-                );
-            }
-            return "No disponible";
-        } catch (error) {
-            console.error("Error fetching vendedor data:", error);
-            return "No disponible";
-        }
-    };
+    // //api nombre del vendedor 
+    // const fetchVendedor = async (idVendedor) => {
+    //     try {
+    //         const response = await axios.get(APIURL.getVendedor(idVendedor), {
+    //             headers: { method: "GET", cache: "no-store" },
+    //         });
+    //         if (response.status === 200) {
+    //             const vendedor = response.data;
+    //             return (
+    //                 `${vendedor.PrimerNombre || ""} ${vendedor.ApellidoPaterno || ""}`.trim() || "No disponible"
+    //             );
+    //         }
+    //         return "No disponible";
+    //     } catch (error) {
+    //         console.error("Error fetching vendedor data:", error);
+    //         return "No disponible";
+    //     }
+    // };
 
-    useEffect(() => {
-        const getVendedorInfo = async () => {
-            if (clientInfo.vendedor) {
-                const nombre = await fetchVendedor(clientInfo.vendedor);
-                setVendedorNombre(nombre);
-            }
-        };
+    // useEffect(() => {
+    //     const getVendedorInfo = async () => {
+    //         if (clientInfo.vendedor) {
+    //             const nombre = await fetchVendedor(clientInfo.vendedor);
+    //             setVendedorNombre(nombre);
+    //         }
+    //     };
 
-        getVendedorInfo();
-    }, [clientInfo.vendedor]);
+    //     getVendedorInfo();
+    // }, [clientInfo.vendedor]);
 
     //api nombre consulta 
     const fetchTipoConsulta = async (consulta) => {
@@ -774,7 +783,24 @@ export function GestorDocumentos({
                 <div className="w-full bg-white p-4 md:p-6 rounded-lg shadow-lg">
                     <div className="mb-4 md:mb-6">
                         <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
-                            {clientInfo.foto && (
+                            {!clientInfo.foto ? (
+                                <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-24 w-24 text-gray-400"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                    </svg>
+                                </div>
+                            ) : (
                                 <div className="flex justify-center items-center">
                                     <img
                                         src={clientInfo.foto}
@@ -788,11 +814,11 @@ export function GestorDocumentos({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 text-sm md:text-base leading-relaxed">
                                     {[
                                         ["Número Solicitud", clientInfo.NumeroSolicitud],
-                                        ["Nombre", clientInfo.nombre + " " + clientInfo.apellido],
+                                        ["Nombre", clientInfo.nombre],
                                         ["Cédula", clientInfo.cedula],
-                                        ["Fecha", clientInfo.fecha],
-                                        ["Vendedor", vendedorNombre],
-                                        ["Tipo de consulta", tipoConsultaDescripcion],
+                                        ["Fecha", formatDate(clientInfo.fecha)],
+                                        ["Vendedor", clientInfo.vendedor],
+                                        ["Tipo de consulta", clientInfo.consulta],
                                         ["Almacén", clientInfo.almacen],
                                     ].map(([label, value], idx) => (
                                         <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 md:gap-4">

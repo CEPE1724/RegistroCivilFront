@@ -89,7 +89,7 @@ export function TelefonicaList({
   };
 
 
- 
+
 
   const tienePermisoDenegar = clientInfo.permisos.some(
     (permiso) => permiso.Permisos === 'EDITAR TELEFONICA DENEGAR' && permiso.Activo
@@ -120,7 +120,7 @@ export function TelefonicaList({
         Usuario: userData.Nombre,
         Telefono: ``,
       });
-     
+
       patchSolicitud(
         clientInfo.id,
         3 // Cambia el estado a "En Validación"
@@ -178,8 +178,8 @@ export function TelefonicaList({
           console.error("Error al obtener los datos de la API", error);
         }
       };
-      
-      
+
+
       fetchData();
 
     }
@@ -321,7 +321,7 @@ export function TelefonicaList({
         Tipo: 2,
         idEstadoVerificacionDocumental: 4,
         Usuario: userData.Nombre,
-         //selectedRow.Telefono+"-"+selectedRow.Contacto,
+        //selectedRow.Telefono+"-"+selectedRow.Contacto,
       }
       );
     }
@@ -385,7 +385,7 @@ export function TelefonicaList({
       enqueueSnackbar("Registro Guardado", { variant: "success" });
 
 
-      
+
 
       // **Recargar datos de la API** después de guardar
       await fetchSearchCreSolicitudVerificacionTelefonica(
@@ -402,9 +402,8 @@ export function TelefonicaList({
               Tipo: 2,
               idEstadoVerificacionDocumental: 5,
               Usuario: userData.Nombre,
-              Telefono: `${selectedRow.Telefono}-${
-                idToTextMapEstado[nuevoRegistro.estado]
-              }`, //selectedRow.Telefono+"-"+selectedRow.Contacto,
+              Telefono: `${selectedRow.Telefono}-${idToTextMapEstado[nuevoRegistro.estado]
+                }`, //selectedRow.Telefono+"-"+selectedRow.Contacto,
             });
           }
         })
@@ -538,7 +537,7 @@ export function TelefonicaList({
       console.error("Error al enviar los datos 2:", error.response?.data);
       enqueueSnackbar(
         "Error al enviar los datos: " + error.response?.data?.message ||
-          error.message,
+        error.message,
         { variant: "error" }
       );
     }
@@ -552,13 +551,13 @@ export function TelefonicaList({
           {/* Información del cliente */}
           <div className="mb-6">
             <div className="flex flex-col md:flex-row gap-6 Pr-6">
-              {clientInfo.foto !== null && clientInfo.foto!== "prueba"? (
-                  <img
-                    src={clientInfo.foto}
-                    alt="Foto del cliente"
-                    className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-in-out"
-                  />
-              ):(
+              {clientInfo.foto !== null && clientInfo.foto !== "prueba" ? (
+                <img
+                  src={clientInfo.foto}
+                  alt="Foto del cliente"
+                  className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-in-out"
+                />
+              ) : (
                 <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -594,24 +593,30 @@ export function TelefonicaList({
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-4 items-center">
-                  {resultContactedDocs.length >= 2 && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !==3 && (
+                    {resultContactedDocs.length >= 2 && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
+                      <button
+                        onClick={handleSubmit}
+                        className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-300 ease-in-out"
+                      >
+                        Aprobar
+                      </button>
+                    )}
+
+                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && (
+                      <button
+                        onClick={handleRemove
+                        }
+                        className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 transition duration-300 ease-in-out"
+                      >
+                        Rechazar
+                      </button>
+                    )}
                     <button
-                      onClick={handleSubmit}
+                      onClick={() => navigate("/ListadoSolicitud", { replace: true })}
                       className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
                     >
-                      Validar
+                      Regresar
                     </button>
-                  )}
-
-                  {tienePermisoDenegar &&  clientInfo.idEstadoVerificacionTelefonica !==4 && (
-                  <button
-                    onClick={handleRemove
-                    }
-                    className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 transition duration-300 ease-in-out"
-                  >
-                    Rechazar
-                  </button>
-                  )}
                   </div>
                 </div>
               </div>
@@ -625,13 +630,11 @@ export function TelefonicaList({
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="px-4 py-2 text-center font-bold">#</th>
+                    <th className="px-4 py-2 text-center font-bold">Nombre</th>
                     <th className="px-4 py-2 text-center font-bold">Origen</th>
                     <th className="px-4 py-2 text-center font-bold">Fecha</th>
-                    <th className="px-4 py-2 text-center font-bold">
-                      Telefono
-                    </th>
+                    <th className="px-4 py-2 text-center font-bold">Telefono</th>
                     <th className="px-4 py-2 text-center font-bold">Estado</th>
-
                     <th className="px-4 py-2 text-center font-bold">....</th>
                   </tr>
                 </thead>
@@ -639,6 +642,7 @@ export function TelefonicaList({
                   {tablaDatos.map((item, index) => (
                     <tr key={index}>
                       <td className="px-4 py-2 text-center">{index + 1}</td>
+                      <td className="px-4 py-2 text-center">{item.idEstadoOrigenTelefonica === 4 ? item.Observacion : ""}</td>
                       {/* Mostrar origen como Estacion */}
                       <td className="px-4 py-2 text-center">
                         {origenMap[item.idEstadoOrigenTelefonica] ||
@@ -681,7 +685,7 @@ export function TelefonicaList({
                 <PersonIcon className="text-blue-500" fontSize="medium" />
                 <span>
                   Verificación Telefónica de {clientInfo?.nombre}{" "}
-                  {selectedRow?.Telefono} {selectedRow?.idEstadoGestns}{" "}
+                  {selectedRow?.Telefono}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
@@ -847,15 +851,15 @@ export function TelefonicaList({
 
             <DialogActions className="bg-gray-100 py-3 px-6">
               {selectedRow?.idEstadoGestns !== 11 && tienePermisoGuardar
-               && (
-                <Button
-                  onClick={handleGuardarModal}
-                  color="primary"
-                  variant="contained"
-                >
-                  Guardar
-                </Button>
-              )}
+                && (
+                  <Button
+                    onClick={handleGuardarModal}
+                    color="primary"
+                    variant="contained"
+                  >
+                    Guardar
+                  </Button>
+                )}
               <Button
                 onClick={handleCloseDialog}
                 color="secondary"
