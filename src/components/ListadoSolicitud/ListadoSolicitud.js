@@ -2306,7 +2306,7 @@ export function ListadoSolicitud() {
                               disabled={
                                 verificacionSolicitud(data) ||
                                 data.Laboral === false ||
-                                !!docAprobados[data.id]
+                                !docAprobados[data.id]
                                 
                               }
                               size="small"
