@@ -402,7 +402,6 @@ export function ListadoSolicitud() {
     };
   
     if (datos.length > 0) {
-      console.log("Imprimo los datos:", datos);
       verificarTodosDocumentos();
     }
   }, [datos]);
@@ -673,7 +672,6 @@ export function ListadoSolicitud() {
   };
 
   const [fechaTiempos, setfechaTiempos] = useState([]);
-  console.log("fechaTiempos", fechaTiempos);
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
@@ -1428,12 +1426,14 @@ export function ListadoSolicitud() {
   };
 
 
-  const handleEquifax = (data) => 
+  const handleEquifax = () => 
     {
       navigate("/equifaxx", {
         replace: true,
         state: {
-          data: data,
+          nombre: selectedRow.nombre,
+          cedula: selectedRow.cedula,
+          Fecha: selectedRow.fecha,
         },
       });
     }
