@@ -33,7 +33,7 @@ function addListener(socket) {
     });
 
     socket.on('clients-updated', (clients) => {
-        console.log("Clients updated:", clients);
+        console.log("Clients updated:");
     })
 
     

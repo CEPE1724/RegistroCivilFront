@@ -404,7 +404,6 @@ const [recargar, setRecargar] = useState(false);
     };
   
     if (datos.length > 0) {
-      console.log("Imprimo los datos:", datos);
       verificarTodosDocumentos();
     }
   }, [datos]);
@@ -676,7 +675,7 @@ const [recargar, setRecargar] = useState(false);
   };
 
   const [fechaTiempos, setfechaTiempos] = useState([]);
-  console.log("fechaTiempos", fechaTiempos);
+ 
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
