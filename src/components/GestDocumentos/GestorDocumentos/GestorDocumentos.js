@@ -7,6 +7,7 @@ import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@mui/joy";
 
 export function GestorDocumentos({
     id,
@@ -783,7 +784,7 @@ export function GestorDocumentos({
                 <div className="w-full bg-white p-4 md:p-6 rounded-lg shadow-lg">
                     <div className="mb-4 md:mb-6">
                         <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
-                            {!clientInfo.foto ? (
+                            {clientInfo.foto.length < 30 ? (
                                 <div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -826,6 +827,15 @@ export function GestorDocumentos({
                                             <p className="text-gray-500 break-words">{value || "-"}</p>
                                         </div>
                                     ))}
+                                </div>
+                                <div className="flex justify-end mt-4 md:mt-6">
+                                <button
+                                    name="aprobTodo"
+                                    className="bg-blue-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300 mb-3"
+                                    onClick={() => navigate("/ListadoSolicitud", { replace: true })}
+                                >
+                                    Regresar
+                                </button>
                                 </div>
                             </div>
                         </div>

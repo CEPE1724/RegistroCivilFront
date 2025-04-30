@@ -16,29 +16,9 @@ import {
 import { AlertTriangle, Check, X, FileText, Printer, Undo2 } from 'lucide-react';
 
 export function ReporteEquifax({
-  setImprimiendo2, // Prop para manejar el estado de impresión
-  // Props para datos dinámicos
-  // datosPersonales = {
-  //   nombre: "GUALPA ALUCHO SEGUNDO MANUEL",
-  //   identificacion: "0200706745",
-  //   fechaConsulta: "23/04/2025"
-  // },
   resultado = {
-    segmentacion: "RECHAZAR",
-    rangoIngresos: "751-1000",
-    capacidadPago: "$ 0.00",
-    edad: "65 años",
     cuotaEstimada: "$0.00"
   },
-  scoreSobreendeudamiento = 750,
-  scoreV4 = 900,
-  politicas = [
-    {
-      politica: "MATRIZ DUAL: SCORE BURO 3.0 - SCORE SOBREENDEUDAMIENTO",
-      decision: "RECHAZAR",
-      valor: "528-550"
-    }
-  ]
 }) {
   const [imprimiendo, setImprimiendo] = useState(false);
   const location = useLocation();
@@ -134,8 +114,7 @@ export function ReporteEquifax({
     if (cedula) {
       fetchEqfxInformacion(cedula);
     }
-  }
-    , []);
+  }, []);
 
   const fetchEqfxSegmentacion = async (id) => {
     try {
@@ -224,12 +203,6 @@ export function ReporteEquifax({
       console.error("Error fetching edad data:", error);
     }
   };
-
-  const handleReturn = () => {
-    navigate("/ListadoSolicitud", {
-      replace: true,
-    });
-  }
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-2">
@@ -400,16 +373,13 @@ export function ReporteEquifax({
                 {/* Texto debajo del gráfico */}
                 <div className="w-full max-w-xs text-center  text-xs">
                   <p>
-                    Una persona con un score entre <span className="font-medium">325 y 562</span> tiene una probabilidad de <span className="font-medium">29.90%</span> de incurrir en morosidad en el Sistema Crediticio Ecuatoriano.
+                    Una persona con un score entre <span className="font-medium">{clienteDatos.segmentacion?.RangoIngresos}</span> tiene una probabilidad de <span className="font-medium">29.90%</span> de incurrir en morosidad en el Sistema Crediticio Ecuatoriano.
                   </p>
                   <p className="bg-blue-50 border border-blue-100 rounded ">
                     <span className="font-semibold">Importante:</span> El <span className="font-medium">20%</span> de las personas en el Sistema Crediticio Ecuatoriano tienen un Score menor que el evaluado.
                   </p>
                 </div>
-
               </div>
-
-
             </div>
           </div>
         </div>
@@ -461,13 +431,11 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-              {politicas.map((politica, index) => (
-                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="p-3 text-xs">{clienteDatos.politicas?.Politica}</td>
                   <td className={`p-3 text-xs font-bold ${clienteDatos.politicas?.Resultado === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>{clienteDatos.politicas?.Resultado}</td>
                   <td className="p-3 text-xs">{clienteDatos.segmentacion?.RangoIngresos}</td>
                 </tr>
-              ))}
             </tbody>
           </table>
         </div>
@@ -476,7 +444,7 @@ export function ReporteEquifax({
       <div className={`p-6 flex justify-end ${imprimiendo ? 'hidden' : ''}`}>
         <button
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center transition-all duration-300 shadow-md mr-4"
-          onClick={handleReturn}>
+          onClick={() => navigate("/ListadoSolicitud", { replace: true })}>
           <Undo2 className="w-5 h-5 mr-2" />
           Regresar
         </button>

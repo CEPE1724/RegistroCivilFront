@@ -1431,12 +1431,14 @@ const [recargar, setRecargar] = useState(false);
   };
 
 
-  const handleEquifax = (data) => 
+  const handleEquifax = () => 
     {
       navigate("/equifaxx", {
         replace: true,
         state: {
-          data: data,
+          nombre: selectedRow.nombre,
+          cedula: selectedRow.cedula,
+          Fecha: selectedRow.fecha,
         },
       });
     }
