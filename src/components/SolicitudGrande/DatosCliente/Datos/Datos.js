@@ -4,8 +4,12 @@ import {
     fetchNacionalidad, fecthGenero, fecthEstadoCivil, fetchNivelEducacion, fetchProfesion, fetchSituacionLaboral,
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
+
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+
 import { SelectField } from "../../../Utils";
+import { Facebook } from "@mui/icons-material";
 
 const Datos = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
@@ -34,6 +38,7 @@ const Datos = forwardRef((props, ref) => {
         situacionLaboral: data.idSituacionLaboral || '',
         actividadEconomica: data.idActEconomica || '',
         observacionActividadEconomica: data?.ObservacionesActividadEconomica || '',
+        Facebook: data?.Facebook || ''
     });
 
     useEffect(() => {
@@ -69,7 +74,7 @@ const Datos = forwardRef((props, ref) => {
         const { name, value } = e.target;
         // Eliminar caracteres no permitidos
         const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
-        if (invalidCharsRegex.test(value)) {
+        if (name !== 'Facebook' && invalidCharsRegex.test(value)) {
             const cleanedValue = value.replace(invalidCharsRegex, '');
             setFormData((prevState) => ({
                 ...prevState,
@@ -78,7 +83,7 @@ const Datos = forwardRef((props, ref) => {
 
             setFormErrors((prevErrors) => ({
                 ...prevErrors,
-                [name]: 'Este campo contiene caracteres no permitidos bernave',
+                [name]: 'Este campo contiene caracteres no permitidos.',
             }));
             return;
         }
@@ -110,10 +115,10 @@ const Datos = forwardRef((props, ref) => {
             nacionalidad: 'Por favor, selecciona tu nacionalidad',
             fechaNacimiento: 'Ingresa tu fecha de nacimiento (formato YYYY-MM-DD)',
             genero: 'Por favor, selecciona tu género',
-           //provinciaNacimiento: 'Selecciona la provincia donde naciste',
+            //provinciaNacimiento: 'Selecciona la provincia donde naciste',
             //cantonNacimiento: 'Selecciona el cantón donde naciste',
             estadoCivil: 'Por favor, indica tu estado civil',
-           // dependientes: 'Ingresa el número de personas dependientes (0 si no tienes)',
+            // dependientes: 'Ingresa el número de personas dependientes (0 si no tienes)',
             nivelEducacion: 'Selecciona tu nivel de educación',
             profesion: 'Indica tu profesión actual',
             situacionLaboral: 'Selecciona tu situación laboral actual',
@@ -121,7 +126,7 @@ const Datos = forwardRef((props, ref) => {
             observacionActividadEconomica: 'Describe brevemente tu actividad económica',
         };
         if (formData.nacionalidad == 54) {
-            requiredFieldMessages.provinciaNacimiento= 'Selecciona la provincia donde naciste';
+            requiredFieldMessages.provinciaNacimiento = 'Selecciona la provincia donde naciste';
             requiredFieldMessages.cantonNacimiento = 'Selecciona el cantón donde naciste';
         }
 
@@ -136,6 +141,10 @@ const Datos = forwardRef((props, ref) => {
                 continue;
             }
             if (field === 'dependientes' && formData.dependientes === 0) {
+                continue;
+            }
+            // si el campo es facebook y no tiene valor no lo validamos
+            if (field === 'Facebook' && formData.Facebook === '') {
                 continue;
             }
             if (!formData[field]) {
@@ -178,6 +187,13 @@ const Datos = forwardRef((props, ref) => {
             return false;
         }
 
+
+        // validra Facebook si escribio algo minimo 3 caracteres y maximo 20 caracteres
+        if (formData.Facebook && (formData.Facebook.length < 3 || formData.Facebook.length > 20)) {
+            errors.Facebook = 'El campo Facebook debe tener entre 3 y 20 caracteres';
+            setFormErrors(errors);
+            return false;
+        }
         return true;
     }, [formData]);
 
@@ -321,8 +337,9 @@ const Datos = forwardRef((props, ref) => {
                             readOnly={data.idActEconomica !== undefined && data.idActEconomica !== null && data.idActEconomica !== "" && data.idActEconomica > 0}
                         />
                     </div>
-                    { data.idNacionalidad == 54 && (
+                    {data.idNacionalidad == 54 && (
                         <>
+
                     <div className="mb-6">
                         <SelectField
                             label="Provincia Nacimiento (*)"
@@ -347,7 +364,27 @@ const Datos = forwardRef((props, ref) => {
                             readOnly={data.idCantonNacimiento !== undefined && data.idCantonNacimiento !== null && data.idCantonNacimiento !== "" && data.idCantonNacimiento > 0}
                         />
                     </div>
+                    <div className="mb-6">
+                        <label className="text-xs font-medium mb-1 flex items-center">
+                            <FingerprintIcon sx={{ fontSize: 15 }} className="mr-2 text-primaryBlue" />
+                            Código Dactilar (*)
+                        </label>
+                        <input
+                            type="text"
+                            className="solcitudgrande-style"
+                            name="codigoDactilar"
+                            //onChange={handleFormChange}
+                            value={formData.codigoDactilar || ''}
+                            //readOnly={data.codigoDactilar !== undefined && data.codigoDactilar !== null && data.codigoDactilar !== "" && data.codigoDactilar.length > 0}
+                        />
+                        {formErrors.codigoDactilar && (
+                            <p className="mt-1 text-sm text-red-500 border-red-500">
+                                {formErrors.codigoDactilar}
+                            </p>
+                        )}
+                    </div>                
                     </>
+
                     )}
                     <div className="mb-6">
 
@@ -363,6 +400,26 @@ const Datos = forwardRef((props, ref) => {
                         />
                         {formErrors.observacionActividadEconomica && (
                             <p className="mt-1 text-sm text-red-500">{formErrors.observacionActividadEconomica}</p>
+                        )}
+                    </div>
+                   
+                    <div className="col-span-1">
+                        <label className="text-xs font-medium mb-1 flex items-center">
+                            <FaFacebook className="mr-2 text-primaryBlue" />
+                            Facebook
+                        </label>
+                        <input
+                            type="text"
+                            className="solcitudgrande-style"
+                            name="Facebook"
+                            onChange={handleFormChange}
+                            value={formData.Facebook || ''}
+
+                        />
+                        {formErrors.Facebook && (
+                            <p className="mt-1 text-sm text-red-500 border-red-500">
+                                {formErrors.Facebook}
+                            </p>
                         )}
                     </div>
                 </div>
