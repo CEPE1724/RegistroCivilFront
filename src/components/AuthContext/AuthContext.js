@@ -28,10 +28,10 @@ export const AuthProvider = ({ children }) => {
     socket.on("disconnect", () => setIsConnected(false));
     socket.on("clients-updated", (clients) => setConnectedClients(clients));
 
-    socket.on('solicitud-web-changed', (data) => {
+  /*  socket.on('solicitud-web-changed', (data) => {
       console.log('Cambio en algun dato de la  solicitud web ojala funcione :', data);
       // aquí puedes actualizar la UI o volver a hacer una consulta
-    });
+    });*/
 
 
     return () => socket.disconnect();
@@ -145,6 +145,7 @@ export const AuthProvider = ({ children }) => {
          setMenuId,
          isConnected,
          connectedClients,
+         socket: socketRef.current,
       }}
     >
       {children}

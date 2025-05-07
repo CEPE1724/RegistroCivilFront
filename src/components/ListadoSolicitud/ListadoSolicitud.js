@@ -144,7 +144,7 @@ const [recargar, setRecargar] = useState(false);
   const [idsTerrenas, setIdsTerrenas] = useState([]);
 
   const navigate = useNavigate();
-  const { userData, idMenu } = useAuth();
+  const { userData, idMenu , socket} = useAuth();
 
   const [cedula, setCedula] = useState("");
   const [dactilar, setDactilar] = useState("");
@@ -1110,6 +1110,21 @@ const [recargar, setRecargar] = useState(false);
     }
   };
 
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onChanged = () => {
+      // invierte el booleano para forzar el re-fetch
+      setRecargar(prev => !prev);
+    };
+
+    socket.on("solicitud-web-changed", onChanged);
+    return () => {
+      socket.off("solicitud-web-changed", onChanged);
+    };
+  }, [socket]);
+  
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
