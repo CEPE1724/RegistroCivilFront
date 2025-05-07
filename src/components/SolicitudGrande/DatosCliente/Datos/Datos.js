@@ -5,6 +5,7 @@ import {
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { SelectField } from "../../../Utils";
 
 const Datos = forwardRef((props, ref) => {
@@ -347,6 +348,25 @@ const Datos = forwardRef((props, ref) => {
                             readOnly={data.idCantonNacimiento !== undefined && data.idCantonNacimiento !== null && data.idCantonNacimiento !== "" && data.idCantonNacimiento > 0}
                         />
                     </div>
+                    <div className="mb-6">
+                        <label className="text-xs font-medium mb-1 flex items-center">
+                            <FingerprintIcon sx={{ fontSize: 15 }} className="mr-2 text-primaryBlue" />
+                            Código Dactilar (*)
+                        </label>
+                        <input
+                            type="text"
+                            className="solcitudgrande-style"
+                            name="codigoDactilar"
+                            //onChange={handleFormChange}
+                            value={formData.codigoDactilar || ''}
+                            //readOnly={data.codigoDactilar !== undefined && data.codigoDactilar !== null && data.codigoDactilar !== "" && data.codigoDactilar.length > 0}
+                        />
+                        {formErrors.codigoDactilar && (
+                            <p className="mt-1 text-sm text-red-500 border-red-500">
+                                {formErrors.codigoDactilar}
+                            </p>
+                        )}
+                    </div>                
                     </>
                     )}
                     <div className="mb-6">
