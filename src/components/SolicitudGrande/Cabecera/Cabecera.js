@@ -24,6 +24,7 @@ import Domicilio from "../DatosCliente/Domicilio/Domicilio";
 import Referencias from "../Referencia/Referencia";
 import { ModalConfirm } from "../ModalConfirm";
 import { useAuth } from "../../AuthContext/AuthContext";
+import { Facebook } from "@mui/icons-material";
 export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
@@ -1426,6 +1427,7 @@ export function Cabecera() {
           idActEconomica: getParsedValue(formData.actividadEconomica),
           ObservacionesActividadEconomica:
             formData.observacionActividadEconomica,
+          Facebook: formData.Facebook,
         },
         {
           headers: {
