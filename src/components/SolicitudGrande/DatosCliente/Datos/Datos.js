@@ -5,7 +5,7 @@ import {
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
 
-import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
+import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaFacebook, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 
 import { SelectField } from "../../../Utils";
@@ -38,7 +38,8 @@ const Datos = forwardRef((props, ref) => {
         situacionLaboral: data.idSituacionLaboral || '',
         actividadEconomica: data.idActEconomica || '',
         observacionActividadEconomica: data?.ObservacionesActividadEconomica || '',
-        Facebook: data?.Facebook || ''
+        Facebook: data?.Facebook || '',
+        codigoDactilar: data?.CodigoDactilar || ''
     });
 
     useEffect(() => {
@@ -128,6 +129,7 @@ const Datos = forwardRef((props, ref) => {
         if (formData.nacionalidad == 54) {
             requiredFieldMessages.provinciaNacimiento = 'Selecciona la provincia donde naciste';
             requiredFieldMessages.cantonNacimiento = 'Selecciona el cantón donde naciste';
+            requiredFieldMessages.codigoDactilar = 'Ingresa tu código dactilar';
         }
 
         const errors = {};
@@ -373,9 +375,8 @@ const Datos = forwardRef((props, ref) => {
                             type="text"
                             className="solcitudgrande-style"
                             name="codigoDactilar"
-                            //onChange={handleFormChange}
-                            value={formData.codigoDactilar || ''}
-                            //readOnly={data.codigoDactilar !== undefined && data.codigoDactilar !== null && data.codigoDactilar !== "" && data.codigoDactilar.length > 0}
+                            value={formData.codigoDactilar}
+                            onChange={handleFormChange}
                         />
                         {formErrors.codigoDactilar && (
                             <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -414,7 +415,6 @@ const Datos = forwardRef((props, ref) => {
                             name="Facebook"
                             onChange={handleFormChange}
                             value={formData.Facebook || ''}
-
                         />
                         {formErrors.Facebook && (
                             <p className="mt-1 text-sm text-red-500 border-red-500">
