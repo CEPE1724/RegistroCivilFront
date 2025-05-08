@@ -3,7 +3,7 @@ import { get } from "react-hook-form";
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-const API_BASE_URL = "http://192.168.2.20:3025/api/v1/"
+const API_BASE_URL = "http://192.168.2.14:3025/api/v1/"
 
 
 
@@ -179,4 +179,5 @@ export const APIURL = {
   getEqfxScorePuntaje : (id) => `${API_BASE_URL}eqfxScorePuntajeV3/${id}`,
   getVerificacionTresDocumentos :(id) => `${API_BASE_URL}documentos-solicitud/verificar-documentos-aprobados/${id}`,
   getReporteBuroCredito : (id) => `${API_BASE_URL}eqfxReporteBuroCredito/${id}`,
+  patch_codDactil : (id) => `${API_BASE_URL}cre-solicitud-web/updatecodDactilar/${id}`,
 };
