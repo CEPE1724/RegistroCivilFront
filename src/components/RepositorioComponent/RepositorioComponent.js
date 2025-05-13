@@ -9,7 +9,7 @@ import {
   Menu as MenuIcon,
 } from "@mui/icons-material";
 import { APIURL } from "../../configApi/apiConfig";
-import axios from 'axios';
+import axios from '../../configApi/axiosConfig';
 
 export const RepositorioComponent = () => {
   const [view, setView] = useState("grid");

@@ -1,6 +1,6 @@
 // hooks/useBodegaUsuario.js
 import { useState } from "react";
-import axios from "axios";
+import axios from "../configApi/axiosConfig"
 import { APIURL } from "../configApi/apiConfig";
 
 const useBodegaUsuario = () => {

@@ -37,6 +37,8 @@ const Login = () => {
 
       if (response.status === 201) {
         const data = response.data;
+        localStorage.setItem("token", data.token);
+
         const expirationTime = new Date().getTime() + 3 * 60 * 60 * 1000; // 3 horas
         login(data.token, expirationTime);
         enqueueSnackbar("Acceso correcto!", { variant: "success" });
