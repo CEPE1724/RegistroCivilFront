@@ -5,7 +5,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/joy";
 
@@ -61,7 +61,6 @@ export function GestorDocumentos({
         consulta: "",
         estadoVerifD: "",
     });
-    console.log("clientInfo", clientInfo);
 
     // mostrar botones
     useEffect(() => {
