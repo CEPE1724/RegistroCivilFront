@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import {
   GoogleMap,
   LoadScript,
@@ -230,6 +230,7 @@ function LocationModal({
   };
 
   // Función de subida de archivos: llama al backend y retorna las URLs públicas
+
   const uploadFiles = async () => {
     if (!files || files.length === 0) {
       showSnackbar("Debe subir al menos un archivo.", "error");
@@ -239,7 +240,10 @@ function LocationModal({
       showSnackbar("Debe subir al menos 3 archivos.", "error");
       return null;
     }
+  
     const uploadEndpoint = APIURL.postFileupload();
+    const token = localStorage.getItem("token"); // 🔐 capturamos el token
+  
     try {
       const uploadResults = await Promise.all(
         files.map(async (file) => {
@@ -249,12 +253,15 @@ function LocationModal({
           formData.append("cedula", userSolicitudData.cedula);
           formData.append("numerosolicitud", userSolicitudData.NumeroSolicitud);
           formData.append("Tipo", userSolicitudData.Tipo || "DEFAULT");
-          const res = await fetch(uploadEndpoint, {
-            method: "POST",
-            body: formData,
+  
+          const response = await axios.post(uploadEndpoint, formData, {
+            headers: {
+              Authorization: `Bearer ${token}`, // ✅ Se envía el token aquí
+            },
           });
-          const data = await res.json();
-          if (!res.ok || !data.url) throw new Error("Upload failed");
+  
+          const data = response.data;
+          if (!data.url) throw new Error("Upload failed");
           return data.url;
         })
       );
@@ -265,7 +272,7 @@ function LocationModal({
       return null;
     }
   };
-
+  
   const handleSave = async () => {
     const newErrors = {
       address: validateField("address", localLocation.address),
@@ -281,7 +288,7 @@ function LocationModal({
       showSnackbar(errorMessages, "error");
       return;
     }
-
+  
     if (files.length < 3) {
       setErrors((prev) => ({
         ...prev,
@@ -290,10 +297,10 @@ function LocationModal({
       showSnackbar("Debe subir al menos 3 archivos.", "error");
       return;
     }
-
+  
     const uploadedUrls = await uploadFiles();
     if (!uploadedUrls) return;
-
+  
     const payload = {
       id: userSolicitudData.id,
       cedula: userSolicitudData.cedula,
@@ -303,9 +310,15 @@ function LocationModal({
       ip: "192.168.2.183",
       UrlImagen: uploadedUrls,
     };
-
+  
+    const token = localStorage.getItem("token"); // 🔐 capturamos el token
+  
     try {
-      await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);
+      await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Se envía el token aquí también
+        },
+      });
       showSnackbar("Ubicación guardada exitosamente.", "success");
       if (onLocationChange) {
         onLocationChange(localLocation);
@@ -323,6 +336,7 @@ function LocationModal({
       );
     }
   };
+  
 
   if (!openLocationModal) return null;
 

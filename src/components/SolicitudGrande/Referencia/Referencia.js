@@ -1,6 +1,6 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import { useSnackbar } from "notistack";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { APIURL } from "../../../configApi/apiConfig";
 import {
   FaUserFriends, FaUser, FaMapMarkerAlt, FaMobileAlt,

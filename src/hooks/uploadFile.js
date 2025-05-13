@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../configApi/axiosConfig";
 import { APIURL } from "../configApi/apiConfig";
 const uploadFile = async (file, almacen, cedula, numeroSolicitud, Tipo) => {
 

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { APIURL } from "../../../configApi/apiConfig";
 import { useSnackbar } from "notistack";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { SelectField } from "../../Utils";
 import {
   fetchTipoEmpresa,

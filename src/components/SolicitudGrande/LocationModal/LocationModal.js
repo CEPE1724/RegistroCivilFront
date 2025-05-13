@@ -224,8 +224,13 @@ export function LocationModal({
 
 
     try {
-      await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload);
-      showSnackbar("Ubicación guardada exitosamente.", "success");
+      const token = localStorage.getItem("token");
+
+      await axios.post(APIURL.postInsertarCoordenadasprefactura(), payload, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });      showSnackbar("Ubicación guardada exitosamente.", "success");
       if (onLocationChange) {
         onLocationChange(localLocation);
       }

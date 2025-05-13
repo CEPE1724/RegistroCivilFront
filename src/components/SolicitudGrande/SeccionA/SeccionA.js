@@ -24,7 +24,7 @@ import {
   fecthCiudadInmueble,
 } from "../DatosCliente/apisFetch";
 import { APIURL } from "../../../configApi/apiConfig";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import {
   FaStoreAlt,
   FaMoneyCheckAlt,

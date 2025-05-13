@@ -3,6 +3,7 @@ import { Paginacion } from "../../Utils";
 import { TablaConDocumentos } from "../TablaConDocumentos";
 import { GoogleGeoreferencia } from "../GoogleGeoreferencia";
 import { APIURL } from "../../../configApi/apiConfig";
+import axios from "../../../configApi/axiosConfig"
 
 export function GestorGeoreferencia() {
     const [fechaInicio, setFechaInicio] = useState("");
@@ -32,39 +33,44 @@ export function GestorGeoreferencia() {
     ];
 
     useEffect(() => {
-        fecthData();
+        fetchData();
     }, [fechaInicio, fechaFin, cedula, estado, tipo, currentPage]);
 
-    const fecthData = async () => {
-        try {
-            const fechaHoy = new Date().toISOString().split("T")[0];
-            const fechahoymasuno = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-            const fechaInicioFinal = fechaInicio || fechaHoy;
-            const fechaFinFinal = fechaFin || fechahoymasuno;
-            const estadoFinal = estado || 0;
-            const tipoFinal = tipo || 0;
-            const itemsPerPage = 5;
-            const offset = (currentPage - 1) * itemsPerPage;
+  
+const fetchData = async () => {
+    try {
+        const fechaHoy = new Date().toISOString().split("T")[0];
+        const fechahoymasuno = new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+        const fechaInicioFinal = fechaInicio || fechaHoy;
+        const fechaFinFinal = fechaFin || fechahoymasuno;
+        const estadoFinal = estado || 0;
+        const tipoFinal = tipo || 0;
+        const itemsPerPage = 5;
+        const offset = (currentPage - 1) * itemsPerPage;
 
-            const queryParams = new URLSearchParams({
-                FechaInicio: fechaInicioFinal,
-                FechaFin: fechaFinFinal,
-                Estado: estadoFinal,
-                Tipo: tipoFinal,
-                Cedula: cedula,
-                limit: itemsPerPage,
-                offset: offset,
-            }).toString();
+        const queryParams = {
+            FechaInicio: fechaInicioFinal,
+            FechaFin: fechaFinFinal,
+            Estado: estadoFinal,
+            Tipo: tipoFinal,
+            Cedula: cedula,
+            limit: itemsPerPage,
+            offset: offset,
+        };
 
-            const response = await fetch(`${APIURL.getCoordenadasprefactura()}?${queryParams}`);
-            const data = await response.json();
-            setDatos(data.data);
-            setTotalRecords(data.total);
-            setTotalPages(Math.ceil(data.total / itemsPerPage));
-        } catch (error) {
-            console.log(error);
-        }
-    };
+        const response = await axios.get(APIURL.getCoordenadasprefactura(), {
+            params: queryParams
+        });
+
+        const data = response.data;
+
+        setDatos(data.data);
+        setTotalRecords(data.total);
+        setTotalPages(Math.ceil(data.total / itemsPerPage));
+    } catch (error) {
+        console.log(error);
+    }
+};
 
     const changePage = (page) => {
         setCurrentPage(page);
@@ -176,7 +182,7 @@ export function GestorGeoreferencia() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {datos.map((data, index) => {
+                                {datos?.map((data, index) => {
                                     const estado = optEstado.find(option => option.value === data.iEstado);
                                     const estadoLabel = estado ? estado.label : 'Desconocido';
 
