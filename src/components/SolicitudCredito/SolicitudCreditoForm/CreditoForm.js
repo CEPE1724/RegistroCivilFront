@@ -155,7 +155,7 @@ export default function CreditoForm() {
         // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
         idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
         idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
-        CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
+        // CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
         Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
         Email: prevValues.Email || '',  // Siempre tomar el valor previo
         idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
@@ -220,7 +220,7 @@ export default function CreditoForm() {
     idVendedor: IdVendedor || null,
     idCompraEncuesta: null,
     Cedula: "",
-    CodDactilar: "",
+    // CodDactilar: "",
     ApellidoPaterno: "",
     ApellidoMaterno: "",
     PrimerNombre: "",
@@ -269,7 +269,7 @@ export default function CreditoForm() {
     { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
     { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
     { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
-    { label: "Código Dactilar", name: "CodDactilar", type: "text" },
+    // { label: "Código Dactilar", name: "CodDactilar", type: "text" },
     {
       label: "Bodega",
       name: "Bodega",
@@ -362,14 +362,14 @@ export default function CreditoForm() {
       Cedula: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
         .required("Ingresa 10 digitos de la cedula"),
-      CodDactilar: Yup.string()
-        .transform((value) => value.toUpperCase())
-        .matches(
-          /^[A-Z]\d{4}[A-Z]\d{4}$/,
-          "El primer y sexto carácter deben ser letras"
-        )
-        .min(8, "Debe tener al menos 8 caracteres")
-        .required("Revisa y coloca correctamente el código dactilar"),
+      // CodDactilar: Yup.string()
+      //   .transform((value) => value.toUpperCase())
+      //   .matches(
+      //     /^[A-Z]\d{4}[A-Z]\d{4}$/,
+      //     "El primer y sexto carácter deben ser letras"
+      //   )
+      //   .min(8, "Debe tener al menos 8 caracteres")
+      //   .required("Revisa y coloca correctamente el código dactilar"),
       ApellidoPaterno: Yup.string()
         .trim()
         .min(3, "Debe tener al menos 3 caracteres")
@@ -519,7 +519,7 @@ export default function CreditoForm() {
       ApellidoPaterno: values.ApellidoPaterno?.trim().toUpperCase(),
       PrimerNombre: values.PrimerNombre?.trim().toUpperCase(),
       SegundoNombre: values.SegundoNombre?.trim().toUpperCase(),
-      CodDactilar: values.CodDactilar?.toUpperCase(),
+      // CodDactilar: values.CodDactilar?.toUpperCase(),
       idCompraEncuesta: Number(values.idCompraEncuesta),
       idCre_TiempoVivienda: Number(values.idCre_TiempoVivienda),
       idEstadoVerificacionDocumental: 1,

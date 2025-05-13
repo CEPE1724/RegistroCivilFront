@@ -1,19 +1,15 @@
 import { get } from "react-hook-form";
 
-
-
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-const API_BASE_URL = "http://192.168.2.90:3025/api/v1/"
 
-
+const API_BASE_URL = "http://192.168.2.22:3008/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
-
-const SOCKET_BASE_URL = "http://192.168.2.20:3025";
-
-//const API_BASE_URL = "https://appservices.com.ec/cobranza/api/v1/point/";
 //const SOCKET_BASE_URL = "https://appservices.com.ec";
+const SOCKET_BASE_URL = "http://192.168.2.22:3008";
+
+
 export const APIURL = {
 
 
@@ -181,4 +177,5 @@ export const APIURL = {
   getEqfxScorePuntaje : (id) => `${API_BASE_URL}eqfxScorePuntajeV3/${id}`,
   getVerificacionTresDocumentos :(id) => `${API_BASE_URL}documentos-solicitud/verificar-documentos-aprobados/${id}`,
   getReporteBuroCredito : (id) => `${API_BASE_URL}eqfxReporteBuroCredito/${id}`,
+  patch_codDactil : (id) => `${API_BASE_URL}cre-solicitud-web/updatecodDactilar/${id}`,
 };

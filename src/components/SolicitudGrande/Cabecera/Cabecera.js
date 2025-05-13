@@ -73,6 +73,7 @@ export function Cabecera() {
     data?.NumeroSolicitud || ""
   );
   const [clienteData, setClienteData] = useState(null);
+  // en clientdata tengo el idCre_solicitudweb
   const [loading, setLoading] = useState(true); // Loading state
   const [checkDatos, setCheckDatos] = useState(false); // Loading state
   const [checkDomicilio, setCheckDomicilio] = useState(false); // Loading state
@@ -989,10 +990,12 @@ export function Cabecera() {
     if (activeTab === "Datos Cliente") {
       tipoDato = 2;
       const formData = datosRef.current.getFormData();
+      console.log("formData", formData);
       const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         isValidSumit = true;
         fetchSaveDatosNacimiento(formData);
+        fetchCodDact(formData);
         setActiveTab("Domicilio");
         // Aquí podrías proceder con el envío de los datos o alguna otra acción
       } else {
@@ -1445,6 +1448,23 @@ export function Cabecera() {
         variant: "error",
       });
       console.error("Error al guardar los datos de nacimiento", error);
+    }
+  };
+
+  const fetchCodDact = async (formData) => {
+    try {
+      const url = APIURL.patch_codDactil(clienteData.idCre_SolicitudWeb);
+      const response = await axios.patch(url, {
+        CodDactilar: formData.codigoDactilar,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error al obtener el código dactilar", error);
+      return null;
     }
   };
 

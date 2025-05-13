@@ -73,10 +73,10 @@ const FormField = ({
       value = value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "").toUpperCase();
     }
 
-    if (name === "CodDactilar") {
-      value = value.toUpperCase();
-      value = value.slice(0, 10);
-    }
+    // if (name === "CodDactilar") {
+    //   value = value.toUpperCase();
+    //   value = value.slice(0, 10);
+    // }
 
     if (name === "Celular" && value.length === 10) {
       const existe = await comprobTelf(value);
