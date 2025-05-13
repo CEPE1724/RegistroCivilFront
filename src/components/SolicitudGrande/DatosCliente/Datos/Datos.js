@@ -5,7 +5,10 @@ import {
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
 
-import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaFacebook, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
+
+import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox, FaFacebook} from "react-icons/fa";
+
+
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 
 import { SelectField } from "../../../Utils";

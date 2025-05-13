@@ -9,8 +9,13 @@ export const connectToServer = (token) => {
 
 
 
+
+    //const manager = new Manager("http://192.168.2.173:3025/socket.io/socket.io.js", 
+
 /*https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js*/
     const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
+
+
 
         {
             extraHeaders: {
@@ -39,7 +44,13 @@ function addListener(socket) {
 
     socket.on('clients-updated', (clients) => {
         console.log("Clients updated:", clients);
-    })
+    });
+    socket.on('solicitud-web-usuario', (data) => {
+        console.log('📩 Solicitud Web para el usuario:', data);
+        // Aquí puedes manejar la lógica que necesites con los datos
+        alert("tienes una notificacion nueva revisa porque modificaron algo ")
+    });
+    
 
   ////  socket.on("solicitud-web-changed", (data) => console.log("📩 Evento recibido (cambio solicitud):", data));
 

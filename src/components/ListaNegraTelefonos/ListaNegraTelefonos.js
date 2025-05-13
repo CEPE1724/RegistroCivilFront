@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../configApi/axiosConfig';
 import { APIURL } from "../../configApi/apiConfig";
 import { useSnackbar } from 'notistack';
 import { useAuth } from "../AuthContext/AuthContext";

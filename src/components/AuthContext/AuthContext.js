@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }) => {
     socket.on("connect", () => setIsConnected(true));
     socket.on("disconnect", () => setIsConnected(false));
     socket.on("clients-updated", (clients) => setConnectedClients(clients));
+    
 
   /*  socket.on('solicitud-web-changed', (data) => {
       console.log('Cambio en algun dato de la  solicitud web ojala funcione :', data);
