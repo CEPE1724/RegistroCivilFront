@@ -92,6 +92,16 @@ const Datos = forwardRef((props, ref) => {
             return;
         }
 
+	   if (name === 'codigoDactilar') {
+		const upperValue = value.toUpperCase();
+		setFormData((prevState) => ({
+		    ...prevState,
+		    [name]: upperValue,
+		}));
+		return; 
+	 }
+	 
+
         // Actualizar el estado con el valor limpio
         setFormData((prevState) => ({
             ...prevState,
@@ -183,6 +193,10 @@ const Datos = forwardRef((props, ref) => {
         if (formData.fechaNacimiento && !/^\d{4}-\d{2}-\d{2}$/.test(formData.fechaNacimiento)) {
             errors.fechaNacimiento = 'Formato de fecha inválido';
         }
+
+	   if (formData.codigoDactilar && !/^[A-Z]{1}[0-9]{4}[A-Z]{1}[0-9]{4}$/.test(formData.codigoDactilar)){
+		errors.codigoDactilar = 'Formato de codigo dactilar invalido';
+	   }
 
         if (formData.actividadEconomica === '' || formData.actividadEconomica === null || formData.actividadEconomica === undefined || formData.actividadEconomica === 0) {
             errors.actividadEconomica = 'Selecciona tu actividad económica';
@@ -380,6 +394,7 @@ const Datos = forwardRef((props, ref) => {
                             name="codigoDactilar"
                             value={formData.codigoDactilar}
                             onChange={handleFormChange}
+					   		autoComplete="off"
                         />
                         {formErrors.codigoDactilar && (
                             <p className="mt-1 text-sm text-red-500 border-red-500">

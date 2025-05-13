@@ -73,7 +73,6 @@ export function Cabecera() {
     data?.NumeroSolicitud || ""
   );
   const [clienteData, setClienteData] = useState(null);
-  // en clientdata tengo el idCre_solicitudweb
   const [loading, setLoading] = useState(true); // Loading state
   const [checkDatos, setCheckDatos] = useState(false); // Loading state
   const [checkDomicilio, setCheckDomicilio] = useState(false); // Loading state
