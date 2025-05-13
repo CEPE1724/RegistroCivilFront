@@ -28,6 +28,7 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
  
 
   // Fetching data from the API with axios
+  /*
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -40,7 +41,37 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
     };
 
     fetchData();
+  }, [userDataToken]);*/
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Obtenemos el token del localStorage
+  
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+  
+        const url = APIURL.getMenu(userDataToken.idUsuario);
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Enviamos el token en la cabecera
+          },
+        });
+  
+        setUserData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    if (userDataToken?.idUsuario) {
+      fetchData();
+    }
   }, [userDataToken]);
+  
+
 
   // Filtrar los datos de menú para los elementos principales
   const menuItems = userData.filter(item => item.i_parent_id === null || item.i_parent_id === 0);
