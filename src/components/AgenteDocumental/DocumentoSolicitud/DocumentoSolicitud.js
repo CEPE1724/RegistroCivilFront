@@ -8,7 +8,7 @@ import AlternateEmailIcon from '@mui/icons-material/AlternateEmail';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { useNavigate } from "react-router-dom";
 import { APIURL } from "../../../configApi/apiConfig";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 export function DocumentoSolicitud() {
   const { data, loading, error, listaVendedoresporBodega , fetchBodegaUsuario, vendedor , analista , listadoAnalista } = useBodegaUsuario();
   const { userData } = useAuth();

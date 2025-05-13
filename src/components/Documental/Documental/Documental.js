@@ -6,7 +6,7 @@ import { IconButton } from "@mui/material";
 import { APIURL } from "../../../configApi/apiConfig";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa"; // Importar icono de usuario
 import { HistorialObservacionesModal } from "../HistorialObservacionesModal";
