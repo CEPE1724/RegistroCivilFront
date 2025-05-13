@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import EventIcon from "@mui/icons-material/Event";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import { useAuth } from "../AuthContext/AuthContext";
 
 
