@@ -11,8 +11,7 @@ import { APIURL } from "../../configApi/apiConfig";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import { useAuth } from "../AuthContext/AuthContext";
 
-import axios from "axios";
-
+import axios from "../../configApi/axiosConfig";
 Chart.register(...registerables);
 
 export function Dashboards() {

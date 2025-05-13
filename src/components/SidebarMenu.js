@@ -17,7 +17,7 @@ import GpsFixed from "@mui/icons-material/GpsFixed";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"; // Flecha para submenú
 import Collapse from "@mui/material/Collapse";
-import axios from "axios"; // Importando axios
+import axios from "../configApi/axiosConfig"; // Importando axios
 import { APIURL } from "../configApi/apiConfig";
 import { useAuth } from "./AuthContext/AuthContext"; // Importando el contexto de autenticación
 export function SwipeableTemporaryDrawer({ userDataToken }) {
