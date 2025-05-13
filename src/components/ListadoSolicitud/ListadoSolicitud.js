@@ -130,35 +130,26 @@ const [recargar, setRecargar] = useState(false);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [fechaInicio, setFechaInicio] = useState(today);
   const [fechaFin, setFechaFin] = useState(today);
-
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
   const [openRegistroCivil, setOpenRegistroCivil] = useState(false);
-
   const [isTrabajoModalOpen, setTrabajoModalOpen] = useState(false);
   const handleCloseTrabajoModal = () => setTrabajoModalOpen(false);
-
   const [domicilioData, setDomicilioData] = useState([]);
   const [trabajoData, setTrabajoData] = useState([]);
-
   const [idsTerrenas, setIdsTerrenas] = useState([]);
-
   const navigate = useNavigate();
   const { userData, idMenu , socket} = useAuth();
-
   const [cedula, setCedula] = useState("");
   const [dactilar, setDactilar] = useState("");
-
   const [fileToUpload, setFileToUpload] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
-
   const [resultadoVerificacion, setResultadoVerificacion] = useState([]);
   const [loadingVerificacion, setLoadingVerificacion] = useState(false);
-
   const [openCameraModal, setOpenCameraModal] = useState(false);
   const [imagenCapturada, setImagenCapturada] = useState(null);
+  const [fechaTiempos, setfechaTiempos] = useState([]);
 
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
@@ -674,7 +665,7 @@ const [recargar, setRecargar] = useState(false);
     }
   };
 
-  const [fechaTiempos, setfechaTiempos] = useState([]);
+  console.log("fechaTiempos", fechaTiempos);
  
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
@@ -1403,19 +1394,25 @@ const [recargar, setRecargar] = useState(false);
   const handleOpenDialog = async (row) => {
     setSelectedRow(row);
     setView(true);
-    const [resultado1, resultado2, resultado3] = await Promise.all([
+    const [tipo1, tipo2, tipo3] = await Promise.all([
       fetchTiempSolicweb(1, row.id, "1,12"),
       fetchTiempSolicweb(2, row.id, "2,3"),
       fetchTiempSolicweb(3, row.id, "1,4")
     ]);
 
-    const todosLosResultados = [
-      ...(resultado1 || []),
-      ...(resultado2 || []),
-      ...(resultado3 || [])
-    ];
-    setfechaTiempos(todosLosResultados);
+    // const todosLosResultados = [
+    //   ...(tipo1 || []),
+    //   ...(tipo2 || []),
+    //   ...(tipo3 || [])
+    // ];
+
+    const resultados = {
+	tipo1, tipo2, tipo3
+    }
+    setfechaTiempos(resultados);
   };
+
+    console.log("fecha?", fechaTiempos?.tipo1?.length > 0);
 
   const handleCloseDialog = () => {
     setView(false);
@@ -2518,7 +2515,7 @@ const [recargar, setRecargar] = useState(false);
             }}
           >
 
-            {/* Primer ítem */}
+            {/* Solicitud */}
             <TimelineItem>
               <TimelineSeparator
                 sx={{
@@ -2551,7 +2548,7 @@ const [recargar, setRecargar] = useState(false);
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos[0] && (
+                    {fechaTiempos?.tipo1?.length > 0 && (   
                       <Typography
                         variant="caption"
                         sx={{
@@ -2564,7 +2561,7 @@ const [recargar, setRecargar] = useState(false);
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo1[0].FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -2593,7 +2590,7 @@ const [recargar, setRecargar] = useState(false);
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos[1] && (
+                    {fechaTiempos?.tipo1?.length > 1 && (
                       <>
                         <Typography
                           variant="caption"
@@ -2609,7 +2606,7 @@ const [recargar, setRecargar] = useState(false);
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                          {formatDateTime(fechaTiempos?.tipo1[1]?.FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -2627,8 +2624,8 @@ const [recargar, setRecargar] = useState(false);
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos[0]?.FechaSistema,
-                            fechaTiempos[1]?.FechaSistema
+                            fechaTiempos?.tipo1[0]?.FechaSistema,
+                            fechaTiempos?.tipo1[1]?.FechaSistema
                           )}
                         </Typography>
                       </>
@@ -2638,7 +2635,7 @@ const [recargar, setRecargar] = useState(false);
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-
+			{/* Documental */}
             <TimelineItem>
               <TimelineSeparator
                 sx={{
@@ -2671,7 +2668,7 @@ const [recargar, setRecargar] = useState(false);
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos[4] && (
+                    {fechaTiempos?.tipo3?.length > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -2684,7 +2681,7 @@ const [recargar, setRecargar] = useState(false);
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos[4].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo3[0].FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -2713,7 +2710,7 @@ const [recargar, setRecargar] = useState(false);
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos[5] && (
+                    {fechaTiempos?.tipo3?.length > 1 && (
                       <>
                         <Typography
                           variant="caption"
@@ -2729,7 +2726,7 @@ const [recargar, setRecargar] = useState(false);
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos[5].FechaSistema)}
+                          {formatDateTime(fechaTiempos?.tipo3[1].FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -2747,8 +2744,8 @@ const [recargar, setRecargar] = useState(false);
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos[4]?.FechaSistema,
-                            fechaTiempos[5]?.FechaSistema
+                            fechaTiempos?.tipo3[0]?.FechaSistema,
+                            fechaTiempos?.tipo3[1]?.FechaSistema
                           )}
                         </Typography>
                       </>
@@ -2758,7 +2755,7 @@ const [recargar, setRecargar] = useState(false);
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-
+			{/* Telefónica */}
             <TimelineItem>
               <TimelineSeparator
                 sx={{
@@ -2791,7 +2788,7 @@ const [recargar, setRecargar] = useState(false);
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos[2] && (
+                    {fechaTiempos?.tipo2?.length > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -2804,7 +2801,7 @@ const [recargar, setRecargar] = useState(false);
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos[2].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo2[0].FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -2833,7 +2830,7 @@ const [recargar, setRecargar] = useState(false);
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos[3] && (
+                    {fechaTiempos?.tipo2?.length > 1 && (
                       <>
                         <Typography
                           variant="caption"
@@ -2849,7 +2846,7 @@ const [recargar, setRecargar] = useState(false);
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos[3].FechaSistema)}
+                          {formatDateTime(fechaTiempos?.tipo2[1].FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -2867,8 +2864,8 @@ const [recargar, setRecargar] = useState(false);
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos[2]?.FechaSistema,
-                            fechaTiempos[3]?.FechaSistema
+                            fechaTiempos?.tipo2[0]?.FechaSistema,
+                            fechaTiempos?.tipo2[1]?.FechaSistema
                           )}
                         </Typography>
                       </>
