@@ -61,7 +61,6 @@ export function GestorDocumentos({
         consulta: "",
         estadoVerifD: "",
     });
-    console.log("clientInfo", clientInfo);
 
     // mostrar botones
     useEffect(() => {
