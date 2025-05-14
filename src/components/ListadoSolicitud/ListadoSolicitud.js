@@ -665,7 +665,6 @@ const [recargar, setRecargar] = useState(false);
     }
   };
 
-  console.log("fechaTiempos", fechaTiempos);
  
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
@@ -1412,7 +1411,6 @@ const [recargar, setRecargar] = useState(false);
     setfechaTiempos(resultados);
   };
 
-    console.log("fecha?", fechaTiempos?.tipo1?.length > 0);
 
   const handleCloseDialog = () => {
     setView(false);

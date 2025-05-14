@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ReusableForm from "../../FormField";
 import * as Yup from "yup";
 import { APIURL } from "../../../configApi/apiConfig";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";

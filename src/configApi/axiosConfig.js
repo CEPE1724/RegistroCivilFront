@@ -11,7 +11,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    console.log('TOKEN ENVIADO:', token); // <- Agrega esto para depurar
+    // console.log('TOKEN ENVIADO:', token); // <- Agrega esto para depurar
     // o sessionStorage, o desde donde guardes tu token
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
