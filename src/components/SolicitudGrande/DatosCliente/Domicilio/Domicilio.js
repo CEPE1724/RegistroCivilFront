@@ -41,7 +41,7 @@ import { SelectField } from "../../../Utils";
 import { InputField } from "../../../Utils";
 import { LocationModal } from "../../LocationModal";
 import { useAuth } from "../../../AuthContext/AuthContext";
-import axios from "axios";
+import axios from "../../../../configApi/axiosConfig";
 import { APIURL } from "../../../../configApi/apiConfig";
 import { useLocation } from "react-router-dom";
 const Domicilio = forwardRef((props, ref) => {

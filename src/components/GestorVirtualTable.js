@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../configApi/axiosConfig';
 import { APIURL } from '../configApi/apiConfig';  // Suponiendo que tienes tu configuración para la API
 import IconCard from './IconCard';
 import { GestorTelefonico } from './GestorVirtual';  // Suponiendo que tienes un componente GestorTelefonico

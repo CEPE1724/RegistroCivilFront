@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useImperativeHandle } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios"; // Import axios
+import axios from "../../../configApi/axiosConfig"; // Import axios
 import { useNavigate } from "react-router-dom";
 import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
