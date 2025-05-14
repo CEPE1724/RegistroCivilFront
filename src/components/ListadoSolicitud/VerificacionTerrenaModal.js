@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import { APIURL } from "../../configApi/apiConfig";
 import { useSnackbar } from "notistack";
 
@@ -107,10 +107,8 @@ export default function VerificacionTerrenaModal({
   useEffect(() => {
     const fetchVerificadores = async () => {
       try {
-        const response = await fetch(APIURL.get_ingresoCobrador());
-        if (!response.ok) throw new Error("Error al obtener verificadores");
-        const data = await response.json();
-        setVerificadores(data);
+        const response = await axios.get(APIURL.get_ingresoCobrador());
+        setVerificadores(response.data);
       } catch (error) {
         console.error("❌ Error al cargar verificadores:", error);
         enqueueSnackbar("Error al cargar verificadores", { variant: "error" });
