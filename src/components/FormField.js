@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPModal';
 import { APIURL } from "../configApi/apiConfig";
-import axios from "axios";
+import axios from "../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { Loader } from "../components/Utils/Loader";
 
@@ -262,7 +262,7 @@ const ReusableForm = ({
   );
 
   useEffect(() => {
-    console.log('initialValues updated:', initialValues);
+    // console.log('initialValues updated:', initialValues);
   }, [initialValues]);
   const formik = useFormik({
     initialValues: initialValues,
