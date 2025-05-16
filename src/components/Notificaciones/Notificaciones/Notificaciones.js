@@ -3,6 +3,8 @@ import { X, Upload, Trash2 } from "lucide-react";
 import axios from "../../../configApi/axiosConfig";
 import { APIURL } from "../../../configApi/apiConfig";
 import { useSnackbar } from "notistack";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton } from "@mui/material";
 
 export function Notificaciones() {
   const { enqueueSnackbar } = useSnackbar();
@@ -17,6 +19,8 @@ export function Notificaciones() {
   const [isUploading, setIsUploading] = useState(false);
   const tokenInputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [view, setView] = useState(false);
+  const modalRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,6 +40,10 @@ export function Notificaciones() {
     } else if (name === "empresa") {
       setEmpresa(value);
     }
+  };
+
+  const toggleView = () => {
+    setView(!view);
   };
 
   // Función agregar token
@@ -332,6 +340,10 @@ export function Notificaciones() {
                   </span>
                 </div>
 
+			  	{(imagen || imagenUrl) && (
+				<IconButton onClick={toggleView}>
+					<VisibilityIcon />
+                </IconButton>)}
                 <button
                   type="button"
                   onClick={handleClickUpload}
@@ -377,6 +389,31 @@ export function Notificaciones() {
                   </span>
                 </button>
               </div>
+
+              {view && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                  <div
+                    ref={modalRef}
+                    className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative"
+                  >
+                    <button
+                      onClick={toggleView}
+                      className="absolute top-2 right-2 text-lg"
+                    >
+                      ❌
+                    </button>
+                    <iframe
+                      src={
+                        imagenUrl
+						  ? imagenUrl
+						  : URL.createObjectURL(imagen)
+                      }
+                      className="w-full h-full"
+                      title="Vista previa del archivo"
+                    ></iframe>
+                  </div>
+                </div>
+              )}
 
               {/* {imagenUrl && (
                 <div className="text-xs text-gray-500 mt-1 break-all">
