@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { APIURL } from "../../configApi/apiConfig";
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Home, Work, CalendarToday, AttachMoney, LocationOn, Phone, Person, Map } from '@mui/icons-material';
 
