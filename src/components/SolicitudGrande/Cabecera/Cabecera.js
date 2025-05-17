@@ -31,24 +31,24 @@ export function Cabecera() {
   const { data } = state || {};
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
 
-   const location = useLocation();
-        const [clientInfo, setClientInfo] = useState(null);
-        useEffect(() => {
-        if (location.state) {
-          // Si hay datos en `location.state`, los guardamos en localStorage
-          localStorage.setItem("clientInfo", JSON.stringify(location.state));
-          setClientInfo(location.state);
-        } else {
-          // Si no hay datos en `location.state`, intentamos recuperar de localStorage
-          const savedClientInfo = localStorage.getItem("clientInfo");
-          if (savedClientInfo) {
-          setClientInfo(JSON.parse(savedClientInfo));
-          }
-        }
-        }, [location.state]);
-  
-  
-  
+  const location = useLocation();
+  const [clientInfo, setClientInfo] = useState(null);
+  useEffect(() => {
+    if (location.state) {
+      // Si hay datos en `location.state`, los guardamos en localStorage
+      localStorage.setItem("clientInfo", JSON.stringify(location.state));
+      setClientInfo(location.state);
+    } else {
+      // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+      const savedClientInfo = localStorage.getItem("clientInfo");
+      if (savedClientInfo) {
+        setClientInfo(JSON.parse(savedClientInfo));
+      }
+    }
+  }, [location.state]);
+
+
+
 
   const [activeTab, setActiveTab] = useState("Datos Cliente");
   const [fecha, setFecha] = useState(
@@ -662,15 +662,15 @@ export function Cabecera() {
   };
 
   const comprobTelf = async (telefono) => {
-      try {
-        const url = APIURL.validarTelefono(telefono);
-        const response = await axios.get(url);
-        return response.data;
-      } catch (error) {
-        console.error("Error al validar el teléfono:", error);
-        return false;
-      }
-    };
+    try {
+      const url = APIURL.validarTelefono(telefono);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el teléfono:", error);
+      return false;
+    }
+  };
 
   // Si todos los campos son válidos, actualizamos el estado
 
@@ -1010,7 +1010,9 @@ export function Cabecera() {
 
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(1);
-        if (!coordenadas.exists) {
+        console.log("coordenadas", clientInfo?.data.Domicilio);
+        if (clientInfo?.data.Domicilio === 0) {
+        if (!coordenadas.exists && data.Domicilio) {
           enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" });
           return;
         }
@@ -1018,7 +1020,7 @@ export function Cabecera() {
         if (datosDomicilioRef.current.setUbicacionError) {
           datosDomicilioRef.current.setUbicacionError(""); // Limpiar si hay coordenadas
         }
-
+      }
 
 
         isValidSumit = true;
@@ -1057,20 +1059,21 @@ export function Cabecera() {
         const coordenadas = await fetchValidaDomicilio(2);
 
 
-        if (clientInfo?.data.Laboral=== 0)
-        { if (!coordenadas.exists || coordenadas.count === 0) {
-          enqueueSnackbar(
-            "Para guardar datos Dependiente, primero debes registrar la ubicación.",
-            { variant: "error" }
-          );
+        if (clientInfo?.data.Laboral === 0) {
+          if (!coordenadas.exists || coordenadas.count === 0) {
+            enqueueSnackbar(
+              "Para guardar datos Dependiente, primero debes registrar la ubicación.",
+              { variant: "error" }
+            );
 
-          if (datosTrabajo.current.setUbicacionError) {
-            datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
+            if (datosTrabajo.current.setUbicacionError) {
+              datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
+            }
+
+            return;
           }
+        }
 
-          return;
-        }}
-       
         if (datosTrabajo.current.setUbicacionError) {
           datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
         }
@@ -1088,17 +1091,19 @@ export function Cabecera() {
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-        if (!coordenadas.exists || coordenadas.count === 0) {
-          enqueueSnackbar(
-            "Para guardar datos del  negocio, primero debes registrar la ubicación.",
-            { variant: "error" }
-          );
+        if (clientInfo?.data.Laboral === 0) {
+          if (!coordenadas.exists || coordenadas.count === 0) {
+            enqueueSnackbar(
+              "Para guardar datos del  negocio, primero debes registrar la ubicación.",
+              { variant: "error" }
+            );
 
-          if (datosNegocio.current.setUbicacionError) {
-            datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
+            if (datosNegocio.current.setUbicacionError) {
+              datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
+            }
+
+            return;
           }
-
-          return;
         }
         if (datosNegocio.current.setUbicacionError) {
           datosNegocio.current.setUbicacionError(""); // Limpiar si hay coordenadas
@@ -1132,16 +1137,16 @@ export function Cabecera() {
           });
           return;
         }
-  
+
         // Obtiene los datos
-        const formData = factoresCreditoRef.current.getFormData();  
+        const formData = factoresCreditoRef.current.getFormData();
         // Envía a la API
         //await fetchCuotaCupo(formData);
-        
+
         // enqueueSnackbar("Datos de crédito guardados correctamente", {
         //   variant: "success",
         // });
-        
+
         isValidSumit = true;
       } catch (error) {
         console.error("Error detallado al guardar factores de crédito:", error);
@@ -1149,7 +1154,7 @@ export function Cabecera() {
           variant: "error",
         });
       }
-    }     
+    }
     if (isValidSumit) {
       fetchInsertarDatos(tipoDato);
     } // Llamar a la función para insertar datos
@@ -1477,7 +1482,7 @@ export function Cabecera() {
         Cupo: Number(formData.cupo)
       };
       const url = APIURL.patch_CuotayCupo(clienteData.idWeb_SolicitudGrande);
-      const response = await axios.patch(url,cuotaCupo, {
+      const response = await axios.patch(url, cuotaCupo, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -1558,8 +1563,8 @@ export function Cabecera() {
                     key={name}
                     onClick={() => handleTabClick(name)}
                     className={`inline-flex items-center px-2 py-2 rounded-lg w-full ${activeTab === name
-                        ? "bg-blue-700 text-white"
-                        : "bg-gray-50 text-gray-500"
+                      ? "bg-blue-700 text-white"
+                      : "bg-gray-50 text-gray-500"
                       } hover:text-gray-900 hover:bg-gray-100 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white`}
                   >
                     {icon}
@@ -1661,7 +1666,7 @@ export function Cabecera() {
                   </button>
                 </div>
               )}
-{/*
+              {/*
 
 <div className="flex items-center">
                 <button
@@ -1673,7 +1678,7 @@ export function Cabecera() {
                 </button>
               </div>
 */}
-              
+
               <div className="flex items-center">
                 <button
                   onClick={navigateToListadoSolicitud}
