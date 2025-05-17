@@ -108,8 +108,7 @@ export default function VerificacionTerrenaModal({
     const fetchVerificadores = async () => {
       try {
         const response = await axios.get(APIURL.get_ingresoCobrador());
-        // if (!response.ok) throw new Error("Error al obtener verificadores");
-        // const data = await response.json();
+
         setVerificadores(response.data);
       } catch (error) {
         console.error("❌ Error al cargar verificadores:", error);
