@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { FaEdit, FaCheckCircle, FaSearch } from "react-icons/fa";
 import { APIURL } from "../../../configApi/apiConfig";
 import VisibilityIcon from "@mui/icons-material/Visibility";

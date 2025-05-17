@@ -4,7 +4,7 @@ import React, { useState, useEffect, forwardRef, useCallback, useImperativeHandl
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox } from "react-icons/fa";
 import { SelectField } from "../../Utils";
 import { useSnackbar } from "notistack";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { APIURL } from "../../../configApi/apiConfig";
 import {
     fetchTipoDocumento, fetchNacionalidad, fecthGenero, fetchNivelEducacion, fetchProfesion

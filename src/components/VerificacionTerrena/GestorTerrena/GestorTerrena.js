@@ -3,7 +3,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { useSnackbar } from "notistack";
-import axios from "axios";
+import axios from "../../../configApi/axiosConfig";
 import { APIURL } from "../../../configApi/apiConfig";
 import {
     Grid,

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../../configApi/axiosConfig";
 import React, { useEffect, useState } from "react";
 import { APIURL } from "../../configApi/apiConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
