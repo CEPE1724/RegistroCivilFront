@@ -1011,7 +1011,7 @@ export function Cabecera() {
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(1);
         console.log("coordenadas", clientInfo?.data.Domicilio);
-        if (clientInfo?.data.Domicilio === 0) {
+        if (clientInfo?.data.Domicilio === true) {
         if (!coordenadas.exists && data.Domicilio) {
           enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" });
           return;
@@ -1059,7 +1059,9 @@ export function Cabecera() {
         const coordenadas = await fetchValidaDomicilio(2);
 
 
-        if (clientInfo?.data.Laboral === 0) {
+        if (clientInfo?.data.Laboral === true) {
+          console.log("coordenadas LABORAL", clientInfo?.data.Laboral);
+
           if (!coordenadas.exists || coordenadas.count === 0) {
             enqueueSnackbar(
               "Para guardar datos Dependiente, primero debes registrar la ubicación.",
@@ -1091,7 +1093,8 @@ export function Cabecera() {
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-        if (clientInfo?.data.Laboral === 0) {
+        if (clientInfo?.data.Laboral === true) {
+          console.log("coordenadas 2 NOSE PARA QUE", clientInfo?.data.Laboral);
           if (!coordenadas.exists || coordenadas.count === 0) {
             enqueueSnackbar(
               "Para guardar datos del  negocio, primero debes registrar la ubicación.",
