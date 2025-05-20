@@ -85,6 +85,13 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         0: { label: "No aplica", icon: <CancelIcon />, color: red[500] },
         1: { label: "APlica", icon: <VerifiedIcon />, color: blue[500] }
 
+      } ,
+
+
+       8: /// Resultado
+      {
+        1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] }
+
       } 
 
     };
@@ -150,6 +157,11 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
                   <Typography sx={{ fontSize: '0.8rem' }}>
                     {new Date(estado.FechaSistema).toLocaleString()}
                   </Typography>
+
+                   <Typography sx={{ fontSize: '0.8rem' }}>
+                    {(estado.Telefono)}
+                  </Typography>
+
                 </TimelineOppositeContent>
 
                 <TimelineSeparator>
