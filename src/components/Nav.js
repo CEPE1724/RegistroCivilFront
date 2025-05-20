@@ -242,8 +242,8 @@ const Nav = ({ showButton, userData }) => {
         </div>
       )}
 
-      {/* Estilos CSS adicionales agregados internamente */}
-      <style jsx>{`
+      {/* Estilos CSS adicionales agregados internamente, al lado de style habia jsx */}
+      <style>{`
         @keyframes shrink {
           from { width: 100%; }
           to { width: 0%; }
