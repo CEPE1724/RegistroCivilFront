@@ -2581,7 +2581,7 @@ export function ListadoSolicitud() {
                             display: "inline-block",
                             maxWidth: "100%",
                             px: 1,
-                            ...(tienePermisoEditarAnalista() && {
+                            ...(tienePermisoEditarAnalista() && data.idEstadoVerificacionSolicitud == 10 && {
                               "&:hover .analistaNombre": {
                                 opacity: 0,
                                 visibility: "hidden",
@@ -2607,7 +2607,7 @@ export function ListadoSolicitud() {
                           </Box>
 
                           {/* Ícono de editar solo si tiene permiso */}
-                          {tienePermisoEditarAnalista() && (
+                          {tienePermisoEditarAnalista() &&  (
                             <Box
                               className="editIcon"
                               onClick={() => handleEditarAnalista(data)}
@@ -2653,7 +2653,7 @@ export function ListadoSolicitud() {
                             display: "inline-block",
                             maxWidth: "100%",
                             px: 1,
-                            ...(permisoEditarOperador() && {
+                            ...(permisoEditarOperador() && data.idEstadoVerificacionSolicitud == 10 && {
                               "&:hover .operadorNombre": {
                                 opacity: 0,
                                 visibility: "hidden",
