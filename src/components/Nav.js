@@ -242,6 +242,7 @@ const Nav = ({ showButton, userData }) => {
         </div>
       )}
 
+
       {/* Estilos CSS adicionales agregados internamente */}
       <style>
         {`
@@ -264,6 +265,7 @@ const Nav = ({ showButton, userData }) => {
     }
   `}
       </style>
+
 
     </>
   );

@@ -16,6 +16,8 @@ export default function VerificacionTerrenaModal({
   const [verificador, setVerificador] = useState("");
   const [verificadores, setVerificadores] = useState([]);
   const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
+  console.log("verificadores", verificadores);
+  console.log("verificador", verificador)
 
 
   const isFormValid = tipoVerificacion && verificador;
