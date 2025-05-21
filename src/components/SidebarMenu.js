@@ -159,6 +159,7 @@ export function SwipeableTemporaryDrawer({ userDataToken }) {
     const subMenu = createSubMenu(i_idmenu_items); // Creando los submenús automáticamente
     return (
       <MenuItem
+        key={i_idmenu_items}
         to={i_route || '#'} // Ahora los menús principales también tienen su ruta
         icon={icon}
         text={i_name}

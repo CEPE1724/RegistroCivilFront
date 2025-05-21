@@ -145,7 +145,7 @@ function DropDown() {
         }}
       >
         <DialogTitle>
-          <Typography variant="h6" component="h2">
+          <Typography variant="h6" component="div">
             Sesión expirada <TimerOffIcon />
           </Typography>
         </DialogTitle>

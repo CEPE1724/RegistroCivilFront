@@ -2775,7 +2775,7 @@ export function ListadoSolicitud() {
             </Typography>
           </Box>
           <Timeline
-            position="bottom"
+            position="alternate"
             sx={{
               display: "flex",
               flexDirection: "row",
