@@ -4,18 +4,11 @@ import { Manager, Socket } from "socket.io-client";
 
 let socket;
 export const connectToServer = (token) => {
-
-
-
-
-
-
     //const manager = new Manager("http://192.168.2.173:3025/socket.io/socket.io.js", 
 
 /*https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js*/
-    const manager = new Manager("http://192.168.2.67:3025/socket.io/socket.io.js",
 
-
+    const manager = new Manager("http://192.168.2.49:3008/socket.io/socket.io.js",
 
         {
             extraHeaders: {
@@ -33,17 +26,12 @@ export const connectToServer = (token) => {
 }
 
 function addListener(socket) {
-    socket.on("connect", () => {
-                console.log("Connected to server");
-        
-    });
+    socket.on("connect", () => {});
 
     socket.on("disconnect", () => {
-        console.log("Disconnected from server");
     });
 
     socket.on('clients-updated', (clients) => {
-        console.log("Clients updated:", clients);
     });
 
 

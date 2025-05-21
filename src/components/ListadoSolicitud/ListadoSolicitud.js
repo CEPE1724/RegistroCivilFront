@@ -2597,7 +2597,7 @@ const updateAnalista = async (fila, numero) => {
             </Typography>
           </Box>
           <Timeline
-            position="bottom"
+            position="alternate"
             sx={{
               display: "flex",
               flexDirection: "row",
