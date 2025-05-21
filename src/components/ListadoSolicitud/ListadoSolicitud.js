@@ -1189,7 +1189,8 @@ export function ListadoSolicitud() {
     nombre,
     numeroSolicitud,
     cedula,
-    recargar
+    recargar , 
+
   ]);
 
   const [openDialog3, setOpenDialog3] = useState(false);
@@ -2552,7 +2553,7 @@ export function ListadoSolicitud() {
                             >
                               <MoreVertIcon
                                 onClick={(event) =>
-                                  handlePopoverOpen(event, 4, data)
+                                  handlePopoverOpen(event, 5, data)
                                 }
                                 style={{ cursor: "pointer" }}
                               />
@@ -2581,7 +2582,7 @@ export function ListadoSolicitud() {
                             display: "inline-block",
                             maxWidth: "100%",
                             px: 1,
-                            ...(tienePermisoEditarAnalista() && data.idEstadoVerificacionSolicitud == 10 && {
+                            ...(tienePermisoEditarAnalista() && (data.idEstadoVerificacionSolicitud == 10 || data.idEstadoVerificacionSolicitud == 12 ) && {
                               "&:hover .analistaNombre": {
                                 opacity: 0,
                                 visibility: "hidden",
@@ -2653,7 +2654,7 @@ export function ListadoSolicitud() {
                             display: "inline-block",
                             maxWidth: "100%",
                             px: 1,
-                            ...(permisoEditarOperador() && data.idEstadoVerificacionSolicitud == 10 && {
+                            ...(permisoEditarOperador() && (data.idEstadoVerificacionSolicitud == 10 || data.idEstadoVerificacionSolicitud == 12 ) && {
                               "&:hover .operadorNombre": {
                                 opacity: 0,
                                 visibility: "hidden",

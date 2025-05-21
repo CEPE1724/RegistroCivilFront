@@ -70,6 +70,17 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 			4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
 			5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
       },
+      4:
+      {
+       1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
+
+      },
+
+      5: 
+      {
+         1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
+
+      },
 
       6: { //// ESTADo
         2 : { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
@@ -165,8 +176,10 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
                   </Typography>
 
                    <Typography sx={{ fontSize: '0.8rem' }}>
-                    {(estado.Telefono)}
-                  </Typography>
+  {([8, 9].includes(estado.Tipo))
+    ? '' + (estado.Telefono || 'N/A')
+    : 'asignado a ' + (estado.Telefono || 'N/A')}
+</Typography>
 
                 </TimelineOppositeContent>
 
