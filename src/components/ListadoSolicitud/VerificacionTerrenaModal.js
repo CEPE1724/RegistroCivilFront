@@ -56,6 +56,16 @@ export default function VerificacionTerrenaModal({
       Web: 1
     };
 
+	const payload2 = {
+		tokens: [tokenVerificador],
+        notification: {
+          type: "alert",
+          title: "VERIFICACIÓN TERRENA REQUERIDA",
+          body: `📍 ${userSolicitudData.almacen} | Solicitante: ${userSolicitudData?.PrimerNombre} ${userSolicitudData.SegundoNombre} ${userSolicitudData?.ApellidoPaterno} ${userSolicitudData.ApellidoMaterno} 🪪 ${userSolicitudData.cedula}  | Solicitud activa de inspección en terreno.`,
+          url: "",
+          empresa: "CREDI",}
+	}
+
     try {
       await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
       enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
@@ -75,7 +85,6 @@ export default function VerificacionTerrenaModal({
       patchSolicitud(userSolicitudData.id, "trabajo");
         await fetchInsertarDatos(5, userSolicitudData.id, verificadorNombre, 1);
     }
-
 
   };
 
@@ -140,6 +149,22 @@ export default function VerificacionTerrenaModal({
   }, [isOpen, enqueueSnackbar]);
 
   if (!isOpen) return null;
+
+  const handleSelectChange = (e) => {
+    const selectedId = e.target.value;
+    setVerificador(selectedId);
+
+    const verificadorSeleccionado = verificadores.find(
+      (v) => v.idIngresoCobrador === parseInt(selectedId)
+    );
+
+    if (verificadorSeleccionado && verificadorSeleccionado.dispositivos.length > 0) {
+      const token = verificadorSeleccionado.dispositivos[0].TokenExpo;
+      setTokenVerificador(token);
+    } else {
+      setTokenVerificador("");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
