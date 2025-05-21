@@ -525,6 +525,8 @@ export default function CreditoForm() {
       idEstadoVerificacionDocumental: 1,
       Usuario: userData?.Nombre
     };
+	console.log("Valores formateados para la API:", formattedValues);
+	console.log("values:", values);
     delete formattedValues.FechaNacimeinto;
     delete formattedValues.Edad;
 

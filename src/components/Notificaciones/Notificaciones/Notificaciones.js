@@ -9,7 +9,7 @@ import { IconButton } from "@mui/material";
 export function Notificaciones() {
   const { enqueueSnackbar } = useSnackbar();
   const [tokens, setTokens] = useState([]);
-  const [tokenInput, setTokenInput] = useState("");
+  const [selectedTokenExpo, setSelectedTokenExpo] = useState("");
   const [titulo, setTitulo] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [tipo, setTipo] = useState("");
@@ -17,10 +17,11 @@ export function Notificaciones() {
   const [imagen, setImagen] = useState(null);
   const [imagenUrl, setImagenUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const tokenInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const [view, setView] = useState(false);
   const modalRef = useRef(null);
+  const [disponibleUsuarios, setDisponibleUsuarios] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +29,7 @@ export function Notificaciones() {
     if (name === "titulo" || name === "mensaje") {
       if (value.length <= 255) {
         if (name === "titulo") {
-          setTitulo(value);
+          setTitulo(value.toUpperCase());
         } else if (name === "mensaje") {
           setMensaje(value);
         }
@@ -39,6 +40,39 @@ export function Notificaciones() {
       setTipo(value);
     } else if (name === "empresa") {
       setEmpresa(value);
+      // Limpiar tokens
+      setTokens([]);
+      setDisponibleUsuarios([]);
+      // Cargar usuarios según la empresa seleccionada
+      if (value) {
+        cargarUsuariosPorEmpresa(value);
+      }
+    } else if (name === "selectedTokenExpo") {
+      setSelectedTokenExpo(value);
+    }
+  };
+
+  const cargarUsuariosPorEmpresa = async (empresaSeleccionada) => {
+    setIsLoading(true);
+    try {
+      const empresaId = empresaSeleccionada === "POINT" ? 1 : 33;
+      
+      const url = APIURL.consultarNombresNotif(empresaId);
+      
+      const response = await axios.get(url);
+      
+      if (response.data.success) {
+        setDisponibleUsuarios(response.data.data);
+      } else {
+        enqueueSnackbar(response.data.message || "No se encontraron usuarios", { variant: "warning" });
+        setDisponibleUsuarios([]);
+      }
+    } catch (error) {
+      console.error("Error al cargar usuarios:", error);
+      enqueueSnackbar("Error al cargar usuarios.", { variant: "error" });
+      setDisponibleUsuarios([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,10 +82,25 @@ export function Notificaciones() {
 
   // Función agregar token
   const addToken = () => {
-    if (tokenInput.trim() !== "") {
-      setTokens([...tokens, tokenInput.trim()]);
-      setTokenInput("");
-      tokenInputRef.current.focus();
+    if (selectedTokenExpo) {
+      // Buscar el usuario seleccionado para obtener su información
+      const usuarioSeleccionado = disponibleUsuarios.find(
+        (usuario) => usuario.TokenExpo === selectedTokenExpo
+      );
+      
+      if (usuarioSeleccionado) {
+        // Verificar si el token ya existe en la lista
+        if (!tokens.some(token => token.TokenExpo === selectedTokenExpo)) {
+          setTokens([...tokens, {
+            TokenExpo: selectedTokenExpo,
+            nombreCompleto: usuarioSeleccionado.nombreCompleto
+          }]);
+        } else {
+          enqueueSnackbar("Este usuario ya ha sido agregado", { variant: "warning" });
+        }
+        
+        setSelectedTokenExpo("");
+      }
     }
   };
 
@@ -60,7 +109,7 @@ export function Notificaciones() {
     setTokens(tokens.filter((_, index) => index !== indexToRemove));
   };
 
-  // Manejar la tecla Enter en el input de tokens
+  // Manejar la tecla Enter
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -106,7 +155,6 @@ export function Notificaciones() {
         },
       });
 
-      // Asumiendo que la respuesta contiene la URL de la imagen
       setImagenUrl(response.data.url);
       enqueueSnackbar("Imagen subida correctamente.", { variant: "success" });
     } catch (error) {
@@ -133,11 +181,14 @@ export function Notificaciones() {
     setTipo("");
     setEmpresa("");
     setImagen(null);
+    setImagenUrl("");
+    setSelectedTokenExpo("");
+    setDisponibleUsuarios([]);
   };
 
   const enviarNotificacion = async () => {
     if (tokens.length === 0) {
-      enqueueSnackbar("Debes agregar al menos un token.", { variant: "error" });
+      enqueueSnackbar("Debes agregar al menos un usuario.", { variant: "error" });
       return;
     }
 
@@ -161,17 +212,25 @@ export function Notificaciones() {
       });
       return;
     }
-
+	
+	if (imagen && !imagenUrl) {
+	  enqueueSnackbar("Debes subir la imagen antes de enviar la notificación.", {
+		variant: "error",
+	  });
+	  return;
+	}
     try {
       const url = APIURL.enviarNotificacion();
 
+      const tokensList = tokens.map(token => token.TokenExpo);
+
       const response = await axios.post(url, {
-        tokens: tokens,
+        tokens: tokensList,
         notification: {
-          type: "promotion",
+          type: tipo,
           title: titulo,
           body: mensaje,
-          url: "",
+          url: imagenUrl,
           empresa: empresa,
         },
       });
@@ -193,51 +252,23 @@ export function Notificaciones() {
 
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {/* Tokens */}
-          <div className="sm:w-full lg:col-span-3">
-            <label
-              htmlFor="tokens"
-              className="block text-gray-700 font-semibold mb-2"
-            >
-              Tokens:
+          {/* Empresa */}
+          <div className="sm:w-full">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Empresa:
             </label>
-            <div className="flex flex-wrap gap-2 p-2 border-2 border-gray-300 rounded-md min-h-12 mb-2">
-              {tokens.map((token, index) => (
-                <div
-                  key={index}
-                  className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
-                >
-                  <span className="mr-1">{token}</span>
-                  <button
-                    onClick={() => removeToken(index)}
-                    className="text-blue-600 hover:text-blue-800 focus:outline-none"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="flex gap-2">
-              <input
-                ref={tokenInputRef}
-                value={tokenInput}
-                onChange={(e) => setTokenInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ingresa un token"
-                className="flex-grow p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={addToken}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-md"
-              >
-                Agregar
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Tokens agregados: {tokens.length}
-            </p>
+            <select
+              id="empresa"
+              name="empresa"
+              value={empresa}
+              onChange={handleChange}
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Seleccione uno</option>
+              <option value="POINT">POINT</option>
+              <option value="CREDI">CREDI</option>
+            </select>
           </div>
-
           {/* Tipo */}
           <div className="sm:w-full">
             <label
@@ -254,13 +285,15 @@ export function Notificaciones() {
               className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Selecciona uno</option>
-              <option value="1">Tipo 1</option>
-              <option value="2">Tipo 2</option>
-              <option value="3">Tipo 3</option>
-              <option value="4">Tipo 4</option>
+              <option value="alert">ALERT</option>
+              <option value="info">INFO</option>
+              <option value="promotion">PROMOTION</option>
+              <option value="update">UPDATE</option>
+			  <option value="warning">WARNING</option>
+			  <option value="success">SUCCESS</option>
+			  <option value="evento">EVENTO</option>
             </select>
           </div>
-
           {/* Título */}
           <div className="sm:w-full">
             <label
@@ -281,23 +314,75 @@ export function Notificaciones() {
             </p>
           </div>
 
-          {/* Empresa */}
-          <div className="sm:w-full">
-            <label className="block text-gray-700 font-semibold mb-2">
-              Empresa:
-            </label>
-            <select
-              id="empresa"
-              name="empresa"
-              value={empresa}
-              onChange={handleChange}
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Seleccione uno</option>
-              <option value="POINT">POINT</option>
-              <option value="CREDI">CREDI</option>
-            </select>
-          </div>
+          {/* Tokens */}
+          {empresa !== "" && (
+            <div className="sm:w-full lg:col-span-3">
+              <label
+                htmlFor="tokens"
+                className="block text-gray-700 font-semibold mb-2"
+              >
+                Usuarios:
+              </label>
+              <div className="flex flex-wrap gap-2 p-2 border-2 border-gray-300 rounded-md min-h-12 mb-2">
+                {tokens.map((token, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full"
+                  >
+                    <span className="mr-1">{token.nombreCompleto}</span>
+                    <button
+                      onClick={() => removeToken(index)}
+                      className="text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+                {tokens.length === 0 && (
+                  <span className="text-gray-400 p-1">
+                    No se han seleccionado usuarios
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <select
+                  name="selectedTokenExpo"
+                  value={selectedTokenExpo}
+                  onChange={handleChange}
+                  onKeyDown={handleKeyDown}
+                  className="flex-grow p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isLoading || disponibleUsuarios.length === 0}
+                >
+                  <option value="">
+                    {isLoading
+                      ? "Cargando usuarios..."
+                      : disponibleUsuarios.length === 0
+                      ? "No hay usuarios disponibles"
+                      : "Seleccione un usuario"}
+                  </option>
+                  {disponibleUsuarios.map((usuario, index) => (
+                    <option key={index} value={usuario.TokenExpo}>
+                      {usuario.nombreCompleto || `Usuario ${index + 1}`}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={addToken}
+                  disabled={!selectedTokenExpo}
+                  className={`px-4 rounded-md ${
+                    !selectedTokenExpo
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
+                >
+                  Agregar
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Usuarios seleccionados: {tokens.length}
+              </p>
+            </div>
+          )}
 
           {/* Mensaje */}
           <div className="sm:w-full lg:col-span-3">
@@ -340,10 +425,11 @@ export function Notificaciones() {
                   </span>
                 </div>
 
-			  	{(imagen || imagenUrl) && (
-				<IconButton onClick={toggleView}>
-					<VisibilityIcon />
-                </IconButton>)}
+                {(imagen || imagenUrl) && (
+                  <IconButton onClick={toggleView}>
+                    <VisibilityIcon />
+                  </IconButton>
+                )}
                 <button
                   type="button"
                   onClick={handleClickUpload}
@@ -391,7 +477,7 @@ export function Notificaciones() {
               </div>
 
               {view && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                   <div
                     ref={modalRef}
                     className="bg-white p-4 rounded-lg shadow-lg w-3/4 h-3/4 relative"
@@ -403,11 +489,7 @@ export function Notificaciones() {
                       ❌
                     </button>
                     <iframe
-                      src={
-                        imagenUrl
-						  ? imagenUrl
-						  : URL.createObjectURL(imagen)
-                      }
+                      src={imagenUrl ? imagenUrl : URL.createObjectURL(imagen)}
                       className="w-full h-full"
                       title="Vista previa del archivo"
                     ></iframe>
