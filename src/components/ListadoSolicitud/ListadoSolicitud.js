@@ -87,6 +87,8 @@ import { Api } from "@mui/icons-material";
 import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
+import EditIcon from "@mui/icons-material/Edit";
+
 
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
@@ -103,7 +105,7 @@ export function ListadoSolicitud() {
   } = useBodegaUsuario();
 
 
-const [recargar, setRecargar] = useState(false);
+  const [recargar, setRecargar] = useState(false);
   const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
@@ -139,7 +141,7 @@ const [recargar, setRecargar] = useState(false);
   const [trabajoData, setTrabajoData] = useState([]);
   const [idsTerrenas, setIdsTerrenas] = useState([]);
   const navigate = useNavigate();
-  const { userData, idMenu , socket} = useAuth();
+  const { userData, idMenu, socket } = useAuth();
   const [cedula, setCedula] = useState("");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
@@ -366,7 +368,7 @@ const [recargar, setRecargar] = useState(false);
     return data.idEstadoVerificacionSolicitud !== 12;
   };
 
-   
+
   ///// METODO QUE VALIDE SI 3 TIPOS DE DOCUMENTO UNICAMENTE YA FUERON APROBADOS 
   const [docAprobados, setDocAprobados] = useState({}); // <-- ahora es un objeto, no un solo booleano
 
@@ -380,26 +382,26 @@ const [recargar, setRecargar] = useState(false);
       return false; // si hay error, consideramos como no aprobado
     }
   };
-  
+
   // ahora en el useEffect
   useEffect(() => {
     const verificarTodosDocumentos = async () => {
       const resultados = {}; // objeto para guardar resultados por id
-  
+
       for (const solicitud of datos) {
         const aprobado = await laboralYDomicilioAprobados(solicitud.id);
         resultados[solicitud.id] = aprobado;
       }
-  
+
       setDocAprobados(resultados); // guarda todo junto
     };
-  
+
     if (datos.length > 0) {
       verificarTodosDocumentos();
     }
   }, [datos]);
-  
-  
+
+
 
 
 
@@ -485,6 +487,25 @@ const [recargar, setRecargar] = useState(false);
         Tipo: tipo,
         idEstadoVerificacionDocumental: estado,
         Usuario: userData.Nombre,
+        
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+  const fetchInsertarDatos2 = async (tipo, data, estado) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+     const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible";      console.log(data)
+      await axios.post(url, {
+        idCre_SolicitudWeb: data.id,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: analistaNombre
+        
       });
     } catch (error) {
       console.error("Error al guardar los datos del cliente", error);
@@ -546,6 +567,11 @@ const [recargar, setRecargar] = useState(false);
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
   };
+
+const tienePermisoEditarAnalista = () => {
+  const permiso = permisos.find((p) => p.Permisos === "EDITAR ANALISTA");
+  return permiso && permiso.Activo;
+};
 
   const estadoDeshabilitadoporPermisos = (data) => {
     // Obtener el estado correspondiente al ID
@@ -665,7 +691,7 @@ const [recargar, setRecargar] = useState(false);
     }
   };
 
- 
+
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
@@ -726,53 +752,53 @@ const [recargar, setRecargar] = useState(false);
 
   const convertirTiempoASegundos = (tiempoStr) => {
     if (tiempoStr === "N/A") return 0;
-    
+
     let segundos = 0;
-    
+
     // Extraer días
     const diasMatch = tiempoStr.match(/(\d+)d/);
     if (diasMatch) {
       segundos += parseInt(diasMatch[1]) * 86400; // 1 día = 86400 segundos
     }
-    
+
     // Extraer horas
     const horasMatch = tiempoStr.match(/(\d+)h/);
     if (horasMatch) {
       segundos += parseInt(horasMatch[1]) * 3600; // 1 hora = 3600 segundos
     }
-    
+
     // Extraer minutos
     const minutosMatch = tiempoStr.match(/(\d+)min/);
     if (minutosMatch) {
       segundos += parseInt(minutosMatch[1]) * 60; // 1 minuto = 60 segundos
     }
-    
+
     return segundos;
   };
 
   const convertirSegundosATuFormato = (totalSegundos) => {
     if (totalSegundos === 0) return "0min";
-    
+
     const dias = Math.floor(totalSegundos / 86400);
     const horas = Math.floor((totalSegundos % 86400) / 3600);
     const minutos = Math.floor((totalSegundos % 3600) / 60);
-    
+
     let resultado = [];
-    
+
     if (dias > 0) resultado.push(`${dias}d`);
     if (horas > 0) resultado.push(`${horas}h`);
     if (minutos > 0) resultado.push(`${minutos}min`);
-    
+
     return resultado.join(" ") || "0min";
   };
 
   const sumarTodosLosTiempos = () => {
     // Obtener todos los elementos con la clase 'tiempo-transcurrido'
     const elementosTiempo = Array.from(document.querySelectorAll('.tiempo-transcurrido'));
-    
+
     let totalSegundos = 0;
     let tiemposValidos = 0;
-  
+
     elementosTiempo.forEach(elemento => {
       const tiempoTexto = elemento.textContent.trim();
       if (tiempoTexto && tiempoTexto !== "N/A") {
@@ -780,9 +806,9 @@ const [recargar, setRecargar] = useState(false);
         tiemposValidos++;
       }
     });
-  
+
     if (tiemposValidos === 0) return "N/A";
-    
+
     return convertirSegundosATuFormato(totalSegundos);
   };
 
@@ -793,26 +819,26 @@ const [recargar, setRecargar] = useState(false);
     const observer = new ResizeObserver(() => {
       const timer = setTimeout(() => {
         setTiempoTotal(sumarTodosLosTiempos());
-      }, 100); 
+      }, 100);
       return () => clearTimeout(timer);
     });
-    
+
     // Observar el contenedor principal
     const dialogElement = document.querySelector('.MuiDialog-paper');
     if (dialogElement) {
       observer.observe(dialogElement);
     }
-    
+
     // También actualizar cuando cambian las fechas
     setTiempoTotal(sumarTodosLosTiempos());
-    
+
     return () => {
       if (dialogElement) {
         observer.unobserve(dialogElement);
       }
       observer.disconnect();
     };
-  }, [fechaTiempos]); 
+  }, [fechaTiempos]);
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
@@ -885,9 +911,9 @@ const [recargar, setRecargar] = useState(false);
 
       if (analistaCoincidente) {
         setAnalistaSelected(analistaCoincidente.idUsuario);
-        setSelectDeshabilitado(true); // 👈 desactiva edición
+        setSelectDeshabilitado(true); 
       } else {
-        setSelectDeshabilitado(false); // por si no hay coincidencia
+        setSelectDeshabilitado(false); 
       }
     }
   }, [userData?.Nombre, analistas]);
@@ -1114,7 +1140,7 @@ const [recargar, setRecargar] = useState(false);
       socket.off("solicitud-web-changed", onChanged);
     };
   }, [socket]);
-  
+
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
@@ -1140,6 +1166,72 @@ const [recargar, setRecargar] = useState(false);
     cedula,
     recargar
   ]);
+
+const [openDialog3, setOpenDialog3] = useState(false);
+const [analistasDisponibles, setAnalistasDisponibles] = useState([]);
+const [analistaSeleccionado, setAnalistaSeleccionado] = useState(null);
+const [filaActual, setFilaActual] = useState(null);
+const [openDialogConfirmar, setOpenDialogConfirmar] = useState(false); // Confirmación
+
+const handleConfirmarAsignacion = async () => {
+  try {
+    setOpenDialogConfirmar(false);
+    await updateAnalista(filaActual, analistaSeleccionado);
+  } catch (error) {
+    console.error("Error al confirmar la asignación:", error);
+  }
+};
+
+
+const handleEditarAnalista = (fila) => {
+  setFilaActual(fila); 
+  fetchAnalistas();
+};
+
+const fetchAnalistas = async () => {
+  try {
+    const response = await axios.get(APIURL.analistacredito(), {
+      headers: { method: "GET", cache: "no-store" },
+    });
+
+    const activos = response.data.filter((a) => a.Estado === 1);
+    setAnalistasDisponibles(activos);
+    setOpenDialog3(true); 
+  } catch (error) {
+    console.error("Error al obtener analistas:", error);
+  }
+};
+
+const updateAnalista = async (fila, numero) => {
+  console.log(fila.id)
+  console.log(numero)
+  try {
+    const response = await axios.patch(
+      APIURL.update_solicitud(fila.id),
+      {
+        idAnalista: numero,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data) {
+      enqueueSnackbar("Solicitud actualizada correctamente.", {
+        variant: "success",
+      });
+    }
+  } catch (error) {
+    console.error("Error al actualizar la solicitud:", error);
+    enqueueSnackbar("Error al actualizar la solicitud.", {
+      variant: "error",
+    });
+  }
+
+ fetchInsertarDatos2(8, fila , 1)
+};
 
   const fetchSolicitudes = async () => {
     // Primero se obtiene el array de bodegas
@@ -1406,7 +1498,7 @@ const [recargar, setRecargar] = useState(false);
     // ];
 
     const resultados = {
-	tipo1, tipo2, tipo3
+      tipo1, tipo2, tipo3
     }
     setfechaTiempos(resultados);
   };
@@ -1441,17 +1533,16 @@ const [recargar, setRecargar] = useState(false);
   };
 
 
-  const handleEquifax = () => 
-    {
-      navigate("/equifaxx", {
-        replace: true,
-        state: {
-          nombre: selectedRow.nombre,
-          cedula: selectedRow.cedula,
-          Fecha: selectedRow.fecha,
-        },
-      });
-    }
+  const handleEquifax = () => {
+    navigate("/equifaxx", {
+      replace: true,
+      state: {
+        nombre: selectedRow.nombre,
+        cedula: selectedRow.cedula,
+        Fecha: selectedRow.fecha,
+      },
+    });
+  }
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -1815,6 +1906,7 @@ const [recargar, setRecargar] = useState(false);
                       <TableCell align="center">{data.almacen}</TableCell>
                       <TableCell align="center">{data.vendedor}</TableCell>
                       <TableCell align="center">{data.consulta}</TableCell>
+
                       <TableCell align="center">
                         {data.estado === "RECHAZADO" ? (
                           <Box
@@ -2253,10 +2345,10 @@ const [recargar, setRecargar] = useState(false);
                               }
                               disabled={
                                 verificacionSolicitud(data) ||
-                                data.Domicilio === false ||  !docAprobados[data.id]
+                                data.Domicilio === false || !docAprobados[data.id]
 
 
-                                 
+
                               }
                               size="small"
                               sx={{
@@ -2322,7 +2414,7 @@ const [recargar, setRecargar] = useState(false);
                                 verificacionSolicitud(data) ||
                                 data.Laboral === false ||
                                 !docAprobados[data.id]
-                                
+
                               }
                               size="small"
                               sx={{
@@ -2374,25 +2466,79 @@ const [recargar, setRecargar] = useState(false);
                       </TableCell>
 
                       {/* Analista */}
-                      <TableCell align="center">
-                        {data.idAnalista ? (
-                          <span style={{ fontWeight: 500 }}>
-                            {analistas.find(
-                              (a) => a.idUsuario === data.idAnalista
-                            )?.Nombre || "No disponible"}
-                          </span>
-                        ) : (
-                          <span
-                            style={{
-                              fontStyle: "italic",
-                              fontSize: "0.875rem",
-                              color: "#9ca3af",
-                            }}
-                          >
-                            Sin asignar
-                          </span>
-                        )}
-                      </TableCell>
+
+                   <TableCell align="center">
+  <Box
+    sx={{
+      position: "relative",
+      display: "inline-block",
+      maxWidth: "100%",
+      px: 1,
+      ...(tienePermisoEditarAnalista() && {
+        "&:hover .analistaNombre": {
+          opacity: 0,
+          visibility: "hidden",
+        },
+        "&:hover .editIcon": {
+          opacity: 1,
+          visibility: "visible",
+        },
+      }),
+    }}
+  >
+    {/* Nombre del analista */}
+    <Box
+      className="analistaNombre"
+      sx={{
+        transition: "opacity 0.2s ease",
+        fontWeight: 500,
+        textAlign: "center",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"}
+    </Box>
+
+    {/* Ícono de editar solo si tiene permiso */}
+    {tienePermisoEditarAnalista() && (
+      <Box
+        className="editIcon"
+        onClick={() => handleEditarAnalista(data)}
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          textAlign: "center",
+          opacity: 0,
+          visibility: "hidden",
+          color: "#6b7280",
+          cursor: "pointer",
+          transition: "opacity 0.2s ease",
+        }}
+      >
+        <EditIcon fontSize="small" />
+      </Box>
+    )}
+      <span
+                              style={{
+                                pointerEvents: estaDeshabilitado(data)
+                                  ? "none"
+                                  : "auto",
+                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              }}
+                            >
+                              <MoreVertIcon
+                                onClick={(event) =>
+                                  handlePopoverOpen(event, 8, data)
+                                }
+                                style={{ cursor: "pointer" }}
+                              />
+                            </span>
+  </Box>
+</TableCell>
+
+
                     </TableRow>
                   );
                 })}
@@ -2451,6 +2597,7 @@ const [recargar, setRecargar] = useState(false);
             </Typography>
           </Box>
           <Timeline
+            position="alternate"
             sx={{
               display: "flex",
               flexDirection: "row",
@@ -2545,7 +2692,7 @@ const [recargar, setRecargar] = useState(false);
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos?.tipo1?.length > 0 && (   
+                    {fechaTiempos?.tipo1?.length > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -2632,7 +2779,7 @@ const [recargar, setRecargar] = useState(false);
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-			{/* Documental */}
+            {/* Documental */}
             <TimelineItem>
               <TimelineSeparator
                 sx={{
@@ -2645,7 +2792,7 @@ const [recargar, setRecargar] = useState(false);
                 <Box
                   sx={{
                     position: "relative",
-                    height: "40px", 
+                    height: "40px",
                     width: "100%",
                     display: "flex",
                     alignItems: "center",
@@ -2752,7 +2899,7 @@ const [recargar, setRecargar] = useState(false);
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-			{/* Telefónica */}
+            {/* Telefónica */}
             <TimelineItem>
               <TimelineSeparator
                 sx={{
@@ -3397,17 +3544,17 @@ const [recargar, setRecargar] = useState(false);
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
                   <div className="flex items-center gap-2">
-  <button
-   onClick={() => handleEquifax(data)}
+                    <button
+                      onClick={() => handleEquifax(data)}
 
-    className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
-  >
-    Consultar Equifax
-  </button>
-</div>
-                </div> 
+                      className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
+                    >
+                      Consultar Equifax
+                    </button>
+                  </div>
+                </div>
               </div>
-              
+
             </div>
           )}
         </DialogContent>
@@ -3447,7 +3594,67 @@ const [recargar, setRecargar] = useState(false);
             )} */}
         </DialogActions>
         {loadingVerificacion && <Loader />}
-      </Dialog>
+      </Dialog> 
+
+ <Dialog open={openDialog3} onClose={() => setOpenDialog3(false)}>
+  <DialogTitle>Seleccionar Analista</DialogTitle>
+  <DialogContent>
+    <FormControl fullWidth>
+      <InputLabel id="select-analista-label">Analista</InputLabel>
+      <Select
+        labelId="select-analista-label"
+        value={analistaSeleccionado || ""}
+        onChange={(e) => setAnalistaSeleccionado(e.target.value)}
+        label="Analista"
+      >
+        {analistasDisponibles.map((analista) => (
+          <MenuItem key={analista.idUsuario} value={analista.idUsuario}>
+            {analista.Nombre}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDialog3(false)}>Cancelar</Button>
+    <Button
+      variant="contained"
+      onClick={() => {
+        setOpenDialog3(false);
+        setOpenDialogConfirmar(true); // Mostrar diálogo de confirmación
+      }}
+      disabled={!analistaSeleccionado}
+    >
+      Asignar
+    </Button>
+  </DialogActions>
+</Dialog>
+
+{/* confirmacion de cambiar analista  */}
+<Dialog open={openDialogConfirmar} onClose={() => setOpenDialogConfirmar(false)}>
+  <DialogTitle>Confirmar acción</DialogTitle>
+  <DialogContent>
+    <Typography>
+      ¿Estás seguro de asignar este analista a la solicitud?
+    </Typography>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDialogConfirmar(false)} color="primary">
+      Cancelar
+    </Button>
+    <Button
+      onClick={() => {
+        handleConfirmarAsignacion();
+      }}
+      color="primary"
+      variant="contained"
+    >
+      Confirmar
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
 
       {totalPages > 1 && (
         <div className="mt-6 flex justify-center items-center gap-4">
@@ -3544,6 +3751,7 @@ const [recargar, setRecargar] = useState(false);
           resultadoVerificacion={resultadoVerificacion}
         />
       </Dialog>
+
 
       {/* Dialog de confirmación */}
       <Dialog open={openDialog2} onClose={() => setOpenDialog2(false)}>

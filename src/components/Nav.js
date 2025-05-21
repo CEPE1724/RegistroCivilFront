@@ -107,7 +107,7 @@ const Nav = ({ showButton, userData }) => {
 
             {/* Notificaciones */}
             <div>
-              <IconButton 
+              <IconButton
                 onClick={handleClick}
                 className="transition-transform duration-200 hover:scale-110"
               >
@@ -135,14 +135,14 @@ const Nav = ({ showButton, userData }) => {
                 onClose={handleClose}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
-                PaperProps={{ 
-                  sx: { 
+                PaperProps={{
+                  sx: {
                     width: 350,
                     maxHeight: 400,
                     borderRadius: '10px',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
                     overflow: 'hidden'
-                  } 
+                  }
                 }}
                 TransitionComponent={Fade}
               >
@@ -151,7 +151,7 @@ const Nav = ({ showButton, userData }) => {
                     Notificaciones ({notifications.length})
                   </Typography>
                   {notifications.length > 0 && (
-                    <button 
+                    <button
                       onClick={handleClearAll}
                       className="text-xs text-white/80 hover:text-white hover:underline transition-colors"
                     >
@@ -160,7 +160,7 @@ const Nav = ({ showButton, userData }) => {
                   )}
                 </div>
                 <Divider />
-                
+
                 <div className="max-h-72 overflow-y-auto">
                   {notifications.length === 0 ? (
                     <div className="py-6 px-4 text-center text-gray-500">
@@ -172,7 +172,7 @@ const Nav = ({ showButton, userData }) => {
                   ) : (
                     notifications.map((noti, index) => (
                       <React.Fragment key={noti.id}>
-                        <MenuItem 
+                        <MenuItem
                           className={`py-3 px-4 ${!noti.read ? 'bg-blue-50' : ''}`}
                         >
                           <div className="flex w-full">
@@ -211,7 +211,7 @@ const Nav = ({ showButton, userData }) => {
 
       {/* Toast flotante mejorado */}
       {showToast && (
-        <div 
+        <div
           className="fixed bottom-4 right-4 bg-white text-gray-800 shadow-xl rounded-xl border-l-4 border-blue-500
                    flex items-center space-x-3 z-50 overflow-hidden transition-all duration-300 
                    animate-slide-in-right max-w-md"
@@ -232,8 +232,8 @@ const Nav = ({ showButton, userData }) => {
             </button>
           </div>
           <div className="h-1 w-full bg-gray-100 absolute bottom-0 left-0">
-            <div 
-              className="h-full bg-blue-500 animate-shrink" 
+            <div
+              className="h-full bg-blue-500 animate-shrink"
               style={{
                 animation: 'shrink 5s linear forwards',
               }}
@@ -242,26 +242,31 @@ const Nav = ({ showButton, userData }) => {
         </div>
       )}
 
-      {/* Estilos CSS adicionales agregados internamente, al lado de style habia jsx */}
-      <style>{`
-        @keyframes shrink {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-        
-        @keyframes slide-in-right {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .animate-shrink {
-          animation: shrink 5s linear forwards;
-        }
-        
-        .animate-slide-in-right {
-          animation: slide-in-right 0.3s ease-out forwards;
-        }
-      `}</style>
+
+      {/* Estilos CSS adicionales agregados internamente */}
+      <style>
+        {`
+    @keyframes shrink {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+    
+    @keyframes slide-in-right {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .animate-shrink {
+      animation: shrink 5s linear forwards;
+    }
+    
+    .animate-slide-in-right {
+      animation: slide-in-right 0.3s ease-out forwards;
+    }
+  `}
+      </style>
+
+
     </>
   );
 };
