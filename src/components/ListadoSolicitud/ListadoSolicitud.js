@@ -487,7 +487,7 @@ export function ListadoSolicitud() {
         Tipo: tipo,
         idEstadoVerificacionDocumental: estado,
         Usuario: userData.Nombre,
-        
+
       });
     } catch (error) {
       console.error("Error al guardar los datos del cliente", error);
@@ -498,14 +498,32 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-     const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible";      console.log(data)
+      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"; console.log(data)
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
         idEstadoVerificacionDocumental: estado,
         Usuario: userData.Nombre,
         Telefono: analistaNombre
-        
+
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+  const fetchInsertarDatos3 = async (tipo, data, estado) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio"; console.log(data)
+      await axios.post(url, {
+        idCre_SolicitudWeb: data.id,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: operadorNombre
+
       });
     } catch (error) {
       console.error("Error al guardar los datos del cliente", error);
@@ -568,10 +586,16 @@ export function ListadoSolicitud() {
     return !permiso || !permiso.Activo;
   };
 
-const tienePermisoEditarAnalista = () => {
-  const permiso = permisos.find((p) => p.Permisos === "EDITAR ANALISTA");
-  return permiso && permiso.Activo;
-};
+  const tienePermisoEditarAnalista = () => {
+    const permiso = permisos.find((p) => p.Permisos === "EDITAR ANALISTA");
+    return permiso && permiso.Activo;
+  };
+
+  const permisoEditarOperador = () => {
+    const permiso = permisos.find((p) => p.Permisos === "EDITAR OPERADORA");
+    ///return permiso && permiso.Activo;}
+    return true
+  };
 
   const estadoDeshabilitadoporPermisos = (data) => {
     // Obtener el estado correspondiente al ID
@@ -642,6 +666,7 @@ const tienePermisoEditarAnalista = () => {
           fetchTipoCliente(),
           permissionscomponents(idMenu, userData.idUsuario),
           fecthAnalista(),
+          fetchOperador()
         ]);
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
@@ -911,9 +936,9 @@ const tienePermisoEditarAnalista = () => {
 
       if (analistaCoincidente) {
         setAnalistaSelected(analistaCoincidente.idUsuario);
-        setSelectDeshabilitado(true); 
+        setSelectDeshabilitado(true);
       } else {
-        setSelectDeshabilitado(false); 
+        setSelectDeshabilitado(false);
       }
     }
   }, [userData?.Nombre, analistas]);
@@ -1167,71 +1192,151 @@ const tienePermisoEditarAnalista = () => {
     recargar
   ]);
 
-const [openDialog3, setOpenDialog3] = useState(false);
-const [analistasDisponibles, setAnalistasDisponibles] = useState([]);
-const [analistaSeleccionado, setAnalistaSeleccionado] = useState(null);
-const [filaActual, setFilaActual] = useState(null);
-const [openDialogConfirmar, setOpenDialogConfirmar] = useState(false); // Confirmación
+  const [openDialog3, setOpenDialog3] = useState(false);
+  const [analistasDisponibles, setAnalistasDisponibles] = useState([]);
+  const [analistaSeleccionado, setAnalistaSeleccionado] = useState(null);
+  const [filaActual, setFilaActual] = useState(null);
+  const [openDialogConfirmar, setOpenDialogConfirmar] = useState(false); // Confirmación
 
-const handleConfirmarAsignacion = async () => {
-  try {
-    setOpenDialogConfirmar(false);
-    await updateAnalista(filaActual, analistaSeleccionado);
-  } catch (error) {
-    console.error("Error al confirmar la asignación:", error);
-  }
-};
+  const [openDialogOperador, setOpenDialogOperador] = useState(false);
+  const [operadorSeleccionado, setOperadorSeleccionado] = useState(null);
 
+  const handleConfirmarAsignacion = async () => {
+    try {
+      setOpenDialogConfirmar(false);
 
-const handleEditarAnalista = (fila) => {
-  setFilaActual(fila); 
-  fetchAnalistas();
-};
-
-const fetchAnalistas = async () => {
-  try {
-    const response = await axios.get(APIURL.analistacredito(), {
-      headers: { method: "GET", cache: "no-store" },
-    });
-
-    const activos = response.data.filter((a) => a.Estado === 1);
-    setAnalistasDisponibles(activos);
-    setOpenDialog3(true); 
-  } catch (error) {
-    console.error("Error al obtener analistas:", error);
-  }
-};
-
-const updateAnalista = async (fila, numero) => {
-  console.log(fila.id)
-  console.log(numero)
-  try {
-    const response = await axios.patch(
-      APIURL.update_solicitud(fila.id),
-      {
-        idAnalista: numero,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
+      if (analistaSeleccionado === filaActual.idAnalista) {
+        enqueueSnackbar("El analista seleccionado es el mismo que el actual.", {
+          variant: "error",
+        });
+        setAnalistaSeleccionado(null)
+        return;
       }
-    );
 
-    if (response.data) {
-      enqueueSnackbar("Solicitud actualizada correctamente.", {
+      await updateAnalista(filaActual, analistaSeleccionado);
+      enqueueSnackbar("Analista actualizado correctamente", {
         variant: "success",
       });
+      setAnalistaSeleccionado(null)
+    } catch (error) {
+      console.error("Error al confirmar la asignación:", error);
+      enqueueSnackbar("Ocurrió un error al actualizar el analista.", {
+        variant: "error",
+      });
     }
-  } catch (error) {
-    console.error("Error al actualizar la solicitud:", error);
-    enqueueSnackbar("Error al actualizar la solicitud.", {
-      variant: "error",
-    });
-  }
+  };
 
- fetchInsertarDatos2(8, fila , 1)
-};
+
+  const handleEditarAnalista = (fila) => {
+    setFilaActual(fila);
+    fetchAnalistas();
+  };
+
+
+  const handleEditarOperador = (fila) => {
+    setFilaActual(fila);
+    fetchOperador(); // Ya la tienes definida
+    setOpenDialogOperador(true);
+  };
+
+
+  const fetchAnalistas = async () => {
+    try {
+      const response = await axios.get(APIURL.analistacredito(), {
+        headers: { method: "GET", cache: "no-store" },
+      });
+
+      const activos = response.data.filter((a) => a.Estado === 1);
+      setAnalistasDisponibles(activos);
+      setOpenDialog3(true);
+    } catch (error) {
+      console.error("Error al obtener analistas:", error);
+    }
+  };
+
+  const updateAnalista = async (fila, numero) => {
+    console.log(fila.id)
+    console.log(numero)
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(fila.id),
+        {
+          idAnalista: numero,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+    }
+
+    fetchInsertarDatos2(8, fila, 1)
+  };
+
+
+  const updateOperador = async (fila, numero) => {
+    console.log(fila.id)
+    console.log(numero)
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(fila.id),
+        {
+          idOperador: numero,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+    }
+
+    fetchInsertarDatos3(9, fila, 1)
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+  const [operadores, setOperadores] = useState([]);
+
+  const fetchOperador = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(APIURL.getUsuarioPorROL(16), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200) {
+        setOperadores(response.data); // Guarda directamente la lista de operadores
+      }
+    } catch (error) {
+      console.error("Error al obtener operadores:", error);
+    }
+  };
 
   const fetchSolicitudes = async () => {
     // Primero se obtiene el array de bodegas
@@ -1335,6 +1440,7 @@ const updateAnalista = async (fila, numero) => {
               CodigoDactilar: item.CodDactilar,
               idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio,
               idAnalista: item.idAnalista,
+              Operador: item.idOperador,
             };
           })
         );
@@ -1841,6 +1947,7 @@ const updateAnalista = async (fila, numero) => {
                   <TableCell align="center">Domicilio</TableCell>
                   <TableCell align="center">Laborales</TableCell>
                   <TableCell align="center">Analista</TableCell>
+                  <TableCell align="center">Operador</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -2467,76 +2574,147 @@ const updateAnalista = async (fila, numero) => {
 
                       {/* Analista */}
 
-                   <TableCell align="center">
-  <Box
-    sx={{
-      position: "relative",
-      display: "inline-block",
-      maxWidth: "100%",
-      px: 1,
-      ...(tienePermisoEditarAnalista() && {
-        "&:hover .analistaNombre": {
-          opacity: 0,
-          visibility: "hidden",
-        },
-        "&:hover .editIcon": {
-          opacity: 1,
-          visibility: "visible",
-        },
-      }),
-    }}
-  >
-    {/* Nombre del analista */}
-    <Box
-      className="analistaNombre"
-      sx={{
-        transition: "opacity 0.2s ease",
-        fontWeight: 500,
-        textAlign: "center",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"}
-    </Box>
+                      <TableCell align="center">
+                        <Box
+                          sx={{
+                            position: "relative",
+                            display: "inline-block",
+                            maxWidth: "100%",
+                            px: 1,
+                            ...(tienePermisoEditarAnalista() && {
+                              "&:hover .analistaNombre": {
+                                opacity: 0,
+                                visibility: "hidden",
+                              },
+                              "&:hover .editIcon": {
+                                opacity: 1,
+                                visibility: "visible",
+                              },
+                            }),
+                          }}
+                        >
+                          {/* Nombre del analista */}
+                          <Box
+                            className="analistaNombre"
+                            sx={{
+                              transition: "opacity 0.2s ease",
+                              fontWeight: 500,
+                              textAlign: "center",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"}
+                          </Box>
 
-    {/* Ícono de editar solo si tiene permiso */}
-    {tienePermisoEditarAnalista() && (
-      <Box
-        className="editIcon"
-        onClick={() => handleEditarAnalista(data)}
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          textAlign: "center",
-          opacity: 0,
-          visibility: "hidden",
-          color: "#6b7280",
-          cursor: "pointer",
-          transition: "opacity 0.2s ease",
-        }}
-      >
-        <EditIcon fontSize="small" />
-      </Box>
-    )}
-      <span
-                              style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                          {/* Ícono de editar solo si tiene permiso */}
+                          {tienePermisoEditarAnalista() && (
+                            <Box
+                              className="editIcon"
+                              onClick={() => handleEditarAnalista(data)}
+                              sx={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                textAlign: "center",
+                                opacity: 0,
+                                visibility: "hidden",
+                                color: "#6b7280",
+                                cursor: "pointer",
+                                transition: "opacity 0.2s ease",
                               }}
                             >
-                              <MoreVertIcon
-                                onClick={(event) =>
-                                  handlePopoverOpen(event, 8, data)
-                                }
-                                style={{ cursor: "pointer" }}
-                              />
-                            </span>
-  </Box>
-</TableCell>
+                              <EditIcon fontSize="small" />
+                            </Box>
+                          )}
+                          <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data)
+                                ? "none"
+                                : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                          >
+                            <MoreVertIcon
+                              onClick={(event) =>
+                                handlePopoverOpen(event, 8, data)
+                              }
+                              style={{ cursor: "pointer" }}
+                            />
+                          </span>
+                        </Box>
+                      </TableCell>
+
+                      {/* OPerador */}
+                      <TableCell align="center">
+                        <Box
+                          sx={{
+                            position: "relative",
+                            display: "inline-block",
+                            maxWidth: "100%",
+                            px: 1,
+                            ...(permisoEditarOperador() && {
+                              "&:hover .operadorNombre": {
+                                opacity: 0,
+                                visibility: "hidden",
+                              },
+                              "&:hover .editIcon": {
+                                opacity: 1,
+                                visibility: "visible",
+                              },
+                            }),
+                          }}
+                        >
+                          <Box
+                            className="operadorNombre"
+                            sx={{
+                              transition: "opacity 0.2s ease",
+                              fontWeight: 500,
+                              textAlign: "center",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {operadores.find((o) => o.idUsuario === data.Operador)?.Nombre || "Vacio"}
+                          </Box>
+
+                          {permisoEditarOperador() && (
+                            <Box
+                              className="editIcon"
+                              onClick={() => handleEditarOperador(data)}
+                              sx={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "100%",
+                                textAlign: "center",
+                                opacity: 0,
+                                visibility: "hidden",
+                                color: "#6b7280",
+                                cursor: "pointer",
+                                transition: "opacity 0.2s ease",
+                              }}
+                            >
+                              <EditIcon fontSize="small" />
+                            </Box>
+                          )}
+                          <span
+                            style={{
+                              pointerEvents: estaDeshabilitado(data)
+                                ? "none"
+                                : "auto",
+                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                            }}
+                          >
+                            <MoreVertIcon
+                              onClick={(event) =>
+                                handlePopoverOpen(event, 9, data)
+                              }
+                              style={{ cursor: "pointer" }}
+                            />
+                          </span>
+                        </Box>
+                      </TableCell>
+
 
 
                     </TableRow>
@@ -3594,65 +3772,113 @@ const updateAnalista = async (fila, numero) => {
             )} */}
         </DialogActions>
         {loadingVerificacion && <Loader />}
-      </Dialog> 
+      </Dialog>
 
- <Dialog open={openDialog3} onClose={() => setOpenDialog3(false)}>
-  <DialogTitle>Seleccionar Analista</DialogTitle>
-  <DialogContent>
-    <FormControl fullWidth>
-      <InputLabel id="select-analista-label">Analista</InputLabel>
-      <Select
-        labelId="select-analista-label"
-        value={analistaSeleccionado || ""}
-        onChange={(e) => setAnalistaSeleccionado(e.target.value)}
-        label="Analista"
-      >
-        {analistasDisponibles.map((analista) => (
-          <MenuItem key={analista.idUsuario} value={analista.idUsuario}>
-            {analista.Nombre}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenDialog3(false)}>Cancelar</Button>
-    <Button
-      variant="contained"
-      onClick={() => {
-        setOpenDialog3(false);
-        setOpenDialogConfirmar(true); // Mostrar diálogo de confirmación
-      }}
-      disabled={!analistaSeleccionado}
-    >
-      Asignar
-    </Button>
-  </DialogActions>
-</Dialog>
+      <Dialog open={openDialog3} onClose={() => setOpenDialog3(false)}>
+        <DialogTitle>Seleccionar Analista</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth>
+            <InputLabel id="select-analista-label">Analista</InputLabel>
+            <Select
+              labelId="select-analista-label"
+              value={analistaSeleccionado || ""}
+              onChange={(e) => setAnalistaSeleccionado(e.target.value)}
+              label="Analista"
+            >
+              {analistasDisponibles.map((analista) => (
+                <MenuItem key={analista.idUsuario} value={analista.idUsuario}>
+                  {analista.Nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog3(false)}>Cancelar</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setOpenDialog3(false);
+              setOpenDialogConfirmar(true); // Mostrar diálogo de confirmación
+            }}
+            disabled={!analistaSeleccionado}
+          >
+            Asignar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-{/* confirmacion de cambiar analista  */}
-<Dialog open={openDialogConfirmar} onClose={() => setOpenDialogConfirmar(false)}>
-  <DialogTitle>Confirmar acción</DialogTitle>
-  <DialogContent>
-    <Typography>
-      ¿Estás seguro de asignar este analista a la solicitud?
-    </Typography>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={() => setOpenDialogConfirmar(false)} color="primary">
-      Cancelar
-    </Button>
-    <Button
-      onClick={() => {
-        handleConfirmarAsignacion();
-      }}
-      color="primary"
-      variant="contained"
-    >
-      Confirmar
-    </Button>
-  </DialogActions>
-</Dialog>
+      {/* confirmacion de cambiar analista  */}
+      <Dialog open={openDialogConfirmar} onClose={() => setOpenDialogConfirmar(false)}>
+        <DialogTitle>Confirmar acción</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de asignar este analista a la solicitud?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialogConfirmar(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              handleConfirmarAsignacion();
+            }}
+            color="primary"
+            variant="contained"
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* confirmacion de cambiar operador  */}
+      <Dialog open={openDialogOperador} onClose={() => setOpenDialogOperador(false)}>
+        <DialogTitle>Seleccionar Operador</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth>
+            <InputLabel id="select-operador-label">Operador</InputLabel>
+            <Select
+              labelId="select-operador-label"
+              value={operadorSeleccionado || ""}
+              onChange={(e) => setOperadorSeleccionado(e.target.value)}
+              label="Operador"
+            >
+              {operadores.map((operador) => (
+                <MenuItem key={operador.idUsuario} value={operador.idUsuario}>
+                  {operador.Nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialogOperador(false)}>Cancelar</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setOpenDialogOperador(false);
+              if (filaActual.Operador === operadorSeleccionado) {
+                enqueueSnackbar("El operador seleccionado es el mismo que el actual.", {
+                  variant: "error",
+                });
+                 setOperadorSeleccionado(null)
+                return;
+              }
+              updateOperador(filaActual, operadorSeleccionado);
+              enqueueSnackbar("Operador actualizado correctamente.", {
+                variant: "success",
+              });
+              setOperadorSeleccionado(null)
+            }}
+            disabled={!operadorSeleccionado}
+          >
+            Asignar
+          </Button>
+
+        </DialogActions>
+      </Dialog>
+
 
 
 
