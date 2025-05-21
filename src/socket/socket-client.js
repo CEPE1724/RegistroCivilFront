@@ -6,15 +6,12 @@ export const connectToServer = (token) => {
 
 /*https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js*/
 
-    const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
-
-        {
-            extraHeaders: {
-                hola: "mundo",
-                authentication : token,
-            },
-        }
-    );
+    const manager = new Manager("https://backregistrocivil.appservices.com.ec", {
+  path: "/socket.io",
+  extraHeaders: {
+    authentication: token,
+  },
+});
 
     const socket = manager.socket("/");
 

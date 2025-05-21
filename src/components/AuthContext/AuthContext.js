@@ -21,22 +21,20 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const socket = connectToServer(token); // Conéctate usando el token
+  if (token && !socketRef.current) {
+    const socket = connectToServer(token);
     socketRef.current = socket;
 
     socket.on("connect", () => setIsConnected(true));
     socket.on("disconnect", () => setIsConnected(false));
     socket.on("clients-updated", (clients) => setConnectedClients(clients));
-    
 
-  /*  socket.on('solicitud-web-changed', (data) => {
-      console.log('Cambio en algun dato de la  solicitud web ojala funcione :', data);
-      // aquí puedes actualizar la UI o volver a hacer una consulta
-    });*/
-
-
-    return () => socket.disconnect();
-  }, [token]);
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }
+}, [token]);
 
   // Effect para revisar la expiración del token
   useEffect(() => {

@@ -28,6 +28,7 @@ const Nav = ({ showButton, userData }) => {
   // Socket listener
   useEffect(() => {
     if (!socket) return;
+    
 
     const handleNotification = (data) => {
       const mensaje = data?.mensaje || "📩 Tienes una nueva notificación";
