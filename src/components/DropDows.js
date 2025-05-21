@@ -37,7 +37,7 @@ function DropDown() {
 
     logoutTimer = setTimeout(() => {
       setIsModalOpen(true); // Mostrar el modal de sesión expirada
-    }, 300000); // 5 minutos
+    }, 3000000); // 5 minutos
   };
 
   useEffect(() => {

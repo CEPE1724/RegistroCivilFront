@@ -1,5 +1,3 @@
-
-
 import { Manager, Socket } from "socket.io-client";
 
 let socket;
@@ -8,15 +6,12 @@ export const connectToServer = (token) => {
 
 /*https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js*/
 
-    const manager = new Manager("http://192.168.2.49:3008/socket.io/socket.io.js",
-
-        {
-            extraHeaders: {
-                hola: "mundo",
-                authentication : token,
-            },
-        }
-    );
+    const manager = new Manager("https://backregistrocivil.appservices.com.ec", {
+  path: "/socket.io",
+  extraHeaders: {
+    authentication: token,
+  },
+});
 
     const socket = manager.socket("/");
 
@@ -44,4 +39,3 @@ function addListener(socket) {
 }
 
 export const getSocket = () => socket;
-
