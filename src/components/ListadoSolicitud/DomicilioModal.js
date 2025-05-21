@@ -2,7 +2,8 @@ import axios from "../../configApi/axiosConfig";
 import React, { useEffect, useState } from "react";
 import { APIURL } from "../../configApi/apiConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-
+import Modal from "react-modal";
+import { Visibility } from "@mui/icons-material";
 const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
@@ -49,14 +50,30 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
   const [verificacionData, setVerificacionData] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
-
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
   useEffect(() => {
     const fetchVerificacionData = async () => {
       try {
         const id = idsTerrenas.idTerrenaGestionDomicilio;
         if (!id) return;
         const response = await axios.get(APIURL.getTerrenaGestionDomicilio(id));
-        setVerificacionData(response.data);
+        const data = response.data;
+
+        // 👇 Convertir imágenes de string a array si es necesario
+        if (typeof data.domicilioImages === "string") {
+          try {
+            data.domicilioImages = JSON.parse(data.domicilioImages);
+          } catch (e) {
+            // Si falla JSON.parse, lo tratamos como string manual
+            data.domicilioImages = data.domicilioImages
+              .replace(/[\[\]"]+/g, "")
+              .split(",")
+              .map((url) => url.trim());
+          }
+        }
+
+        setVerificacionData(data);
       } catch (error) {
         console.error("Error al obtener los datos de verificación:", error);
       }
@@ -66,6 +83,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
       fetchVerificacionData();
     }
   }, [openModal, idsTerrenas]);
+
 
   if (!openModal || !verificacionData) return null;
 
@@ -132,6 +150,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
     ValorArrendado,
     Latitud,
     Longitud,
+    domicilioImages
   } = verificacionData;
 
   const renderField = (label, value) =>
@@ -183,6 +202,36 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
             {renderField("Observaciones", Observaciones)}
             {/* {renderField("Fecha", FechaSistema?.slice(0, 19).replace("T", " "))} */}
             {renderField("Valor Arrendado", ValorArrendado)}
+            {Array.isArray(domicilioImages) && domicilioImages.length > 0 && (
+              <div className="col-span-full mt-6">
+                <h3 className="text-lg font-semibold mb-2">Fotos del domicilio</h3>
+                <div className="flex overflow-x-auto space-x-4 p-2 border rounded-lg">
+                  {domicilioImages.map((url, idx) => (
+                    <div key={idx} className="relative flex-shrink-0 w-40 h-40 border rounded-lg overflow-hidden group">
+                      <img
+                        src={url}
+                        alt={`Foto ${idx + 1}`}
+                        className="object-cover w-full h-full"
+                        onClick={() => setSelectedImage(url)}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          className="text-white text-2xl"
+                          onClick={ () => {
+                            setSelectedImage(url);
+                            setShowImageModal(true);
+                          }}
+                        >
+                          👁
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+
 
             {Latitud && Longitud && (
               <div>
@@ -212,6 +261,28 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={showImageModal}
+        onRequestClose={() => setShowImageModal(false)}
+        contentLabel="Imagen ampliada"
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50"
+        overlayClassName="Overlay"
+      >
+        <div className="relative bg-white rounded-xl p-4 max-w-4xl w-full flex flex-col items-center">
+          <button
+            onClick={() => setShowImageModal(false)}
+            className="absolute top-2 right-2 text-red-600 font-bold text-xl"
+          >
+            ✕
+          </button>
+          <img
+            src={selectedImage}
+            alt="Imagen ampliada"
+            className="max-h-[80vh] object-contain rounded-lg"
+          />
+        </div>
+      </Modal>
 
       {/* MAP MODAL */}
       {showMapModal && Latitud && Longitud && (

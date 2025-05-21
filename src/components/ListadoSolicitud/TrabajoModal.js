@@ -3,7 +3,8 @@ import { APIURL } from "../../configApi/apiConfig";
 import axios from "../../configApi/axiosConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Home, Work, CalendarToday, AttachMoney, LocationOn, Phone, Person, Map } from '@mui/icons-material';
-
+import Modal from "react-modal";
+import { Visibility } from "@mui/icons-material";
 
 const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
@@ -48,6 +49,8 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
   const [trabajoInfo, setTrabajoInfo] = useState(null); // Estado para almacenar los datos del trabajo
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // Usamos useEffect para realizar la llamada a la API solo cuando el modal está abierto
   useEffect(() => {
@@ -67,7 +70,23 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
       });
 
       if (response.status === 200) {
-        setTrabajoInfo(response.data); // Guardamos los datos en el estado
+        // Si trabajoImages es un string, lo convertimos a un array
+        let trabajoImages = response.data.trabajoImages;
+
+        // Convertimos el string de trabajoImages en un array si es necesario
+        if (typeof trabajoImages === "string") {
+          try {
+            trabajoImages = JSON.parse(trabajoImages);
+          } catch (e) {
+            trabajoImages = trabajoImages
+              .replace(/[\[\]"]+/g, "") // Eliminamos corchetes y comillas
+              .split(",") // Separamos por coma
+              .map((url) => url.trim()); // Limpiamos los posibles espacios extra
+          }
+        }
+
+        response.data.trabajoImages = trabajoImages;
+        setTrabajoInfo(response.data);
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -81,12 +100,12 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
   // Si el modal no está abierto, retornamos null
   if (!openModal) return null;
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-40">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl sm:max-w-3xl md:max-w-2xl lg:max-w-7xl p-8 max-h-[90vh] overflow-y-auto">
         <h2 className="text-2xl font-semibold mb-6 flex items-center">
           <Work className="mr-2 w-5 h-5" /> Trabajo
         </h2>
-  
+
         <div className="grid grid-cols-1 gap-4">
           {trabajoInfo && (
             <>
@@ -115,7 +134,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                   )}
                 </div>
               </div>
-  
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { label: "Tiempo de Trabajo (Meses)", value: trabajoInfo.iTiempoTrabajo, icon: CalendarToday },
@@ -137,7 +156,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                   </div>
                 ))}
               </div>
-  
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="font-semibold flex items-center mb-2">
@@ -150,8 +169,9 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                     className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
                     readOnly
                   />
+
                 </div>
-  
+
                 <div>
                   <button
                     className="mt-6 px-4 py-2 text-sm rounded-full bg-blue-500 text-white hover:bg-white hover:text-blue-500 border border-blue-500 transition flex items-center justify-center"
@@ -161,7 +181,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                   </button>
                 </div>
               </div>
-  
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { label: "Punto de Referencia Laboral", value: trabajoInfo.PuntoReferencia, icon: LocationOn },
@@ -181,7 +201,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                   </div>
                 ))}
               </div>
-  
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
                   { label: "Calle Principal", value: trabajoInfo.CallePrincipal, icon: LocationOn },
@@ -201,10 +221,38 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                   </div>
                 ))}
               </div>
+              {Array.isArray(trabajoInfo.trabajoImages) && trabajoInfo.trabajoImages.length > 0 && (
+                <div className="col-span-full mt-6">
+                  <h3 className="text-lg font-semibold mb-2">Imágenes del Trabajo</h3>
+                  <div className="flex overflow-x-auto space-x-4 p-2 border rounded-lg">
+                    {trabajoInfo.trabajoImages.map((url, idx) => (
+                      <div key={idx} className="relative flex-shrink-0 w-40 h-40 border rounded-lg overflow-hidden group">
+                        <img
+                          src={url}
+                          alt={`Foto ${idx + 1}`}
+                          className="object-cover w-full h-full"
+                          onClick={() => setSelectedImage(url)}
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            className="text-white text-2xl"
+                            onClick={() => {
+                              setSelectedImage(url);
+                              setShowImageModal(true);
+                            }}
+                          >
+                            👁
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
-  
+
         <div className="flex justify-end space-x-4 mt-8">
           <button
             onClick={closeModal}
@@ -220,7 +268,28 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
           </button>
         </div>
       </div>
-  
+
+      <Modal
+        isOpen={showImageModal}
+        onRequestClose={() => setShowImageModal(false)}
+        contentLabel="Imagen ampliada"
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50"
+        overlayClassName="Overlay"
+      >
+        <div className="relative bg-white rounded-xl p-4 max-w-4xl w-full flex flex-col items-center">
+          <button
+            onClick={() => setShowImageModal(false)}
+            className="absolute top-2 right-2 text-red-600 font-bold text-xl"
+          >
+            ✕
+          </button>
+          <img
+            src={selectedImage}
+            alt="Imagen ampliada"
+            className="max-h-[80vh] object-contain rounded-lg"
+          />
+        </div>
+      </Modal>
       {showMapModal && (
         <GoogleMapModal
           lat={trabajoInfo.Latitud}
