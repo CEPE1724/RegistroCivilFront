@@ -16,8 +16,7 @@ export default function VerificacionTerrenaModal({
   const [verificador, setVerificador] = useState("");
   const [verificadores, setVerificadores] = useState([]);
   const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
-  console.log("verificadores", verificadores);
-  console.log("verificador", verificador)
+  const [tokenVerificador, setTokenVerificador] = useState("");
 
 
   const isFormValid = tipoVerificacion && verificador;
@@ -57,9 +56,29 @@ export default function VerificacionTerrenaModal({
       Web: 1
     };
 
+	const payload2 = {
+		tokens: [tokenVerificador],
+        notification: {
+          type: "alert",
+          title: "VERIFICACIÓN TERRENA REQUERIDA",
+          body: `📍 ${userSolicitudData.almacen} | Solicitante: ${userSolicitudData?.PrimerNombre} ${userSolicitudData.SegundoNombre} ${userSolicitudData?.ApellidoPaterno} ${userSolicitudData.ApellidoMaterno} 🪪 ${userSolicitudData.cedula}  | Solicitud activa de inspección en terreno.`,
+          url: "",
+          empresa: "CREDI",}
+	}
+
     try {
       await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
       enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
+	  if (tokenVerificador) {
+		try {
+			await axios.post(APIURL.enviarNotificacion(), payload2)
+			enqueueSnackbar("Notificación enviada correctamente", { variant: "success" });
+		}catch (error) {
+			console.error("❌ Error al enviar notificación:", error);
+			enqueueSnackbar("Error al enviar notificación", { variant: "error" });
+				
+		}
+	  }
       resetForm();
       onClose(); // Cierra el modal
     } catch (error) {
@@ -74,10 +93,7 @@ export default function VerificacionTerrenaModal({
       patchSolicitud(userSolicitudData.id, "trabajo");
     }
 
-
   };
-
-
 
   const patchSolicitud = async (idSolicitud, tipo) => {
     try {
@@ -123,6 +139,22 @@ export default function VerificacionTerrenaModal({
 
   if (!isOpen) return null;
 
+  const handleSelectChange = (e) => {
+    const selectedId = e.target.value;
+    setVerificador(selectedId);
+
+    const verificadorSeleccionado = verificadores.find(
+      (v) => v.idIngresoCobrador === parseInt(selectedId)
+    );
+
+    if (verificadorSeleccionado && verificadorSeleccionado.dispositivos.length > 0) {
+      const token = verificadorSeleccionado.dispositivos[0].TokenExpo;
+      setTokenVerificador(token);
+    } else {
+      setTokenVerificador("");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-6">
@@ -165,7 +197,7 @@ export default function VerificacionTerrenaModal({
           <select
             className="w-full border rounded px-3 py-2"
             value={verificador}
-            onChange={(e) => setVerificador(e.target.value)}
+            onChange={handleSelectChange}
           >
             <option value="">Seleccione un verificador</option>
             {verificadores.map((v) => (
