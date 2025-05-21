@@ -2451,7 +2451,7 @@ const [recargar, setRecargar] = useState(false);
             </Typography>
           </Box>
           <Timeline
-            position="bottom"
+            position="alternate"
             sx={{
               display: "flex",
               flexDirection: "row",
