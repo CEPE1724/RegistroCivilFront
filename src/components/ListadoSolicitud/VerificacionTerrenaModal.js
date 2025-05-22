@@ -16,8 +16,8 @@ export default function VerificacionTerrenaModal({
   const [verificador, setVerificador] = useState("");
   const [verificadores, setVerificadores] = useState([]);
   const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
-   const [verificadorNombre, setVerificadorNombre] = useState("");
-const [tokenVerificador, setTokenVerificador] = useState("");
+  const [verificadorNombre, setVerificadorNombre] = useState("");
+  const [tokenVerificador, setTokenVerificador] = useState("");
 
 
   const isFormValid = tipoVerificacion && verificador;
@@ -57,20 +57,31 @@ const [tokenVerificador, setTokenVerificador] = useState("");
       Web: 1
     };
 
-	const payload2 = {
-		tokens: [tokenVerificador],
-        notification: {
-          type: "alert",
-          title: "VERIFICACIÓN TERRENA REQUERIDA",
-          body: `📍 ${userSolicitudData.almacen} | Solicitante: ${userSolicitudData?.PrimerNombre} ${userSolicitudData.SegundoNombre} ${userSolicitudData?.ApellidoPaterno} ${userSolicitudData.ApellidoMaterno} 🪪 ${userSolicitudData.cedula}  | Solicitud activa de inspección en terreno.`,
-          url: "",
-          empresa: "CREDI",}
-	}
+    const payload2 = {
+      tokens: [tokenVerificador],
+      notification: {
+        type: "alert",
+        title: "VERIFICACIÓN TERRENA REQUERIDA",
+        body: `📍 ${userSolicitudData.almacen} | Solicitante: ${userSolicitudData?.PrimerNombre} ${userSolicitudData.SegundoNombre} ${userSolicitudData?.ApellidoPaterno} ${userSolicitudData.ApellidoMaterno} 🪪 ${userSolicitudData.cedula}  | Solicitud activa de inspección en terreno.`,
+        url: "",
+        empresa: "CREDI",
+      }
+    }
 
     try {
       await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
       enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
-      
+      if (tokenVerificador) {
+        try {
+          const response = await axios.post(APIURL.enviarNotificacion(), payload2);
+          if (response.status === 200) {
+            enqueueSnackbar("Verificación Terrena enviada", { variant: "success" });
+          }
+        } catch (error) {
+          console.error("Error al enviar la notificación:", error);
+        }
+      }
+
       resetForm();
       onClose(); // Cierra el modal
     } catch (error) {
@@ -81,30 +92,30 @@ const [tokenVerificador, setTokenVerificador] = useState("");
 
     if (tipoVerificacion === "domicilio") {
       patchSolicitud(userSolicitudData.id, "domicilio");
-     await fetchInsertarDatos(4, userSolicitudData.id, verificadorNombre, 1)
+      await fetchInsertarDatos(4, userSolicitudData.id, verificadorNombre, 1)
     } else if (tipoVerificacion === "trabajo") {
       patchSolicitud(userSolicitudData.id, "trabajo");
-        await fetchInsertarDatos(5, userSolicitudData.id, verificadorNombre, 1);
+      await fetchInsertarDatos(5, userSolicitudData.id, verificadorNombre, 1);
     }
 
   };
 
 
   const fetchInsertarDatos = async (tipo, idSolicitudWeb, telefono, estado) => {
-  try {
-    const url = APIURL.post_createtiemposolicitudeswebDto();
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
 
-    await axios.post(url, {
-      idCre_SolicitudWeb: idSolicitudWeb,
-      Tipo: tipo,
-      idEstadoVerificacionDocumental: estado,
-      Usuario: userData.Nombre,
-      Telefono: telefono
-    });
-  } catch (error) {
-    console.error("Error al guardar los datos del cliente:", error);
-  }
-};
+      await axios.post(url, {
+        idCre_SolicitudWeb: idSolicitudWeb,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: telefono
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente:", error);
+    }
+  };
 
 
   const patchSolicitud = async (idSolicitud, tipo) => {
@@ -209,12 +220,7 @@ const [tokenVerificador, setTokenVerificador] = useState("");
           <select
             className="w-full border rounded px-3 py-2"
             value={verificador}
-           onChange={(e) => {
-  const selectedId = e.target.value;
-  const selected = verificadores.find(v => v.idIngresoCobrador.toString() === selectedId);
-  setVerificador(selectedId);
-  setVerificadorNombre(selected?.Nombre || "");
-}}
+            onChange={handleSelectChange}
           >
             <option value="">Seleccione un verificador</option>
             {verificadores.map((v) => (
