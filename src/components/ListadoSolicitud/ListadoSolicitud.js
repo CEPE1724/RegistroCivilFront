@@ -1516,7 +1516,6 @@ export function ListadoSolicitud() {
           },
         }
       );
-      console.log("Response data:", response.data); // Log the response data
       if (response.data) {
         enqueueSnackbar("Solicitud actualizada correctamente.", {
           variant: "success",
@@ -2776,7 +2775,7 @@ export function ListadoSolicitud() {
             </Typography>
           </Box>
           <Timeline
-            position="alternate"
+            // position="alternate"
             sx={{
               display: "flex",
               flexDirection: "row",

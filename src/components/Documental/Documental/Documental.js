@@ -228,9 +228,9 @@ export function Documental({
       9: "Acta",
       10: "Consentimiento",
       11: "Autorización",
-      12: "Servicio Basico",
-      13: "Foto del Cliente",
-      14: "Croquis",
+      12: "Foto del Cliente",  //Servicio Basico
+      13: "Croquis",   //Foto del Cliente
+      14: "Servicio Basico",   //Croquis
     };
     return documentoIds[id] || null;
   };
@@ -518,9 +518,9 @@ export function Documental({
       9: "Acta",
       10: "Consentimiento",
       11: "Autorización",
-      12: "Servicio Basico",
-      13: "Foto del Cliente",
-      14: "Croquis",
+      12: "Foto del Cliente",   //Servicio Basico
+      13: "Croquis",   //Foto del Cliente
+      14: "Servicio Basico",   //Croquis
     };
 
     // Buscamos la clave (número) correspondiente al nombre
@@ -653,9 +653,9 @@ export function Documental({
         Acta: 9,
         Consentimiento: 10,
         Autorización: 11,
-        "Servicio Basico": 12,
-        "Foto del Cliente": 13,
-        Croquis: 14,
+        "Foto del Cliente": 12,
+        Croquis: 13,
+        "Servicio Basico": 14,
       };
 
       const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
@@ -684,7 +684,6 @@ export function Documental({
           Usuario: userData.Nombre,
           IdUsuario: userData.idUsuario,
         };
-        console.log("usuario", userData.Nombre);
 
         // Verifica el payload antes de enviarlo
 
@@ -831,9 +830,13 @@ export function Documental({
                         }}
                         className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
                 ${
-                  isSelected
-                    ? "bg-red-600 text-white shadow-lg"
-                    : "text-red-600 hover:bg-red-100 hover:text-red-800"
+                  isSelected && completedFields2.includes(item)
+				 	? "bg-green-600 text-white shadow-lg"
+        			: isSelected
+        			? "bg-red-600 text-white shadow-lg"
+        			: completedFields2.includes(item)
+        			? "text-green-600 hover:bg-green-100 hover:text-green-800"
+        			: "text-red-600 hover:bg-red-100 hover:text-red-800"
                 }`}
                       >
                         {item}
@@ -1016,6 +1019,13 @@ export function Documental({
                     </div>
                   ))}
                 </div>
+				<div className="flex justify-end items-center mt-8 w-full">
+					<button 
+					className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300" 
+					onClick={() => navigate("/ListadoSolicitud", { replace: true })}>
+						Regresar
+					</button>				
+				</div>
               </div>
             </div>
           </div>
@@ -1044,7 +1054,8 @@ export function Documental({
                   return (
                     <div
                       key={index}
-                      className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300"
+                      className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300 flex flex-col"
+					  style={{ height: '70vh', width: '70vw' }}
                     >
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-700">
@@ -1067,13 +1078,11 @@ export function Documental({
                         </div>
                       </div>
 
-                      <div className="mt-4">
+                      <div className="flex-1 overflow-hidden">
                         <object
                           data={previewUrl}
                           type="application/pdf"
-                          width="100%"
-                          height="200px"
-                          className="rounded-md"
+                          className="w-full h-full rounded-md"
                           aria-label="Vista previa PDF"
                         >
                           <p>Vista previa no disponible</p>
