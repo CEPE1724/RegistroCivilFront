@@ -5,6 +5,7 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Home, Work, CalendarToday, AttachMoney, LocationOn, Phone, Person, Map } from '@mui/icons-material';
 import Modal from "react-modal";
 import { Visibility } from "@mui/icons-material";
+import { TicketMinus } from "lucide-react";
 
 const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
@@ -52,6 +53,15 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
 
+  const direccionCoinMap = {
+    1: "Coincide",
+    2: "No Coincide",
+  };
+
+  const tipoVerificacionMap = {
+    1: "Campo Malo",
+    2: "Aprobado",
+  };
   // Usamos useEffect para realizar la llamada a la API solo cuando el modal está abierto
   useEffect(() => {
     if (openModal && idsTerrenas.idTerrenaGestionTrabajo) {
@@ -95,7 +105,13 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
     }
   };
 
-
+  const renderField = (label, value) =>
+    value !== null && value !== "" ? (
+      <div>
+        <p className="text-sm font-semibold">{label}</p>
+        <p className="text-sm text-gray-700">{value}</p>
+      </div>
+    ) : null;
 
   // Si el modal no está abierto, retornamos null
   if (!openModal) return null;
@@ -137,7 +153,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                  { label: "Tiempo de Trabajo (Meses)", value: trabajoInfo.iTiempoTrabajo, icon: CalendarToday },
+                  { label: "Tiempo de Trabajo (Meses)....", value: trabajoInfo.iTiempoTrabajo, icon: CalendarToday },
                   { label: "Tiempo de Trabajo (Años)", value: trabajoInfo.iTiempoTrabajoYear, icon: CalendarToday },
                   { label: "Ingresos Mensuales", value: trabajoInfo.dIngresoTrabajo, icon: AttachMoney },
                   { label: "Actividad Laboral", value: trabajoInfo.ActividadTrabajo, icon: Work },
@@ -220,6 +236,32 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
                     />
                   </div>
                 ))}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="font-semibold flex items-center mb-2">
+                    <LocationOn className="mr-2 w-5 h-5" /> ¿Dirección Coincide?
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="¿Dirección Coincide?"
+                    value={direccionCoinMap[trabajoInfo.direccionCoincide] || ""}
+                    className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold flex items-center mb-2">
+                    <TicketMinus className="mr-2 w-5 h-5" /> Tipo Verificación
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="¿Tipo Verificación?"
+                    value={tipoVerificacionMap[trabajoInfo.tipoVerificacion] || ""}
+                    className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
+                    readOnly
+                  />
+                </div>
               </div>
               {Array.isArray(trabajoInfo.trabajoImages) && trabajoInfo.trabajoImages.length > 0 && (
                 <div className="col-span-full mt-6">
