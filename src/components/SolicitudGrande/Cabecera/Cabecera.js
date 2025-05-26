@@ -989,7 +989,6 @@ export function Cabecera() {
     if (activeTab === "Datos Cliente") {
       tipoDato = 2;
       const formData = datosRef.current.getFormData();
-      console.log("formData", formData);
       const isValid = datosRef.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         isValidSumit = true;

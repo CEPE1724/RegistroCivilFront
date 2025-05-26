@@ -209,7 +209,7 @@ const Referencias = forwardRef((props, ref) => {
 
     if (name === "apellidoPaterno" || name === "primerNombre" || name === "segundoNombre") {
       // Solo letras
-      const filteredValue = value.replace(/[^A-Za-z]/g, '');
+      const filteredValue = value.replace(/[^A-Za-z]/g, '').toUpperCase();
       setFormData({ ...formData, [name]: filteredValue });
     } else if (name === "celular") {
       // Solo números
