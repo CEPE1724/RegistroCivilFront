@@ -113,6 +113,16 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
     3: "Familiar",
   };
 
+  const direccionCoinMap = {
+    1: "Coincide",
+    2: "No Coincide",
+  };
+
+  const tipoVerificacionMap = {
+    1: "Campo Malo",
+    2: "Aprobado",
+  };
+
   const accesoMap = {
     1: "Fácil",
     2: "Difícil",
@@ -150,7 +160,10 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
     ValorArrendado,
     Latitud,
     Longitud,
-    domicilioImages
+    domicilioImages,
+    direccionCoincide,
+    tipoVerificacion,
+
   } = verificacionData;
 
   const renderField = (label, value) =>
@@ -202,6 +215,14 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
             {renderField("Observaciones", Observaciones)}
             {/* {renderField("Fecha", FechaSistema?.slice(0, 19).replace("T", " "))} */}
             {renderField("Valor Arrendado", ValorArrendado)}
+            {renderField(
+              "Dirección Coincide",
+              direccionCoinMap[direccionCoincide]
+            )}
+            {renderField(
+              "Tipo de Verificación",
+              tipoVerificacionMap[tipoVerificacion]
+            )}
             {Array.isArray(domicilioImages) && domicilioImages.length > 0 && (
               <div className="col-span-full mt-6">
                 <h3 className="text-lg font-semibold mb-2">Fotos del domicilio</h3>
