@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, use } from "react";
 import { useSnackbar } from "notistack";
+import { APIURL } from "../../../../configApi/apiConfig";
+import axios from "../../../../configApi/axiosConfig";
 import {
     fetchNacionalidad, fecthGenero, fecthEstadoCivil, fetchNivelEducacion, fetchProfesion, fetchSituacionLaboral,
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
-
-
+import uploadFile from "../../../../hooks/uploadFile";
 import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox, FaFacebook} from "react-icons/fa";
-
-
+import { Button, Dialog, DialogTitle, DialogContent, } from "@mui/material";
+import CapturarCamara from "../../../CapturarCamara/CapturarCamara";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 
 import { SelectField } from "../../../Utils";
@@ -27,6 +28,13 @@ const Datos = forwardRef((props, ref) => {
     const [profesion, setProfesion] = useState([]);
     const [situacionLaboral, setSituacionLaboral] = useState([]);
     const [actividadEconomica, setActividadEconomica] = useState([]);
+
+	const [openCameraModal, setOpenCameraModal] = useState(false);
+	const [openModal, setOpenModal] = useState(false);
+	const [imagenCapturada, setImagenCapturada] = useState(null);
+	const [previewUrl, setPreviewUrl] = useState(null);
+	const [fileToUpload, setFileToUpload] = useState(null);
+	const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
     const [formData, setFormData] = useState({
         nacionalidad: data?.idNacionalidad || '',
@@ -222,10 +230,139 @@ const Datos = forwardRef((props, ref) => {
         getFormData: () => formData
     }));
 
+	const fetchActualizaSolicitud = async (idSolicitud, data) => {
+    try {
+      const url = APIURL.putUpdatesolicitud(idSolicitud); // URL para actualizar la solicitud
+      const response = await axios.put(url, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      return response.data; // Retornar datos actualizados si es necesario
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error.message);
+      throw error; // Re-lanzar error para manejarlo más tarde
+    }
+  };
+
+	 const handleUploadClick = async () => {
+	  if (!fileToUpload) {
+		alert("Primero selecciona una imagen");
+		return;
+	  }
+	  try {
+		let updatedUrl = ""; 
+		const fileUploadResponse = await uploadFile(
+		  fileToUpload,
+		  data.Bodega,
+		  data.Cedula,
+		  data.NumeroSolicitud,
+		  "Foto"
+		);
+		if (fileUploadResponse) {
+		  updatedUrl = fileUploadResponse.url;
+		  // Actualizar en backend
+		  const updatedData = { Foto: updatedUrl };
+		  await fetchActualizaSolicitud(data.idCre_SolicitudWeb, updatedData);
+		  setUrlCloudstorage();
+		  setFileToUpload(null);
+		  enqueueSnackbar("Foto subida correctamente", {
+			variant: "success",
+		  });
+		}
+	  } catch (error) {
+		alert(error.message);
+	  }
+	};
+
     return (
         <div className="py-2 w-full">
             <div className="mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+					{/* Primera columna */}
+      				<div className="md:col-span-1">
+      				  <div className="h-full border rounded p-4 bg-gray-50">
+      				    
+						<div className="w-64 flex flex-col items-center space-y-4">
+							{/* Contenedor de la imagen */}
+							<div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
+						{!previewUrl ? 				  
+						(<div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+						  <svg
+							xmlns="http://www.w3.org/2000/svg"
+							className="h-24 w-24 text-gray-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							strokeWidth={2}
+						  >
+							<path
+							  strokeLinecap="round"
+							  strokeLinejoin="round"
+							  d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+							/>
+						  </svg>
+						</div>) : (
+                    <img
+                      src={previewUrl}
+                      alt="Foto del cliente"
+                      className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                    />
+                  )
+						}
+					</div>		
+					{/* Botones debajo de la imagen */}
+					<div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">		
+					  {/* Botón subir imagen */}		
+
+						<div className="flex flex-col md:flex-row gap-2 mt-4">
+						  <Button onClick={() => setOpenCameraModal(true)} >
+							Tomar Foto
+						  </Button>		
+						  <button
+							onClick={handleUploadClick}
+							disabled={!fileToUpload}
+							className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300
+							  }`}
+						  >
+							Subir imagen
+						  </button>
+						</div>
+							
+					</div>
+				  </div>
+					<Dialog
+	   				  open={openCameraModal}
+	   				  onClose={() => setOpenCameraModal(false)}
+	   				  maxWidth="sm"
+	   				  fullWidth
+	   				>
+	   				  <DialogTitle>Captura de foto 😀</DialogTitle>
+	   				  <DialogContent>
+	   					<CapturarCamara
+	   					  onCapture={(imgBase64) => {
+	   						setImagenCapturada(imgBase64);
+	   						setPreviewUrl(imgBase64);
+	   						setOpenCameraModal(false);
+	   						// Convertir base64 a objeto File para permitir subir
+	   						const blob = fetch(imgBase64)
+	   						  .then((res) => res.blob())
+	   						  .then((blobData) => {
+	   							const file = new File([blobData], "captura.jpg", {
+	   							  type: "image/jpeg",
+	   							});
+	   							setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
+	   						  });
+	   					  }}
+	   					/>
+	   				  </DialogContent>
+	   				</Dialog>
+      				  </div>
+      				</div>
+					{/* segunda columnda */}
+	  				<div className="md:col-span-3">
+      				  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {/* Nacionalidad */}
                     <SelectField
                         label="Nacionalidad (*)"
@@ -440,6 +577,8 @@ const Datos = forwardRef((props, ref) => {
                             </p>
                         )}
                     </div>
+					</div>
+					</div>
                 </div>
             </div>
         </div>

@@ -246,6 +246,7 @@ const ReusableForm = ({
   onCancel,
   columns = 1,
   formStatus,
+  onExternalUpdate,
 }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -288,6 +289,11 @@ const ReusableForm = ({
     },
   });
 
+  useEffect(() => {
+  if (onExternalUpdate) {
+    onExternalUpdate(formik);
+  }
+}, [onExternalUpdate]);
   
   const requestOtp = async () => {
     try {
