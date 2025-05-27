@@ -9,6 +9,7 @@ export function RegistroCivil({
   onAceptar,
   onRechazar,
   resultadoVerificacion,
+  permisos
 }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -107,6 +108,13 @@ export function RegistroCivil({
   // 	  setError("Error durante la verificación facial.");
   // 	}
   //   };
+
+    const permisoAprobarVerificacion = () => {
+    const permiso = permisos.find((p) => p.Permisos === "APROBAR RECONOCIMIENTO FACIAL");
+    return permiso && permiso.Activo;
+  //}
+    //return true
+  };
 
   useEffect(() => {
     if (cedula && dactilar) {
@@ -271,7 +279,7 @@ export function RegistroCivil({
               )}
 
               <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
-                {(resultadoVerificacion.verified || !data?.FOTO) && (
+                {(!resultadoVerificacion.verified || !data?.FOTO) && permisoAprobarVerificacion() && (
                   <Button
                     variant="contained"
                     color="success"
@@ -296,6 +304,7 @@ export function RegistroCivil({
                   </Button>
                 )}
 
+                { permisoAprobarVerificacion() && 
                 <Button
                   variant="outlined"
                   color="error"
@@ -317,7 +326,7 @@ export function RegistroCivil({
                   }
                 >
                   Rechazar Verificación
-                </Button>
+                </Button>}
               </div>
             </>
           )}
