@@ -383,11 +383,11 @@ export function ListadoSolicitud() {
   }; */}
 
   const fetchInsertarimagen = async (tipo, data, estado , imagen) => {
-    alert(imagen)
+  
    
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
-      alert(data)
+    
       await axios.post(url, {
         idCre_SolicitudWeb: data,
         Tipo: tipo,
@@ -1755,7 +1755,7 @@ export function ListadoSolicitud() {
   const handleApprove = (rowData) => {
     // aquí tu lógica para aprobar...
     console.log("Aprobando fila:", rowData);
-    alert("aporbar ");
+    
   };
 
 
