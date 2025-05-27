@@ -1281,6 +1281,8 @@ export function Cabecera() {
         {
           NombreEmpresa: formData.empresa,
           idTipoEmpresa: getParsedValue(formData.tipoEmpresa),
+		  JefeInmediato: formData.jefeInmediato,
+		  CelularInmediato: formData.numeroJefe,
           FechaIngresoEmpresa: formData.fechaIngreso,
           IngresosTrabajo: IngresosTrabajoString,
           EgresosTrabajo: EgresosTrabajoString,
@@ -1309,15 +1311,15 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos del conyuge guardados correctamente.", {
+      enqueueSnackbar("Dependiente guardados correctamente.", {
         variant: "success",
       });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos del conyuge.", {
+      enqueueSnackbar("Error al guardar los datos del Dependiente.", {
         variant: "error",
       });
-      console.error("Error al guardar los datos del conyuge", error);
+      console.error("Error al guardar los datos del Dependiente.", error);
     }
   };
 

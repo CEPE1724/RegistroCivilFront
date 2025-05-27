@@ -91,6 +91,8 @@ const SeccionB = forwardRef((props, ref) => {
   const [formData, setFormData] = useState({
     empresa: data.NombreEmpresa || "",
     tipoEmpresa: data.idTipoEmpresa || 0,
+	jefeInmediato: data.jefeInmediato || "",
+	numeroJefe: data.numeroJefe || "",
     fechaIngreso: data.FechaIngresoEmpresa || "",
     ingresos: data.IngresosTrabajo || 0,
     gastos: data.EgresosTrabajo || 0,
@@ -138,7 +140,7 @@ const SeccionB = forwardRef((props, ref) => {
     const { name, value, type, checked } = e.target;
 
     // Validación para campos de teléfono
-  if (name === 'telefono' || name === 'celular') {
+  if (name === 'telefono' || name === 'celular' || name === 'numeroJefe') {
   // Solo validar si el campo tiene valor y tiene la longitud correcta
   if (value && (value.length === 9 || value.length === 10)) {
     const existe = await props.comprobTelf(value); 
@@ -198,6 +200,29 @@ const SeccionB = forwardRef((props, ref) => {
     }
   };
 
+  const handleBlur = (e) => {
+	const {name, value} = e.target;
+
+	if (name === 'jefeInmediato' || name === 'callePrincipal' || name === 'callePrincipal' || name === 'calleSecundaria' || name === 'referenciaUbicacion') {
+		if(value.length > 0 && value.length < 5){
+			enqueueSnackbar("El nombre debe tener mínimo 5 caracteres", { variant: 'warning' });
+		}
+ 	}
+
+	if(name === 'numeroJefe' || name === 'telefono'){
+		if(value.length < 9 || value.length > 10){
+			enqueueSnackbar("Ingresa un número valido.", {variant: 'warning'})
+		}
+	}
+
+	if(name === 'celular'){
+		if(value.length < 10 || value.length > 10){
+			enqueueSnackbar("El número debe tener 10 caracteres.", {variant: 'warning'})
+		}
+	}
+
+  }
+
   const fecthValidaDomicilio = async () => {
     try {
       const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
@@ -224,6 +249,8 @@ const SeccionB = forwardRef((props, ref) => {
     const camposBase = [
       { dataKey: "NombreEmpresa", formKey: "empresa" },
       { dataKey: "idTipoEmpresa", formKey: "tipoEmpresa" },
+	  { dataKey: "JefeInmediato", formKey: "jefeInmediato"},
+	  { dataKey: "CelularInmediato", formKey: "numeroJefe"},
       { dataKey: "FechaIngresoEmpresa", formKey: "fechaIngreso" },
       { dataKey: "IngresosTrabajo", formKey: "ingresos" },
       { dataKey: "EgresosTrabajo", formKey: "gastos" },
@@ -575,15 +602,55 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
+			<label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoEmpresa === "" ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaBriefcase className="mr-2 text-primaryBlue" />
+            (*)Tipo Empresa
+          </label>
           <SelectField
-            label="Tipo Empresa"
-            icon={<FaBriefcase />}
+            // label="Tipo Empresa"
+            // icon={<FaBriefcase />}
             value={formData.tipoEmpresa}
             onChange={handleInputChange}
             options={tipoEmpresa}
             name="tipoEmpresa"
             error={errors.tipoEmpresa}
           />
+        </div>
+
+		<div className="col-span-1">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.jefeInmediato.length < 5 ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaCity className="mr-2 text-primaryBlue" />
+            (*)Jefe Inmediato
+          </label>
+          <input
+            type="text"
+            name="jefeInmediato"
+            value={formData.jefeInmediato}
+            onChange={handleInputChange}
+			onBlur={handleBlur}
+            className="block w-full solcitudgrande-style"
+          />
+          {/* {errors.departamento && (
+            <span className="text-red-500 text-xs">{errors.departamento}</span>
+          )} */}
+        </div>
+
+		<div className="col-span-1">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroJefe.length < 10 ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaHouseUser className="mr-2 text-primaryBlue" />
+            (*)Número Jefe
+          </label>
+          <input
+            type="number"
+            name="numeroJefe"
+            value={formData.numeroJefe}
+            onChange={handleInputChange}
+			onBlur={handleBlur}
+            className="block w-full solcitudgrande-style"
+          />
+          {/* {errors.numeroCasa && (
+            <span className="text-red-500 text-xs">{errors.numeroCasa}</span>
+          )} */}
         </div>
 
         <div className="col-span-1">
@@ -649,9 +716,13 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
+			<label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoContrato === "" ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaFileContract className="mr-2 text-primaryBlue" />
+            (*)Tipo Contrato
+          </label>
           <SelectField
-            label="Tipo Contrato"
-            icon={<FaFileContract />}
+            // label="Tipo Contrato"
+            // icon={<FaFileContract />}
             value={formData.tipoContrato}
             onChange={handleInputChange}
             options={tipoContrato}
@@ -661,9 +732,13 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
+			<label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoSueldo === "" ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaDollarSign className="mr-2 text-primaryBlue" />
+            (*)Tipo Sueldo
+          </label>
           <SelectField
-            label="Tipo Sueldo"
-            icon={<FaDollarSign />}
+            // label="Tipo Sueldo"
+            // icon={<FaDollarSign />}
             value={formData.tipoSueldo}
             onChange={handleInputChange}
             options={tipoSueldo}
@@ -673,9 +748,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.departamento.length < 5 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaCity className="mr-2 text-primaryBlue" />
-            Departamento
+            (*)Departamento
           </label>
           <input
             type="text"
@@ -689,41 +764,7 @@ const SeccionB = forwardRef((props, ref) => {
           )}
         </div>
 
-        <div className="col-span-1">
-          <SelectField
-            label="Cargo"
-            icon={<FaUserTie />}
-            value={formData.cargo}
-            onChange={handleInputChange}
-            options={cargo}
-            name="cargo"
-            error={errors.cargo}
-            readOnly={
-              data.idCargo !== 0 &&
-              data.idCargo !== null &&
-              data.idCargo !== undefined
-            } // Deshabilitar el campo de cargo
-          />
-        </div>
-
-        <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
-            <FaClock className="mr-2 text-primaryBlue" />
-            Dias Pago
-          </label>
-          <input
-            type="number"
-            name="diasPago"
-            value={formData.diasPago}
-            onChange={handleInputChange}
-            className="block w-full solcitudgrande-style"
-          />
-          {errors.diasPago && (
-            <span className="text-red-500 text-xs">{errors.diasPago}</span>
-          )}
-        </div>
-
-        <div className="col-span-1 flex flex-col items-center">
+		<div className="col-span-1 flex flex-col items-center">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaUserCheck className="mr-2 text-primaryBlue" />
             Afiliado IESS
@@ -745,9 +786,47 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
+			<label className={`text-xs font-medium mb-1 flex items-center ${formData.cargo === "" ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaUserTie className="mr-2 text-primaryBlue" />
+            (*)Cargo
+          </label>
+          <SelectField
+            // label="Cargo"
+            // icon={<FaUserTie />}
+            value={formData.cargo}
+            onChange={handleInputChange}
+            options={cargo}
+            name="cargo"
+            error={errors.cargo}
+            readOnly={
+              data.idCargo !== 0 &&
+              data.idCargo !== null &&
+              data.idCargo !== undefined
+            } // Deshabilitar el campo de cargo
+          />
+        </div>
+
+        <div className="col-span-1">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.diasPago < 1 || formData.diasPago < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+            <FaClock className="mr-2 text-primaryBlue" />
+            (*)Dias Pago
+          </label>
+          <input
+            type="number"
+            name="diasPago"
+            value={formData.diasPago}
+            onChange={handleInputChange}
+            className="block w-full solcitudgrande-style"
+          />
+          {errors.diasPago && (
+            <span className="text-red-500 text-xs">{errors.diasPago}</span>
+          )}
+        </div>
+
+        <div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-            Provincia
+            (*)Provincia
           </label>
           <select
             name="provincia"
@@ -770,7 +849,7 @@ const SeccionB = forwardRef((props, ref) => {
         <div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-            Cantón
+            (*)Cantón
           </label>
           <select
             name="canton"
@@ -791,9 +870,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.parroquia === "" ? 'text-red-500' : 'text-gray-500'}`}>
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-            Parroquia
+            (*)Parroquia
           </label>
           <select
             name="parroquia"
@@ -801,7 +880,7 @@ const SeccionB = forwardRef((props, ref) => {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           >
-            <option value="Selecciona una opcion">Selecciona una opcion</option>
+            <option value="">Selecciona una opcion</option>
             {parroquia?.map((parroquia) => (
               <option key={parroquia.value} value={parroquia.value}>
                 {parroquia.label}
@@ -814,9 +893,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.barrio === "" ? 'text-red-500' : 'text-gray-500'}`}>
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-            Barrio
+            (*)Barrio
           </label>
           <select
             name="barrio"
@@ -824,7 +903,7 @@ const SeccionB = forwardRef((props, ref) => {
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
           >
-            <option value="Selecciona una opcion">Selecciona una opcion</option>
+            <option value="">Selecciona una opcion</option>
             {barrio?.map((barrio) => (
               <option key={barrio?.value} value={barrio?.value}>
                 {barrio?.label}
@@ -837,9 +916,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.callePrincipal.length < 5 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaRoad className="mr-2 text-primaryBlue" />
-            Calle Principal
+            (*)Calle Principal
           </label>
           <input
             type="text"
@@ -856,9 +935,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroCasa.length < 3 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaHouseUser className="mr-2 text-primaryBlue" />
-            Numero casa
+            (*)Numero casa
           </label>
           <input
             type="text"
@@ -873,9 +952,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.calleSecundaria.length < 5 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaRoad className="mr-2 text-primaryBlue" />
-            Calle Secundaria
+            (*)Calle Secundaria
           </label>
           <input
             type="text"
@@ -892,9 +971,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.telefono.length < 9 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaPhoneAlt className="mr-2 text-primaryBlue" />
-            Telefono
+            (*)Telefono
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input
@@ -902,6 +981,7 @@ const SeccionB = forwardRef((props, ref) => {
               name="telefono"
               value={formData.telefono}
               onChange={handleInputChange}
+			  onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
             />
           </div>
@@ -911,7 +991,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center`}>
             <FaPhone className="mr-2 text-primaryBlue" />
             Ext
           </label>
@@ -928,9 +1008,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.celular.length < 10 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaMobileAlt className="mr-2 text-primaryBlue" />
-            Celular
+            (*)Celular
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input
@@ -938,6 +1018,7 @@ const SeccionB = forwardRef((props, ref) => {
               name="celular"
               value={formData.celular}
               onChange={handleInputChange}
+			  onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
               //readOnly={data.CelularTrabajo !== "" && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
             />
@@ -948,9 +1029,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.referenciaUbicacion.length < 5 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaMapPin className="mr-2 text-primaryBlue" />
-            Referencia Ubicacion
+            (*)Referencia Ubicacion
           </label>
           <input
             type="text"

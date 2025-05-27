@@ -7,6 +7,12 @@ import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
+// import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
+// import WbSunnyIcon from '@mui/icons-material/WbSunny';
+// import CapturarCamara from "../../CapturarCamara/CapturarCamara";
+// import { Dialog, DialogTitle, DialogContent, Button } from "@mui/material";
+// import { BurstMode } from "@mui/icons-material";
+// import Point from "../SolicitudCreditoForm/img/SmartSelect_20250526_163023_WhatsApp_1748295060875.jpg"
 
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
@@ -17,6 +23,12 @@ export default function CreditoForm() {
   const [dataRecibir, setDataRecibir] = useState(null);
   const [loading, setLoading] = useState(false);  // Estado para mostrar el loading
   const [cedula, setCedula] = useState("");  // Estado para la cédula
+//   const [showIdentityModal, setShowIdentityModal] = useState(false); 
+//   const [openCameraModal, setOpenCameraModal] = useState(false);
+//   const [openModal, setOpenModal] = useState(false);
+//   const [imagenCapturada, setImagenCapturada] = useState(null);
+//   const [previewUrl, setPreviewUrl] = useState(null);
+//   const [fileToUpload, setFileToUpload] = useState(null);
 
   const IdVendedor = userUsuario?.idPersonal;
   const [actividadLaboral, setActividadLaboral] = useState([]);
@@ -25,12 +37,8 @@ export default function CreditoForm() {
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const [dataBodega, setDataBodega] = useState([]);
   const [ActEconomina, setActEconomina] = useState([]);
-  ///
-
-
- 
-
-
+  const [bodegaSeleccionada, setBodegaSeleccionada] = useState(null);
+  const [tipoConsultaSeleccionado, setTipoConsultaSeleccionado] = useState(null);
 
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
@@ -135,47 +143,90 @@ export default function CreditoForm() {
     fetchBodega();
   }, []);
 
-  useEffect(() => {
-    if (dataRecibir) {
-      console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
+  const handleUpdateFromCedula = (formik) => {
+  if (dataRecibir) {
+    formik.setFieldValue("PrimerNombre", dataRecibir.primerNombre || "");
+    formik.setFieldValue("SegundoNombre", dataRecibir.segundoNombre || "");
+    formik.setFieldValue("ApellidoPaterno", dataRecibir.apellidoPaterno || "");
+    formik.setFieldValue("ApellidoMaterno", dataRecibir.apellidoMaterno || "");
+    formik.setFieldValue("FechaNacimeinto", dataRecibir.fechaNacimiento || "");
+    formik.setFieldValue("Edad", dataRecibir.edad || "");
+    formik.setFieldValue("Cedula", dataRecibir.identificacion || "");
+
+	if (bodegaSeleccionada !== null) {
+    formik.setFieldValue("Bodega", bodegaSeleccionada);
+  }
+  if (tipoConsultaSeleccionado !== null) {
+    formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
+  } 
+  }
+};
+
+
+//   useEffect(() => {
+//     if (dataRecibir) {
+//       console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
+		
+//       setInitialValues((prevValues) => ({
+//         // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
+// 		...prevValues,
+//         PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
+//         SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
+//         ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
+//         ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
+//         FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
+//         Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
+//         Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
+//         // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
+//         NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
+//         Bodega: Number(prevValues.Bodega) || '',  // Mantener el valor previo
   
-      setInitialValues((prevValues) => ({
-        // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
-        PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
-        SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
-        ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
-        ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
-        FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
-        Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
-        Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
-        // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
-        NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
-        Bodega: prevValues.Bodega || '',  // Mantener el valor previo
-  
-        // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
-        idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
-        idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
-        // CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
-        Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
-        Email: prevValues.Email || '',  // Siempre tomar el valor previo
-        idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
-        idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
-        idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
-        bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
-        bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
-        Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
-        bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
-        bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
-        idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
-        idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
-        otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
-      }));
-    }
-  }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
+//         // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
+//         idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
+//         idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
+//         // CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
+//         Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
+//         Email: prevValues.Email || '',  // Siempre tomar el valor previo
+//         idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
+//         idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
+//         idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
+//         bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
+//         bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
+//         Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
+//         bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
+//         bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
+//         idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
+//         idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
+//         otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
+//       }));
+//     }
+//   }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
   
   const handleSituacionLaboralChange = (selectedOption) => {
-    fetchActEconomina(selectedOption);  // Realizamos la llamada para obtener la actividad económica
-  };
+  fetchActEconomina(selectedOption);  // Llamada API
+
+  const situacion = Number(selectedOption);
+  let bAfiliado = false;
+  let bTieneRuc = false;
+
+  if (situacion === 1) {
+    bAfiliado = true;
+    bTieneRuc = false;
+  } else if (situacion === 2) {
+    bAfiliado = false;
+    bTieneRuc = false;
+  } else if (situacion === 5) {
+    bAfiliado = false;
+    bTieneRuc = true;
+  }
+
+  setInitialValues((prevValues) => ({
+    ...prevValues,
+    idSituacionLaboral: situacion,
+    bAfiliado,
+    bTieneRuc,
+  }));
+};
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -242,7 +293,10 @@ export default function CreditoForm() {
     Edad:"",
   });
 
-
+  // Ordenar las opciones de tipoConsulta alfabéticamente por label
+const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
+	a.label.localeCompare(b.label, 'es', { sensitivity: 'base' })
+);
 
   const formConfig = [
     {
@@ -260,57 +314,22 @@ export default function CreditoForm() {
       disabled: true,
       hidden: true,
     },
-    {
-      label: "Cédula", name: "Cedula", type: "text",
-      onBlur: handleCedulaChange, // Llama a la función al perder el foco
-    },
-
+	{label: "Bodega",name: "Bodega",type: "select",options: dataBodega, onchange: (value) => setBodegaSeleccionada(value),},
+    {label: "Tipo de Consulta",name: "idCompraEncuesta",type: "select",options: tipoConsultaOrdenada , onchange: (value) => setTipoConsultaSeleccionado(value),},
+    {label: "Cédula", name: "Cedula", type: "text",onBlur: handleCedulaChange, },
     { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
     { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
     { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
     { label: "Segundo Nombre", name: "SegundoNombre", type: "text" },
     // { label: "Código Dactilar", name: "CodDactilar", type: "text" },
-    {
-      label: "Bodega",
-      name: "Bodega",
-      type: "select",
-      options: dataBodega,
-    },
-    {
-      label: "Tipo de Consulta",
-      name: "idCompraEncuesta",
-      type: "select",
-      options: tipoConsulta,
-    },
     { label: "Fecha Nacimiento", name: "FechaNacimeinto", type: "text", disabled: true },
     { label: "Edad", name: "Edad", type: "text", disabled: true },
+	{label: "Situación Laboral",name: "idSituacionLaboral",type: "select",options: actividadLaboral,onchange: handleSituacionLaboralChange,},
     { label: "Celular", name: "Celular", type: "text" },
     { label: "Email", name: "Email", type: "email" },
-    {
-      label: "Situacion Laboral",
-      name: "idSituacionLaboral",
-      type: "select",
-      options: actividadLaboral,
-      onchange: handleSituacionLaboralChange,
-    },
-    {
-      label: "Actividad Economica",
-      name: "idActEconomina",
-      type: "select",
-      options: ActEconomina,
-    },
-    {
-      label: "Estabilidad Laboral",
-      name: "idCre_Tiempo",
-      type: "select",
-      options: estabilidadLaboral,
-    },
-    {
-      label: "Tiempo de Vivienda",
-      name: "idCre_TiempoVivienda",
-      type: "select",
-      options: tiempoVivienda,
-    },
+    {label: "Actividad Economica",name: "idActEconomina",type: "select",options: ActEconomina,},
+    {label: "Estabilidad Laboral",name: "idCre_Tiempo",type: "select",options: estabilidadLaboral,},
+    {label: "Tiempo de Vivienda",name: "idCre_TiempoVivienda",type: "select",options: tiempoVivienda,},
     {
       label: "Producto",
       name: "idProductos",
@@ -324,8 +343,8 @@ export default function CreditoForm() {
         { value: 6, label: "TELEVISOR" },
       ],
     },
-    { label: "Afiliado", name: "bAfiliado", type: "switch" },
-    { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
+    // { label: "Afiliado", name: "bAfiliado", type: "switch" },
+    // { label: "Tiene RUC?", name: "bTieneRuc", type: "switch" },
     // { label: "Subir foto", name: "Foto", type: "file" },
   ];
 
@@ -432,6 +451,7 @@ export default function CreditoForm() {
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
+	  //Foto: Yup.string(),
 
       bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
 
@@ -443,13 +463,6 @@ export default function CreditoForm() {
         .integer()
         .required("Por favor selecciona un producto"),
     })
-    .test(
-      "at-least-one-switch",
-      "Debe seleccionar al menos una opción (Afiliado o Tiene RUC)",
-      function (values) {
-        return values.bAfiliado || values.bTieneRuc;
-      },
-    );
 
   const handleCancel = () => {
     console.log("Formulario cancelado");
@@ -484,10 +497,6 @@ export default function CreditoForm() {
     }
   };
   
-
-
-
-
   const fetchConsultaSolicitud = async (idSolicitud) => {
     try {
       const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
@@ -525,8 +534,6 @@ export default function CreditoForm() {
       idEstadoVerificacionDocumental: 1,
       Usuario: userData?.Nombre
     };
-	console.log("Valores formateados para la API:", formattedValues);
-	console.log("values:", values);
     delete formattedValues.FechaNacimeinto;
     delete formattedValues.Edad;
 
@@ -582,6 +589,40 @@ export default function CreditoForm() {
     }
   };
 
+//   const handleUploadClick = async () => {
+// 	  if (!fileToUpload) {
+// 		alert("Primero selecciona una imagen");
+// 		return;
+// 	  }
+  
+// 	  try {
+// 		let updatedUrl = ""; 
+// 		const fileUploadResponse = await uploadFile(
+// 		  fileToUpload,
+// 		//   selectedRow.almacen,
+// 		//   selectedRow.cedula,
+// 		//   selectedRow.NumeroSolicitud,
+// 		  "Foto"
+// 		);
+  
+// 		if (fileUploadResponse) {
+// 		  updatedUrl = fileUploadResponse.url;
+  
+// 		  // Actualizar en backend
+// 		  const updatedData = { Foto: updatedUrl };
+// 		  await fetchActualizaSolicitud(1, updatedData);
+  
+// 		  setUrlCloudstorage();
+// 		  setFileToUpload(null);
+  
+// 		  enqueueSnackbar("Foto subida correctamente", {
+// 			variant: "success",
+// 		  });
+// 		}
+// 	  } catch (error) {
+// 		alert(error.message);
+// 	  }
+// 	};
 
   return (
     <div>
@@ -595,6 +636,89 @@ export default function CreditoForm() {
           </div>
         </div>
       )}
+	  {/* <Dialog
+	     open={openCameraModal}
+	     onClose={() => setOpenCameraModal(false)}
+	     maxWidth="sm"
+	     fullWidth
+	   >
+	     <DialogTitle>Captura de foto 😊</DialogTitle>
+	     <DialogContent>
+	   	<CapturarCamara
+	   	  onCapture={(imgBase64) => {
+	   		setImagenCapturada(imgBase64);
+	   		setPreviewUrl(imgBase64);
+	   		setOpenCameraModal(false);
+	   		// Convertir base64 a objeto File para permitir subir
+	   		const blob = fetch(imgBase64)
+	   		  .then((res) => res.blob())
+	   		  .then((blobData) => {
+	   			const file = new File([blobData], "captura.jpg", {
+	   			  type: "image/jpeg",
+	   			});
+	   			setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
+	   		  });
+	   	  }}
+	   	/>
+	     </DialogContent>
+	   </Dialog>
+
+	   <Dialog open={openModal}>
+		<div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-800">
+          Validaremos la identidad de la cédula
+        </h3>
+      </div>
+	  <button onClick={() => setOpenModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+		x
+	  </button>
+      
+      <div className="flex items-center justify-center mb-6">
+        <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+          <img 
+            src={Point} 
+            alt="Avatar del usuario" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4 mb-6">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0 mt-1">
+            <SentimentSatisfiedAltIcon className="text-blue-500" />
+          </div>
+          <p className="text-gray-700 text-sm">
+            Mantén los ojos abiertos y evita usar lentes o gafas.
+          </p>
+        </div>
+        
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0 mt-1">
+            <WbSunnyIcon className="text-yellow-500" />
+          </div>
+          <p className="text-gray-700 text-sm">
+            Busca un lugar iluminado y evita ponerte de espaldas a la luz.
+          </p>
+        </div>
+      </div>
+
+      <div className="mb-4">
+        <button className="text-blue-600 text-sm underline hover:text-blue-800">
+          Términos de uso ▼
+        </button>
+      </div>
+	  <Button onClick={() => setOpenCameraModal(true)}>
+			Tomar Foto
+		</Button>
+    </div>
+	   </Dialog> */}
+
+		{/* <button open={openModal} onClick={() => setOpenModal(true)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center">
+		foto
+	   </button>  */}
+	  
       <ReusableForm
         formConfig={formConfig}
         initialValues={initialValues}
@@ -606,6 +730,7 @@ export default function CreditoForm() {
         includeTermsAndConditions={true}
         formStatus={formStatus}
         enableReinitialize={true}
+		onExternalUpdate={handleUpdateFromCedula}
       />
     </div>
   );
