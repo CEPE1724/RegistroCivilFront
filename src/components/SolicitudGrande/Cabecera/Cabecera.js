@@ -765,7 +765,7 @@ export function Cabecera() {
 
     switch (activeTab) {
       case "Datos Cliente":
-        return <Datos ref={datosRef} data={clienteData} />;
+        return <Datos ref={datosRef} data={clienteData} cresolicitud ={data} />;
       case "Domicilio":
         return <Domicilio ref={datosDomicilioRef} data={clienteData} comprobTelf={comprobTelf} />;
       case "Datos Conyuge":

@@ -7,7 +7,7 @@ import {
     fetchProvincias, fetchCantones, fetchParroquias, fetchBarrios, fetchActividadEconomina
 } from "../apisFetch";
 import uploadFile from "../../../../hooks/uploadFile";
-import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox, FaFacebook} from "react-icons/fa";
+import { FaCalendarAlt, FaStore, FaUserAlt, FaUser, FaMapMarkerAlt, FaCog, FaPhoneAlt, FaTransgender, FaChild, FaUserGraduate, FaUserSecret, FaToolbox, FaFacebook } from "react-icons/fa";
 import { Button, Dialog, DialogTitle, DialogContent, } from "@mui/material";
 import CapturarCamara from "../../../CapturarCamara/CapturarCamara";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -17,7 +17,7 @@ import { Facebook } from "@mui/icons-material";
 
 const Datos = forwardRef((props, ref) => {
     const { enqueueSnackbar } = useSnackbar();
-    const { data } = props;
+    const { data, cresolicitud } = props;
     const [formErrors, setFormErrors] = useState({});
     const [nacionalidad, setNacionalidad] = useState([]);
     const [genero, setGenero] = useState([]);
@@ -29,12 +29,12 @@ const Datos = forwardRef((props, ref) => {
     const [situacionLaboral, setSituacionLaboral] = useState([]);
     const [actividadEconomica, setActividadEconomica] = useState([]);
 
-	const [openCameraModal, setOpenCameraModal] = useState(false);
-	const [openModal, setOpenModal] = useState(false);
-	const [imagenCapturada, setImagenCapturada] = useState(null);
-	const [previewUrl, setPreviewUrl] = useState(null);
-	const [fileToUpload, setFileToUpload] = useState(null);
-	const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+    const [openCameraModal, setOpenCameraModal] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
+    const [imagenCapturada, setImagenCapturada] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(cresolicitud?.Foto || null);
+    const [fileToUpload, setFileToUpload] = useState(null);
+    const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
     const [formData, setFormData] = useState({
         nacionalidad: data?.idNacionalidad || '',
@@ -50,8 +50,10 @@ const Datos = forwardRef((props, ref) => {
         actividadEconomica: data.idActEconomica || '',
         observacionActividadEconomica: data?.ObservacionesActividadEconomica || '',
         Facebook: data?.Facebook || '',
-        codigoDactilar: data?.CodigoDactilar || ''
+        codigoDactilar: cresolicitud?.CodigoDactilar || '',
+       
     });
+
 
     useEffect(() => {
         // Cargar los datos de las opciones del formulario
@@ -100,15 +102,15 @@ const Datos = forwardRef((props, ref) => {
             return;
         }
 
-	   if (name === 'codigoDactilar') {
-		const upperValue = value.toUpperCase();
-		setFormData((prevState) => ({
-		    ...prevState,
-		    [name]: upperValue,
-		}));
-		return; 
-	 }
-	 
+        if (name === 'codigoDactilar') {
+            const upperValue = value.toUpperCase();
+            setFormData((prevState) => ({
+                ...prevState,
+                [name]: upperValue,
+            }));
+            return;
+        }
+
 
         // Actualizar el estado con el valor limpio
         setFormData((prevState) => ({
@@ -146,11 +148,12 @@ const Datos = forwardRef((props, ref) => {
             situacionLaboral: 'Selecciona tu situación laboral actual',
             actividadEconomica: 'Selecciona tu actividad económica', // Asegúrate de incluir este campo
             observacionActividadEconomica: 'Describe brevemente tu actividad económica',
+            codigoDactilar: 'Ingresa tu código dactilar (formato A0000A0000)',
         };
         if (formData.nacionalidad == 54) {
             requiredFieldMessages.provinciaNacimiento = 'Selecciona la provincia donde naciste';
             requiredFieldMessages.cantonNacimiento = 'Selecciona el cantón donde naciste';
-            requiredFieldMessages.codigoDactilar = 'Ingresa tu código dactilar';
+
         }
 
         const errors = {};
@@ -202,9 +205,9 @@ const Datos = forwardRef((props, ref) => {
             errors.fechaNacimiento = 'Formato de fecha inválido';
         }
 
-	   if (formData.codigoDactilar && !/^[A-Z]{1}[0-9]{4}[A-Z]{1}[0-9]{4}$/.test(formData.codigoDactilar)){
-		errors.codigoDactilar = 'Formato de codigo dactilar invalido';
-	   }
+        if (formData.codigoDactilar && !/^[A-Z]{1}[0-9]{4}[A-Z]{1}[0-9]{4}$/.test(formData.codigoDactilar)) {
+            errors.codigoDactilar = 'Formato de codigo dactilar invalido';
+        }
 
         if (formData.actividadEconomica === '' || formData.actividadEconomica === null || formData.actividadEconomica === undefined || formData.actividadEconomica === 0) {
             errors.actividadEconomica = 'Selecciona tu actividad económica';
@@ -230,355 +233,356 @@ const Datos = forwardRef((props, ref) => {
         getFormData: () => formData
     }));
 
-	const fetchActualizaSolicitud = async (idSolicitud, data) => {
-    try {
-      const url = APIURL.putUpdatesolicitud(idSolicitud); // URL para actualizar la solicitud
-      const response = await axios.put(url, data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    const fetchActualizaSolicitud = async (idSolicitud, data) => {
+        try {
+            const url = APIURL.putUpdatesolicitud(idSolicitud); // URL para actualizar la solicitud
+            const response = await axios.put(url, data, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-      return response.data; // Retornar datos actualizados si es necesario
-    } catch (error) {
-      console.error("Error al actualizar la solicitud:", error.message);
-      throw error; // Re-lanzar error para manejarlo más tarde
-    }
-  };
+            return response.data; // Retornar datos actualizados si es necesario
+        } catch (error) {
+            console.error("Error al actualizar la solicitud:", error.message);
+            throw error; // Re-lanzar error para manejarlo más tarde
+        }
+    };
 
-	 const handleUploadClick = async () => {
-	  if (!fileToUpload) {
-		alert("Primero selecciona una imagen");
-		return;
-	  }
-	  try {
-		let updatedUrl = ""; 
-		const fileUploadResponse = await uploadFile(
-		  fileToUpload,
-		  data.Bodega,
-		  data.Cedula,
-		  data.NumeroSolicitud,
-		  "Foto"
-		);
-		if (fileUploadResponse) {
-		  updatedUrl = fileUploadResponse.url;
-		  // Actualizar en backend
-		  const updatedData = { Foto: updatedUrl };
-		  await fetchActualizaSolicitud(data.idCre_SolicitudWeb, updatedData);
-		  setUrlCloudstorage();
-		  setFileToUpload(null);
-		  enqueueSnackbar("Foto subida correctamente", {
-			variant: "success",
-		  });
-		}
-	  } catch (error) {
-		alert(error.message);
-	  }
-	};
+    const handleUploadClick = async () => {
+        if (!fileToUpload) {
+            alert("Primero selecciona una imagen");
+            return;
+        }
+        try {
+            let updatedUrl = "";
+            const fileUploadResponse = await uploadFile(
+                fileToUpload,
+                data.Bodega,
+                data.Cedula,
+                data.NumeroSolicitud,
+                "Foto"
+            );
+            if (fileUploadResponse) {
+                updatedUrl = fileUploadResponse.url;
+                // Actualizar en backend
+                const updatedData = { Foto: updatedUrl };
+                await fetchActualizaSolicitud(data.idCre_SolicitudWeb, updatedData);
+                setUrlCloudstorage();
+                setFileToUpload(null);
+                enqueueSnackbar("Foto subida correctamente", {
+                    variant: "success",
+                });
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    };
 
     return (
         <div className="py-2 w-full">
             <div className="mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-					{/* Primera columna */}
-      				<div className="md:col-span-1">
-      				  <div className="h-full border rounded p-4 bg-gray-50">
-      				    
-						<div className="w-64 flex flex-col items-center space-y-4">
-							{/* Contenedor de la imagen */}
-							<div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
-						{!previewUrl ? 				  
-						(<div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
-						  <svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-24 w-24 text-gray-400"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={2}
-						  >
-							<path
-							  strokeLinecap="round"
-							  strokeLinejoin="round"
-							  d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-							/>
-						  </svg>
-						</div>) : (
-                    <img
-                      src={previewUrl}
-                      alt="Foto del cliente"
-                      className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
-                    />
-                  )
-						}
-					</div>		
-					{/* Botones debajo de la imagen */}
-					<div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">		
-					  {/* Botón subir imagen */}		
+                    {/* Primera columna */}
+                    <div className="md:col-span-1">
+                        <div className="h-full border rounded p-4 bg-gray-50">
 
-						<div className="flex flex-col md:flex-row gap-2 mt-4">
-						  <Button onClick={() => setOpenCameraModal(true)} >
-							Tomar Foto
-						  </Button>		
-						  <button
-							onClick={handleUploadClick}
-							disabled={!fileToUpload}
-							className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300
+                            <div className="w-64 flex flex-col items-center space-y-4">
+                                {/* Contenedor de la imagen */}
+                                <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
+                                    {!previewUrl ?
+                                        (<div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                className="h-24 w-24 text-gray-400"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                strokeWidth={2}
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                />
+                                            </svg>
+                                        </div>) : (
+                                            <img
+                                                src={previewUrl}
+                                                alt="Foto del cliente"
+                                                className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                                            />
+                                        )
+                                    }
+                                </div>
+                                {/* Botones debajo de la imagen */}
+                                <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
+                                    {/* Botón subir imagen */}
+
+                                    <div className="flex flex-col md:flex-row gap-2 mt-4">
+                                        <Button onClick={() => setOpenCameraModal(true)} >
+                                            Tomar Foto
+                                        </Button>
+                                        <button
+                                            onClick={handleUploadClick}
+                                            disabled={!fileToUpload}
+                                            className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300
 							  }`}
-						  >
-							Subir imagen
-						  </button>
-						</div>
-							
-					</div>
-				  </div>
-					<Dialog
-	   				  open={openCameraModal}
-	   				  onClose={() => setOpenCameraModal(false)}
-	   				  maxWidth="sm"
-	   				  fullWidth
-	   				>
-	   				  <DialogTitle>Captura de foto 😀</DialogTitle>
-	   				  <DialogContent>
-	   					<CapturarCamara
-	   					  onCapture={(imgBase64) => {
-	   						setImagenCapturada(imgBase64);
-	   						setPreviewUrl(imgBase64);
-	   						setOpenCameraModal(false);
-	   						// Convertir base64 a objeto File para permitir subir
-	   						const blob = fetch(imgBase64)
-	   						  .then((res) => res.blob())
-	   						  .then((blobData) => {
-	   							const file = new File([blobData], "captura.jpg", {
-	   							  type: "image/jpeg",
-	   							});
-	   							setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
-	   						  });
-	   					  }}
-	   					/>
-	   				  </DialogContent>
-	   				</Dialog>
-      				  </div>
-      				</div>
-					{/* segunda columnda */}
-	  				<div className="md:col-span-3">
-      				  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {/* Nacionalidad */}
-                    <SelectField
-                        label="Nacionalidad (*)"
-                        icon={<FaStore />}
-                        value={formData.nacionalidad}
-                        onChange={handleFormChange}
-                        options={nacionalidad}
-                        name="nacionalidad"
-                        error={formErrors.nacionalidad}
-                        readOnly={data.idNacionalidad !== undefined && data.idNacionalidad !== null && data.idNacionalidad !== "" && data.idNacionalidad > 0}
-                    />
+                                        >
+                                            Subir imagen
+                                        </button>
+                                    </div>
 
-                    {/* Fecha Nacimiento */}
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaCalendarAlt className="mr-2 text-primaryBlue" />
-                            Fecha Nacimiento (*)
-                        </label>
-                        <input
-                            type="date"
-                            value={formData.fechaNacimiento}
-                            className="solcitudgrande-style"
-                            name="fechaNacimiento"
-                            onChange={handleFormChange}
-                            readOnly={data.FechaNacimiento !== undefined && data.FechaNacimiento !== null && data.FechaNacimiento !== "" && data.FechaNacimiento.length > 0}
-                        />
-                        {formErrors.fechaNacimiento && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.fechaNacimiento}
-                            </p>
-                        )}
+                                </div>
+                            </div>
+                            <Dialog
+                                open={openCameraModal}
+                                onClose={() => setOpenCameraModal(false)}
+                                maxWidth="sm"
+                                fullWidth
+                            >
+                                <DialogTitle>Captura de foto 😀</DialogTitle>
+                                <DialogContent>
+                                    <CapturarCamara
+                                        onCapture={(imgBase64) => {
+                                            setImagenCapturada(imgBase64);
+                                            setPreviewUrl(imgBase64);
+                                            setOpenCameraModal(false);
+                                            // Convertir base64 a objeto File para permitir subir
+                                            const blob = fetch(imgBase64)
+                                                .then((res) => res.blob())
+                                                .then((blobData) => {
+                                                    const file = new File([blobData], "captura.jpg", {
+                                                        type: "image/jpeg",
+                                                    });
+                                                    setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
+                                                });
+                                        }}
+                                    />
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     </div>
+                    {/* segunda columnda */}
+                    <div className="md:col-span-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {/* Nacionalidad */}
+                            <SelectField
+                                label="Nacionalidad (*)"
+                                icon={<FaStore />}
+                                value={formData.nacionalidad}
+                                onChange={handleFormChange}
+                                options={nacionalidad}
+                                name="nacionalidad"
+                                error={formErrors.nacionalidad}
+                                readOnly={data.idNacionalidad !== undefined && data.idNacionalidad !== null && data.idNacionalidad !== "" && data.idNacionalidad > 0}
+                            />
 
-                    {/* Género */}
-                    <div className="col-span-1">
-                        <SelectField
-                            label="Género (*)"
-                            icon={<FaTransgender />}
-                            value={formData.genero}
-                            onChange={handleFormChange}
-                            options={genero}
-                            name="genero"
-                            error={formErrors.genero}
-                            readOnly={data.idGenero !== undefined && data.idGenero !== null && data.idGenero !== "" && data.idGenero > 0}
-                        />
-                    </div>
+                            {/* Fecha Nacimiento */}
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaCalendarAlt className="mr-2 text-primaryBlue" />
+                                    Fecha Nacimiento (*)
+                                </label>
+                                <input
+                                    type="date"
+                                    value={formData.fechaNacimiento}
+                                    className="solcitudgrande-style"
+                                    name="fechaNacimiento"
+                                    onChange={handleFormChange}
+                                    readOnly={data.FechaNacimiento !== undefined && data.FechaNacimiento !== null && data.FechaNacimiento !== "" && data.FechaNacimiento.length > 0}
+                                />
+                                {formErrors.fechaNacimiento && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.fechaNacimiento}
+                                    </p>
+                                )}
+                            </div>
 
-                    {/* Estado Civil */}
-                    <div className="col-span-1">
-                        <SelectField
-                            label="Estado Civil (*)"
-                            icon={<FaCog />}
-                            value={formData.estadoCivil}
-                            onChange={handleFormChange}
-                            options={estadoCivil}
-                            name="estadoCivil"
-                            error={formErrors.estadoCivil}
-                            readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
-                        />
-                    </div>
+                            {/* Género */}
+                            <div className="col-span-1">
+                                <SelectField
+                                    label="Género (*)"
+                                    icon={<FaTransgender />}
+                                    value={formData.genero}
+                                    onChange={handleFormChange}
+                                    options={genero}
+                                    name="genero"
+                                    error={formErrors.genero}
+                                    readOnly={data.idGenero !== undefined && data.idGenero !== null && data.idGenero !== "" && data.idGenero > 0}
+                                />
+                            </div>
 
-                    {/* Dependientes */}
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaChild className="mr-2 text-primaryBlue" />
-                            Dependientes (*)
-                        </label>
-                        <input
-                            type="number"
-                            className="solcitudgrande-style"
-                            name="dependientes"
-                            onChange={handleFormChange}
-                            value={formData.dependientes || 0}
-                            min="0"
-                            max="12"
-                        />
-                        {formErrors.dependientes && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.dependientes}
-                            </p>
-                        )}
-                    </div>
+                            {/* Estado Civil */}
+                            <div className="col-span-1">
+                                <SelectField
+                                    label="Estado Civil (*)"
+                                    icon={<FaCog />}
+                                    value={formData.estadoCivil}
+                                    onChange={handleFormChange}
+                                    options={estadoCivil}
+                                    name="estadoCivil"
+                                    error={formErrors.estadoCivil}
+                                    readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
+                                />
+                            </div>
 
-                    {/* Nivel de Educación */}
-                    <div className="col-span-1">
-                        <SelectField
-                            label="Nivel Educación (*)"
-                            icon={<FaUserGraduate />}
-                            value={formData.nivelEducacion}
-                            onChange={handleFormChange}
-                            options={nivelEducacion}
-                            name="nivelEducacion"
-                            error={formErrors.nivelEducacion}
-                        />
-                    </div>
-                    <div className="col-span-1">
-                        <SelectField
-                            label="Profesión (*)"
-                            icon={<FaUserSecret />}
-                            value={formData.profesion}
-                            onChange={handleFormChange}
-                            options={profesion}
-                            name="profesion"
-                            error={formErrors.profesion}
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <SelectField
-                            label="Situación Laboral (*)"
-                            icon={<FaToolbox />}
-                            value={formData.situacionLaboral}
-                            onChange={handleFormChange}
-                            options={situacionLaboral}
-                            name="situacionLaboral"
-                            error={formErrors.situacionLaboral}
-                            readOnly={data.idSituacionLaboral !== undefined && data.idSituacionLaboral !== null && data.idSituacionLaboral !== "" && data.idSituacionLaboral > 0}
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <SelectField
-                            label="Actividad Económica (*)"
-                            icon={<FaMapMarkerAlt />}
-                            value={formData.actividadEconomica}
-                            onChange={handleFormChange}
-                            options={actividadEconomica}
-                            name="actividadEconomica"
-                            error={formErrors.actividadEconomica}
-                            readOnly={data.idActEconomica !== undefined && data.idActEconomica !== null && data.idActEconomica !== "" && data.idActEconomica > 0}
-                        />
-                    </div>
-                    {data.idNacionalidad == 54 && (
-                        <>
+                            {/* Dependientes */}
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaChild className="mr-2 text-primaryBlue" />
+                                    Dependientes (*)
+                                </label>
+                                <input
+                                    type="number"
+                                    className="solcitudgrande-style"
+                                    name="dependientes"
+                                    onChange={handleFormChange}
+                                    value={formData.dependientes || 0}
+                                    min="0"
+                                    max="12"
+                                />
+                                {formErrors.dependientes && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.dependientes}
+                                    </p>
+                                )}
+                            </div>
 
-                    <div className="mb-6">
-                        <SelectField
-                            label="Provincia Nacimiento (*)"
-                            icon={<FaMapMarkerAlt />}
-                            value={formData.provinciaNacimiento}
-                            onChange={handleFormChange}
-                            options={provinciaNacimiento}
-                            name="provinciaNacimiento"
-                            error={formErrors.provinciaNacimiento}
-                            readOnly={data.idProvinciaNacimiento !== undefined && data.idProvinciaNacimiento !== null && data.idProvinciaNacimiento !== "" && data.idProvinciaNacimiento > 0}
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <SelectField
-                            label="Cantón Nacimiento (*)"
-                            icon={<FaMapMarkerAlt />}
-                            value={formData.cantonNacimiento}
-                            onChange={handleFormChange}
-                            options={cantonNacimiento}
-                            name="cantonNacimiento"
-                            error={formErrors.cantonNacimiento}
-                            readOnly={data.idCantonNacimiento !== undefined && data.idCantonNacimiento !== null && data.idCantonNacimiento !== "" && data.idCantonNacimiento > 0}
-                        />
-                    </div>
-                    <div className="mb-6">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FingerprintIcon sx={{ fontSize: 15 }} className="mr-2 text-primaryBlue" />
-                            Código Dactilar (*)
-                        </label>
-                        <input
-                            type="text"
-                            className="solcitudgrande-style"
-                            name="codigoDactilar"
-                            value={formData.codigoDactilar}
-                            onChange={handleFormChange}
-					   		autoComplete="off"
-                        />
-                        {formErrors.codigoDactilar && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.codigoDactilar}
-                            </p>
-                        )}
-                    </div>                
-                    </>
+                            {/* Nivel de Educación */}
+                            <div className="col-span-1">
+                                <SelectField
+                                    label="Nivel Educación (*)"
+                                    icon={<FaUserGraduate />}
+                                    value={formData.nivelEducacion}
+                                    onChange={handleFormChange}
+                                    options={nivelEducacion}
+                                    name="nivelEducacion"
+                                    error={formErrors.nivelEducacion}
+                                />
+                            </div>
+                            <div className="col-span-1">
+                                <SelectField
+                                    label="Profesión (*)"
+                                    icon={<FaUserSecret />}
+                                    value={formData.profesion}
+                                    onChange={handleFormChange}
+                                    options={profesion}
+                                    name="profesion"
+                                    error={formErrors.profesion}
+                                />
+                            </div>
+                            <div className="mb-6">
+                                <SelectField
+                                    label="Situación Laboral (*)"
+                                    icon={<FaToolbox />}
+                                    value={formData.situacionLaboral}
+                                    onChange={handleFormChange}
+                                    options={situacionLaboral}
+                                    name="situacionLaboral"
+                                    error={formErrors.situacionLaboral}
+                                    readOnly={data.idSituacionLaboral !== undefined && data.idSituacionLaboral !== null && data.idSituacionLaboral !== "" && data.idSituacionLaboral > 0}
+                                />
+                            </div>
+                            <div className="mb-6">
+                                <SelectField
+                                    label="Actividad Económica (*)"
+                                    icon={<FaMapMarkerAlt />}
+                                    value={formData.actividadEconomica}
+                                    onChange={handleFormChange}
+                                    options={actividadEconomica}
+                                    name="actividadEconomica"
+                                    error={formErrors.actividadEconomica}
+                                    readOnly={data.idActEconomica !== undefined && data.idActEconomica !== null && data.idActEconomica !== "" && data.idActEconomica > 0}
+                                />
+                            </div>
+                            {data.idNacionalidad == 54 && (
+                                <>
 
-                    )}
-                    <div className="mb-6">
+                                    <div className="mb-6">
+                                        <SelectField
+                                            label="Provincia Nacimiento (*)"
+                                            icon={<FaMapMarkerAlt />}
+                                            value={formData.provinciaNacimiento}
+                                            onChange={handleFormChange}
+                                            options={provinciaNacimiento}
+                                            name="provinciaNacimiento"
+                                            error={formErrors.provinciaNacimiento}
+                                            readOnly={data.idProvinciaNacimiento !== undefined && data.idProvinciaNacimiento !== null && data.idProvinciaNacimiento !== "" && data.idProvinciaNacimiento > 0}
+                                        />
+                                    </div>
+                                    <div className="mb-6">
+                                        <SelectField
+                                            label="Cantón Nacimiento (*)"
+                                            icon={<FaMapMarkerAlt />}
+                                            value={formData.cantonNacimiento}
+                                            onChange={handleFormChange}
+                                            options={cantonNacimiento}
+                                            name="cantonNacimiento"
+                                            error={formErrors.cantonNacimiento}
+                                            readOnly={data.idCantonNacimiento !== undefined && data.idCantonNacimiento !== null && data.idCantonNacimiento !== "" && data.idCantonNacimiento > 0}
+                                        />
+                                    </div>
+                                    <div className="mb-6">
+                                        <label className="text-xs font-medium mb-1 flex items-center">
+                                            <FingerprintIcon sx={{ fontSize: 15 }} className="mr-2 text-primaryBlue" />
+                                            Código Dactilar (*)
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="solcitudgrande-style"
+                                            name="codigoDactilar"
+                                            value={formData.codigoDactilar}
+                                            onChange={handleFormChange}
+                                            autoComplete="off"
+                                        />
 
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaChild className="mr-2 text-primaryBlue" />
-                            Actividad Económica (*)
-                        </label>
-                        <textarea
-                            className="form-input"
-                            name="observacionActividadEconomica"
-                            onChange={handleFormChange}
-                            value={formData.observacionActividadEconomica}
-                        />
-                        {formErrors.observacionActividadEconomica && (
-                            <p className="mt-1 text-sm text-red-500">{formErrors.observacionActividadEconomica}</p>
-                        )}
+                                        {formErrors.codigoDactilar && (
+                                            <p className="mt-1 text-sm text-red-500 border-red-500">
+                                                {formErrors.codigoDactilar}
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+
+                            )}
+                            <div className="mb-6">
+
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaChild className="mr-2 text-primaryBlue" />
+                                    Actividad Económica (*)
+                                </label>
+                                <textarea
+                                    className="form-input"
+                                    name="observacionActividadEconomica"
+                                    onChange={handleFormChange}
+                                    value={formData.observacionActividadEconomica}
+                                />
+                                {formErrors.observacionActividadEconomica && (
+                                    <p className="mt-1 text-sm text-red-500">{formErrors.observacionActividadEconomica}</p>
+                                )}
+                            </div>
+
+                            <div className="col-span-1">
+                                <label className="text-xs font-medium mb-1 flex items-center">
+                                    <FaFacebook className="mr-2 text-primaryBlue" />
+                                    Facebook
+                                </label>
+                                <input
+                                    type="text"
+                                    className="solcitudgrande-style"
+                                    name="Facebook"
+                                    onChange={handleFormChange}
+                                    value={formData.Facebook || ''}
+                                />
+                                {formErrors.Facebook && (
+                                    <p className="mt-1 text-sm text-red-500 border-red-500">
+                                        {formErrors.Facebook}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                   
-                    <div className="col-span-1">
-                        <label className="text-xs font-medium mb-1 flex items-center">
-                            <FaFacebook className="mr-2 text-primaryBlue" />
-                            Facebook
-                        </label>
-                        <input
-                            type="text"
-                            className="solcitudgrande-style"
-                            name="Facebook"
-                            onChange={handleFormChange}
-                            value={formData.Facebook || ''}
-                        />
-                        {formErrors.Facebook && (
-                            <p className="mt-1 text-sm text-red-500 border-red-500">
-                                {formErrors.Facebook}
-                            </p>
-                        )}
-                    </div>
-					</div>
-					</div>
                 </div>
             </div>
         </div>
