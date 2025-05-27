@@ -37,57 +37,58 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
     const estadosPorTipo = {
       1: { // Documental
         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
-			2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
-			3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
-			4: { label: "Conyuge", icon: <FavoriteIcon />, color: yellow[500] },
-			5: { label: "Referencias", icon: <ContactsIcon />, color: red[500] },
-			6: { label: "Negocios", icon: <StorefrontIcon />, color: grey[600] },
-			7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[600] },
-			8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[600] },
-			9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[600] },
-			10: { label: "Completado", icon: <CheckCircleIcon />, color: green[500] },
+        2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
+        3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
+        4: { label: "Conyuge", icon: <FavoriteIcon />, color: yellow[500] },
+        5: { label: "Referencias", icon: <ContactsIcon />, color: red[500] },
+        6: { label: "Negocios", icon: <StorefrontIcon />, color: grey[600] },
+        7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[600] },
+        8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[600] },
+        9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[600] },
+        10: { label: "Completado", icon: <CheckCircleIcon />, color: green[500] },
         11: { label: "Corrección", icon: <EventIcon />, color: red[500] },
         12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
         13: { label: "Rechazado", icon: <InfoIcon />, color: red[500] },
-        
-        
-        
+        14: { label: "Foto", icon: <PersonIcon />, color: grey[500] },
+
+
+
         /*11: "CORRECIÓN",
         12: "APROBADO",
         13: "RECHAZADO",*/
       },
       2: { // Verificación
-      1: { label: "No asginado", icon: <SupervisorAccountIcon />, color: grey[500] },
-			2: { label: "Asignado", icon: <SearchIcon />, color: green[500] },
-			3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-			4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
-      5: { label: "Gestionado", icon: <PhoneCallback />, color: grey[500] },
+        1: { label: "No asginado", icon: <SupervisorAccountIcon />, color: grey[500] },
+        2: { label: "Asignado", icon: <SearchIcon />, color: green[500] },
+        3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
+        4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
+        5: { label: "Gestionado", icon: <PhoneCallback />, color: grey[500] },
       },
       3: { // Procesos
         1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
-			2: { label: "Revisión", icon: <VisibilityIcon />, color: grey[500] },
-			3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
-			4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
-			5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
+        2: { label: "Revisión", icon: <VisibilityIcon />, color: grey[500] },
+        3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
+        4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
+        5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
       },
       4:
       {
-       1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
+        1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
 
       },
 
-      5: 
+      5:
       {
-         1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
+        1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
 
       },
 
       6: { //// ESTADo
-        2 : { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-        4:{label: "REchazado" , icon: <CancelIcon/> , color: red[500]},
-  
+        2: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
+        4: { label: "REchazado", icon: <CancelIcon />, color: red[500] },
 
-       },
+
+      },
 
 
 
@@ -96,20 +97,20 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         0: { label: "No aplica", icon: <CancelIcon />, color: red[500] },
         1: { label: "APlica", icon: <VerifiedIcon />, color: blue[500] }
 
-      } ,
+      },
 
 
-       8: /// Resultado
+      8: /// Resultado
       {
         1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] }
 
-      } ,
+      },
 
-       9: /// Resultado
+      9: /// Resultado
       {
         1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] }
 
-      } 
+      }
 
     };
 
@@ -175,11 +176,41 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
                     {new Date(estado.FechaSistema).toLocaleString()}
                   </Typography>
 
-                   <Typography sx={{ fontSize: '0.8rem' }}>
-  {([8, 9].includes(estado.Tipo))
-    ? '' + (estado.Telefono || 'N/A')
-    : 'asignado a ' + (estado.Telefono || 'N/A')}
+                  <Typography sx={{ fontSize: '0.8rem' }}>
+  {(() => {
+    const esFoto = estado.Tipo === 1 && estado.idEstadoVerificacionDocumental === 14;
+    const esURL = estado.Telefono?.startsWith('http');
+
+    if (esFoto && esURL) {
+      return (
+        <Box>
+          <a
+            href={estado.Telefono}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#1976d2", textDecoration: "underline", fontSize: "0.75rem" }}
+          >
+            Ver imagen
+          </a>
+          <Box mt={1}>
+            <img
+              src={estado.Telefono}
+              alt="Foto"
+              style={{ maxWidth: "100px", borderRadius: "8px", border: "1px solid #ccc" }}
+            />
+          </Box>
+        </Box>
+      );
+    }
+
+    if ([8, 9, 1].includes(estado.Tipo)) {
+      return 'la url es ' + (estado.Telefono || 'N/A');
+    }
+
+    return 'asignado a ' + (estado.Telefono || 'N/A');
+  })()}
 </Typography>
+
 
                 </TimelineOppositeContent>
 

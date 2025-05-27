@@ -2,11 +2,11 @@ import { Manager, Socket } from "socket.io-client";
 
 let socket;
 export const connectToServer = (token) => {
-    //const manager = new Manager("http://192.168.2.173:3025/socket.io/socket.io.js", 
+    const manager = new Manager("http://192.168.2.49:3008",{
 
 /*https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js*/
 
-    const manager = new Manager("https://backregistrocivil.appservices.com.ec", {
+    ///const manager = new Manager("https://backregistrocivil.appservices.com.ec", {
   path: "/socket.io",
   extraHeaders: {
     authentication: token,
@@ -21,7 +21,7 @@ export const connectToServer = (token) => {
 }
 
 function addListener(socket) {
-    socket.on("connect", () => {});
+   socket.on("connect", () => {});
 
     socket.on("disconnect", () => {
     });

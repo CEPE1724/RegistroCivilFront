@@ -88,6 +88,8 @@ import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
+import { useRef } from "react";
+
 
 
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
@@ -152,6 +154,8 @@ export function ListadoSolicitud() {
   const [openCameraModal, setOpenCameraModal] = useState(false);
   const [imagenCapturada, setImagenCapturada] = useState(null);
   const [fechaTiempos, setfechaTiempos] = useState([]);
+  const inputFileRef = useRef(null); // ⬅️ Coloca esto en la parte superior de tu componente
+
 
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
@@ -184,6 +188,39 @@ export function ListadoSolicitud() {
       });
       console.error(error);
       return null;
+    }
+  };
+  const handleAbrirVerificacionManual = async () => {
+    const cedula = selectedRow?.cedula;
+    const dactilar = selectedRow?.CodigoDactilar;
+    const imagenSubida = selectedRow?.imagen;
+
+    if (!cedula || !dactilar || !imagenSubida) {
+      enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
+        variant: "warning",
+      });
+      return;
+    }
+
+    try {
+      setCedula(cedula);
+      setDactilar(dactilar);
+
+      const dataFOTO = await fetchImagenRegistroCivil(cedula, dactilar);
+
+      if (dataFOTO && typeof dataFOTO === "string" && dataFOTO.trim() !== "") {
+        // Ya tienes todo, abre el componente para mostrar
+        setOpenRegistroCivil(true);
+      } else {
+        enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar("Error al cargar la verificación facial.", {
+        variant: "error",
+      });
     }
   };
 
@@ -221,17 +258,23 @@ export function ListadoSolicitud() {
 
       if (verified) {
         await patchSolicitud(selectedRow?.id, 2);
+        fetchInsertarDatos(6, selectedRow?.id, 2)
+
         enqueueSnackbar("Identidad verificada correctamente.", {
           variant: "success",
         });
+        setOpenRegistroCivil(false);
+        setView(false);
       } else {
         enqueueSnackbar(
-          `Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}`,
+          `Las fotos no coinciden por favor contactar con el analista `,
           { variant: "error" }
+          /////Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}
         );
+        setOpenRegistroCivil(true);
       }
 
-      setOpenRegistroCivil(true);
+
     } catch (err) {
       console.error("Error durante la verificación facial:", err);
       enqueueSnackbar("Error durante la verificación facial.", {
@@ -242,21 +285,26 @@ export function ListadoSolicitud() {
     }
   };
 
-  const handleFileChange = (event) => {
-    const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
-    const file = event.target.files?.[0];
-
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
     if (!file) return;
 
-    if (!SUPPORTED_FORMATS.includes(file.type)) {
-      alert("El archivo debe ser una imagen (JPG o PNG)");
+    const extension = file.name.split('.').pop().toLowerCase();
+    if (extension !== "jpeg") {
+      enqueueSnackbar("Solo archivos con extensión .jpeg son permitidos", { variant: "error" });
+      e.target.value = null; // reset input
+      setFileToUpload(null);
+      setPreviewUrl(null);
       return;
     }
 
     setFileToUpload(file);
-    setPreviewUrl(URL.createObjectURL(file));
+      const localUrl = URL.createObjectURL(file);
+  setPreviewUrl(localUrl);
   };
 
+
+  {/*
   const handleUploadClick = async () => {
     if (!fileToUpload) {
       alert("Primero selecciona una imagen");
@@ -332,7 +380,78 @@ export function ListadoSolicitud() {
     } catch (error) {
       alert(error.message);
     }
+  }; */}
+
+  const fetchInsertarimagen = async (tipo, data, estado , imagen) => {
+    alert(imagen)
+   
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+      alert(data)
+      await axios.post(url, {
+        idCre_SolicitudWeb: data,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: imagen
+
+      });
+    } catch (error) {
+     console.error("Error al guardar los datos del cliente", error.response?.data || error.message);
+
+    }
   };
+
+  const handleUploadClick = async () => {
+    if (!fileToUpload) {
+      alert("Primero selecciona una imagen");
+      return;
+    }
+
+    try {
+      const fileUploadResponse = await uploadFile(
+        fileToUpload,
+        selectedRow.almacen,
+        selectedRow.cedula,
+        selectedRow.NumeroSolicitud,
+        "Foto"
+      );
+
+      if (fileUploadResponse) {
+        const updatedUrl = fileUploadResponse.url;
+
+        // 1. Actualizar local
+        setSelectedRow((prevRow) => ({
+          ...prevRow,
+          imagen: updatedUrl,
+        }));
+
+        // 2. Actualizar en la tabla
+        setDatos((prevDatos) =>
+          prevDatos.map((item) =>
+            item.id === selectedRow.id ? { ...item, imagen: updatedUrl } : item
+          )
+        );
+
+        // 3. Actualizar en backend
+        const updatedData = { Foto: updatedUrl };
+        await fetchActualizaSolicitud(selectedRow.id, updatedData);
+        fetchInsertarimagen(1, selectedRow.id , 14 , updatedUrl)
+
+        setUrlCloudstorage();
+        setFileToUpload(null);
+
+        enqueueSnackbar("Foto subida correctamente", {
+          variant: "success",
+        });
+
+        
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
 
   const fetchActualizaSolicitud = async (idSolicitud, data) => {
     try {
@@ -593,8 +712,9 @@ export function ListadoSolicitud() {
 
   const permisoEditarOperador = () => {
     const permiso = permisos.find((p) => p.Permisos === "EDITAR OPERADORA");
-    ///return permiso && permiso.Activo;}
-    return true
+    return permiso && permiso.Activo;
+    // }
+    //return true
   };
 
   const estadoDeshabilitadoporPermisos = (data) => {
@@ -1189,7 +1309,7 @@ export function ListadoSolicitud() {
     nombre,
     numeroSolicitud,
     cedula,
-    recargar , 
+    recargar,
 
   ]);
 
@@ -2581,7 +2701,7 @@ export function ListadoSolicitud() {
                             display: "inline-block",
                             maxWidth: "100%",
                             px: 1,
-                            ...(tienePermisoEditarAnalista() && (data.idEstadoVerificacionSolicitud == 10 || data.idEstadoVerificacionSolicitud == 12 ) && {
+                            ...(tienePermisoEditarAnalista() && (data.idEstadoVerificacionSolicitud == 10 || data.idEstadoVerificacionSolicitud == 12) && {
                               "&:hover .analistaNombre": {
                                 opacity: 0,
                                 visibility: "hidden",
@@ -2607,7 +2727,7 @@ export function ListadoSolicitud() {
                           </Box>
 
                           {/* Ícono de editar solo si tiene permiso */}
-                          {tienePermisoEditarAnalista() &&  (
+                          {tienePermisoEditarAnalista() && (
                             <Box
                               className="editIcon"
                               onClick={() => handleEditarAnalista(data)}
@@ -2653,7 +2773,7 @@ export function ListadoSolicitud() {
                             display: "inline-block",
                             maxWidth: "100%",
                             px: 1,
-                            ...(permisoEditarOperador() && (data.idEstadoVerificacionSolicitud == 10 || data.idEstadoVerificacionSolicitud == 12 ) && {
+                            ...(permisoEditarOperador() && (data.idEstadoVerificacionSolicitud == 10 || data.idEstadoVerificacionSolicitud == 12) && {
                               "&:hover .operadorNombre": {
                                 opacity: 0,
                                 visibility: "hidden",
@@ -3596,8 +3716,8 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {/* Botón subir imagen */}
-
+                  {/* Botón subir imagen 
+                       Version anterior automatica con el boton de subir imagen 
                   {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (  //&& selectedRow.estado !== "APROBADO"
                     <div className="flex flex-col md:flex-row gap-2 mt-4">
                       <Button onClick={() => setOpenCameraModal(true)}>
@@ -3614,8 +3734,82 @@ export function ListadoSolicitud() {
                       >
                         Subir imagen
                       </button>
+                       
+                       <Button >
+                        Cargar foto 
+                      </Button>
+
+                    </div>
+
+                  )} */}
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
+                    <div className="flex flex-col gap-4 mt-4">
+                      {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
+                      <input
+                        type="file"
+                        accept="image/jpeg"
+                        onChange={handleFileChange}
+                        ref={inputFileRef}
+                        style={{ display: "none" }}
+                      />
+
+                      {/* PRIMERA FILA DE BOTONES */}
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <Button onClick={() => setOpenCameraModal(true)}>
+                          Tomar Foto
+                        </Button>
+
+                        <button
+                          onClick={handleUploadClick}
+                          disabled={!fileToUpload}
+                          className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                            ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            }`}
+                        >
+                          Subir imagen
+                        </button>
+
+                        <Button onClick={() => inputFileRef.current.click()}>
+                          Cargar foto
+                        </Button>
+                      </div>
+
+                      {/* SEGUNDA FILA: BOTÓN VERIFICAR */}
+                      <div>
+                        <Button
+                          onClick={async () => {
+                            const cedula = selectedRow?.cedula;
+                            const dactilar = selectedRow?.CodigoDactilar;
+                            const imagenSubida = selectedRow?.imagen;
+
+                            if (!cedula || !dactilar || !imagenSubida) {
+                              enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
+                                variant: "warning",
+                              });
+                              return;
+                            }
+
+                            const fotoRegistro = await fetchImagenRegistroCivil(cedula, dactilar);
+
+                            if (fotoRegistro && typeof fotoRegistro === "string" && fotoRegistro.trim() !== "") {
+                              await handleVerificarIdentidad(imagenSubida, fotoRegistro);
+                            } else {
+                              enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
+                                variant: "error",
+                              });
+                              setOpenRegistroCivil(true);
+                            }
+                          }}
+                        >
+                          Verificar fotos
+                        </Button>
+                      </div>
                     </div>
                   )}
+
+
+
                 </div>
               </div>
 
@@ -3730,6 +3924,19 @@ export function ListadoSolicitud() {
                       Consultar Equifax
                     </button>
                   </div>
+
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleAbrirVerificacionManual}
+                        className="py-2 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
+                      >
+                        Verificación Facial
+                      </button>
+                    </div>
+                  )}
+
+
                 </div>
               </div>
 
@@ -3862,7 +4069,7 @@ export function ListadoSolicitud() {
                 enqueueSnackbar("El operador seleccionado es el mismo que el actual.", {
                   variant: "error",
                 });
-                 setOperadorSeleccionado(null)
+                setOperadorSeleccionado(null)
                 return;
               }
               updateOperador(filaActual, operadorSeleccionado);
@@ -3965,16 +4172,18 @@ export function ListadoSolicitud() {
 
             patchSolicitud(selectedRow?.id, 2);
 
+            fetchInsertarDatos(6, selectedRow?.id, 2)
             setOpenRegistroCivil(false);
           }}
           onRechazar={() => {
             // Acción al rechazar
 
             patchSolicitud(selectedRow?.id, 4);
-
+            fetchInsertarDatos(6, selectedRow?.id, 4)
             setOpenRegistroCivil(false);
           }}
           resultadoVerificacion={resultadoVerificacion}
+          permisos={permisos}
         />
       </Dialog>
 
