@@ -32,7 +32,7 @@ const Datos = forwardRef((props, ref) => {
     const [openCameraModal, setOpenCameraModal] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [imagenCapturada, setImagenCapturada] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(cresolicitud?.Foto || null);
+    const [previewUrl, setPreviewUrl] = useState(cresolicitud?.imagen || null);
     const [fileToUpload, setFileToUpload] = useState(null);
     const [urlCloudstorage, setUrlCloudstorage] = useState(null);
 
@@ -290,7 +290,7 @@ const Datos = forwardRef((props, ref) => {
                             <div className="w-64 flex flex-col items-center space-y-4">
                                 {/* Contenedor de la imagen */}
                                 <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
-                                    {!previewUrl ?
+                                    {!previewUrl || previewUrl === "prueba" ?
                                         (<div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -308,7 +308,7 @@ const Datos = forwardRef((props, ref) => {
                                             </svg>
                                         </div>) : (
                                             <img
-                                                src={previewUrl}
+                                                src={urlCloudstorage === "prueba" || urlCloudstorage === null ? previewUrl : urlCloudstorage}  //urlCloudstorage === "prueba" || urlCloudstorage === null ? previewUrl : urlCloudstorage
                                                 alt="Foto del cliente"
                                                 className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
                                             />
@@ -326,10 +326,9 @@ const Datos = forwardRef((props, ref) => {
                                         <button
                                             onClick={handleUploadClick}
                                             disabled={!fileToUpload}
-                                            className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300
-							  }`}
+                                            className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 }`}
                                         >
-                                            Subir imagen
+                                        	Guardar Foto
                                         </button>
                                     </div>
 
