@@ -91,8 +91,8 @@ const SeccionB = forwardRef((props, ref) => {
   const [formData, setFormData] = useState({
     empresa: data.NombreEmpresa || "",
     tipoEmpresa: data.idTipoEmpresa || 0,
-	jefeInmediato: data.jefeInmediato || "",
-	numeroJefe: data.numeroJefe || "",
+	jefeInmediato: data.JefeInmediato || "",
+	numeroJefe: data.CelularInmediato || "", 
     fechaIngreso: data.FechaIngresoEmpresa || "",
     ingresos: data.IngresosTrabajo || 0,
     gastos: data.EgresosTrabajo || 0,
