@@ -359,6 +359,17 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       return false;
     }
   };
+
+    const comprobcedula = async (cedula) => {
+    try {
+      const url = APIURL.validarCedula(cedula);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el cedula:", error);
+      return false;
+    }
+  };
   
   const validationSchema = Yup.object()
     .shape({
@@ -380,7 +391,16 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
 
       Cedula: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
-        .required("Ingresa 10 digitos de la cedula"),
+        .required("Ingresa 10 digitos de la cedula")
+       .test(
+        "not-blacklisted",
+        "La cedula ${value} se encuentra en la lista negra",
+        async (value) => {
+          if (!value) return false;            // ya cubierto por .required()
+          const res = await comprobcedula(value);
+          return res !== 1;                    // false → lanza el mensaje
+        }
+      ),
       // CodDactilar: Yup.string()
       //   .transform((value) => value.toUpperCase())
       //   .matches(
@@ -419,7 +439,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       .trim()
       .test(
         "not-blacklisted",
-        "El número ${value} se encuentra en la lista negra",
+        "el telefono número ${value} se encuentra en la lista negra",
         async (value) => {
           if (!value) return false;            // ya cubierto por .required()
           const res = await comprobTelf(value);

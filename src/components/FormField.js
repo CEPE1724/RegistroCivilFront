@@ -60,6 +60,18 @@ const FormField = ({
         }        
   };
 
+      const comprobcedula = async (cedula) => {
+    try {
+      const url = APIURL.validarCedula(cedula);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el cedula:", error);
+      return false;
+    }
+  };
+  
+
   const handleInputChange = async (e) => {
     let { name, value } = e.target;
     let originalValue = value;
@@ -80,8 +92,25 @@ const FormField = ({
 
     if (name === "Celular" && value.length === 10) {
       const existe = await comprobTelf(value);
+    
+
       if (existe === 1) {
         enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
+          variant: 'warning'
+        });
+        setIsBlacklisted(true);
+        return;
+      } else {
+        setIsBlacklisted(false);
+      }
+    }
+
+      if (name === "Cedula" && value.length === 10) {
+      const existe = await comprobcedula(value);
+    
+
+      if (existe === 1) {
+        enqueueSnackbar(`La cedula  ${value} se encuentra en la lista negra`, {
           variant: 'warning'
         });
         setIsBlacklisted(true);
