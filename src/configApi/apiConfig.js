@@ -1,7 +1,7 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
-//const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 const SOCKET_BASE_URL = "https://appservices.com.ec";
@@ -167,6 +167,14 @@ export const APIURL = {
   postTelefono : () => `${API_BASE_URL}lista-negra-cell`,
   updateTelefono : (id) => `${API_BASE_URL}lista-negra-cell/${id}`,
   validarTelefono : (telefono) => `${API_BASE_URL}lista-negra-cell/telefono/${telefono}`,
+  getCedulas : () => `${API_BASE_URL}lista-negra-cedula`,
+  postCedula : () => `${API_BASE_URL}lista-negra-cedula`,
+  updateCedula : (id) => `${API_BASE_URL}lista-negra-cedula/${id}`,
+  validarCedula : (cedula) => `${API_BASE_URL}lista-negra-cedula/cedula/${cedula}`,
+
+
+
+
   validarCedulaCognos : (cedula) => `${API_BASE_URL}cre-solicitud-web/solicitud-Cogno/${cedula}`,
   analistacreditoUsuarioRol: (igrupo, analista) => `${API_BASE_URL}analistacredito/usuario/${igrupo}/${analista}`,
   getEqfxIdentificacion : (Cedula) => `${API_BASE_URL}eqfxidentificacionconsultada/${Cedula}`,
