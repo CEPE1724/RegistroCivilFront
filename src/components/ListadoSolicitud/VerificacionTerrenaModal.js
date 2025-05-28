@@ -18,11 +18,13 @@ export default function VerificacionTerrenaModal({
   const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
   const [verificadorNombre, setVerificadorNombre] = useState("");
   const [tokenVerificador, setTokenVerificador] = useState("");
-
+  const [searchTerm, setSearchTerm] = useState("");
 
   const isFormValid = tipoVerificacion && verificador;
 
-
+const filteredVerificadores = verificadores.filter((v) =>
+  v.Nombre.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   useEffect(() => {
     if (isOpen) {
@@ -215,6 +217,18 @@ export default function VerificacionTerrenaModal({
           </label>
         </div>
 
+        {/* Buscador de verificadores */}
+        <div className="space-y-2">
+          <label className="text-sm">Buscar verificador:</label>
+          <input
+            type="text"
+            className="w-full border rounded px-3 py-2"
+            placeholder="Buscar por nombre..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm">Verificador:</label>
           <select
@@ -223,7 +237,7 @@ export default function VerificacionTerrenaModal({
             onChange={handleSelectChange}
           >
             <option value="">Seleccione un verificador</option>
-            {verificadores.map((v) => (
+            {filteredVerificadores.map((v) => (
               <option key={v.idIngresoCobrador} value={v.idIngresoCobrador}>
                 {v.Nombre}
               </option>
