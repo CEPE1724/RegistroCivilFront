@@ -6,7 +6,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import HomeIcon from '@mui/icons-material/Home';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import WalletIcon from '@mui/icons-material/Wallet';
-import axios from 'axios';
+import axios from '../../../configApi/axiosConfig';
 import { APIURL } from '../../../configApi/apiConfig';
 
 

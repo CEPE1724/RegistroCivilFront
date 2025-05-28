@@ -26,7 +26,11 @@ export function ReporteEquifax({
   const [clienteDatos, setClienteDatos] = useState([]);
   const [datosTablas, setDatosTablas] = useState([]); 
   const navigate = useNavigate();
-  // console.log("cliente datos", clienteDatos);
+  console.log("datos tabla", datosTablas)
+  const [encEntConsu, setEncEntConsu] = useState([])
+  const [tabEntConsu, setTabEntConsu] = useState([]) 
+  console.log("encabezado", encEntConsu)
+  console.log("cuerpo", tabEntConsu)
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -217,6 +221,8 @@ export function ReporteEquifax({
         const data  = response.data;
         setDatosTablas(data);
         // console.log("Datos de las tablas:", data);
+		setEncEntConsu(data.entidadesConsultadas.data[0])
+		setTabEntConsu(data.entidadesConsultadas.data.slice(1))
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -1114,24 +1120,25 @@ export function ReporteEquifax({
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">ENTIDAD QUE CONSULTO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">ENERO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">FEBRERO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">MARZO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">ABRIL</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">MAYO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">JUNIO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">JULIO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">AGOSTO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">SEPTIEMBRE</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">OCTUBRE</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">NOVIEMBRE</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">DICIEMBRE</th>
-              </tr>
+			  { encEntConsu && (
+			  <tr className="bg-gray-100">
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.NombreCliente}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes1}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes2}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes3}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes4}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes5}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes6}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes7}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes8}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes9}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes10}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes11}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes12}</th>
+              </tr>)}
             </thead>
             <tbody>
-            {datosTablas?.entidadesConsultadas?.data?.map((item) => (
+            {tabEntConsu.map((item) => ( 
               <tr className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.NombreCliente}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes1}</td>
