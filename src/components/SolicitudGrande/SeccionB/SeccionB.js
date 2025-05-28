@@ -114,6 +114,7 @@ const SeccionB = forwardRef((props, ref) => {
     celular: data.CelularTrabajo || "",
     referenciaUbicacion: data.ReferenciaUbicacionTrabajo || "",
   });
+  console.log("formData", formData)
 
   useEffect(() => {
     if (formData.provincia) {
@@ -141,8 +142,11 @@ const SeccionB = forwardRef((props, ref) => {
 
     // Validación para campos de teléfono
   if (name === 'telefono' || name === 'celular' || name === 'numeroJefe') {
-  // Solo validar si el campo tiene valor y tiene la longitud correcta
-  if (value && (value.length === 9 || value.length === 10)) {
+
+	if (!/^\d*$/.test(value)) {
+      return; 
+    }
+
     const existe = await props.comprobTelf(value); 
     if (existe === 1) {
       enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
@@ -150,7 +154,6 @@ const SeccionB = forwardRef((props, ref) => {
       });
       return;
     }
-  }
 }
 
     if (name === "provincia") {
@@ -411,6 +414,26 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
+	if(!formData.jefeInmediato || formData.jefeInmediato === "" ){
+		newErrors.jefeInmediato = "Este campo es obligatorio"
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, ingresa un Jefe Inmediato", {
+          variant: "error",
+        });
+        showSnackbar = true;
+      }
+	}
+
+	if(!formData.numeroJefe || formData.numeroJefe === "" || formData.numeroJefe.length < 9){
+		newErrors.numeroJefe = "Este campo es obligatorio"
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, ingresa un número", {
+          variant: "error",
+        });
+        showSnackbar = true;
+      }
+	}
+
     if (!formData.departamento) {
       newErrors.departamento = "Este campo es obligatorio";
       if (!showSnackbar) {
@@ -529,7 +552,7 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-    if (!formData.telefono && !formData.celular) {
+    if (!formData.telefono && !formData.celular || formData.telefono.length < 9 || formData.celular.length < 10) {
       newErrors.telefono = "Debes proporcionar al menos un teléfono o celular";
       newErrors.celular = "Debes proporcionar al menos un teléfono o celular";
       if (!showSnackbar) {
@@ -630,27 +653,29 @@ const SeccionB = forwardRef((props, ref) => {
 			onBlur={handleBlur}
             className="block w-full solcitudgrande-style"
           />
-          {/* {errors.departamento && (
-            <span className="text-red-500 text-xs">{errors.departamento}</span>
-          )} */}
+           {errors.jefeInmediato && (
+            <span className="text-red-500 text-xs">{errors.jefeInmediato}</span>
+          	)} 
         </div>
 
 		<div className="col-span-1">
-          <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroJefe.length < 10 ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroJefe.length < 9 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaHouseUser className="mr-2 text-primaryBlue" />
             (*)Número Jefe
           </label>
           <input
-            type="number"
+            type="text"
             name="numeroJefe"
             value={formData.numeroJefe}
             onChange={handleInputChange}
 			onBlur={handleBlur}
             className="block w-full solcitudgrande-style"
+			maxLength="10"
+            pattern="\d{10}"
           />
-          {/* {errors.numeroCasa && (
-            <span className="text-red-500 text-xs">{errors.numeroCasa}</span>
-          )} */}
+          {errors.numeroJefe && (
+            <span className="text-red-500 text-xs">{errors.numeroJefe}</span>
+          )}
         </div>
 
         <div className="col-span-1">
@@ -977,12 +1002,14 @@ const SeccionB = forwardRef((props, ref) => {
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input
-              type="number"
+              type="text"
               name="telefono"
               value={formData.telefono}
               onChange={handleInputChange}
 			  onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
+			  maxLength="10"
+			  pattern="\d{10}"
             />
           </div>
           {errors.telefono && (
@@ -1014,12 +1041,14 @@ const SeccionB = forwardRef((props, ref) => {
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input
-              type="number"
+              type="text"
               name="celular"
               value={formData.celular}
               onChange={handleInputChange}
 			  onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
+			  maxLength="10"
+			  pattern="\d{10}"
               //readOnly={data.CelularTrabajo !== "" && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
             />
           </div>

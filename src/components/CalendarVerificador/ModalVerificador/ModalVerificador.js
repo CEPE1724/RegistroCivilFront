@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../../../configApi/axiosConfig';
 import { useSnackbar } from 'notistack';
 import { APIURL } from '../../../configApi/apiConfig';
 export function ModalVerificador({ isOpen, onClose }) {
