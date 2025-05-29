@@ -1211,7 +1211,7 @@ export function Documental({
                     <input
                       type="file"
                       multiple
-                      accept=".pdf"
+                       accept=".pdf,.png,.jpg,.jpeg"
                       onChange={(e) => handleFileChange(e, activeTab)}
                       className="hidden"
                     />
