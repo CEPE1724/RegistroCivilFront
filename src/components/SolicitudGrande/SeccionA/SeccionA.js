@@ -46,21 +46,21 @@ import { useAuth } from "../../AuthContext/AuthContext";
 import { useLocation } from "react-router-dom";
 const SeccionA = forwardRef((props, ref) => {
 
- const location = useLocation();
-      const [clientInfo, setClientInfo] = useState(null);
-      useEffect(() => {
-      if (location.state) {
-        // Si hay datos en `location.state`, los guardamos en localStorage
-        localStorage.setItem("clientInfo", JSON.stringify(location.state));
-        setClientInfo(location.state);
-      } else {
-        // Si no hay datos en `location.state`, intentamos recuperar de localStorage
-        const savedClientInfo = localStorage.getItem("clientInfo");
-        if (savedClientInfo) {
+  const location = useLocation();
+  const [clientInfo, setClientInfo] = useState(null);
+  useEffect(() => {
+    if (location.state) {
+      // Si hay datos en `location.state`, los guardamos en localStorage
+      localStorage.setItem("clientInfo", JSON.stringify(location.state));
+      setClientInfo(location.state);
+    } else {
+      // Si no hay datos en `location.state`, intentamos recuperar de localStorage
+      const savedClientInfo = localStorage.getItem("clientInfo");
+      if (savedClientInfo) {
         setClientInfo(JSON.parse(savedClientInfo));
-        }
       }
-      }, [location.state]);
+    }
+  }, [location.state]);
 
 
 
@@ -130,29 +130,29 @@ const SeccionA = forwardRef((props, ref) => {
   }, [formData.parroquia, enqueueSnackbar]);
 
   const fecthValidaDomicilio = async () => {
-	try {
-	  
-	  const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
-	  const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
-	  const response = await axios.get(url, {
-		headers: {
-		  "Content-Type": "application/json",
-		},
-	  });
-	  if (response.data) {
-		return response.data; // Return the fetched data
-	  } else {
-		console.error("No se encontraron datos para la solicitud.");
-		return null; // Return null if no data is found
-	  }
-	} catch (error) {
-	  console.error("Error al obtener los datos del cliente", error);
-	  return null; // Return null in case of an error
-	}
+    try {
+
+      const idCre_SolicitudWeb = data.idCre_SolicitudWeb;
+      const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.data) {
+        return response.data; // Return the fetched data
+      } else {
+        console.error("No se encontraron datos para la solicitud.");
+        return null; // Return null if no data is found
+      }
+    } catch (error) {
+      console.error("Error al obtener los datos del cliente", error);
+      return null; // Return null in case of an error
+    }
   };
 
 
-  const handleOpenModal = async() => {
+  const handleOpenModal = async () => {
 
 
     const camposBase = [
@@ -188,7 +188,7 @@ const SeccionA = forwardRef((props, ref) => {
         formData[formKey] === 0
     );
 
-    if ( camposNoLlenados.length > 0) {
+    if (camposNoLlenados.length > 0) {
       enqueueSnackbar(
         "Para seleccionar la ubicación del negocio, primero debes llenar y guardar correctamente todos los campos requeridos.",
         {
@@ -198,14 +198,14 @@ const SeccionA = forwardRef((props, ref) => {
       return;
     }
 
-	const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
-	if (!validation || !validation.exists || validation.count === 0) {
-		enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
-			variant: 'error'
-		});
-		setUbicacionError("No existen coordenadas registradas para esta solicitud.");
-		return;
-	}
+    const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
+    if (!validation || !validation.exists || validation.count === 0) {
+      enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
+        variant: 'error'
+      });
+      setUbicacionError("No existen coordenadas registradas para esta solicitud.");
+      return;
+    }
 
     setOpenLocationModal((prev) => !prev);
   };
@@ -214,18 +214,18 @@ const SeccionA = forwardRef((props, ref) => {
     const { name, value, type, checked } = e.target;
 
     // Validación para campos de teléfono
-  if (name === 'telefono' || name === 'celular') {
-  // Solo validar si el campo tiene valor y tiene la longitud correcta
-  if (value && (value.length === 9 || value.length === 10)) {
-    const existe = await props.comprobTelf(value); 
-    if (existe === 1) {
-      enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
-        variant: 'warning'
-      });
-      return;
+    if (name === 'telefono' || name === 'celular') {
+      // Solo validar si el campo tiene valor y tiene la longitud correcta
+      if (value && (value.length === 9 || value.length === 10)) {
+        const existe = await props.comprobTelf(value);
+        if (existe === 1) {
+          enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
+            variant: 'warning'
+          });
+          return;
+        }
+      }
     }
-  }
-}
     // Expresión regular para detectar caracteres no permitidos
     const invalidCharsRegex = /[<>'"\\;{}()[\]`~!@#$%^&*=+|/?]/g;
 
@@ -509,16 +509,16 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
-		// if (!formData.telefono && !formData.celular) {
+    // if (!formData.telefono && !formData.celular) {
 
-		// 	newErrors.telefono = "Debes proporcionar al menos un teléfono o celular";
-		// 	newErrors.celular = "Debes proporcionar al menos un teléfono o celular";
+    // 	newErrors.telefono = "Debes proporcionar al menos un teléfono o celular";
+    // 	newErrors.celular = "Debes proporcionar al menos un teléfono o celular";
 
-		// 	if (!showSnackbar) {
-		// 		enqueueSnackbar("Por favor, proporciona al menos un teléfono o celular", { variant: "error" });
-		// 		showSnackbar = true;
-		// 	}
-		// }
+    // 	if (!showSnackbar) {
+    // 		enqueueSnackbar("Por favor, proporciona al menos un teléfono o celular", { variant: "error" });
+    // 		showSnackbar = true;
+    // 	}
+    // }
 
 
     // Actualizamos los errores en el estado
@@ -667,7 +667,7 @@ const SeccionA = forwardRef((props, ref) => {
           />
         </div>
 
-        {clientInfo?.data.Laboral && (<div className="col-span-1">
+        <div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
             Ubicacion Trabajo
@@ -680,13 +680,13 @@ const SeccionA = forwardRef((props, ref) => {
           >
             Ubicacion Trabajo
           </button>
-		  {ubicacionError && (
-    <p className="mt-1 text-sm text-red-500 border-red-500">
-      No se han registrado coordenadas para este domicilio.
-    </p>
-  )}
-        </div>)}
-        
+          {ubicacionError && (
+            <p className="mt-1 text-sm text-red-500 border-red-500">
+              No se han registrado coordenadas para este domicilio.
+            </p>
+          )}
+        </div>
+
 
         <div className="lg:col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">

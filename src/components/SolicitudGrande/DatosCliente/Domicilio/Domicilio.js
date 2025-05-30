@@ -497,7 +497,7 @@ const Domicilio = forwardRef((props, ref) => {
             )}
           </div>
 
-          {clientInfo?.data.Domicilio && (
+          
             <div className="col-span-1">
               <label className="text-xs font-medium mb-1 flex items-center">
                 <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
@@ -517,7 +517,7 @@ const Domicilio = forwardRef((props, ref) => {
                 </p>
               )}
             </div>
-          )}
+        
 
           <div className="col-span-1">
             <label className="text-xs font-medium mb-1 flex items-center">

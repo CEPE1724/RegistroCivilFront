@@ -1058,7 +1058,7 @@ export function Cabecera() {
         const coordenadas = await fetchValidaDomicilio(2);
 
 
-        if (clientInfo?.data.Laboral === true) {
+        
           console.log("coordenadas LABORAL", clientInfo?.data.Laboral);
 
           if (!coordenadas.exists || coordenadas.count === 0) {
@@ -1073,7 +1073,7 @@ export function Cabecera() {
 
             return;
           }
-        }
+        
 
         if (datosTrabajo.current.setUbicacionError) {
           datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
@@ -1092,7 +1092,7 @@ export function Cabecera() {
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-        if (clientInfo?.data.Laboral === true) {
+        
           console.log("coordenadas 2 NOSE PARA QUE", clientInfo?.data.Laboral);
           if (!coordenadas.exists || coordenadas.count === 0) {
             enqueueSnackbar(
@@ -1106,7 +1106,7 @@ export function Cabecera() {
 
             return;
           }
-        }
+        
         if (datosNegocio.current.setUbicacionError) {
           datosNegocio.current.setUbicacionError(""); // Limpiar si hay coordenadas
         }

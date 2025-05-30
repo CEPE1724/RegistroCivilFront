@@ -1083,7 +1083,7 @@ console.log("data dependiente", data)
           )}
         </div>
 
-        {clientInfo?.data.Laboral && (
+        
           <div className="col-span-1">
             <label className="text-xs font-medium mb-1 flex items-center">
               <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
@@ -1098,7 +1098,7 @@ console.log("data dependiente", data)
               Ubicacion Trabajo
             </button>
           </div>
-        )}
+     
       </form>
       <LocationModal
         isOpen={() => handleOpenModal()}
