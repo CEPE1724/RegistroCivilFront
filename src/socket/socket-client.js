@@ -2,8 +2,8 @@ import { Manager, Socket } from "socket.io-client";
 
 let socket;
 export const connectToServer = (token) => {
-
-  const manager = new Manager("http://192.168.2.67:3025",
+//https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js
+  const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
 
     {
       extraHeaders: {
