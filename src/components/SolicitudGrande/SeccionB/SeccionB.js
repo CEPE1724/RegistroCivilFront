@@ -86,13 +86,13 @@ const SeccionB = forwardRef((props, ref) => {
 
     fetchProvincias(enqueueSnackbar, setProvincia);
   }, []);
-
+console.log("data dependiente", data)
   // Estado para manejar los valores de los campos
   const [formData, setFormData] = useState({
     empresa: data.NombreEmpresa || "",
     tipoEmpresa: data.idTipoEmpresa || 0,
-	jefeInmediato: data.JefeInmediato || "",
-	numeroJefe: data.CelularInmediato || "", 
+    jefeInmediato: data.JefeInmediato || "",
+    numeroJefe: data.CelularInmediato || "",
     fechaIngreso: data.FechaIngresoEmpresa || "",
     ingresos: data.IngresosTrabajo || 0,
     gastos: data.EgresosTrabajo || 0,
@@ -100,8 +100,8 @@ const SeccionB = forwardRef((props, ref) => {
     tipoSueldo: data.idTipoSueldo || 0,
     departamento: data.Departaento || "",
     cargo: data.idCargo || 0,
-    diasPago: data.DiaPago || 0,
-    afiliado: data.AfiliadoIESS || 1,
+    diasPago: data.DiaPago || 1,
+    afiliado: data.AfiliadoIESS || true,
     provincia: data.idProvinciaTrabajo || 0,
     canton: data.idCantonTrabajo || 0,
     parroquia: data.idParroquiaTrabajo || 0,
@@ -141,20 +141,20 @@ const SeccionB = forwardRef((props, ref) => {
     const { name, value, type, checked } = e.target;
 
     // Validación para campos de teléfono
-  if (name === 'telefono' || name === 'celular' || name === 'numeroJefe') {
+    if (name === 'telefono' || name === 'celular' || name === 'numeroJefe') {
 
-	if (!/^\d*$/.test(value)) {
-      return; 
-    }
+      if (!/^\d*$/.test(value)) {
+        return;
+      }
 
-    const existe = await props.comprobTelf(value); 
-    if (existe === 1) {
-      enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
-        variant: 'warning'
-      });
-      return;
+      const existe = await props.comprobTelf(value);
+      if (existe === 1) {
+        enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
+          variant: 'warning'
+        });
+        return;
+      }
     }
-}
 
     if (name === "provincia") {
       setFormData((prev) => ({
@@ -204,25 +204,25 @@ const SeccionB = forwardRef((props, ref) => {
   };
 
   const handleBlur = (e) => {
-	const {name, value} = e.target;
+    const { name, value } = e.target;
 
-	if (name === 'jefeInmediato' || name === 'callePrincipal' || name === 'callePrincipal' || name === 'calleSecundaria' || name === 'referenciaUbicacion') {
-		if(value.length > 0 && value.length < 5){
-			enqueueSnackbar("El nombre debe tener mínimo 5 caracteres", { variant: 'warning' });
-		}
- 	}
+    if (name === 'jefeInmediato' || name === 'callePrincipal' || name === 'callePrincipal' || name === 'calleSecundaria' || name === 'referenciaUbicacion') {
+      if (value.length > 0 && value.length < 5) {
+        enqueueSnackbar("El nombre debe tener mínimo 5 caracteres", { variant: 'warning' });
+      }
+    }
 
-	if(name === 'numeroJefe' || name === 'telefono'){
-		if(value.length < 9 || value.length > 10){
-			enqueueSnackbar("Ingresa un número valido.", {variant: 'warning'})
-		}
-	}
+    if (name === 'numeroJefe' || name === 'telefono') {
+      if (value.length < 9 || value.length > 10) {
+        enqueueSnackbar("Ingresa un número valido.", { variant: 'warning' })
+      }
+    }
 
-	if(name === 'celular'){
-		if(value.length < 10 || value.length > 10){
-			enqueueSnackbar("El número debe tener 10 caracteres.", {variant: 'warning'})
-		}
-	}
+    if (name === 'celular') {
+      if (value.length < 10 || value.length > 10) {
+        enqueueSnackbar("El número debe tener 10 caracteres.", { variant: 'warning' })
+      }
+    }
 
   }
 
@@ -247,13 +247,13 @@ const SeccionB = forwardRef((props, ref) => {
     }
   };
 
-  const handleOpenModal = async() => {
-    
+  const handleOpenModal = async () => {
+
     const camposBase = [
       { dataKey: "NombreEmpresa", formKey: "empresa" },
       { dataKey: "idTipoEmpresa", formKey: "tipoEmpresa" },
-	  { dataKey: "JefeInmediato", formKey: "jefeInmediato"},
-	  { dataKey: "CelularInmediato", formKey: "numeroJefe"},
+      { dataKey: "JefeInmediato", formKey: "jefeInmediato" },
+      { dataKey: "CelularInmediato", formKey: "numeroJefe" },
       { dataKey: "FechaIngresoEmpresa", formKey: "fechaIngreso" },
       { dataKey: "IngresosTrabajo", formKey: "ingresos" },
       { dataKey: "EgresosTrabajo", formKey: "gastos" },
@@ -290,7 +290,7 @@ const SeccionB = forwardRef((props, ref) => {
         formData[formKey] === 0
     );
 
-    if ( camposNoLlenados.length > 0) {
+    if (camposNoLlenados.length > 0) {
       enqueueSnackbar(
         "Para seleccionar la ubicación del trabajo, primero debes llenar y guardar todos los campos requeridos.",
         { variant: "warning" }
@@ -298,14 +298,14 @@ const SeccionB = forwardRef((props, ref) => {
       return;
     }
 
-	const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
-	if (!validation || !validation.exists || validation.count === 0) {
-		enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
-			variant: 'error'
-		});
-		setUbicacionError("No existen coordenadas registradas para esta solicitud.");
-		return;
-	}
+    const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
+    if (!validation || !validation.exists || validation.count === 0) {
+      enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
+        variant: 'error'
+      });
+      setUbicacionError("No existen coordenadas registradas para esta solicitud.");
+      return;
+    }
 
     setOpenLocationModal((prev) => !prev);
   };
@@ -414,25 +414,25 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-	if(!formData.jefeInmediato || formData.jefeInmediato === "" ){
-		newErrors.jefeInmediato = "Este campo es obligatorio"
-		if (!showSnackbar) {
+    if (!formData.jefeInmediato || formData.jefeInmediato === "") {
+      newErrors.jefeInmediato = "Este campo es obligatorio"
+      if (!showSnackbar) {
         enqueueSnackbar("Por favor, ingresa un Jefe Inmediato", {
           variant: "error",
         });
         showSnackbar = true;
       }
-	}
+    }
 
-	if(!formData.numeroJefe || formData.numeroJefe === "" || formData.numeroJefe.length < 9){
-		newErrors.numeroJefe = "Este campo es obligatorio"
-		if (!showSnackbar) {
+    if (!formData.numeroJefe || formData.numeroJefe === "" || formData.numeroJefe.length < 9) {
+      newErrors.numeroJefe = "Este campo es obligatorio"
+      if (!showSnackbar) {
         enqueueSnackbar("Por favor, ingresa un número", {
           variant: "error",
         });
         showSnackbar = true;
       }
-	}
+    }
 
     if (!formData.departamento) {
       newErrors.departamento = "Este campo es obligatorio";
@@ -616,7 +616,8 @@ const SeccionB = forwardRef((props, ref) => {
             readOnly={
               data.NombreEmpresa !== 0 &&
               data.NombreEmpresa !== null &&
-              data.NombreEmpresa !== undefined
+              data.NombreEmpresa !== undefined &&
+              data.NombreEmpresa !== "" 
             } // Deshabilitar el campo de empresa
           />
           {errors.empresa && (
@@ -625,7 +626,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-			<label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoEmpresa === "" ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoEmpresa === "" ? 'text-red-500' : 'text-gray-500'}`}>
             <FaBriefcase className="mr-2 text-primaryBlue" />
             (*)Tipo Empresa
           </label>
@@ -640,7 +641,7 @@ const SeccionB = forwardRef((props, ref) => {
           />
         </div>
 
-		<div className="col-span-1">
+        <div className="col-span-1">
           <label className={`text-xs font-medium mb-1 flex items-center ${formData.jefeInmediato.length < 5 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaCity className="mr-2 text-primaryBlue" />
             (*)Jefe Inmediato
@@ -650,15 +651,15 @@ const SeccionB = forwardRef((props, ref) => {
             name="jefeInmediato"
             value={formData.jefeInmediato}
             onChange={handleInputChange}
-			onBlur={handleBlur}
+            onBlur={handleBlur}
             className="block w-full solcitudgrande-style"
           />
-           {errors.jefeInmediato && (
+          {errors.jefeInmediato && (
             <span className="text-red-500 text-xs">{errors.jefeInmediato}</span>
-          	)} 
+          )}
         </div>
 
-		<div className="col-span-1">
+        <div className="col-span-1">
           <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroJefe.length < 9 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaHouseUser className="mr-2 text-primaryBlue" />
             (*)Número Jefe
@@ -668,9 +669,9 @@ const SeccionB = forwardRef((props, ref) => {
             name="numeroJefe"
             value={formData.numeroJefe}
             onChange={handleInputChange}
-			onBlur={handleBlur}
+            onBlur={handleBlur}
             className="block w-full solcitudgrande-style"
-			maxLength="10"
+            maxLength="10"
             pattern="\d{10}"
           />
           {errors.numeroJefe && (
@@ -689,7 +690,12 @@ const SeccionB = forwardRef((props, ref) => {
             value={formData.fechaIngreso}
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
-            readOnly={true} // Deshabilitar el campo de fecha
+            readOnly={
+              data.fechaIngreso !== 0 &&
+              data.fechaIngreso !== null &&
+              data.fechaIngreso !== undefined &&
+              data.fechaIngreso !== "" 
+            } // Deshabilitar el campo de empresa
           />
           {errors.fechaIngreso && (
             <span className="text-red-500 text-xs">{errors.fechaIngreso}</span>
@@ -741,7 +747,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-			<label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoContrato === "" ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoContrato === "" ? 'text-red-500' : 'text-gray-500'}`}>
             <FaFileContract className="mr-2 text-primaryBlue" />
             (*)Tipo Contrato
           </label>
@@ -757,7 +763,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-			<label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoSueldo === "" ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoSueldo === "" ? 'text-red-500' : 'text-gray-500'}`}>
             <FaDollarSign className="mr-2 text-primaryBlue" />
             (*)Tipo Sueldo
           </label>
@@ -789,7 +795,7 @@ const SeccionB = forwardRef((props, ref) => {
           )}
         </div>
 
-		<div className="col-span-1 flex flex-col items-center">
+        <div className="col-span-1 flex flex-col items-center">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaUserCheck className="mr-2 text-primaryBlue" />
             Afiliado IESS
@@ -811,7 +817,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-			<label className={`text-xs font-medium mb-1 flex items-center ${formData.cargo === "" ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.cargo === "" ? 'text-red-500' : 'text-gray-500'}`}>
             <FaUserTie className="mr-2 text-primaryBlue" />
             (*)Cargo
           </label>
@@ -1006,10 +1012,10 @@ const SeccionB = forwardRef((props, ref) => {
               name="telefono"
               value={formData.telefono}
               onChange={handleInputChange}
-			  onBlur={handleBlur}
+              onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
-			  maxLength="10"
-			  pattern="\d{10}"
+              maxLength="10"
+              pattern="\d{10}"
             />
           </div>
           {errors.telefono && (
@@ -1045,11 +1051,11 @@ const SeccionB = forwardRef((props, ref) => {
               name="celular"
               value={formData.celular}
               onChange={handleInputChange}
-			  onBlur={handleBlur}
+              onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
-			  maxLength="10"
-			  pattern="\d{10}"
-              //readOnly={data.CelularTrabajo !== "" && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
+              maxLength="10"
+              pattern="\d{10}"
+            //readOnly={data.CelularTrabajo !== "" && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
             />
           </div>
           {errors.celular && (
@@ -1068,7 +1074,7 @@ const SeccionB = forwardRef((props, ref) => {
             value={formData.referenciaUbicacion}
             onChange={handleInputChange}
             className="block w-full solcitudgrande-style"
-            //readOnly={data.ReferenciaUbicacionTrabajo !== 0 && data.ReferenciaUbicacionTrabajo !== null && data.ReferenciaUbicacionTrabajo !== undefined} // Deshabilitar el campo de referencia
+          //readOnly={data.ReferenciaUbicacionTrabajo !== 0 && data.ReferenciaUbicacionTrabajo !== null && data.ReferenciaUbicacionTrabajo !== undefined} // Deshabilitar el campo de referencia
           />
           {errors.referenciaUbicacion && (
             <span className="text-red-500 text-xs">
