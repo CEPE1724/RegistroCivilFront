@@ -46,12 +46,38 @@ const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   );
 };
 
-const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
+const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
   const [trabajoInfo, setTrabajoInfo] = useState(null); // Estado para almacenar los datos del trabajo
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [verificador, setVerificador] = useState(null);
+
+
+  const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
+    console.log("llega id", estado)
+    try {
+      const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data[0].Telefono;
+        // data puede ser un array o un objeto, asumo objeto:
+        // El nombre del verificador está en data.Telefono
+        console.log("aqui esta el nomnbre ", data)
+        setVerificador(data || "Sin verificador");
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching tiemposolicitudesweb data:", error);
+    }
+  };
+
 
   const direccionCoinMap = {
     1: "Coincide",
@@ -66,6 +92,8 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
   useEffect(() => {
     if (openModal && idsTerrenas.idTerrenaGestionTrabajo) {
       fetchTrabajoInfo(idsTerrenas.idTerrenaGestionTrabajo);
+      fetchVerificador(idSolicitud, 5); // Estado fijo 5
+
     }
   }, [openModal, idsTerrenas.idTerrenaGestionTrabajo]); // Se ejecuta cuando cambia openModal o idsTerrenas.idTerrenaGestionTrabajo
 
@@ -118,9 +146,17 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-40">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl sm:max-w-3xl md:max-w-2xl lg:max-w-7xl p-8 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-semibold mb-6 flex items-center">
-          <Work className="mr-2 w-5 h-5" /> Trabajo
+        <h2 className="text-2xl font-semibold mb-6 flex items-center space-x-4">
+          <div className="flex items-center">
+            <Work className="mr-2 w-5 h-5" /> <span>Trabajo</span>
+          </div>
+          {verificador && (
+            <div className="text-sm text-gray-700 bg-blue-100 px-3 py-1 rounded-full">
+              Verificador: {verificador}
+            </div>
+          )}
         </h2>
+
 
         <div className="grid grid-cols-1 gap-4">
           {trabajoInfo && (

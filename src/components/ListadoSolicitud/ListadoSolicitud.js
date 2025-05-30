@@ -1026,7 +1026,7 @@ export function ListadoSolicitud() {
           
         }
         if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo > 0) {
-          setTrabajoData(idsTerrenas ); // Asigna los datos necesarios para el modal de trabajo
+          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id }); // Asigna los datos necesarios para el modal de trabajo
           setTrabajoModalOpen(true);
         }
 
@@ -4147,6 +4147,8 @@ export function ListadoSolicitud() {
         openModal={isTrabajoModalOpen}
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={idsTerrenas}
+        idSolicitud={trabajoData?.idSolicitud}
+
       />
 
       <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>

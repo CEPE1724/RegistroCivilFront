@@ -56,7 +56,28 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
    const [verificador, setVerificador] = useState(null);
 
    console.log(idSolicitud)
-
+ const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
+  console.log("llega id" ,estado )
+  try {
+    const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.status === 200) {
+      const data = response.data[0].Telefono;
+      // data puede ser un array o un objeto, asumo objeto:
+      // El nombre del verificador está en data.Telefono
+      console.log("aqui esta el nomnbre ",data )
+      setVerificador(data|| "Sin verificador");
+    } else {
+      console.error(`Error: ${response.status} - ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching tiemposolicitudesweb data:", error);
+  }
+};
 
   useEffect(() => {
     const fetchVerificacionData = async () => {
@@ -182,28 +203,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
   
   
 
-const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
-  console.log("llega id" ,estado )
-  try {
-    const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
-    const response = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.status === 200) {
-      const data = response.data;
-      // data puede ser un array o un objeto, asumo objeto:
-      // El nombre del verificador está en data.Telefono
-      console.log("aqui esta el nomnbre ",data)
-      setVerificador(data.Telefono || "Sin verificador");
-    } else {
-      console.error(`Error: ${response.status} - ${response.statusText}`);
-    }
-  } catch (error) {
-    console.error("Error fetching tiemposolicitudesweb data:", error);
-  }
-};
+
 
   const renderField = (label, value) =>
     value !== null && value !== "" ? (
