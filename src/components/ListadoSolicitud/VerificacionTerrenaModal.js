@@ -162,7 +162,7 @@ export default function VerificacionTerrenaModal({
 
   if (!isOpen) return null;
 
-  const handleSelectChange = (e) => {
+  {/*const handleSelectChange = (e) => {
     const selectedId = e.target.value;
     setVerificador(selectedId);
 
@@ -176,7 +176,31 @@ export default function VerificacionTerrenaModal({
     } else {
       setTokenVerificador("");
     }
-  };
+  };*/}
+
+  const handleSelectChange = (e) => {
+  const selectedId = e.target.value;
+  setVerificador(selectedId);
+
+  const verificadorSeleccionado = verificadores.find(
+    (v) => v.idIngresoCobrador === parseInt(selectedId)
+  );
+
+  if (verificadorSeleccionado) {
+    setVerificadorNombre(verificadorSeleccionado.Nombre); // 👉 Aquí asignamos el nombre
+
+    if (verificadorSeleccionado.dispositivos.length > 0) {
+      const token = verificadorSeleccionado.dispositivos[0].TokenExpo;
+      setTokenVerificador(token);
+    } else {
+      setTokenVerificador("");
+    }
+  } else {
+    setVerificadorNombre("");
+    setTokenVerificador("");
+  }
+};
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
