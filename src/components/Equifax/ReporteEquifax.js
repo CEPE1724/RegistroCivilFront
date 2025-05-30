@@ -26,11 +26,8 @@ export function ReporteEquifax({
   const [clienteDatos, setClienteDatos] = useState([]);
   const [datosTablas, setDatosTablas] = useState([]); 
   const navigate = useNavigate();
-  console.log("datos tabla", datosTablas)
   const [encEntConsu, setEncEntConsu] = useState([])
   const [tabEntConsu, setTabEntConsu] = useState([]) 
-  console.log("encabezado", encEntConsu)
-  console.log("cuerpo", tabEntConsu)
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
