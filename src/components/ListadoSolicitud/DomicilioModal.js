@@ -4,6 +4,7 @@ import { APIURL } from "../../configApi/apiConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import Modal from "react-modal";
 import { Visibility } from "@mui/icons-material";
+import { Alert } from "@mui/lab";
 const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
@@ -46,12 +47,38 @@ const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
 };
 
 
-const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
+const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
   const [verificacionData, setVerificacionData] = useState(null);
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showImageModal, setShowImageModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false); 
+   const [verificador, setVerificador] = useState(null);
+
+   console.log(idSolicitud)
+ const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
+  console.log("llega id" ,estado )
+  try {
+    const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.status === 200) {
+      const data = response.data[0].Telefono;
+      // data puede ser un array o un objeto, asumo objeto:
+      // El nombre del verificador está en data.Telefono
+      console.log("aqui esta el nomnbre ",data )
+      setVerificador(data|| "Sin verificador");
+    } else {
+      console.error(`Error: ${response.status} - ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error fetching tiemposolicitudesweb data:", error);
+  }
+};
+
   useEffect(() => {
     const fetchVerificacionData = async () => {
       try {
@@ -59,6 +86,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
         if (!id) return;
         const response = await axios.get(APIURL.getTerrenaGestionDomicilio(id));
         const data = response.data;
+        console.log(data)
 
         // 👇 Convertir imágenes de string a array si es necesario
         if (typeof data.domicilioImages === "string") {
@@ -73,7 +101,13 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
           }
         }
 
-        setVerificacionData(data);
+        setVerificacionData(data); 
+
+         if (idSolicitud ) {
+          fetchVerificador(idSolicitud, 4);
+        }
+         
+      
       } catch (error) {
         console.error("Error al obtener los datos de verificación:", error);
       }
@@ -81,8 +115,9 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
 
     if (openModal) {
       fetchVerificacionData();
+      
     }
-  }, [openModal, idsTerrenas]);
+  }, [openModal, idsTerrenas, idSolicitud]);
 
 
   if (!openModal || !verificacionData) return null;
@@ -165,6 +200,10 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
     tipoVerificacion,
 
   } = verificacionData;
+  
+  
+
+
 
   const renderField = (label, value) =>
     value !== null && value !== "" ? (
@@ -180,6 +219,11 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas }) => {
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-40">
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-5xl p-8 max-h-[90vh] overflow-y-auto animate-fade-in">
           <h2 className="text-2xl font-semibold mb-6">Domicilio</h2>
+         {verificador && (
+  <p className="mb-4 text-sm font-medium text-gray-700">
+    Verificador: <span className="font-semibold">{verificador}</span>
+  </p>
+)}
           <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-4 gap-4">
             {/* {renderField("ID Terreno", idTerrenaGestionDomicilio)} */}
             {/* {renderField("ID Cliente Verificación", idClienteVerificacion)} */}

@@ -299,8 +299,8 @@ export function ListadoSolicitud() {
     }
 
     setFileToUpload(file);
-      const localUrl = URL.createObjectURL(file);
-  setPreviewUrl(localUrl);
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
   };
 
 
@@ -382,12 +382,12 @@ export function ListadoSolicitud() {
     }
   }; */}
 
-  const fetchInsertarimagen = async (tipo, data, estado , imagen) => {
-  
-   
+  const fetchInsertarimagen = async (tipo, data, estado, imagen) => {
+
+
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
-    
+
       await axios.post(url, {
         idCre_SolicitudWeb: data,
         Tipo: tipo,
@@ -397,7 +397,7 @@ export function ListadoSolicitud() {
 
       });
     } catch (error) {
-     console.error("Error al guardar los datos del cliente", error.response?.data || error.message);
+      console.error("Error al guardar los datos del cliente", error.response?.data || error.message);
 
     }
   };
@@ -436,7 +436,7 @@ export function ListadoSolicitud() {
         // 3. Actualizar en backend
         const updatedData = { Foto: updatedUrl };
         await fetchActualizaSolicitud(selectedRow.id, updatedData);
-        fetchInsertarimagen(1, selectedRow.id , 14 , updatedUrl)
+        fetchInsertarimagen(1, selectedRow.id, 14, updatedUrl)
 
         setUrlCloudstorage();
         setFileToUpload(null);
@@ -445,7 +445,7 @@ export function ListadoSolicitud() {
           variant: "success",
         });
 
-        
+
       }
     } catch (error) {
       alert(error.message);
@@ -1019,21 +1019,23 @@ export function ListadoSolicitud() {
       } else {
         // Si hay datos, determina qué modal abrir en función del tipo y los datos recibidos
         if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio > 0) {
-          setDomicilioData(idsTerrenas); // Asigna los datos necesarios para el modal de domicilio
-          setDomicilioModalOpen(true);
+           
+          
+          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });// Asigna los datos necesarios para el modal de domicilio
+          setDomicilioModalOpen(true); 
+          
         }
         if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo > 0) {
-          setTrabajoData(idsTerrenas); // Asigna los datos necesarios para el modal de trabajo
+          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id }); // Asigna los datos necesarios para el modal de trabajo
           setTrabajoModalOpen(true);
         }
 
-        if (
-          tipo === "domicilio" &&
-          idsTerrenas.idTerrenaGestionDomicilio == 0
-        ) {
+        if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio == 0) {
+          await fetchtiemposolicitudesweb(data.id, 4); // 4 = tipo domicilio
           setOpenModalPendiente(true);
         }
         if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo == 0) {
+          await fetchtiemposolicitudesweb(data.id, 5); // 5 = tipo trabajo
           setOpenModalPendiente(true);
         }
       }
@@ -1041,6 +1043,8 @@ export function ListadoSolicitud() {
       console.error("Error fetching data for verificación terrena:", error);
     }
   };
+
+  ////const fetch verificador => {}
 
   /// variable y useffect para que se stere el nombre de usuario
 
@@ -1275,16 +1279,20 @@ export function ListadoSolicitud() {
   useEffect(() => {
     if (!socket) return;
 
-    const onChanged = () => {
-      // invierte el booleano para forzar el re-fetch
+    const onChanged = (data) => {
+      console.log('📡 Evento recibido: solicitud-web-changed', data);
+
+      // Forzar re-fetch
       setRecargar(prev => !prev);
     };
 
     socket.on("solicitud-web-changed", onChanged);
+
     return () => {
       socket.off("solicitud-web-changed", onChanged);
     };
   }, [socket]);
+
 
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
@@ -1755,7 +1763,7 @@ export function ListadoSolicitud() {
   const handleApprove = (rowData) => {
     // aquí tu lógica para aprobar...
     console.log("Aprobando fila:", rowData);
-    
+
   };
 
 
@@ -4131,22 +4139,26 @@ export function ListadoSolicitud() {
         openModal={isDomicilioModalOpen}
         closeModal={handleCloseDomicilioModal}
         idsTerrenas={idsTerrenas}
+        idSolicitud={domicilioData?.idSolicitud}
+
       />
 
       <TrabajoModal
         openModal={isTrabajoModalOpen}
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={idsTerrenas}
+        idSolicitud={trabajoData?.idSolicitud}
+
       />
 
-      <Dialog
-        open={openModalPendiente}
-        onClose={() => setOpenModalPendiente(false)}
-      >
+      <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
         <DialogTitle>Verificación Pendiente</DialogTitle>
         <DialogContent>
           <Typography>
-            Verificación pendiente por el personal asignado.
+            Verificación pendiente por el verificador:
+            <strong className="ml-2 text-blue-700">
+              {clienteEstados.length > 0 ? clienteEstados[0].Telefono : "N/A"}
+            </strong>
           </Typography>
         </DialogContent>
         <DialogActions>
