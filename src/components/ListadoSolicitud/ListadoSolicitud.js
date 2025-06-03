@@ -132,7 +132,13 @@ export function ListadoSolicitud() {
   const [tipoClienteMap, setTipoClienteMap] = useState({});
   const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] = useState(null);
   const [tipoConsulta, setTipoConsulta] = useState([]);
-  const [fechaInicio, setFechaInicio] = useState(today);
+
+
+  const date15DaysAgo = new Date();
+date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
+
+  const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr);
   const [fechaFin, setFechaFin] = useState(today);
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
