@@ -270,7 +270,7 @@ export function ReporteEquifax({
   };
 
   return (
-    <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-2">
+    <div className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-2 px-4 sm:px-6 lg:px-8 py-4">
       {/* Cabecera Mejorada */}
       <div className="flex justify-between items-center bg-gradient-to-r from-blue-900 to-blue-700 p-6 text-white print-header">
         <div className="flex items-center">

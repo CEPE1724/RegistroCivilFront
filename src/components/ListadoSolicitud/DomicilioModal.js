@@ -55,7 +55,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
   const [showImageModal, setShowImageModal] = useState(false); 
    const [verificador, setVerificador] = useState(null);
 
-   console.log(idSolicitud)
  const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
   console.log("llega id" ,estado )
   try {
@@ -86,7 +85,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
         if (!id) return;
         const response = await axios.get(APIURL.getTerrenaGestionDomicilio(id));
         const data = response.data;
-        console.log(data)
 
         // 👇 Convertir imágenes de string a array si es necesario
         if (typeof data.domicilioImages === "string") {

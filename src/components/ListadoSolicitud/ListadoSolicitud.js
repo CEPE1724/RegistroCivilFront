@@ -296,7 +296,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     if (!file) return;
 
     const extension = file.name.split('.').pop().toLowerCase();
-    if (extension !== "jpeg") {
+    if (extension !== "jpeg" && extension !== "jpg" && extension !=="png") {
       enqueueSnackbar("Solo archivos con extensión .jpeg son permitidos", { variant: "error" });
       e.target.value = null; // reset input
       setFileToUpload(null);
@@ -1957,7 +1957,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
         </FormControl>
         <button
           title="Nueva Solicitud"
-          className="group cursor-pointer outline-none hover:rotate-90 duration-300"
+          className="group cursor-pointer outline-none hover:rotate-90 transition-transform duration-300 w-[60px] h-[60px] flex items-center justify-center"
           onClick={handleSolictud}
         >
           <svg
@@ -3761,7 +3761,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
                       <input
                         type="file"
-                        accept="image/jpeg"
+                        accept="image/jpeg, image/png"
                         onChange={handleFileChange}
                         ref={inputFileRef}
                         style={{ display: "none" }}
@@ -3958,6 +3958,17 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           )}
         </DialogContent>
         <DialogActions>
+			{selectedRow?.Estado === 1 && (<Button
+			color="error"
+			onClick={() => {
+				patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
+				patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+				fetchInsertarDatos(6, selectedRow?.id, 4); handleCloseDialog(); 
+				}}
+			className="group relative py-3 px-8 text-lg font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-red-200 hover:shadow-xl"
+			>
+				Rechazar Solicitud
+			</Button>)}
           <Button
             onClick={handleCloseDialog}
             color="primary"

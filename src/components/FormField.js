@@ -271,6 +271,7 @@ const ReusableForm = ({
   includeButtons = false,
   submitButtonText = "Enviar",
   cancelButtonText = "Cancelar",
+  returnButtonText = "Regresar",
   loading = false,
   onCancel,
   columns = 1,
@@ -545,6 +546,13 @@ const handleOtpVerification = async (isVerified, otpCode) => {
 			  disabled={isCanceling}
 			>
 			  {isCanceling ? "Cancelando..." : cancelButtonText}
+			</button>
+			<button
+			  type="submit"
+			  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+			  onClick={() => navigate("/ListadoSolicitud", { replace: true })}
+			>
+				{returnButtonText}
 			</button>
 		  </div>
 		)}
