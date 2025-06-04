@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, use } from "react";
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, use, useRef } from "react";
 import { useSnackbar } from "notistack";
 import { APIURL } from "../../../../configApi/apiConfig";
 import axios from "../../../../configApi/axiosConfig";
@@ -35,6 +35,7 @@ const Datos = forwardRef((props, ref) => {
     const [previewUrl, setPreviewUrl] = useState(cresolicitud?.imagen || null);
     const [fileToUpload, setFileToUpload] = useState(null);
     const [urlCloudstorage, setUrlCloudstorage] = useState(null);
+	const inputFileRef = useRef(null); 
 
     const [formData, setFormData] = useState({
         nacionalidad: data?.idNacionalidad || '',
@@ -263,6 +264,7 @@ const Datos = forwardRef((props, ref) => {
                 data.NumeroSolicitud,
                 "Foto"
             );
+			console.log("updateurl", updatedUrl)
             if (fileUploadResponse) {
                 updatedUrl = fileUploadResponse.url;
                 // Actualizar en backend
@@ -278,6 +280,24 @@ const Datos = forwardRef((props, ref) => {
             alert(error.message);
         }
     };
+
+	const handleFileChange = (e) => {
+		const file = e.target.files[0];
+		if (!file) return;
+	
+		const extension = file.name.split('.').pop().toLowerCase();
+		if (extension !== "jpeg" && extension !== "jpg" && extension !== "png") {
+		  enqueueSnackbar("Solo archivos con extensión .jpeg son permitidos", { variant: "error" });
+		  e.target.value = null; // reset input
+		  setFileToUpload(null);
+		  setPreviewUrl(null);
+		  return;
+		}
+	
+		setFileToUpload(file);
+		const localUrl = URL.createObjectURL(file);
+		setPreviewUrl(localUrl);
+	  };
 
     return (
         <div className="py-2 w-full">
@@ -326,10 +346,24 @@ const Datos = forwardRef((props, ref) => {
                                         <button
                                             onClick={handleUploadClick}
                                             disabled={!fileToUpload}
-                                            className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 }`}
+                                            className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                            				? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                            				: "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            				} }`}
                                         >
                                         	Guardar Foto
                                         </button>
+										<input
+                      					  type="file"
+                      					  accept="image/jpeg, image/png"
+                      					  onChange={handleFileChange}
+                      					  ref={inputFileRef}
+                      					  style={{ display: "none" }}
+                      					/>
+										<Button onClick={() => inputFileRef.current.click()}>
+										  Cargar foto
+										</Button>
+										
                                     </div>
 
                                 </div>

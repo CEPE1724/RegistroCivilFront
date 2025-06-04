@@ -703,7 +703,8 @@ export function GestorDocumentos({
             <div
                 className={`w-64 bg-[#2d3689] text-white ${isMenuOpen ? "block" : "hidden"} md:block transition-all duration-300 ease-in-out overflow-y-auto`}
             >
-                <div className="p-6">
+                <div className="p-6 fixed top-0 left-0 w-full h-full bg-white z-40 overflow-y-auto
+  				transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:static md:translate-x-0 md:h-auto md:w-auto md:bg-transparent md:z-auto`}">
                     {clientInfo.estadoVerifD === 2 && (
                         <div>
                             <button name="rechTodo"
@@ -773,7 +774,7 @@ export function GestorDocumentos({
             {/* Menu Toggle Button */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="fixed top-15 left-6 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
+                className="fixed top-12 left-6 z-50 md:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition duration-300"
             >
                 {isMenuOpen ? "❌" : "☰"}
             </button>
@@ -878,7 +879,7 @@ export function GestorDocumentos({
                                     {/* Documento actual */}
                                     <div className={`flex-1 bg-gray-50 p-6 rounded-lg shadow-lg border ${flatFiles[currentIndex].estado === 3 ? "border-green-300" :
                                         flatFiles[currentIndex].estado === 4 ? "border-red-300" :
-                                            "border-gray-200"} relative h-screen flex flex-col`}>
+                                            "border-gray-200"} relative md:h-screen flex flex-col`}>
 
                                         {/* Estado visual del documento */}
                                         {flatFiles[currentIndex].estado === 3 && (
@@ -910,9 +911,7 @@ export function GestorDocumentos({
                                             <object
                                                 data={flatFiles[currentIndex].url}
                                                 type="application/pdf"
-                                                width="100%"
-                                                height="100%"
-                                                className="rounded-md"
+                                                className="w-full h-full rounded-md"
                                                 aria-label="Vista previa PDF"
                                             >
                                                 <p>Vista previa no disponible</p>

@@ -546,7 +546,7 @@ export function TelefonicaList({
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-white">
+      <div className="flex-1 p-6 bg-white overflow-x-hidden">
         <div className="w-full bg-white p-6 rounded-lg shadow-lg">
           {/* Información del cliente */}
           <div className="mb-6">
@@ -602,7 +602,7 @@ export function TelefonicaList({
                       </button>
                     )}
 
-                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && (
+                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica!==3 && (
                       <button
                         onClick={handleRemove
                         }
@@ -624,9 +624,9 @@ export function TelefonicaList({
           </div>
 
           {/* Tabla */}
-          <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
-            <div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
-              <table className="min-w-full table-auto">
+          <div className="p-6 bg-gray-50 min-h-screen overflow-hidden">
+            <div className="w-full overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
+              <table className="w-full table-auto">
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="px-4 py-2 text-center font-bold">#</th>
