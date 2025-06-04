@@ -88,6 +88,8 @@ import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
+import { Checkbox, FormControlLabel } from '@mui/material';
+
 import { useRef } from "react";
 
 
@@ -135,8 +137,8 @@ export function ListadoSolicitud() {
 
 
   const date15DaysAgo = new Date();
-date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
-const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
+  date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+  const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
 
   const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr);
   const [fechaFin, setFechaFin] = useState(today);
@@ -150,6 +152,9 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   const [idsTerrenas, setIdsTerrenas] = useState([]);
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
+    const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 21;
+
+  console.log("tiene permiso0",userData?.idGrupo)
   const [cedula, setCedula] = useState("");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
@@ -296,7 +301,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     if (!file) return;
 
     const extension = file.name.split('.').pop().toLowerCase();
-    if (extension !== "jpeg" && extension !== "jpg" && extension !=="png") {
+    if (extension !== "jpeg" && extension !== "jpg" && extension !== "png") {
       enqueueSnackbar("Solo archivos con extensión .jpeg son permitidos", { variant: "error" });
       e.target.value = null; // reset input
       setFileToUpload(null);
@@ -592,15 +597,81 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   const [openDialog2, setOpenDialog2] = useState(false);
   const [currentAction, setCurrentAction] = useState(null); // Estado para saber qué acción se va a realizar
   const [currentData, setCurrentData] = useState([]);
+  const [laboralChecked, setLaboralChecked] = useState(false);
+  const [domicilioChecked, setDomicilioChecked] = useState(false);
 
-  const handleConfirm = () => {
+
+  const handleConfirm = async () => {
     if (currentAction === "estado") {
       handleApproveEstado(currentData);
     } else if (currentAction === "resultado") {
-      handleApproveResultado(currentData);
+      await handleApproveResultado(currentData); 
+      if (laboralChecked) {
+        await patchLaboral(currentData.id);
+      }
+      if (domicilioChecked) {
+        await patchDomicilio(currentData.id);
+      }
     }
-    setOpenDialog2(false); // Cierra el diálogo
+    setOpenDialog2(false);
+    // Limpiar los checks por si se vuelve a abrir
+    setLaboralChecked(false);
+    setDomicilioChecked(false);
   };
+
+
+  const patchDomicilio = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          TerrenoDomicilio: 1,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+    }
+  };
+
+  const patchLaboral = async (idSolicitud) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          TerrenoLaboral: 1,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.data) {
+        enqueueSnackbar("Solicitud actualizada correctamente.", {
+          variant: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la solicitud:", error);
+      enqueueSnackbar("Error al actualizar la solicitud.", {
+        variant: "error",
+      });
+    }
+  };
+
 
 
   const fetchInsertarDatos = async (tipo, data, estado) => {
@@ -1025,11 +1096,11 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
       } else {
         // Si hay datos, determina qué modal abrir en función del tipo y los datos recibidos
         if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio > 0) {
-           
-          
+
+
           setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });// Asigna los datos necesarios para el modal de domicilio
-          setDomicilioModalOpen(true); 
-          
+          setDomicilioModalOpen(true);
+
         }
         if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo > 0) {
           setTrabajoData({ ...idsTerrenas, idSolicitud: data.id }); // Asigna los datos necesarios para el modal de trabajo
@@ -1303,7 +1374,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
-      fetchSolicitudes(); 
+      fetchSolicitudes();
     }
   }, [
     currentPage,
@@ -1328,25 +1399,25 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   ]);
 
   useEffect(() => {
-  // Resetear página si cambian filtros
-  setCurrentPage(1);
-}, [
-  tipoConsulta,
-  selectedBodega,
-  estado,
-  fechaInicio,
-  fechaFin,
-  selectedVendedor,
-  analistaSelected,
-  solicitud,
-  documental,
-  telefonica,
-  domicilio,
-  laboral,
-  nombre,
-  numeroSolicitud,
-  cedula,
-]);
+    // Resetear página si cambian filtros
+    setCurrentPage(1);
+  }, [
+    tipoConsulta,
+    selectedBodega,
+    estado,
+    fechaInicio,
+    fechaFin,
+    selectedVendedor,
+    analistaSelected,
+    solicitud,
+    documental,
+    telefonica,
+    domicilio,
+    laboral,
+    nombre,
+    numeroSolicitud,
+    cedula,
+  ]);
 
 
 
@@ -1686,6 +1757,9 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     }
   };
 
+
+
+
   const handledocumentos = (registro) => {
     const stateData = {
       id: registro.id,
@@ -1978,6 +2052,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
             ))}
           </Select>
         </FormControl>
+         {puedeCrearSolicitud && (
         <button
           title="Nueva Solicitud"
           className="group cursor-pointer outline-none hover:rotate-90 transition-transform duration-300 w-[60px] h-[60px] flex items-center justify-center"
@@ -1997,7 +2072,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
             <path d="M8 12H16" strokeWidth="1.5"></path>
             <path d="M12 16V8" strokeWidth="1.5"></path>
           </svg>
-        </button>
+        </button>)}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -3981,17 +4056,17 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           )}
         </DialogContent>
         <DialogActions>
-			{selectedRow?.Estado === 1 && (<Button
-			color="error"
-			onClick={() => {
-				patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
-				patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-				fetchInsertarDatos(6, selectedRow?.id, 4); handleCloseDialog(); 
-				}}
-			className="group relative py-3 px-8 text-lg font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-red-200 hover:shadow-xl"
-			>
-				Rechazar Solicitud
-			</Button>)}
+          {selectedRow?.Estado === 1 && (<Button
+            color="error"
+            onClick={() => {
+              patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
+              patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+              fetchInsertarDatos(6, selectedRow?.id, 4); handleCloseDialog();
+            }}
+            className="group relative py-3 px-8 text-lg font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-red-200 hover:shadow-xl"
+          >
+            Rechazar Solicitud
+          </Button>)}
           <Button
             onClick={handleCloseDialog}
             color="primary"
@@ -4248,16 +4323,47 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
             ¿Estás seguro de cambiar el{" "}
             {currentAction === "estado" ? "estado" : "resultado"}?
           </Typography>
+
+          {currentAction === "resultado" && (
+            <div style={{ marginTop: '1rem' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={laboralChecked}
+                    onChange={(e) => setLaboralChecked(e.target.checked)}
+                  />
+                }
+                label="Laboral"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={domicilioChecked}
+                    onChange={(e) => setDomicilioChecked(e.target.checked)}
+                  />
+                }
+                label="Domicilio"
+              />
+            </div>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog2(false)} color="primary">
             Cancelar
           </Button>
-          <Button onClick={handleConfirm} color="primary">
+          <Button
+            onClick={handleConfirm}
+            color="primary"
+            disabled={
+              currentAction === "resultado" && !laboralChecked && !domicilioChecked
+            }
+          >
             Confirmar
           </Button>
+
         </DialogActions>
       </Dialog>
+
     </div>
   );
 }
