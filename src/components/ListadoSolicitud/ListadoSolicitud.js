@@ -89,7 +89,7 @@ import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
 import { useRef } from "react";
-
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
@@ -109,11 +109,11 @@ export function ListadoSolicitud() {
 
   const [recargar, setRecargar] = useState(false);
   const [bodegass, setBodegass] = useState([]);
-  const [selectedBodega, setSelectedBodega] = useState("todos");
-  const [selectedVendedor, setSelectedVendedor] = useState("todos");
-  const [analistaSelected, setAnalistaSelected] = useState("todos");
+  const [selectedBodega, setSelectedBodega] = useState(localStorage.getItem('filtroBodega') || "todos");
+  const [selectedVendedor, setSelectedVendedor] = useState(localStorage.getItem('filtroVendedor') || "todos");
+  const [analistaSelected, setAnalistaSelected] = useState(localStorage.getItem('filtroAnalista') || "todos");
   const [dataBodega, setDataBodega] = useState([]);
-  const [estado, setEstado] = useState("todos");
+  const [estado, setEstado] = useState(localStorage.getItem('filtroEstado') || "todos");
   const [datos, setDatos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
@@ -138,8 +138,8 @@ export function ListadoSolicitud() {
 date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
 const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
 
-  const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr);
-  const [fechaFin, setFechaFin] = useState(today);
+  const [fechaInicio, setFechaInicio] = useState(localStorage.getItem('filtroIniFecha') || date15DaysAgoStr);
+  const [fechaFin, setFechaFin] = useState(localStorage.getItem('filtroFinFecha') || today);
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
   const [openRegistroCivil, setOpenRegistroCivil] = useState(false);
@@ -150,7 +150,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   const [idsTerrenas, setIdsTerrenas] = useState([]);
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
-  const [cedula, setCedula] = useState("");
+  const [cedula, setCedula] = useState(localStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -535,7 +535,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     return data.resultado === 0;
   };
 
-  const [solicitud, setSolicitud] = useState("Todos");
+  const [solicitud, setSolicitud] = useState(localStorage.getItem('filtroSolicitud') || "Todos");
 
   /// estado solicitudes
   const estadoMap = {
@@ -546,7 +546,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     13: "RECHAZADO",
   };
 
-  const [documental, setDocumental] = useState("Todos");
+  const [documental, setDocumental] = useState(localStorage.getItem('filtroDocumental') || "Todos");
   const estadoDocumentalMap = {
     1: "PROCESO",
     2: "REVISIÓN",
@@ -554,7 +554,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     4: "APROBACION",
   };
 
-  const [telefonica, setTelefonica] = useState("Todos");
+  const [telefonica, setTelefonica] = useState(localStorage.getItem('filtroTelefonica') || "Todos");
   const estadoTelefonicaMap = {
     1: "NO ASIGNADO",
     2: "ASIGNADO",
@@ -562,11 +562,11 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     4: "RECHAZADO",
   };
 
-  const [domicilio, setDomicilio] = useState("Todos");
-  const [laboral, setLaboral] = useState("Todos");
+  const [domicilio, setDomicilio] = useState(localStorage.getItem('filtroDomicilio') || "Todos");
+  const [laboral, setLaboral] = useState(localStorage.getItem('filtroLaboral') || "Todos");
 
-  const [nombre, setNombre] = useState("");
-  const [numeroSolicitud, setNumeroSolicitud] = useState("");
+  const [nombre, setNombre] = useState(localStorage.getItem('filtroNombre') || "");
+  const [numeroSolicitud, setNumeroSolicitud] = useState(localStorage.getItem('filtroNumSolicitud') || "");
 
   const DomicilioLaboralMap = {
     1: "ASIGNADO",
@@ -1635,17 +1635,17 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   };
 
   // Manejar cambio de bodega
-  const handleBodegaChange = (event) => {
-    setSelectedBodega(event.target.value);
-  };
+//   const handleBodegaChange = (event) => {
+//     setSelectedBodega(event.target.value);
+//   };
 
-  const handleVendedorChange = (event) => {
-    setSelectedVendedor(event.target.value);
-  };
+//   const handleVendedorChange = (event) => {
+//     setSelectedVendedor(event.target.value);
+//   };
 
-  const handleAnalistaChange = (event) => {
-    setAnalistaSelected(event.target.value);
-  };
+//   const handleAnalistaChange = (event) => {
+//     setAnalistaSelected(event.target.value);
+//   };
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -1807,6 +1807,38 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     });
   }
 
+  const limpiarFiltros = () => {
+	setFechaInicio(date15DaysAgoStr);
+	setFechaFin(today);
+	setSelectedBodega("todos");
+	setSelectedVendedor("todos");
+	setAnalistaSelected("todos");
+	setEstado("todos");
+	setSolicitud("Todos");
+	setDocumental("Todos");
+	setTelefonica("Todos");
+	setDomicilio("Todos");
+	setLaboral("Todos");
+	setCedula('')
+	setNombre('')
+	setNumeroSolicitud('')
+
+	localStorage.removeItem('filtroIniFecha');
+	localStorage.removeItem('filtroFinFecha');
+	localStorage.removeItem('filtroBodega');
+	localStorage.removeItem('filtroVendedor');
+	localStorage.removeItem('filtroAnalista');
+	localStorage.removeItem('filtroEstado');
+	localStorage.removeItem('filtroSolicitud');
+	localStorage.removeItem('filtroDocumental');
+	localStorage.removeItem('filtroTelefonica');
+	localStorage.removeItem('filtroDomicilio');
+	localStorage.removeItem('filtroLaboral');
+	localStorage.removeItem('filtroCedula')
+	localStorage.removeItem('filtroNombre')
+	localStorage.removeItem('filtroNumSolicitud')
+};
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -1815,7 +1847,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           type="date"
           variant="outlined"
           value={fechaInicio}
-          onChange={(e) => setFechaInicio(e.target.value)}
+          onChange={(e) => {const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); localStorage.setItem('filtroIniFecha', fechaIniFiltro);}}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -1827,7 +1859,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           type="date"
           variant="outlined"
           value={fechaFin}
-          onChange={(e) => setFechaFin(e.target.value)}
+          onChange={(e) => {const fechaFinFiltro = e.target.value; setFechaFin(fechaFinFiltro); localStorage.setItem('filtroFinFecha', fechaFinFiltro);}}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -1838,7 +1870,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Buscar por bodega</InputLabel>
           <Select
             value={selectedBodega}
-            onChange={handleBodegaChange}
+            onChange={(e) => {const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); localStorage.setItem('filtroBodega', bodegaFiltro);}}
             label="Buscar por nombre"
           >
             <MenuItem value="todos">Todos</MenuItem>
@@ -1855,7 +1887,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
 
           <Select
             value={selectedVendedor}
-            onChange={handleVendedorChange}
+            onChange={(e) => {const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); localStorage.setItem('filtroVendedor', vendedorFiltro);}}
             label="Buscar por nombre"
           >
             <MenuItem value="todos">Todos</MenuItem>
@@ -1871,7 +1903,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Analista</InputLabel>
           <Select
             value={analistaSelected}
-            onChange={handleAnalistaChange}
+            onChange={(e) => {const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); localStorage.setItem('filtroAnalista', analistaFiltro);}}
             label="Analista"
             disabled={selectDeshabilitado} //  solo si hubo match
           >
@@ -1888,7 +1920,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Estado</InputLabel>
           <Select
             value={estado}
-            onChange={(e) => setEstado(e.target.value)}
+            onChange={(e) => {const estadoFiltro = e.target.value; setEstado(estadoFiltro); localStorage.setItem('filtroEstado', estadoFiltro);}}
             label="Estado"
           >
             {estadosOpciones.map((estado) => (
@@ -1904,7 +1936,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Solicitud</InputLabel>
           <Select
             value={solicitud}
-            onChange={(e) => setSolicitud(e.target.value)}
+            onChange={(e) => {const solicitudFiltro = e.target.value; setSolicitud(solicitudFiltro); localStorage.setItem('filtroSolicitud', solicitudFiltro);}}
             label="Solicitud"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -1919,7 +1951,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Documental</InputLabel>
           <Select
             value={documental}
-            onChange={(e) => setDocumental(e.target.value)}
+            onChange={(e) => {const documentalFiltro = e.target.value; setDocumental(documentalFiltro); localStorage.setItem('filtroDocumental', documentalFiltro);}}
             label="Documental"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -1935,7 +1967,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Telefonica</InputLabel>
           <Select
             value={telefonica}
-            onChange={(e) => setTelefonica(e.target.value)}
+            onChange={(e) => {const telefonicaFiltro = e.target.value; setTelefonica(telefonicaFiltro); localStorage.setItem('filtroTelefonica', telefonicaFiltro);}}
             label="Telefonica"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -1951,7 +1983,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Domicilio</InputLabel>
           <Select
             value={domicilio}
-            onChange={(e) => setDomicilio(e.target.value)}
+            onChange={(e) => {const domicilioFiltro = e.target.value; setDomicilio(domicilioFiltro); localStorage.setItem('filtroDomicilio', domicilioFiltro);}}
             label="Domicilio"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -1967,7 +1999,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           <InputLabel>Laboral</InputLabel>
           <Select
             value={laboral}
-            onChange={(e) => setLaboral(e.target.value)}
+            onChange={(e) => {const LaboralFiltro = e.target.value; setLaboral(LaboralFiltro); localStorage.setItem('filtroLaboral', LaboralFiltro);}}
             label="Laboral"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2007,7 +2039,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           label="Buscar por cédula"
           variant="outlined"
           value={cedula}
-          onChange={(e) => setCedula(e.target.value)}
+          onChange={(e) => {const cedulaFiltro = e.target.value; setCedula(cedulaFiltro); localStorage.setItem('filtroCedula', cedulaFiltro);}} 
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2024,7 +2056,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           label="Buscar por nombre cliente"
           variant="outlined"
           value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
+          onChange={(e) => {const nombreFiltro = e.target.value; setNombre(nombreFiltro); localStorage.setItem('filtroNombre', nombreFiltro);}} 
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2040,7 +2072,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
           label="Buscar por número de solicitud"
           variant="outlined"
           value={numeroSolicitud}
-          onChange={(e) => setNumeroSolicitud(e.target.value)}
+          onChange={(e) => {const numSoliFiltro = e.target.value; setNumeroSolicitud(numSoliFiltro); localStorage.setItem('filtroNumSolicitud', numSoliFiltro);}} 
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2050,6 +2082,12 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
             endAdornment: <IconButton></IconButton>,
           }}
         />
+		<button
+		className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
+		onClick={limpiarFiltros}
+		>
+			<DeleteIcon/> Limpiar Filtros
+		</button>
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">
