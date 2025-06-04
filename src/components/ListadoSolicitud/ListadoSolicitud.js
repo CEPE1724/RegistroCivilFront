@@ -1303,7 +1303,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
-      fetchSolicitudes();
+      fetchSolicitudes(); 
     }
   }, [
     currentPage,
@@ -1326,6 +1326,29 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
     recargar,
 
   ]);
+
+  useEffect(() => {
+  // Resetear página si cambian filtros
+  setCurrentPage(1);
+}, [
+  tipoConsulta,
+  selectedBodega,
+  estado,
+  fechaInicio,
+  fechaFin,
+  selectedVendedor,
+  analistaSelected,
+  solicitud,
+  documental,
+  telefonica,
+  domicilio,
+  laboral,
+  nombre,
+  numeroSolicitud,
+  cedula,
+]);
+
+
 
   const [openDialog3, setOpenDialog3] = useState(false);
   const [analistasDisponibles, setAnalistasDisponibles] = useState([]);

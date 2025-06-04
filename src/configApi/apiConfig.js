@@ -1,7 +1,7 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
-//const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -116,7 +116,7 @@ export const APIURL = {
   get_cre_referenciasclientesweb_id: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/${id}`,
   update_soliciutd_telefonica:(id, estado) => `${API_BASE_URL}cre-solicitud-web/updatetelefonica/${id}/${estado}`,
   update_solicitud:(id) => `${API_BASE_URL}cre-solicitud-web/updatetelefonicaEstados/${id}`,
-
+verificarRegistroSolicitud: (cedula, bodega) =>`${API_BASE_URL}cre-solicitud-web/verificar-cedula-bodega?cedula=${cedula}&bodega=${bodega}`,
   getIdsTerrenas: (id, tipo) => `${API_BASE_URL}clientes-verificacion-terrena/${id}/${tipo}`,
   get_info_trabajo: (id) => `${API_BASE_URL}terrena-gestion-trabajo/${id}`,
 

@@ -70,6 +70,8 @@ const FormField = ({
       return false;
     }
   };
+
+  
   
 
   const handleInputChange = async (e) => {
@@ -105,23 +107,47 @@ const FormField = ({
       }
     }
 
-      if (name === "Cedula" && value.length === 10) {
-      const existe = await comprobcedula(value);
-    
+     if (name === "Cedula" && value.length === 10) {
+    const existe = await comprobcedula(value);
 
-      if (existe === 1) {
-        enqueueSnackbar(`La cedula  ${value} se encuentra en la lista negra`, {
-          variant: 'warning'
-        });
-        setIsBlacklisted(true);
-        return;
-      } else {
-        setIsBlacklisted(false);
+    if (existe === 1) {
+      enqueueSnackbar(`La cédula ${value} se encuentra en la lista negra`, {
+        variant: 'warning'
+      });
+      setIsBlacklisted(true);
+      return;
+    } else {
+      // Aquí validamos además la combinación cédula + bodega
+      const bodega = formik.values.Bodega; // Asegúrate que este campo exista y se llame así
+      if (bodega) {
+        const existeCombo = await verificarCedulaBodega(value, bodega);
+        if (existeCombo) {
+          enqueueSnackbar(`Ya existe una solicitud con la cédula ${value} en la bodega seleccionada`, {
+            variant: 'warning'
+          });
+          setIsBlacklisted(true);
+          return;
+        }
       }
+
+      setIsBlacklisted(false);
     }
+  }
     
     formik.setFieldValue(name, value);
+  }; 
+  const verificarCedulaBodega = async (cedula, bodega) => {
+    try {
+      const response = await axios.get(APIURL.verificarRegistroSolicitud(cedula, bodega), {
+      });
+  
+      return response.data.existe === true;
+    } catch (error) {
+      console.error("Error al verificar existencia de solicitud:", error);
+      return false; // por defecto, asumir que no existe para no bloquear
+    }
   };
+  
 
   if (type === "button") {
     return (
