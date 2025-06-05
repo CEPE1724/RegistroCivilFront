@@ -153,7 +153,7 @@ export function ListadoSolicitud() {
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
 
-    const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 21;
+  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
   const [cedula, setCedula] = useState(localStorage.getItem('filtroCedula') || "");
 
   const [dactilar, setDactilar] = useState("");
