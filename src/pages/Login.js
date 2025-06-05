@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { TextField, InputAdornment, CircularProgress, IconButton } from "@mui/material";
+import React, { useState , useEffect } from "react";
+import { TextField, InputAdornment, CircularProgress, IconButton, Alert } from "@mui/material";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
@@ -9,9 +9,19 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
 import crediPointLogo from "../img/credipoint_digital2.png";
-
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material"; // <-- agrega Dialog, Button, etc.
+import {
+  TimerOff as TimerOffIcon, // <-- agrega este ícono
+} from "@mui/icons-material"; // <-- TimerOffIcon también
 const Login = () => {
-  const { login, isLoggedIn, isSessionExpired, token } = useAuth();
+  const { login, isLoggedIn, isSessionExpired2,  logout } = useAuth();
+  const [sessionExpired, setShowExpiredModal] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [messageError, setMessageError] = useState("");
@@ -19,6 +29,19 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    console.log(isSessionExpired2)
+    if (isSessionExpired2) {
+      setShowExpiredModal(true);
+    }
+  }, [isSessionExpired2]);
+
+  const handleCloseModal = () => {
+  
+    setShowExpiredModal(false);
+    
+  };
 
   if (isLoggedIn) {
     navigate("/ciudadanos", { replace: true });
@@ -29,7 +52,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       // Llama a tu API para hacer login
-  
+
       const response = await axios.post("auth/login", {
         Nombre: userName,
         Clave: password,
@@ -66,11 +89,11 @@ const Login = () => {
                 <div className="w-full lg:w-6/12 px-4 py-8 md:px-6 relative">
                   <img className="mx-auto w-[150px] sm:w-[180px] md:w-[200px] lg:w-5/6 mb-2" src={crediPointLogo} alt="logo" />
                   <div className="md:mx-6 p-8 rounded-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.50)' }}>
-                    
+
                     {messageError && <div className="text-red-500 text-start mb-4 text-sm">*{messageError}</div>}
                     <form className="space-y-4" onSubmit={handleSubmit}>
                       <Box>
-                        
+
                         <TextField
                           placeholder="Usuario"
                           fullWidth
@@ -89,9 +112,9 @@ const Login = () => {
                       </Box>
 
                       <Box sx={{ width: '100%' }}>
-                        
+
                         <TextField
-                        placeholder="Contraseña"
+                          placeholder="Contraseña"
                           fullWidth
                           required
                           value={password}
@@ -130,6 +153,51 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <Dialog
+        open={sessionExpired}
+        onClose={handleCloseModal}
+        PaperProps={{
+          sx: {
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            borderRadius: "8px",
+            boxShadow: 24,
+            p: 4,
+            textAlign: "center",
+          },
+        }}
+      >
+        <DialogTitle>
+          <Typography variant="h6" component="div">
+            Sesión expirada <TimerOffIcon />
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mt: 2 }}>
+            Tu sesión ha expirado por inactividad. Por favor inicia sesión nuevamente.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", mt: 2 }}>
+          <Button
+            onClick={handleCloseModal}
+            variant="contained"
+            sx={{
+              backgroundColor: "#2d3689",
+              color: "#ffffff",
+              "&:hover": {
+                backgroundColor: "#212863",
+              },
+            }}
+          >
+            Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </section>
   );
 };

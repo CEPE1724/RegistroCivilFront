@@ -17,7 +17,7 @@ import { useAuth } from "../components/AuthContext/AuthContext";
 
 function DropDown() {
   const navigate = useNavigate();
-  const { logout, isLoggedIn } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
+  const { logout, isLoggedIn , logoutinactividad } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
@@ -36,8 +36,9 @@ function DropDown() {
     clearTimeout(logoutTimer); // Limpiar el temporizador anterior
 
     logoutTimer = setTimeout(() => {
+      logoutinactividad()
       setIsModalOpen(true); // Mostrar el modal de sesión expirada
-    }, 3000000); // 5 minutos
+    }, 3600000); // 5 minutos
   };
 
   useEffect(() => {
