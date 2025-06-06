@@ -5,7 +5,6 @@ import {
   DialogContent, 
   DialogActions, 
   Button, 
-  Checkbox, 
   IconButton,
   Card,
   CardContent,
@@ -15,13 +14,12 @@ import {
   LinearProgress,
   Alert,
   Tooltip,
-  Badge
+  Badge,
+  Snackbar
 } from '@mui/material';
 import { 
   Visibility, 
   Close, 
-  CheckCircle, 
-  Cancel, 
   Download,
   Image as ImageIcon,
   PictureAsPdf,
@@ -57,6 +55,8 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     const [previewLoading, setPreviewLoading] = useState(false);
     const [previewError, setPreviewError] = useState(false);
     const [currentDocType, setCurrentDocType] = useState(null);
+    const [updatingDoc, setUpdatingDoc] = useState(null);
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         const fetchDocs = async () => {
@@ -77,16 +77,17 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                     nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
                     tipoId: doc.idTipoDocumentoWEB,
                     url: doc.RutaDocumento || '',
-                    validado: false,
-                    invalido: false,
+                    tieneX: false, // Cambiar de validado/invalido a tieneX
                     fechaSubida: doc.FechaSubida,
-                    usuario: doc.Usuario
+                    usuario: doc.Usuario,
+                    estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
                 }));
 
                 setEstadoDocs(docsFiltrados);
             } catch (error) {
                 console.error("Error al obtener los documentos:", error);
                 setError("Error al cargar los documentos. Por favor, intente nuevamente.");
+                showSnackbar("Error al cargar los documentos", "error");
             } finally {
                 setLoading(false);
             }
@@ -95,39 +96,93 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
         fetchDocs();
     }, [idSolicitud, open]);
 
-    const handleCheck = (index) => {
-        const newDocs = [...estadoDocs];
-        newDocs[index].validado = !newDocs[index].validado;
-        if (newDocs[index].validado) {
-            newDocs[index].invalido = false; // Si se valida, no puede estar inválido
-        }
-        setEstadoDocs(newDocs);
+    const showSnackbar = (message, severity = 'success') => {
+        setSnackbar({ open: true, message, severity });
     };
 
-    const marcarInvalido = (index) => {
-        const newDocs = [...estadoDocs];
-        newDocs[index].invalido = !newDocs[index].invalido;
-        if (newDocs[index].invalido) {
-            newDocs[index].validado = false; // Si se marca inválido, no puede estar validado
-        }
-        setEstadoDocs(newDocs);
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
     };
 
-    // Función corregida para manejar la previsualización
-    const handlePreview = async (url, tipoId) => {
-        if (!url) return;
+    // Función para actualizar el estado del documento en la API
+    const updateDocumentStatus = async (docId, newStatus) => {
+        try {
+            setUpdatingDoc(docId);
+            
+            if (newStatus === 6) {
+                // Documento rechazado/cancelado
+                await axios.patch(APIURL.patch_documentos(docId), {
+                    idEstadoDocumento: 5
+                });
+                showSnackbar("Documento rechazado", "warning");
+            } else if (newStatus === 3) {
+                // Documento aceptado
+                await axios.patch(APIURL.patch_documentos(docId), {
+                    idEstadoDocumento: 3
+                });
+                showSnackbar(" removida del documento", "success");
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("Error al actualizar el estado del documento:", error);
+            showSnackbar("Error al actualizar el documento", "error");
+            return false;
+        } finally {
+            setUpdatingDoc(null);
+        }
+    };
+
+    // Cambiar función para manejar las X
+    const handleToggleX = async (index) => {
+        const doc = estadoDocs[index];
+        const newTieneX = !doc.tieneX;
         
-        console.log('Abriendo preview para:', url, 'Tipo:', tipoId);
+        // Actualizar estado local primero para UX inmediata
+        const newDocs = [...estadoDocs];
+        newDocs[index].tieneX = newTieneX;
+        setEstadoDocs(newDocs);
+
+        // Llamar a la API según el nuevo estado
+        const newStatus = newTieneX ? 5 : 3; // 6 para rechazado, 3 para aceptado
+        const success = await updateDocumentStatus(doc.id, newStatus);
+        
+        if (!success) {
+            // Revertir cambio si falló la API
+            const revertDocs = [...estadoDocs];
+            revertDocs[index].tieneX = !newTieneX;
+            setEstadoDocs(revertDocs);
+        }
+    };
+
+    // Función mejorada para manejar la previsualización
+    const handlePreview = async (url, tipoId) => {
+        if (!url) {
+            console.error('❌ URL vacía o undefined');
+            return;
+        }
+        
+        console.log('🔍 Abriendo preview para:', url, 'Tipo:', tipoId);
         
         setPreviewLoading(true);
         setPreviewError(false);
-        setImagenPreview(url);
-        setCurrentDocType(tipoId); // Guardar el tipo de documento
         
-        // Simular carga del preview
+        // Construir URL completa si es necesario
+        let fullUrl = url;
+        if (!url.startsWith('http')) {
+            // Ajusta esta línea según tu configuración de API
+            fullUrl = url.startsWith('/') ? `${window.location.origin}${url}` : url;
+        }
+        
+        console.log('🌐 URL final:', fullUrl);
+        
+        setImagenPreview(fullUrl);
+        setCurrentDocType(tipoId);
+        
+        // Simular carga mínima
         setTimeout(() => {
             setPreviewLoading(false);
-        }, 500);
+        }, 300);
     };
 
     const closePreview = () => {
@@ -138,40 +193,25 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     };
 
     const handleImageError = () => {
+        console.error('❌ Error al cargar el archivo');
         setPreviewError(true);
         setPreviewLoading(false);
     };
 
     const getFileType = (url, tipoId) => {
-        if (!url) return 'unknown';
-        
-        // Lógica específica por tipo de documento
-        if (tipoId === 12) return 'image'; // Foto del Cliente
-        if (tipoId === 13) return 'image'; // Croquis
-        if (tipoId === 14) return 'image'; // Servicio Básico (generalmente es imagen)
-        
-        // Fallback: detectar por extensión
-        const extension = url.split('.').pop()?.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) return 'image';
-        if (extension === 'pdf') return 'pdf';
-        return 'unknown';
+        // FORZAR TODO COMO PDF - YA NO MÁS PROBLEMAS
+        return 'pdf';
     };
 
     const getStatusColor = (doc) => {
-        if (doc.invalido) return 'error';
-        if (doc.validado) return 'success';
+        if (doc.tieneX) return 'error';
         return 'default';
     };
 
-    const getStatusIcon = (doc) => {
-        if (doc.invalido) return <Cancel color="error" />;
-        if (doc.validado) return <CheckCircle color="success" />;
-        return null;
-    };
-
-    const continuarHabilitado = estadoDocs.length > 0 && estadoDocs.every(doc => !doc.invalido);
-    const documentosValidados = estadoDocs.filter(doc => doc.validado).length;
-    const documentosInvalidos = estadoDocs.filter(doc => doc.invalido).length;
+    // Validación modificada: botón "Aceptar" se deshabilita si algún documento tiene X
+    const hayDocumentosConX = estadoDocs.some(doc => doc.tieneX);
+    const continuarHabilitado = estadoDocs.length > 0 && !hayDocumentosConX;
+    const documentosConX = estadoDocs.filter(doc => doc.tieneX).length;
 
     return (
         <>
@@ -183,14 +223,14 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                         </Typography>
                         <Box display="flex" gap={1}>
                             <Chip 
-                                label={`${documentosValidados} validados`} 
-                                color="success" 
+                                label={`${estadoDocs.length - documentosConX}/${estadoDocs.length} sin X`} 
+                                color={!hayDocumentosConX ? "success" : "default"} 
                                 variant="outlined" 
                                 size="small"
                             />
-                            {documentosInvalidos > 0 && (
+                            {documentosConX > 0 && (
                                 <Chip 
-                                    label={`${documentosInvalidos} inválidos`} 
+                                    label={`${documentosConX} con X`} 
                                     color="error" 
                                     variant="outlined" 
                                     size="small"
@@ -216,6 +256,12 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                         </Alert>
                     )}
 
+                    {hayDocumentosConX && estadoDocs.length > 0 && (
+                        <Alert severity="warning" sx={{ mb: 2 }}>
+                            Hay documentos marcados con X. Para continuar, debe remover todas las X.
+                        </Alert>
+                    )}
+
                     {!loading && estadoDocs.length === 0 && !error && (
                         <Alert severity="info">
                             No se encontraron documentos para validar.
@@ -228,11 +274,23 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                 key={doc.id || index} 
                                 variant="outlined"
                                 sx={{
-                                    borderColor: doc.invalido ? 'error.main' : doc.validado ? 'success.main' : 'grey.300',
-                                    backgroundColor: doc.invalido ? 'error.light' : doc.validado ? 'success.light' : 'transparent',
-                                    opacity: doc.invalido ? 0.7 : 1
+                                    borderColor: doc.tieneX ? 'error.main' : 'grey.300',
+                                    backgroundColor: doc.tieneX ? 'error.light' : 'transparent',
+                                    opacity: doc.tieneX ? 0.7 : 1,
+                                    position: 'relative'
                                 }}
                             >
+                                {updatingDoc === doc.id && (
+                                    <LinearProgress 
+                                        sx={{ 
+                                            position: 'absolute', 
+                                            top: 0, 
+                                            left: 0, 
+                                            right: 0,
+                                            borderRadius: '4px 4px 0 0'
+                                        }} 
+                                    />
+                                )}
                                 <CardContent>
                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                         <Box flex={1}>
@@ -240,7 +298,22 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                                 <Typography variant="h6" component="div">
                                                     {doc.nombre}
                                                 </Typography>
-                                                {getStatusIcon(doc)}
+                                                {doc.tieneX && (
+                                                    <Chip 
+                                                        label="X" 
+                                                        color="error" 
+                                                        size="small"
+                                                        sx={{ fontWeight: 'bold' }}
+                                                    />
+                                                )}
+                                                {updatingDoc === doc.id && (
+                                                    <Chip 
+                                                        label="Actualizando..." 
+                                                        size="small" 
+                                                        color="primary"
+                                                        variant="outlined"
+                                                    />
+                                                )}
                                             </Box>
                                             
                                             <Typography variant="body2" color="text.secondary">
@@ -249,8 +322,8 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                             
                                             <Box display="flex" alignItems="center" gap={1} mt={1}>
                                                 <Chip 
-                                                    icon={getFileType(doc.url, doc.tipoId) === 'pdf' ? <PictureAsPdf /> : <ImageIcon />}
-                                                    label={getFileType(doc.url, doc.tipoId).toUpperCase()}
+                                                    icon={<PictureAsPdf />}
+                                                    label="PDF"
                                                     size="small"
                                                     variant="outlined"
                                                 />
@@ -258,15 +331,6 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                         </Box>
 
                                         <Box display="flex" alignItems="center" gap={1}>
-                                            <Tooltip title={doc.validado ? "Documento validado" : "Marcar como válido"}>
-                                                <Checkbox
-                                                    checked={doc.validado}
-                                                    onChange={() => handleCheck(index)}
-                                                    disabled={doc.invalido}
-                                                    color="success"
-                                                />
-                                            </Tooltip>
-
                                             <Tooltip title="Vista previa">
                                                 <span>
                                                     <IconButton 
@@ -294,13 +358,23 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                                 </span>
                                             </Tooltip>
 
-                                            <Tooltip title={doc.invalido ? "Marcar como válido" : "Marcar como inválido"}>
-                                                <IconButton 
-                                                    onClick={() => marcarInvalido(index)}
-                                                    color={doc.invalido ? "error" : "default"}
-                                                >
-                                                    <Close />
-                                                </IconButton>
+                                            <Tooltip title={doc.tieneX ? "Remover X" : "Marcar con X"}>
+                                                <span>
+                                                    <IconButton 
+                                                        onClick={() => handleToggleX(index)}
+                                                        color={doc.tieneX ? "error" : "default"}
+                                                        disabled={updatingDoc === doc.id}
+                                                        sx={{
+                                                            backgroundColor: doc.tieneX ? 'error.main' : 'transparent',
+                                                            color: doc.tieneX ? 'white' : 'inherit',
+                                                            '&:hover': {
+                                                                backgroundColor: doc.tieneX ? 'error.dark' : 'rgba(0, 0, 0, 0.04)'
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Close />
+                                                    </IconButton>
+                                                </span>
                                             </Tooltip>
                                         </Box>
                                     </Box>
@@ -319,14 +393,16 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                         disabled={!continuarHabilitado}
                         variant="contained"
                         color="primary"
-                        startIcon={<CheckCircle />}
                     >
-                        Continuar ({estadoDocs.length - documentosInvalidos} documentos)
+                        {hayDocumentosConX 
+                            ? `Aceptar (${documentosConX} )` 
+                            : `Aceptar (${estadoDocs.length})`
+                        }
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Dialog de Vista Previa */}
+            {/* Dialog de Vista Previa - CORREGIDO CON OBJECT */}
             <Dialog
                 open={Boolean(imagenPreview)}
                 onClose={closePreview}
@@ -338,10 +414,19 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
             >
                 <DialogTitle>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Typography variant="h6">Vista previa del documento</Typography>
-                        <IconButton onClick={closePreview} color="inherit">
-                            <Close />
-                        </IconButton>
+                        <Typography variant="h6">
+                            Vista previa del documento
+                        </Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                            <Chip 
+                                label="PDF"
+                                size="small"
+                                variant="outlined"
+                            />
+                            <IconButton onClick={closePreview} color="inherit">
+                                <Close />
+                            </IconButton>
+                        </Box>
                     </Box>
                 </DialogTitle>
                 
@@ -387,38 +472,46 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
 
                     {imagenPreview && !previewLoading && !previewError && (
                         <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
-                            {getFileType(imagenPreview, currentDocType) === 'pdf' ? (
-                                <iframe
-                                    src={imagenPreview}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ 
-                                        border: 'none', 
+                            {/* SIEMPRE MOSTRAR COMO PDF */}
+                            <Box sx={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center' 
+                            }}>
+                                <object
+                                    data={imagenPreview}
+                                    type="application/pdf"
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
                                         minHeight: '600px',
                                         borderRadius: '8px',
                                         backgroundColor: '#f5f5f5'
                                     }}
-                                    title="Vista previa PDF"
-                                    onLoad={() => setPreviewLoading(false)}
-                                    onError={handleImageError}
-                                />
-                            ) : (
-                                <img
-                                    src={imagenPreview}
-                                    alt="Vista previa"
-                                    style={{ 
-                                        maxHeight: '100%', 
-                                        maxWidth: '100%', 
-                                        objectFit: 'contain',
-                                        borderRadius: '8px',
-                                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                        display: 'block',
-                                        margin: '0 auto'
-                                    }}
-                                    onError={handleImageError}
-                                    onLoad={() => setPreviewLoading(false)}
-                                />
-                            )}
+                                    aria-label="Vista previa PDF"
+                                >
+                                    <Box sx={{ textAlign: 'center', p: 4 }}>
+                                        <ErrorIcon color="warning" sx={{ fontSize: 64, mb: 2 }} />
+                                        <Typography variant="h6" gutterBottom>
+                                            Vista previa no disponible
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                            No se puede mostrar el archivo en el navegador.
+                                        </Typography>
+                                        <Button 
+                                            variant="contained" 
+                                            href={imagenPreview} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            startIcon={<Download />}
+                                        >
+                                            Abrir en nueva pestaña
+                                        </Button>
+                                    </Box>
+                                </object>
+                            </Box>
                         </Box>
                     )}
                 </DialogContent>
@@ -438,6 +531,23 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Snackbar para notificaciones */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={handleCloseSnackbar} 
+                    severity={snackbar.severity}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </>
     );
 };
