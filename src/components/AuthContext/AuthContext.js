@@ -10,6 +10,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [isSessionExpired, setIsSessionExpired] = useState(false);
+  const [isSessionExpired2, setIsSessionExpired2] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null); // Para almacenar los datos del usuario
   const [userUsuario, setUserUsuario] = useState(null); // Para almacenar los datos de la API 'get_nomina'
@@ -127,6 +128,18 @@ export const AuthProvider = ({ children }) => {
     setUserData(null); // Limpiar los datos del usuario
     setUserUsuario(null); // Limpiar los datos de 'get_nomina'
     navigate("/login");
+  }; 
+
+    const logoutinactividad = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiration");
+    localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
+    setToken(null);
+    setIsSessionExpired2(true);
+    setIsLoggedIn(false);
+    setUserData(null); // Limpiar los datos del usuario
+    setUserUsuario(null); // Limpiar los datos de 'get_nomina'
+    navigate("/login");
   };
 
   return (
@@ -135,11 +148,13 @@ export const AuthProvider = ({ children }) => {
         token,
         setToken,
         isSessionExpired,
+        isSessionExpired2,
         isLoggedIn,
         userData,
         userUsuario, // Datos obtenidos de 'get_nomina'
         login,
         logout,
+        logoutinactividad,
         idMenu,
          setMenuId,
          isConnected,
