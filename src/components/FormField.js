@@ -54,13 +54,13 @@ const FormField = ({
       const url = APIURL.validarTelefono(telefono);
       const response = await axios.get(url);
       return response.data;
-      } catch (error) {
-        console.error("Error al validar el teléfono:", error);
-        return false;
-        }        
+    } catch (error) {
+      console.error("Error al validar el teléfono:", error);
+      return false;
+    }
   };
 
-      const comprobcedula = async (cedula) => {
+  const comprobcedula = async (cedula) => {
     try {
       const url = APIURL.validarCedula(cedula);
       const response = await axios.get(url);
@@ -71,8 +71,8 @@ const FormField = ({
     }
   };
 
-  
-  
+
+
 
   const handleInputChange = async (e) => {
     let { name, value } = e.target;
@@ -94,7 +94,7 @@ const FormField = ({
 
     if (name === "Celular" && value.length === 10) {
       const existe = await comprobTelf(value);
-    
+
 
       if (existe === 1) {
         enqueueSnackbar(`El número ${value} se encuentra en la lista negra`, {
@@ -107,47 +107,47 @@ const FormField = ({
       }
     }
 
-     if (name === "Cedula" && value.length === 10) {
-    const existe = await comprobcedula(value);
+    if (name === "Cedula" && value.length === 10) {
+      const existe = await comprobcedula(value);
 
-    if (existe === 1) {
-      enqueueSnackbar(`La cédula ${value} se encuentra en la lista negra`, {
-        variant: 'warning'
-      });
-      setIsBlacklisted(true);
-      return;
-    } else {
-      // Aquí validamos además la combinación cédula + bodega
-      const bodega = formik.values.Bodega; // Asegúrate que este campo exista y se llame así
-      if (bodega) {
-        const existeCombo = await verificarCedulaBodega(value, bodega);
-        if (existeCombo) {
-          enqueueSnackbar(`Ya existe una solicitud con la cédula ${value} en la bodega seleccionada`, {
-            variant: 'warning'
-          });
-          setIsBlacklisted(true);
-          return;
+      if (existe === 1) {
+        enqueueSnackbar(`La cédula ${value} se encuentra en la lista negra`, {
+          variant: 'warning'
+        });
+        setIsBlacklisted(true);
+        return;
+      } else {
+        // Aquí validamos además la combinación cédula + bodega
+        const bodega = formik.values.Bodega; // Asegúrate que este campo exista y se llame así
+        if (bodega) {
+          const existeCombo = await verificarCedulaBodega(value, bodega);
+          if (existeCombo) {
+            enqueueSnackbar(`Ya existe una solicitud con la cédula ${value} en la bodega seleccionada`, {
+              variant: 'warning'
+            });
+            setIsBlacklisted(true);
+            return;
+          }
         }
-      }
 
-      setIsBlacklisted(false);
+        setIsBlacklisted(false);
+      }
     }
-  }
-    
+
     formik.setFieldValue(name, value);
-  }; 
+  };
   const verificarCedulaBodega = async (cedula, bodega) => {
     try {
       const response = await axios.get(APIURL.verificarRegistroSolicitud(cedula, bodega), {
       });
-  
+
       return response.data.existe === true;
     } catch (error) {
       console.error("Error al verificar existencia de solicitud:", error);
       return false; // por defecto, asumir que no existe para no bloquear
     }
   };
-  
+
 
   if (type === "button") {
     return (
@@ -324,33 +324,33 @@ const ReusableForm = ({
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema,
-    enableReinitialize: true, 
+    enableReinitialize: true,
     onSubmit: async (values) => {
-    //   if (isOtpVerified) {
-        // setIsSubmitting(true);
-        // try {
-        //   await onSubmit(values);
-        // } catch (error) {
-        //   enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
-        //   console.error("Error en envío:", error);
-        // } finally {
-        //   setIsSubmitting(false);
-        // }
-    //   } else {
-        // Si el OTP no es verificado, muestra el modal
+      //   if (isOtpVerified) {
+      // setIsSubmitting(true);
+      // try {
+      //   await onSubmit(values);
+      // } catch (error) {
+      //   enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
+      //   console.error("Error en envío:", error);
+      // } finally {
+      //   setIsSubmitting(false);
+      // }
+      //   } else {
+      // Si el OTP no es verificado, muestra el modal
 
-       requestOtp();
-        //setIsOtpModalOpen(true);
-    //   }
+      requestOtp();
+      //setIsOtpModalOpen(true);
+      //   }
     },
   });
 
   useEffect(() => {
-  if (onExternalUpdate) {
-    onExternalUpdate(formik);
-  }
-}, [onExternalUpdate]);
-  
+    if (onExternalUpdate) {
+      onExternalUpdate(formik);
+    }
+  }, [onExternalUpdate]);
+
   const requestOtp = async () => {
     try {
       const url = APIURL.generateOTP();
@@ -387,10 +387,10 @@ const ReusableForm = ({
     }
   };
 
-//   Reset del formulario cuando status es success
-//   useEffect(() => {
-//     formik.resetForm();
-//   }, [isOtpVerified]);
+  //   Reset del formulario cuando status es success
+  //   useEffect(() => {
+  //     formik.resetForm();
+  //   }, [isOtpVerified]);
 
   const handleCancel = () => {
     setIsCanceling(true);
@@ -400,200 +400,198 @@ const ReusableForm = ({
     setTimeout(() => setIsCanceling(false), 1000);
   };
 
-//   const handleOtpVerification = (isVerified) => {
-//     setIsOtpVerified(isVerified);
-//     setIsOtpModalOpen(false); // Cerrar el modal después de la verificación del OTP
-//   };
+  //   const handleOtpVerification = (isVerified) => {
+  //     setIsOtpVerified(isVerified);
+  //     setIsOtpModalOpen(false); // Cerrar el modal después de la verificación del OTP
+  //   };
 
-const handleOtpVerification = async (isVerified, otpCode) => {
-	if (isVerified) {
-	  let otpCodeString = String(otpCode);
-	  // Se asigna el OTP al objeto de Formik
-	  formik.values.otp_code = otpCodeString;
-	  setIsSubmitting(true);
-	  try {
-		await onSubmit(formik.values);
-		// Espera 2 segundos para que el loader se muestre
-		await new Promise((resolve) => setTimeout(resolve, 2000));
-		formik.resetForm();
-		setPreviewUrl(null);
-		navigate("/ListadoSolicitud", { replace: true });
-	  } catch (error) {
-		enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
-		console.error("Error en envío:", error);
-	  } finally {
-		setIsSubmitting(false);
-	  }
-	}
-	setIsOtpModalOpen(false);
-	setIsOtpVerified(isVerified);
+  const handleOtpVerification = async (isVerified, otpCode) => {
+    if (isVerified) {
+      let otpCodeString = String(otpCode);
+      // Se asigna el OTP al objeto de Formik
+      formik.values.otp_code = otpCodeString;
+      setIsSubmitting(true);
+      try {
+        await onSubmit(formik.values);
+        // Espera 2 segundos para que el loader se muestre
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        formik.resetForm();
+        setPreviewUrl(null);
+        navigate("/ListadoSolicitud", { replace: true });
+      } catch (error) {
+        enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
+        console.error("Error en envío:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+    setIsOtpModalOpen(false);
+    setIsOtpVerified(isVerified);
   };
-  
-  
+
+
 
   // Separar el campo de archivo y otros campos
   const fileField = formConfig.find((field) => field.type === "file");
   const otherFields = formConfig.filter((field) => field.type !== "file");
 
   return (
-	<div className="relative">
-	  {isSubmitting && (
-		<div className="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
-		  <Loader />
-		</div>
-	  )}
-	  <form
-		className="w-full bg-white p-4 rounded-lg grid"
-		onSubmit={(e) => {
-		  e.preventDefault();
-		  // Validar y mostrar el primer error si hay alguno
-		  formik.validateForm().then((errors) => {
-			if (Object.keys(errors).length > 0) {
-			  formik.setTouched(
-				Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
-				false
-			  );
-			  showFirstError();
-			} else {
-			  formik.handleSubmit(e);
-			}
-		  });
-		}}
-	  >
-		<div className="grid gap-4 grid-cols-1 md:grid-cols-4">
-		  {fileField && (
-			<div className="md:col-span-1 order-2 md:order-1">
-			  <div className="w-30">
-				<FormField
-				  key={fileField.name}
-				  {...fileField}
-				  formik={formik}
-				  previewUrl={previewUrl}
-				  setPreviewUrl={setPreviewUrl}
-				/>
-			  </div>
-			</div>
-		  )}
-  
-		  <div
-			className={`grid gap-4 order-1 md:order-2 ${
-			  fileField ? "md:col-span-3" : "md:col-span-4"
-			} ${
-			  columns === 2
-				? "grid-cols-1 md:grid-cols-2"
-				: columns === 3
-				? "grid-cols-1 md:grid-cols-3"
-				: columns === 4
-				? "grid-cols-1 md:grid-cols-4"
-				: "grid-cols-1"
-			}`}
-		  >
-			{otherFields.map((field) => (
-			  <FormField key={field.name} {...field} formik={formik} />
-			))}
-		  </div>
-		</div>
-  
-		{/* Términos y condiciones */}
-		{includeTermsAndConditions && (
-		  <div className="flex justify-center gap-4 mt-4 mb-4">
-			<div className="flex items-center gap-2">
-			  <input
-				type="checkbox"
-				name="bTerminosYCondiciones"
-				id="bTerminosYCondiciones"
-				onChange={formik.handleChange}
-				onBlur={formik.handleBlur}
-				checked={formik.values.bTerminosYCondiciones}
-				className="text-fontRed accent-fontRed rounded"
-			  />
-			  <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
-				Acepto los{" "}
-				<a
-				  href="https://point.com.ec/terminos-y-condiciones"
-				  className="underline"
-				  target="_blank"
-				  rel="noopener noreferrer"
-				>
-				  términos y condiciones
-				</a>
-			  </label>
-			</div>
-			{formik.errors.bTerminosYCondiciones &&
-			  formik.touched.bTerminosYCondiciones && (
-				<p className="text-red-500 text-xs mt-1 text-center">
-				  {formik.errors.bTerminosYCondiciones}
-				</p>
-			  )}
-  
-			<div className="flex items-center gap-2">
-			  <input
-				type="checkbox"
-				name="bPoliticas"
-				id="bPoliticas"
-				onChange={formik.handleChange}
-				onBlur={formik.handleBlur}
-				checked={formik.values.bPoliticas}
-				className="text-fontRed accent-fontRed rounded"
-			  />
-			  <label htmlFor="bPoliticas" className="text-lightGrey text-xs">
-				Acepto las{" "}
-				<a
-				  href="https://point.com.ec/politicas-de-privacidad"
-				  className="underline"
-				  target="_blank"
-				  rel="noopener noreferrer"
-				>
-				  políticas de privacidad
-				</a>
-			  </label>
-			</div>
-			{formik.errors.bPoliticas && formik.touched.bPoliticas && (
-			  <p className="text-red-500 text-xs mt-1 text-center">
-				{formik.errors.bPoliticas}
-			  </p>
-			)}
-		  </div>
-		)}
-  
-		{includeButtons && (
-		  <div className="py-2 flex justify-center gap-2">
-			<button
-			  type="submit"
-			  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-			  disabled={isSubmitting}
-			>
-			  {isSubmitting ? <Loader /> : submitButtonText}
-			</button>
-			<button
-			  type="button"
-			  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
-			  onClick={handleCancel}
-			  disabled={isCanceling}
-			>
-			  {isCanceling ? "Cancelando..." : cancelButtonText}
-			</button>
-			<button
-			  type="submit"
-			  className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-			  onClick={() => navigate("/ListadoSolicitud", { replace: true })}
-			>
-				{returnButtonText}
-			</button>
-		  </div>
-		)}
-		{
-		  <OTPModal
-			isOpen={isOtpModalOpen}
-			onClose={() => setIsOtpModalOpen(false)}
-			onVerifyOtp={handleOtpVerification}
-			phoneNumberOTP={formik.values.Celular}
-		  />
-		}
-	  </form>
-	</div>
+    <div className="relative">
+      {isSubmitting && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white bg-opacity-75">
+          <Loader />
+        </div>
+      )}
+      <form
+        className="w-full bg-white p-4 rounded-lg grid"
+        onSubmit={(e) => {
+          e.preventDefault();
+          // Validar y mostrar el primer error si hay alguno
+          formik.validateForm().then((errors) => {
+            if (Object.keys(errors).length > 0) {
+              formik.setTouched(
+                Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+                false
+              );
+              showFirstError();
+            } else {
+              formik.handleSubmit(e);
+            }
+          });
+        }}
+      >
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
+          {fileField && (
+            <div className="md:col-span-1 order-2 md:order-1">
+              <div className="w-30">
+                <FormField
+                  key={fileField.name}
+                  {...fileField}
+                  formik={formik}
+                  previewUrl={previewUrl}
+                  setPreviewUrl={setPreviewUrl}
+                />
+              </div>
+            </div>
+          )}
+
+          <div
+            className={`grid gap-4 order-1 md:order-2 ${fileField ? "md:col-span-3" : "md:col-span-4"
+              } ${columns === 2
+                ? "grid-cols-1 md:grid-cols-2"
+                : columns === 3
+                  ? "grid-cols-1 md:grid-cols-3"
+                  : columns === 4
+                    ? "grid-cols-1 md:grid-cols-4"
+                    : "grid-cols-1"
+              }`}
+          >
+            {otherFields.map((field) => (
+              <FormField key={field.name} {...field} formik={formik} />
+            ))}
+          </div>
+        </div>
+
+        {/* Términos y condiciones */}
+        {includeTermsAndConditions && (
+          <div className="flex justify-center gap-4 mt-4 mb-4">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="bTerminosYCondiciones"
+                id="bTerminosYCondiciones"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                checked={formik.values.bTerminosYCondiciones}
+                className="text-fontRed accent-fontRed rounded"
+              />
+              <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
+                Acepto los{" "}
+                <a
+                  href="https://point.com.ec/terminos-y-condiciones"
+                  className="underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  términos y condiciones
+                </a>
+              </label>
+            </div>
+            {formik.errors.bTerminosYCondiciones &&
+              formik.touched.bTerminosYCondiciones && (
+                <p className="text-red-500 text-xs mt-1 text-center">
+                  {formik.errors.bTerminosYCondiciones}
+                </p>
+              )}
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="bPoliticas"
+                id="bPoliticas"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                checked={formik.values.bPoliticas}
+                className="text-fontRed accent-fontRed rounded"
+              />
+              <label htmlFor="bPoliticas" className="text-lightGrey text-xs">
+                Acepto las{" "}
+                <a
+                  href="https://point.com.ec/politicas-de-privacidad"
+                  className="underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  políticas de privacidad
+                </a>
+              </label>
+            </div>
+            {formik.errors.bPoliticas && formik.touched.bPoliticas && (
+              <p className="text-red-500 text-xs mt-1 text-center">
+                {formik.errors.bPoliticas}
+              </p>
+            )}
+          </div>
+        )}
+
+        {includeButtons && (
+          <div className="py-2 flex justify-center gap-2">
+            <button
+              type="submit"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader /> : submitButtonText}
+            </button>
+            <button
+              type="button"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
+              onClick={handleCancel}
+              disabled={isCanceling}
+            >
+              {isCanceling ? "Cancelando..." : cancelButtonText}
+            </button>
+            <button
+              type="submit"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+              onClick={() => navigate("/ListadoSolicitud", { replace: true })}
+            >
+              {returnButtonText}
+            </button>
+          </div>
+        )}
+        {
+          <OTPModal
+            isOpen={isOtpModalOpen}
+            onClose={() => setIsOtpModalOpen(false)}
+            onVerifyOtp={handleOtpVerification}
+            phoneNumberOTP={formik.values.Celular}
+          />
+        }
+      </form>
+    </div>
   );
-  
+
 };
 
 export default ReusableForm;
