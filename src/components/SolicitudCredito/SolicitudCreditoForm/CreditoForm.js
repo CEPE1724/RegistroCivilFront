@@ -23,12 +23,12 @@ export default function CreditoForm() {
   const [dataRecibir, setDataRecibir] = useState(null);
   const [loading, setLoading] = useState(false);  // Estado para mostrar el loading
   const [cedula, setCedula] = useState("");  // Estado para la cédula
-//   const [showIdentityModal, setShowIdentityModal] = useState(false); 
-//   const [openCameraModal, setOpenCameraModal] = useState(false);
-//   const [openModal, setOpenModal] = useState(false);
-//   const [imagenCapturada, setImagenCapturada] = useState(null);
-//   const [previewUrl, setPreviewUrl] = useState(null);
-//   const [fileToUpload, setFileToUpload] = useState(null);
+  //   const [showIdentityModal, setShowIdentityModal] = useState(false); 
+  //   const [openCameraModal, setOpenCameraModal] = useState(false);
+  //   const [openModal, setOpenModal] = useState(false);
+  //   const [imagenCapturada, setImagenCapturada] = useState(null);
+  //   const [previewUrl, setPreviewUrl] = useState(null);
+  //   const [fileToUpload, setFileToUpload] = useState(null);
 
   const IdVendedor = userUsuario?.idPersonal;
   const [actividadLaboral, setActividadLaboral] = useState([]);
@@ -144,89 +144,89 @@ export default function CreditoForm() {
   }, []);
 
   const handleUpdateFromCedula = (formik) => {
-  if (dataRecibir) {
-    formik.setFieldValue("PrimerNombre", dataRecibir.primerNombre || "");
-    formik.setFieldValue("SegundoNombre", dataRecibir.segundoNombre || "");
-    formik.setFieldValue("ApellidoPaterno", dataRecibir.apellidoPaterno || "");
-    formik.setFieldValue("ApellidoMaterno", dataRecibir.apellidoMaterno || "");
-    formik.setFieldValue("FechaNacimeinto", dataRecibir.fechaNacimiento || "");
-    formik.setFieldValue("Edad", dataRecibir.edad || "");
-    formik.setFieldValue("Cedula", dataRecibir.identificacion || "");
+    if (dataRecibir) {
+      formik.setFieldValue("PrimerNombre", dataRecibir.primerNombre || "");
+      formik.setFieldValue("SegundoNombre", dataRecibir.segundoNombre || "");
+      formik.setFieldValue("ApellidoPaterno", dataRecibir.apellidoPaterno || "");
+      formik.setFieldValue("ApellidoMaterno", dataRecibir.apellidoMaterno || "");
+      formik.setFieldValue("FechaNacimeinto", dataRecibir.fechaNacimiento || "");
+      formik.setFieldValue("Edad", dataRecibir.edad || "");
+      formik.setFieldValue("Cedula", dataRecibir.identificacion || "");
 
-	if (bodegaSeleccionada !== null) {
-    formik.setFieldValue("Bodega", bodegaSeleccionada);
-  }
-  if (tipoConsultaSeleccionado !== null) {
-    formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
-  } 
-  }
-};
+      if (bodegaSeleccionada !== null) {
+        formik.setFieldValue("Bodega", bodegaSeleccionada);
+      }
+      if (tipoConsultaSeleccionado !== null) {
+        formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
+      }
+    }
+  };
 
 
-//   useEffect(() => {
-//     if (dataRecibir) {
-//       console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
-		
-//       setInitialValues((prevValues) => ({
-//         // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
-// 		...prevValues,
-//         PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
-//         SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
-//         ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
-//         ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
-//         FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
-//         Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
-//         Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
-//         // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
-//         NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
-//         Bodega: Number(prevValues.Bodega) || '',  // Mantener el valor previo
-  
-//         // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
-//         idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
-//         idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
-//         // CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
-//         Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
-//         Email: prevValues.Email || '',  // Siempre tomar el valor previo
-//         idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
-//         idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
-//         idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
-//         bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
-//         bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
-//         Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
-//         bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
-//         bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
-//         idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
-//         idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
-//         otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
-//       }));
-//     }
-//   }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
-  
+  //   useEffect(() => {
+  //     if (dataRecibir) {
+  //       console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
+
+  //       setInitialValues((prevValues) => ({
+  //         // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
+  // 		...prevValues,
+  //         PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
+  //         SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
+  //         ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
+  //         ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
+  //         FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
+  //         Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
+  //         Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
+  //         // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
+  //         NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
+  //         Bodega: Number(prevValues.Bodega) || '',  // Mantener el valor previo
+
+  //         // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
+  //         idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
+  //         idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
+  //         // CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
+  //         Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
+  //         Email: prevValues.Email || '',  // Siempre tomar el valor previo
+  //         idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
+  //         idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
+  //         idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
+  //         bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
+  //         bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
+  //         Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
+  //         bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
+  //         bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
+  //         idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
+  //         idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
+  //         otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
+  //       }));
+  //     }
+  //   }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
+
   const handleSituacionLaboralChange = (selectedOption) => {
-  fetchActEconomina(selectedOption);  // Llamada API
+    fetchActEconomina(selectedOption);  // Llamada API
 
-  const situacion = Number(selectedOption);
-  let bAfiliado = false;
-  let bTieneRuc = false;
+    const situacion = Number(selectedOption);
+    let bAfiliado = false;
+    let bTieneRuc = false;
 
-  if (situacion === 1) {
-    bAfiliado = true;
-    bTieneRuc = false;
-  } else if (situacion === 2) {
-    bAfiliado = false;
-    bTieneRuc = false;
-  } else if (situacion === 5) {
-    bAfiliado = false;
-    bTieneRuc = true;
-  }
+    if (situacion === 1) {
+      bAfiliado = true;
+      bTieneRuc = false;
+    } else if (situacion === 2) {
+      bAfiliado = false;
+      bTieneRuc = false;
+    } else if (situacion === 5) {
+      bAfiliado = false;
+      bTieneRuc = true;
+    }
 
-  setInitialValues((prevValues) => ({
-    ...prevValues,
-    idSituacionLaboral: situacion,
-    bAfiliado,
-    bTieneRuc,
-  }));
-};
+    setInitialValues((prevValues) => ({
+      ...prevValues,
+      idSituacionLaboral: situacion,
+      bAfiliado,
+      bTieneRuc,
+    }));
+  };
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -243,10 +243,10 @@ export default function CreditoForm() {
     const cedula = event.target.value.trim();
     if (cedula.length === 10) {
       setLoading(true);  // Activamos el loading
-  
+
       try {
         const datosCogno = await fecthDatosCogno(cedula);
-        
+
         if (datosCogno.codigo === "OK") {
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
         } else {
@@ -262,7 +262,7 @@ export default function CreditoForm() {
       setDataRecibir(null);  // Limpiamos el estado si la cédula no tiene el formato correcto
     }
   };
-  
+
 
   const [initialValues, setInitialValues] = useState({
     // Estado inicial para los valores del formulario
@@ -290,13 +290,13 @@ export default function CreditoForm() {
     idCre_TiempoVivienda: null,
     otp_code: "",
     FechaNacimeinto: "",
-    Edad:"",
+    Edad: "",
   });
 
   // Ordenar las opciones de tipoConsulta alfabéticamente por label
-const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
-	a.label.localeCompare(b.label, 'es', { sensitivity: 'base' })
-);
+  const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
+    a.label.localeCompare(b.label, 'es', { sensitivity: 'base' })
+  );
 
   const formConfig = [
     {
@@ -306,7 +306,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       disabled: true,
       hidden: true,
     },
-    
+
     {
       label: "ID Vendedor",
       name: "idVendedor",
@@ -314,9 +314,9 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       disabled: true,
       hidden: true,
     },
-	{label: "Bodega",name: "Bodega",type: "select",options: dataBodega, onchange: (value) => setBodegaSeleccionada(value),},
-    {label: "Tipo de Consulta",name: "idCompraEncuesta",type: "select",options: tipoConsultaOrdenada , onchange: (value) => setTipoConsultaSeleccionado(value),},
-    {label: "Cédula", name: "Cedula", type: "text",onBlur: handleCedulaChange, },
+    { label: "Bodega", name: "Bodega", type: "select", options: dataBodega, onchange: (value) => setBodegaSeleccionada(value), },
+    { label: "Tipo de Consulta", name: "idCompraEncuesta", type: "select", options: tipoConsultaOrdenada, onchange: (value) => setTipoConsultaSeleccionado(value), },
+    { label: "Cédula", name: "Cedula", type: "text", onBlur: handleCedulaChange, },
     { label: "Apellido Paterno", name: "ApellidoPaterno", type: "text" },
     { label: "Apellido Materno", name: "ApellidoMaterno", type: "text" },
     { label: "Primer Nombre", name: "PrimerNombre", type: "text" },
@@ -324,12 +324,12 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
     // { label: "Código Dactilar", name: "CodDactilar", type: "text" },
     { label: "Fecha Nacimiento", name: "FechaNacimeinto", type: "text", disabled: true },
     { label: "Edad", name: "Edad", type: "text", disabled: true },
-	{label: "Situación Laboral",name: "idSituacionLaboral",type: "select",options: actividadLaboral,onchange: handleSituacionLaboralChange,},
+    { label: "Situación Laboral", name: "idSituacionLaboral", type: "select", options: actividadLaboral, onchange: handleSituacionLaboralChange, },
     { label: "Celular", name: "Celular", type: "text" },
     { label: "Email", name: "Email", type: "email" },
-    {label: "Actividad Economica",name: "idActEconomina",type: "select",options: ActEconomina,},
-    {label: "Estabilidad Laboral",name: "idCre_Tiempo",type: "select",options: estabilidadLaboral,},
-    {label: "Tiempo de Vivienda",name: "idCre_TiempoVivienda",type: "select",options: tiempoVivienda,},
+    { label: "Actividad Economica", name: "idActEconomina", type: "select", options: ActEconomina, },
+    { label: "Estabilidad Laboral", name: "idCre_Tiempo", type: "select", options: estabilidadLaboral, },
+    { label: "Tiempo de Vivienda", name: "idCre_TiempoVivienda", type: "select", options: tiempoVivienda, },
     {
       label: "Producto",
       name: "idProductos",
@@ -360,7 +360,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
     }
   };
 
-    const comprobcedula = async (cedula) => {
+  const comprobcedula = async (cedula) => {
     try {
       const url = APIURL.validarCedula(cedula);
       const response = await axios.get(url);
@@ -370,7 +370,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       return false;
     }
   };
-  
+
   const validationSchema = Yup.object()
     .shape({
       NumeroSolicitud: Yup.number()
@@ -392,15 +392,15 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       Cedula: Yup.string()
         .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
         .required("Ingresa 10 digitos de la cedula")
-       .test(
-        "not-blacklisted",
-        "La cedula ${value} se encuentra en la lista negra",
-        async (value) => {
-          if (!value) return false;            // ya cubierto por .required()
-          const res = await comprobcedula(value);
-          return res !== 1;                    // false → lanza el mensaje
-        }
-      ),
+        .test(
+          "not-blacklisted",
+          "La cedula ${value} se encuentra en la lista negra",
+          async (value) => {
+            if (!value) return false;            // ya cubierto por .required()
+            const res = await comprobcedula(value);
+            return res !== 1;                    // false → lanza el mensaje
+          }
+        ),
       // CodDactilar: Yup.string()
       //   .transform((value) => value.toUpperCase())
       //   .matches(
@@ -434,18 +434,18 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       // .test("no-espacios", "No puede estar vacío", (value) => value && value.trim() !== ""),
       // .required("Revisa el nombre debe tener al menos 2 caracteres"),
       Celular: Yup.string()
-      .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
-      .required("El celular debe tener 10 dígitos")
-      .trim()
-      .test(
-        "not-blacklisted",
-        "el telefono número ${value} se encuentra en la lista negra",
-        async (value) => {
-          if (!value) return false;            // ya cubierto por .required()
-          const res = await comprobTelf(value);
-          return res !== 1;                    // false → lanza el mensaje
-        }
-      ),
+        .matches(/^\d{10}$/, "Debe ser un número de 10 dígitos")
+        .required("El celular debe tener 10 dígitos")
+        .trim()
+        .test(
+          "not-blacklisted",
+          "el telefono número ${value} se encuentra en la lista negra",
+          async (value) => {
+            if (!value) return false;            // ya cubierto por .required()
+            const res = await comprobTelf(value);
+            return res !== 1;                    // false → lanza el mensaje
+          }
+        ),
 
 
       Email: Yup.string().email("Correo inválido").required("Ingresa un correo válido"),
@@ -471,7 +471,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
 
       bAfiliado: Yup.boolean(),
       bTieneRuc: Yup.boolean(),
-	  //Foto: Yup.string(),
+      //Foto: Yup.string(),
 
       bTerminosYCondiciones: Yup.boolean().oneOf([true], "Debes aceptar los términos y condiciones.").required(),
 
@@ -503,6 +503,22 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
     }
   };
 
+  const fetchNotificaciones = async (Bodega) => {
+    try {
+      const url = APIURL.get_Asignacion_vendedores(Bodega);  // URL para obtener notificaciones
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      return response.data;  // Retornar los datos de notificaciones
+    } catch (error) {
+      console.error("Error al obtener notificaciones:", error.message);
+      throw error;  // Re-lanzar error para manejarlo más tarde
+    }
+  };
+
+
   const fecthDatosCogno = async (cedula) => {
     try {
       const url = APIURL.validarCedulaCognos(cedula);  // URL para obtener datos de Cogno
@@ -516,7 +532,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       throw error;  // Lanzar el error para manejarlo más tarde
     }
   };
-  
+
   const fetchConsultaSolicitud = async (idSolicitud) => {
     try {
       const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
@@ -567,7 +583,13 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
       // 2. Consultar la solicitud recién creada
       if (createResponse.data.idCre_SolicitudWeb) {
         const solicitudData = await fetchConsultaSolicitud(createResponse.data.idCre_SolicitudWeb);
-
+        // capturar la bodega
+        const bodega = values.Bodega;
+        // 7. Obtener las notificaciones de la bodega
+        const notificaciones = await fetchNotificaciones(bodega);
+        if (notificaciones.status) {
+          console.log("Notificaciones obtenidas:", notificaciones);
+        }
         // 3. Subir archivo si existe una foto
         if (fotourl && solicitudData) {
           const file = fotourl;  // El archivo completo, no solo el nombre
@@ -590,6 +612,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
               Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
             };
             const updatedSolicitud = await fetchActualizaSolicitud(solicitudData.idCre_SolicitudWeb, updatedData);
+
           }
         }
       }
@@ -609,40 +632,40 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
     }
   };
 
-//   const handleUploadClick = async () => {
-// 	  if (!fileToUpload) {
-// 		alert("Primero selecciona una imagen");
-// 		return;
-// 	  }
-  
-// 	  try {
-// 		let updatedUrl = ""; 
-// 		const fileUploadResponse = await uploadFile(
-// 		  fileToUpload,
-// 		//   selectedRow.almacen,
-// 		//   selectedRow.cedula,
-// 		//   selectedRow.NumeroSolicitud,
-// 		  "Foto"
-// 		);
-  
-// 		if (fileUploadResponse) {
-// 		  updatedUrl = fileUploadResponse.url;
-  
-// 		  // Actualizar en backend
-// 		  const updatedData = { Foto: updatedUrl };
-// 		  await fetchActualizaSolicitud(1, updatedData);
-  
-// 		  setUrlCloudstorage();
-// 		  setFileToUpload(null);
-  
-// 		  enqueueSnackbar("Foto subida correctamente", {
-// 			variant: "success",
-// 		  });
-// 		}
-// 	  } catch (error) {
-// 		alert(error.message);
-// 	  }
-// 	};
+  //   const handleUploadClick = async () => {
+  // 	  if (!fileToUpload) {
+  // 		alert("Primero selecciona una imagen");
+  // 		return;
+  // 	  }
+
+  // 	  try {
+  // 		let updatedUrl = ""; 
+  // 		const fileUploadResponse = await uploadFile(
+  // 		  fileToUpload,
+  // 		//   selectedRow.almacen,
+  // 		//   selectedRow.cedula,
+  // 		//   selectedRow.NumeroSolicitud,
+  // 		  "Foto"
+  // 		);
+
+  // 		if (fileUploadResponse) {
+  // 		  updatedUrl = fileUploadResponse.url;
+
+  // 		  // Actualizar en backend
+  // 		  const updatedData = { Foto: updatedUrl };
+  // 		  await fetchActualizaSolicitud(1, updatedData);
+
+  // 		  setUrlCloudstorage();
+  // 		  setFileToUpload(null);
+
+  // 		  enqueueSnackbar("Foto subida correctamente", {
+  // 			variant: "success",
+  // 		  });
+  // 		}
+  // 	  } catch (error) {
+  // 		alert(error.message);
+  // 	  }
+  // 	};
 
   return (
     <div>
@@ -656,7 +679,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
           </div>
         </div>
       )}
-	  {/* <Dialog
+      {/* <Dialog
 	     open={openCameraModal}
 	     onClose={() => setOpenCameraModal(false)}
 	     maxWidth="sm"
@@ -735,10 +758,10 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
     </div>
 	   </Dialog> */}
 
-		{/* <button open={openModal} onClick={() => setOpenModal(true)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center">
+      {/* <button open={openModal} onClick={() => setOpenModal(true)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center">
 		foto
 	   </button>  */}
-	  
+
       <ReusableForm
         formConfig={formConfig}
         initialValues={initialValues}
@@ -750,7 +773,7 @@ const tipoConsultaOrdenada = [...tipoConsulta].sort((a, b) =>
         includeTermsAndConditions={true}
         formStatus={formStatus}
         enableReinitialize={true}
-		onExternalUpdate={handleUpdateFromCedula}
+        onExternalUpdate={handleUpdateFromCedula}
       />
     </div>
   );
