@@ -28,7 +28,7 @@ import CalendarioVerificador from "./pages/CalendarioVerificador";
 import AgenteDocumental from "./pages/AgenteDocumental";
 import Dashboard from "./pages/Dashboard";
 import ListaNegra from "./pages/ListaNegra";
-import NotificacionesCli  from "./pages/Notificaciones";
+import NotificacionesCli from "./pages/Notificaciones";
 
 import Equifax from "./pages/Equifax";
 
@@ -84,9 +84,9 @@ function App() {
         <Route path="/listaNegra" element={<PrivateRouteWrapper title="ListaNegra" element={<ListaNegra />} />} />
         <Route path="/equifaxx" element={<PrivateRouteWrapper title="Equifax" element={<Equifax />} />} />
         <Route path="/depositoPendiente" element={<PrivateRouteWrapper title="Deposito Pendiente" element={<DepositoPendiente />} />} />
-		<Route path="/notificaciones" element={<PrivateRouteWrapper title="Notificaciones" element={<NotificacionesCli />} />} />
-     		<Route path="/ListaNegraCedulas" element={<PrivateRouteWrapper title="ListaNegraCedula" element={<ListaNegraCedula />} />} />
-
+        <Route path="/notificaciones" element={<PrivateRouteWrapper title="Notificaciones" element={<NotificacionesCli />} />} />
+        <Route path="/ListaNegraCedulas" element={<PrivateRouteWrapper title="ListaNegraCedula" element={<ListaNegraCedula />} />} />
+      
       </Routes>
 
       {isSessionExpired && (

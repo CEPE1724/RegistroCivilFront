@@ -124,7 +124,6 @@ export function ListadoSolicitud() {
   const [total, setTotal] = useState(0); // Total de registros
   //const itemsPerPage = 5;
   const [ itemsPerPage, setItemsPerPage ] = useState(5)     
-  console.log("items",itemsPerPage)
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const [openModalPendiente, setOpenModalPendiente] = useState(false);
