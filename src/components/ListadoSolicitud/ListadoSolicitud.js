@@ -89,6 +89,7 @@ import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, FormControlLabel } from '@mui/material';
+import PreDocumentos from "./Pre-Documentos";
 
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -1091,7 +1092,7 @@ export function ListadoSolicitud() {
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
-  const handleOpenModalVerificacion = async (data, tipo) => {
+ {/*const handleOpenModalVerificacion = async (data, tipo) => {
     try {
       let idtipo = 0;
       if (tipo === "domicilio") idtipo = 1;
@@ -1146,7 +1147,75 @@ export function ListadoSolicitud() {
     } catch (error) {
       console.error("Error fetching data for verificación terrena:", error);
     }
-  };
+  }; */}  // version anterior para el manejo de mensajes en modal de domicilio y laboral 
+  
+  
+  const [openPreDocumentos, setOpenPreDocumentos] = useState(false);
+const [preDocumentosData, setPreDocumentosData] = useState(null);
+const handleOpenModalVerificacion = async (data, tipo) => {
+  try {
+    let idtipo = 0;
+    if (tipo === "domicilio") idtipo = 1;
+    else if (tipo === "trabajo") idtipo = 2;
+
+    const url = APIURL.getIdsTerrenas(data.id, idtipo);
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error("Error al obtener los IDs terrenas");
+    }
+
+    const idsTerrenas = response.data;
+
+    setIdsTerrenasMap((prev) => ({
+      ...prev,
+      [data.id]: idsTerrenas,
+    }));
+
+    setIdsTerrenas(idsTerrenas);
+
+    if (!idsTerrenas || idsTerrenas.length === 0) {
+      // No hay datos, abrir PreDocumentos (nuevo componente)
+      setPreDocumentosData({ data, tipo });
+      setOpenPreDocumentos(true);
+      return;
+    }
+
+    if (tipo === "domicilio") {
+      if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
+        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
+        setDomicilioModalOpen(true);
+      } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
+        await fetchtiemposolicitudesweb(data.id, 4);
+        setOpenModalPendiente(true);
+      }
+      return;
+    }
+
+    if (tipo === "trabajo") {
+      if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
+        setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
+        setTrabajoModalOpen(true);
+      } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
+        await fetchtiemposolicitudesweb(data.id, 5);
+        setOpenModalPendiente(true);
+      }
+      return;
+    }
+
+  } catch (error) {
+    console.error("Error fetching data for verificación terrena:", error);
+  }
+};
+
+
+
+
+
 
   ////const fetch verificador => {}
 
@@ -4309,6 +4378,52 @@ export function ListadoSolicitud() {
         onLocationChange={null}
         userSolicitudData={userSolicitudData}
       />
+
+ <PreDocumentos
+  open={openPreDocumentos}
+  onClose={() => setOpenPreDocumentos(false)}
+  idSolicitud={preDocumentosData?.data?.id}
+  onContinue={async () => {
+    setOpenPreDocumentos(false);
+
+    const data = preDocumentosData.data;
+    const tipo = preDocumentosData.tipo;
+    const idsTerrenas = idsTerrenasMap[data.id];
+
+    if (!idsTerrenas || idsTerrenas.length === 0) {
+      setUserSolicitudData(data);
+      setTipoVerificacionSeleccionada(tipo);
+      setOpenVerificacionModal(true);
+      return;
+    }
+
+    if (tipo === "domicilio") {
+      if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
+        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
+        setDomicilioModalOpen(true);
+      } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
+        await fetchtiemposolicitudesweb(data.id, 4);
+        setOpenModalPendiente(true);
+      }
+      return;
+    }
+
+    if (tipo === "trabajo") {
+      if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
+        setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
+        setTrabajoModalOpen(true);
+      } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
+        await fetchtiemposolicitudesweb(data.id, 5);
+        setOpenModalPendiente(true);
+      }
+      return;
+    }
+  }}
+/>
+
+
+
+
 
       <VerificacionTerrenaModal
         isOpen={openVerificacionModal}
