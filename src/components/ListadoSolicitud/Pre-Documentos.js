@@ -68,16 +68,18 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
             setError(null);
             
             try {
-                const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, 1));
-				setTodosDocs(response.data || []);
-				if(response.data === null || response.data.length === 0) {
-					const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, 3));
-					setTodosDocs(response.data || []);
+                const response1 = await axios.get(APIURL.get_documentosEstado(idSolicitud, 1));
+				let documentos = [];
+				if(response1.data && response1.data.length > 0) {
+					documentos = response1.data;
+				} else {
+					const response2 = await axios.get(APIURL.get_documentosEstado(idSolicitud, 3));
+					documentos = response2.data || [];
 				}
                 // const todosDocs = response.data || [];
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB
-                const docsFiltrados = todosDocs.filter(doc =>
+                const docsFiltrados = documentos.filter(doc =>
                     [12, 13, 14].includes(doc.idTipoDocumentoWEB)
                 ).map(doc => ({
                     id: doc.idDocumentosSolicitudWeb,
@@ -89,7 +91,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                     usuario: doc.Usuario,
                     estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
                 }));
-
+				setTodosDocs(docsFiltrados);
                 setEstadoDocs(docsFiltrados);
             } catch (error) {
                 console.error("Error al obtener los documentos:", error);
