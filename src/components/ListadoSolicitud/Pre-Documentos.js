@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import { APIURL } from "../../configApi/apiConfig";
 import axios from "../../configApi/axiosConfig";
+import { set } from 'react-hook-form';
 
 const getTipoDocumento = (id) => {
   const documentoIds = {
@@ -57,6 +58,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     const [currentDocType, setCurrentDocType] = useState(null);
     const [updatingDoc, setUpdatingDoc] = useState(null);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+	const [ todosDocs, setTodosDocs ] = useState([]);
 
     useEffect(() => {
         const fetchDocs = async () => {
@@ -66,8 +68,13 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
             setError(null);
             
             try {
-                const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, 3));
-                const todosDocs = response.data || [];
+                const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, 1));
+				setTodosDocs(response.data || []);
+				if(response.data === null || response.data.length === 0) {
+					const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, 3));
+					setTodosDocs(response.data || []);
+				}
+                // const todosDocs = response.data || [];
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB
                 const docsFiltrados = todosDocs.filter(doc =>
@@ -105,33 +112,33 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     };
 
     // Función para actualizar el estado del documento en la API
-    const updateDocumentStatus = async (docId, newStatus) => {
-        try {
-            setUpdatingDoc(docId);
+    // const updateDocumentStatus = async (docId, newStatus) => {
+    //     try {
+    //         setUpdatingDoc(docId);
             
-            if (newStatus === 6) {
-                // Documento rechazado/cancelado
-                await axios.patch(APIURL.patch_documentos(docId), {
-                    idEstadoDocumento: 5
-                });
-                showSnackbar("Documento rechazado", "warning");
-            } else if (newStatus === 3) {
-                // Documento aceptado
-                await axios.patch(APIURL.patch_documentos(docId), {
-                    idEstadoDocumento: 3
-                });
-                showSnackbar(" removida del documento", "success");
-            }
+    //         if (newStatus === 6) {
+    //             // Documento rechazado/cancelado
+    //             await axios.patch(APIURL.patch_documentos(docId), {
+    //                 idEstadoDocumento: 5
+    //             });
+    //             showSnackbar("Documento rechazado", "warning");
+    //         } else if (newStatus === 3) {
+    //             // Documento aceptado
+    //             await axios.patch(APIURL.patch_documentos(docId), {
+    //                 idEstadoDocumento: 3
+    //             });
+    //             showSnackbar(" removida del documento", "success");
+    //         }
             
-            return true;
-        } catch (error) {
-            console.error("Error al actualizar el estado del documento:", error);
-            showSnackbar("Error al actualizar el documento", "error");
-            return false;
-        } finally {
-            setUpdatingDoc(null);
-        }
-    };
+    //         return true;
+    //     } catch (error) {
+    //         console.error("Error al actualizar el estado del documento:", error);
+    //         showSnackbar("Error al actualizar el documento", "error");
+    //         return false;
+    //     } finally {
+    //         setUpdatingDoc(null);
+    //     }
+    // };
 
     // Cambiar función para manejar las X
     const handleToggleX = async (index) => {
@@ -145,14 +152,14 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
 
         // Llamar a la API según el nuevo estado
         const newStatus = newTieneX ? 5 : 3; // 6 para rechazado, 3 para aceptado
-        const success = await updateDocumentStatus(doc.id, newStatus);
+        // const success = await updateDocumentStatus(doc.id, newStatus);
         
-        if (!success) {
-            // Revertir cambio si falló la API
-            const revertDocs = [...estadoDocs];
-            revertDocs[index].tieneX = !newTieneX;
-            setEstadoDocs(revertDocs);
-        }
+        // if (!success) {
+        //     // Revertir cambio si falló la API
+        //     const revertDocs = [...estadoDocs];
+        //     revertDocs[index].tieneX = !newTieneX;
+        //     setEstadoDocs(revertDocs);
+        // }
     };
 
     // Función mejorada para manejar la previsualización

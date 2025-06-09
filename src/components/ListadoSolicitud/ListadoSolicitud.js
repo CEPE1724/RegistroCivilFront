@@ -122,9 +122,7 @@ export function ListadoSolicitud() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
-  //const itemsPerPage = 5;
-  const [ itemsPerPage, setItemsPerPage ] = useState(5)     
-  console.log("items",itemsPerPage)
+  const [ itemsPerPage, setItemsPerPage ] = useState(5)
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const [openModalPendiente, setOpenModalPendiente] = useState(false);
@@ -4451,7 +4449,7 @@ useEffect(() => {
 
     if (tipo === "domicilio") {
       if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
-        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
+        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });   
         setDomicilioModalOpen(true);
       } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
         await fetchtiemposolicitudesweb(data.id, 4);
