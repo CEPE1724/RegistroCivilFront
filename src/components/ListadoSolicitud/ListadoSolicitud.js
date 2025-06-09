@@ -151,7 +151,10 @@ export function ListadoSolicitud() {
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
 
-    const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 21;
+
+  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
+  const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
+
   const [cedula, setCedula] = useState(localStorage.getItem('filtroCedula') || "");
 
   const [dactilar, setDactilar] = useState("");
@@ -591,26 +594,50 @@ export function ListadoSolicitud() {
   const [currentData, setCurrentData] = useState([]);
   const [laboralChecked, setLaboralChecked] = useState(false);
   const [domicilioChecked, setDomicilioChecked] = useState(false);
+  const [entrada, setEntrada] = useState("");
 
 
   const handleConfirm = async () => {
     if (currentAction === "estado") {
       handleApproveEstado(currentData);
     } else if (currentAction === "resultado") {
-      await handleApproveResultado(currentData); 
-      if (laboralChecked) {
-        await patchLaboral(currentData.id);
-      }
-      if (domicilioChecked) {
-        await patchDomicilio(currentData.id);
-      }
+      await handleApproveResultado(currentData);
+      if (laboralChecked) await patchLaboral(currentData.id);
+      if (domicilioChecked) await patchDomicilio(currentData.id);
+      if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
     }
+
     setOpenDialog2(false);
-    // Limpiar los checks por si se vuelve a abrir
     setLaboralChecked(false);
     setDomicilioChecked(false);
+    setEntrada("");
   };
 
+  const patchEntrada = async (idSolicitud, valor) => {
+    try {
+      const response = await axios.patch(
+        APIURL.update_solicitud(idSolicitud),
+        {
+          Entrada: parseFloat(valor),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.data) {
+        enqueueSnackbar("Entrada registrada correctamente.", {
+          variant: "success",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la entrada:", error);
+      enqueueSnackbar("Error al actualizar la entrada.", {
+        variant: "error",
+      });
+    }
+  };
 
   const patchDomicilio = async (idSolicitud) => {
     try {
@@ -1365,7 +1392,7 @@ export function ListadoSolicitud() {
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
-      fetchSolicitudes(); 
+      fetchSolicitudes();
     }
   }, [
     currentPage,
@@ -1688,17 +1715,17 @@ export function ListadoSolicitud() {
   };
 
   // Manejar cambio de bodega
-//   const handleBodegaChange = (event) => {
-//     setSelectedBodega(event.target.value);
-//   };
+  //   const handleBodegaChange = (event) => {
+  //     setSelectedBodega(event.target.value);
+  //   };
 
-//   const handleVendedorChange = (event) => {
-//     setSelectedVendedor(event.target.value);
-//   };
+  //   const handleVendedorChange = (event) => {
+  //     setSelectedVendedor(event.target.value);
+  //   };
 
-//   const handleAnalistaChange = (event) => {
-//     setAnalistaSelected(event.target.value);
-//   };
+  //   const handleAnalistaChange = (event) => {
+  //     setAnalistaSelected(event.target.value);
+  //   };
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -1861,29 +1888,8 @@ export function ListadoSolicitud() {
   const limpiarFiltros = () => {
 	setFechaInicio(date15DaysAgoStr);
 	setFechaFin(today);
-	if (userData?.idGrupo === 23 && bodegas.length > 0) {
-    const primeraBodega = bodegas[0].b_Bodega;
-    setSelectedBodega(primeraBodega);
-    localStorage.setItem('filtroBodega', primeraBodega);
-  } else {
-    setSelectedBodega("todos");
-    localStorage.removeItem('filtroBodega');
-  }
-
-  if (userData?.idGrupo === 23) {
-    const vendedorAutorizado = vendedores.find(
-      (v) => v.Codigo === userData.Nombre
-    );
-    if (vendedorAutorizado) {
-      setSelectedVendedor(vendedorAutorizado.idPersonal);
-      localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
-    }
-  } else {
-    setSelectedVendedor("todos");
-    localStorage.removeItem('filtroVendedor');
-  }
-	// setSelectedBodega("todos");
-	// setSelectedVendedor("todos");
+	setSelectedBodega("todos");
+	setSelectedVendedor("todos");
 	setAnalistaSelected("todos");
 	setEstado("todos");
 	setSolicitud("Todos");
@@ -1897,8 +1903,8 @@ export function ListadoSolicitud() {
 
 	localStorage.removeItem('filtroIniFecha');
 	localStorage.removeItem('filtroFinFecha');
-	// localStorage.removeItem('filtroBodega');
-	// localStorage.removeItem('filtroVendedor');
+	localStorage.removeItem('filtroBodega');
+	localStorage.removeItem('filtroVendedor');
 	localStorage.removeItem('filtroAnalista');
 	localStorage.removeItem('filtroEstado');
 	localStorage.removeItem('filtroSolicitud');
@@ -1911,34 +1917,6 @@ export function ListadoSolicitud() {
 	localStorage.removeItem('filtroNumSolicitud')
 };
 
-useEffect(() => {
-  if (userData?.idGrupo === 23) {
-    if (bodegas.length > 0) {
-      const primeraBodega = bodegas[0].b_Bodega;
-      setSelectedBodega(primeraBodega);
-      localStorage.setItem('filtroBodega', primeraBodega);
-    }
-
-    const vendedorAutorizado = vendedores.find(
-      (v) => v.Codigo === userData.Nombre
-    );
-    if (vendedorAutorizado) {
-      setSelectedVendedor(vendedorAutorizado.idPersonal);
-      localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
-    }
-  }
-}, [userData?.idGrupo, bodegas, vendedores]);
-
-const handleItemsPerPageChange = (e) => {
-  setItemsPerPage(Number(e.target.value));
-  setCurrentPage(1); 
-};
-
-
-useEffect(() => {
-  fetchSolicitudes();
-}, [itemsPerPage, currentPage]);
-
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -1947,7 +1925,7 @@ useEffect(() => {
           type="date"
           variant="outlined"
           value={fechaInicio}
-          onChange={(e) => {const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); localStorage.setItem('filtroIniFecha', fechaIniFiltro);}}
+          onChange={(e) => { const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); localStorage.setItem('filtroIniFecha', fechaIniFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -1959,7 +1937,7 @@ useEffect(() => {
           type="date"
           variant="outlined"
           value={fechaFin}
-          onChange={(e) => {const fechaFinFiltro = e.target.value; setFechaFin(fechaFinFiltro); localStorage.setItem('filtroFinFecha', fechaFinFiltro);}}
+          onChange={(e) => { const fechaFinFiltro = e.target.value; setFechaFin(fechaFinFiltro); localStorage.setItem('filtroFinFecha', fechaFinFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -1970,7 +1948,7 @@ useEffect(() => {
           <InputLabel>Buscar por bodega</InputLabel>
           <Select
             value={selectedBodega}
-            onChange={(e) => {const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); localStorage.setItem('filtroBodega', bodegaFiltro);}}
+            onChange={(e) => { const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); localStorage.setItem('filtroBodega', bodegaFiltro); }}
             label="Buscar por nombre"
 			disabled={userData?.idGrupo === 23}
           >
@@ -1988,7 +1966,7 @@ useEffect(() => {
 
           <Select
             value={selectedVendedor}
-            onChange={(e) => {const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); localStorage.setItem('filtroVendedor', vendedorFiltro);}}
+            onChange={(e) => { const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); localStorage.setItem('filtroVendedor', vendedorFiltro); }}
             label="Buscar por nombre"
 			disabled={userData?.idGrupo === 23}
           >
@@ -2008,7 +1986,7 @@ useEffect(() => {
           <InputLabel>Analista</InputLabel>
           <Select
             value={analistaSelected}
-            onChange={(e) => {const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); localStorage.setItem('filtroAnalista', analistaFiltro);}}
+            onChange={(e) => { const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); localStorage.setItem('filtroAnalista', analistaFiltro); }}
             label="Analista"
             disabled={selectDeshabilitado} //  solo si hubo match
           >
@@ -2025,7 +2003,7 @@ useEffect(() => {
           <InputLabel>Estado</InputLabel>
           <Select
             value={estado}
-            onChange={(e) => {const estadoFiltro = e.target.value; setEstado(estadoFiltro); localStorage.setItem('filtroEstado', estadoFiltro);}}
+            onChange={(e) => { const estadoFiltro = e.target.value; setEstado(estadoFiltro); localStorage.setItem('filtroEstado', estadoFiltro); }}
             label="Estado"
           >
             {estadosOpciones.map((estado) => (
@@ -2041,7 +2019,7 @@ useEffect(() => {
           <InputLabel>Solicitud</InputLabel>
           <Select
             value={solicitud}
-            onChange={(e) => {const solicitudFiltro = e.target.value; setSolicitud(solicitudFiltro); localStorage.setItem('filtroSolicitud', solicitudFiltro);}}
+            onChange={(e) => { const solicitudFiltro = e.target.value; setSolicitud(solicitudFiltro); localStorage.setItem('filtroSolicitud', solicitudFiltro); }}
             label="Solicitud"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2056,7 +2034,7 @@ useEffect(() => {
           <InputLabel>Documental</InputLabel>
           <Select
             value={documental}
-            onChange={(e) => {const documentalFiltro = e.target.value; setDocumental(documentalFiltro); localStorage.setItem('filtroDocumental', documentalFiltro);}}
+            onChange={(e) => { const documentalFiltro = e.target.value; setDocumental(documentalFiltro); localStorage.setItem('filtroDocumental', documentalFiltro); }}
             label="Documental"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2072,7 +2050,7 @@ useEffect(() => {
           <InputLabel>Telefonica</InputLabel>
           <Select
             value={telefonica}
-            onChange={(e) => {const telefonicaFiltro = e.target.value; setTelefonica(telefonicaFiltro); localStorage.setItem('filtroTelefonica', telefonicaFiltro);}}
+            onChange={(e) => { const telefonicaFiltro = e.target.value; setTelefonica(telefonicaFiltro); localStorage.setItem('filtroTelefonica', telefonicaFiltro); }}
             label="Telefonica"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2088,7 +2066,7 @@ useEffect(() => {
           <InputLabel>Domicilio</InputLabel>
           <Select
             value={domicilio}
-            onChange={(e) => {const domicilioFiltro = e.target.value; setDomicilio(domicilioFiltro); localStorage.setItem('filtroDomicilio', domicilioFiltro);}}
+            onChange={(e) => { const domicilioFiltro = e.target.value; setDomicilio(domicilioFiltro); localStorage.setItem('filtroDomicilio', domicilioFiltro); }}
             label="Domicilio"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2104,7 +2082,7 @@ useEffect(() => {
           <InputLabel>Laboral</InputLabel>
           <Select
             value={laboral}
-            onChange={(e) => {const LaboralFiltro = e.target.value; setLaboral(LaboralFiltro); localStorage.setItem('filtroLaboral', LaboralFiltro);}}
+            onChange={(e) => { const LaboralFiltro = e.target.value; setLaboral(LaboralFiltro); localStorage.setItem('filtroLaboral', LaboralFiltro); }}
             label="Laboral"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2115,27 +2093,27 @@ useEffect(() => {
             ))}
           </Select>
         </FormControl>
-         {puedeCrearSolicitud && (
-        <button
-          title="Nueva Solicitud"
-          className="group cursor-pointer outline-none hover:rotate-90 transition-transform duration-300 w-[60px] h-[60px] flex items-center justify-center"
-          onClick={handleSolictud}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="50px"
-            height="50px"
-            viewBox="0 0 24 24"
-            className="stroke-indigo-400 fill-none group-hover:fill-indigo-800 group-active:stroke-indigo-200 group-active:fill-indigo-600 group-active:duration-0 duration-300"
+        {puedeCrearSolicitud && (
+          <button
+            title="Nueva Solicitud"
+            className="group cursor-pointer outline-none hover:rotate-90 transition-transform duration-300 w-[60px] h-[60px] flex items-center justify-center"
+            onClick={handleSolictud}
           >
-            <path
-              d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
-              strokeWidth="1.5"
-            ></path>
-            <path d="M8 12H16" strokeWidth="1.5"></path>
-            <path d="M12 16V8" strokeWidth="1.5"></path>
-          </svg>
-        </button>)}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="50px"
+              height="50px"
+              viewBox="0 0 24 24"
+              className="stroke-indigo-400 fill-none group-hover:fill-indigo-800 group-active:stroke-indigo-200 group-active:fill-indigo-600 group-active:duration-0 duration-300"
+            >
+              <path
+                d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
+                strokeWidth="1.5"
+              ></path>
+              <path d="M8 12H16" strokeWidth="1.5"></path>
+              <path d="M12 16V8" strokeWidth="1.5"></path>
+            </svg>
+          </button>)}
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -2145,7 +2123,7 @@ useEffect(() => {
           label="Buscar por cédula"
           variant="outlined"
           value={cedula}
-          onChange={(e) => {const cedulaFiltro = e.target.value; setCedula(cedulaFiltro); localStorage.setItem('filtroCedula', cedulaFiltro);}} 
+          onChange={(e) => { const cedulaFiltro = e.target.value; setCedula(cedulaFiltro); localStorage.setItem('filtroCedula', cedulaFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2162,7 +2140,7 @@ useEffect(() => {
           label="Buscar por nombre cliente"
           variant="outlined"
           value={nombre}
-          onChange={(e) => {const nombreFiltro = e.target.value; setNombre(nombreFiltro); localStorage.setItem('filtroNombre', nombreFiltro);}} 
+          onChange={(e) => { const nombreFiltro = e.target.value; setNombre(nombreFiltro); localStorage.setItem('filtroNombre', nombreFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2178,7 +2156,7 @@ useEffect(() => {
           label="Buscar por número de solicitud"
           variant="outlined"
           value={numeroSolicitud}
-          onChange={(e) => {const numSoliFiltro = e.target.value; setNumeroSolicitud(numSoliFiltro); localStorage.setItem('filtroNumSolicitud', numSoliFiltro);}} 
+          onChange={(e) => { const numSoliFiltro = e.target.value; setNumeroSolicitud(numSoliFiltro); localStorage.setItem('filtroNumSolicitud', numSoliFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2188,12 +2166,12 @@ useEffect(() => {
             endAdornment: <IconButton></IconButton>,
           }}
         />
-		<button
-		className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
-		onClick={limpiarFiltros}
-		>
-			<DeleteIcon/> Limpiar Filtros
-		</button>
+        <button
+          className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
+          onClick={limpiarFiltros}
+        >
+          <DeleteIcon /> Limpiar Filtros
+        </button>
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">
@@ -4097,13 +4075,14 @@ useEffect(() => {
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEquifax(data)}
-
-                      className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
-                    >
-                      Consultar Equifax
-                    </button>
+                    {!verEquifax && (
+                      <button
+                        onClick={() => handleEquifax(data)}
+                        className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
+                      >
+                        Consultar Equifax
+                      </button>
+                    )}
                   </div>
 
                   {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
@@ -4456,6 +4435,38 @@ useEffect(() => {
                 }
                 label="Domicilio"
               />
+              <TextField
+                label="Digite la entrada"
+                fullWidth
+                margin="normal"
+                value={entrada}
+                onChange={(e) => {
+                  const val = e.target.value;
+
+                  // Solo permitir números positivos con hasta 7 enteros y 2 decimales
+                  const regex = /^\d{0,7}(\.\d{0,2})?$/;
+
+                  if (val === "" || regex.test(val)) {
+                    setEntrada(val);
+                  }
+                }}
+                inputProps={{
+                  inputMode: "decimal", // para móviles
+                  pattern: "^[0-9]{1,7}(\\.[0-9]{0,2})?$",
+                  maxLength: 10,
+                }}
+                error={
+                  entrada !== "" &&
+                  (isNaN(parseFloat(entrada)) ||
+                    parseFloat(entrada) > 9999999.99)
+                }
+                helperText={
+                  entrada !== "" && parseFloat(entrada) > 9999999.99
+                    ? "Máximo permitido: 9,999,999.99"
+                    : ""
+                }
+              />
+
             </div>
           )}
         </DialogContent>
