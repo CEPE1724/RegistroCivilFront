@@ -122,8 +122,9 @@ export function ListadoSolicitud() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
-  //const itemsPerPage = 5;
-  const [ itemsPerPage, setItemsPerPage ] = useState(5)     
+
+  const [ itemsPerPage, setItemsPerPage ] = useState(5)
+
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const [openModalPendiente, setOpenModalPendiente] = useState(false);
@@ -1954,32 +1955,10 @@ const handleOpenModalVerificacion = async (data, tipo) => {
   }
 
   const limpiarFiltros = () => {
-
 	setFechaInicio(date15DaysAgoStr);
 	setFechaFin(today);
-	if (userData?.idGrupo === 23 && bodegas.length > 0) {
-    const primeraBodega = bodegas[0].b_Bodega;
-    setSelectedBodega(primeraBodega);
-    localStorage.setItem('filtroBodega', primeraBodega);
-  } else {
-    setSelectedBodega("todos");
-    localStorage.removeItem('filtroBodega');
-  }
-
-  if (userData?.idGrupo === 23) {
-    const vendedorAutorizado = vendedores.find(
-      (v) => v.Codigo === userData.Nombre
-    );
-    if (vendedorAutorizado) {
-      setSelectedVendedor(vendedorAutorizado.idPersonal);
-      localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
-    }
-  } else {
-    setSelectedVendedor("todos");
-    localStorage.removeItem('filtroVendedor');
-  }
-	// setSelectedBodega("todos");
-	// setSelectedVendedor("todos");
+	setSelectedBodega("todos");
+	setSelectedVendedor("todos");
 	setAnalistaSelected("todos");
 	setEstado("todos");
 	setSolicitud("Todos");
@@ -1993,8 +1972,8 @@ const handleOpenModalVerificacion = async (data, tipo) => {
 
 	localStorage.removeItem('filtroIniFecha');
 	localStorage.removeItem('filtroFinFecha');
-	// localStorage.removeItem('filtroBodega');
-	// localStorage.removeItem('filtroVendedor');
+	localStorage.removeItem('filtroBodega');
+	localStorage.removeItem('filtroVendedor');
 	localStorage.removeItem('filtroAnalista');
 	localStorage.removeItem('filtroEstado');
 	localStorage.removeItem('filtroSolicitud');
@@ -4472,7 +4451,7 @@ useEffect(() => {
 
     if (tipo === "domicilio") {
       if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
-        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
+        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });   
         setDomicilioModalOpen(true);
       } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
         await fetchtiemposolicitudesweb(data.id, 4);
