@@ -4,7 +4,7 @@ let socket;
 export const connectToServer = (token) => {
 //https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js
   //const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
-  const manager = new Manager("http://192.168.2.67:3025:",
+  const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
 
     {
       extraHeaders: {

@@ -56,7 +56,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
 
 
   const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
-    console.log("llega id", estado)
+
     try {
       const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
       const response = await axios.get(url, {
