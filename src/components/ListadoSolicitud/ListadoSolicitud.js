@@ -110,7 +110,6 @@ export function ListadoSolicitud() {
 
 
   const [recargar, setRecargar] = useState(false);
-  const [bodegass, setBodegass] = useState([]);
   const [selectedBodega, setSelectedBodega] = useState(localStorage.getItem('filtroBodega') || "todos");
   const [selectedVendedor, setSelectedVendedor] = useState(localStorage.getItem('filtroVendedor') || "todos");
   const [analistaSelected, setAnalistaSelected] = useState(localStorage.getItem('filtroAnalista') || "todos");
@@ -122,13 +121,12 @@ export function ListadoSolicitud() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
-  const itemsPerPage = 5;
-  const [searchDateFrom, setSearchDateFrom] = useState(""); // Fecha de inicio
-  const [searchDateTo, setSearchDateTo] = useState("");
+  //const itemsPerPage = 5;
+  const [ itemsPerPage, setItemsPerPage ] = useState(5)     
+  console.log("items",itemsPerPage)
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const [openModalPendiente, setOpenModalPendiente] = useState(false);
-  const [closeVerificacionModal, setCloseVerificacionModal] = useState(false);
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
@@ -498,7 +496,6 @@ export function ListadoSolicitud() {
     return data.idEstadoVerificacionSolicitud !== 12;
   };
 
-
   ///// METODO QUE VALIDE SI 3 TIPOS DE DOCUMENTO UNICAMENTE YA FUERON APROBADOS 
   const [docAprobados, setDocAprobados] = useState({}); // <-- ahora es un objeto, no un solo booleano
 
@@ -530,11 +527,6 @@ export function ListadoSolicitud() {
       verificarTodosDocumentos();
     }
   }, [datos]);
-
-
-
-
-
 
   const estaDeshabilitado = (data) => {
     return data.resultado === 0;
@@ -1352,7 +1344,6 @@ export function ListadoSolicitud() {
     }
   };
 
-
   useEffect(() => {
     if (!socket) return;
 
@@ -1537,17 +1528,6 @@ export function ListadoSolicitud() {
 
     fetchInsertarDatos3(9, fila, 1)
   };
-
-
-
-
-
-
-
-
-
-
-
 
   const [operadores, setOperadores] = useState([]);
 
@@ -1825,16 +1805,11 @@ export function ListadoSolicitud() {
     setSelectedRow(row);
     setView(true);
     const [tipo1, tipo2, tipo3] = await Promise.all([
-      fetchTiempSolicweb(1, row.id, "1,12"),
-      fetchTiempSolicweb(2, row.id, "2,3"),
-      fetchTiempSolicweb(3, row.id, "1,4")
+      fetchTiempSolicweb(1, row.id, "1,12"), //solicitudes
+      fetchTiempSolicweb(2, row.id, "2,3"),  //telefonica 
+      fetchTiempSolicweb(3, row.id, "2,4")   //documental
     ]);
 
-    // const todosLosResultados = [
-    //   ...(tipo1 || []),
-    //   ...(tipo2 || []),
-    //   ...(tipo3 || [])
-    // ];
 
     const resultados = {
       tipo1, tipo2, tipo3
@@ -1886,8 +1861,29 @@ export function ListadoSolicitud() {
   const limpiarFiltros = () => {
 	setFechaInicio(date15DaysAgoStr);
 	setFechaFin(today);
-	setSelectedBodega("todos");
-	setSelectedVendedor("todos");
+	if (userData?.idGrupo === 23 && bodegas.length > 0) {
+    const primeraBodega = bodegas[0].b_Bodega;
+    setSelectedBodega(primeraBodega);
+    localStorage.setItem('filtroBodega', primeraBodega);
+  } else {
+    setSelectedBodega("todos");
+    localStorage.removeItem('filtroBodega');
+  }
+
+  if (userData?.idGrupo === 23) {
+    const vendedorAutorizado = vendedores.find(
+      (v) => v.Codigo === userData.Nombre
+    );
+    if (vendedorAutorizado) {
+      setSelectedVendedor(vendedorAutorizado.idPersonal);
+      localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
+    }
+  } else {
+    setSelectedVendedor("todos");
+    localStorage.removeItem('filtroVendedor');
+  }
+	// setSelectedBodega("todos");
+	// setSelectedVendedor("todos");
 	setAnalistaSelected("todos");
 	setEstado("todos");
 	setSolicitud("Todos");
@@ -1901,8 +1897,8 @@ export function ListadoSolicitud() {
 
 	localStorage.removeItem('filtroIniFecha');
 	localStorage.removeItem('filtroFinFecha');
-	localStorage.removeItem('filtroBodega');
-	localStorage.removeItem('filtroVendedor');
+	// localStorage.removeItem('filtroBodega');
+	// localStorage.removeItem('filtroVendedor');
 	localStorage.removeItem('filtroAnalista');
 	localStorage.removeItem('filtroEstado');
 	localStorage.removeItem('filtroSolicitud');
@@ -1914,6 +1910,34 @@ export function ListadoSolicitud() {
 	localStorage.removeItem('filtroNombre')
 	localStorage.removeItem('filtroNumSolicitud')
 };
+
+useEffect(() => {
+  if (userData?.idGrupo === 23) {
+    if (bodegas.length > 0) {
+      const primeraBodega = bodegas[0].b_Bodega;
+      setSelectedBodega(primeraBodega);
+      localStorage.setItem('filtroBodega', primeraBodega);
+    }
+
+    const vendedorAutorizado = vendedores.find(
+      (v) => v.Codigo === userData.Nombre
+    );
+    if (vendedorAutorizado) {
+      setSelectedVendedor(vendedorAutorizado.idPersonal);
+      localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
+    }
+  }
+}, [userData?.idGrupo, bodegas, vendedores]);
+
+const handleItemsPerPageChange = (e) => {
+  setItemsPerPage(Number(e.target.value));
+  setCurrentPage(1); 
+};
+
+
+useEffect(() => {
+  fetchSolicitudes();
+}, [itemsPerPage, currentPage]);
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -1948,6 +1972,7 @@ export function ListadoSolicitud() {
             value={selectedBodega}
             onChange={(e) => {const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); localStorage.setItem('filtroBodega', bodegaFiltro);}}
             label="Buscar por nombre"
+			disabled={userData?.idGrupo === 23}
           >
             <MenuItem value="todos">Todos</MenuItem>
 
@@ -1965,9 +1990,13 @@ export function ListadoSolicitud() {
             value={selectedVendedor}
             onChange={(e) => {const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); localStorage.setItem('filtroVendedor', vendedorFiltro);}}
             label="Buscar por nombre"
+			disabled={userData?.idGrupo === 23}
           >
-            <MenuItem value="todos">Todos</MenuItem>
-            {vendedores.map((vendedor) => (
+            {userData?.idGrupo !== 23 && (<MenuItem value="todos">Todos</MenuItem>)}
+            {(userData?.idGrupo === 23 ? vendedores.filter(
+				(vendedor) => vendedor?.Codigo === userData?.Nombre)
+				: vendedores
+				).map((vendedor) => (
               <MenuItem key={vendedor.idPersonal} value={vendedor.idPersonal}>
                 {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
               </MenuItem>
@@ -3262,7 +3291,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos?.tipo3?.length > 0 && (
+                    {fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 2) && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -3275,7 +3304,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos?.tipo3[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo3?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -3304,7 +3333,7 @@ export function ListadoSolicitud() {
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos?.tipo3?.length > 1 && (
+                    {fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 4) && (
                       <>
                         <Typography
                           variant="caption"
@@ -3320,7 +3349,7 @@ export function ListadoSolicitud() {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos?.tipo3[1].FechaSistema)}
+                          {formatDateTime(fechaTiempos?.tipo3?.find(item => item.idEstadoVerificacionDocumental === 4)?.FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -3338,8 +3367,8 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos?.tipo3[0]?.FechaSistema,
-                            fechaTiempos?.tipo3[1]?.FechaSistema
+                            fechaTiempos?.tipo3.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema,
+                            fechaTiempos?.tipo3.find(item => item.idEstadoVerificacionDocumental === 4)?.FechaSistema
                           )}
                         </Typography>
                       </>
@@ -3382,7 +3411,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos?.tipo2?.length > 0 && (
+                    {fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 2) && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -3395,7 +3424,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos?.tipo2[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -3424,7 +3453,7 @@ export function ListadoSolicitud() {
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos?.tipo2?.length > 1 && (
+                    {fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 3) && (
                       <>
                         <Typography
                           variant="caption"
@@ -3440,7 +3469,7 @@ export function ListadoSolicitud() {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos?.tipo2[1].FechaSistema)}
+                          {formatDateTime(fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -3458,8 +3487,8 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos?.tipo2[0]?.FechaSistema,
-                            fechaTiempos?.tipo2[1]?.FechaSistema
+                            fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema,
+                            fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema
                           )}
                         </Typography>
                       </>
@@ -3470,7 +3499,7 @@ export function ListadoSolicitud() {
               </TimelineSeparator>
             </TimelineItem>
 
-            <TimelineItem>
+            {/* <TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3489,7 +3518,7 @@ export function ListadoSolicitud() {
                     justifyContent: "center",
                   }}
                 >
-                  {/* Contenedor fecha superior */}
+                  
                   <Box
                     sx={{
                       position: "absolute",
@@ -3520,7 +3549,7 @@ export function ListadoSolicitud() {
                     )}
                   </Box>
 
-                  {/* Icono */}
+                 
                   <TimelineDot
                     sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
                   >
@@ -3529,7 +3558,7 @@ export function ListadoSolicitud() {
                     />
                   </TimelineDot>
 
-                  {/* Contenedor fecha inferior */}
+                  
                   <Box
                     sx={{
                       position: "absolute",
@@ -3562,7 +3591,7 @@ export function ListadoSolicitud() {
                         >
                           {formatDateTime(fechaTiempos[1].FechaSistema)}
                         </Typography>
-                        {/* Tiempo transcurrido */}
+                        
                         <Typography
                           variant="caption"
                           className="tiempo-transcurrido"
@@ -3588,9 +3617,9 @@ export function ListadoSolicitud() {
                 </Box>
                 <TimelineConnector />
               </TimelineSeparator>
-            </TimelineItem>
+            </TimelineItem> */}
 
-            <TimelineItem>
+            {/* <TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3609,7 +3638,7 @@ export function ListadoSolicitud() {
                     justifyContent: "center",
                   }}
                 >
-                  {/* Contenedor fecha superior */}
+                  
                   <Box
                     sx={{
                       position: "absolute",
@@ -3640,7 +3669,7 @@ export function ListadoSolicitud() {
                     )}
                   </Box>
 
-                  {/* Icono */}
+                 
                   <TimelineDot
                     sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
                   >
@@ -3649,7 +3678,7 @@ export function ListadoSolicitud() {
                     />
                   </TimelineDot>
 
-                  {/* Contenedor fecha inferior */}
+                  
                   <Box
                     sx={{
                       position: "absolute",
@@ -3682,7 +3711,7 @@ export function ListadoSolicitud() {
                         >
                           {formatDateTime(fechaTiempos[1].FechaSistema)}
                         </Typography>
-                        {/* Tiempo transcurrido */}
+                        
                         <Typography
                           variant="caption"
                           className="tiempo-transcurrido"
@@ -3708,7 +3737,7 @@ export function ListadoSolicitud() {
                 </Box>
                 <TimelineConnector />
               </TimelineSeparator>
-            </TimelineItem>
+            </TimelineItem> */}
 
             <TimelineItem>
               <TimelineSeparator
@@ -4252,7 +4281,7 @@ export function ListadoSolicitud() {
 
 
 
-      {totalPages > 1 && (
+      {/* {totalPages > 1 && (
         <div className="mt-6 flex justify-center items-center gap-4">
           <button
             onClick={() => changePage(Math.max(currentPage - 1, 1))}
@@ -4272,7 +4301,50 @@ export function ListadoSolicitud() {
             <SkipNextIcon />
           </button>
         </div>
-      )}
+      )} */}
+	  {totalPages > 1 && (
+  		<div className="mt-6 flex justify-between items-center">
+  		  {/* Espacio vacío para alineación */}
+  		  <div className="w-1/3" />
+
+  		  {/* Navegación centrada */}
+  		  <div className="flex justify-center items-center gap-4 w-1/3">
+  		    <button
+  		      onClick={() => changePage(Math.max(currentPage - 1, 1))}
+  		      disabled={currentPage === 1}
+  		      className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+  		    >
+  		      <SkipPreviousIcon />
+  		    </button>
+  		    <span className="font-semibold text-gray-600">
+  		      Página {currentPage} de {totalPages}
+  		    </span>
+  		    <button
+  		      onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+  		      disabled={currentPage === totalPages}
+  		      className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+  		    >
+  		      <SkipNextIcon />
+  		    </button>
+  		  </div>
+
+  		  {/* Select en el extremo derecho */}
+  		  <div className="w-1/3 flex justify-end">
+  		    <select
+  		      value={itemsPerPage}
+  		      onChange={handleItemsPerPageChange}
+  		      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+  		    >
+  		      {[5, 10, 15, 20].map((value) => (
+  		        <option key={value} value={value}>
+  		          {value} por página
+  		        </option>
+  		      ))}
+  		    </select>
+  		  </div>
+  		</div>
+)}
+
       <LocationModal
         isOpen={() => handleOpenModal()}
         openLocationModal={openLocationModal}
