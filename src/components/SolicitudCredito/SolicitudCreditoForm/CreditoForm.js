@@ -7,6 +7,7 @@ import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
+import { sendNotification } from "../../Utils";
 // import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 // import WbSunnyIcon from '@mui/icons-material/WbSunny';
 // import CapturarCamara from "../../CapturarCamara/CapturarCamara";
@@ -587,8 +588,27 @@ export default function CreditoForm() {
         const bodega = values.Bodega;
         // 7. Obtener las notificaciones de la bodega
         const notificaciones = await fetchNotificaciones(bodega);
-        if (notificaciones.status) {
-          console.log("Notificaciones obtenidas:", notificaciones);
+        if (notificaciones.status && Array.isArray(notificaciones.data)) {
+          const tokens = notificaciones.data;
+
+          if (tokens.length > 0) {
+            const title = "¡Crédito creado con éxito! 🎉💳";
+            const body = `Nueva solicitud de crédito de 🧑‍💼 ${values.PrimerNombre} ${values.ApellidoPaterno}`;
+
+            const notificationSent = await sendNotification({
+              tokens, 
+              title,
+              body,
+              type: "alert",
+              empresa: "POINT",
+            });
+
+            console.log("Resultado del envío:", notificationSent);
+          } else {
+            console.warn("No se encontraron tokens para enviar la notificación.");
+          }
+        } else {
+          console.error("Error al obtener las notificaciones o formato incorrecto.");
         }
         // 3. Subir archivo si existe una foto
         if (fotourl && solicitudData) {
