@@ -25,6 +25,7 @@ import Referencias from "../Referencia/Referencia";
 import { ModalConfirm } from "../ModalConfirm";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { Facebook } from "@mui/icons-material";
+import { fetchConsultaYNotifica } from "../../Utils";
 export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
@@ -765,7 +766,7 @@ export function Cabecera() {
 
     switch (activeTab) {
       case "Datos Cliente":
-        return <Datos ref={datosRef} data={clienteData} cresolicitud ={data} />;
+        return <Datos ref={datosRef} data={clienteData} cresolicitud={data} />;
       case "Domicilio":
         return <Domicilio ref={datosDomicilioRef} data={clienteData} comprobTelf={comprobTelf} />;
       case "Datos Conyuge":
@@ -923,10 +924,22 @@ export function Cabecera() {
     }
   };
 
+
+
   // Función para confirmar la acción (enviar)
-  const handleConfirm = () => {
-    patchSolicitud(idSolicitud);
-    fetchInsertarDatos(10);
+  const handleConfirm = async () => {
+    await patchSolicitud(idSolicitud);
+    await fetchInsertarDatos(10);
+    await fetchConsultaYNotifica(idSolicitud, data, {
+      title: "¡Solicitud enviada a revisión! 👀 ",
+      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      type: "alert",
+      empresa: "CREDI",
+      url: "", // Opcional
+      tipo: "analista",
+    });
+
+    //fetchConsultaSolicitud(idSolicitud);
 
     closeModal(); // Cerrar el modal después de confirmar
   };
@@ -1011,15 +1024,15 @@ export function Cabecera() {
         const coordenadas = await fetchValidaDomicilio(1);
         console.log("coordenadas", clientInfo?.data.Domicilio);
         if (clientInfo?.data.Domicilio === true) {
-        if (!coordenadas.exists && data.Domicilio) {
-          enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" });
-          return;
-        }
+          if (!coordenadas.exists && data.Domicilio) {
+            enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" });
+            return;
+          }
 
-        if (datosDomicilioRef.current.setUbicacionError) {
-          datosDomicilioRef.current.setUbicacionError(""); // Limpiar si hay coordenadas
+          if (datosDomicilioRef.current.setUbicacionError) {
+            datosDomicilioRef.current.setUbicacionError(""); // Limpiar si hay coordenadas
+          }
         }
-      }
 
 
         isValidSumit = true;
@@ -1058,22 +1071,22 @@ export function Cabecera() {
         const coordenadas = await fetchValidaDomicilio(2);
 
 
-        
-          console.log("coordenadas LABORAL", clientInfo?.data.Laboral);
 
-          if (!coordenadas.exists || coordenadas.count === 0) {
-            enqueueSnackbar(
-              "Para guardar datos Dependiente, primero debes registrar la ubicación.",
-              { variant: "error" }
-            );
+        console.log("coordenadas LABORAL", clientInfo?.data.Laboral);
 
-            if (datosTrabajo.current.setUbicacionError) {
-              datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
-            }
+        if (!coordenadas.exists || coordenadas.count === 0) {
+          enqueueSnackbar(
+            "Para guardar datos Dependiente, primero debes registrar la ubicación.",
+            { variant: "error" }
+          );
 
-            return;
+          if (datosTrabajo.current.setUbicacionError) {
+            datosTrabajo.current.setUbicacionError("No se han registrado coordenadas para este trabajo.");
           }
-        
+
+          return;
+        }
+
 
         if (datosTrabajo.current.setUbicacionError) {
           datosTrabajo.current.setUbicacionError(""); // Limpiar si hay coordenadas
@@ -1092,21 +1105,21 @@ export function Cabecera() {
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-        
-          console.log("coordenadas 2 NOSE PARA QUE", clientInfo?.data.Laboral);
-          if (!coordenadas.exists || coordenadas.count === 0) {
-            enqueueSnackbar(
-              "Para guardar datos del  negocio, primero debes registrar la ubicación.",
-              { variant: "error" }
-            );
 
-            if (datosNegocio.current.setUbicacionError) {
-              datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
-            }
+        console.log("coordenadas 2 NOSE PARA QUE", clientInfo?.data.Laboral);
+        if (!coordenadas.exists || coordenadas.count === 0) {
+          enqueueSnackbar(
+            "Para guardar datos del  negocio, primero debes registrar la ubicación.",
+            { variant: "error" }
+          );
 
-            return;
+          if (datosNegocio.current.setUbicacionError) {
+            datosNegocio.current.setUbicacionError("No se han registrado coordenadas para este negocio.");
           }
-        
+
+          return;
+        }
+
         if (datosNegocio.current.setUbicacionError) {
           datosNegocio.current.setUbicacionError(""); // Limpiar si hay coordenadas
         }
@@ -1281,8 +1294,8 @@ export function Cabecera() {
         {
           NombreEmpresa: formData.empresa,
           idTipoEmpresa: getParsedValue(formData.tipoEmpresa),
-		  JefeInmediato: formData.jefeInmediato,
-		  CelularInmediato: formData.numeroJefe,
+          JefeInmediato: formData.jefeInmediato,
+          CelularInmediato: formData.numeroJefe,
           FechaIngresoEmpresa: formData.fechaIngreso,
           IngresosTrabajo: IngresosTrabajoString,
           EgresosTrabajo: EgresosTrabajoString,
