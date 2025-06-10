@@ -93,7 +93,7 @@ import PreDocumentos from "./Pre-Documentos";
 
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
-
+import {fetchConsultaYNotifica} from "../Utils";
 
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
@@ -123,7 +123,7 @@ export function ListadoSolicitud() {
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
 
-  const [ itemsPerPage, setItemsPerPage ] = useState(5)
+  const [itemsPerPage, setItemsPerPage] = useState(5)
 
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
@@ -1084,7 +1084,7 @@ export function ListadoSolicitud() {
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
 
- {/*const handleOpenModalVerificacion = async (data, tipo) => {
+  {/*const handleOpenModalVerificacion = async (data, tipo) => {
     try {
       let idtipo = 0;
       if (tipo === "domicilio") idtipo = 1;
@@ -1140,69 +1140,69 @@ export function ListadoSolicitud() {
       console.error("Error fetching data for verificación terrena:", error);
     }
   }; */}  // version anterior para el manejo de mensajes en modal de domicilio y laboral 
-  
-  
+
+
   const [openPreDocumentos, setOpenPreDocumentos] = useState(false);
-const [preDocumentosData, setPreDocumentosData] = useState(null);
-const handleOpenModalVerificacion = async (data, tipo) => {
-  try {
-    let idtipo = 0;
-    if (tipo === "domicilio") idtipo = 1;
-    else if (tipo === "trabajo") idtipo = 2;
+  const [preDocumentosData, setPreDocumentosData] = useState(null);
+  const handleOpenModalVerificacion = async (data, tipo) => {
+    try {
+      let idtipo = 0;
+      if (tipo === "domicilio") idtipo = 1;
+      else if (tipo === "trabajo") idtipo = 2;
 
-    const url = APIURL.getIdsTerrenas(data.id, idtipo);
-    const response = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+      const url = APIURL.getIdsTerrenas(data.id, idtipo);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    if (response.status !== 200) {
-      throw new Error("Error al obtener los IDs terrenas");
-    }
-
-    const idsTerrenas = response.data;
-
-    setIdsTerrenasMap((prev) => ({
-      ...prev,
-      [data.id]: idsTerrenas,
-    }));
-
-    setIdsTerrenas(idsTerrenas);
-
-    if (!idsTerrenas || idsTerrenas.length === 0) {
-      // No hay datos, abrir PreDocumentos (nuevo componente)
-      setPreDocumentosData({ data, tipo });
-      setOpenPreDocumentos(true);
-      return;
-    }
-
-    if (tipo === "domicilio") {
-      if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
-        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
-        setDomicilioModalOpen(true);
-      } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
-        await fetchtiemposolicitudesweb(data.id, 4);
-        setOpenModalPendiente(true);
+      if (response.status !== 200) {
+        throw new Error("Error al obtener los IDs terrenas");
       }
-      return;
-    }
 
-    if (tipo === "trabajo") {
-      if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
-        setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
-        setTrabajoModalOpen(true);
-      } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
-        await fetchtiemposolicitudesweb(data.id, 5);
-        setOpenModalPendiente(true);
+      const idsTerrenas = response.data;
+
+      setIdsTerrenasMap((prev) => ({
+        ...prev,
+        [data.id]: idsTerrenas,
+      }));
+
+      setIdsTerrenas(idsTerrenas);
+
+      if (!idsTerrenas || idsTerrenas.length === 0) {
+        // No hay datos, abrir PreDocumentos (nuevo componente)
+        setPreDocumentosData({ data, tipo });
+        setOpenPreDocumentos(true);
+        return;
       }
-      return;
-    }
 
-  } catch (error) {
-    console.error("Error fetching data for verificación terrena:", error);
-  }
-};
+      if (tipo === "domicilio") {
+        if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
+          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
+          setDomicilioModalOpen(true);
+        } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
+          await fetchtiemposolicitudesweb(data.id, 4);
+          setOpenModalPendiente(true);
+        }
+        return;
+      }
+
+      if (tipo === "trabajo") {
+        if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
+          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
+          setTrabajoModalOpen(true);
+        } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
+          await fetchtiemposolicitudesweb(data.id, 5);
+          setOpenModalPendiente(true);
+        }
+        return;
+      }
+
+    } catch (error) {
+      console.error("Error fetching data for verificación terrena:", error);
+    }
+  };
 
 
 
@@ -1532,6 +1532,15 @@ const handleOpenModalVerificacion = async (data, tipo) => {
       }
 
       await updateAnalista(filaActual, analistaSeleccionado);
+      console.log("Analista actualizado:", filaActual);
+      await fetchConsultaYNotifica(filaActual.id, filaActual, {
+            title: "¡Solicitud enviada a revisión! 👀 ",
+            body: `Revisa la solicitud de crédito de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}`,
+            type: "alert",
+            empresa: "CREDI",
+            url: "", // Opcional
+            tipo: "analista",
+          });
       enqueueSnackbar("Analista actualizado correctamente", {
         variant: "success",
       });
@@ -1955,65 +1964,65 @@ const handleOpenModalVerificacion = async (data, tipo) => {
   }
 
   const limpiarFiltros = () => {
-	setFechaInicio(date15DaysAgoStr);
-	setFechaFin(today);
-	setSelectedBodega("todos");
-	setSelectedVendedor("todos");
-	setAnalistaSelected("todos");
-	setEstado("todos");
-	setSolicitud("Todos");
-	setDocumental("Todos");
-	setTelefonica("Todos");
-	setDomicilio("Todos");
-	setLaboral("Todos");
-	setCedula('')
-	setNombre('')
-	setNumeroSolicitud('')
+    setFechaInicio(date15DaysAgoStr);
+    setFechaFin(today);
+    setSelectedBodega("todos");
+    setSelectedVendedor("todos");
+    setAnalistaSelected("todos");
+    setEstado("todos");
+    setSolicitud("Todos");
+    setDocumental("Todos");
+    setTelefonica("Todos");
+    setDomicilio("Todos");
+    setLaboral("Todos");
+    setCedula('')
+    setNombre('')
+    setNumeroSolicitud('')
 
-	localStorage.removeItem('filtroIniFecha');
-	localStorage.removeItem('filtroFinFecha');
-	localStorage.removeItem('filtroBodega');
-	localStorage.removeItem('filtroVendedor');
-	localStorage.removeItem('filtroAnalista');
-	localStorage.removeItem('filtroEstado');
-	localStorage.removeItem('filtroSolicitud');
-	localStorage.removeItem('filtroDocumental');
-	localStorage.removeItem('filtroTelefonica');
-	localStorage.removeItem('filtroDomicilio');
-	localStorage.removeItem('filtroLaboral');
-	localStorage.removeItem('filtroCedula')
-	localStorage.removeItem('filtroNombre')
-	localStorage.removeItem('filtroNumSolicitud')
-};
+    localStorage.removeItem('filtroIniFecha');
+    localStorage.removeItem('filtroFinFecha');
+    localStorage.removeItem('filtroBodega');
+    localStorage.removeItem('filtroVendedor');
+    localStorage.removeItem('filtroAnalista');
+    localStorage.removeItem('filtroEstado');
+    localStorage.removeItem('filtroSolicitud');
+    localStorage.removeItem('filtroDocumental');
+    localStorage.removeItem('filtroTelefonica');
+    localStorage.removeItem('filtroDomicilio');
+    localStorage.removeItem('filtroLaboral');
+    localStorage.removeItem('filtroCedula')
+    localStorage.removeItem('filtroNombre')
+    localStorage.removeItem('filtroNumSolicitud')
+  };
 
 
-useEffect(() => {
-  if (userData?.idGrupo === 23) {
-    if (bodegas.length > 0) {
-      const primeraBodega = bodegas[0].b_Bodega;
-      setSelectedBodega(primeraBodega);
-      localStorage.setItem('filtroBodega', primeraBodega);
+  useEffect(() => {
+    if (userData?.idGrupo === 23) {
+      if (bodegas.length > 0) {
+        const primeraBodega = bodegas[0].b_Bodega;
+        setSelectedBodega(primeraBodega);
+        localStorage.setItem('filtroBodega', primeraBodega);
+      }
+
+      const vendedorAutorizado = vendedores.find(
+        (v) => v.Codigo === userData.Nombre
+      );
+      if (vendedorAutorizado) {
+        setSelectedVendedor(vendedorAutorizado.idPersonal);
+        localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
+      }
     }
+  }, [userData?.idGrupo, bodegas, vendedores]);
 
-    const vendedorAutorizado = vendedores.find(
-      (v) => v.Codigo === userData.Nombre
-    );
-    if (vendedorAutorizado) {
-      setSelectedVendedor(vendedorAutorizado.idPersonal);
-      localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
-    }
-  }
-}, [userData?.idGrupo, bodegas, vendedores]);
-
-const handleItemsPerPageChange = (e) => {
-  setItemsPerPage(Number(e.target.value));
-  setCurrentPage(1); 
-};
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
 
 
-useEffect(() => {
-  fetchSolicitudes();
-}, [itemsPerPage, currentPage]);
+  useEffect(() => {
+    fetchSolicitudes();
+  }, [itemsPerPage, currentPage]);
 
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
@@ -2048,7 +2057,7 @@ useEffect(() => {
             value={selectedBodega}
             onChange={(e) => { const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); localStorage.setItem('filtroBodega', bodegaFiltro); }}
             label="Buscar por nombre"
-			disabled={userData?.idGrupo === 23}
+            disabled={userData?.idGrupo === 23}
           >
             <MenuItem value="todos">Todos</MenuItem>
 
@@ -2066,13 +2075,13 @@ useEffect(() => {
             value={selectedVendedor}
             onChange={(e) => { const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); localStorage.setItem('filtroVendedor', vendedorFiltro); }}
             label="Buscar por nombre"
-			disabled={userData?.idGrupo === 23}
+            disabled={userData?.idGrupo === 23}
           >
             {userData?.idGrupo !== 23 && (<MenuItem value="todos">Todos</MenuItem>)}
             {(userData?.idGrupo === 23 ? vendedores.filter(
-				(vendedor) => vendedor?.Codigo === userData?.Nombre)
-				: vendedores
-				).map((vendedor) => (
+              (vendedor) => vendedor?.Codigo === userData?.Nombre)
+              : vendedores
+            ).map((vendedor) => (
               <MenuItem key={vendedor.idPersonal} value={vendedor.idPersonal}>
                 {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
               </MenuItem>
@@ -4379,48 +4388,48 @@ useEffect(() => {
           </button>
         </div>
       )} */}
-	  {totalPages > 1 && (
-  		<div className="mt-6 flex justify-between items-center">
-  		  {/* Espacio vacío para alineación */}
-  		  <div className="w-1/3" />
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-between items-center">
+          {/* Espacio vacío para alineación */}
+          <div className="w-1/3" />
 
-  		  {/* Navegación centrada */}
-  		  <div className="flex justify-center items-center gap-4 w-1/3">
-  		    <button
-  		      onClick={() => changePage(Math.max(currentPage - 1, 1))}
-  		      disabled={currentPage === 1}
-  		      className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-  		    >
-  		      <SkipPreviousIcon />
-  		    </button>
-  		    <span className="font-semibold text-gray-600">
-  		      Página {currentPage} de {totalPages}
-  		    </span>
-  		    <button
-  		      onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
-  		      disabled={currentPage === totalPages}
-  		      className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-  		    >
-  		      <SkipNextIcon />
-  		    </button>
-  		  </div>
+          {/* Navegación centrada */}
+          <div className="flex justify-center items-center gap-4 w-1/3">
+            <button
+              onClick={() => changePage(Math.max(currentPage - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+            >
+              <SkipPreviousIcon />
+            </button>
+            <span className="font-semibold text-gray-600">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+            >
+              <SkipNextIcon />
+            </button>
+          </div>
 
-  		  {/* Select en el extremo derecho */}
-  		  <div className="w-1/3 flex justify-end">
-  		    <select
-  		      value={itemsPerPage}
-  		      onChange={handleItemsPerPageChange}
-  		      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-  		    >
-  		      {[5, 10, 15, 20].map((value) => (
-  		        <option key={value} value={value}>
-  		          {value} por página
-  		        </option>
-  		      ))}
-  		    </select>
-  		  </div>
-  		</div>
-)}
+          {/* Select en el extremo derecho */}
+          <div className="w-1/3 flex justify-end">
+            <select
+              value={itemsPerPage}
+              onChange={handleItemsPerPageChange}
+              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              {[5, 10, 15, 20].map((value) => (
+                <option key={value} value={value}>
+                  {value} por página
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       <LocationModal
         isOpen={() => handleOpenModal()}
@@ -4431,47 +4440,47 @@ useEffect(() => {
         userSolicitudData={userSolicitudData}
       />
 
- <PreDocumentos
-  open={openPreDocumentos}
-  onClose={() => setOpenPreDocumentos(false)}
-  idSolicitud={preDocumentosData?.data?.id}
-  onContinue={async () => {
-    setOpenPreDocumentos(false);
+      <PreDocumentos
+        open={openPreDocumentos}
+        onClose={() => setOpenPreDocumentos(false)}
+        idSolicitud={preDocumentosData?.data?.id}
+        onContinue={async () => {
+          setOpenPreDocumentos(false);
 
-    const data = preDocumentosData.data;
-    const tipo = preDocumentosData.tipo;
-    const idsTerrenas = idsTerrenasMap[data.id];
+          const data = preDocumentosData.data;
+          const tipo = preDocumentosData.tipo;
+          const idsTerrenas = idsTerrenasMap[data.id];
 
-    if (!idsTerrenas || idsTerrenas.length === 0) {
-      setUserSolicitudData(data);
-      setTipoVerificacionSeleccionada(tipo);
-      setOpenVerificacionModal(true);
-      return;
-    }
+          if (!idsTerrenas || idsTerrenas.length === 0) {
+            setUserSolicitudData(data);
+            setTipoVerificacionSeleccionada(tipo);
+            setOpenVerificacionModal(true);
+            return;
+          }
 
-    if (tipo === "domicilio") {
-      if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
-        setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });   
-        setDomicilioModalOpen(true);
-      } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
-        await fetchtiemposolicitudesweb(data.id, 4);
-        setOpenModalPendiente(true);
-      }
-      return;
-    }
+          if (tipo === "domicilio") {
+            if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
+              setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
+              setDomicilioModalOpen(true);
+            } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
+              await fetchtiemposolicitudesweb(data.id, 4);
+              setOpenModalPendiente(true);
+            }
+            return;
+          }
 
-    if (tipo === "trabajo") {
-      if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
-        setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
-        setTrabajoModalOpen(true);
-      } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
-        await fetchtiemposolicitudesweb(data.id, 5);
-        setOpenModalPendiente(true);
-      }
-      return;
-    }
-  }}
-/>
+          if (tipo === "trabajo") {
+            if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
+              setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
+              setTrabajoModalOpen(true);
+            } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
+              await fetchtiemposolicitudesweb(data.id, 5);
+              setOpenModalPendiente(true);
+            }
+            return;
+          }
+        }}
+      />
 
 
 

@@ -29,7 +29,7 @@ export const fetchConsultaYNotifica = async (
     } = {}
 ) => {
     try {
-
+console.log("Iniciando consulta y notificación para ID de solicitud:", idSolicitud);
         if (!idSolicitud || isNaN(Number(idSolicitud) || Number(idSolicitud) == 0)) {
             // para solitidu creada en el frontend jefe de almacem
             const enviado = await sendNotification({
@@ -43,14 +43,17 @@ export const fetchConsultaYNotifica = async (
             console.log(enviado ? "✅ Notificación enviada." : "❌ Fallo al enviar notificación.");
             throw new Error("ID de solicitud inválido");
         }
-
+        // 
+        /* daniel */
         const solicitudURL = APIURL.getConsultaCre_solicitud_web(idSolicitud);
         const { data: solicitud } = await axios.get(solicitudURL, {
             headers: { 'Content-Type': 'application/json' }
         });
 
 
+
         if (tipo === "analista" && solicitud?.idAnalista) {
+            console.log("Enviando notificación al analista:", solicitud.idAnalista);
             await fetchYNotificaAnalista(
                 solicitud.idAnalista,
                 data,
@@ -79,13 +82,17 @@ export const fetchConsultaYNotifica = async (
                 );
             }
         }
+        /* daniel */
+
     } catch (error) {
         console.error("❌ Error al procesar solicitud:", error.message);
     }
 };
 
+
 const fetchYNotificaAnalista = async (idAnalista, data, options) => {
     try {
+        console.log("Buscando usuario por ID:", idAnalista);
         const usuarioURL = APIURL.get_UsuariobyId(idAnalista);
         const { data: usuario } = await axios.get(usuarioURL, {
             headers: { 'Content-Type': 'application/json' }
@@ -117,7 +124,7 @@ const fetchTokenYEnviar = async (nombreUsuario, data, options) => {
         }
 
         const tokens = [expoToken];
-
+        console.log("Tokens obtenidos:", tokens);
         const filledBody = options.body
             .replace("{nombre}", data?.PrimerNombre || "")
             .replace("{apellido}", data?.ApellidoPaterno || "");
@@ -136,6 +143,7 @@ const fetchTokenYEnviar = async (nombreUsuario, data, options) => {
         console.error("❌ Error al enviar notificación:", error.message);
     }
 };
+
 const sendNotification = async ({
     tokens,
     title,
