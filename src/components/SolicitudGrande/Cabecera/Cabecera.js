@@ -1521,19 +1521,36 @@ export function Cabecera() {
     handleValidate,
   }));
 
-  const handleAceptar = () => {
+  const handleAceptar = async () => {
     // Lógica para aceptar la solicitud
     enqueueSnackbar("Solicitud aceptada.", { variant: "success" });
     patchSolicitudAceptar(idSolicitud);
     fetchInsertarDatos(12);
+    await fetchConsultaYNotifica(idSolicitud, data, {
+      title: "Se acepto la solicitud grnade! 👀 ",
+      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      type: "alert",
+      empresa: "POINT",
+      url: "", // Opcional
+      tipo: "vendedor",
+    });
+     
     navigate("/ListadoSolicitud", {
       replace: true,
     });
   };
 
-  const handleRechazar = () => {
+  const handleRechazar = async () => {
     patchSolicitudRechazar(idSolicitud);
-    fetchInsertarDatos(13);
+    fetchInsertarDatos(13); 
+     await fetchConsultaYNotifica(idSolicitud, data, {
+      title: "¡se mando rechazo la Solicitud grande ! 👀 ",
+      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      type: "alert",
+      empresa: "POINT",
+      url: "", // Opcional
+      tipo: "vendedor",
+    });
     navigate("/ListadoSolicitud", {
       replace: true,
     });
@@ -1541,9 +1558,18 @@ export function Cabecera() {
     // Lógica para rechazar la solicitud
   };
 
-  const handleCorreccion = () => {
+  const handleCorreccion = async () => {
     patchSolicitudCorrecion(idSolicitud);
     fetchInsertarDatos(11);
+
+    await fetchConsultaYNotifica(idSolicitud, data, {
+      title: "¡se mando a corregir la info ! 👀 ",
+      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      type: "alert",
+      empresa: "POINT",
+      url: "", // Opcional
+      tipo: "vendedor",
+    });
     navigate("/ListadoSolicitud", {
       replace: true,
     });

@@ -190,4 +190,5 @@ verificarRegistroSolicitud: (cedula, bodega) =>`${API_BASE_URL}cre-solicitud-web
   get_Asignacion_vendedores : (id) => `${API_BASE_URL}com-asignacion-de-vendedores/jefes-de-bodega/${id}`,
   get_UsuariobyId : (id) => `${API_BASE_URL}usuarios/id/${id}`,
   get_tokenbyUsuario : (nombre) => `${API_BASE_URL}dispositivosApp/usuario/${nombre}`,
+  get_tokenVendedor : (id) => `${API_BASE_URL}dispositivosApp/tokenExpo/${id}`,
 };
