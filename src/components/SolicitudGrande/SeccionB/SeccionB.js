@@ -86,7 +86,6 @@ const SeccionB = forwardRef((props, ref) => {
 
     fetchProvincias(enqueueSnackbar, setProvincia);
   }, []);
-console.log("data dependiente", data)
   // Estado para manejar los valores de los campos
   const [formData, setFormData] = useState({
     empresa: data.NombreEmpresa || "",
@@ -114,7 +113,6 @@ console.log("data dependiente", data)
     celular: data.CelularTrabajo || "",
     referenciaUbicacion: data.ReferenciaUbicacionTrabajo || "",
   });
-  console.log("formData", formData)
 
   useEffect(() => {
     if (formData.provincia) {
