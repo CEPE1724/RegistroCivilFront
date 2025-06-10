@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
-import { sendNotification } from "../../Utils";
+import { fetchConsultaYNotifica } from "../../Utils";
 // import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 // import WbSunnyIcon from '@mui/icons-material/WbSunny';
 // import CapturarCamara from "../../CapturarCamara/CapturarCamara";
@@ -592,18 +592,25 @@ export default function CreditoForm() {
           const tokens = notificaciones.data;
 
           if (tokens.length > 0) {
-            const title = "¡Crédito creado con éxito! 🎉💳";
-            const body = `Nueva solicitud de crédito de 🧑‍💼 ${values.PrimerNombre} ${values.ApellidoPaterno}`;
 
+            await fetchConsultaYNotifica(0, '', {
+              title: "¡Crédito creado con éxito! 🎉💳",
+              body: `Nueva solicitud de crédito de 🧑‍💼 ${values.PrimerNombre} ${values.ApellidoPaterno}`,
+              type: "alert",
+              empresa: "POINT",
+              url: "",
+              expoToken: tokens,  // Opcional
+            });
+            /*
             const notificationSent = await sendNotification({
               tokens, 
               title,
               body,
               type: "alert",
               empresa: "POINT",
-            });
+            });*/
 
-            console.log("Resultado del envío:", notificationSent);
+            //  console.log("Resultado del envío:", notificationSent);
           } else {
             console.warn("No se encontraron tokens para enviar la notificación.");
           }
