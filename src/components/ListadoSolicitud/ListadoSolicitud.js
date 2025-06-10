@@ -881,7 +881,7 @@ export function ListadoSolicitud() {
           fetchTipoConsulta(),
           fetchBodega(),
           fetchTipoCliente(),
-          permissionscomponents(idMenu, userData.idUsuario),
+          permissionscomponents(idMenu, userData?.idUsuario),
           fecthAnalista(),
           fetchOperador()
         ]);
@@ -1235,7 +1235,7 @@ const handleOpenModalVerificacion = async (data, tipo) => {
   // Obtener bodegas
   const fetchBodega = async () => {
     try {
-      const userId = userData.idUsuario;
+      const userId = userData?.idUsuario;
       const idTipoFactura = 43;
       const fecha = new Date().toISOString();
       const recibeConsignacion = true;

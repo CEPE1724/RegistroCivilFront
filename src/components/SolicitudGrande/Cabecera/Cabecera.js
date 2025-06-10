@@ -25,6 +25,7 @@ import Referencias from "../Referencia/Referencia";
 import { ModalConfirm } from "../ModalConfirm";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { Facebook } from "@mui/icons-material";
+import { sendNotification } from "../../Utils";
 export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
@@ -923,10 +924,72 @@ export function Cabecera() {
     }
   };
 
+  const fetchConsultaSolicitud = async (idSolicitud) => {
+	  try {
+		const url = APIURL.getConsultaCre_solicitud_web(idSolicitud);
+		const response = await axios.get(url, {
+		  headers: {
+			'Content-Type': 'application/json',
+		  },
+		});
+		fetchUsuario(response.data.idAnalista);
+	  } catch (error) {
+		console.error("Error al consultar la solicitud:", error.message);
+		throw error;  
+	  }
+	};
+
+	const fetchUsuario = async (id) => {
+		try {
+			const url = APIURL.get_UsuariobyId(id);
+			const response = await axios.get(url, {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+			fetchToken(response.data.Nombre);
+		}
+		catch (error) {
+			console.error("Error al obtener el usuario:", error);
+			throw error;  
+		}
+	}
+
+	const fetchToken = async (nombre) => {
+		try {
+			const url = APIURL.get_tokenbyUsuario(nombre);
+			const response = await axios.get(url, {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			});
+			if (response.data.TokenExpo !== null && response.data.TokenExpo !== "") {	
+				const tokens = [response.data.TokenExpo];		
+				const title = "¡Solicitud enviada a revisión! 👀 ";
+				const body = `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`;
+				
+				const notificationSent = await sendNotification({
+					tokens, 
+					title,
+					body,
+					type: "alert",
+					empresa: "CREDI",
+			});
+			console.log("Resultado del envío:", notificationSent);
+			} else {
+            console.warn("No se encontraron tokens para enviar la notificación.");
+          }
+		} catch (error) {
+			console.error("Error al obtener el token:", error);
+			throw error;  
+		}
+	}
+
   // Función para confirmar la acción (enviar)
   const handleConfirm = () => {
     patchSolicitud(idSolicitud);
     fetchInsertarDatos(10);
+	fetchConsultaSolicitud(idSolicitud);
 
     closeModal(); // Cerrar el modal después de confirmar
   };
