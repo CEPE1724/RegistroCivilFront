@@ -25,7 +25,7 @@ import Referencias from "../Referencia/Referencia";
 import { ModalConfirm } from "../ModalConfirm";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { Facebook } from "@mui/icons-material";
-import { fetchConsultaYNotifica } from "../../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
@@ -932,7 +932,8 @@ export function Cabecera() {
     await fetchInsertarDatos(10);
     await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Solicitud enviada a revisión! 👀 ",
-      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+	   📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "CREDI",
       url: "", // Opcional
@@ -1527,8 +1528,9 @@ export function Cabecera() {
     patchSolicitudAceptar(idSolicitud);
     fetchInsertarDatos(12);
     await fetchConsultaYNotifica(idSolicitud, data, {
-      title: "Se acepto la solicitud grnade! 👀 ",
-      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      title: "¡Se acepto la solicitud grande! 🎉 ",
+      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+	   📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "POINT",
       url: "", // Opcional
@@ -1544,11 +1546,12 @@ export function Cabecera() {
     patchSolicitudRechazar(idSolicitud);
     fetchInsertarDatos(13); 
      await fetchConsultaYNotifica(idSolicitud, data, {
-      title: "¡se mando rechazo la Solicitud grande ! 👀 ",
-      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      title: "¡Se rechazo la Solicitud grande ! 🚫 ",
+      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+	  📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "POINT",
-      url: "", // Opcional
+      url: "",
       tipo: "vendedor",
     });
     navigate("/ListadoSolicitud", {
@@ -1563,11 +1566,12 @@ export function Cabecera() {
     fetchInsertarDatos(11);
 
     await fetchConsultaYNotifica(idSolicitud, data, {
-      title: "¡se mando a corregir la info ! 👀 ",
-      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}`,
+      title: "¡Se envio a corregir la solicitud grande! ✍️",
+      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+	  📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "POINT",
-      url: "", // Opcional
+      url: "",
       tipo: "vendedor",
     });
     navigate("/ListadoSolicitud", {
@@ -1709,18 +1713,6 @@ export function Cabecera() {
                   </button>
                 </div>
               )}
-              {/*
-
-<div className="flex items-center">
-                <button
-                  onClick={() => { }}
-                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-                >
-                  <PrintIcon className="text-lg" />
-                  <span className="text-xs">Imprimir</span>
-                </button>
-              </div>
-*/}
 
               <div className="flex items-center">
                 <button

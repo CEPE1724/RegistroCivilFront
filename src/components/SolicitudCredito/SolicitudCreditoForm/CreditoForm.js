@@ -7,7 +7,7 @@ import { useSnackbar } from "notistack";
 import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
-import { fetchConsultaYNotifica } from "../../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 // import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 // import WbSunnyIcon from '@mui/icons-material/WbSunny';
 // import CapturarCamara from "../../CapturarCamara/CapturarCamara";
@@ -595,7 +595,8 @@ export default function CreditoForm() {
 
             await fetchConsultaYNotifica(0, '', {
               title: "¡Crédito creado con éxito! 🎉💳",
-              body: `Nueva solicitud de crédito de 🧑‍💼 ${values.PrimerNombre} ${values.ApellidoPaterno}`,
+              body: `Nueva solicitud de crédito de 🧑‍💼 ${values.PrimerNombre} ${values.ApellidoPaterno}
+			   📅 Fecha: ${fechaHoraEcuador}`,
               type: "alert",
               empresa: "POINT",
               url: "",

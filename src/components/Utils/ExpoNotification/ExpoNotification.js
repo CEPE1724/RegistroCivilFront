@@ -27,7 +27,6 @@ import axios from "../../../configApi/axiosConfig";
   } = {}
 ) => {
   try {
-    console.log("Iniciando consulta y notificación para ID de solicitud:", idSolicitud);
 
     if (!idSolicitud || isNaN(Number(idSolicitud)) || Number(idSolicitud) === 0) {
       if (expoToken) {
@@ -40,7 +39,7 @@ import axios from "../../../configApi/axiosConfig";
     const solicitudURL = APIURL.getConsultaCre_solicitud_web(idSolicitud);
     const { data: solicitud } = await axios.get(solicitudURL);
 
-    console.log("Datos de la solicitud obtenidos:", solicitud);
+
 
     const notificar = async (id, callback) => {
       if (id) {
@@ -171,3 +170,13 @@ const personalizeMessage = (template, data) => {
     .replace("{nombre}", data?.PrimerNombre || "")
     .replace("{apellido}", data?.ApellidoPaterno || "");
 };
+
+export const fechaHoraEcuador = new Date().toLocaleString('es-EC', {
+    timeZone: 'America/Guayaquil',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    });
