@@ -1,5 +1,5 @@
 // Listado Solicitud 2
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -20,8 +20,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Alert,
-  Icon,
 } from "@mui/material";
 import {
   Timeline,
@@ -29,9 +27,7 @@ import {
   TimelineSeparator,
   TimelineDot,
   TimelineConnector,
-  TimelineContent,
 } from "@mui/lab";
-import { FaCheckCircle } from "react-icons/fa";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "../../configApi/axiosConfig";
 import { APIURL } from "../../configApi/apiConfig";
@@ -62,39 +58,28 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PhoneDisabledIcon from "@mui/icons-material/PhoneDisabled";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
-import SmartphoneIcon from "@mui/icons-material/Smartphone";
-import CancelIcon from "@mui/icons-material/Cancel";
 import LocationModal from "./LocationModal";
-
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
-
 import SettingsPhoneIcon from "@mui/icons-material/SettingsPhone";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // PENDIENTE
 import HomeIcon from "@mui/icons-material/Home"; // DATOS DOMICILIO
-import FavoriteIcon from "@mui/icons-material/Favorite"; // DATOS CÓNYUGE
 import ContactsIcon from "@mui/icons-material/Contacts"; // DATOS REFERENCIAS
 import CreditScoreIcon from "@mui/icons-material/CreditScore"; // INFORMACIÓN DE CRÉDITO
 import AssessmentIcon from "@mui/icons-material/Assessment"; // FACTORES DE CRÉDITO
-
-import { Popover, Box, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert"; // Icono de tres puntos verticales
 import DocumentStatusPopover from "./DocumentStatusPopover";
-import Domicilio from "../SolicitudGrande/DatosCliente/Domicilio/Domicilio";
 import DomicilioModal from "./DomicilioModal";
 import TrabajoModal from "./TrabajoModal";
-import { set } from "react-hook-form";
-import { Api } from "@mui/icons-material";
 import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, FormControlLabel } from '@mui/material';
 import PreDocumentos from "./Pre-Documentos";
-
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
-import {fetchConsultaYNotifica} from "../Utils";
-
+import {fetchConsultaYNotifica, fechaHoraEcuador} from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
 export function ListadoSolicitud() {
@@ -109,7 +94,6 @@ export function ListadoSolicitud() {
     listadoAnalista,
   } = useBodegaUsuario();
 
-
   const [recargar, setRecargar] = useState(false);
   const [selectedBodega, setSelectedBodega] = useState(localStorage.getItem('filtroBodega') || "todos");
   const [selectedVendedor, setSelectedVendedor] = useState(localStorage.getItem('filtroVendedor') || "todos");
@@ -122,9 +106,7 @@ export function ListadoSolicitud() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
-
   const [itemsPerPage, setItemsPerPage] = useState(5)
-
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
   const [openModalPendiente, setOpenModalPendiente] = useState(false);
@@ -133,12 +115,9 @@ export function ListadoSolicitud() {
   const [tipoClienteMap, setTipoClienteMap] = useState({});
   const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] = useState(null);
   const [tipoConsulta, setTipoConsulta] = useState([]);
-
-
   const date15DaysAgo = new Date();
   date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
   const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
-
   const [fechaInicio, setFechaInicio] = useState(localStorage.getItem('filtroIniFecha') || date15DaysAgoStr);
   const [fechaFin, setFechaFin] = useState(localStorage.getItem('filtroFinFecha') || today);
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
@@ -151,13 +130,9 @@ export function ListadoSolicitud() {
   const [idsTerrenas, setIdsTerrenas] = useState([]);
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
-
-
   const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
   const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
-
   const [cedula, setCedula] = useState(localStorage.getItem('filtroCedula') || "");
-
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -168,8 +143,6 @@ export function ListadoSolicitud() {
   const [imagenCapturada, setImagenCapturada] = useState(null);
   const [fechaTiempos, setfechaTiempos] = useState([]);
   const inputFileRef = useRef(null); // ⬅️ Coloca esto en la parte superior de tu componente
-
-
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -286,7 +259,6 @@ export function ListadoSolicitud() {
         );
         setOpenRegistroCivil(true);
       }
-
 
     } catch (err) {
       console.error("Error durante la verificación facial:", err);
@@ -565,10 +537,8 @@ export function ListadoSolicitud() {
 
   const [domicilio, setDomicilio] = useState(localStorage.getItem('filtroDomicilio') || "Todos");
   const [laboral, setLaboral] = useState(localStorage.getItem('filtroLaboral') || "Todos");
-
   const [nombre, setNombre] = useState(localStorage.getItem('filtroNombre') || "");
   const [numeroSolicitud, setNumeroSolicitud] = useState(localStorage.getItem('filtroNumSolicitud') || "");
-
   const DomicilioLaboralMap = {
     1: "ASIGNADO",
     2: "DATOS VERIFICADOR",
@@ -596,7 +566,6 @@ export function ListadoSolicitud() {
   const [laboralChecked, setLaboralChecked] = useState(false);
   const [domicilioChecked, setDomicilioChecked] = useState(false);
   const [entrada, setEntrada] = useState("");
-
 
   const handleConfirm = async () => {
     if (currentAction === "estado") {
@@ -692,8 +661,6 @@ export function ListadoSolicitud() {
     }
   };
 
-
-
   const fetchInsertarDatos = async (tipo, data, estado) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
@@ -745,8 +712,6 @@ export function ListadoSolicitud() {
       console.error("Error al guardar los datos del cliente", error);
     }
   };
-
-
 
   const handleApproveEstado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Estado: 2 });
@@ -933,7 +898,6 @@ export function ListadoSolicitud() {
     }
   };
 
-
   const fetchTiempSolicweb = async (tipo, idCre_SolicitudWeb, estado) => {
     try {
       const url = APIURL.get_TiempSolicWeb(tipo, idCre_SolicitudWeb, estado);
@@ -1083,65 +1047,6 @@ export function ListadoSolicitud() {
   }, [fechaTiempos]);
 
   const [idsTerrenasMap, setIdsTerrenasMap] = useState({});
-
-  {/*const handleOpenModalVerificacion = async (data, tipo) => {
-    try {
-      let idtipo = 0;
-      if (tipo === "domicilio") idtipo = 1;
-      else if (tipo === "trabajo") idtipo = 2;
-      const url = APIURL.getIdsTerrenas(data.id, idtipo);
-      const response = await axios.get(url, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.status !== 200) {
-        throw new Error("Error al obtener los IDs terrenas");
-      }
-
-      const idsTerrenas = response.data;
-
-      setIdsTerrenasMap((prev) => ({
-        ...prev,
-        [data.id]: idsTerrenas,
-      }));
-
-      setIdsTerrenas(idsTerrenas);
-
-      if (!idsTerrenas || idsTerrenas.length === 0) {
-        // Si no hay datos, abre el modal de verificación terrena
-        setUserSolicitudData(data);
-        setTipoVerificacionSeleccionada(tipo);
-        setOpenVerificacionModal(true);
-      } else {
-        // Si hay datos, determina qué modal abrir en función del tipo y los datos recibidos
-        if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio > 0) {
-
-
-          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });// Asigna los datos necesarios para el modal de domicilio
-          setDomicilioModalOpen(true);
-
-        }
-        if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo > 0) {
-          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id }); // Asigna los datos necesarios para el modal de trabajo
-          setTrabajoModalOpen(true);
-        }
-
-        if (tipo === "domicilio" && idsTerrenas.idTerrenaGestionDomicilio == 0) {
-          await fetchtiemposolicitudesweb(data.id, 4); // 4 = tipo domicilio
-          setOpenModalPendiente(true);
-        }
-        if (tipo === "trabajo" && idsTerrenas.idTerrenaGestionTrabajo == 0) {
-          await fetchtiemposolicitudesweb(data.id, 5); // 5 = tipo trabajo
-          setOpenModalPendiente(true);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching data for verificación terrena:", error);
-    }
-  }; */}  // version anterior para el manejo de mensajes en modal de domicilio y laboral 
-
-
   const [openPreDocumentos, setOpenPreDocumentos] = useState(false);
   const [preDocumentosData, setPreDocumentosData] = useState(null);
   const handleOpenModalVerificacion = async (data, tipo) => {
@@ -1203,15 +1108,6 @@ export function ListadoSolicitud() {
       console.error("Error fetching data for verificación terrena:", error);
     }
   };
-
-
-
-
-
-
-  ////const fetch verificador => {}
-
-  /// variable y useffect para que se stere el nombre de usuario
 
   const [selectDeshabilitado, setSelectDeshabilitado] = useState(false);
 
@@ -1506,16 +1402,11 @@ export function ListadoSolicitud() {
     numeroSolicitud,
     cedula,
   ]);
-
-
-
-
   const [openDialog3, setOpenDialog3] = useState(false);
   const [analistasDisponibles, setAnalistasDisponibles] = useState([]);
   const [analistaSeleccionado, setAnalistaSeleccionado] = useState(null);
   const [filaActual, setFilaActual] = useState(null);
   const [openDialogConfirmar, setOpenDialogConfirmar] = useState(false); // Confirmación
-
   const [openDialogOperador, setOpenDialogOperador] = useState(false);
   const [operadorSeleccionado, setOperadorSeleccionado] = useState(null);
 
@@ -1532,15 +1423,15 @@ export function ListadoSolicitud() {
       }
 
       await updateAnalista(filaActual, analistaSeleccionado);
-      console.log("Analista actualizado:", filaActual);
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
-            title: "¡Solicitud enviada a revisión! 👀 ",
-            body: `Revisa la solicitud de crédito de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}`,
-            type: "alert",
-            empresa: "CREDI",
-            url: "", // Opcional
-            tipo: "analista",
-          });
+		title: "¡Nueva solicitud enviada a revisión! 👀",
+        body: `Revisa la solicitud de crédito ${filaActual.numeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}
+		Fecha: ${fechaHoraEcuador}`,
+        type: "success",
+        empresa: "CREDI",
+        url: "", // Opcional
+        tipo: "analista",
+        });
       enqueueSnackbar("Analista actualizado correctamente", {
         variant: "success",
       });
@@ -4364,30 +4255,6 @@ export function ListadoSolicitud() {
         </DialogActions>
       </Dialog>
 
-
-
-
-      {/* {totalPages > 1 && (
-        <div className="mt-6 flex justify-center items-center gap-4">
-          <button
-            onClick={() => changePage(Math.max(currentPage - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-          >
-            <SkipPreviousIcon />
-          </button>
-          <span className="font-semibold text-gray-600">
-            Página {currentPage} de {totalPages}
-          </span>
-          <button
-            onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-          >
-            <SkipNextIcon />
-          </button>
-        </div>
-      )} */}
       {totalPages > 1 && (
         <div className="mt-6 flex justify-between items-center">
           {/* Espacio vacío para alineación */}
@@ -4482,10 +4349,6 @@ export function ListadoSolicitud() {
         }}
       />
 
-
-
-
-
       <VerificacionTerrenaModal
         isOpen={openVerificacionModal}
         onClose={() => setOpenVerificacionModal(false)}
@@ -4507,7 +4370,6 @@ export function ListadoSolicitud() {
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={trabajoData?.idSolicitud}
-
       />
 
       <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
@@ -4540,15 +4402,12 @@ export function ListadoSolicitud() {
           imagenSubida={selectedRow?.imagen}
           onAceptar={() => {
             // Acción al aceptar
-
             patchSolicitud(selectedRow?.id, 2);
-
             fetchInsertarDatos(6, selectedRow?.id, 2)
             setOpenRegistroCivil(false);
           }}
           onRechazar={() => {
             // Acción al rechazar
-
             patchSolicitud(selectedRow?.id, 4);
             fetchInsertarDatos(6, selectedRow?.id, 4)
             setOpenRegistroCivil(false);
@@ -4557,7 +4416,6 @@ export function ListadoSolicitud() {
           permisos={permisos}
         />
       </Dialog>
-
 
       {/* Dialog de confirmación */}
       <Dialog open={openDialog2} onClose={() => setOpenDialog2(false)}>
@@ -4619,7 +4477,6 @@ export function ListadoSolicitud() {
                     : ""
                 }
               />
-
             </div>
           )}
         </DialogContent>

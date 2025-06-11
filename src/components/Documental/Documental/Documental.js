@@ -18,6 +18,7 @@ import {
   Button,
 } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
 import { get, set } from "react-hook-form";
+import {fetchConsultaYNotifica, fechaHoraEcuador} from "../../Utils";
 
 export function Documental({
   id,
@@ -32,9 +33,7 @@ export function Documental({
 }) {
   const { userData, userUsuario, idMenu } = useAuth();
   const navigate = useNavigate();
-
   const { state } = useLocation();
-
   const [files, setFiles] = useState({});
   const [activeTab, setActiveTab] = useState("Copia De Cedula");
   const [showFileInput, setShowFileInput] = useState(false);
@@ -52,6 +51,7 @@ export function Documental({
   const [completedFields2, setCompletedFields2] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observaciones, setObservaciones] = useState([]);
+  const [notificacionEnviada, setNotificacionEnviada] = useState(false);
 
   const patchSolicitud = async (idSolicitud) => {
     try {
@@ -86,7 +86,15 @@ export function Documental({
   const handleConfirm = async () => {
     setIsModalOpen(false); // Cierra el modal
     patchsolicitudWeb();
-    //patchSolicitud(clientInfo.id)// aqui llamo a la api que cambia el estado de idverificacion solicitud a 10
+	fetchConsultaYNotifica(id, userUsuario, {
+		title: "¡Documentos listos para revisar! 🔍",
+		   body: `¡Hola! Ya puedes verificar todos documentos de la solicitud ${NumeroSolicitud} de ${nombre}.¡Gracias! 😀
+		   📅 Fecha: ${fechaHoraEcuador}`,
+		   type: "success",
+		   empresa: "CREDI",
+		   url: "",
+		   tipo: "analista",
+		  });
 
     if (showOnlyCorrections) {
       try {
@@ -276,24 +284,6 @@ export function Documental({
   }, [files]);
   // Se ejecuta cuando 'location.state' o 'files' cambian
 
-  /* useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        setShowFileInput(false);
-        setView(false);
-
-      }
-    };
-
-    // Agregar el event listener
-    document.addEventListener("mousedown", handleClickOutside);
-
-    // Limpiar el event listener al desmontar el componente
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []); */
-
   const calculateProgress = () => {
     if (showOnlyCorrections) {
       // Modo Correcciones: Progreso basado SOLO en las secciones con estado 4
@@ -354,14 +344,6 @@ export function Documental({
     return "#4CAF50";
   };
 
-  /*useEffect(() => {
-    if (calculateProgress() === 100) {
-      // 
-      patchsolicitudWeb();
-      ///
-    }
-  }, [calculateProgress()]); // Se ejecuta cuando el progreso cambia
-*/
   const handleFileChange = (e, field) => {
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length === 0) {
@@ -767,6 +749,38 @@ export function Documental({
     (field) => !(files[field] && files[field].length > 0)
   );
 
+  const laboralYDomicilioAprobados = async (id) => {
+	  try {
+		const response = await axios.get(APIURL.getVerificacionTresDocumentos(id));
+		return response.data.allThreeDocsApproved; // true o false
+	  } catch (error) {
+		console.error("Error fetching data:", error);
+		return false;
+	  }
+	};
+
+	useEffect(() => {
+    async function checkYEnviar() {
+      if (notificacionEnviada) return; 
+
+      const aprobados = await laboralYDomicilioAprobados(id);
+      if (aprobados) {
+        await fetchConsultaYNotifica(id, userUsuario, {
+		title: "¡Documentos para revisar! 🔍",
+		   body: `¡Hola! Ya puedes verificar los primeros 3 documentos de la solicitud ${NumeroSolicitud} (croquis, foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀            📅 Fecha: ${fechaHoraEcuador}`,
+		   type: "success",
+		   empresa: "CREDI",
+		   url: "",
+		   tipo: "analista",
+		  });
+        setNotificacionEnviada(true); 
+      }
+    }
+
+    checkYEnviar();
+
+  }, [files, notificacionEnviada]);
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
@@ -1095,31 +1109,6 @@ export function Documental({
               })}
           </div>
 
-          {/* Observación */}
-          {/* <div className="mb-6">
-            <label className="text-lg font-medium text-gray-700">
-              Observación
-            </label>
-            <textarea
-              name="observacion"
-              value={observacion[activeTab] || ""}
-              onChange={(e) =>
-                setObservacion((prev) => ({
-                  ...prev,
-                  [activeTab]: e.target.value,
-                }))
-              }
-              rows="4"
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
-              placeholder="Escribe una observación aquí..."
-            ></textarea>
-            {observacion[activeTab] && observacion[activeTab].length < 10 && (
-              <p className="text-red-500 text-sm mt-2">
-                La observación debe tener al menos 10 caracteres.
-              </p>
-            )}
-          </div> */}
-
           <div className="flex justify-center items-center mt-6 w-full">
             <button
               onClick={() => setShowFileInput(true)}
@@ -1254,8 +1243,6 @@ export function Documental({
           </div>
         </div>
       )}
-
-      {/* Historial de Observaciones */}
 
       {/* Modal para mostrar el chat de observaciones */}
       <HistorialObservacionesModal

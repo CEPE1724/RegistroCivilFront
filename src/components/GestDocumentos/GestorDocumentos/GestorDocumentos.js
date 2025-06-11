@@ -7,7 +7,7 @@ import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "../../../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@mui/joy";
+import {fetchConsultaYNotifica, fechaHoraEcuador} from "../../Utils";
 
 export function GestorDocumentos({
     id,
@@ -42,8 +42,6 @@ export function GestorDocumentos({
     const [flatFiles, setFlatFiles] = useState([]);  // Array de los archivos para el carrusel
     const [showApproveAllButton, setShowApproveAllButton] = useState(false); // Mostrar botón de aprobar 
     const [showRevisionButton, setShowRevisionButton] = useState(false); // Mostrar botón de revisión
-    const [vendedorNombre, setVendedorNombre] = useState("Cargando..."); //nombre vendedor
-    const [tipoConsultaDescripcion, setTipoConsultaDescripcion] = useState("Cargando...");  //nombre almacen
     // estados para el modal global
     const [showGlobalConfirmModal, setShowGlobalConfirmModal] = useState(false);
     const [globalConfirmAction, setGlobalConfirmAction] = useState(null);
@@ -232,16 +230,6 @@ export function GestorDocumentos({
                     Authorization: `Bearer ${token}`,
                 },
             });
-            /*
-                        const url_estado = APIURL.post_createtiemposolicitudeswebDto();
-                        await axios.post(url_estado, {
-            
-                            idCre_SolicitudWeb: idDocumentosSolicitudWeb,
-                            Tipo: 3,
-                            idEstadoVerificacionDocumental: idEstadoDocumento,
-                            Usuario: 'ECEPEDA',
-                        });
-            */
             if (response.status === 200) {
                 // Guardamos la observación
                 const updatedObservaciones = { ...observaciones };
@@ -347,64 +335,6 @@ export function GestorDocumentos({
             enqueueSnackbar("Error al enviar los datos: " + error.response?.data?.message || error.message, { variant: "error" });
         }
     };
-
-    // //api nombre del vendedor 
-    // const fetchVendedor = async (idVendedor) => {
-    //     try {
-    //         const response = await axios.get(APIURL.getVendedor(idVendedor), {
-    //             headers: { method: "GET", cache: "no-store" },
-    //         });
-    //         if (response.status === 200) {
-    //             const vendedor = response.data;
-    //             return (
-    //                 `${vendedor.PrimerNombre || ""} ${vendedor.ApellidoPaterno || ""}`.trim() || "No disponible"
-    //             );
-    //         }
-    //         return "No disponible";
-    //     } catch (error) {
-    //         console.error("Error fetching vendedor data:", error);
-    //         return "No disponible";
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     const getVendedorInfo = async () => {
-    //         if (clientInfo.vendedor) {
-    //             const nombre = await fetchVendedor(clientInfo.vendedor);
-    //             setVendedorNombre(nombre);
-    //         }
-    //     };
-
-    //     getVendedorInfo();
-    // }, [clientInfo.vendedor]);
-
-    //api nombre consulta 
-    const fetchTipoConsulta = async (consulta) => {
-        try {
-            const response = await axios.get(APIURL.getNombreTipoConsulta(consulta), {
-                headers: { method: "GET", cache: "no-store" },
-            });
-            if (response.status === 200) {
-                const tipoConsulta = Array.isArray(response.data) ? response.data[0] : response.data;
-                return tipoConsulta?.Descripcion?.trim() || "No disponible";
-            }
-            return "No disponible";
-        } catch (error) {
-            console.error("Error fetching tipo consulta data:", error);
-            return "No disponible";
-        }
-    };
-
-    useEffect(() => {
-        const getTipoConsultaInfo = async () => {
-            if (clientInfo.consulta) {
-                const descripcion = await fetchTipoConsulta(clientInfo.consulta);
-                setTipoConsultaDescripcion(descripcion);
-            }
-        };
-
-        getTipoConsultaInfo();
-    }, [clientInfo.consulta]);
 
     const handleEnviarObservacion = () => {
         //objeto que se enviara a la api  
@@ -683,14 +613,41 @@ export function GestorDocumentos({
         switch (globalConfirmAction) {
             case 'rechTodo':
                 updateEstadoVerificacion(5);
+				fetchConsultaYNotifica(clientInfo.id, clientInfo, {					
+					title: "¡Documentos rechazados! 🚫",
+					body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
+					Fecha: ${fechaHoraEcuador}`,
+					type: "success",
+					empresa: "CREDI",
+					url: "",
+					tipo: "vendedor",
+				});
                 navigate("/ListadoSolicitud", { replace: true });
                 break;
             case 'aprobTodo':
                 updateEstadoVerificacion(4);
+				fetchConsultaYNotifica(clientInfo.id, clientInfo, {					
+					title: "¡Documentos aprobados! 🎉",
+					body: `¡Excelente noticia! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} han sido revisados y aprobados 📂. Ya puedes avanzar al siguiente paso del proceso. ¡Gracias!
+					Fecha: ${fechaHoraEcuador}`,
+					type: "success",
+					empresa: "CREDI",
+					url: "",
+					tipo: "vendedor",
+				});
                 navigate("/ListadoSolicitud", { replace: true });
                 break;
             case 'revTodo':
                 updateEstadoVerificacion(3);
+				fetchConsultaYNotifica(clientInfo.id, clientInfo, {					
+					title: "¡Documentos enviados a corrección! ✏️",
+					body: `¡Hola! Algunos documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron enviados a corrección ⚠️. Revisa los comentarios para realizar los ajustes necesarios. ¡Gracias!
+					Fecha: ${fechaHoraEcuador}`,
+					type: "success",
+					empresa: "CREDI",
+					url: "",
+					tipo: "vendedor",
+				});
                 navigate("/ListadoSolicitud", { replace: true });
                 break;
             default:
@@ -959,31 +916,6 @@ export function GestorDocumentos({
                             {confirmAction === 'rechazar' && (<label htmlFor="observacion" className="block text-sm font-medium text-gray-700 mb-1">
                                 Observación {confirmAction === 'rechazar' && <span className="text-red-500">*</span>}
                             </label>)}
-                            {/* <textarea
-                                id="observacion"
-                                rows="4"
-                                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                placeholder={confirmAction === 'aprobar'
-                                    ? "Observación (opcional)"
-                                    : "Mínimo 10 caracteres (obligatorio)"}
-                                value={observacion}
-                                onChange={(e) => {
-                                    // Elimina espacios al inicio
-                                    const value = e.target.value;
-                                    if (value === '' || value.match(/^\S/) || observacion.length > 0) {
-                                        setObservacion(value);
-                                    }
-                                }}
-                                onPaste={(e) => {
-                                    // Para eventos de pegado, elimina espacios iniciales
-                                    const pasteText = e.clipboardData.getData('text');
-                                    if (observacion.length === 0) {
-                                        e.preventDefault();
-                                        const trimmedText = pasteText.replace(/^\s+/, '');
-                                        setObservacion(trimmedText);
-                                    }
-                                }}
-                            ></textarea> */}
                             {confirmAction === 'rechazar' && (<select id="observacion" value={observacion} onChange={(e) => setObservacion(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Seleccione un motivo</option>
                                 <option value="Firmas Inconformes">Firmas Inconformes</option>
