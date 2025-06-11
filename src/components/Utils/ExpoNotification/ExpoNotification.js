@@ -40,7 +40,7 @@ import axios from "../../../configApi/axiosConfig";
     const solicitudURL = APIURL.getConsultaCre_solicitud_web(idSolicitud);
     const { data: solicitud } = await axios.get(solicitudURL);
 
-    console.log("Datos de la solicitud obtenidos:", solicitud.NumeroSolicitud);
+    console.log("Datos de la solicitud obtenidos:", solicitud);
 
     const notificar = async (id, callback) => {
       if (id) {
