@@ -40,6 +40,7 @@ import axios from "../../../configApi/axiosConfig";
     const { data: solicitud } = await axios.get(solicitudURL);
 
 
+
     const notificar = async (id, callback) => {
       if (id) {
         console.log(`Enviando notificación al ${tipo}:`, id);

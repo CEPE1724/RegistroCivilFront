@@ -8,6 +8,7 @@ import EventIcon from "@mui/icons-material/Event";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import axios from "../../configApi/axiosConfig";
 import { useAuth } from "../AuthContext/AuthContext";
+import { fetchConsultaYNotifica } from "../Utils";
 
 
 import { APIURL } from "../../configApi/apiConfig";
@@ -121,10 +122,20 @@ export function TelefonicaList({
         Telefono: ``,
       });
 
+      console.log("Cliente info de validar a ver si hay el nombre " , clientInfo)
+
       patchSolicitud(
         clientInfo.id,
         3 // Cambia el estado a "En Validación"
       );
+      await fetchConsultaYNotifica(clientInfo.id, clientInfo, {
+        title: "Se aprobo la verificacion telefonica! 👀 ",
+        body: `Revisa la solicitud de crédito de 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+        type: "alert",
+        empresa: "CREDI",
+        url: "", // Opcional
+        tipo: "vendedor",
+      });
       navigate("/ListadoSolicitud", {
         replace: true,
       });
@@ -142,6 +153,15 @@ export function TelefonicaList({
       clientInfo.id,
       4 // Cambia el estado a "rechazado"
     );
+    console.log("cliente info del rechazar " , clientInfo)
+      await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
+          title: "Se rechazo la verificación telefonica! 👀 ",
+          body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+          type: "alert",
+          empresa: "POINT",
+          url: "", // Opcional
+          tipo: "vendedor",
+        });
     navigate("/ListadoSolicitud", {
       replace: true,
     });
@@ -602,7 +622,7 @@ export function TelefonicaList({
                       </button>
                     )}
 
-                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica!==3 && (
+                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
                       <button
                         onClick={handleRemove
                         }
