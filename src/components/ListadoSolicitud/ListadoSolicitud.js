@@ -2095,7 +2095,7 @@ export function ListadoSolicitud() {
             value={analistaSelected}
             onChange={(e) => { const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); localStorage.setItem('filtroAnalista', analistaFiltro); }}
             label="Analista"
-            disabled={selectDeshabilitado} //  solo si hubo match
+            //disabled={selectDeshabilitado} //  solo si hubo match
           >
             <MenuItem value="todos">Todos</MenuItem>
             {analistas.map((vendedor) => (
