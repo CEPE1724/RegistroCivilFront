@@ -304,14 +304,14 @@ const Datos = forwardRef((props, ref) => {
             <div className="mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {/* Primera columna */}
-                    <div className="md:col-span-1">
+                    <div className="col-span-1 lg:col-span-1 min-w-0">
                         <div className="h-full border rounded p-4 bg-gray-50">
 
-                            <div className="w-64 flex flex-col items-center space-y-4">
+                            <div className="w-full flex flex-col items-center space-y-4">
                                 {/* Contenedor de la imagen */}
-                                <div className="w-64 h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
+                                <div className="w-full h-48 sm:h-56 md:h-64 border-2 border-dashed border-gray-400 rounded-xl overflow-hidden flex items-center justify-center bg-gray-100 shadow-inner">
                                     {!previewUrl || previewUrl === "prueba" ?
-                                        (<div className="w-80 h-80 md:w-64 md:h-64 flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
+                                        (<div className="w-full h-full flex items-center justify-center bg-gray-100 border-4 border-gray-300 rounded-lg">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 className="h-24 w-24 text-gray-400"
@@ -330,26 +330,26 @@ const Datos = forwardRef((props, ref) => {
                                             <img
                                                 src={urlCloudstorage === "prueba" || urlCloudstorage === null ? previewUrl : urlCloudstorage}  //urlCloudstorage === "prueba" || urlCloudstorage === null ? previewUrl : urlCloudstorage
                                                 alt="Foto del cliente"
-                                                className="w-80 h-80 md:w-64 md:h-64 object-cover border-4 border-gray-300 rounded-lg"
+                                                className="w-full h-full object-cover border-4 border-gray-300 rounded-lg"
                                             />
                                         )
                                     }
                                 </div>
                                 {/* Botones debajo de la imagen */}
-                                <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
+                                <div className="flex flex-col sm:flex-row justify-center items-center gap-2 w-full">
                                     {/* Botón subir imagen */}
 
-                                    <div className="flex flex-col md:flex-row gap-2 mt-4">
+                                    <div className="flex flex-col sm:flex-row gap-2 w-full">
                                         <Button onClick={() => setOpenCameraModal(true)} >
                                             Tomar Foto
                                         </Button>
                                         <button
                                             onClick={handleUploadClick}
                                             disabled={!fileToUpload}
-                                            className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
-                            				? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                            				: "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            				} }`}
+                                            className={`w-full sm:flex-1 py-2 px-2 sm:px-4 text-sm rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+										    ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+										    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+											} }`}
                                         >
                                         	Guardar Foto
                                         </button>

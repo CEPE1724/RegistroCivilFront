@@ -95,11 +95,11 @@ export function ListadoSolicitud() {
   } = useBodegaUsuario();
 
   const [recargar, setRecargar] = useState(false);
-  const [selectedBodega, setSelectedBodega] = useState(localStorage.getItem('filtroBodega') || "todos");
-  const [selectedVendedor, setSelectedVendedor] = useState(localStorage.getItem('filtroVendedor') || "todos");
-  const [analistaSelected, setAnalistaSelected] = useState(localStorage.getItem('filtroAnalista') || "todos");
+  const [selectedBodega, setSelectedBodega] = useState(sessionStorage.getItem('filtroBodega') || "todos");
+  const [selectedVendedor, setSelectedVendedor] = useState(sessionStorage.getItem('filtroVendedor') || "todos");
+  const [analistaSelected, setAnalistaSelected] = useState(sessionStorage.getItem('filtroAnalista') || "todos");
   const [dataBodega, setDataBodega] = useState([]);
-  const [estado, setEstado] = useState(localStorage.getItem('filtroEstado') || "todos");
+  const [estado, setEstado] = useState(sessionStorage.getItem('filtroEstado') || "todos");
   const [datos, setDatos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
@@ -118,8 +118,8 @@ export function ListadoSolicitud() {
   const date15DaysAgo = new Date();
   date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
   const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
-  const [fechaInicio, setFechaInicio] = useState(localStorage.getItem('filtroIniFecha') || date15DaysAgoStr);
-  const [fechaFin, setFechaFin] = useState(localStorage.getItem('filtroFinFecha') || today);
+  const [fechaInicio, setFechaInicio] = useState(sessionStorage.getItem('filtroIniFecha') || date15DaysAgoStr);
+  const [fechaFin, setFechaFin] = useState(sessionStorage.getItem('filtroFinFecha') || today);
   const [isDomicilioModalOpen, setDomicilioModalOpen] = useState(false);
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
   const [openRegistroCivil, setOpenRegistroCivil] = useState(false);
@@ -132,7 +132,7 @@ export function ListadoSolicitud() {
   const { userData, idMenu, socket } = useAuth();
   const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
   const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
-  const [cedula, setCedula] = useState(localStorage.getItem('filtroCedula') || "");
+  const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -508,7 +508,7 @@ export function ListadoSolicitud() {
     return data.resultado === 0;
   };
 
-  const [solicitud, setSolicitud] = useState(localStorage.getItem('filtroSolicitud') || "Todos");
+  const [solicitud, setSolicitud] = useState(sessionStorage.getItem('filtroSolicitud') || "Todos");
 
   /// estado solicitudes
   const estadoMap = {
@@ -519,7 +519,7 @@ export function ListadoSolicitud() {
     13: "RECHAZADO",
   };
 
-  const [documental, setDocumental] = useState(localStorage.getItem('filtroDocumental') || "Todos");
+  const [documental, setDocumental] = useState(sessionStorage.getItem('filtroDocumental') || "Todos");
   const estadoDocumentalMap = {
     1: "PROCESO",
     2: "REVISIÓN",
@@ -527,7 +527,7 @@ export function ListadoSolicitud() {
     4: "APROBACION",
   };
 
-  const [telefonica, setTelefonica] = useState(localStorage.getItem('filtroTelefonica') || "Todos");
+  const [telefonica, setTelefonica] = useState(sessionStorage.getItem('filtroTelefonica') || "Todos");
   const estadoTelefonicaMap = {
     1: "NO ASIGNADO",
     2: "ASIGNADO",
@@ -535,10 +535,10 @@ export function ListadoSolicitud() {
     4: "RECHAZADO",
   };
 
-  const [domicilio, setDomicilio] = useState(localStorage.getItem('filtroDomicilio') || "Todos");
-  const [laboral, setLaboral] = useState(localStorage.getItem('filtroLaboral') || "Todos");
-  const [nombre, setNombre] = useState(localStorage.getItem('filtroNombre') || "");
-  const [numeroSolicitud, setNumeroSolicitud] = useState(localStorage.getItem('filtroNumSolicitud') || "");
+  const [domicilio, setDomicilio] = useState(sessionStorage.getItem('filtroDomicilio') || "Todos");
+  const [laboral, setLaboral] = useState(sessionStorage.getItem('filtroLaboral') || "Todos");
+  const [nombre, setNombre] = useState(sessionStorage.getItem('filtroNombre') || "");
+  const [numeroSolicitud, setNumeroSolicitud] = useState(sessionStorage.getItem('filtroNumSolicitud') || "");
   const DomicilioLaboralMap = {
     1: "ASIGNADO",
     2: "DATOS VERIFICADOR",
@@ -1340,8 +1340,6 @@ export function ListadoSolicitud() {
     if (!socket) return;
 
     const onChanged = (data) => {
-      console.log('📡 Evento recibido: solicitud-web-changed', data);
-
       // Forzar re-fetch
       setRecargar(prev => !prev);
     };
@@ -1870,20 +1868,20 @@ export function ListadoSolicitud() {
     setNombre('')
     setNumeroSolicitud('')
 
-    localStorage.removeItem('filtroIniFecha');
-    localStorage.removeItem('filtroFinFecha');
-    localStorage.removeItem('filtroBodega');
-    localStorage.removeItem('filtroVendedor');
-    localStorage.removeItem('filtroAnalista');
-    localStorage.removeItem('filtroEstado');
-    localStorage.removeItem('filtroSolicitud');
-    localStorage.removeItem('filtroDocumental');
-    localStorage.removeItem('filtroTelefonica');
-    localStorage.removeItem('filtroDomicilio');
-    localStorage.removeItem('filtroLaboral');
-    localStorage.removeItem('filtroCedula')
-    localStorage.removeItem('filtroNombre')
-    localStorage.removeItem('filtroNumSolicitud')
+    sessionStorage.removeItem('filtroIniFecha');
+    sessionStorage.removeItem('filtroFinFecha');
+    sessionStorage.removeItem('filtroBodega');
+    sessionStorage.removeItem('filtroVendedor');
+    sessionStorage.removeItem('filtroAnalista');
+    sessionStorage.removeItem('filtroEstado');
+    sessionStorage.removeItem('filtroSolicitud');
+    sessionStorage.removeItem('filtroDocumental');
+    sessionStorage.removeItem('filtroTelefonica');
+    sessionStorage.removeItem('filtroDomicilio');
+    sessionStorage.removeItem('filtroLaboral');
+    sessionStorage.removeItem('filtroCedula')
+    sessionStorage.removeItem('filtroNombre')
+    sessionStorage.removeItem('filtroNumSolicitud')
   };
 
 
@@ -1892,7 +1890,7 @@ export function ListadoSolicitud() {
       if (bodegas.length > 0) {
         const primeraBodega = bodegas[0].b_Bodega;
         setSelectedBodega(primeraBodega);
-        localStorage.setItem('filtroBodega', primeraBodega);
+        sessionStorage.setItem('filtroBodega', primeraBodega);
       }
 
       const vendedorAutorizado = vendedores.find(
@@ -1900,7 +1898,7 @@ export function ListadoSolicitud() {
       );
       if (vendedorAutorizado) {
         setSelectedVendedor(vendedorAutorizado.idPersonal);
-        localStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
+        sessionStorage.setItem('filtroVendedor', vendedorAutorizado.idPersonal);
       }
     }
   }, [userData?.idGrupo, bodegas, vendedores]);
@@ -1923,7 +1921,7 @@ export function ListadoSolicitud() {
           type="date"
           variant="outlined"
           value={fechaInicio}
-          onChange={(e) => { const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); localStorage.setItem('filtroIniFecha', fechaIniFiltro); }}
+          onChange={(e) => { const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); sessionStorage.setItem('filtroIniFecha', fechaIniFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -1935,7 +1933,7 @@ export function ListadoSolicitud() {
           type="date"
           variant="outlined"
           value={fechaFin}
-          onChange={(e) => { const fechaFinFiltro = e.target.value; setFechaFin(fechaFinFiltro); localStorage.setItem('filtroFinFecha', fechaFinFiltro); }}
+          onChange={(e) => { const fechaFinFiltro = e.target.value; setFechaFin(fechaFinFiltro); sessionStorage.setItem('filtroFinFecha', fechaFinFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -1946,7 +1944,7 @@ export function ListadoSolicitud() {
           <InputLabel>Buscar por bodega</InputLabel>
           <Select
             value={selectedBodega}
-            onChange={(e) => { const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); localStorage.setItem('filtroBodega', bodegaFiltro); }}
+            onChange={(e) => { const bodegaFiltro = e.target.value; setSelectedBodega(bodegaFiltro); sessionStorage.setItem('filtroBodega', bodegaFiltro); }}
             label="Buscar por nombre"
             disabled={userData?.idGrupo === 23}
           >
@@ -1964,7 +1962,7 @@ export function ListadoSolicitud() {
 
           <Select
             value={selectedVendedor}
-            onChange={(e) => { const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); localStorage.setItem('filtroVendedor', vendedorFiltro); }}
+            onChange={(e) => { const vendedorFiltro = e.target.value; setSelectedVendedor(vendedorFiltro); sessionStorage.setItem('filtroVendedor', vendedorFiltro); }}
             label="Buscar por nombre"
             disabled={userData?.idGrupo === 23}
           >
@@ -1984,7 +1982,7 @@ export function ListadoSolicitud() {
           <InputLabel>Analista</InputLabel>
           <Select
             value={analistaSelected}
-            onChange={(e) => { const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); localStorage.setItem('filtroAnalista', analistaFiltro); }}
+            onChange={(e) => { const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); sessionStorage.setItem('filtroAnalista', analistaFiltro); }}
             label="Analista"
             disabled={selectDeshabilitado} //  solo si hubo match
           >
@@ -2001,7 +1999,7 @@ export function ListadoSolicitud() {
           <InputLabel>Estado</InputLabel>
           <Select
             value={estado}
-            onChange={(e) => { const estadoFiltro = e.target.value; setEstado(estadoFiltro); localStorage.setItem('filtroEstado', estadoFiltro); }}
+            onChange={(e) => { const estadoFiltro = e.target.value; setEstado(estadoFiltro); sessionStorage.setItem('filtroEstado', estadoFiltro); }}
             label="Estado"
           >
             {estadosOpciones.map((estado) => (
@@ -2017,7 +2015,7 @@ export function ListadoSolicitud() {
           <InputLabel>Solicitud</InputLabel>
           <Select
             value={solicitud}
-            onChange={(e) => { const solicitudFiltro = e.target.value; setSolicitud(solicitudFiltro); localStorage.setItem('filtroSolicitud', solicitudFiltro); }}
+            onChange={(e) => { const solicitudFiltro = e.target.value; setSolicitud(solicitudFiltro); sessionStorage.setItem('filtroSolicitud', solicitudFiltro); }}
             label="Solicitud"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2032,7 +2030,7 @@ export function ListadoSolicitud() {
           <InputLabel>Documental</InputLabel>
           <Select
             value={documental}
-            onChange={(e) => { const documentalFiltro = e.target.value; setDocumental(documentalFiltro); localStorage.setItem('filtroDocumental', documentalFiltro); }}
+            onChange={(e) => { const documentalFiltro = e.target.value; setDocumental(documentalFiltro); sessionStorage.setItem('filtroDocumental', documentalFiltro); }}
             label="Documental"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2048,7 +2046,7 @@ export function ListadoSolicitud() {
           <InputLabel>Telefonica</InputLabel>
           <Select
             value={telefonica}
-            onChange={(e) => { const telefonicaFiltro = e.target.value; setTelefonica(telefonicaFiltro); localStorage.setItem('filtroTelefonica', telefonicaFiltro); }}
+            onChange={(e) => { const telefonicaFiltro = e.target.value; setTelefonica(telefonicaFiltro); sessionStorage.setItem('filtroTelefonica', telefonicaFiltro); }}
             label="Telefonica"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2064,7 +2062,7 @@ export function ListadoSolicitud() {
           <InputLabel>Domicilio</InputLabel>
           <Select
             value={domicilio}
-            onChange={(e) => { const domicilioFiltro = e.target.value; setDomicilio(domicilioFiltro); localStorage.setItem('filtroDomicilio', domicilioFiltro); }}
+            onChange={(e) => { const domicilioFiltro = e.target.value; setDomicilio(domicilioFiltro); sessionStorage.setItem('filtroDomicilio', domicilioFiltro); }}
             label="Domicilio"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2080,7 +2078,7 @@ export function ListadoSolicitud() {
           <InputLabel>Laboral</InputLabel>
           <Select
             value={laboral}
-            onChange={(e) => { const LaboralFiltro = e.target.value; setLaboral(LaboralFiltro); localStorage.setItem('filtroLaboral', LaboralFiltro); }}
+            onChange={(e) => { const LaboralFiltro = e.target.value; setLaboral(LaboralFiltro); sessionStorage.setItem('filtroLaboral', LaboralFiltro); }}
             label="Laboral"
           >
             <MenuItem value="Todos">Todos</MenuItem>
@@ -2121,7 +2119,7 @@ export function ListadoSolicitud() {
           label="Buscar por cédula"
           variant="outlined"
           value={cedula}
-          onChange={(e) => { const cedulaFiltro = e.target.value; setCedula(cedulaFiltro); localStorage.setItem('filtroCedula', cedulaFiltro); }}
+          onChange={(e) => { const cedulaFiltro = e.target.value; setCedula(cedulaFiltro); sessionStorage.setItem('filtroCedula', cedulaFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2138,7 +2136,7 @@ export function ListadoSolicitud() {
           label="Buscar por nombre cliente"
           variant="outlined"
           value={nombre}
-          onChange={(e) => { const nombreFiltro = e.target.value; setNombre(nombreFiltro); localStorage.setItem('filtroNombre', nombreFiltro); }}
+          onChange={(e) => { const nombreFiltro = e.target.value; setNombre(nombreFiltro); sessionStorage.setItem('filtroNombre', nombreFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -2154,7 +2152,7 @@ export function ListadoSolicitud() {
           label="Buscar por número de solicitud"
           variant="outlined"
           value={numeroSolicitud}
-          onChange={(e) => { const numSoliFiltro = e.target.value; setNumeroSolicitud(numSoliFiltro); localStorage.setItem('filtroNumSolicitud', numSoliFiltro); }}
+          onChange={(e) => { const numSoliFiltro = e.target.value; setNumeroSolicitud(numSoliFiltro); sessionStorage.setItem('filtroNumSolicitud', numSoliFiltro); }}
           fullWidth
           size="small"
           InputLabelProps={{
@@ -3873,32 +3871,6 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {/* Botón subir imagen 
-                       Version anterior automatica con el boton de subir imagen 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (  //&& selectedRow.estado !== "APROBADO"
-                    <div className="flex flex-col md:flex-row gap-2 mt-4">
-                      <Button onClick={() => setOpenCameraModal(true)}>
-                        Tomar Foto
-                      </Button>
-
-                      <button
-                        onClick={handleUploadClick}
-                        disabled={!fileToUpload}
-                        className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
-                          ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                          }`}
-                      >
-                        Subir imagen
-                      </button>
-                       
-                       <Button >
-                        Cargar foto 
-                      </Button>
-
-                    </div>
-
-                  )} */}
                   {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
                     <div className="flex flex-col gap-4 mt-4">
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}

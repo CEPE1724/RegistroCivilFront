@@ -1071,10 +1071,6 @@ export function Cabecera() {
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
 
-
-
-        console.log("coordenadas LABORAL", clientInfo?.data.Laboral);
-
         if (!coordenadas.exists || coordenadas.count === 0) {
           enqueueSnackbar(
             "Para guardar datos Dependiente, primero debes registrar la ubicación.",
