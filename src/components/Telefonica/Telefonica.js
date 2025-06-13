@@ -122,8 +122,6 @@ export function TelefonicaList({
         Telefono: ``,
       });
 
-      console.log("Cliente info de validar a ver si hay el nombre " , clientInfo)
-
       patchSolicitud(
         clientInfo.id,
         3 // Cambia el estado a "En Validación"
@@ -153,7 +151,6 @@ export function TelefonicaList({
       clientInfo.id,
       4 // Cambia el estado a "rechazado"
     );
-    console.log("cliente info del rechazar " , clientInfo)
       await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
           title: "Se rechazo la verificación telefonica! 👀 ",
           body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,

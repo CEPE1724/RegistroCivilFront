@@ -164,22 +164,6 @@ const filteredVerificadores = verificadores.filter((v) =>
 
   if (!isOpen) return null;
 
-  {/*const handleSelectChange = (e) => {
-    const selectedId = e.target.value;
-    setVerificador(selectedId);
-
-    const verificadorSeleccionado = verificadores.find(
-      (v) => v.idIngresoCobrador === parseInt(selectedId)
-    );
-
-    if (verificadorSeleccionado && verificadorSeleccionado.dispositivos.length > 0) {
-      const token = verificadorSeleccionado.dispositivos[0].TokenExpo;
-      setTokenVerificador(token);
-    } else {
-      setTokenVerificador("");
-    }
-  };*/}
-
   const handleSelectChange = (e) => {
   const selectedId = e.target.value;
   setVerificador(selectedId);

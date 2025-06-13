@@ -287,7 +287,7 @@ export function GestorDocumentos({
                     idCre_SolicitudWeb: clientInfo.id,
                     Tipo: 3,
                     idEstadoVerificacionDocumental: idEstadoVerificacionDocumental,
-                    Usuario: 'ECEPEDA',
+                    Usuario: userData.Nombre,   
                 });
 
                 const estadoTexto = {

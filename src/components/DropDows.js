@@ -26,6 +26,8 @@ function DropDown() {
   const handleLogout = () => {
     setIsLoading(true);
     logout();  // Llamar al logout desde el contexto
+	sessionStorage.clear();
+	localStorage.clear();
     setTimeout(() => {
       setIsLoading(false);
       navigate("/login", { replace: true });

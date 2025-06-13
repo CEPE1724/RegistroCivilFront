@@ -31,7 +31,6 @@ const Login = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
-    console.log(isSessionExpired2)
     if (isSessionExpired2) {
       setShowExpiredModal(true);
     }
