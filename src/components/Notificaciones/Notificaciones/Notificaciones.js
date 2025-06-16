@@ -22,6 +22,8 @@ export function Notificaciones() {
   const modalRef = useRef(null);
   const [disponibleUsuarios, setDisponibleUsuarios] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [ roles, setRoles ] = useState([]);
+  const gruposUnicos = [...new Set(disponibleUsuarios.map(usuario => usuario.idGrupo.idGrupo).filter(id => id !== undefined && id !== null && id !== '' && id !== 36))].sort((a, b) => a - b);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,6 +53,38 @@ export function Notificaciones() {
       setSelectedTokenExpo(value);
     }
   };
+
+  const fetchRoles = async () => {
+	try {
+		const url = APIURL.getRolesWeb();
+		const response = await axios.get(url);
+		if (response.data) {
+        setRoles(response.data);
+      } else {
+        enqueueSnackbar(response.data.message || "No se encontraron roles", { variant: "warning" });
+        setRoles([]);
+      }	
+	}  catch (error) {
+		  console.error("Error al cargar roles:", error);
+  	}
+}
+
+useEffect(() => {
+  fetchRoles();
+  }, []);
+
+  const handleGrupos = (e) => {
+	const { value } = e.target;
+
+	switch (value) {
+		case "": setTokens([]); break;
+		case "todos": setTokens(disponibleUsuarios); break;
+		default:
+			const usuariosFiltrados = disponibleUsuarios.filter(usuario => usuario?.idGrupo?.idGrupo == value);
+			setTokens(usuariosFiltrados);
+			break;
+	}
+}
 
   const cargarUsuariosPorEmpresa = async (empresaSeleccionada) => {
     setIsLoading(true);
@@ -381,6 +415,31 @@ export function Notificaciones() {
               <p className="text-xs text-gray-500 mt-1">
                 Usuarios seleccionados: {tokens.length}
               </p>
+			  <div className="flex gap-2 mt-10">
+				<label
+              	htmlFor="grupo"
+              	className="block text-gray-700 font-semibold mb-2"
+				>
+					Enviar por grupo:
+            	</label>
+           		<select
+           		  id="grupo"
+           		  name="grupo"
+				  onChange={handleGrupos}
+           		  className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+           		>
+					<option value="">Ninguno</option>
+           		  	<option value="todos">Todos</option>
+					{gruposUnicos.map((idGrupo, index) => {
+						const nombreGrupo = roles.find(role => role.idRolesWeb === idGrupo)?.Nombre || `Grupo ${idGrupo}`;
+						return (
+    					  <option key={index} value={idGrupo}>
+    					    {nombreGrupo}
+    					  </option>
+    					);	
+					})}
+           		</select>			
+			  </div>
             </div>
           )}
 

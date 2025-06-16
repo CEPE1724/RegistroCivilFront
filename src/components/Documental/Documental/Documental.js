@@ -761,19 +761,23 @@ export function Documental({
 
 	useEffect(() => {
     async function checkYEnviar() {
-      if (notificacionEnviada) return; 
+		const claveLocal = `notificacion_enviada_${id}`;
+		const yaEnviada = localStorage.getItem(claveLocal) === "true";
+
+		if (yaEnviada || notificacionEnviada) return; 
 
       const aprobados = await laboralYDomicilioAprobados(id);
       if (aprobados) {
         await fetchConsultaYNotifica(id, userUsuario, {
 		title: "¡Documentos para revisar! 🔍",
-		   body: `¡Hola! Ya puedes verificar los primeros 3 documentos de la solicitud ${NumeroSolicitud} (croquis, foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀            📅 Fecha: ${fechaHoraEcuador}`,
+		   body: `¡Hola! Ya puedes verificar los primeros 3 documentos de la solicitud ${NumeroSolicitud} (croquis, foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀
+		   📅 Fecha: ${fechaHoraEcuador}`,
 		   type: "success",
-		   empresa: "CREDI",
+		   empresa: "POINT",
 		   url: "",
 		   tipo: "analista",
 		  });
-        setNotificacionEnviada(true); 
+		  localStorage.setItem(claveLocal, "true"); 
       }
     }
 
@@ -1022,7 +1026,8 @@ export function Documental({
                     ["Número de Solicitud", clientInfo.NumeroSolicitud],
                     ["Nombre", clientInfo.nombre],
                     ["Cédula", clientInfo.cedula],
-                    ["Fecha", clientInfo.fecha],
+                    ["Fecha", new Date(clientInfo.fecha).toLocaleString('es-EC', {
+  					day: 'numeric',month: 'numeric',year: 'numeric',hour: 'numeric',minute: '2-digit',hour12: true,})],
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],

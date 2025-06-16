@@ -647,8 +647,15 @@ const SeccionB = forwardRef((props, ref) => {
           <input
             type="text"
             name="jefeInmediato"
+			autoComplete="off"
             value={formData.jefeInmediato}
-            onChange={handleInputChange}
+            onChange={(e) => {
+			  const onlyLetters = e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase();
+			  setFormData(prev => ({
+				...prev,
+				jefeInmediato: onlyLetters
+			  }));
+			}}
             onBlur={handleBlur}
             className="block w-full solcitudgrande-style"
           />

@@ -5,7 +5,6 @@ import CallIcon from "@mui/icons-material/Call";
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import EventIcon from "@mui/icons-material/Event";
-import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import axios from "../../configApi/axiosConfig";
 import { useAuth } from "../AuthContext/AuthContext";
 import { fetchConsultaYNotifica } from "../Utils";
@@ -42,8 +41,7 @@ export function TelefonicaList({
 }) {
   const { userData, idMenu } = useAuth();
   const [files, setFiles] = useState({});
-  const [apiResponseData, setApiResponseData] = useState([]); // Nuevo estado para almacenar la respuesta de la API
-
+  const [apiResponseData, setApiResponseData] = useState([]); 
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,6 +66,7 @@ export function TelefonicaList({
   const [filePreviews, setFilePreviews] = useState({});
   const [selectedRow, setSelectedRow] = useState(null);
   const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
+  const [ soliParen, setSoliParen] = useState([])
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -88,9 +87,6 @@ export function TelefonicaList({
     14: "NO QUIERE SER REFERENCIA",
     15: "MALAS REFERENCIAS",
   };
-
-
-
 
   const tienePermisoDenegar = clientInfo.permisos.some(
     (permiso) => permiso.Permisos === 'EDITAR TELEFONICA DENEGAR' && permiso.Activo
@@ -164,8 +160,6 @@ export function TelefonicaList({
     });
   }
 
-
-
   //almacenar datos modal
   const [formDataModal, setFormDataModal] = useState({
     contactoEfectivo: "",
@@ -196,8 +190,8 @@ export function TelefonicaList({
         }
       };
 
-
       fetchData();
+	  fetchParentesco();
 
     }
   }, [clientInfo.id, shouldReload]);
@@ -206,6 +200,11 @@ export function TelefonicaList({
   const handleOpenDialog = async (index, item) => {
     const selectedItem = tablaDatos[index];
     setSelectedRow(item);
+	const match = soliParen.find(p => p.Celular === item.Telefono);
+	setSelectedRow({
+		...item,
+		idParentesco: match ? match.idParentesco : ''
+	});
     const idCre_VerificacionTelefonicaMaestro =
       selectedItem.idCre_VerificacionTelefonicaMaestro;
 
@@ -401,9 +400,6 @@ export function TelefonicaList({
       setTablaModal([...tablaModal, nuevoRegistro]);
       enqueueSnackbar("Registro Guardado", { variant: "success" });
 
-
-
-
       // **Recargar datos de la API** después de guardar
       await fetchSearchCreSolicitudVerificacionTelefonica(
         clientInfo.id,
@@ -560,6 +556,16 @@ export function TelefonicaList({
     }
   };
 
+  const fetchParentesco = async () => {
+	try {
+		const response = await axios.get(APIURL.get_cre_referenciasclientesweb_id(clientInfo.id))
+		setSoliParen(response.data);
+	}  catch (error) {
+	console.error("Error al obtener los datos de parentesco:", error);
+	enqueueSnackbar("Error al obtener los datos de parentesco", { variant: "error" });
+  }
+}
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Main Content */}
@@ -599,7 +605,8 @@ export function TelefonicaList({
                     ["Número de Solicitud", clientInfo.NumeroSolicitud],
                     ["Nombre", clientInfo.nombre],
                     ["Cédula", clientInfo.cedula],
-                    ["Fecha", clientInfo.fecha],
+                    ["Fecha", new Date(clientInfo.fecha).toLocaleString('es-EC', {
+  					day: 'numeric',month: 'numeric',year: 'numeric',hour: 'numeric',minute: '2-digit',hour12: true,})],
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],
@@ -648,6 +655,7 @@ export function TelefonicaList({
                   <tr>
                     <th className="px-4 py-2 text-center font-bold">#</th>
                     <th className="px-4 py-2 text-center font-bold">Nombre</th>
+					<th className="px-4 py-2 text-center font-bold">Parentesco</th>
                     <th className="px-4 py-2 text-center font-bold">Origen</th>
                     <th className="px-4 py-2 text-center font-bold">Fecha</th>
                     <th className="px-4 py-2 text-center font-bold">Telefono</th>
@@ -656,10 +664,15 @@ export function TelefonicaList({
                   </tr>
                 </thead>
                 <tbody>
-                  {tablaDatos.map((item, index) => (
-                    <tr key={index}>
+                  {tablaDatos.map((item, index) => {
+					const match = soliParen.find(p => p.Celular == item.Telefono);
+					const nombreParentesco = match
+     				? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
+     				: 'TITULAR';
+                    return (<tr key={index}>
                       <td className="px-4 py-2 text-center">{index + 1}</td>
                       <td className="px-4 py-2 text-center">{item.idEstadoOrigenTelefonica === 4 ? item.Observacion : ""}</td>
+					  <td className="px-4 py-2 text-center">{nombreParentesco}</td>
                       {/* Mostrar origen como Estacion */}
                       <td className="px-4 py-2 text-center">
                         {origenMap[item.idEstadoOrigenTelefonica] ||
@@ -684,8 +697,8 @@ export function TelefonicaList({
                           <CallIcon />
                         </IconButton>
                       </td>
-                    </tr>
-                  ))}
+                    </tr>)
+					})}
                 </tbody>
               </table>
             </div>
@@ -701,8 +714,8 @@ export function TelefonicaList({
               <div className="flex items-center gap-2">
                 <PersonIcon className="text-blue-500" fontSize="medium" />
                 <span>
-                  Verificación Telefónica de {clientInfo?.nombre}{" "}
-                  {selectedRow?.Telefono}
+                  Verificación Telefónica de {selectedRow?.Observacion}{" "}
+                  {selectedRow?.Telefono} - {selectedRow?.idParentesco ? datoParentesco.find(item => item.idParentesco === selectedRow.idParentesco)?.Nombre || 'Titular'	: 'Titular'}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
@@ -852,8 +865,6 @@ export function TelefonicaList({
                             <TableCell className="text-sm px-4 py-2">
                               {idToTextMapEstado[registro.idEstadoGestns]}
                             </TableCell>
-
-                            {/* Aquí está el ajuste */}
                             <TableCell className="text-sm px-4 py-2 max-w-[200px] whitespace-normal break-words">
                               {registro.Observaciones}
                             </TableCell>
