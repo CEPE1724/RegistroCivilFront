@@ -473,7 +473,7 @@ export function ListadoSolicitud() {
   };
 
   ///// METODO QUE VALIDE SI 3 TIPOS DE DOCUMENTO UNICAMENTE YA FUERON APROBADOS 
-  const [docAprobados, setDocAprobados] = useState({}); // <-- ahora es un objeto, no un solo booleano
+  const [docAprobados, setDocAprobados] = useState({}); // 
 
   // función para verificar documentos
   const laboralYDomicilioAprobados = async (id) => {
@@ -2572,10 +2572,10 @@ export function ListadoSolicitud() {
                             </IconButton>
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2631,10 +2631,10 @@ export function ListadoSolicitud() {
                             {/* InfoIcon al lado del IconButton */}
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2689,10 +2689,10 @@ export function ListadoSolicitud() {
                             {/* InfoIcon al lado del IconButton */}
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2728,9 +2728,6 @@ export function ListadoSolicitud() {
                               disabled={
                                 verificacionSolicitud(data) ||
                                 data.Domicilio === false || !docAprobados[data.id]
-
-
-
                               }
                               size="small"
                               sx={{
@@ -2756,10 +2753,10 @@ export function ListadoSolicitud() {
 
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2819,10 +2816,10 @@ export function ListadoSolicitud() {
                             {/* InfoIcon al lado del IconButton */}
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2904,10 +2901,10 @@ export function ListadoSolicitud() {
                           )}
                           <span
                             style={{
-                              pointerEvents: estaDeshabilitado(data)
-                                ? "none"
-                                : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              // pointerEvents: estaDeshabilitado(data)
+                              //   ? "none"
+                              //   : "auto",
+                              // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                             }}
                           >
                             <MoreVertIcon
@@ -2974,10 +2971,10 @@ export function ListadoSolicitud() {
                           )}
                           <span
                             style={{
-                              pointerEvents: estaDeshabilitado(data)
-                                ? "none"
-                                : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              // pointerEvents: estaDeshabilitado(data)
+                              //   ? "none"
+                              //   : "auto",
+                              // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                             }}
                           >
                             <MoreVertIcon
@@ -3871,7 +3868,7 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
                     <div className="flex flex-col gap-4 mt-4">
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
                       <input
@@ -4055,7 +4052,7 @@ export function ListadoSolicitud() {
                     )}
                   </div>
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleAbrirVerificacionManual}

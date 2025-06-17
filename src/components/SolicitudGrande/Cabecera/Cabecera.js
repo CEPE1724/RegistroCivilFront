@@ -26,6 +26,7 @@ import { ModalConfirm } from "../ModalConfirm";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { Facebook } from "@mui/icons-material";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
+import ModalConfirmacionRechazo from "./ModalConfirmacionRechazo";
 export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
@@ -1538,6 +1539,8 @@ export function Cabecera() {
     });
   };
 
+  const [showModalRechazo, setShowModalRechazo] = useState(false);
+
   const handleRechazar = async () => {
     patchSolicitudRechazar(idSolicitud);
     fetchInsertarDatos(13); 
@@ -1553,6 +1556,7 @@ export function Cabecera() {
     navigate("/ListadoSolicitud", {
       replace: true,
     });
+    setShowModalRechazo(false);
 
     // Lógica para rechazar la solicitud
   };
@@ -1630,7 +1634,7 @@ export function Cabecera() {
                 </button>
 
                 <button
-                  onClick={() => handleRechazar()}
+                 onClick={() => setShowModalRechazo(true)}
                   className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-red-600 hover:text-white transition duration-200"
                 >
@@ -1726,6 +1730,13 @@ export function Cabecera() {
             onClose={closeModal}
             onConfirm={handleConfirm}
           />
+
+          <ModalConfirmacionRechazo
+  isOpen={showModalRechazo}
+  onClose={() => setShowModalRechazo(false)}
+  onConfirm={handleRechazar}
+  solicitudData={data}
+/>
         </div>
       )}
     </>

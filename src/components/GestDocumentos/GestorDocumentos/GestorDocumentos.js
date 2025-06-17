@@ -7,7 +7,8 @@ import { APIURL } from '../../../configApi/apiConfig';
 import { useAuth } from '../../AuthContext/AuthContext';
 import axios from "../../../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
-import {fetchConsultaYNotifica, fechaHoraEcuador} from "../../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
+import ModalConfirmacionRechazo from '../../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
 
 export function GestorDocumentos({
     id,
@@ -287,7 +288,7 @@ export function GestorDocumentos({
                     idCre_SolicitudWeb: clientInfo.id,
                     Tipo: 3,
                     idEstadoVerificacionDocumental: idEstadoVerificacionDocumental,
-                    Usuario: userData.Nombre,   
+                    Usuario: userData.Nombre,
                 });
 
                 const estadoTexto = {
@@ -613,41 +614,41 @@ export function GestorDocumentos({
         switch (globalConfirmAction) {
             case 'rechTodo':
                 updateEstadoVerificacion(5);
-				fetchConsultaYNotifica(clientInfo.id, clientInfo, {					
-					title: "¡Documentos rechazados! 🚫",
-					body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
+                fetchConsultaYNotifica(clientInfo.id, clientInfo, {
+                    title: "¡Documentos rechazados! 🚫",
+                    body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
 					Fecha: ${fechaHoraEcuador}`,
-					type: "success",
-					empresa: "CREDI",
-					url: "",
-					tipo: "vendedor",
-				});
+                    type: "success",
+                    empresa: "CREDI",
+                    url: "",
+                    tipo: "vendedor",
+                });
                 navigate("/ListadoSolicitud", { replace: true });
                 break;
             case 'aprobTodo':
                 updateEstadoVerificacion(4);
-				fetchConsultaYNotifica(clientInfo.id, clientInfo, {					
-					title: "¡Documentos aprobados! 🎉",
-					body: `¡Excelente noticia! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} han sido revisados y aprobados 📂. Ya puedes avanzar al siguiente paso del proceso. ¡Gracias!
+                fetchConsultaYNotifica(clientInfo.id, clientInfo, {
+                    title: "¡Documentos aprobados! 🎉",
+                    body: `¡Excelente noticia! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} han sido revisados y aprobados 📂. Ya puedes avanzar al siguiente paso del proceso. ¡Gracias!
 					Fecha: ${fechaHoraEcuador}`,
-					type: "success",
-					empresa: "CREDI",
-					url: "",
-					tipo: "vendedor",
-				});
+                    type: "success",
+                    empresa: "CREDI",
+                    url: "",
+                    tipo: "vendedor",
+                });
                 navigate("/ListadoSolicitud", { replace: true });
                 break;
             case 'revTodo':
                 updateEstadoVerificacion(3);
-				fetchConsultaYNotifica(clientInfo.id, clientInfo, {					
-					title: "¡Documentos enviados a corrección! ✏️",
-					body: `¡Hola! Algunos documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron enviados a corrección ⚠️. Revisa los comentarios para realizar los ajustes necesarios. ¡Gracias!
+                fetchConsultaYNotifica(clientInfo.id, clientInfo, {
+                    title: "¡Documentos enviados a corrección! ✏️",
+                    body: `¡Hola! Algunos documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron enviados a corrección ⚠️. Revisa los comentarios para realizar los ajustes necesarios. ¡Gracias!
 					Fecha: ${fechaHoraEcuador}`,
-					type: "success",
-					empresa: "CREDI",
-					url: "",
-					tipo: "vendedor",
-				});
+                    type: "success",
+                    empresa: "CREDI",
+                    url: "",
+                    tipo: "vendedor",
+                });
                 navigate("/ListadoSolicitud", { replace: true });
                 break;
             default:
@@ -786,13 +787,13 @@ export function GestorDocumentos({
                                     ))}
                                 </div>
                                 <div className="flex justify-end mt-4 md:mt-6">
-                                <button
-                                    name="aprobTodo"
-                                    className="bg-blue-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300 mb-3"
-                                    onClick={() => navigate("/ListadoSolicitud", { replace: true })}
-                                >
-                                    Regresar
-                                </button>
+                                    <button
+                                        name="aprobTodo"
+                                        className="bg-blue-500 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300 mb-3"
+                                        onClick={() => navigate("/ListadoSolicitud", { replace: true })}
+                                    >
+                                        Regresar
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -949,55 +950,71 @@ export function GestorDocumentos({
             )}
             {/* Modal global */}
             {showGlobalConfirmModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div
-                        ref={globalConfirmModalRef}
-                        className="bg-white p-6 rounded-lg shadow-lg w-1/3 max-w-md relative"
-                    >
-                        <div className="mb-4">
-                            <h3 className="text-xl font-medium text-gray-900">
-                                {globalConfirmAction === 'rechTodo'
-                                    ? 'Rechazar Todos los Documentos'
-                                    : globalConfirmAction === 'aprobTodo'
+                globalConfirmAction === 'rechTodo' ? (
+                    <ModalConfirmacionRechazo
+                        isOpen={true}
+                        onClose={() => setShowGlobalConfirmModal(false)}
+                        onConfirm={() => {
+                            setShowGlobalConfirmModal(false);
+                            // Aquí va la lógica de rechazo global:
+                            updateEstadoVerificacion(5);
+                            fetchConsultaYNotifica(clientInfo.id, clientInfo, {
+                                title: "¡Documentos rechazados! 🚫",
+                                body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
+                    Fecha: ${fechaHoraEcuador}`,
+                                type: "success",
+                                empresa: "CREDI",
+                                url: "",
+                                tipo: "vendedor",
+                            });
+                            navigate("/ListadoSolicitud", { replace: true });
+                        }}
+                        solicitudData={clientInfo}
+                         mensajePrincipal="¿Está seguro de que desea rechazar todos los documentos?"
+                    />
+                ) : (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div
+                            ref={globalConfirmModalRef}
+                            className="bg-white p-6 rounded-lg shadow-lg w-1/3 max-w-md relative"
+                        >
+                            <div className="mb-4">
+                                <h3 className="text-xl font-medium text-gray-900">
+                                    {globalConfirmAction === 'aprobTodo'
                                         ? 'Aprobar Todos los Documentos'
                                         : 'Enviar Todos los Documentos a Corrección'}
-                            </h3>
-                            <p className="text-sm text-gray-500 mt-2">
-                                {globalConfirmAction === 'rechTodo'
-                                    ? '¿Está seguro de que desea rechazar todos los documentos?'
-                                    : globalConfirmAction === 'aprobTodo'
+                                </h3>
+                                <p className="text-sm text-gray-500 mt-2">
+                                    {globalConfirmAction === 'aprobTodo'
                                         ? '¿Está seguro de que desea aprobar todos los documentos?'
                                         : '¿Está seguro de que desea enviar todos los documentos a corrección?'}
-                            </p>
-                        </div>
+                                </p>
+                            </div>
 
-                        <div className="flex justify-end gap-2">
-                            <button
-                                type="button"
-                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-                                onClick={() => setShowGlobalConfirmModal(false)}
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                className={`px-4 py-2 text-white rounded-md ${globalConfirmAction === 'rechTodo'
-                                    ? 'bg-red-600 hover:bg-red-700'
-                                    : globalConfirmAction === 'aprobTodo'
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    type="button"
+                                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                                    onClick={() => setShowGlobalConfirmModal(false)}
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`px-4 py-2 text-white rounded-md ${globalConfirmAction === 'aprobTodo'
                                         ? 'bg-green-600 hover:bg-green-700'
                                         : 'bg-gray-600 hover:bg-gray-700'
-                                    }`}
-                                onClick={handleGlobalConfirmAction}
-                            >
-                                {globalConfirmAction === 'rechTodo'
-                                    ? 'Rechazar'
-                                    : globalConfirmAction === 'aprobTodo'
+                                        }`}
+                                    onClick={handleGlobalConfirmAction}
+                                >
+                                    {globalConfirmAction === 'aprobTodo'
                                         ? 'Aprobar'
                                         : 'Corrección'}
-                            </button>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )
             )}
         </div>
     );
