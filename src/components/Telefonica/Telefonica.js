@@ -9,6 +9,8 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import axios from "../../configApi/axiosConfig";
 import { useAuth } from "../AuthContext/AuthContext";
 import { fetchConsultaYNotifica } from "../Utils";
+import ModalConfirmacionRechazo from '../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
+
 
 
 import { APIURL } from "../../configApi/apiConfig";
@@ -145,24 +147,45 @@ export function TelefonicaList({
     }
   };
 
+  const [showRechazoModal, setShowRechazoModal] = useState(false);
   const handleRemove = async () => {
     rechazar();
     patchSolicitud(
       clientInfo.id,
       4 // Cambia el estado a "rechazado"
     );
-      await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
-          title: "Se rechazo la verificación telefonica! 👀 ",
-          body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
-          type: "alert",
-          empresa: "POINT",
-          url: "", // Opcional
-          tipo: "vendedor",
-        });
+    await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
+      title: "Se rechazo la verificación telefonica! 👀 ",
+      body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+      type: "alert",
+      empresa: "POINT",
+      url: "", // Opcional
+      tipo: "vendedor",
+    });
     navigate("/ListadoSolicitud", {
       replace: true,
     });
   }
+
+  const handleConfirmRechazo = async () => {
+    await rechazar();
+    await patchSolicitud(
+      clientInfo.id,
+      4 // Cambia el estado a "rechazado"
+    );
+    await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
+      title: "Se rechazo la verificación telefonica! 👀 ",
+      body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+      type: "alert",
+      empresa: "POINT",
+      url: "",
+      tipo: "vendedor",
+    });
+    setShowRechazoModal(false);
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+  };
 
 
 
@@ -621,8 +644,7 @@ export function TelefonicaList({
 
                     {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
                       <button
-                        onClick={handleRemove
-                        }
+                        onClick={() => setShowRechazoModal(true)}
                         className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 transition duration-300 ease-in-out"
                       >
                         Rechazar
@@ -887,6 +909,13 @@ export function TelefonicaList({
             </DialogActions>
           </Dialog>
         </div>
+        <ModalConfirmacionRechazo
+          isOpen={showRechazoModal}
+          onClose={() => setShowRechazoModal(false)}
+          onConfirm={handleConfirmRechazo}
+          solicitudData={clientInfo}
+          mensajePrincipal="¿Está seguro de rechazar la verificación telefónica?"
+        />
       </div>
     </div>
   );
