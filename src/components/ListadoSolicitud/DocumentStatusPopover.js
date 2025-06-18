@@ -84,8 +84,9 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       },
 
       6: { //// ESTADo
+		1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
         2: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-        4: { label: "REchazado", icon: <CancelIcon />, color: red[500] },
+        4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
 
 
       },
