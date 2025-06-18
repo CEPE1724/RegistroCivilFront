@@ -48,7 +48,7 @@ const Datos = forwardRef((props, ref) => {
         nivelEducacion: data?.idNivelEducacion || '',
         profesion: data?.idProfesion || '',
         situacionLaboral: data?.idSituacionLaboral || '',
-        actividadEconomica: data.idActEconomica || '',
+        actividadEconomica: data?.idActEconomica || '',
         observacionActividadEconomica: data?.ObservacionesActividadEconomica || '',
         Facebook: data?.Facebook || '',
         codigoDactilar: cresolicitud?.CodigoDactilar || '',

@@ -79,7 +79,7 @@ import { Checkbox, FormControlLabel } from '@mui/material';
 import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
-import {fetchConsultaYNotifica, fechaHoraEcuador} from "../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
 export function ListadoSolicitud() {
@@ -473,7 +473,7 @@ export function ListadoSolicitud() {
   };
 
   ///// METODO QUE VALIDE SI 3 TIPOS DE DOCUMENTO UNICAMENTE YA FUERON APROBADOS 
-  const [docAprobados, setDocAprobados] = useState({}); // <-- ahora es un objeto, no un solo booleano
+  const [docAprobados, setDocAprobados] = useState({}); // 
 
   // función para verificar documentos
   const laboralYDomicilioAprobados = async (id) => {
@@ -1422,14 +1422,14 @@ export function ListadoSolicitud() {
 
       await updateAnalista(filaActual, analistaSeleccionado);
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
-		title: "¡Nueva solicitud enviada a revisión! 👀",
+        title: "¡Nueva solicitud enviada a revisión! 👀",
         body: `Revisa la solicitud de crédito ${filaActual.numeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}
 		Fecha: ${fechaHoraEcuador}`,
         type: "success",
         empresa: "CREDI",
         url: "", // Opcional
         tipo: "analista",
-        });
+      });
       enqueueSnackbar("Analista actualizado correctamente", {
         variant: "success",
       });
@@ -1984,7 +1984,7 @@ export function ListadoSolicitud() {
             value={analistaSelected}
             onChange={(e) => { const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); sessionStorage.setItem('filtroAnalista', analistaFiltro); }}
             label="Analista"
-            //disabled={selectDeshabilitado} //  solo si hubo match
+          //disabled={selectDeshabilitado} //  solo si hubo match
           >
             <MenuItem value="todos">Todos</MenuItem>
             {analistas.map((vendedor) => (
@@ -2395,20 +2395,17 @@ export function ListadoSolicitud() {
                           </Box>
                         )}
 
-                        {/* Ícono de los tres puntos y llamada al popover */}
+                        <div style={{ height: 12 }} />
+
                         <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
+                          className="flex justify-end items-center "
                         >
                           <MoreVertIcon
                             onClick={(event) =>
                               handlePopoverOpen(event, 6, data)
                             }
                             style={{ cursor: "pointer" }}
+                            className="ml-2 text-gray-400 hover:text-indigo-600 transition-colors duration-200"
                           />
                         </span>
 
@@ -2493,12 +2490,12 @@ export function ListadoSolicitud() {
 
                         {/* Ícono de acciones y popover */}
                         <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
+                        /* style={{
+                           pointerEvents: estaDeshabilitado(data)
+                             ? "none"
+                             : "auto",
+                           opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                         }}*/
                         >
                           <MoreVertIcon
                             onClick={(event) =>
@@ -2572,10 +2569,10 @@ export function ListadoSolicitud() {
                             </IconButton>
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2631,10 +2628,10 @@ export function ListadoSolicitud() {
                             {/* InfoIcon al lado del IconButton */}
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2689,10 +2686,10 @@ export function ListadoSolicitud() {
                             {/* InfoIcon al lado del IconButton */}
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2728,9 +2725,6 @@ export function ListadoSolicitud() {
                               disabled={
                                 verificacionSolicitud(data) ||
                                 data.Domicilio === false || !docAprobados[data.id]
-
-
-
                               }
                               size="small"
                               sx={{
@@ -2756,10 +2750,10 @@ export function ListadoSolicitud() {
 
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2819,10 +2813,10 @@ export function ListadoSolicitud() {
                             {/* InfoIcon al lado del IconButton */}
                             <span
                               style={{
-                                pointerEvents: estaDeshabilitado(data)
-                                  ? "none"
-                                  : "auto",
-                                opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                                // pointerEvents: estaDeshabilitado(data)
+                                //   ? "none"
+                                //   : "auto",
+                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                               }}
                             >
                               <MoreVertIcon
@@ -2904,10 +2898,10 @@ export function ListadoSolicitud() {
                           )}
                           <span
                             style={{
-                              pointerEvents: estaDeshabilitado(data)
-                                ? "none"
-                                : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              // pointerEvents: estaDeshabilitado(data)
+                              //   ? "none"
+                              //   : "auto",
+                              // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                             }}
                           >
                             <MoreVertIcon
@@ -2974,10 +2968,10 @@ export function ListadoSolicitud() {
                           )}
                           <span
                             style={{
-                              pointerEvents: estaDeshabilitado(data)
-                                ? "none"
-                                : "auto",
-                              opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                              // pointerEvents: estaDeshabilitado(data)
+                              //   ? "none"
+                              //   : "auto",
+                              // opacity: estaDeshabilitado(data) ? 0.5 : 1,
                             }}
                           >
                             <MoreVertIcon
@@ -3871,7 +3865,7 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
                     <div className="flex flex-col gap-4 mt-4">
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
                       <input
@@ -4055,7 +4049,7 @@ export function ListadoSolicitud() {
                     )}
                   </div>
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleAbrirVerificacionManual}
