@@ -79,7 +79,7 @@ import { Checkbox, FormControlLabel } from '@mui/material';
 import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
-import {fetchConsultaYNotifica, fechaHoraEcuador} from "../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 
 export function ListadoSolicitud() {
@@ -1422,14 +1422,14 @@ export function ListadoSolicitud() {
 
       await updateAnalista(filaActual, analistaSeleccionado);
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
-		title: "¡Nueva solicitud enviada a revisión! 👀",
+        title: "¡Nueva solicitud enviada a revisión! 👀",
         body: `Revisa la solicitud de crédito ${filaActual.numeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}
 		Fecha: ${fechaHoraEcuador}`,
         type: "success",
         empresa: "CREDI",
         url: "", // Opcional
         tipo: "analista",
-        });
+      });
       enqueueSnackbar("Analista actualizado correctamente", {
         variant: "success",
       });
@@ -1984,7 +1984,7 @@ export function ListadoSolicitud() {
             value={analistaSelected}
             onChange={(e) => { const analistaFiltro = e.target.value; setAnalistaSelected(analistaFiltro); sessionStorage.setItem('filtroAnalista', analistaFiltro); }}
             label="Analista"
-            //disabled={selectDeshabilitado} //  solo si hubo match
+          //disabled={selectDeshabilitado} //  solo si hubo match
           >
             <MenuItem value="todos">Todos</MenuItem>
             {analistas.map((vendedor) => (
@@ -2395,20 +2395,17 @@ export function ListadoSolicitud() {
                           </Box>
                         )}
 
-                        {/* Ícono de los tres puntos y llamada al popover */}
+                        <div style={{ height: 12 }} />
+
                         <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
+                          className="flex justify-end items-center "
                         >
                           <MoreVertIcon
                             onClick={(event) =>
                               handlePopoverOpen(event, 6, data)
                             }
                             style={{ cursor: "pointer" }}
+                            className="ml-2 text-gray-400 hover:text-indigo-600 transition-colors duration-200"
                           />
                         </span>
 
@@ -2493,12 +2490,12 @@ export function ListadoSolicitud() {
 
                         {/* Ícono de acciones y popover */}
                         <span
-                          style={{
-                            pointerEvents: estaDeshabilitado(data)
-                              ? "none"
-                              : "auto",
-                            opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                          }}
+                        /* style={{
+                           pointerEvents: estaDeshabilitado(data)
+                             ? "none"
+                             : "auto",
+                           opacity: estaDeshabilitado(data) ? 0.5 : 1,
+                         }}*/
                         >
                           <MoreVertIcon
                             onClick={(event) =>
