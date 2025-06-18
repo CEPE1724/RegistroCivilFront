@@ -312,6 +312,47 @@ export function GestorDocumentos({
             console.error("Error al actualizar la solicitud:", error);
         }
     };
+    ///para el rechazo 
+    const updateEstadoVerificacionrechazo = async (idEstadoVerificacionDocumental , observacionModal) => {
+     
+        try {
+            const url = APIURL.update_soliciutd_telefonica(clientInfo.id, idEstadoVerificacionDocumental);
+
+            const response = await axios.patch(url);
+     console.log("porque no esta imrpiendo 0")
+            if (response.status === 200) {
+                // Mensaje de éxito con el estado actualizado
+                const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+                await axios.post(url_estado, {
+
+                    idCre_SolicitudWeb: clientInfo.id,
+                    Tipo: 3,
+                    idEstadoVerificacionDocumental: idEstadoVerificacionDocumental,
+                    Usuario: userData.Nombre,
+                    Telefono: observacionModal
+                });
+
+                const estadoTexto = {
+                    3: "Enviado para corrección",
+                    4: "Aprobados",
+                    5: "Rechazados"
+                }[idEstadoVerificacionDocumental] || "Actualizado";
+
+                enqueueSnackbar(`Documentos ${estadoTexto}`, {
+                    variant: "success",
+                });
+            } else {
+                enqueueSnackbar("Error al actualizar la solicitud.", {
+                    variant: "error",
+                });
+            }
+        } catch (error) {
+            enqueueSnackbar("Error al actualizar la solicitud.", {
+                variant: "error",
+            });
+            console.error("Error al actualizar la solicitud:", error);
+        }
+    };
 
     //api enviar datos modal    
     const enviarObservacion = async (datos) => {
@@ -954,10 +995,12 @@ export function GestorDocumentos({
                     <ModalConfirmacionRechazo
                         isOpen={true}
                         onClose={() => setShowGlobalConfirmModal(false)}
-                        onConfirm={() => {
+                        onConfirm={(observacionModal) => {
                             setShowGlobalConfirmModal(false);
+        console.log("onConfirm del ModalConfirmacionRechazo:", observacionModal);
                             // Aquí va la lógica de rechazo global:
-                            updateEstadoVerificacion(5);
+                            updateEstadoVerificacionrechazo(5 , observacionModal);
+
                             fetchConsultaYNotifica(clientInfo.id, clientInfo, {
                                 title: "¡Documentos rechazados! 🚫",
                                 body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!

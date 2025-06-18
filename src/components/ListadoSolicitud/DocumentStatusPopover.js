@@ -84,7 +84,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       },
 
       6: { //// ESTADo
-		1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
+        1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
         2: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
         4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
 
@@ -178,39 +178,39 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
                   </Typography>
 
                   <Typography sx={{ fontSize: '0.8rem' }}>
-  {(() => {
-    const esFoto = estado.Tipo === 1 && estado.idEstadoVerificacionDocumental === 14;
-    const esURL = estado.Telefono?.startsWith('http');
+                    {(() => {
+                      const esFoto = estado.Tipo === 1 && estado.idEstadoVerificacionDocumental === 14;
+                      const esURL = estado.Telefono?.startsWith('http');
 
-    if (esFoto && esURL) {
-      return (
-        <Box>
-          <a
-            href={estado.Telefono}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#1976d2", textDecoration: "underline", fontSize: "0.75rem" }}
-          >
-            Ver imagen
-          </a>
-          <Box mt={1}>
-            <img
-              src={estado.Telefono}
-              alt="Foto"
-              style={{ maxWidth: "100px", borderRadius: "8px", border: "1px solid #ccc" }}
-            />
-          </Box>
-        </Box>
-      );
-    }
+                      if (esFoto && esURL) {
+                        return (
+                          <Box>
+                            <a
+                              href={estado.Telefono}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: "#1976d2", textDecoration: "underline", fontSize: "0.75rem" }}
+                            >
+                              Ver imagen
+                            </a>
+                            <Box mt={1}>
+                              <img
+                                src={estado.Telefono}
+                                alt="Foto"
+                                style={{ maxWidth: "100px", borderRadius: "8px", border: "1px solid #ccc" }}
+                              />
+                            </Box>
+                          </Box>
+                        );
+                      }
 
-    if ([8, 9, 1].includes(estado.Tipo)) {
-      return 'la url es ' + (estado.Telefono || 'N/A');
-    }
+                      if ([8, 9, 1].includes(estado.Tipo)) {
+                        return '' + (estado.Telefono || 'N/A');
+                      }
 
-    return 'asignado a ' + (estado.Telefono || 'N/A');
-  })()}
-</Typography>
+                      return '' + (estado.Telefono || 'N/A');
+                    })()}
+                  </Typography>
 
 
                 </TimelineOppositeContent>

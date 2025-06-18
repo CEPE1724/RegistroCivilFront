@@ -9,25 +9,58 @@ const ModalConfirmacionRechazo = ({
     mensajePrincipal
 }) => {
     const [isLoading, setIsLoading] = useState(false);
+    const [observaciones, setObservaciones] = useState('');
+    const [error, setError] = useState('');
+
+    const handleObservacionesChange = (e) => {
+        const value = e.target.value;
+        setObservaciones(value);
+        
+        // Validar longitud
+        if (value.length < 10 && value.length > 0) {
+            setError('Las observaciones deben tener al menos 10 caracteres');
+        } else if (value.length > 350) {
+            setError('Las observaciones no pueden exceder 350 caracteres');
+        } else {
+            setError('');
+        }
+    };
 
     const handleConfirm = async () => {
+          console.log("Observaciones a enviar:", observaciones);
+
+        // Validar antes de confirmar
+        if (observaciones.length < 10) {
+            setError('Las observaciones son obligatorias y deben tener al menos 10 caracteres');
+            return;
+        }
+        
+        if (observaciones.length > 350) {
+            setError('Las observaciones no pueden exceder 350 caracteres');
+            return;
+        }
+
         setIsLoading(true);
         try {
-            await onConfirm();
+            await onConfirm(observaciones);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleClose = () => {
+        setObservaciones('');
+        setError('');
         onClose();
     };
+
+    const isValidObservaciones = observaciones.length >= 10 && observaciones.length <= 350;
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full mx-4 shadow-2xl">
+            <div className="bg-white rounded-lg max-w-md w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <div className="flex items-center space-x-3">
@@ -51,7 +84,8 @@ const ModalConfirmacionRechazo = ({
                 <div className="p-6">
                     <div className="mb-6">
                         <p className="text-gray-700 mb-4">
-                            {mensajePrincipal || "¿Estás seguro de que deseas rechazar esta solicitud?"}                        </p>
+                            {mensajePrincipal || "¿Estás seguro de que deseas rechazar esta solicitud?"}
+                        </p>
                         {solicitudData && (
                             <div className="bg-gray-50 p-4 rounded-lg mb-4">
                                 <p className="text-sm text-gray-600">
@@ -66,6 +100,39 @@ const ModalConfirmacionRechazo = ({
                             </div>
                         )}
 
+                        {/* Campo de Observaciones */}
+                        <div className="mb-4">
+                            <label htmlFor="observaciones" className="block text-sm font-medium text-gray-700 mb-2">
+                                Motivo del rechazo <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="observaciones"
+                                value={observaciones}
+                                onChange={handleObservacionesChange}
+                                placeholder="Ingrese el motivo del rechazo (mínimo 10 caracteres, máximo 350)"
+                                rows="4"
+                                className={`w-full px-3 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2 transition-colors ${
+                                    error 
+                                        ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                                        : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+                                }`}
+                                disabled={isLoading}
+                            />
+                            <div className="flex justify-between items-center mt-1">
+                                <div className="text-xs">
+                                    {error && (
+                                        <span className="text-red-500">{error}</span>
+                                    )}
+                                </div>
+                                <span className={`text-xs ${
+                                    observaciones.length > 350 ? 'text-red-500' : 
+                                    observaciones.length < 10 ? 'text-gray-400' : 'text-green-600'
+                                }`}>
+                                    {observaciones.length}/350
+                                </span>
+                            </div>
+                        </div>
+
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                             <div className="flex items-start space-x-2">
                                 <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
@@ -76,7 +143,8 @@ const ModalConfirmacionRechazo = ({
                                     <p className="text-sm text-yellow-700 mt-1">
                                         Al confirmar esta acción, la prefactura será anulada y no podrás continuar con el crédito actual.
                                         Será necesario iniciar una nueva solicitud desde el principio.
-                                        Esta acción es permanente.                  </p>
+                                        Esta acción es permanente.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -93,7 +161,7 @@ const ModalConfirmacionRechazo = ({
                         </button>
                         <button
                             onClick={handleConfirm}
-                            disabled={isLoading}
+                            disabled={isLoading || !isValidObservaciones}
                             className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                         >
                             {isLoading ? (

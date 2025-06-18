@@ -164,8 +164,8 @@ export function TelefonicaList({
   }
 
 
-  const handleConfirmRechazo = async () => {
-    await rechazar();
+  const handleConfirmRechazo = async (observacion) => {
+    await rechazar(observacion);
     await patchSolicitud(
       clientInfo.id,
       4 // Cambia el estado a "rechazado"
@@ -356,7 +356,7 @@ export function TelefonicaList({
     }
   };
 
-  const rechazar = async () => {
+  const rechazar = async (observacion) => {
     if (clientInfo.id) {
       const url_estado = APIURL.post_createtiemposolicitudeswebDto();
       await axios.post(url_estado, {
@@ -364,6 +364,7 @@ export function TelefonicaList({
         Tipo: 2,
         idEstadoVerificacionDocumental: 4,
         Usuario: userData.Nombre,
+        Telefono: observacion,
         //selectedRow.Telefono+"-"+selectedRow.Contacto,
       }
       );

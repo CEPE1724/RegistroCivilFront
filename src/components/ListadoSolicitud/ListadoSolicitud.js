@@ -596,12 +596,29 @@ export function ListadoSolicitud() {
         idEstadoVerificacionDocumental: estado,
         Usuario: userData.Nombre,
 
+
       });
     } catch (error) {
       console.error("Error al guardar los datos del cliente", error);
     }
   };
+  const fetchInsertarDatosRechazo = async (tipo, data, estado, observacion) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
 
+      await axios.post(url, {
+        idCre_SolicitudWeb: data,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: observacion
+
+
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
   const fetchInsertarDatos2 = async (tipo, data, estado) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
@@ -640,10 +657,10 @@ export function ListadoSolicitud() {
 
   const handleApproveEstado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-	patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
     fetchInsertarDatos(6, data.id, 1);
     setRecargar(true);
-	setShowModalRechazo(false)
+    setShowModalRechazo(false)
   };
 
   const handleApproveResultado = (data) => {
@@ -1839,11 +1856,12 @@ export function ListadoSolicitud() {
     fetchSolicitudes();
   }, [itemsPerPage, currentPage]);
 
-  const handleRechazar = async () => {
-	patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
-	patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-    fetchInsertarDatos(6, selectedRow?.id, 4); 
-	handleCloseDialog()
+  const handleRechazar = async (observacion) => {
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+    fetchInsertarDatosRechazo(6, selectedRow?.id, 4, observacion);
+    setShowModalRechazo(false);
+    handleCloseDialog()
   }
 
   return (
@@ -2389,13 +2407,13 @@ export function ListadoSolicitud() {
                               <Box
                                 className="approveOverlay"
                                 onClick={() => {
-								  if (data.Estado == 5) {
-									setCurrentAction("resultado");
-									setCurrentData(data);
-									setOpenDialog2(true);
-								  } else {
-									  enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", {variant: "warning", });
-								  }
+                                  if (data.Estado == 5) {
+                                    setCurrentAction("resultado");
+                                    setCurrentData(data);
+                                    setOpenDialog2(true);
+                                  } else {
+                                    enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", { variant: "warning", });
+                                  }
                                 }}
                                 sx={{
                                   position: "absolute",
@@ -4011,12 +4029,12 @@ export function ListadoSolicitud() {
           >
             Rechazar Solicitud
           </Button>)}
-		  <ModalConfirmacionRechazo
-		  isOpen={showModalRechazo}
-		  onClose={() => setShowModalRechazo(false)}
-		  onConfirm={handleRechazar}
-		  solicitudData={selectedRow}
-		  />
+          <ModalConfirmacionRechazo
+            isOpen={showModalRechazo}
+            onClose={() => setShowModalRechazo(false)}
+            onConfirm={handleRechazar}
+            solicitudData={selectedRow}
+          />
           <Button
             onClick={handleCloseDialog}
             color="primary"
