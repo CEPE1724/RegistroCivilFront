@@ -81,6 +81,8 @@ import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
+import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
+import { set } from "react-hook-form";
 
 export function ListadoSolicitud() {
   const {
@@ -104,6 +106,7 @@ export function ListadoSolicitud() {
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  console.log("selectedRow", selectedRow);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
   const [itemsPerPage, setItemsPerPage] = useState(5)
@@ -142,7 +145,8 @@ export function ListadoSolicitud() {
   const [openCameraModal, setOpenCameraModal] = useState(false);
   const [imagenCapturada, setImagenCapturada] = useState(null);
   const [fechaTiempos, setfechaTiempos] = useState([]);
-  const inputFileRef = useRef(null); // ⬅️ Coloca esto en la parte superior de tu componente
+  const inputFileRef = useRef(null);
+  const [showModalRechazo, setShowModalRechazo] = useState(false);
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -287,85 +291,6 @@ export function ListadoSolicitud() {
     const localUrl = URL.createObjectURL(file);
     setPreviewUrl(localUrl);
   };
-
-
-  {/*
-  const handleUploadClick = async () => {
-    if (!fileToUpload) {
-      alert("Primero selecciona una imagen");
-      return;
-    }
-
-    try {
-      let updatedUrl = ""; // ✅ lo declaramos aquí arriba
-
-      const fileUploadResponse = await uploadFile(
-        fileToUpload,
-        selectedRow.almacen,
-        selectedRow.cedula,
-        selectedRow.NumeroSolicitud,
-        "Foto"
-      );
-
-      if (fileUploadResponse) {
-        updatedUrl = fileUploadResponse.url;
-
-        // 1. Actualizar la imagen localmente
-        setSelectedRow((prevRow) => ({
-          ...prevRow,
-          imagen: updatedUrl,
-        }));
-
-        // 2. Actualizar también la tabla
-        setDatos((prevDatos) =>
-          prevDatos.map((item) =>
-            item.id === selectedRow.id ? { ...item, imagen: updatedUrl } : item
-          )
-        );
-
-        // 3. Actualizar en backend
-        const updatedData = { Foto: updatedUrl };
-        await fetchActualizaSolicitud(selectedRow.id, updatedData);
-
-        setUrlCloudstorage();
-        setFileToUpload(null);
-
-        enqueueSnackbar("Foto subida correctamente", {
-          variant: "success",
-        });
-      }
-
-      // 4. Ejecutar verificación automáticamente (fuera del if, usando updatedUrl declarado arriba)
-      if (updatedUrl) {
-        const cedula = selectedRow?.cedula;
-        const dactilar = selectedRow?.CodigoDactilar;
-
-        if (cedula && dactilar) {
-          setCedula(cedula); // <== AÑADIR ESTO
-          setDactilar(dactilar);
-          const dataFOTO = await fetchImagenRegistroCivil(cedula, dactilar);
-          if (
-            dataFOTO &&
-            typeof dataFOTO === "string" &&
-            dataFOTO.trim() !== ""
-          ) {
-            await handleVerificarIdentidad(updatedUrl, dataFOTO);
-          } else {
-            enqueueSnackbar(
-              "No se pudo obtener imagen del Registro Civil. Se continuara manualmente ",
-              {
-                variant: "error",
-              }
-            );
-
-            setOpenRegistroCivil(true);
-          }
-        }
-      }
-    } catch (error) {
-      alert(error.message);
-    }
-  }; */}
 
   const fetchInsertarimagen = async (tipo, data, estado, imagen) => {
 
@@ -571,7 +496,7 @@ export function ListadoSolicitud() {
     if (currentAction === "estado") {
       handleApproveEstado(currentData);
     } else if (currentAction === "resultado") {
-      await handleApproveResultado(currentData);
+      handleApproveResultado(currentData);
       if (laboralChecked) await patchLaboral(currentData.id);
       if (domicilioChecked) await patchDomicilio(currentData.id);
       if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
@@ -714,10 +639,11 @@ export function ListadoSolicitud() {
   };
 
   const handleApproveEstado = (data) => {
-    patchSolicitudEstadoyResultado(data.id, { Estado: 2 });
-    fetchInsertarDatos(6, data.id, 2);
+    patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
+	patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    fetchInsertarDatos(6, data.id, 1);
     setRecargar(true);
-
+	setShowModalRechazo(false)
   };
 
   const handleApproveResultado = (data) => {
@@ -1913,6 +1839,13 @@ export function ListadoSolicitud() {
     fetchSolicitudes();
   }, [itemsPerPage, currentPage]);
 
+  const handleRechazar = async () => {
+	patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
+	patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+    fetchInsertarDatos(6, selectedRow?.id, 4); 
+	handleCloseDialog()
+  }
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen overflow-auto">
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -2213,7 +2146,6 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Estado</TableCell>
                   <TableCell align="center">Tipo de Cliente</TableCell>
                   <TableCell align="center">Resultado</TableCell>
-
                   <TableCell align="center">Entradas</TableCell>
                   <TableCell align="center">Detalles</TableCell>
                   <TableCell align="center">Solicitudes</TableCell>
@@ -2338,7 +2270,7 @@ export function ListadoSolicitud() {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  bgcolor: "#22c55e",
+                                  bgcolor: "#dbeafe",
                                   borderRadius: "9999px",
                                   cursor: "pointer",
                                   transform: "translateY(100%)",
@@ -2349,7 +2281,7 @@ export function ListadoSolicitud() {
                               >
                                 <Typography
                                   sx={{
-                                    color: "#ffffff",
+                                    color: "#1e40af",
                                     fontSize: "0.75rem",
                                     fontWeight: 600,
                                     display: "flex",
@@ -2358,7 +2290,7 @@ export function ListadoSolicitud() {
                                   }}
                                 >
                                   <CheckCircleIcon fontSize="small" />
-                                  APROBAR?
+                                  PRE-APROBAR?
                                 </Typography>
                               </Box>
                             )}
@@ -2457,9 +2389,13 @@ export function ListadoSolicitud() {
                               <Box
                                 className="approveOverlay"
                                 onClick={() => {
-                                  setCurrentAction("resultado");
-                                  setCurrentData(data); // Guarda la fila actual
-                                  setOpenDialog2(true); // Abrir el diálogo para confirmar
+								  if (data.Estado == 5) {
+									setCurrentAction("resultado");
+									setCurrentData(data);
+									setOpenDialog2(true);
+								  } else {
+									  enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", {variant: "warning", });
+								  }
                                 }}
                                 sx={{
                                   position: "absolute",
@@ -4070,15 +4006,17 @@ export function ListadoSolicitud() {
         <DialogActions>
           {selectedRow?.Estado === 1 && (<Button
             color="error"
-            onClick={() => {
-              patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
-              patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-              fetchInsertarDatos(6, selectedRow?.id, 4); handleCloseDialog();
-            }}
+            onClick={() => setShowModalRechazo(true)}
             className="group relative py-3 px-8 text-lg font-semibold rounded-lg shadow-lg transition-all duration-300 hover:shadow-red-200 hover:shadow-xl"
           >
             Rechazar Solicitud
           </Button>)}
+		  <ModalConfirmacionRechazo
+		  isOpen={showModalRechazo}
+		  onClose={() => setShowModalRechazo(false)}
+		  onConfirm={handleRechazar}
+		  solicitudData={selectedRow}
+		  />
           <Button
             onClick={handleCloseDialog}
             color="primary"
