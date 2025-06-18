@@ -14,3 +14,10 @@ node_modules
 /.env.development
 /.env.test
 /.env.production
+# Ignorar archivos de configuración de entorno
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
