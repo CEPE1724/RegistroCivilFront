@@ -134,7 +134,7 @@ export function ListadoSolicitud() {
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
   const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
-  const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
+  ///const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
   const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
@@ -722,6 +722,12 @@ export function ListadoSolicitud() {
     //return true
   };
 
+  const permitirEquifax = () => {
+    const permiso = permisos.find((p) => p.Permisos === "CONSULTA EQUIFAX");
+    console.log("sadsa0" , permiso)
+    return permiso && permiso.Activo;
+  };
+
   const estadoDeshabilitadoporPermisos = (data) => {
     // Obtener el estado correspondiente al ID
     const estado = estadoMap[data.idEstadoVerificacionSolicitud];
@@ -750,6 +756,11 @@ export function ListadoSolicitud() {
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
   };
+
+  
+
+
+ 
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -3993,7 +4004,7 @@ export function ListadoSolicitud() {
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {!verEquifax && (
+                    { permitirEquifax() && (
                       <button
                         onClick={() => handleEquifax(data)}
                         className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
