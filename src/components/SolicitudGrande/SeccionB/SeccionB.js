@@ -9,6 +9,7 @@ import { APIURL } from "../../../configApi/apiConfig";
 import { useSnackbar } from "notistack";
 import axios from "../../../configApi/axiosConfig";
 import { SelectField } from "../../Utils";
+import { GoogleMapModal } from "../../ListadoSolicitud/DomicilioModal"
 import {
   fetchTipoEmpresa,
   fetchTipoContrato,
@@ -64,7 +65,7 @@ const SeccionB = forwardRef((props, ref) => {
     }
   }, [location.state]);
   const { data } = props;
-
+  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const { userData, userUsuario } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [tipoEmpresa, setTipoEmpresa] = useState([]);
@@ -77,6 +78,9 @@ const SeccionB = forwardRef((props, ref) => {
   const [parroquia, setParroquia] = useState([]);
   const [barrio, setBarrio] = useState([]);
   const [errorUbicacion, setErrorUbicacion] = useState("");
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [ Latitud, setLatitud ] = useState("")
+  const [ Longitud, setLongitud ] = useState ("")
 
   useEffect(() => {
     fetchTipoEmpresa(enqueueSnackbar, setTipoEmpresa);
@@ -248,26 +252,26 @@ const SeccionB = forwardRef((props, ref) => {
   const handleOpenModal = async () => {
 
     const camposBase = [
-      { dataKey: "NombreEmpresa", formKey: "empresa" },
-      { dataKey: "idTipoEmpresa", formKey: "tipoEmpresa" },
-      { dataKey: "JefeInmediato", formKey: "jefeInmediato" },
-      { dataKey: "CelularInmediato", formKey: "numeroJefe" },
-      { dataKey: "FechaIngresoEmpresa", formKey: "fechaIngreso" },
-      { dataKey: "IngresosTrabajo", formKey: "ingresos" },
-      { dataKey: "EgresosTrabajo", formKey: "gastos" },
-      { dataKey: "idTipoContrato", formKey: "tipoContrato" },
-      { dataKey: "idTipoSueldo", formKey: "tipoSueldo" },
-      { dataKey: "Departaento", formKey: "departamento" },
-      { dataKey: "idCargo", formKey: "cargo" },
-      { dataKey: "DiaPago", formKey: "diasPago" },
-      { dataKey: "idProvinciaTrabajo", formKey: "provincia" },
-      { dataKey: "idCantonTrabajo", formKey: "canton" },
-      { dataKey: "idParroquiaTrabajo", formKey: "parroquia" },
-      { dataKey: "idBarrioTrabajo", formKey: "barrio" },
-      { dataKey: "CallePrincipalTrabajo", formKey: "callePrincipal" },
-      { dataKey: "NumeroCasaTrabajo", formKey: "numeroCasa" },
-      { dataKey: "CalleSecundariaTrabajo", formKey: "calleSecundaria" },
-      { dataKey: "ReferenciaUbicacionTrabajo", formKey: "referenciaUbicacion" },
+    //   { dataKey: "NombreEmpresa", formKey: "empresa" },
+    //   { dataKey: "idTipoEmpresa", formKey: "tipoEmpresa" },
+    //   { dataKey: "JefeInmediato", formKey: "jefeInmediato" },
+    //   { dataKey: "CelularInmediato", formKey: "numeroJefe" },
+    //   { dataKey: "FechaIngresoEmpresa", formKey: "fechaIngreso" },
+    //   { dataKey: "IngresosTrabajo", formKey: "ingresos" },
+    //   { dataKey: "EgresosTrabajo", formKey: "gastos" },
+    //   { dataKey: "idTipoContrato", formKey: "tipoContrato" },
+    //   { dataKey: "idTipoSueldo", formKey: "tipoSueldo" },
+    //   { dataKey: "Departaento", formKey: "departamento" },
+    //   { dataKey: "idCargo", formKey: "cargo" },
+    //   { dataKey: "DiaPago", formKey: "diasPago" },
+    //   { dataKey: "idProvinciaTrabajo", formKey: "provincia" },
+    //   { dataKey: "idCantonTrabajo", formKey: "canton" },
+    //   { dataKey: "idParroquiaTrabajo", formKey: "parroquia" },
+    //   { dataKey: "idBarrioTrabajo", formKey: "barrio" },
+    //   { dataKey: "CallePrincipalTrabajo", formKey: "callePrincipal" },
+    //   { dataKey: "NumeroCasaTrabajo", formKey: "numeroCasa" },
+    //   { dataKey: "CalleSecundariaTrabajo", formKey: "calleSecundaria" },
+    //   { dataKey: "ReferenciaUbicacionTrabajo", formKey: "referenciaUbicacion" },
     ];
 
     // Verifica que estén guardados (en data)
@@ -290,20 +294,20 @@ const SeccionB = forwardRef((props, ref) => {
 
     if (camposNoLlenados.length > 0) {
       enqueueSnackbar(
-        "Para seleccionar la ubicación del trabajo, primero debes llenar y guardar todos los campos requeridos.",
+        "Para seleccionar la ubicación del trabajo, primero debes llenar la provincia, cantón, parroquia y barrio.",
         { variant: "warning" }
       );
       return;
     }
 
-    const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
-    if (!validation || !validation.exists || validation.count === 0) {
-      enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
-        variant: 'error'
-      });
-      setUbicacionError("No existen coordenadas registradas para esta solicitud.");
-      return;
-    }
+    // const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
+    // if (!validation || !validation.exists || validation.count === 0) {
+    //   enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
+    //     variant: 'error'
+    //   });
+    //   setUbicacionError("No existen coordenadas registradas para esta solicitud.");
+    //   return;
+    // }
 
     setOpenLocationModal((prev) => !prev);
   };
@@ -593,6 +597,19 @@ const SeccionB = forwardRef((props, ref) => {
     validateForm,
     getFormData: () => formData,
   }));
+
+  const fetchLatyLon = async () => {
+	try {
+		const id = clientInfo?.data?.id
+		const response = await axios.get(APIURL.getCoordenadasId(id, 2))
+		setLatitud(response.data[0].latitud)
+		setLongitud(response.data[0].longitud)
+		setShowMapModal(true)
+	}  catch (error) {
+	console.error("Error al obtener coordenadas", error);
+	enqueueSnackbar("Error al obtener coordenadas", { variant: "error" });
+  }
+}
 
   return (
     <div className="py-2 w-full">
@@ -1089,7 +1106,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         
-          <div className="col-span-1">
+          {(clientInfo?.data?.idEstadoVerificacionSolicitud == 1 || clientInfo?.data?.idEstadoVerificacionSolicitud == 11 ) &&(<div className="col-span-1">
             <label className="text-xs font-medium mb-1 flex items-center">
               <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
               Ubicacion Trabajo
@@ -1102,7 +1119,23 @@ const SeccionB = forwardRef((props, ref) => {
             >
               Ubicacion Trabajo
             </button>
-          </div>
+          </div>)}
+
+			{(clientInfo?.data.idEstadoVerificacionSolicitud == 12 || clientInfo?.data.idEstadoVerificacionSolicitud == 10 || clientInfo?.data?.idEstadoVerificacionSolicitud == 13) &&(
+		  <div className="col-span-1">
+            <label className="text-xs font-medium mb-1 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+              Ver Ubicacion Trabajo
+            </label>
+            <button
+              type="button"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
+              name="verubicacionDomicilio"
+              onClick={fetchLatyLon}
+            >
+              Ver Ubicacion Trabajo
+            </button>
+          </div>)}
      
       </form>
       <LocationModal
@@ -1115,6 +1148,15 @@ const SeccionB = forwardRef((props, ref) => {
         tipo={2}
         userData={userData}
       />
+	  {/* MAP MODAL */}
+			{showMapModal && Latitud && Longitud && (
+			  <GoogleMapModal
+				lat={Latitud}
+				lng={Longitud}
+				apiKey={GOOGLE_MAPS_API_KEY}
+				onClose={() => setShowMapModal(false)}
+			  />
+			)}
     </div>
   );
 

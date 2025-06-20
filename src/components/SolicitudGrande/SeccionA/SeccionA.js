@@ -44,6 +44,7 @@ import { SelectField } from "../../Utils";
 import { LocationModal } from "../LocationModal";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { useLocation } from "react-router-dom";
+import { GoogleMapModal } from "../../ListadoSolicitud/DomicilioModal"
 const SeccionA = forwardRef((props, ref) => {
 
   const location = useLocation();
@@ -83,7 +84,7 @@ const SeccionA = forwardRef((props, ref) => {
   const [actividadNegocio, setActividadNegocio] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [ubicacionError, setUbicacionError] = useState(false);
-
+  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     nombreNegocio: data.NombreNegocio || "",
@@ -105,6 +106,9 @@ const SeccionA = forwardRef((props, ref) => {
     telefono: data.TelefonoNegocio || "",
     celular: data.CelularNegocio || "",
   });
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [ Latitud, setLatitud ] = useState("")
+  const [ Longitud, setLongitud ] = useState ("")
 
   useEffect(() => {
     fetchTiempoVivienda(enqueueSnackbar, setTiempoNegocio);
@@ -156,20 +160,20 @@ const SeccionA = forwardRef((props, ref) => {
 
 
     const camposBase = [
-      { dataKey: "NombreNegocio", formKey: "nombreNegocio" },
-      { dataKey: "idCre_TiempoNegocio", formKey: "tiempoNegocio" },
-      { dataKey: "MetrosCuadrados", formKey: "metros" },
-      { dataKey: "IngresosNegosio", formKey: "ingresos" },
-      { dataKey: "EgresosNegocio", formKey: "gastos" },
-      { dataKey: "idProvinciaNegocio", formKey: "provincia" },
-      { dataKey: "idCantonNegocio", formKey: "canton" },
-      { dataKey: "idParroquiaNegocio", formKey: "parroquia" },
-      { dataKey: "idBarrioNegocio", formKey: "barrio" },
-      { dataKey: "CallePrincipalNegocio", formKey: "callePrincipal" },
-      { dataKey: "NumeroCasaNegocio", formKey: "numeroCasa" },
-      { dataKey: "CalleSecundariaNegocio", formKey: "calleSecundaria" },
-      { dataKey: "ReferenciaUbicacionNegocio", formKey: "referenciaUbicacion" },
-      { dataKey: "ActividadEconomicaNegocio", formKey: "actividadNegocio" },
+    //   { dataKey: "NombreNegocio", formKey: "nombreNegocio" },
+    //   { dataKey: "idCre_TiempoNegocio", formKey: "tiempoNegocio" },
+    //   { dataKey: "MetrosCuadrados", formKey: "metros" },
+    //   { dataKey: "IngresosNegosio", formKey: "ingresos" },
+    //   { dataKey: "EgresosNegocio", formKey: "gastos" },
+    //   { dataKey: "idProvinciaNegocio", formKey: "provincia" },
+    //   { dataKey: "idCantonNegocio", formKey: "canton" },
+    //   { dataKey: "idParroquiaNegocio", formKey: "parroquia" },
+    //   { dataKey: "idBarrioNegocio", formKey: "barrio" },
+    //   { dataKey: "CallePrincipalNegocio", formKey: "callePrincipal" },
+    //   { dataKey: "NumeroCasaNegocio", formKey: "numeroCasa" },
+    //   { dataKey: "CalleSecundariaNegocio", formKey: "calleSecundaria" },
+    //   { dataKey: "ReferenciaUbicacionNegocio", formKey: "referenciaUbicacion" },
+    //   { dataKey: "ActividadEconomicaNegocio", formKey: "actividadNegocio" },
     ];
 
     const camposInvalidos = camposBase.filter(
@@ -190,7 +194,7 @@ const SeccionA = forwardRef((props, ref) => {
 
     if (camposNoLlenados.length > 0) {
       enqueueSnackbar(
-        "Para seleccionar la ubicación del negocio, primero debes llenar y guardar correctamente todos los campos requeridos.",
+        "Para seleccionar la ubicación del negocio, primero debes llenar la provincia, cantón, parroquia y barrio.",
         {
           variant: "warning",
         }
@@ -198,14 +202,14 @@ const SeccionA = forwardRef((props, ref) => {
       return;
     }
 
-    const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
-    if (!validation || !validation.exists || validation.count === 0) {
-      enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
-        variant: 'error'
-      });
-      setUbicacionError("No existen coordenadas registradas para esta solicitud.");
-      return;
-    }
+    // const validation = await fecthValidaDomicilio(data.idCre_SolicitudWeb, 2);
+    // if (!validation || !validation.exists || validation.count === 0) {
+    //   enqueueSnackbar("No es posible guardar coordenadas porque no hay datos válidos en la solicitud.", {
+    //     variant: 'error'
+    //   });
+    //   setUbicacionError("No existen coordenadas registradas para esta solicitud.");
+    //   return;
+    // }
 
     setOpenLocationModal((prev) => !prev);
   };
@@ -509,18 +513,6 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
-    // if (!formData.telefono && !formData.celular) {
-
-    // 	newErrors.telefono = "Debes proporcionar al menos un teléfono o celular";
-    // 	newErrors.celular = "Debes proporcionar al menos un teléfono o celular";
-
-    // 	if (!showSnackbar) {
-    // 		enqueueSnackbar("Por favor, proporciona al menos un teléfono o celular", { variant: "error" });
-    // 		showSnackbar = true;
-    // 	}
-    // }
-
-
     // Actualizamos los errores en el estado
     setErrors(newErrors);
 
@@ -533,7 +525,19 @@ const SeccionA = forwardRef((props, ref) => {
     getFormData: () => formData,
   }));
 
-
+  const fetchLatyLon = async () => {
+	try {
+		const id = clientInfo?.data?.id
+		console.log("id", id)
+		const response = await axios.get(APIURL.getCoordenadasId(id, 2))
+		setLatitud(response.data[0].latitud)
+		setLongitud(response.data[0].longitud)
+		setShowMapModal(true)
+	}  catch (error) {
+	console.error("Error al obtener coordenadas", error);
+	enqueueSnackbar("Error al obtener coordenadas", { variant: "error" });
+  }
+}
 
   return (
     <div className="p-6">
@@ -667,7 +671,8 @@ const SeccionA = forwardRef((props, ref) => {
           />
         </div>
 
-        <div className="col-span-1">
+        {(clientInfo?.data?.idEstadoVerificacionSolicitud == 1 || clientInfo?.data?.idEstadoVerificacionSolicitud == 11 ) && (
+		<div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
             Ubicacion Trabajo
@@ -675,7 +680,7 @@ const SeccionA = forwardRef((props, ref) => {
           <button
             type="button"
             className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
-            name="ubicacionDomicilio"
+            name="verubicacionDomicilio"
             onClick={() => handleOpenModal("ubicacionDomicilio")}
           >
             Ubicacion Trabajo
@@ -685,7 +690,28 @@ const SeccionA = forwardRef((props, ref) => {
               No se han registrado coordenadas para este domicilio.
             </p>
           )}
-        </div>
+        </div>)}
+
+		{(clientInfo?.data.idEstadoVerificacionSolicitud == 12 || clientInfo?.data.idEstadoVerificacionSolicitud == 10 || clientInfo?.data?.idEstadoVerificacionSolicitud == 13) && (
+			<div className="col-span-1">
+          <label className="text-xs font-medium mb-1 flex items-center">
+            <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+            Ver Ubicacion Trabajo
+          </label>
+          <button
+            type="button"
+            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
+            name="ubicacionDomicilio"
+            onClick={fetchLatyLon}
+          >
+            Ver Ubicacion Trabajo
+          </button>
+          {ubicacionError && (
+            <p className="mt-1 text-sm text-red-500 border-red-500">
+              No se han registrado coordenadas para este domicilio.
+            </p>
+          )}
+        </div>)}
 
 
         <div className="lg:col-span-1">
@@ -840,6 +866,15 @@ const SeccionA = forwardRef((props, ref) => {
         tipo={2}
         userData={userData}
       />
+	  {/* MAP MODAL */}
+		{showMapModal && Latitud && Longitud && (
+		  <GoogleMapModal
+			lat={Latitud}
+			lng={Longitud}
+			apiKey={GOOGLE_MAPS_API_KEY}
+			onClose={() => setShowMapModal(false)}
+		  />
+		)}
     </div>
   );
 });

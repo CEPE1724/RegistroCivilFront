@@ -5,7 +5,7 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import Modal from "react-modal";
 import { Visibility } from "@mui/icons-material";
 import { Alert } from "@mui/lab";
-const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
+export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
     width: "100%",

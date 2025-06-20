@@ -9,8 +9,10 @@ export function RegistroCivil({
   onAceptar,
   onRechazar,
   resultadoVerificacion,
-  permisos
+  permisos,
+  estadoSolicitud,
 }) {
+	console.log("estadoSolicitud", estadoSolicitud)
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   // Calcular porcentaje de similitud basado en el threshold
@@ -279,7 +281,7 @@ export function RegistroCivil({
               )}
 
               <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
-                {(!resultadoVerificacion.verified || !data?.FOTO) && permisoAprobarVerificacion() && (
+                {(!resultadoVerificacion.verified || !data?.FOTO) && permisoAprobarVerificacion() && estadoSolicitud !== 2 && (
                   <Button
                     variant="contained"
                     color="success"
@@ -304,7 +306,7 @@ export function RegistroCivil({
                   </Button>
                 )}
 
-                { permisoAprobarVerificacion() && 
+                { permisoAprobarVerificacion() && estadoSolicitud !== 2 &&
                 <Button
                   variant="outlined"
                   color="error"
