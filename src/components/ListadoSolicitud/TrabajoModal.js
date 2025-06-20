@@ -68,7 +68,6 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
         const data = response.data[0].Telefono;
         // data puede ser un array o un objeto, asumo objeto:
         // El nombre del verificador está en data.Telefono
-        console.log("aqui esta el nomnbre ", data)
         setVerificador(data || "Sin verificador");
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);

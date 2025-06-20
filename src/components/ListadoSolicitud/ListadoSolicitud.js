@@ -106,7 +106,6 @@ export function ListadoSolicitud() {
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  console.log("selectedRow", selectedRow);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
   const [itemsPerPage, setItemsPerPage] = useState(5)
@@ -1004,7 +1003,9 @@ export function ListadoSolicitud() {
       if (!idsTerrenas || idsTerrenas.length === 0) {
         // No hay datos, abrir PreDocumentos (nuevo componente)
         setPreDocumentosData({ data, tipo });
-        setOpenPreDocumentos(true);
+		if (userData?.idGrupo !== 22 && userData?.idGrupo !== 23){
+			setOpenPreDocumentos(true);
+		}
         return;
       }
 
@@ -1778,11 +1779,10 @@ export function ListadoSolicitud() {
     });
   }
 
+  // filtros 
   const limpiarFiltros = () => {
     setFechaInicio(date15DaysAgoStr);
     setFechaFin(today);
-    setSelectedBodega("todos");
-    setSelectedVendedor("todos");
     setAnalistaSelected("todos");
     setEstado("todos");
     setSolicitud("Todos");
@@ -1796,8 +1796,6 @@ export function ListadoSolicitud() {
 
     sessionStorage.removeItem('filtroIniFecha');
     sessionStorage.removeItem('filtroFinFecha');
-    sessionStorage.removeItem('filtroBodega');
-    sessionStorage.removeItem('filtroVendedor');
     sessionStorage.removeItem('filtroAnalista');
     sessionStorage.removeItem('filtroEstado');
     sessionStorage.removeItem('filtroSolicitud');
@@ -1808,6 +1806,12 @@ export function ListadoSolicitud() {
     sessionStorage.removeItem('filtroCedula')
     sessionStorage.removeItem('filtroNombre')
     sessionStorage.removeItem('filtroNumSolicitud')
+	if (userData?.idGrupo !== 23) {
+		setSelectedVendedor("todos");
+		setSelectedBodega("todos");
+		sessionStorage.removeItem('filtroVendedor');
+		sessionStorage.removeItem('filtroBodega');
+	}
   };
 
 
@@ -2385,7 +2389,7 @@ export function ListadoSolicitud() {
                             />
 
                             {/* Overlay solo si tiene permiso */}
-                            {!permisoAprobarResultado(data) && (
+                            {/* !permisoAprobarResultado(data) && (
                               <Box
                                 className="approveOverlay"
                                 onClick={() => {
@@ -2418,7 +2422,7 @@ export function ListadoSolicitud() {
                               >
                                 <CheckCircleIcon sx={{ fontSize: 20 }} />
                               </Box>
-                            )}
+                            ) */}
                           </Box>
                         ) : data.resultado === 1 ? (
                           <CheckCircleIcon sx={{ color: "#28A745" }} />
@@ -3985,7 +3989,7 @@ export function ListadoSolicitud() {
                     )}
                   </div>
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
+                  {puedeAprobar(selectedRow)  && selectedRow.estado !== "RECHAZADO" && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleAbrirVerificacionManual}
@@ -4304,6 +4308,7 @@ export function ListadoSolicitud() {
           cedula={cedula}
           dactilar={dactilar}
           imagenSubida={selectedRow?.imagen}
+		  estadoSolicitud={selectedRow?.Estado}
           onAceptar={() => {
             // Acción al aceptar
             patchSolicitud(selectedRow?.id, 2);
