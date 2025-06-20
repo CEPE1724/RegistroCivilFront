@@ -640,10 +640,10 @@ export function ListadoSolicitud() {
 
   const handleApproveEstado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-	patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
     fetchInsertarDatos(6, data.id, 1);
     setRecargar(true);
-	setShowModalRechazo(false)
+    setShowModalRechazo(false)
   };
 
   const handleApproveResultado = (data) => {
@@ -1549,6 +1549,8 @@ export function ListadoSolicitud() {
                         ? "RECHAZADO"
                         : item.Estado === 5
                           ? "NO APLICA"
+                          : item.Estado === 6
+                            ? "FACTURADO"
                           : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
@@ -1840,10 +1842,10 @@ export function ListadoSolicitud() {
   }, [itemsPerPage, currentPage]);
 
   const handleRechazar = async () => {
-	patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
-	patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-    fetchInsertarDatos(6, selectedRow?.id, 4); 
-	handleCloseDialog()
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+    fetchInsertarDatos(6, selectedRow?.id, 4);
+    handleCloseDialog()
   }
 
   return (
@@ -2389,13 +2391,13 @@ export function ListadoSolicitud() {
                               <Box
                                 className="approveOverlay"
                                 onClick={() => {
-								  if (data.Estado == 5) {
-									setCurrentAction("resultado");
-									setCurrentData(data);
-									setOpenDialog2(true);
-								  } else {
-									  enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", {variant: "warning", });
-								  }
+                                  if (data.Estado == 5) {
+                                    setCurrentAction("resultado");
+                                    setCurrentData(data);
+                                    setOpenDialog2(true);
+                                  } else {
+                                    enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", { variant: "warning", });
+                                  }
                                 }}
                                 sx={{
                                   position: "absolute",
@@ -2665,9 +2667,8 @@ export function ListadoSolicitud() {
                               size="small"
                               sx={{
                                 opacity:
-                                  estaDeshabilitado(data) ||
-                                    verificacionSolicitud(data)
-                                    ? 0.4
+                                  estaDeshabilitado(data) 
+                                    ? 0
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#f1f5f9",
                                 "&:hover": {
@@ -2724,8 +2725,7 @@ export function ListadoSolicitud() {
                               }
                               disabled={
                                 verificacionSolicitud(data) ||
-                                data.Laboral === false ||
-                                !docAprobados[data.id]
+                                data.Laboral === false 
 
                               }
                               size="small"
@@ -2733,9 +2733,9 @@ export function ListadoSolicitud() {
                                 opacity:
                                   verificacionSolicitud(data) ||
                                     data.Laboral === false
-                                    ? 0.2
+                                    ? 0
                                     : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                bgcolor: isError ? "#fee2e2" : "#fff1f5f9",
                                 "&:hover": {
                                   bgcolor: isError ? "#fca5a5" : "#e2e8f0",
                                   transform: "scale(1.1)",
@@ -4011,12 +4011,12 @@ export function ListadoSolicitud() {
           >
             Rechazar Solicitud
           </Button>)}
-		  <ModalConfirmacionRechazo
-		  isOpen={showModalRechazo}
-		  onClose={() => setShowModalRechazo(false)}
-		  onConfirm={handleRechazar}
-		  solicitudData={selectedRow}
-		  />
+          <ModalConfirmacionRechazo
+            isOpen={showModalRechazo}
+            onClose={() => setShowModalRechazo(false)}
+            onConfirm={handleRechazar}
+            solicitudData={selectedRow}
+          />
           <Button
             onClick={handleCloseDialog}
             color="primary"
