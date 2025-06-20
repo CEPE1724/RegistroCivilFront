@@ -4029,7 +4029,7 @@ export function ListadoSolicitud() {
 
 
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
+                  {puedeAprobar(selectedRow) &&  selectedRow.estado !== "RECHAZADO"  && (
 
                     <div className="flex items-center gap-2">
                       <button
