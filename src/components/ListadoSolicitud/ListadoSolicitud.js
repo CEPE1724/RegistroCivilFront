@@ -389,6 +389,7 @@ export function ListadoSolicitud() {
     { label: "ANULADO", value: 3 },
     { label: "RECHAZADO", value: 4 },
     { label: "NO APLICA", value: 5 },
+    { label: "FACTURADO", value: 6 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -639,10 +640,10 @@ export function ListadoSolicitud() {
 
   const handleApproveEstado = (data) => {
     patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-	patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
     fetchInsertarDatos(6, data.id, 1);
     setRecargar(true);
-	setShowModalRechazo(false)
+    setShowModalRechazo(false)
   };
 
   const handleApproveResultado = (data) => {
@@ -1550,7 +1551,9 @@ export function ListadoSolicitud() {
                         ? "RECHAZADO"
                         : item.Estado === 5
                           ? "NO APLICA"
-                          : "Desconocido",
+                          : item.Estado === 6
+                            ? "FACTURADO"
+                            : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1844,10 +1847,10 @@ export function ListadoSolicitud() {
   }, [itemsPerPage, currentPage]);
 
   const handleRechazar = async () => {
-	patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
-	patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-    fetchInsertarDatos(6, selectedRow?.id, 4); 
-	handleCloseDialog()
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+    fetchInsertarDatos(6, selectedRow?.id, 4);
+    handleCloseDialog()
   }
 
   return (
@@ -2307,28 +2310,61 @@ export function ListadoSolicitud() {
                               px: 1.5,
                               py: 0.5,
                               fontSize: "0.75rem",
-                              fontWeight: 500,
+                              fontWeight: 600,
                               borderRadius: "9999px",
-                              backgroundColor:
-                                data.estado === "APROBADO"
-                                  ? "#dcfce7"
-                                  : data.estado === "PRE-APROBADO"
-                                    ? "#dbeafe"
-                                    : data.estado === "ANULADO"
-                                      ? "#f3f4f6"
-                                      : "#fef9c3",
-                              color:
-                                data.estado === "APROBADO"
-                                  ? "#166534"
-                                  : data.estado === "PRE-APROBADO"
-                                    ? "#1e40af"
-                                    : data.estado === "ANULADO"
-                                      ? "#374151"
-                                      : "#854d0e",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                              backgroundColor: (() => {
+                                switch (data.estado) {
+                                  case "APROBADO":
+                                    return "#dcfce7"; // verde claro
+                                  case "PRE-APROBADO":
+                                    return "#dbeafe"; // azul claro
+                                  case "ANULADO":
+                                    return "#f3f4f6"; // gris claro
+                                  case "FACTURADO":
+                                    return "#166534"; // verde oscuro
+                                  case "RECHAZADO":
+                                    return "#fee2e2"; // rojo claro
+                                  case "CORRECCIÓN":
+                                    return "#fef9c3"; // amarillo claro
+                                  case "PENDIENTE":
+                                    return "#fef9c3";
+                                  case "DATOS CLIENTE":
+                                  
+                                    return "#e0f2fe"; // azul muy claro
+                                  default:
+                                    return "#f3f4f6"; // gris por defecto
+                                }
+                              })(),
+                              color: (() => {
+                                switch (data.estado) {
+                                  case "APROBADO":
+                                    return "#166534"; // verde fuerte
+                                  case "PRE-APROBADO":
+                                    return "#1e40af"; // azul fuerte
+                                  case "ANULADO":
+                                    return "#374151"; // gris oscuro
+                                  case "FACTURADO":
+                                    return "#ffffff"; // blanco
+                                  case "RECHAZADO":
+                                    return "#b91c1c"; // rojo fuerte
+                                  case "CORRECCIÓN":
+                                    return "#854d0e"; // marrón oscuro
+                                  case "PENDIENTE":
+                                    return "#854d0e";
+                                  case "DATOS CLIENTE":
+                                  
+                                    return "#1e3a8a"; // azul medio
+                                  default:
+                                    return "#4b5563"; // gris medio
+                                }
+                              })(),
                             }}
                           >
                             {data.estado}
                           </Box>
+
                         )}
 
                         <div style={{ height: 12 }} />
@@ -2388,18 +2424,20 @@ export function ListadoSolicitud() {
                               }}
                             />
 
+
                             {/* Overlay solo si tiene permiso */}
                             {/* !permisoAprobarResultado(data) && (
+
                               <Box
                                 className="approveOverlay"
                                 onClick={() => {
-								  if (data.Estado == 5) {
-									setCurrentAction("resultado");
-									setCurrentData(data);
-									setOpenDialog2(true);
-								  } else {
-									  enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", {variant: "warning", });
-								  }
+                                  if (data.Estado == 5) {
+                                    setCurrentAction("resultado");
+                                    setCurrentData(data);
+                                    setOpenDialog2(true);
+                                  } else {
+                                    enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", { variant: "warning", });
+                                  }
                                 }}
                                 sx={{
                                   position: "absolute",
@@ -2422,7 +2460,9 @@ export function ListadoSolicitud() {
                               >
                                 <CheckCircleIcon sx={{ fontSize: 20 }} />
                               </Box>
+
                             ) */}
+
                           </Box>
                         ) : data.resultado === 1 ? (
                           <CheckCircleIcon sx={{ color: "#28A745" }} />
@@ -2669,9 +2709,8 @@ export function ListadoSolicitud() {
                               size="small"
                               sx={{
                                 opacity:
-                                  estaDeshabilitado(data) ||
-                                    verificacionSolicitud(data)
-                                    ? 0.4
+                                  estaDeshabilitado(data)
+                                    ? 0
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#f1f5f9",
                                 "&:hover": {
@@ -2728,8 +2767,7 @@ export function ListadoSolicitud() {
                               }
                               disabled={
                                 verificacionSolicitud(data) ||
-                                data.Laboral === false ||
-                                !docAprobados[data.id]
+                                data.Laboral === false
 
                               }
                               size="small"
@@ -2737,9 +2775,9 @@ export function ListadoSolicitud() {
                                 opacity:
                                   verificacionSolicitud(data) ||
                                     data.Laboral === false
-                                    ? 0.2
+                                    ? 0
                                     : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                bgcolor: isError ? "#fee2e2" : "#fff1f5f9",
                                 "&:hover": {
                                   bgcolor: isError ? "#fca5a5" : "#e2e8f0",
                                   transform: "scale(1.1)",
@@ -3805,7 +3843,7 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
                     <div className="flex flex-col gap-4 mt-4">
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
                       <input
@@ -3989,7 +4027,10 @@ export function ListadoSolicitud() {
                     )}
                   </div>
 
-                  {puedeAprobar(selectedRow)  && selectedRow.estado !== "RECHAZADO" && (
+
+
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleAbrirVerificacionManual}
@@ -4015,12 +4056,12 @@ export function ListadoSolicitud() {
           >
             Rechazar Solicitud
           </Button>)}
-		  <ModalConfirmacionRechazo
-		  isOpen={showModalRechazo}
-		  onClose={() => setShowModalRechazo(false)}
-		  onConfirm={handleRechazar}
-		  solicitudData={selectedRow}
-		  />
+          <ModalConfirmacionRechazo
+            isOpen={showModalRechazo}
+            onClose={() => setShowModalRechazo(false)}
+            onConfirm={handleRechazar}
+            solicitudData={selectedRow}
+          />
           <Button
             onClick={handleCloseDialog}
             color="primary"
