@@ -390,6 +390,7 @@ export function ListadoSolicitud() {
     { label: "RECHAZADO", value: 4 },
     { label: "NO APLICA", value: 5 },
     { label: "FACTURADO", value: 6 },
+    { label: "RECHAZADO-LN", value: 7 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -1556,6 +1557,8 @@ export function ListadoSolicitud() {
                           ? "NO APLICA"
                           : item.Estado === 6
                             ? "FACTURADO"
+                            : item.Estado === 7
+                              ? "RECHAZADO-LN"
                             : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
