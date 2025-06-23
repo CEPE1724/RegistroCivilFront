@@ -12,7 +12,6 @@ export function RegistroCivil({
   permisos,
   estadoSolicitud,
 }) {
-	console.log("estadoSolicitud", estadoSolicitud)
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   // Calcular porcentaje de similitud basado en el threshold

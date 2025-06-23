@@ -335,7 +335,7 @@ const Referencias = forwardRef((props, ref) => {
         idEstadoOrigenTelefonica: 4,
         idCre_SolicitudWeb: data.idCre_SolicitudWeb,
         idWeb_SolicitudGrande: data.idWeb_SolicitudGrande,
-        Observacion: data.PrimerNombre + " " + data.ApellidoPaterno,
+        Observacion: formData.primerNombre + " " + formData.apellidoPaterno,
         },{
           headers: {
             "Content-Type": "application/json",

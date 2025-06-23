@@ -495,6 +495,9 @@ export function ListadoSolicitud() {
   const handleConfirm = async () => {
     if (currentAction === "estado") {
       handleApproveEstado(currentData);
+	  if (laboralChecked) await patchLaboral(currentData.id);
+      if (domicilioChecked) await patchDomicilio(currentData.id);
+      if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
     } else if (currentAction === "resultado") {
       handleApproveResultado(currentData);
       if (laboralChecked) await patchLaboral(currentData.id);
@@ -2167,7 +2170,7 @@ export function ListadoSolicitud() {
 
               <TableBody sx={{ marginTop: 0 }}>
                 {datos.map((data, index) => {
-                  const isError = data.resultado === 0;
+                  const isError = (data.Estado === 4 || data.Estado === 5 );
                   const bgColor = isError
                     ? "#fee2e2"
                     : index % 2 === 0
@@ -2229,7 +2232,7 @@ export function ListadoSolicitud() {
                       <TableCell align="center">{data.consulta}</TableCell>
 
                       <TableCell align="center">
-                        {data.estado === "RECHAZADO" ? (
+                        {(data.estado === "RECHAZADO" || data.estado === "NO APLICA") ? (
                           <Box
                             sx={{
                               position: "relative",
@@ -4376,7 +4379,7 @@ export function ListadoSolicitud() {
             {currentAction === "estado" ? "estado" : "resultado"}?
           </Typography>
 
-          {currentAction === "resultado" && (
+          {currentAction === "estado" && (
             <div style={{ marginTop: '1rem' }}>
               <FormControlLabel
                 control={
@@ -4438,7 +4441,7 @@ export function ListadoSolicitud() {
             onClick={handleConfirm}
             color="primary"
             disabled={
-              currentAction === "resultado" && !laboralChecked && !domicilioChecked
+              currentAction === "estado" && !laboralChecked && !domicilioChecked
             }
           >
             Confirmar
