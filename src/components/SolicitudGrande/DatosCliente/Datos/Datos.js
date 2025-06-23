@@ -206,7 +206,7 @@ const Datos = forwardRef((props, ref) => {
             errors.fechaNacimiento = 'Formato de fecha inválido';
         }
 
-        if (formData.codigoDactilar && !/^[A-Z]{1}[0-9]{4}[A-Z]{1}[0-9]{4}$/.test(formData.codigoDactilar)) {
+        if (formData.codigoDactilar && !/^[A-Z]{1}[A-Z0-9]{1}[0-9]{3}[A-Z]{1}[0-9]{4}$/.test(formData.codigoDactilar)) {
             errors.codigoDactilar = 'Formato de codigo dactilar invalido';
         }
 
