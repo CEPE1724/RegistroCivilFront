@@ -76,6 +76,11 @@ import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, FormControlLabel } from '@mui/material';
+import LocationOffIcon from '@mui/icons-material/LocationOff';
+import NotListedLocationIcon from '@mui/icons-material/NotListedLocation';
+import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
+import BlockIcon from '@mui/icons-material/Block';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -496,7 +501,7 @@ export function ListadoSolicitud() {
   const handleConfirm = async () => {
     if (currentAction === "estado") {
       handleApproveEstado(currentData);
-	  if (laboralChecked) await patchLaboral(currentData.id);
+      if (laboralChecked) await patchLaboral(currentData.id);
       if (domicilioChecked) await patchDomicilio(currentData.id);
       if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
     } else if (currentAction === "resultado") {
@@ -1008,9 +1013,9 @@ export function ListadoSolicitud() {
       if (!idsTerrenas || idsTerrenas.length === 0) {
         // No hay datos, abrir PreDocumentos (nuevo componente)
         setPreDocumentosData({ data, tipo });
-		if (userData?.idGrupo !== 22 && userData?.idGrupo !== 23){
-			setOpenPreDocumentos(true);
-		}
+        if (userData?.idGrupo !== 22 && userData?.idGrupo !== 23) {
+          setOpenPreDocumentos(true);
+        }
         return;
       }
 
@@ -1171,29 +1176,75 @@ export function ListadoSolicitud() {
     }
   };
 
+  /*  const tipoVerificacionMap = {
+    1: "Dirección incorrecta",
+    2: "Aprobado",
+    3: "Malas referencias",
+    4: "No vive ahí",
+    5: "Datos falsos",
+    6: "Zona Vetada",
+    7: "No sustenta ingresos",
+  };*/
+
   const getIconDomicilio = (estadoId) => {
-    switch (estadoId) {
-      case 0:
-        return <HomeIcon sx={{ color: "gray" }} />;
-      case 1:
-        return <PendingIcon sx={{ color: "#FFC107" }} />;
-      case 2:
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      default:
-        return <HomeIcon sx={{ color: "gray" }} />;
-    }
-  };
+  switch (estadoId) {
+    case 0: // Sin verificar
+      return <HomeIcon sx={{ color: "gray" }} />;
+
+    case 1: // Dirección incorrecta
+      return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+
+    case 2: // Aprobado
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+
+    case 3: // Malas referencias
+      return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
+
+    case 4: // No vive ahí
+      return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
+
+    case 5: // Datos falsos
+      return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
+
+    case 6: // Zona vetada
+      return <BlockIcon sx={{ color: "#6c757d" }} />;
+
+    case 7: // No sustenta ingresos
+      return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
+
+    default:
+      return <HomeIcon sx={{ color: "gray" }} />;
+  }
+};
 
   const getIconLaboral = (estadoId) => {
     switch (estadoId) {
-      case 0:
-        return <StoreIcon sx={{ color: "gray" }} />;
-      case 1:
-        return <PendingIcon sx={{ color: "#FFC107" }} />;
-      case 2:
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      default:
-        return <StoreIcon sx={{ color: "gray" }} />;
+       case 0: // Sin verificar
+      return <HomeIcon sx={{ color: "gray" }} />;
+
+    case 1: // Dirección incorrecta
+      return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+
+    case 2: // Aprobado
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+
+    case 3: // Malas referencias
+      return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
+
+    case 4: // No vive ahí
+      return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
+
+    case 5: // Datos falsos
+      return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
+
+    case 6: // Zona vetada
+      return <BlockIcon sx={{ color: "#6c757d" }} />;
+
+    case 7: // No sustenta ingresos
+      return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
+
+    default:
+      return <HomeIcon sx={{ color: "gray" }} />;
     }
   };
 
@@ -1559,7 +1610,7 @@ export function ListadoSolicitud() {
                             ? "FACTURADO"
                             : item.Estado === 7
                               ? "RECHAZADO-LN"
-                            : "Desconocido",
+                              : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1815,12 +1866,12 @@ export function ListadoSolicitud() {
     sessionStorage.removeItem('filtroCedula')
     sessionStorage.removeItem('filtroNombre')
     sessionStorage.removeItem('filtroNumSolicitud')
-	if (userData?.idGrupo !== 23) {
-		setSelectedVendedor("todos");
-		setSelectedBodega("todos");
-		sessionStorage.removeItem('filtroVendedor');
-		sessionStorage.removeItem('filtroBodega');
-	}
+    if (userData?.idGrupo !== 23) {
+      setSelectedVendedor("todos");
+      setSelectedBodega("todos");
+      sessionStorage.removeItem('filtroVendedor');
+      sessionStorage.removeItem('filtroBodega');
+    }
   };
 
 
@@ -2173,7 +2224,7 @@ export function ListadoSolicitud() {
 
               <TableBody sx={{ marginTop: 0 }}>
                 {datos.map((data, index) => {
-                  const isError = (data.Estado === 4 || data.Estado === 5 );
+                  const isError = (data.Estado === 4 || data.Estado === 5);
                   const bgColor = isError
                     ? "#fee2e2"
                     : index % 2 === 0
@@ -2337,7 +2388,7 @@ export function ListadoSolicitud() {
                                   case "PENDIENTE":
                                     return "#fef9c3";
                                   case "DATOS CLIENTE":
-                                  
+
                                     return "#e0f2fe"; // azul muy claro
                                   default:
                                     return "#f3f4f6"; // gris por defecto
@@ -2360,7 +2411,7 @@ export function ListadoSolicitud() {
                                   case "PENDIENTE":
                                     return "#854d0e";
                                   case "DATOS CLIENTE":
-                                  
+
                                     return "#1e3a8a"; // azul medio
                                   default:
                                     return "#4b5563"; // gris medio
@@ -4035,7 +4086,7 @@ export function ListadoSolicitud() {
 
 
 
-                  {puedeAprobar(selectedRow) &&  selectedRow.estado !== "RECHAZADO"  && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "RECHAZADO" && (
 
                     <div className="flex items-center gap-2">
                       <button
@@ -4355,7 +4406,7 @@ export function ListadoSolicitud() {
           cedula={cedula}
           dactilar={dactilar}
           imagenSubida={selectedRow?.imagen}
-		  estadoSolicitud={selectedRow?.Estado}
+          estadoSolicitud={selectedRow?.Estado}
           onAceptar={() => {
             // Acción al aceptar
             patchSolicitud(selectedRow?.id, 2);

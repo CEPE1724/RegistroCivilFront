@@ -83,9 +83,15 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
     2: "No Coincide",
   };
 
-  const tipoVerificacionMap = {
-    1: "Campo Malo",
+  
+    const tipoVerificacionMap = {
+    1: "Dirección incorrecta",
     2: "Aprobado",
+    3: "Malas referencias",
+    4: "No vive ahí",
+    5: "Datos falsos",
+    6: "Zona Vetada",
+    7: "No sustenta ingresos",
   };
   // Usamos useEffect para realizar la llamada a la API solo cuando el modal está abierto
   useEffect(() => {

@@ -18,7 +18,7 @@ import {
   Button,
 } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
 import { get, set } from "react-hook-form";
-import {fetchConsultaYNotifica, fechaHoraEcuador} from "../../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 
 export function Documental({
   id,
@@ -86,15 +86,15 @@ export function Documental({
   const handleConfirm = async () => {
     setIsModalOpen(false); // Cierra el modal
     patchsolicitudWeb();
-	fetchConsultaYNotifica(id, userUsuario, {
-		title: "¡Documentos listos para revisar! 🔍",
-		   body: `¡Hola! Ya puedes verificar todos documentos de la solicitud ${NumeroSolicitud} de ${nombre}.¡Gracias! 😀
+    fetchConsultaYNotifica(id, userUsuario, {
+      title: "¡Documentos listos para revisar! 🔍",
+      body: `¡Hola! Ya puedes verificar todos documentos de la solicitud ${NumeroSolicitud} de ${nombre}.¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
-		   type: "success",
-		   empresa: "CREDI",
-		   url: "",
-		   tipo: "analista",
-		  });
+      type: "success",
+      empresa: "CREDI",
+      url: "",
+      tipo: "analista",
+    });
 
     if (showOnlyCorrections) {
       try {
@@ -180,14 +180,25 @@ export function Documental({
             previews[sectionName].push(fileUrl);
 
             if (file.idEstadoDocumento >= 4) {
+            //  alert(`El campo ${sectionName} está en corrección.`);
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
             } else {
-              completed.add(sectionName); // Se considera campo completado si no está en corrección
+              //alert(`El campo ${sectionName} no está en corrección.`);
+              // si sectionname es respaldo # 1 no entre
+              if (sectionName !== "Respaldo 1" &&
+                sectionName !== "Respaldo 2" &&
+                sectionName !== "Respaldo 3" &&
+                sectionName !== "Respaldo 4" &&
+                sectionName !== "Respaldo 5" &&
+                sectionName !== "Respaldo 6" &&
+                sectionName !== "Respaldo 7" &&
+                sectionName !== "Respaldo 8" &&
+                sectionName !== "Respaldo 9" &&
+                sectionName !== "Respaldo 10")
+                completed.add(sectionName); // Agrupa en "Campos Completados" si estado < 4
             }
-            /*previews[sectionName].push(fileUrl);
-            completed.add(sectionName);*/
           });
-
+          console.log("Archivos subidos:", completed);
           setFiles(uploadedFiles);
           setFilePreviews(previews);
           setCompletedFields2([...completed]);
@@ -239,6 +250,17 @@ export function Documental({
       12: "Foto del Cliente",  //Servicio Basico
       13: "Croquis",   //Foto del Cliente
       14: "Servicio Basico",   //Croquis
+      15: "Foto del Cliente Firmando",
+      16: "Respaldo 1", // Respaldo 1
+      17: "Respaldo 2", // Respaldo 2
+      18: "Respaldo 3", // Respaldo 3
+      19: "Respaldo 4", // Respaldo 4
+      20: "Respaldo 5", // Respaldo 5
+      21: "Respaldo 6", // Respaldo 6
+      22: "Respaldo 7", // Respaldo 7
+      23: "Respaldo 8", // Respaldo 8
+      24: "Respaldo 9", // Respaldo 9
+      25: "Respaldo 10", // Respaldo 10
     };
     return documentoIds[id] || null;
   };
@@ -297,7 +319,7 @@ export function Documental({
       return (completedCorrections / totalCorrections) * 100;
     } else {
       // Modo Normal: Progreso basado en los 11 campos totales
-      const totalFields = 13;
+      const totalFields = 14;
       const completedFieldsCount = completedFields2.length;
 
       return (completedFieldsCount / totalFields) * 100;
@@ -503,6 +525,17 @@ export function Documental({
       12: "Foto del Cliente",   //Servicio Basico
       13: "Croquis",   //Foto del Cliente
       14: "Servicio Basico",   //Croquis
+      15: "Foto del Cliente Firmando",
+      16: "Respaldo 1", // Respaldo 1
+      17: "Respaldo 2", // Respaldo 2
+      18: "Respaldo 3", // Respaldo 3
+      19: "Respaldo 4", // Respaldo 4
+      20: "Respaldo 5", // Respaldo 5
+      21: "Respaldo 6", // Respaldo 6
+      22: "Respaldo 7", // Respaldo 7
+      23: "Respaldo 8", // Respaldo 8
+      24: "Respaldo 9", // Respaldo 9
+      25: "Respaldo 10", // Respaldo 10
     };
 
     // Buscamos la clave (número) correspondiente al nombre
@@ -638,6 +671,17 @@ export function Documental({
         "Foto del Cliente": 12,
         Croquis: 13,
         "Servicio Basico": 14,
+        "Foto del Cliente Firmando": 15,
+        "Respaldo 1": 16,
+        "Respaldo 2": 17,
+        "Respaldo 3": 18,
+        "Respaldo 4": 19,
+        "Respaldo 5": 20,
+        "Respaldo 6": 21,
+        "Respaldo 7": 22,
+        "Respaldo 8": 23,
+        "Respaldo 9": 24,
+        "Respaldo 10": 25,
       };
 
       const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
@@ -691,7 +735,7 @@ export function Documental({
         } else {
           enqueueSnackbar(
             "Error al guardar el documento en la BD. " +
-              apiResponse.data?.message || "",
+            apiResponse.data?.message || "",
             { variant: "error" }
           );
         }
@@ -739,6 +783,17 @@ export function Documental({
     "Servicio Basico",
     "Foto del Cliente",
     "Croquis",
+    "Foto del Cliente Firmando",
+    "Respaldo 1",
+    "Respaldo 2",
+    "Respaldo 3",
+    "Respaldo 4",
+    "Respaldo 5",
+    "Respaldo 6",
+    "Respaldo 7",
+    "Respaldo 8",
+    "Respaldo 9",
+    "Respaldo 10",
   ];
 
   const completedFields = menuItems.filter(
@@ -750,34 +805,34 @@ export function Documental({
   );
 
   const laboralYDomicilioAprobados = async (id) => {
-	  try {
-		const response = await axios.get(APIURL.getVerificacionTresDocumentos(id));
-		return response.data.allThreeDocsApproved; // true o false
-	  } catch (error) {
-		console.error("Error fetching data:", error);
-		return false;
-	  }
-	};
+    try {
+      const response = await axios.get(APIURL.getVerificacionTresDocumentos(id));
+      return response.data.allThreeDocsApproved; // true o false
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return false;
+    }
+  };
 
-	useEffect(() => {
+  useEffect(() => {
     async function checkYEnviar() {
-		const claveLocal = `notificacion_enviada_${id}`;
-		const yaEnviada = localStorage.getItem(claveLocal) === "true";
+      const claveLocal = `notificacion_enviada_${id}`;
+      const yaEnviada = localStorage.getItem(claveLocal) === "true";
 
-		if (yaEnviada || notificacionEnviada) return; 
+      if (yaEnviada || notificacionEnviada) return;
 
       const aprobados = await laboralYDomicilioAprobados(id);
       if (aprobados) {
         await fetchConsultaYNotifica(id, userUsuario, {
-		title: "¡Documentos para revisar! 🔍",
-		   body: `¡Hola! Ya puedes verificar los primeros 3 documentos de la solicitud ${NumeroSolicitud} (croquis, foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀
+          title: "¡Documentos para revisar! 🔍",
+          body: `¡Hola! Ya puedes verificar los primeros 3 documentos de la solicitud ${NumeroSolicitud} (croquis, foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
-		   type: "success",
-		   empresa: "POINT",
-		   url: "",
-		   tipo: "analista",
-		  });
-		  localStorage.setItem(claveLocal, "true"); 
+          type: "success",
+          empresa: "POINT",
+          url: "",
+          tipo: "analista",
+        });
+        localStorage.setItem(claveLocal, "true");
       }
     }
 
@@ -788,9 +843,8 @@ export function Documental({
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div
-        className={`w-64 bg-white text-gray-800 shadow-lg ${
-          isMenuOpen ? "block" : "hidden"
-        } md:block transition-all duration-300 ease-in-out`}
+        className={`w-64 bg-white text-gray-800 shadow-lg ${isMenuOpen ? "block" : "hidden"
+          } md:block transition-all duration-300 ease-in-out`}
       >
         <div className="p-4 space-y-6">
           {/* Progreso de Archivos */}
@@ -847,24 +901,22 @@ export function Documental({
                           setActiveTab(item);
                         }}
                         className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                ${
-                  isSelected && completedFields2.includes(item)
-				 	? "bg-green-600 text-white shadow-lg"
-        			: isSelected
-        			? "bg-red-600 text-white shadow-lg"
-        			: completedFields2.includes(item)
-        			? "text-green-600 hover:bg-green-100 hover:text-green-800"
-        			: "text-red-600 hover:bg-red-100 hover:text-red-800"
-                }`}
+                ${isSelected && completedFields2.includes(item)
+                            ? "bg-green-600 text-white shadow-lg"
+                            : isSelected
+                              ? "bg-red-600 text-white shadow-lg"
+                              : completedFields2.includes(item)
+                                ? "text-green-600 hover:bg-green-100 hover:text-green-800"
+                                : "text-red-600 hover:bg-red-100 hover:text-red-800"
+                          }`}
                       >
                         {item}
                         {fileCount > 0 && (
                           <span
-                            className={`text-xs font-bold px-2 py-1 rounded-full ${
-                              isSelected
-                                ? "bg-white text-red-600"
-                                : "bg-red-500 text-white"
-                            }`}
+                            className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected
+                              ? "bg-white text-red-600"
+                              : "bg-red-500 text-white"
+                              }`}
                           >
                             {`+${fileCount}`}
                           </span>
@@ -901,20 +953,18 @@ export function Documental({
                             setActiveTab(item);
                           }}
                           className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                  ${
-                    isSelected
-                      ? "bg-blue-600 text-white shadow-lg"
-                      : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                  }`}
+                  ${isSelected
+                              ? "bg-blue-600 text-white shadow-lg"
+                              : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                            }`}
                         >
                           {item}
                           {fileCount > 0 && (
                             <span
-                              className={`text-xs font-bold px-2 py-1 rounded-full ${
-                                isSelected
-                                  ? "bg-white text-blue-600"
-                                  : "bg-green-500 text-white"
-                              }`}
+                              className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected
+                                ? "bg-white text-blue-600"
+                                : "bg-green-500 text-white"
+                                }`}
                             >
                               {`+${fileCount}`}
                             </span>
@@ -946,21 +996,19 @@ export function Documental({
                               setActiveTab(item);
                             }}
                             className={`flex justify-between items-center text-sm py-2 px-3 rounded-lg transition-all duration-200
-                    ${
-                      isSelected
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
-                    }`}
+                    ${isSelected
+                                ? "bg-blue-600 text-white shadow-lg"
+                                : "text-gray-600 hover:bg-blue-100 hover:text-blue-800"
+                              }`}
                           >
                             {item}
                             <div className="flex items-center">
                               {fileCount > 0 && (
                                 <span
-                                  className={`text-xs font-bold px-2 py-1 rounded-full ${
-                                    isSelected
-                                      ? "bg-white text-blue-600"
-                                      : "bg-green-500 text-white"
-                                  }`}
+                                  className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected
+                                    ? "bg-white text-blue-600"
+                                    : "bg-green-500 text-white"
+                                    }`}
                                 >
                                   {`+${fileCount}`}
                                 </span>
@@ -1027,7 +1075,8 @@ export function Documental({
                     ["Nombre", clientInfo.nombre],
                     ["Cédula", clientInfo.cedula],
                     ["Fecha", new Date(clientInfo.fecha).toLocaleString('es-EC', {
-  					day: 'numeric',month: 'numeric',year: 'numeric',hour: 'numeric',minute: '2-digit',hour12: true,})],
+                      day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+                    })],
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],
@@ -1038,13 +1087,13 @@ export function Documental({
                     </div>
                   ))}
                 </div>
-				<div className="flex justify-end items-center mt-8 w-full">
-					<button 
-					className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300" 
-					onClick={() => navigate("/ListadoSolicitud", { replace: true })}>
-						Regresar
-					</button>				
-				</div>
+                <div className="flex justify-end items-center mt-8 w-full">
+                  <button
+                    className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+                    onClick={() => navigate("/ListadoSolicitud", { replace: true })}>
+                    Regresar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1074,7 +1123,7 @@ export function Documental({
                     <div
                       key={index}
                       className="bg-gray-50 p-4 rounded-md shadow-md border border-gray-200 hover:border-blue-500 transition duration-300 flex flex-col"
-					  style={{ height: '70vh', width: '70vw' }}
+                      style={{ height: '70vh', width: '70vw' }}
                     >
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-700">
@@ -1205,7 +1254,7 @@ export function Documental({
                     <input
                       type="file"
                       multiple
-                       accept=".pdf,.png,.jpg,.jpeg"
+                      accept=".pdf,.png,.jpg,.jpeg"
                       onChange={(e) => handleFileChange(e, activeTab)}
                       className="hidden"
                     />
