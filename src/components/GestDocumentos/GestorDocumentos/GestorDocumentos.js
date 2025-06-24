@@ -9,6 +9,7 @@ import axios from "../../../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 import ModalConfirmacionRechazo from '../../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
+import { GoogleMapModal } from "../../ListadoSolicitud/DomicilioModal"
 
 export function GestorDocumentos({
     id,
@@ -47,6 +48,7 @@ export function GestorDocumentos({
     const [showGlobalConfirmModal, setShowGlobalConfirmModal] = useState(false);
     const [globalConfirmAction, setGlobalConfirmAction] = useState(null);
     const globalConfirmModalRef = useRef(null);
+  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
 
     const [clientInfo, setClientInfo] = useState({
         id: "",
@@ -64,25 +66,49 @@ export function GestorDocumentos({
     // mostrar botones
     useEffect(() => {
         if (allDocuments.length > 0) {
-			const filteredDocs = allDocuments.filter(doc => doc.type >= 1 && doc.type <= 15);
-			if (filteredDocs.length > 0){
-				const allReviewed = filteredDocs.every(doc => doc.estado === 3 || doc.estado === 4);
-				if (allReviewed) {
-                // si todos los documentos estan aprobados
-                const allApproved = filteredDocs.every(doc => doc.estado === 3);
-                setShowApproveAllButton(allApproved);
-                // si algún documento está en corrección
-                const hasRejectedDocs = filteredDocs.some(doc => doc.estado === 4);
-                setShowRevisionButton(hasRejectedDocs);
-            } else {
-                setShowApproveAllButton(false);
-                setShowRevisionButton(false);
+            const filteredDocs = allDocuments.filter(doc => doc.type >= 1 && doc.type <= 15);
+            if (filteredDocs.length > 0) {
+                const allReviewed = filteredDocs.every(doc => doc.estado === 3 || doc.estado === 4);
+                if (allReviewed) {
+                    // si todos los documentos estan aprobados
+                    const allApproved = filteredDocs.every(doc => doc.estado === 3);
+                    setShowApproveAllButton(allApproved);
+                    // si algún documento está en corrección
+                    const hasRejectedDocs = filteredDocs.some(doc => doc.estado === 4);
+                    setShowRevisionButton(hasRejectedDocs);
+                } else {
+                    setShowApproveAllButton(false);
+                    setShowRevisionButton(false);
+                }
+
             }
-				
-			}
         }
     }, [allDocuments]);
 
+
+    ///funcion para el croquis 
+
+    const fetchCroquisCoords = async (tipo) => {
+        try {
+            // tipo: 1 = domicilio, 2 = laboral
+            const response = await axios.get(APIURL.getCoordenadasId(clientInfo.id, tipo));
+            if (response.data && response.data[0]) {
+                setMapLat(response.data[0].latitud);
+                setMapLng(response.data[0].longitud);
+                setMapTitle(tipo === 1 ? "Croquis Domicilio" : "Croquis Laboral");
+                setShowMapModal(true);
+            } else {
+                enqueueSnackbar("No hay coordenadas registradas para este croquis.", { variant: "warning" });
+            }
+        } catch (error) {
+            enqueueSnackbar("Error al obtener coordenadas", { variant: "error" });
+        }
+    };
+
+    const [showMapModal, setShowMapModal] = useState(false);
+    const [mapLat, setMapLat] = useState(null);
+    const [mapLng, setMapLng] = useState(null);
+    const [mapTitle, setMapTitle] = useState(""); // Para saber cuál croquis se está mostrando
     // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
         try {
@@ -314,6 +340,47 @@ export function GestorDocumentos({
             console.error("Error al actualizar la solicitud:", error);
         }
     };
+    ///para el rechazo 
+    const updateEstadoVerificacionrechazo = async (idEstadoVerificacionDocumental, observacionModal) => {
+
+        try {
+            const url = APIURL.update_soliciutd_telefonica(clientInfo.id, idEstadoVerificacionDocumental);
+
+            const response = await axios.patch(url);
+            console.log("porque no esta imrpiendo 0")
+            if (response.status === 200) {
+                // Mensaje de éxito con el estado actualizado
+                const url_estado = APIURL.post_createtiemposolicitudeswebDto();
+                await axios.post(url_estado, {
+
+                    idCre_SolicitudWeb: clientInfo.id,
+                    Tipo: 3,
+                    idEstadoVerificacionDocumental: idEstadoVerificacionDocumental,
+                    Usuario: userData.Nombre,
+                    Telefono: observacionModal
+                });
+
+                const estadoTexto = {
+                    3: "Enviado para corrección",
+                    4: "Aprobados",
+                    5: "Rechazados"
+                }[idEstadoVerificacionDocumental] || "Actualizado";
+
+                enqueueSnackbar(`Documentos ${estadoTexto}`, {
+                    variant: "success",
+                });
+            } else {
+                enqueueSnackbar("Error al actualizar la solicitud.", {
+                    variant: "error",
+                });
+            }
+        } catch (error) {
+            enqueueSnackbar("Error al actualizar la solicitud.", {
+                variant: "error",
+            });
+            console.error("Error al actualizar la solicitud:", error);
+        }
+    };
 
     //api enviar datos modal    
     const enviarObservacion = async (datos) => {
@@ -418,19 +485,19 @@ export function GestorDocumentos({
             10: "Consentimiento",
             11: "Autorización",
             12: "Foto del Cliente",  //Servicio Basico
-            13: "Croquis",  //Foto del Cliente
+            // 13: "Croquis",  //Foto del Cliente
             14: "Servicio Basico",  //Croquis
-			15: "Foto del Cliente firmando",
-			16: "RESPALDO 1",
-			17: "RESPALDO 2",
-			18: "RESPALDO 3",
-			19: "RESPALDO 4",
-			20: "RESPALDO 5",
-			21: "RESPALDO 6",
-			22: "RESPALDO 7",
-			23: "RESPALDO 8",
-			24: "RESPALDO 9",
-			25: "RESPALDO 10",
+            15: "Foto del Cliente firmando",
+            16: "RESPALDO 1",
+            17: "RESPALDO 2",
+            18: "RESPALDO 3",
+            19: "RESPALDO 4",
+            20: "RESPALDO 5",
+            21: "RESPALDO 6",
+            22: "RESPALDO 7",
+            23: "RESPALDO 8",
+            24: "RESPALDO 9",
+            25: "RESPALDO 10",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };
@@ -548,11 +615,31 @@ export function GestorDocumentos({
     const renderActionButtons = (document) => {
         //habilitar botones cuando estadoVerifD = 2
         if (clientInfo.estadoVerifD === 2) {
-            if(document.idTipoDocumento >= 1 && document.idTipoDocumento <= 15){
-				switch (document.estado) {
-                case 2: // Pendiente - mostrar ambos botones
-                    return (
-                        <>
+            if (document.idTipoDocumento >= 1 && document.idTipoDocumento <= 15) {
+                switch (document.estado) {
+                    case 2: // Pendiente - mostrar ambos botones
+                        return (
+                            <>
+                                <button
+                                    type="button"
+                                    name="rechazar"
+                                    className="text-red-500 hover:text-red-700"
+                                    onClick={() => handleRechazar(document)}
+                                >
+                                    ❌
+                                </button>
+                                <button
+                                    type="button"
+                                    name="aprobar"
+                                    className="text-green-500 hover:text-green-700"
+                                    onClick={() => handleAprobar(document)}
+                                >
+                                    ✅
+                                </button>
+                            </>
+                        );
+                    case 3: // Aprobado - mostrar solo rechazar
+                        return (
                             <button
                                 type="button"
                                 name="rechazar"
@@ -561,6 +648,9 @@ export function GestorDocumentos({
                             >
                                 ❌
                             </button>
+                        );
+                    case 4: // Rechazado - mostrar solo aprobar
+                        return (
                             <button
                                 type="button"
                                 name="aprobar"
@@ -569,37 +659,14 @@ export function GestorDocumentos({
                             >
                                 ✅
                             </button>
-                        </>
-                    );
-                case 3: // Aprobado - mostrar solo rechazar
-                    return (
-                        <button
-                            type="button"
-                            name="rechazar"
-                            className="text-red-500 hover:text-red-700"
-                            onClick={() => handleRechazar(document)}
-                        >
-                            ❌
-                        </button>
-                    );
-                case 4: // Rechazado - mostrar solo aprobar
-                    return (
-                        <button
-                            type="button"
-                            name="aprobar"
-                            className="text-green-500 hover:text-green-700"
-                            onClick={() => handleAprobar(document)}
-                        >
-                            ✅
-                        </button>
-                    );
-                default:
-                    return null;
+                        );
+                    default:
+                        return null;
+                }
             }
-		}
         } else {
-			return null;
-		}  
+            return null;
+        }
     };
 
     // detectar clicks fuera del modal global
@@ -716,7 +783,6 @@ export function GestorDocumentos({
                                 <h4
                                     className="text-white font-medium mb-1 cursor-pointer hover:underline"
                                     onClick={() => {
-                                        // Encuentra el primer documento de este tipo en flatFiles
                                         const index = flatFiles.findIndex(file => file.sectionName === typeName);
                                         if (index !== -1) {
                                             setCurrentIndex(index);
@@ -739,6 +805,28 @@ export function GestorDocumentos({
                                 </ul>
                             </div>
                         ))}
+                        {/* Croquis tabs */}
+                        <div className="mt-6">
+                            <h3 className="text-lg font-semibold mb-2">Croquis:</h3>
+                            <button
+                                className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-700 transition mb-2"
+                                onClick={() => {
+                                    fetchCroquisCoords(1); // 1 = domicilio
+                                    setIsMenuOpen(false);
+                                }}
+                            >
+                                Croquis Domicilio
+                            </button>
+                            <button
+                                className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-700 transition"
+                                onClick={() => {
+                                    fetchCroquisCoords(2); // 2 = laboral
+                                    setIsMenuOpen(false);
+                                }}
+                            >
+                                Croquis Laboral
+                            </button>
+                        </div>
                         {allDocuments.length === 0 && (
                             <p className="text-sm text-gray-300">No hay documentos disponibles</p>
                         )}
@@ -882,16 +970,23 @@ export function GestorDocumentos({
                                         </div>
 
                                         {/* Vista previa del documento */}
-                                        <div className="w-full flex-1 flex items-center justify-center">
-                                            <object
-                                                data={flatFiles[currentIndex].url}
-                                                type="application/pdf"
-                                                className="w-full h-full rounded-md"
-                                                aria-label="Vista previa PDF"
-                                            >
-                                                <p>Vista previa no disponible</p>
-                                            </object>
-                                        </div>
+                                        {flatFiles[currentIndex].sectionName === "Croquis" ? (
+                                            // No mostrar nada, el modal ya se abrirá por el menú lateral
+                                            <div className="w-full flex-1 flex items-center justify-center">
+                                                <p className="text-gray-400">Selecciona otro documento o cierra el mapa.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="w-full flex-1 flex items-center justify-center">
+                                                <object
+                                                    data={flatFiles[currentIndex].url}
+                                                    type="application/pdf"
+                                                    className="w-full h-full rounded-md"
+                                                    aria-label="Vista previa PDF"
+                                                >
+                                                    <p>Vista previa no disponible</p>
+                                                </object>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Botón Siguiente */}
@@ -965,16 +1060,30 @@ export function GestorDocumentos({
                     </div>
                 </div>
             )}
+
+
+
+            {showMapModal && mapLat && mapLng && (
+                <GoogleMapModal
+                    lat={mapLat}
+                    lng={mapLng}
+                    title={mapTitle}
+                    apiKey={GOOGLE_MAPS_API_KEY}
+                    onClose={() => setShowMapModal(false)}
+                />
+            )}
             {/* Modal global */}
             {showGlobalConfirmModal && (
                 globalConfirmAction === 'rechTodo' ? (
                     <ModalConfirmacionRechazo
                         isOpen={true}
                         onClose={() => setShowGlobalConfirmModal(false)}
-                        onConfirm={() => {
+                        onConfirm={(observacionModal) => {
                             setShowGlobalConfirmModal(false);
+                            console.log("onConfirm del ModalConfirmacionRechazo:", observacionModal);
                             // Aquí va la lógica de rechazo global:
-                            updateEstadoVerificacion(5);
+                            updateEstadoVerificacionrechazo(5, observacionModal);
+
                             fetchConsultaYNotifica(clientInfo.id, clientInfo, {
                                 title: "¡Documentos rechazados! 🚫",
                                 body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
@@ -987,7 +1096,7 @@ export function GestorDocumentos({
                             navigate("/ListadoSolicitud", { replace: true });
                         }}
                         solicitudData={clientInfo}
-                         mensajePrincipal="¿Está seguro de que desea rechazar todos los documentos?"
+                        mensajePrincipal="¿Está seguro de que desea rechazar todos los documentos?"
                     />
                 ) : (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">

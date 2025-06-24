@@ -1186,6 +1186,21 @@ export function Cabecera() {
     }
   };
 
+ const fetchInsertarDatosRechazar = async (tipo , observacion) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+        idCre_SolicitudWeb: clienteData.idCre_SolicitudWeb,
+        Tipo: 1,
+        idEstadoVerificacionDocumental: tipo,
+        Usuario: userData.Nombre,
+        Telefono: observacion,
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
   const fetchValidaDomicilio = async (tipo) => {
     try {
       const url = APIURL.getCoordenadasprefacturaPorId(
@@ -1541,9 +1556,9 @@ export function Cabecera() {
 
   const [showModalRechazo, setShowModalRechazo] = useState(false);
 
-  const handleRechazar = async () => {
-    patchSolicitudRechazar(idSolicitud);
-    fetchInsertarDatos(13); 
+  const handleRechazar = async (Observacion) => {
+    patchSolicitudRechazar(idSolicitud );
+    fetchInsertarDatosRechazar(13 , Observacion); 
      await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Se rechazo la Solicitud grande ! 🚫 ",
       body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}

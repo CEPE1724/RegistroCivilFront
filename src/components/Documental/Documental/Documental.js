@@ -248,7 +248,7 @@ export function Documental({
       10: "Consentimiento",
       11: "Autorización",
       12: "Foto del Cliente",  //Servicio Basico
-      13: "Croquis",   //Foto del Cliente
+      ///13: "Croquis",   //Foto del Cliente
       14: "Servicio Basico",   //Croquis
       15: "Foto del Cliente Firmando",
       16: "Respaldo 1", // Respaldo 1
@@ -523,7 +523,7 @@ export function Documental({
       10: "Consentimiento",
       11: "Autorización",
       12: "Foto del Cliente",   //Servicio Basico
-      13: "Croquis",   //Foto del Cliente
+      ///13: "Croquis",   //Foto del Cliente
       14: "Servicio Basico",   //Croquis
       15: "Foto del Cliente Firmando",
       16: "Respaldo 1", // Respaldo 1
@@ -669,7 +669,7 @@ export function Documental({
         Consentimiento: 10,
         Autorización: 11,
         "Foto del Cliente": 12,
-        Croquis: 13,
+        ///Croquis: 13,
         "Servicio Basico": 14,
         "Foto del Cliente Firmando": 15,
         "Respaldo 1": 16,
@@ -782,7 +782,7 @@ export function Documental({
     "Autorización",
     "Servicio Basico",
     "Foto del Cliente",
-    "Croquis",
+   /// "Croquis",
     "Foto del Cliente Firmando",
     "Respaldo 1",
     "Respaldo 2",
@@ -825,7 +825,7 @@ export function Documental({
       if (aprobados) {
         await fetchConsultaYNotifica(id, userUsuario, {
           title: "¡Documentos para revisar! 🔍",
-          body: `¡Hola! Ya puedes verificar los primeros 3 documentos de la solicitud ${NumeroSolicitud} (croquis, foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀
+          body: `¡Hola! Ya puedes verificar los primeros  documentos de la solicitud ${NumeroSolicitud} ( foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
           type: "success",
           empresa: "POINT",

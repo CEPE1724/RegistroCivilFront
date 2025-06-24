@@ -92,6 +92,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
       6: { //// ESTADo
         1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
+        1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
         2: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
         4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
 
@@ -212,10 +213,10 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
                       }
 
                       if ([8, 9, 1].includes(estado.Tipo)) {
-                        return 'la url es ' + (estado.Telefono || 'N/A');
+                        return '' + (estado.Telefono || 'N/A');
                       }
 
-                      return 'asignado a ' + (estado.Telefono || 'N/A');
+                      return '' + (estado.Telefono || 'N/A');
                     })()}
                   </Typography>
 
