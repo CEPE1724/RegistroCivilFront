@@ -42,7 +42,7 @@ const getTipoDocumento = (id) => {
         10: "Consentimiento",
         11: "Autorización",
         12: "Foto del Cliente",
-        13: "Croquis",
+        13: "Casa",
         14: "Servicio Básico"
     };
     return documentoIds[id] || `Documento ${id}`;
@@ -83,7 +83,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB
                 const docsFiltrados = documentos.filter(doc =>
-                    [12, 13].includes(doc.idTipoDocumentoWEB)
+                    [13 , 12 ,2 ].includes(doc.idTipoDocumentoWEB)
                 ).map(doc => ({
                     id: doc.idDocumentosSolicitudWeb,
                     nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
