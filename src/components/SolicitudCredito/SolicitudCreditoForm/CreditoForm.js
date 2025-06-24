@@ -580,6 +580,14 @@ export default function CreditoForm() {
       const createResponse = await axios.post(url, formattedValues, {
         headers: { method: "POST", cache: "no-store" },
       });
+      if (createResponse.data.success === false) {
+        enqueueSnackbar(createResponse.data.mensaje || "Error en la solicitud.", {
+          variant: "error",
+          preventDuplicate: true,
+        });
+        setFormStatus("error");
+        return; // ⛔ Detener ejecución
+      }
 
       // 2. Consultar la solicitud recién creada
       if (createResponse.data.idCre_SolicitudWeb) {

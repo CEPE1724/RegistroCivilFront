@@ -68,7 +68,6 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
         const data = response.data[0].Telefono;
         // data puede ser un array o un objeto, asumo objeto:
         // El nombre del verificador está en data.Telefono
-        console.log("aqui esta el nomnbre ", data)
         setVerificador(data || "Sin verificador");
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -84,9 +83,15 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
     2: "No Coincide",
   };
 
-  const tipoVerificacionMap = {
-    1: "Campo Malo",
+  
+    const tipoVerificacionMap = {
+    1: "Dirección incorrecta",
     2: "Aprobado",
+    3: "Malas referencias",
+    4: "No vive ahí",
+    5: "Datos falsos",
+    6: "Zona Vetada",
+    7: "No sustenta ingresos",
   };
   // Usamos useEffect para realizar la llamada a la API solo cuando el modal está abierto
   useEffect(() => {

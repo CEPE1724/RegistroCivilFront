@@ -335,7 +335,7 @@ const Referencias = forwardRef((props, ref) => {
         idEstadoOrigenTelefonica: 4,
         idCre_SolicitudWeb: data.idCre_SolicitudWeb,
         idWeb_SolicitudGrande: data.idWeb_SolicitudGrande,
-        Observacion: data.PrimerNombre + " " + data.ApellidoPaterno,
+        Observacion: formData.primerNombre + " " + formData.apellidoPaterno,
         },{
           headers: {
             "Content-Type": "application/json",
@@ -535,7 +535,7 @@ const Referencias = forwardRef((props, ref) => {
       </div>
 
       {/* Tabla */}
-      <div className="p-6 bg-gray-50 min-h-screen overflow-auto">
+      <div className="p-6 bg-gray-50 overflow-auto">
         <div className="overflow-x-auto bg-white shadow-lg rounded-lg border border-gray-300">
           <table className="min-w-full table-auto">
             <thead className="bg-primaryBlue">

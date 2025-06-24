@@ -76,6 +76,11 @@ import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
 import { Checkbox, FormControlLabel } from '@mui/material';
+import LocationOffIcon from '@mui/icons-material/LocationOff';
+import NotListedLocationIcon from '@mui/icons-material/NotListedLocation';
+import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
+import BlockIcon from '@mui/icons-material/Block';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -106,7 +111,6 @@ export function ListadoSolicitud() {
   const [currentPage, setCurrentPage] = useState(1);
   const [view, setView] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  console.log("selectedRow", selectedRow);
   const [totalPages, setTotalPages] = useState(1); // Total de páginas
   const [total, setTotal] = useState(0); // Total de registros
   const [itemsPerPage, setItemsPerPage] = useState(5)
@@ -390,6 +394,8 @@ export function ListadoSolicitud() {
     { label: "ANULADO", value: 3 },
     { label: "RECHAZADO", value: 4 },
     { label: "NO APLICA", value: 5 },
+    { label: "FACTURADO", value: 6 },
+    { label: "RECHAZADO-LN", value: 7 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -495,6 +501,9 @@ export function ListadoSolicitud() {
   const handleConfirm = async () => {
     if (currentAction === "estado") {
       handleApproveEstado(currentData);
+      if (laboralChecked) await patchLaboral(currentData.id);
+      if (domicilioChecked) await patchDomicilio(currentData.id);
+      if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
     } else if (currentAction === "resultado") {
       handleApproveResultado(currentData);
       if (laboralChecked) await patchLaboral(currentData.id);
@@ -655,12 +664,16 @@ export function ListadoSolicitud() {
     }
   };
 
-  const handleApproveEstado = (data) => {
-    patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-    patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    fetchInsertarDatos(6, data.id, 1);
-    setRecargar(true);
-    setShowModalRechazo(false)
+  const handleApproveEstado = async (data) => {
+	try {
+		await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
+    	await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    	await fetchInsertarDatos(6, data.id, 1);
+    	setRecargar(true);
+    	setShowModalRechazo(false)
+	} catch (error) {
+		console.error("Error al pre-aprobar estado:", error);
+	}
   };
 
   const handleApproveResultado = (data) => {
@@ -1032,7 +1045,9 @@ export function ListadoSolicitud() {
       if (!idsTerrenas || idsTerrenas.length === 0) {
         // No hay datos, abrir PreDocumentos (nuevo componente)
         setPreDocumentosData({ data, tipo });
-        setOpenPreDocumentos(true);
+        if (userData?.idGrupo !== 22 && userData?.idGrupo !== 23) {
+          setOpenPreDocumentos(true);
+        }
         return;
       }
 
@@ -1193,29 +1208,75 @@ export function ListadoSolicitud() {
     }
   };
 
+  /*  const tipoVerificacionMap = {
+    1: "Dirección incorrecta",
+    2: "Aprobado",
+    3: "Malas referencias",
+    4: "No vive ahí",
+    5: "Datos falsos",
+    6: "Zona Vetada",
+    7: "No sustenta ingresos",
+  };*/
+
   const getIconDomicilio = (estadoId) => {
-    switch (estadoId) {
-      case 0:
-        return <HomeIcon sx={{ color: "gray" }} />;
-      case 1:
-        return <PendingIcon sx={{ color: "#FFC107" }} />;
-      case 2:
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      default:
-        return <HomeIcon sx={{ color: "gray" }} />;
-    }
-  };
+  switch (estadoId) {
+    case 0: // Sin verificar
+      return <HomeIcon sx={{ color: "gray" }} />;
+
+    case 1: // Dirección incorrecta
+      return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+
+    case 2: // Aprobado
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+
+    case 3: // Malas referencias
+      return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
+
+    case 4: // No vive ahí
+      return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
+
+    case 5: // Datos falsos
+      return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
+
+    case 6: // Zona vetada
+      return <BlockIcon sx={{ color: "#6c757d" }} />;
+
+    case 7: // No sustenta ingresos
+      return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
+
+    default:
+      return <HomeIcon sx={{ color: "gray" }} />;
+  }
+};
 
   const getIconLaboral = (estadoId) => {
     switch (estadoId) {
-      case 0:
-        return <StoreIcon sx={{ color: "gray" }} />;
-      case 1:
-        return <PendingIcon sx={{ color: "#FFC107" }} />;
-      case 2:
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
-      default:
-        return <StoreIcon sx={{ color: "gray" }} />;
+       case 0: // Sin verificar
+      return <HomeIcon sx={{ color: "gray" }} />;
+
+    case 1: // Dirección incorrecta
+      return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+
+    case 2: // Aprobado
+      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+
+    case 3: // Malas referencias
+      return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
+
+    case 4: // No vive ahí
+      return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
+
+    case 5: // Datos falsos
+      return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
+
+    case 6: // Zona vetada
+      return <BlockIcon sx={{ color: "#6c757d" }} />;
+
+    case 7: // No sustenta ingresos
+      return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
+
+    default:
+      return <HomeIcon sx={{ color: "gray" }} />;
     }
   };
 
@@ -1577,7 +1638,11 @@ export function ListadoSolicitud() {
                         ? "RECHAZADO"
                         : item.Estado === 5
                           ? "NO APLICA"
-                          : "Desconocido",
+                          : item.Estado === 6
+                            ? "FACTURADO"
+                            : item.Estado === 7
+                              ? "RECHAZADO-LN"
+                              : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1806,11 +1871,10 @@ export function ListadoSolicitud() {
     });
   }
 
+  // filtros 
   const limpiarFiltros = () => {
     setFechaInicio(date15DaysAgoStr);
     setFechaFin(today);
-    setSelectedBodega("todos");
-    setSelectedVendedor("todos");
     setAnalistaSelected("todos");
     setEstado("todos");
     setSolicitud("Todos");
@@ -1824,8 +1888,6 @@ export function ListadoSolicitud() {
 
     sessionStorage.removeItem('filtroIniFecha');
     sessionStorage.removeItem('filtroFinFecha');
-    sessionStorage.removeItem('filtroBodega');
-    sessionStorage.removeItem('filtroVendedor');
     sessionStorage.removeItem('filtroAnalista');
     sessionStorage.removeItem('filtroEstado');
     sessionStorage.removeItem('filtroSolicitud');
@@ -1836,6 +1898,12 @@ export function ListadoSolicitud() {
     sessionStorage.removeItem('filtroCedula')
     sessionStorage.removeItem('filtroNombre')
     sessionStorage.removeItem('filtroNumSolicitud')
+    if (userData?.idGrupo !== 23) {
+      setSelectedVendedor("todos");
+      setSelectedBodega("todos");
+      sessionStorage.removeItem('filtroVendedor');
+      sessionStorage.removeItem('filtroBodega');
+    }
   };
 
 
@@ -1867,11 +1935,10 @@ export function ListadoSolicitud() {
     fetchSolicitudes();
   }, [itemsPerPage, currentPage]);
 
-  const handleRechazar = async (observacion) => {
+  const handleRechazar = async () => {
     patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
     patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-    fetchInsertarDatosRechazo(6, selectedRow?.id, 4, observacion);
-    setShowModalRechazo(false);
+    fetchInsertarDatos(6, selectedRow?.id, 4);
     handleCloseDialog()
   }
 
@@ -2189,7 +2256,7 @@ export function ListadoSolicitud() {
 
               <TableBody sx={{ marginTop: 0 }}>
                 {datos.map((data, index) => {
-                  const isError = data.resultado === 0;
+                  const isError = (data.Estado === 4 || data.Estado === 5);
                   const bgColor = isError
                     ? "#fee2e2"
                     : index % 2 === 0
@@ -2251,7 +2318,7 @@ export function ListadoSolicitud() {
                       <TableCell align="center">{data.consulta}</TableCell>
 
                       <TableCell align="center">
-                        {data.estado === "RECHAZADO" ? (
+                        {(data.estado === "RECHAZADO" || data.estado === "NO APLICA") ? (
                           <Box
                             sx={{
                               position: "relative",
@@ -2332,28 +2399,61 @@ export function ListadoSolicitud() {
                               px: 1.5,
                               py: 0.5,
                               fontSize: "0.75rem",
-                              fontWeight: 500,
+                              fontWeight: 600,
                               borderRadius: "9999px",
-                              backgroundColor:
-                                data.estado === "APROBADO"
-                                  ? "#dcfce7"
-                                  : data.estado === "PRE-APROBADO"
-                                    ? "#dbeafe"
-                                    : data.estado === "ANULADO"
-                                      ? "#f3f4f6"
-                                      : "#fef9c3",
-                              color:
-                                data.estado === "APROBADO"
-                                  ? "#166534"
-                                  : data.estado === "PRE-APROBADO"
-                                    ? "#1e40af"
-                                    : data.estado === "ANULADO"
-                                      ? "#374151"
-                                      : "#854d0e",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                              backgroundColor: (() => {
+                                switch (data.estado) {
+                                  case "APROBADO":
+                                    return "#dcfce7"; // verde claro
+                                  case "PRE-APROBADO":
+                                    return "#dbeafe"; // azul claro
+                                  case "ANULADO":
+                                    return "#f3f4f6"; // gris claro
+                                  case "FACTURADO":
+                                    return "#166534"; // verde oscuro
+                                  case "RECHAZADO":
+                                    return "#fee2e2"; // rojo claro
+                                  case "CORRECCIÓN":
+                                    return "#fef9c3"; // amarillo claro
+                                  case "PENDIENTE":
+                                    return "#fef9c3";
+                                  case "DATOS CLIENTE":
+
+                                    return "#e0f2fe"; // azul muy claro
+                                  default:
+                                    return "#f3f4f6"; // gris por defecto
+                                }
+                              })(),
+                              color: (() => {
+                                switch (data.estado) {
+                                  case "APROBADO":
+                                    return "#166534"; // verde fuerte
+                                  case "PRE-APROBADO":
+                                    return "#1e40af"; // azul fuerte
+                                  case "ANULADO":
+                                    return "#374151"; // gris oscuro
+                                  case "FACTURADO":
+                                    return "#ffffff"; // blanco
+                                  case "RECHAZADO":
+                                    return "#b91c1c"; // rojo fuerte
+                                  case "CORRECCIÓN":
+                                    return "#854d0e"; // marrón oscuro
+                                  case "PENDIENTE":
+                                    return "#854d0e";
+                                  case "DATOS CLIENTE":
+
+                                    return "#1e3a8a"; // azul medio
+                                  default:
+                                    return "#4b5563"; // gris medio
+                                }
+                              })(),
                             }}
                           >
                             {data.estado}
                           </Box>
+
                         )}
 
                         <div style={{ height: 12 }} />
@@ -2413,8 +2513,10 @@ export function ListadoSolicitud() {
                               }}
                             />
 
+
                             {/* Overlay solo si tiene permiso */}
-                            {!permisoAprobarResultado(data) && (
+                            {/* !permisoAprobarResultado(data) && (
+
                               <Box
                                 className="approveOverlay"
                                 onClick={() => {
@@ -2447,7 +2549,9 @@ export function ListadoSolicitud() {
                               >
                                 <CheckCircleIcon sx={{ fontSize: 20 }} />
                               </Box>
-                            )}
+
+                            ) */}
+
                           </Box>
                         ) : data.resultado === 1 ? (
                           <CheckCircleIcon sx={{ color: "#28A745" }} />
@@ -2694,9 +2798,8 @@ export function ListadoSolicitud() {
                               size="small"
                               sx={{
                                 opacity:
-                                  estaDeshabilitado(data) ||
-                                    verificacionSolicitud(data)
-                                    ? 0.4
+                                  estaDeshabilitado(data)
+                                    ? 0
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#f1f5f9",
                                 "&:hover": {
@@ -2753,8 +2856,7 @@ export function ListadoSolicitud() {
                               }
                               disabled={
                                 verificacionSolicitud(data) ||
-                                data.Laboral === false ||
-                                !docAprobados[data.id]
+                                data.Laboral === false
 
                               }
                               size="small"
@@ -2762,9 +2864,9 @@ export function ListadoSolicitud() {
                                 opacity:
                                   verificacionSolicitud(data) ||
                                     data.Laboral === false
-                                    ? 0.2
+                                    ? 0
                                     : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                bgcolor: isError ? "#fee2e2" : "#fff1f5f9",
                                 "&:hover": {
                                   bgcolor: isError ? "#fca5a5" : "#e2e8f0",
                                   transform: "scale(1.1)",
@@ -3830,7 +3932,7 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
                     <div className="flex flex-col gap-4 mt-4">
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
                       <input
@@ -4014,7 +4116,10 @@ export function ListadoSolicitud() {
                     )}
                   </div>
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && (
+
+
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "RECHAZADO" && (
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleAbrirVerificacionManual}
@@ -4333,6 +4438,7 @@ export function ListadoSolicitud() {
           cedula={cedula}
           dactilar={dactilar}
           imagenSubida={selectedRow?.imagen}
+          estadoSolicitud={selectedRow?.Estado}
           onAceptar={() => {
             // Acción al aceptar
             patchSolicitud(selectedRow?.id, 2);
@@ -4359,7 +4465,7 @@ export function ListadoSolicitud() {
             {currentAction === "estado" ? "estado" : "resultado"}?
           </Typography>
 
-          {currentAction === "resultado" && (
+          {currentAction === "estado" && (
             <div style={{ marginTop: '1rem' }}>
               <FormControlLabel
                 control={
@@ -4421,7 +4527,7 @@ export function ListadoSolicitud() {
             onClick={handleConfirm}
             color="primary"
             disabled={
-              currentAction === "resultado" && !laboralChecked && !domicilioChecked
+              currentAction === "estado" && !laboralChecked && !domicilioChecked
             }
           >
             Confirmar

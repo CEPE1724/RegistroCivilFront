@@ -201,7 +201,19 @@ export function TelefonicaList({
   const [idToTextMapEstado, setIdToTextMapEstado] = useState({}); //estado para mapear IDs a textos de api Estado
   const [datoParentesco, setDatoParentesco] = useState([]); //estado parentesco
   const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
-  const contactedDocs = tablaDatos.filter((doc) => doc.idEstadoGestns === 11);
+  const contactedDocs = tablaDatos.filter((doc) => doc.idEstadoOrigenTelefonica == 4 && doc.idEstadoGestns === 11); //numeros contactados que son referencia
+
+const titulares = tablaDatos.filter((item) => {
+	const match = soliParen.find(p => p.Celular == item.Telefono);
+	const nombreParentesco = match
+		? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
+		: 'TITULAR';
+	return nombreParentesco === 'TITULAR';
+});
+
+const todosTitularesContactados = titulares.every((item) => item.idEstadoGestns === 11);  //numeros TITUlAR contactados
+
+const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
   const resultContactedDocs = contactedDocs.length >= 2 ? contactedDocs : [];
   useEffect(() => {
     if (clientInfo.id) {
@@ -645,7 +657,7 @@ export function TelefonicaList({
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-4 items-center">
-                    {resultContactedDocs.length >= 2 && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
+                    {puedeAprobar && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !== 3 &&(
                       <button
                         onClick={handleSubmit}
                         className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-300 ease-in-out"

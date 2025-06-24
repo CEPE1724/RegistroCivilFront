@@ -9,7 +9,7 @@ import TimelineDot from '@mui/lab/TimelineDot';
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { green, blue, red, yellow, grey } from '@mui/material/colors';
+import { green, blue, red, yellow, grey, purple, orange, teal } from '@mui/material/colors';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
@@ -34,22 +34,29 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
   const obtenerEstadoVerificacion = (estado) => {
     // Definir los estados según el Tipo de solicitud de crédito
+ 
     const estadosPorTipo = {
       1: { // Documental
-        1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
-        2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
-        3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
-        4: { label: "Conyuge", icon: <FavoriteIcon />, color: yellow[500] },
-        5: { label: "Referencias", icon: <ContactsIcon />, color: red[500] },
-        6: { label: "Negocios", icon: <StorefrontIcon />, color: grey[600] },
-        7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[600] },
-        8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[600] },
-        9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[600] },
-        10: { label: "Completado", icon: <CheckCircleIcon />, color: green[500] },
-        11: { label: "Corrección", icon: <EventIcon />, color: red[500] },
-        12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-        13: { label: "Rechazado", icon: <InfoIcon />, color: red[500] },
-        14: { label: "Foto", icon: <PersonIcon />, color: grey[500] },
+         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
+      2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
+      3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
+      4: { label: "Conyuge", icon: <FavoriteIcon />, color: purple[300] },
+      5: { label: "Referencias", icon: <ContactsIcon />, color: orange[500] },
+      6: { label: "Negocios", icon: <StorefrontIcon />, color: teal[600] },
+      7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[300] },
+      8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[700] },
+      9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[700] },
+      10: { label: "Revisión", icon: <CheckCircleIcon />, color: green[500] },
+      11: { label: "Corrección", icon: <EventIcon />, color: red[400] },
+      12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[700] },
+      13: { label: "Rechazado", icon: <InfoIcon />, color: red[600] },
+      14: { label: "Foto", icon: <PersonIcon />, color: grey[700] },
+      15: { label: "Creación de Prefactura", icon: <SettingsIcon />, color: grey[600] },
+      16: { label: "Anulación de Prefactura", icon: <CancelIcon />, color: red[500] },
+      17: { label: "Aprobación Prefactura", icon: <VerifiedIcon />, color: green[600] },
+      18: { label: "Rechazo Prefactura", icon: <CancelIcon />, color: red[700] },
+      19: { label: "Facturado", icon: <CheckCircleIcon />, color: green[800] },
+
 
 
 
@@ -84,6 +91,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       },
 
       6: { //// ESTADo
+        1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
         1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
         2: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
         4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
@@ -181,7 +189,31 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
                     {(() => {
                       const esFoto = estado.Tipo === 1 && estado.idEstadoVerificacionDocumental === 14;
                       const esURL = estado.Telefono?.startsWith('http');
+                    {(() => {
+                      const esFoto = estado.Tipo === 1 && estado.idEstadoVerificacionDocumental === 14;
+                      const esURL = estado.Telefono?.startsWith('http');
 
+                      if (esFoto && esURL) {
+                        return (
+                          <Box>
+                            <a
+                              href={estado.Telefono}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: "#1976d2", textDecoration: "underline", fontSize: "0.75rem" }}
+                            >
+                              Ver imagen
+                            </a>
+                            <Box mt={1}>
+                              <img
+                                src={estado.Telefono}
+                                alt="Foto"
+                                style={{ maxWidth: "100px", borderRadius: "8px", border: "1px solid #ccc" }}
+                              />
+                            </Box>
+                          </Box>
+                        );
+                      }
                       if (esFoto && esURL) {
                         return (
                           <Box>

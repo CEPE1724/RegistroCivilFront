@@ -5,7 +5,7 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import Modal from "react-modal";
 import { Visibility } from "@mui/icons-material";
 import { Alert } from "@mui/lab";
-const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
+export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
     width: "100%",
@@ -52,31 +52,31 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showImageModal, setShowImageModal] = useState(false); 
-   const [verificador, setVerificador] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [verificador, setVerificador] = useState(null);
 
- const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
-  console.log("llega id" ,estado )
-  try {
-    const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
-    const response = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.status === 200) {
-      const data = response.data[0].Telefono;
-      // data puede ser un array o un objeto, asumo objeto:
-      // El nombre del verificador está en data.Telefono
-      console.log("aqui esta el nomnbre ",data )
-      setVerificador(data|| "Sin verificador");
-    } else {
-      console.error(`Error: ${response.status} - ${response.statusText}`);
+  const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
+    console.log("llega id", estado)
+    try {
+      const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data[0].Telefono;
+        // data puede ser un array o un objeto, asumo objeto:
+        // El nombre del verificador está en data.Telefono
+        console.log("aqui esta el nomnbre ", data)
+        setVerificador(data || "Sin verificador");
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching tiemposolicitudesweb data:", error);
     }
-  } catch (error) {
-    console.error("Error fetching tiemposolicitudesweb data:", error);
-  }
-};
+  };
 
   useEffect(() => {
     const fetchVerificacionData = async () => {
@@ -99,13 +99,13 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
           }
         }
 
-        setVerificacionData(data); 
+        setVerificacionData(data);
 
-         if (idSolicitud ) {
+        if (idSolicitud) {
           fetchVerificador(idSolicitud, 4);
         }
-         
-      
+
+
       } catch (error) {
         console.error("Error al obtener los datos de verificación:", error);
       }
@@ -113,7 +113,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
 
     if (openModal) {
       fetchVerificacionData();
-      
+
     }
   }, [openModal, idsTerrenas, idSolicitud]);
 
@@ -152,13 +152,19 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
   };
 
   const tipoVerificacionMap = {
-    1: "Campo Malo",
+    1: "Dirección incorrecta",
     2: "Aprobado",
+    3: "Malas referencias",
+    4: "No vive ahí",
+    5: "Datos falsos",
+    6: "Zona Vetada",
+    7: "No sustenta ingresos",
   };
 
   const accesoMap = {
     1: "Fácil",
     2: "Difícil",
+
   };
 
   const coberturaMap = {
@@ -198,8 +204,8 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
     tipoVerificacion,
 
   } = verificacionData;
-  
-  
+
+
 
 
 
@@ -217,11 +223,11 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 p-4 z-40">
         <div className="bg-white rounded-2xl shadow-lg w-full max-w-5xl p-8 max-h-[90vh] overflow-y-auto animate-fade-in">
           <h2 className="text-2xl font-semibold mb-6">Domicilio</h2>
-         {verificador && (
-  <p className="mb-4 text-sm font-medium text-gray-700">
-    Verificador: <span className="font-semibold">{verificador}</span>
-  </p>
-)}
+          {verificador && (
+            <p className="mb-4 text-sm font-medium text-gray-700">
+              Verificador: <span className="font-semibold">{verificador}</span>
+            </p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-4 gap-4">
             {/* {renderField("ID Terreno", idTerrenaGestionDomicilio)} */}
             {/* {renderField("ID Cliente Verificación", idClienteVerificacion)} */}
@@ -280,7 +286,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           className="text-white text-2xl"
-                          onClick={ () => {
+                          onClick={() => {
                             setSelectedImage(url);
                             setShowImageModal(true);
                           }}
