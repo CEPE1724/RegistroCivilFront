@@ -248,7 +248,7 @@ export function Documental({
       10: "Consentimiento",
       11: "Autorización",
       12: "Foto del Cliente",  //Servicio Basico
-      ///13: "Croquis",   //Foto del Cliente
+      13: "Casa",   //Casa
       14: "Servicio Basico",   //Croquis
       15: "Foto del Cliente Firmando",
       16: "Respaldo 1", // Respaldo 1
@@ -523,7 +523,7 @@ export function Documental({
       10: "Consentimiento",
       11: "Autorización",
       12: "Foto del Cliente",   //Servicio Basico
-      ///13: "Croquis",   //Foto del Cliente
+      13: "Casa",   //Foto del Cliente
       14: "Servicio Basico",   //Croquis
       15: "Foto del Cliente Firmando",
       16: "Respaldo 1", // Respaldo 1
@@ -669,7 +669,7 @@ export function Documental({
         Consentimiento: 10,
         Autorización: 11,
         "Foto del Cliente": 12,
-        ///Croquis: 13,
+        "Casa": 13,
         "Servicio Basico": 14,
         "Foto del Cliente Firmando": 15,
         "Respaldo 1": 16,
@@ -782,7 +782,7 @@ export function Documental({
     "Autorización",
     "Servicio Basico",
     "Foto del Cliente",
-   /// "Croquis",
+    "Casa",
     "Foto del Cliente Firmando",
     "Respaldo 1",
     "Respaldo 2",
