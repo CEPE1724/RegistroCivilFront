@@ -64,20 +64,22 @@ export function GestorDocumentos({
     // mostrar botones
     useEffect(() => {
         if (allDocuments.length > 0) {
-            const allReviewed = allDocuments.every(doc => doc.estado === 3 || doc.estado === 4);
-
-            if (allReviewed) {
-                // si todos los documentos estan aprovados
-                const allApproved = allDocuments.every(doc => doc.estado === 3);
+			const filteredDocs = allDocuments.filter(doc => doc.type >= 1 && doc.type <= 15);
+			if (filteredDocs.length > 0){
+				const allReviewed = filteredDocs.every(doc => doc.estado === 3 || doc.estado === 4);
+				if (allReviewed) {
+                // si todos los documentos estan aprobados
+                const allApproved = filteredDocs.every(doc => doc.estado === 3);
                 setShowApproveAllButton(allApproved);
-                // si algun documento esta rechazado
-                const hasRejectedDocs = allDocuments.some(doc => doc.estado === 4);
+                // si algún documento está en corrección
+                const hasRejectedDocs = filteredDocs.some(doc => doc.estado === 4);
                 setShowRevisionButton(hasRejectedDocs);
             } else {
-                // Reset button visibility if not all documents are reviewed
                 setShowApproveAllButton(false);
                 setShowRevisionButton(false);
             }
+				
+			}
         }
     }, [allDocuments]);
 
@@ -418,6 +420,17 @@ export function GestorDocumentos({
             12: "Foto del Cliente",  //Servicio Basico
             13: "Croquis",  //Foto del Cliente
             14: "Servicio Basico",  //Croquis
+			15: "Foto del Cliente firmando",
+			16: "RESPALDO #1",
+			17: "RESPALDO #2",
+			18: "RESPALDO #3",
+			19: "RESPALDO #4",
+			20: "RESPALDO #5",
+			21: "RESPALDO #6",
+			22: "RESPALDO #7",
+			23: "RESPALDO #8",
+			24: "RESPALDO #9",
+			25: "RESPALDO #10",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };
@@ -535,7 +548,8 @@ export function GestorDocumentos({
     const renderActionButtons = (document) => {
         //habilitar botones cuando estadoVerifD = 2
         if (clientInfo.estadoVerifD === 2) {
-            switch (document.estado) {
+            if(document.idTipoDocumento >= 1 && document.idTipoDocumento <= 15){
+				switch (document.estado) {
                 case 2: // Pendiente - mostrar ambos botones
                     return (
                         <>
@@ -582,7 +596,10 @@ export function GestorDocumentos({
                 default:
                     return null;
             }
-        }
+		}
+        } else {
+			return null;
+		}  
     };
 
     // detectar clicks fuera del modal global

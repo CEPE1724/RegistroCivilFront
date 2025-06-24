@@ -415,6 +415,24 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
+	if ( formData.telefono !== "") {
+		if(formData.telefono.length !== 9){
+			newErrors.telefono = "El teléfono debe tener 9 dígitos";
+			if (!showSnackbar) {
+        	enqueueSnackbar("El teléfono debe tener 9 dígitos", {variant: "error",});
+        	showSnackbar = true;
+			}
+		}
+	}
+
+	if (formData.celular && formData.celular.length !==10 ){
+		newErrors.celular = "El celular debe tener 10 dígitos";
+		if (!showSnackbar) {
+        enqueueSnackbar("El celular debe tener 10 dígitos", {variant: "error",});
+        showSnackbar = true;
+      }	
+	}
+
     if (!formData.callePrincipal) {
       newErrors.callePrincipal = "Este campo es obligatorio";
       if (!showSnackbar) {
@@ -725,6 +743,8 @@ const SeccionA = forwardRef((props, ref) => {
             value={formData.telefono}
             onChange={handleFormChange}
             className="solcitudgrande-style"
+			onInput={(e) => {e.target.value = e.target.value.replace(/[^0-9]/g, "");}}
+			maxLength={10}
           />
           {errors.telefono && (
             <span className="text-red-500 text-xs">{errors.telefono}</span>
@@ -742,6 +762,8 @@ const SeccionA = forwardRef((props, ref) => {
             value={formData.celular}
             onChange={handleFormChange}
             className="solcitudgrande-style"
+			onInput={(e) => {e.target.value = e.target.value.replace(/[^0-9]/g, "");}}
+			maxLength={10}
           />
           {errors.celular && (
             <span className="text-red-500 text-xs">{errors.celular}</span>
