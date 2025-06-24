@@ -641,12 +641,16 @@ export function ListadoSolicitud() {
     }
   };
 
-  const handleApproveEstado = (data) => {
-    patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-    patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    fetchInsertarDatos(6, data.id, 1);
-    setRecargar(true);
-    setShowModalRechazo(false)
+  const handleApproveEstado = async (data) => {
+	try {
+		await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
+    	await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    	await fetchInsertarDatos(6, data.id, 1);
+    	setRecargar(true);
+    	setShowModalRechazo(false)
+	} catch (error) {
+		console.error("Error al pre-aprobar estado:", error);
+	}
   };
 
   const handleApproveResultado = (data) => {

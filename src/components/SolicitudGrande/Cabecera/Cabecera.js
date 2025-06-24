@@ -1103,8 +1103,6 @@ export function Cabecera() {
       const isValid = datosNegocio.current.validateForm(); // Llamamos a validateForm del componente Datos
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(2);
-
-        console.log("coordenadas 2 NOSE PARA QUE", clientInfo?.data.Laboral);
         if (!coordenadas.exists || coordenadas.count === 0) {
           enqueueSnackbar(
             "Para guardar datos del  negocio, primero debes registrar la ubicación.",
@@ -1233,6 +1231,8 @@ export function Cabecera() {
           NumeroCasaNegocio: formData.numeroCasa,
           CalleSecundariaNegocio: formData.calleSecundaria,
           ReferenciaUbicacionNegocio: formData.referenciaUbicacion,
+		  TelefonoNegocio: formData.telefono,
+		  CelularNegocio: formData.celular,
           IngresosNegosio: IngresosTrabajoString,
           EgresosNegocio: EgresosTrabajoString,
           ActividadEconomicaNegocio: formData.actividadNegocio,
@@ -1246,15 +1246,15 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos del conyuge guardados correctamente.", {
+      enqueueSnackbar("Datos del negocio correctamente.", {
         variant: "success",
       });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos del conyuge.", {
+      enqueueSnackbar("Error al guardar los datos del negocio.", {
         variant: "error",
       });
-      console.error("Error al guardar los datos del conyuge", error);
+      console.error("Error al guardar los datos del negocio", error);
     }
   };
 
