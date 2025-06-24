@@ -1,51 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  Button, 
-  IconButton,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  LinearProgress,
-  Alert,
-  Tooltip,
-  Badge,
-  Snackbar
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    IconButton,
+    Card,
+    CardContent,
+    Typography,
+    Box,
+    Chip,
+    LinearProgress,
+    Alert,
+    Tooltip,
+    Badge,
+    Snackbar
 } from '@mui/material';
-import { 
-  Visibility, 
-  Close, 
-  Download,
-  Image as ImageIcon,
-  PictureAsPdf,
-  Error as ErrorIcon
+import {
+    Visibility,
+    Close,
+    Download,
+    Image as ImageIcon,
+    PictureAsPdf,
+    Error as ErrorIcon
 } from '@mui/icons-material';
 import { APIURL } from "../../configApi/apiConfig";
 import axios from "../../configApi/axiosConfig";
 import { set } from 'react-hook-form';
 
 const getTipoDocumento = (id) => {
-  const documentoIds = {
-    2: "Copia de Cédula",
-    3: "Contrato de Compra",
-    4: "Declaración",
-    5: "Pagaré",
-    6: "Tabla de Amortización",
-    7: "Gastos de Cobranza",
-    8: "Compromiso Lugar de Pago",
-    9: "Acta",
-    10: "Consentimiento",
-    11: "Autorización",
-    12: "Foto del Cliente",
-    13: "Croquis",
-    14: "Servicio Básico"
-  };
-  return documentoIds[id] || `Documento ${id}`;
+    const documentoIds = {
+        2: "Copia de Cédula",
+        3: "Contrato de Compra",
+        4: "Declaración",
+        5: "Pagaré",
+        6: "Tabla de Amortización",
+        7: "Gastos de Cobranza",
+        8: "Compromiso Lugar de Pago",
+        9: "Acta",
+        10: "Consentimiento",
+        11: "Autorización",
+        12: "Foto del Cliente",
+        13: "Croquis",
+        14: "Servicio Básico"
+    };
+    return documentoIds[id] || `Documento ${id}`;
 };
 
 const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
@@ -58,24 +58,27 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     const [currentDocType, setCurrentDocType] = useState(null);
     const [updatingDoc, setUpdatingDoc] = useState(null);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-	const [ todosDocs, setTodosDocs ] = useState([]);
+    const [todosDocs, setTodosDocs] = useState([]);
 
     useEffect(() => {
         const fetchDocs = async () => {
             if (!idSolicitud || !open) return;
-            
+
             setLoading(true);
             setError(null);
-            
+
             try {
-                const response1 = await axios.get(APIURL.get_documentosEstado(idSolicitud, 1));
-				let documentos = [];
-				if(response1.data && response1.data.length > 0) {
-					documentos = response1.data;
-				} else {
-					const response2 = await axios.get(APIURL.get_documentosEstado(idSolicitud, 3));
-					documentos = response2.data || [];
-				}
+                let documentos = [];
+
+                const estados = [1, 3, 2];
+
+                for (const estado of estados) {
+                    const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, estado));
+                    if (response.data && response.data.length > 0) {
+                        documentos = response.data;
+                        break;
+                    }
+                }
                 // const todosDocs = response.data || [];
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB
@@ -91,7 +94,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                     usuario: doc.Usuario,
                     estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
                 }));
-				setTodosDocs(docsFiltrados);
+                setTodosDocs(docsFiltrados);
                 setEstadoDocs(docsFiltrados);
             } catch (error) {
                 console.error("Error al obtener los documentos:", error);
@@ -117,7 +120,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     // const updateDocumentStatus = async (docId, newStatus) => {
     //     try {
     //         setUpdatingDoc(docId);
-            
+
     //         if (newStatus === 6) {
     //             // Documento rechazado/cancelado
     //             await axios.patch(APIURL.patch_documentos(docId), {
@@ -131,7 +134,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     //             });
     //             showSnackbar(" removida del documento", "success");
     //         }
-            
+
     //         return true;
     //     } catch (error) {
     //         console.error("Error al actualizar el estado del documento:", error);
@@ -146,7 +149,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
     const handleToggleX = async (index) => {
         const doc = estadoDocs[index];
         const newTieneX = !doc.tieneX;
-        
+
         // Actualizar estado local primero para UX inmediata
         const newDocs = [...estadoDocs];
         newDocs[index].tieneX = newTieneX;
@@ -155,7 +158,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
         // Llamar a la API según el nuevo estado
         const newStatus = newTieneX ? 5 : 3; // 6 para rechazado, 3 para aceptado
         // const success = await updateDocumentStatus(doc.id, newStatus);
-        
+
         // if (!success) {
         //     // Revertir cambio si falló la API
         //     const revertDocs = [...estadoDocs];
@@ -170,24 +173,24 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
             console.error('❌ URL vacía o undefined');
             return;
         }
-        
+
         //console.log('🔍 Abriendo preview para:', url, 'Tipo:', tipoId);
-        
+
         setPreviewLoading(true);
         setPreviewError(false);
-        
+
         // Construir URL completa si es necesario
         let fullUrl = url;
         if (!url.startsWith('http')) {
             // Ajusta esta línea según tu configuración de API
             fullUrl = url.startsWith('/') ? `${window.location.origin}${url}` : url;
         }
-        
+
         //console.log('🌐 URL final:', fullUrl);
-        
+
         setImagenPreview(fullUrl);
         setCurrentDocType(tipoId);
-        
+
         // Simular carga mínima
         setTimeout(() => {
             setPreviewLoading(false);
@@ -231,24 +234,24 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                             Validar Documentos Previos
                         </Typography>
                         <Box display="flex" gap={1}>
-                            <Chip 
-                                label={`${estadoDocs.length - documentosConX}/${estadoDocs.length} sin X`} 
-                                color={!hayDocumentosConX ? "success" : "default"} 
-                                variant="outlined" 
+                            <Chip
+                                label={`${estadoDocs.length - documentosConX}/${estadoDocs.length} sin X`}
+                                color={!hayDocumentosConX ? "success" : "default"}
+                                variant="outlined"
                                 size="small"
                             />
                             {documentosConX > 0 && (
-                                <Chip 
-                                    label={`${documentosConX} con X`} 
-                                    color="error" 
-                                    variant="outlined" 
+                                <Chip
+                                    label={`${documentosConX} con X`}
+                                    color="error"
+                                    variant="outlined"
                                     size="small"
                                 />
                             )}
                         </Box>
                     </Box>
                 </DialogTitle>
-                
+
                 <DialogContent dividers>
                     {loading && (
                         <Box sx={{ width: '100%', mb: 2 }}>
@@ -279,8 +282,8 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
 
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {estadoDocs.map((doc, index) => (
-                            <Card 
-                                key={doc.id || index} 
+                            <Card
+                                key={doc.id || index}
                                 variant="outlined"
                                 sx={{
                                     borderColor: doc.tieneX ? 'error.main' : 'grey.300',
@@ -290,14 +293,14 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                 }}
                             >
                                 {updatingDoc === doc.id && (
-                                    <LinearProgress 
-                                        sx={{ 
-                                            position: 'absolute', 
-                                            top: 0, 
-                                            left: 0, 
+                                    <LinearProgress
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
                                             right: 0,
                                             borderRadius: '4px 4px 0 0'
-                                        }} 
+                                        }}
                                     />
                                 )}
                                 <CardContent>
@@ -308,29 +311,29 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                                     {doc.nombre}
                                                 </Typography>
                                                 {doc.tieneX && (
-                                                    <Chip 
-                                                        label="X" 
-                                                        color="error" 
+                                                    <Chip
+                                                        label="X"
+                                                        color="error"
                                                         size="small"
                                                         sx={{ fontWeight: 'bold' }}
                                                     />
                                                 )}
                                                 {updatingDoc === doc.id && (
-                                                    <Chip 
-                                                        label="Actualizando..." 
-                                                        size="small" 
+                                                    <Chip
+                                                        label="Actualizando..."
+                                                        size="small"
                                                         color="primary"
                                                         variant="outlined"
                                                     />
                                                 )}
                                             </Box>
-                                            
+
                                             <Typography variant="body2" color="text.secondary">
                                                 Subido: {new Date(doc.fechaSubida).toLocaleDateString()} por {doc.usuario}
                                             </Typography>
-                                            
+
                                             <Box display="flex" alignItems="center" gap={1} mt={1}>
-                                                <Chip 
+                                                <Chip
                                                     icon={<PictureAsPdf />}
                                                     label="PDF"
                                                     size="small"
@@ -342,8 +345,8 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                         <Box display="flex" alignItems="center" gap={1}>
                                             <Tooltip title="Vista previa">
                                                 <span>
-                                                    <IconButton 
-                                                        onClick={() => handlePreview(doc.url, doc.tipoId)} 
+                                                    <IconButton
+                                                        onClick={() => handlePreview(doc.url, doc.tipoId)}
                                                         disabled={!doc.url}
                                                         color="primary"
                                                     >
@@ -354,7 +357,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
 
                                             <Tooltip title="Descargar">
                                                 <span>
-                                                    <IconButton 
+                                                    <IconButton
                                                         component="a"
                                                         href={doc.url}
                                                         target="_blank"
@@ -369,7 +372,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
 
                                             <Tooltip title={doc.tieneX ? "Remover X" : "Marcar con X"}>
                                                 <span>
-                                                    <IconButton 
+                                                    <IconButton
                                                         onClick={() => handleToggleX(index)}
                                                         color={doc.tieneX ? "error" : "default"}
                                                         disabled={updatingDoc === doc.id}
@@ -403,8 +406,8 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                         variant="contained"
                         color="primary"
                     >
-                        {hayDocumentosConX 
-                            ? `Aceptar (${documentosConX} )` 
+                        {hayDocumentosConX
+                            ? `Aceptar (${documentosConX} )`
                             : `Aceptar (${estadoDocs.length})`
                         }
                     </Button>
@@ -427,7 +430,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                             Vista previa del documento
                         </Typography>
                         <Box display="flex" alignItems="center" gap={1}>
-                            <Chip 
+                            <Chip
                                 label="PDF"
                                 size="small"
                                 variant="outlined"
@@ -438,13 +441,13 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                         </Box>
                     </Box>
                 </DialogTitle>
-                
-                <DialogContent 
-                    dividers 
-                    sx={{ 
-                        height: '100%', 
-                        display: 'flex', 
-                        justifyContent: 'center', 
+
+                <DialogContent
+                    dividers
+                    sx={{
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
                         alignItems: 'center',
                         p: 2
                     }}
@@ -467,10 +470,10 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                 No se pudo cargar la vista previa del documento.
                             </Typography>
-                            <Button 
-                                variant="outlined" 
-                                href={imagenPreview} 
-                                target="_blank" 
+                            <Button
+                                variant="outlined"
+                                href={imagenPreview}
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 startIcon={<Download />}
                             >
@@ -482,12 +485,12 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                     {imagenPreview && !previewLoading && !previewError && (
                         <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
                             {/* SIEMPRE MOSTRAR COMO PDF */}
-                            <Box sx={{ 
-                                width: '100%', 
-                                height: '100%', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center' 
+                            <Box sx={{
+                                width: '100%',
+                                height: '100%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                             }}>
                                 <object
                                     data={imagenPreview}
@@ -509,10 +512,10 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                             No se puede mostrar el archivo en el navegador.
                                         </Typography>
-                                        <Button 
-                                            variant="contained" 
-                                            href={imagenPreview} 
-                                            target="_blank" 
+                                        <Button
+                                            variant="contained"
+                                            href={imagenPreview}
+                                            target="_blank"
                                             rel="noopener noreferrer"
                                             startIcon={<Download />}
                                         >
@@ -526,9 +529,9 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button 
-                        href={imagenPreview} 
-                        target="_blank" 
+                    <Button
+                        href={imagenPreview}
+                        target="_blank"
                         rel="noopener noreferrer"
                         startIcon={<Download />}
                         color="primary"
@@ -548,8 +551,8 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                 onClose={handleCloseSnackbar}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
             >
-                <Alert 
-                    onClose={handleCloseSnackbar} 
+                <Alert
+                    onClose={handleCloseSnackbar}
                     severity={snackbar.severity}
                     variant="filled"
                     sx={{ width: '100%' }}

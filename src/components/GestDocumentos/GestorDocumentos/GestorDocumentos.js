@@ -421,16 +421,16 @@ export function GestorDocumentos({
             13: "Croquis",  //Foto del Cliente
             14: "Servicio Basico",  //Croquis
 			15: "Foto del Cliente firmando",
-			16: "RESPALDO #1",
-			17: "RESPALDO #2",
-			18: "RESPALDO #3",
-			19: "RESPALDO #4",
-			20: "RESPALDO #5",
-			21: "RESPALDO #6",
-			22: "RESPALDO #7",
-			23: "RESPALDO #8",
-			24: "RESPALDO #9",
-			25: "RESPALDO #10",
+			16: "RESPALDO 1",
+			17: "RESPALDO 2",
+			18: "RESPALDO 3",
+			19: "RESPALDO 4",
+			20: "RESPALDO 5",
+			21: "RESPALDO 6",
+			22: "RESPALDO 7",
+			23: "RESPALDO 8",
+			24: "RESPALDO 9",
+			25: "RESPALDO 10",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };
