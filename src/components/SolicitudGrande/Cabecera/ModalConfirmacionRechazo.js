@@ -13,7 +13,7 @@ const ModalConfirmacionRechazo = ({
     const [error, setError] = useState('');
 
     const handleObservacionesChange = (e) => {
-        const value = e.target.value;
+        const value = e.target.value.toUpperCase();
         setObservaciones(value);
         
         // Validar longitud

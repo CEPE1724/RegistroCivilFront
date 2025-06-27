@@ -813,10 +813,12 @@ export function ListadoSolicitud() {
           fetchTipoConsulta(),
           fetchBodega(),
           fetchTipoCliente(),
-          permissionscomponents(idMenu, userData?.idUsuario),
           fecthAnalista(),
           fetchOperador()
         ]);
+          if (userData?.idUsuario && idMenu) {
+        await permissionscomponents(idMenu, userData.idUsuario);
+      }
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
       }
@@ -1933,13 +1935,17 @@ export function ListadoSolicitud() {
 
   useEffect(() => {
     fetchSolicitudes();
-  }, [itemsPerPage, currentPage]);
+  }, [itemsPerPage, currentPage , recargar]);
 
-  const handleRechazar = async () => {
+  const handleRechazar = async (observacion) => {
     patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
     patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-    fetchInsertarDatos(6, selectedRow?.id, 4);
-    handleCloseDialog()
+   // fetchInsertarDatos(6, selectedRow?.id, 4);
+     fetchInsertarDatosRechazo(6, selectedRow?.id, 4 ,observacion ) 
+   handleCloseDialog()
+     setShowModalRechazo(false); // <-- Cierra el modal de rechazo siempre que abras el de detalles
+
+   setRecargar(prev => !prev);
   }
 
   return (
@@ -4293,49 +4299,90 @@ export function ListadoSolicitud() {
         </DialogActions>
       </Dialog>
 
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-between items-center">
-          {/* Espacio vacío para alineación */}
-          <div className="w-1/3" />
+     {totalPages > 1 && (
+  <div className="mt-6">
+    {/* Layout para escritorio - horizontal */}
+    <div className="hidden md:flex justify-between items-center">
+      {/* Espacio vacío para alineación */}
+      <div className="w-1/3" />
 
-          {/* Navegación centrada */}
-          <div className="flex justify-center items-center gap-4 w-1/3">
-            <button
-              onClick={() => changePage(Math.max(currentPage - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-            >
-              <SkipPreviousIcon />
-            </button>
-            <span className="font-semibold text-gray-600">
-              Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-            >
-              <SkipNextIcon />
-            </button>
-          </div>
+      {/* Navegación centrada */}
+      <div className="flex justify-center items-center gap-4 w-1/3">
+        <button
+          onClick={() => changePage(Math.max(currentPage - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+        >
+          <SkipPreviousIcon />
+        </button>
+        <span className="font-semibold text-gray-600">
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+        >
+          <SkipNextIcon />
+        </button>
+      </div>
 
-          {/* Select en el extremo derecho */}
-          <div className="w-1/3 flex justify-end">
-            <select
-              value={itemsPerPage}
-              onChange={handleItemsPerPageChange}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              {[5, 10, 15, 20].map((value) => (
-                <option key={value} value={value}>
-                  {value} por página
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      )}
+      {/* Select en el extremo derecho */}
+      <div className="w-1/3 flex justify-end">
+        <select
+          value={itemsPerPage}
+          onChange={handleItemsPerPageChange}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+        >
+          {[5, 10, 15, 20].map((value) => (
+            <option key={value} value={value}>
+              {value} por página
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
 
+    {/* Layout para móvil - vertical */}
+    <div className="flex md:hidden flex-col gap-4 items-center">
+      {/* Select arriba */}
+      <div className="w-full flex justify-center">
+        <select
+          value={itemsPerPage}
+          onChange={handleItemsPerPageChange}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+        >
+          {[5, 10, 15, 20].map((value) => (
+            <option key={value} value={value}>
+              {value} por página
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Navegación abajo */}
+      <div className="flex justify-center items-center gap-4">
+        <button
+          onClick={() => changePage(Math.max(currentPage - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+        >
+          <SkipPreviousIcon />
+        </button>
+        <span className="font-semibold text-gray-600">
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+        >
+          <SkipNextIcon />
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       <LocationModal
         isOpen={() => handleOpenModal()}
         openLocationModal={openLocationModal}

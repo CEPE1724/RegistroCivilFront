@@ -351,23 +351,26 @@ const ReusableForm = ({
     }
   }, [onExternalUpdate]);
 
-  const requestOtp = async () => {
-    try {
-      const url = APIURL.generateOTP();
-      const response = await axios.post(url, {
-        phoneNumber: formik.values.Celular,
-      });
+const requestOtp = async () => {
+  try {
+    const url = APIURL.generateOTP();
+    const response = await axios.post(url, {
+      phoneNumber: formik.values.Celular,
+      email: formik.values.Email,
+      nombreCompleto: `${formik.values.PrimerNombre || ''} ${formik.values.SegundoNombre || ''} ${formik.values.ApellidoPaterno || ''} ${formik.values.ApellidoMaterno || ''}`.trim(),
+    });
 
-      if (response.data.success) {
-        setIsOtpModalOpen(true);
-      } else {
-        alert(response.data.message);
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Hubo un error al generar el OTP');
+    if (response.data.success) {
+      setIsOtpModalOpen(true);
+    } else {
+      alert(response.data.message || "No se pudo generar el OTP");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert('Hubo un error al generar el OTP');
+  }
+};
+
 
   // Sistema unificado para mostrar el primer error en el submit
   const showFirstError = () => {
