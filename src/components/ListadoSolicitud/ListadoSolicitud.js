@@ -87,7 +87,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
-import { set } from "react-hook-form";
+import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
+import ListVerifLaboralModal from "./ListVerifLaboralModal"
 
 export function ListadoSolicitud() {
   const {
@@ -151,6 +152,11 @@ export function ListadoSolicitud() {
   const [fechaTiempos, setfechaTiempos] = useState([]);
   const inputFileRef = useRef(null);
   const [showModalRechazo, setShowModalRechazo] = useState(false);
+  const [listVerifDomiciModal, setListVerifDomiModal] = useState(false);
+  const handleCloseVerifDomModal = () => setListVerifDomiModal(false); 
+  const [listVerifLaborModal, setListVerifLaborModal] = useState(false);
+  const handleCloseVerifLabModal = () => setListVerifLaborModal(false); 
+  
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -737,7 +743,6 @@ export function ListadoSolicitud() {
 
   const permitirEquifax = () => {
     const permiso = permisos.find((p) => p.Permisos === "CONSULTA EQUIFAX");
-    console.log("sadsa0" , permiso)
     return permiso && permiso.Activo;
   };
 
@@ -1055,8 +1060,9 @@ export function ListadoSolicitud() {
 
       if (tipo === "domicilio") {
         if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
-          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
-          setDomicilioModalOpen(true);
+          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id, cliente: data });
+          //setDomicilioModalOpen(true);
+		  setListVerifDomiModal(true);
         } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
           await fetchtiemposolicitudesweb(data.id, 4);
           setOpenModalPendiente(true);
@@ -1066,8 +1072,9 @@ export function ListadoSolicitud() {
 
       if (tipo === "trabajo") {
         if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
-          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
-          setTrabajoModalOpen(true);
+          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id, cliente: data });
+          //setTrabajoModalOpen(true);
+		  setListVerifLaborModal(true)
         } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
           await fetchtiemposolicitudesweb(data.id, 5);
           setOpenModalPendiente(true);
@@ -4447,7 +4454,7 @@ export function ListadoSolicitud() {
         closeModal={handleCloseDomicilioModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={domicilioData?.idSolicitud}
-
+		datosCliente={domicilioData?.cliente}
       />
 
       <TrabajoModal
@@ -4456,6 +4463,18 @@ export function ListadoSolicitud() {
         idsTerrenas={idsTerrenas}
         idSolicitud={trabajoData?.idSolicitud}
       />
+
+	  <ListVerifDomicilioModal
+	  openModal={listVerifDomiciModal}
+	  closeModal={handleCloseVerifDomModal} 
+	  datosCliente={domicilioData}
+	  />
+
+	  <ListVerifLaboralModal
+	  openModal={listVerifLaborModal}
+	  closeModal={handleCloseVerifLabModal} 
+	  datosCliente={trabajoData}
+	  />
 
       <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
         <DialogTitle>Verificación Pendiente</DialogTitle>

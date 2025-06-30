@@ -102,6 +102,12 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
     }
   }, [openModal, idsTerrenas.idTerrenaGestionTrabajo]); // Se ejecuta cuando cambia openModal o idsTerrenas.idTerrenaGestionTrabajo
 
+  useEffect(() => {
+	  if (!openModal) {
+		setTrabajoInfo("");
+	  }
+	}, [openModal]);
+
   // Función para obtener la información del trabajo
   const fetchTrabajoInfo = async (id) => {
     try {
