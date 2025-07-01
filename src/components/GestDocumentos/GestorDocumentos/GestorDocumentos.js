@@ -485,19 +485,19 @@ export function GestorDocumentos({
             10: "Consentimiento",
             11: "Autorización",
             12: "Foto del Cliente",  //Servicio Basico
-            // 13: "Croquis",  //Foto del Cliente
+            13: "Casa",  //Foto del Cliente
             14: "Servicio Basico",  //Croquis
-            15: "Foto del Cliente firmando",
-            16: "RESPALDO 1",
-            17: "RESPALDO 2",
-            18: "RESPALDO 3",
-            19: "RESPALDO 4",
-            20: "RESPALDO 5",
-            21: "RESPALDO 6",
-            22: "RESPALDO 7",
-            23: "RESPALDO 8",
-            24: "RESPALDO 9",
-            25: "RESPALDO 10",
+            15: "Foto del Cliente Firmando",
+            16: "Respaldo 1",
+            17: "Respaldo 2",
+            18: "Respaldo 3",
+            19: "Respaldo 4",
+            20: "Respaldo 5",
+            21: "Respaldo 6",
+            22: "Respaldo 7",
+            23: "Respaldo 8",
+            24: "Respaldo 9",
+            25: "Respaldo 10",
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };

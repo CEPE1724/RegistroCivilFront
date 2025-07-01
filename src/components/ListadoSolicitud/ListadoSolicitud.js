@@ -1,4 +1,3 @@
-// Listado Solicitud 2
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -89,6 +88,7 @@ import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
 import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
 import ListVerifLaboralModal from "./ListVerifLaboralModal"
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 export function ListadoSolicitud() {
   const {
@@ -1674,6 +1674,19 @@ export function ListadoSolicitud() {
               idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio,
               idAnalista: item.idAnalista,
               Operador: item.idOperador,
+			  idProducto: item.idProductos == 1 
+			  ? "COMBOS" 
+			  : item.idProductos == 2 
+			  ? "LAVADORA" 
+			  : item.idProductos == 3
+			  ? "MOVILIDAD" 
+			  : item.idProductos == 4
+			  ? "PORTATIL"
+			  : item.idProductos == 5
+			  ? "REFRIGERADOR"
+			  : item.idProductos == 6
+			  ? "TELEVISOR"
+			  : "DESCONOCIDO"
             };
           })
         );
@@ -4113,6 +4126,16 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Afiliado:</p>
                     <p>{selectedRow.afiliado}</p>
                   </div>
+
+				  <div className="flex items-center gap-2">
+					<ShoppingCartIcon
+					className="text-blue-500"
+                    fontSize="medium"
+					/>
+					<p className="font-semibold">Producto:</p>
+					<p> {selectedRow.idProducto} </p>
+				  </div>
+
                   <div className="flex items-center gap-2">
                     <BusinessIcon className="text-blue-500" fontSize="medium" />
                     <p className="font-semibold">Tiene RUC:</p>
@@ -4462,6 +4485,7 @@ export function ListadoSolicitud() {
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={trabajoData?.idSolicitud}
+		datosCliente={trabajoData?.cliente}
       />
 
 	  <ListVerifDomicilioModal

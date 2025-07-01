@@ -275,7 +275,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
               "Tipo de Verificación",
               tipoVerificacionMap[tipoVerificacion]
             )}
-			  { verificacionData?.tipoVerificacion !==2 && (
+			  { verificacionData?.tipoVerificacion !==2 && idsTerrenas.iEstado !== 2 && (
 			  <div className="col-span-full flex justify-end mt-2">
 				<button
 				  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
