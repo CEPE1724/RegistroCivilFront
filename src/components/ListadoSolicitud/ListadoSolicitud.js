@@ -1,4 +1,3 @@
-// Listado Solicitud 2
 import React, { useState, useEffect } from "react";
 import {
   Table,
@@ -87,7 +86,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
-import { set } from "react-hook-form";
+import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
+import ListVerifLaboralModal from "./ListVerifLaboralModal"
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 export function ListadoSolicitud() {
   const {
@@ -151,6 +152,11 @@ export function ListadoSolicitud() {
   const [fechaTiempos, setfechaTiempos] = useState([]);
   const inputFileRef = useRef(null);
   const [showModalRechazo, setShowModalRechazo] = useState(false);
+  const [listVerifDomiciModal, setListVerifDomiModal] = useState(false);
+  const handleCloseVerifDomModal = () => setListVerifDomiModal(false); 
+  const [listVerifLaborModal, setListVerifLaborModal] = useState(false);
+  const handleCloseVerifLabModal = () => setListVerifLaborModal(false); 
+  
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -737,7 +743,6 @@ export function ListadoSolicitud() {
 
   const permitirEquifax = () => {
     const permiso = permisos.find((p) => p.Permisos === "CONSULTA EQUIFAX");
-    console.log("sadsa0" , permiso)
     return permiso && permiso.Activo;
   };
 
@@ -1055,8 +1060,9 @@ export function ListadoSolicitud() {
 
       if (tipo === "domicilio") {
         if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
-          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id });
-          setDomicilioModalOpen(true);
+          setDomicilioData({ ...idsTerrenas, idSolicitud: data.id, cliente: data });
+          //setDomicilioModalOpen(true);
+		  setListVerifDomiModal(true);
         } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
           await fetchtiemposolicitudesweb(data.id, 4);
           setOpenModalPendiente(true);
@@ -1066,8 +1072,9 @@ export function ListadoSolicitud() {
 
       if (tipo === "trabajo") {
         if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
-          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id });
-          setTrabajoModalOpen(true);
+          setTrabajoData({ ...idsTerrenas, idSolicitud: data.id, cliente: data });
+          //setTrabajoModalOpen(true);
+		  setListVerifLaborModal(true)
         } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
           await fetchtiemposolicitudesweb(data.id, 5);
           setOpenModalPendiente(true);
@@ -1667,6 +1674,19 @@ export function ListadoSolicitud() {
               idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio,
               idAnalista: item.idAnalista,
               Operador: item.idOperador,
+			  idProducto: item.idProductos == 1 
+			  ? "COMBOS" 
+			  : item.idProductos == 2 
+			  ? "LAVADORA" 
+			  : item.idProductos == 3
+			  ? "MOVILIDAD" 
+			  : item.idProductos == 4
+			  ? "PORTATIL"
+			  : item.idProductos == 5
+			  ? "REFRIGERADOR"
+			  : item.idProductos == 6
+			  ? "TELEVISOR"
+			  : "DESCONOCIDO"
             };
           })
         );
@@ -4106,6 +4126,16 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Afiliado:</p>
                     <p>{selectedRow.afiliado}</p>
                   </div>
+
+				  <div className="flex items-center gap-2">
+					<ShoppingCartIcon
+					className="text-blue-500"
+                    fontSize="medium"
+					/>
+					<p className="font-semibold">Producto:</p>
+					<p> {selectedRow.idProducto} </p>
+				  </div>
+
                   <div className="flex items-center gap-2">
                     <BusinessIcon className="text-blue-500" fontSize="medium" />
                     <p className="font-semibold">Tiene RUC:</p>
@@ -4447,7 +4477,7 @@ export function ListadoSolicitud() {
         closeModal={handleCloseDomicilioModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={domicilioData?.idSolicitud}
-
+		datosCliente={domicilioData?.cliente}
       />
 
       <TrabajoModal
@@ -4455,7 +4485,20 @@ export function ListadoSolicitud() {
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={trabajoData?.idSolicitud}
+		datosCliente={trabajoData?.cliente}
       />
+
+	  <ListVerifDomicilioModal
+	  openModal={listVerifDomiciModal}
+	  closeModal={handleCloseVerifDomModal} 
+	  datosCliente={domicilioData}
+	  />
+
+	  <ListVerifLaboralModal
+	  openModal={listVerifLaborModal}
+	  closeModal={handleCloseVerifLabModal} 
+	  datosCliente={trabajoData}
+	  />
 
       <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
         <DialogTitle>Verificación Pendiente</DialogTitle>

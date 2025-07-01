@@ -1,7 +1,7 @@
 import { get } from "react-hook-form";
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
-const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
+const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -76,7 +76,6 @@ export const APIURL = {
   post_creSolicitudVerificacionTelefonica: () => `${API_BASE_URL}cre-solicitudverificaciontelefonica`,
   getActividadEconominasituacionLaboral: () => `${API_BASE_URL}cre-situacionlaboral`,
   getCheckDocumento: (idCreSolicitudWeb, tipoDocumento) => `${API_BASE_URL}documentos-solicitud/check?idCreSolicitudWeb=${idCreSolicitudWeb}&tipoDocumento=${tipoDocumento}`,
-
   get_analis_cogno: (ci) => `${API_BASE_URL}usuarios/analistas/?Filtro=${ci}`,
   get_verif_cogno: (ci) => `${API_BASE_URL}usuarios/verificadores/?Filtro=${ci}`,
   post_analista: () => `${API_BASE_URL}analistacredito`,
@@ -87,7 +86,6 @@ export const APIURL = {
   verificadorcredito: () => `${API_BASE_URL}verificadorcredito`,
   posthorarioanalista: () => `${API_BASE_URL}horariosanalistas`,
   posthorarioverificador: () => `${API_BASE_URL}horariosverificadores`,
-
   get_repositorios: (anio, mes) => {
     let url = API_BASE_URL + "cre-solicitud-web/repositorios";
     let params = [];
@@ -120,20 +118,15 @@ export const APIURL = {
   post_createtiemposolicitudeswebDto: () => `${API_BASE_URL}tiemposolicitudesweb`,
   get_tiemposolicitudesweb_all: (id) => `${API_BASE_URL}tiemposolicitudesweb/all/${id}`,
   /*   @Get('all/estado/:idCre_SolicitudWeb/:tipo')  */
-  get_tiemposolicitudesweb: (id, estado) =>
-    `${API_BASE_URL}tiemposolicitudesweb/all/estado/${id}/${estado}`,
+  get_tiemposolicitudesweb: (id, estado) => `${API_BASE_URL}tiemposolicitudesweb/all/estado/${id}/${estado}`,
   get_TiempSolicWeb: (tipo, id, estado) => `${API_BASE_URL}tiemposolicitudesweb/tiempo/${tipo}/${id}/${estado}`,
   get_Verificador: (id) => `${API_BASE_URL}tiemposolicitudesweb/tiempo/${id}`,
   get_ingresoCobrador: () => `${API_BASE_URL}ingreso-cobrador`,
-  post_clientesVerificacionTerrenaBasica: () =>
-    `${API_BASE_URL}clientes-verificacion-terrena/basica`,
+  post_clientesVerificacionTerrenaBasica: () =>`${API_BASE_URL}clientes-verificacion-terrena/basica`,
   getCoordenadasprefacturaPorId: (id, Tipo) => `${API_BASE_URL}coordenadasprefactura/find/${id}/${Tipo}`,
   get_cre_referenciasclientesweb_id_all: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/count/${id}`,
-
   getTerrenaGestionDomicilio: (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}`,
-
   getacces: (idMenu, idUsuario) => `${API_BASE_URL}menu-item-role/permissionscomponents/${idMenu}/${idUsuario}`,
-
   getRolesWeb: () => `${API_BASE_URL}rolesweb`,
   getUsuarioPorROL: (idRol) => `${API_BASE_URL}usuarios/rol/${idRol}`,
   getMenuPorusuario: (idUsuario) => `${API_BASE_URL}menu-item-role/permissionsmenu/${idUsuario}`,
@@ -147,7 +140,6 @@ export const APIURL = {
   getdocumentosanalista: () => `${API_BASE_URL}cre-solicitud-web/documentosanalista`,
   post_VerificacionTelefonicaMaestro: () => `${API_BASE_URL}cre-verificacion-telefonica-maestro`,
   postCompareFaces: () => `${API_PYTHON_BASE_URL}verify-faces`,
-
   //// LISTA NEGRA TELEFONOS
   getTelefonos: () => `${API_BASE_URL}lista-negra-cell`,
   postTelefono: () => `${API_BASE_URL}lista-negra-cell`,
@@ -175,8 +167,6 @@ export const APIURL = {
   get_tokenVendedor: (id) => `${API_BASE_URL}dispositivosApp/tokenExpo/${id}`,
   getCoordenadasId: (id, tipo) => `${API_BASE_URL}coordenadasprefactura/id/${id}/${tipo}`,
 
-
-
    // Verifica si el usuario ya tiene ingreso en InfoSistema
   verificarCambioClave: (usuario) => `${API_BASE_URL}info-sistema/existe/${usuario}`,
 
@@ -185,4 +175,8 @@ export const APIURL = {
 
   // Cambiar contraseña del usuario
   cambiarClave: () => `${API_BASE_URL}usuarios/cambiar-clave`,
+
+  patch_ClientesVerifTerren: (id) => `${API_BASE_URL}clientes-verificacion-terrena/update/${id}`,
+  get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}` 
+
 };

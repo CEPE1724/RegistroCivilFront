@@ -6,6 +6,8 @@ import { Home, Work, CalendarToday, AttachMoney, LocationOn, Phone, Person, Map 
 import Modal from "react-modal";
 import { Visibility } from "@mui/icons-material";
 import { TicketMinus } from "lucide-react";
+import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
+import { useAuth } from "../AuthContext/AuthContext";
 
 const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
@@ -46,14 +48,15 @@ const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   );
 };
 
-const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
+const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente }) => {
   const [trabajoInfo, setTrabajoInfo] = useState(null); // Estado para almacenar los datos del trabajo
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [verificador, setVerificador] = useState(null);
-
+  const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
+  const { userData } = useAuth();
 
   const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
 
@@ -102,6 +105,12 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
     }
   }, [openModal, idsTerrenas.idTerrenaGestionTrabajo]); // Se ejecuta cuando cambia openModal o idsTerrenas.idTerrenaGestionTrabajo
 
+  useEffect(() => {
+	  if (!openModal) {
+		setTrabajoInfo("");
+	  }
+	}, [openModal]);
+
   // Función para obtener la información del trabajo
   const fetchTrabajoInfo = async (id) => {
     try {
@@ -145,6 +154,10 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
         <p className="text-sm text-gray-700">{value}</p>
       </div>
     ) : null;
+
+	const handleAbrirModalVerificador = () => {
+		setOpenVerificacionModal(true)
+	}
 
   // Si el modal no está abierto, retornamos null
   if (!openModal) return null;
@@ -304,6 +317,17 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
                   />
                 </div>
               </div>
+			  
+			{trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !==2 &&(
+			<div className="col-span-full flex justify-end mt-2">
+			<button
+			  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
+			  onClick={handleAbrirModalVerificador}
+			>
+			  Reasignar verificador
+			</button>
+			</div>)}
+
               {Array.isArray(trabajoInfo.trabajoImages) && trabajoInfo.trabajoImages.length > 0 && (
                 <div className="col-span-full mt-6">
                   <h3 className="text-lg font-semibold mb-2">Imágenes del Trabajo</h3>
@@ -381,6 +405,15 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
           onClose={() => setShowMapModal(false)}
         />
       )}
+
+	  <VerificacionTerrenaModal
+	  isOpen={openVerificacionModal}
+	  onClose={() => setOpenVerificacionModal(false)}
+	  userSolicitudData={datosCliente}
+	  userData={userData}
+	  tipoSeleccionado={"trabajo"}
+	  idClienteVerificacion={trabajoInfo?.idClienteVerificacion}
+	  />
     </div>
   );
 };

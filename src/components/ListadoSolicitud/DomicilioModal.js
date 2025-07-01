@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { APIURL } from "../../configApi/apiConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import Modal from "react-modal";
-import { Visibility } from "@mui/icons-material";
-import { Alert } from "@mui/lab";
+import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
+import { useAuth } from "../AuthContext/AuthContext";
 export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
@@ -47,16 +47,17 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
 };
 
 
-const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => {
-  const [verificacionData, setVerificacionData] = useState(null);
+const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente }) => {
+  const { userData } = useAuth();
+  const [verificacionData, setVerificacionData] = useState("");
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [verificador, setVerificador] = useState(null);
+  const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
 
   const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
-    console.log("llega id", estado)
     try {
       const url = APIURL.get_tiemposolicitudesweb(idCre_SolicitudWeb, estado);
       const response = await axios.get(url, {
@@ -68,7 +69,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
         const data = response.data[0].Telefono;
         // data puede ser un array o un objeto, asumo objeto:
         // El nombre del verificador está en data.Telefono
-        console.log("aqui esta el nomnbre ", data)
         setVerificador(data || "Sin verificador");
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -116,6 +116,12 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
 
     }
   }, [openModal, idsTerrenas, idSolicitud]);
+
+  useEffect(() => {
+    if (!openModal) {
+      setVerificacionData("");
+    }
+  }, [openModal]);
 
 
   if (!openModal || !verificacionData) return null;
@@ -179,7 +185,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
 
   const {
     // idTerrenaGestionDomicilio,
-    // idClienteVerificacion,
+    idClienteVerificacion,
     idTerrenaTipoCliente,
     iTiempoVivienda,
     idTerrenaTipoVivienda,
@@ -205,10 +211,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
 
   } = verificacionData;
 
-
-
-
-
   const renderField = (label, value) =>
     value !== null && value !== "" ? (
       <div>
@@ -216,6 +218,10 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
         <p className="text-sm text-gray-700">{value}</p>
       </div>
     ) : null;
+
+	const handleAbrirModalVerificador = () => {
+		setOpenVerificacionModal(true)
+	}
 
   return (
     <>
@@ -229,8 +235,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
             </p>
           )}
           <div className="grid grid-cols-1 sm:grid-cols-4 md:grid-cols-4 gap-4">
-            {/* {renderField("ID Terreno", idTerrenaGestionDomicilio)} */}
-            {/* {renderField("ID Cliente Verificación", idClienteVerificacion)} */}
             {renderField(
               "Tipo de Cliente",
               tipoClienteMap[idTerrenaTipoCliente]
@@ -271,6 +275,15 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
               "Tipo de Verificación",
               tipoVerificacionMap[tipoVerificacion]
             )}
+			  { verificacionData?.tipoVerificacion !==2 && idsTerrenas.iEstado !== 2 && (
+			  <div className="col-span-full flex justify-end mt-2">
+				<button
+				  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
+				  onClick={handleAbrirModalVerificador}
+				>
+				  Reasignar verificador
+				</button>
+			  </div>)}
             {Array.isArray(domicilioImages) && domicilioImages.length > 0 && (
               <div className="col-span-full mt-6">
                 <h3 className="text-lg font-semibold mb-2">Fotos del domicilio</h3>
@@ -362,11 +375,17 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud }) => 
           onClose={() => setShowMapModal(false)}
         />
       )}
+
+	  <VerificacionTerrenaModal
+	  isOpen={openVerificacionModal}
+	  onClose={() => setOpenVerificacionModal(false)}
+	  userSolicitudData={datosCliente}
+	  userData={userData}
+	  tipoSeleccionado={"domicilio"}
+	  idClienteVerificacion={verificacionData?.idClienteVerificacion}
+	  />
     </>
   );
 };
 
-
-
 export default DomicilioModal;
-
