@@ -15,10 +15,15 @@ import {
   DialogContent,
   DialogActions,
   Button,
-} from "@mui/material"; // <-- agrega Dialog, Button, etc.
+} from "@mui/material";
 import {
-  TimerOff as TimerOffIcon, // <-- agrega este ícono
-} from "@mui/icons-material"; // <-- TimerOffIcon también
+  TimerOff as TimerOffIcon,
+  Security as SecurityIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+} from "@mui/icons-material";
+import { APIURL } from "../configApi/apiConfig"; 
+
 const Login = () => {
   const { login, isLoggedIn, isSessionExpired2,  logout } = useAuth();
   const [sessionExpired, setShowExpiredModal] = useState(false);
@@ -29,6 +34,29 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const [mostrarCambioClave, setMostrarCambioClave] = useState(false);
+  const [nuevaClave, setNuevaClave] = useState("");
+  const [confirmarClave, setConfirmarClave] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Función para validar la contraseña
+  const validarContrasena = (password) => {
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    return {
+      minLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasSpecialChar,
+      isValid: minLength && hasUpperCase && hasLowerCase && hasSpecialChar
+    };
+  };
+
+  const passwordValidation = validarContrasena(nuevaClave);
 
   useEffect(() => {
     if (isSessionExpired2) {
@@ -37,21 +65,21 @@ const Login = () => {
   }, [isSessionExpired2]);
 
   const handleCloseModal = () => {
-  
     setShowExpiredModal(false);
-    
   };
 
-  if (isLoggedIn) {
-    navigate("/ciudadanos", { replace: true });
-  }
+  useEffect(() => {
+    if (isLoggedIn && !mostrarCambioClave) {
+      navigate("/ciudadanos", { replace: true });
+    }
+  }, [isLoggedIn, mostrarCambioClave]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      // Llama a tu API para hacer login
+    setMessageError("");
 
+    try {
       const response = await axios.post("auth/login", {
         Nombre: userName,
         Clave: password,
@@ -61,16 +89,37 @@ const Login = () => {
         const data = response.data;
         localStorage.setItem("token", data.token);
 
-        const expirationTime = new Date().getTime() + 3 * 60 * 60 * 1000; // 3 horas
-        login(data.token, expirationTime);
-        enqueueSnackbar("Acceso correcto!", { variant: "success" });
-        navigate("/dashboard", { replace: true });
+        // Verifica si existe en InfoSistemas2
+        const verificacion = await axios.get(APIURL.verificarCambioClave(userName));
+        const debeCambiar = !verificacion.data.existe;
+
+        console.log("¿Debe cambiar?", debeCambiar);
+
+        if (debeCambiar) {
+          setMostrarCambioClave(true); // muestra el modal
+        } else {
+          const expirationTime = new Date().getTime() + 3 * 60 * 60 * 1000;
+          login(data.token, expirationTime); // inicia sesión
+          enqueueSnackbar("Acceso correcto!", { variant: "success" });
+          navigate("/dashboard", { replace: true });
+        }
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       setMessageError("Credenciales inválidas");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const obtenerIP = async () => {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip; // IP pública
+    } catch (e) {
+      console.error("Error al obtener IP:", e);
+      return "127.0.0.1";
     }
   };
 
@@ -92,7 +141,6 @@ const Login = () => {
                     {messageError && <div className="text-red-500 text-start mb-4 text-sm">*{messageError}</div>}
                     <form className="space-y-4" onSubmit={handleSubmit}>
                       <Box>
-
                         <TextField
                           placeholder="Usuario"
                           fullWidth
@@ -111,14 +159,13 @@ const Login = () => {
                       </Box>
 
                       <Box sx={{ width: '100%' }}>
-
                         <TextField
                           placeholder="Contraseña"
                           fullWidth
                           required
                           value={password}
                           variant="outlined"
-                          onChange={(e) => setPassword(e.target.value.toUpperCase())}
+                          onChange={(e) => setPassword(e.target.value)}
                           type={showPassword ? 'text' : 'password'}
                           InputProps={{
                             startAdornment: (
@@ -152,6 +199,7 @@ const Login = () => {
           </div>
         </div>
       </div>
+      
       <Dialog
         open={sessionExpired}
         onClose={handleCloseModal}
@@ -197,6 +245,227 @@ const Login = () => {
         </DialogActions>
       </Dialog>
 
+      <Dialog 
+        open={mostrarCambioClave} 
+        onClose={() => {}} 
+        disableEscapeKeyDown
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+          },
+        }}
+      >
+        <DialogTitle sx={{ 
+          textAlign: "center", 
+          pb: 1,
+          background: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+            <SecurityIcon sx={{ fontSize: "2rem", color: "#FFD700" }} />
+            <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
+              Configuración de Seguridad
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+            Al ser tu primer acceso, es necesario establecer una contraseña segura
+          </Typography>
+        </DialogTitle>
+        
+        <DialogContent sx={{ 
+          p: 3,
+          background: "rgba(255, 255, 255, 0.95)",
+          color: "#333",
+          m: 2,
+          borderRadius: "8px",
+        }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 3, 
+              backgroundColor: "rgba(33, 150, 243, 0.1)",
+              border: "1px solid rgba(33, 150, 243, 0.3)",
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: "500" }}>
+              🔒 Por tu seguridad, establece una contraseña que cumpla con los siguientes requisitos:
+            </Typography>
+          </Alert>
+
+          <TextField
+            label="Nueva contraseña"
+            type={showNewPassword ? 'text' : 'password'}
+            fullWidth
+            margin="dense"
+            value={nuevaClave}
+            onChange={(e) => setNuevaClave(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
+            }}
+          />
+
+          <TextField
+            label="Confirmar contraseña"
+            type={showConfirmPassword ? 'text' : 'password'}
+            fullWidth
+            margin="dense"
+            value={confirmarClave}
+            onChange={(e) => setConfirmarClave(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
+            }}
+          />
+
+          {/* Indicadores de validación */}
+          <Box sx={{ mt: 2, p: 2, backgroundColor: "rgba(0, 0, 0, 0.05)", borderRadius: "8px" }}>
+            <Typography variant="body2" sx={{ fontWeight: "bold", mb: 1, color: "#555" }}>
+              Requisitos de contraseña:
+            </Typography>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+              {passwordValidation.minLength ? (
+                <CheckCircleIcon sx={{ color: "#4caf50", fontSize: "1rem" }} />
+              ) : (
+                <CancelIcon sx={{ color: "#f44336", fontSize: "1rem" }} />
+              )}
+              <Typography variant="body2" sx={{ color: passwordValidation.minLength ? "#4caf50" : "#f44336" }}>
+                Mínimo 8 caracteres
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+              {passwordValidation.hasUpperCase ? (
+                <CheckCircleIcon sx={{ color: "#4caf50", fontSize: "1rem" }} />
+              ) : (
+                <CancelIcon sx={{ color: "#f44336", fontSize: "1rem" }} />
+              )}
+              <Typography variant="body2" sx={{ color: passwordValidation.hasUpperCase ? "#4caf50" : "#f44336" }}>
+                Al menos una letra mayúscula (A-Z)
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+              {passwordValidation.hasLowerCase ? (
+                <CheckCircleIcon sx={{ color: "#4caf50", fontSize: "1rem" }} />
+              ) : (
+                <CancelIcon sx={{ color: "#f44336", fontSize: "1rem" }} />
+              )}
+              <Typography variant="body2" sx={{ color: passwordValidation.hasLowerCase ? "#4caf50" : "#f44336" }}>
+                Al menos una letra minúscula (a-z)
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {passwordValidation.hasSpecialChar ? (
+                <CheckCircleIcon sx={{ color: "#4caf50", fontSize: "1rem" }} />
+              ) : (
+                <CancelIcon sx={{ color: "#f44336", fontSize: "1rem" }} />
+              )}
+              <Typography variant="body2" sx={{ color: passwordValidation.hasSpecialChar ? "#4caf50" : "#f44336" }}>
+                Al menos un carácter especial (!@#$%^&*...)
+              </Typography>
+            </Box>
+
+            {confirmarClave && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.5 }}>
+                {nuevaClave === confirmarClave ? (
+                  <CheckCircleIcon sx={{ color: "#4caf50", fontSize: "1rem" }} />
+                ) : (
+                  <CancelIcon sx={{ color: "#f44336", fontSize: "1rem" }} />
+                )}
+                <Typography variant="body2" sx={{ color: nuevaClave === confirmarClave ? "#4caf50" : "#f44336" }}>
+                  Las contraseñas coinciden
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+        
+        <DialogActions sx={{ p: 3, pt: 1 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            disabled={!passwordValidation.isValid || nuevaClave !== confirmarClave || !nuevaClave || !confirmarClave}
+            onClick={async () => {
+              if (nuevaClave !== confirmarClave) {
+                enqueueSnackbar("Las contraseñas no coinciden", { variant: "error" });
+                return;
+              }
+
+              if (!passwordValidation.isValid) {
+                enqueueSnackbar("La contraseña no cumple con los requisitos de seguridad", { variant: "error" });
+                return;
+              }
+
+              try {
+                const ip = await obtenerIP();
+
+                // Cambiar la contraseña
+                await axios.post(APIURL.cambiarClave(), {
+                  nombreUsuario: userName,
+                  nuevaClave,
+                  direccionIP: ip,
+                });
+
+                // Realiza el login con el token ya guardado
+                const token = localStorage.getItem("token");
+                const expirationTime = new Date().getTime() + 3 * 60 * 60 * 1000;
+                login(token, expirationTime);
+
+                enqueueSnackbar("Contraseña cambiada exitosamente", { variant: "success" });
+                setMostrarCambioClave(false);
+                navigate("/dashboard", { replace: true });
+              } catch (err) {
+                console.error("Error al cambiar clave o registrar ingreso:", err);
+                enqueueSnackbar("Error al cambiar la contraseña", { variant: "error" });
+              }
+            }}
+            sx={{ 
+              backgroundColor: "#1453C8", 
+              color: "#fff",
+              py: 1.5,
+              borderRadius: "8px",
+              fontSize: "1.1rem",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "#0f3a9f",
+              },
+              "&:disabled": {
+                backgroundColor: "#ccc",
+                color: "#666",
+              },
+            }}
+          >
+            Establecer Nueva Contraseña Segura
+          </Button>
+        </DialogActions>
+      </Dialog>
     </section>
   );
 };

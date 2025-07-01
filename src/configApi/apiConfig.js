@@ -166,6 +166,17 @@ export const APIURL = {
   get_tokenbyUsuario: (nombre) => `${API_BASE_URL}dispositivosApp/usuario/${nombre}`,
   get_tokenVendedor: (id) => `${API_BASE_URL}dispositivosApp/tokenExpo/${id}`,
   getCoordenadasId: (id, tipo) => `${API_BASE_URL}coordenadasprefactura/id/${id}/${tipo}`,
+
+   // Verifica si el usuario ya tiene ingreso en InfoSistema
+  verificarCambioClave: (usuario) => `${API_BASE_URL}info-sistema/existe/${usuario}`,
+
+  // Registra el ingreso del usuario en InfoSistema
+  registrarIngresoSistema: () => `${API_BASE_URL}info-sistema/registrar`,
+
+  // Cambiar contraseña del usuario
+  cambiarClave: () => `${API_BASE_URL}usuarios/cambiar-clave`,
+
   patch_ClientesVerifTerren: (id) => `${API_BASE_URL}clientes-verificacion-terrena/update/${id}`,
   get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}` 
+
 };
