@@ -76,28 +76,32 @@ const filteredVerificadores = verificadores.filter((v) =>
 	}
 
     try {
-	  await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
+	  const response = await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
+
+	  if (response.status !== 200){
+		throw new Error("Error al agregar el registro.");
+	  }
+
 	  await axios.patch(APIURL.patch_ClientesVerifTerren(idClienteVerificacion), payload3);
       enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
       if (tokenVerificador) {
-        try {
-          const response = await axios.post(APIURL.enviarNotificacion(), payload2);
-          if (response.status === 200) {
-            enqueueSnackbar("Verificación Terrena enviada", { variant: "success" });
-          }
-        } catch (error) {
-          console.error("Error al enviar la notificación:", error);
-        }
+          const responseNoti = await axios.post(APIURL.enviarNotificacion(), payload2);
+
+		  if (responseNoti.status !== 200) {
+          throw new Error("Error al enviar la notificación");
+		  }
+
+		  enqueueSnackbar("Notificación enviada", { variant: "success" });
       }
 
       resetForm();
       onClose(); // Cierra el modal
 
 	  if (tipoVerificacion === "domicilio") {
-      patchSolicitud(userSolicitudData.id, "domicilio");
+      await patchSolicitud(userSolicitudData.id, "domicilio");
       await fetchInsertarDatos(4, userSolicitudData.id, verificadorNombre, 1)
     } else if (tipoVerificacion === "trabajo") {
-      patchSolicitud(userSolicitudData.id, "trabajo");
+      await patchSolicitud(userSolicitudData.id, "trabajo");
       await fetchInsertarDatos(5, userSolicitudData.id, verificadorNombre, 1);
     }
 

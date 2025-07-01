@@ -159,6 +159,7 @@ const ListVerifLaboralModal = ({ openModal, closeModal, datosCliente }) => {
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={selectedVerificacion}
         idSolicitud={datosCliente?.idSolicitud}
+		datosCliente={datosCliente?.cliente}
       />
 
       <Dialog
