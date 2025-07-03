@@ -42,7 +42,7 @@ const Login = () => {
 
   // Función para validar la contraseña
   const validarContrasena = (password) => {
-    const minLength = password.length >= 8;
+    const minLength = password.length >= 8 && password.length <= 12;
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
