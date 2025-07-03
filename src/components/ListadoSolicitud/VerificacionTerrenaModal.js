@@ -77,21 +77,23 @@ const filteredVerificadores = verificadores.filter((v) =>
 
     try {
 	  const response = await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
-
-	  if (response.status !== 200){
+	  if (response.status !== 201){
 		throw new Error("Error al agregar el registro.");
 	  }
 
 	  await axios.patch(APIURL.patch_ClientesVerifTerren(idClienteVerificacion), payload3);
       enqueueSnackbar("Verificación registrada correctamente", { variant: "success" });
       if (tokenVerificador) {
-          const responseNoti = await axios.post(APIURL.enviarNotificacion(), payload2);
-
-		  if (responseNoti.status !== 200) {
-          throw new Error("Error al enviar la notificación");
-		  }
-
-		  enqueueSnackbar("Notificación enviada", { variant: "success" });
+		try {
+			const responseNoti = await axios.post(APIURL.enviarNotificacion(), payload2);
+			if (responseNoti.status !== 200) {
+				throw new Error("Error al enviar la notificación");
+			}
+			enqueueSnackbar("Notificación enviada", { variant: "success" });
+		} catch (notiError) {
+			console.error("❌ Error al enviar notificación:", notiError);
+			//enqueueSnackbar("Error al enviar notificación", { variant: "error" });
+		}
       }
 
       resetForm();

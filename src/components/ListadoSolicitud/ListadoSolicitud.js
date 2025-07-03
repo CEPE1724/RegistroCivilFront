@@ -1520,7 +1520,6 @@ export function ListadoSolicitud() {
     fetchInsertarDatos2(8, fila, 1)
   };
 
-
   const updateOperador = async (fila, numero) => {
     console.log(fila.id)
     console.log(numero)
@@ -2888,7 +2887,6 @@ export function ListadoSolicitud() {
                               size="small"
                               sx={{
                                 opacity:
-                                  verificacionSolicitud(data) ||
                                     data.Laboral === false
                                     ? 0
                                     : 1,

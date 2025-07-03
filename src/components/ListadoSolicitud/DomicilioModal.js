@@ -46,7 +46,6 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   );
 };
 
-
 const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente }) => {
   const { userData } = useAuth();
   const [verificacionData, setVerificacionData] = useState("");
@@ -105,7 +104,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
           fetchVerificador(idSolicitud, 4);
         }
 
-
       } catch (error) {
         console.error("Error al obtener los datos de verificación:", error);
       }
@@ -122,7 +120,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
       setVerificacionData("");
     }
   }, [openModal]);
-
 
   if (!openModal || !verificacionData) return null;
 
@@ -170,7 +167,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
   const accesoMap = {
     1: "Fácil",
     2: "Difícil",
-
   };
 
   const coberturaMap = {
@@ -208,7 +204,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
     domicilioImages,
     direccionCoincide,
     tipoVerificacion,
-
   } = verificacionData;
 
   const renderField = (label, value) =>
@@ -275,7 +270,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
               "Tipo de Verificación",
               tipoVerificacionMap[tipoVerificacion]
             )}
-			  { verificacionData?.tipoVerificacion !==2 && idsTerrenas.iEstado !== 2 && (
+			  { verificacionData?.tipoVerificacion !==2 && idsTerrenas.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
 			  <div className="col-span-full flex justify-end mt-2">
 				<button
 				  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
@@ -312,8 +307,6 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
                 </div>
               </div>
             )}
-
-
 
             {Latitud && Longitud && (
               <div>
