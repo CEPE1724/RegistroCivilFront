@@ -75,10 +75,10 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                 for (const estado of estados) {
                     const response = await axios.get(APIURL.get_documentosEstado(idSolicitud, estado));
                     if (response.data && response.data.length > 0) {
-                        documentos = response.data;
-                        break;
+                        documentos = documentos.concat(response.data);
                     }
                 }
+
                 // const todosDocs = response.data || [];
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB

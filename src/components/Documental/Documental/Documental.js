@@ -179,7 +179,7 @@ export function Documental({
 
             previews[sectionName].push(fileUrl);
 
-            if (file.idEstadoDocumento >= 4) {
+            if (file.idEstadoDocumento == 4 && file.idTipoDocumentoWEB <= 15) {
             //  alert(`El campo ${sectionName} está en corrección.`);
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
             } else {
@@ -198,7 +198,6 @@ export function Documental({
                 completed.add(sectionName); // Agrupa en "Campos Completados" si estado < 4
             }
           });
-          console.log("Archivos subidos:", completed);
           setFiles(uploadedFiles);
           setFilePreviews(previews);
           setCompletedFields2([...completed]);
@@ -1253,7 +1252,6 @@ export function Documental({
                     <span className="text-gray-600">Subir archivo</span>
                     <input
                       type="file"
-                      multiple
                       accept=".pdf,.png,.jpg,.jpeg"
                       onChange={(e) => handleFileChange(e, activeTab)}
                       className="hidden"

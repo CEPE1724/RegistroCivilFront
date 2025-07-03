@@ -42,7 +42,7 @@ const Login = () => {
 
   // Función para validar la contraseña
   const validarContrasena = (password) => {
-    const minLength = password.length >= 8;
+    const minLength = password.length >= 8 && password.length <= 12;
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
@@ -355,7 +355,7 @@ const Login = () => {
                 <CancelIcon sx={{ color: "#f44336", fontSize: "1rem" }} />
               )}
               <Typography variant="body2" sx={{ color: passwordValidation.minLength ? "#4caf50" : "#f44336" }}>
-                Mínimo 8 caracteres
+                Mínimo 8 caracteres y máximo 12 caracteres
               </Typography>
             </Box>
 
