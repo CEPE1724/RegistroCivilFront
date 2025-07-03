@@ -80,12 +80,10 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
     }
   };
 
-
   const direccionCoinMap = {
     1: "Coincide",
     2: "No Coincide",
   };
-
   
     const tipoVerificacionMap = {
     1: "Dirección incorrecta",
@@ -239,7 +237,6 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
                     className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
                     readOnly
                   />
-
                 </div>
 
                 <div>
@@ -318,7 +315,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
                 </div>
               </div>
 			  
-			{trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !==2 &&(
+			{trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !==2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
 			<div className="col-span-full flex justify-end mt-2">
 			<button
 			  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
@@ -327,7 +324,6 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
 			  Reasignar verificador
 			</button>
 			</div>)}
-
               {Array.isArray(trabajoInfo.trabajoImages) && trabajoInfo.trabajoImages.length > 0 && (
                 <div className="col-span-full mt-6">
                   <h3 className="text-lg font-semibold mb-2">Imágenes del Trabajo</h3>

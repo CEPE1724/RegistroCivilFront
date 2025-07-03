@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 import ModalConfirmacionRechazo from '../../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
 import { GoogleMapModal } from "../../ListadoSolicitud/DomicilioModal"
+import jsPDF from "jspdf";
 
 export function GestorDocumentos({
     id,
@@ -93,10 +94,13 @@ export function GestorDocumentos({
             // tipo: 1 = domicilio, 2 = laboral
             const response = await axios.get(APIURL.getCoordenadasId(clientInfo.id, tipo));
             if (response.data && response.data[0]) {
-                setMapLat(response.data[0].latitud);
-                setMapLng(response.data[0].longitud);
+				const lat = response.data[0].latitud;
+				const lng = response.data[0].longitud;
+                setMapLat(lat);
+                setMapLng(lng);
                 setMapTitle(tipo === 1 ? "Croquis Domicilio" : "Croquis Laboral");
                 setShowMapModal(true);
+				generatePDF(lat, lng);
             } else {
                 enqueueSnackbar("No hay coordenadas registradas para este croquis.", { variant: "warning" });
             }
@@ -108,6 +112,7 @@ export function GestorDocumentos({
     const [showMapModal, setShowMapModal] = useState(false);
     const [mapLat, setMapLat] = useState(null);
     const [mapLng, setMapLng] = useState(null);
+	console.log(mapLat, mapLng)
     const [mapTitle, setMapTitle] = useState(""); // Para saber cuál croquis se está mostrando
     // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
@@ -225,6 +230,29 @@ export function GestorDocumentos({
             console.error("Error al obtener archivos:", error);
         }
     };
+
+	const generatePDF = (latitude, longitude) => {
+  const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&markers=color:red|${latitude},${longitude}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+
+  const pdf = new jsPDF();
+
+  //titulo
+  pdf.setFontSize(18);
+  pdf.text("Croquis", 80, 20);
+  
+  // Cargar la imagen en el PDF
+  const img = new Image();
+  img.src = mapImageUrl;
+  
+  img.onload = () => {
+    // Añadir la imagen al PDF 
+    pdf.addImage(img, 'JPEG', 10, 45, 180, 120);
+    
+    // Guardar el PDF
+    pdf.save('ubicacion.pdf');
+  };
+};
+
 
     useEffect(() => {
         if (clientInfo.id) {
