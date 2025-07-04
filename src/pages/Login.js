@@ -39,7 +39,66 @@ const Login = () => {
   const [confirmarClave, setConfirmarClave] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  
+  // Estados para modal de olvido de contraseña
 
+ const [showOlvidoModal, setShowOlvidoModal] = useState(false);
+  const [usuarioOlvido, setUsuarioOlvido] = useState("");
+  const [cedulaOlvido, setCedulaOlvido] = useState("");
+  const [isLoadingOlvido, setIsLoadingOlvido] = useState(false);
+
+
+const handleOlvidoPassword = async () => {
+  if (!usuarioOlvido.trim() || !cedulaOlvido.trim()) {
+    enqueueSnackbar("Por favor complete todos los campos", { variant: "error" });
+    return;
+  }
+
+  setIsLoadingOlvido(true);
+  try {
+    const response = await axios.post(APIURL.recuperarClave(), {
+      nombreUsuario: usuarioOlvido,
+      cedula: cedulaOlvido,
+    });
+
+    // Manejo mejorado de respuestas del backend
+    const mensaje = response.data;
+    
+    // Verificar si la respuesta indica éxito o error basándose en el mensaje
+    if (mensaje === 'La contraseña ha sido enviada al correo registrado') {
+      enqueueSnackbar(mensaje, { variant: "success" });
+      setShowOlvidoModal(false);
+      setUsuarioOlvido("");
+      setCedulaOlvido("");
+    } else {
+      // Cualquier otro mensaje del backend se considera un error
+      enqueueSnackbar(mensaje, { variant: "error" });
+    }
+
+  } catch (error) {
+    console.error("Error al recuperar contraseña:", error);
+    
+    // Manejar los diferentes tipos de errores
+    let mensajeError = "Error al procesar la solicitud. Intente nuevamente.";
+    
+    if (error.response?.data) {
+      // Si el backend envía un mensaje específico en response.data
+      mensajeError = error.response.data;
+    } else if (error.response?.status === 400) {
+      mensajeError = "Datos inválidos. Verifique su usuario y cédula.";
+    } else if (error.response?.status === 404) {
+      mensajeError = "Usuario no encontrado o datos incorrectos.";
+    } else if (error.response?.status >= 500) {
+      mensajeError = "Error del servidor. Intente más tarde.";
+    }
+    
+    enqueueSnackbar(mensajeError, { variant: "error" });
+  } finally {
+    setIsLoadingOlvido(false);
+  }
+};
+  
   // Función para validar la contraseña
   const validarContrasena = (password) => {
     const minLength = password.length >= 8 && password.length <= 12;
@@ -188,6 +247,20 @@ const Login = () => {
                         {isLoading ? <CircularProgress size={24} color="inherit" /> : <span className="flex items-center">Ingresar <LoginIcon className="ml-2" /></span>}
                       </button>
                     </form>
+
+   {/* Enlace para olvidar contraseña */}
+                    <div className="text-center mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowOlvidoModal(true)}
+                        className="text-sm text-blue-700 hover:text-blue-900 underline transition-colors duration-200"
+                      >
+                        ¿Olvidaste tu contraseña?
+                      </button>
+                    </div>
+
+
+
                   </div>
                 </div>
 
@@ -241,6 +314,152 @@ const Login = () => {
             }}
           >
             Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal de olvido de contraseña */}
+      <Dialog 
+        open={showOlvidoModal} 
+        onClose={() => setShowOlvidoModal(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: "linear-gradient(135deg, #1965F2 0%, #4A90E2 100%)",
+            color: "white",
+          },
+        }}
+      >
+        <DialogTitle sx={{ 
+          textAlign: "center", 
+          pb: 1,
+          background: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+            <Lock sx={{ fontSize: "2rem", color: "#FFD700" }} />
+            <Typography variant="h5" component="div" sx={{ fontWeight: "bold" }}>
+              Recuperar Contraseña
+            </Typography>
+          </Box>
+          <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }}>
+            Ingrese sus datos para recuperar el acceso a su cuenta
+          </Typography>
+        </DialogTitle>
+        
+        <DialogContent sx={{ 
+          p: 3,
+          background: "rgba(255, 255, 255, 0.95)",
+          color: "#333",
+          m: 2,
+          borderRadius: "8px",
+        }}>
+          <Alert 
+            severity="info" 
+            sx={{ 
+              mb: 3, 
+              backgroundColor: "rgba(33, 150, 243, 0.1)",
+              border: "1px solid rgba(33, 150, 243, 0.3)",
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: "500" }}>
+              🔐 Complete los siguientes datos para verificar su identidad
+            </Typography>
+          </Alert>
+
+          <TextField
+            label="Usuario"
+            fullWidth
+            margin="dense"
+            value={usuarioOlvido}
+            onChange={(e) => setUsuarioOlvido(e.target.value.toUpperCase())}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon sx={{ color: '#1965F2' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
+              mb: 2
+            }}
+          />
+
+          <TextField
+            label="Número de Cédula"
+            fullWidth
+            margin="dense"
+            value={cedulaOlvido}
+            onChange={(e) => setCedulaOlvido(e.target.value)}
+            inputProps={{
+              maxLength: 10,
+              pattern: "[0-9]*"
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+              },
+            }}
+          />
+
+          <Box sx={{ mt: 2, p: 2, backgroundColor: "rgba(25, 101, 242, 0.1)", borderRadius: "8px" }}>
+            <Typography variant="body2" sx={{ color: "#1965F2", fontWeight: "500" }}>
+              💡 Una vez verificados sus datos, recibirá instrucciones para restablecer su contraseña.
+            </Typography>
+          </Box>
+        </DialogContent>
+        
+        <DialogActions sx={{ p: 3, pt: 1, gap: 2 }}>
+          <Button
+            onClick={() => {
+              setShowOlvidoModal(false);
+              setUsuarioOlvido("");
+              setCedulaOlvido("");
+            }}
+            sx={{ 
+              color: "#666",
+              borderColor: "#666",
+              "&:hover": {
+                borderColor: "#333",
+                color: "#333"
+              }
+            }}
+            variant="outlined"
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!usuarioOlvido.trim() || !cedulaOlvido.trim() || isLoadingOlvido}
+            onClick={handleOlvidoPassword}
+            sx={{ 
+              backgroundColor: "#1965F2", 
+              color: "#fff",
+              px: 4,
+              borderRadius: "8px",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "#0f3a9f",
+              },
+              "&:disabled": {
+                backgroundColor: "#ccc",
+                color: "#666",
+              },
+            }}
+          >
+            {isLoadingOlvido ? (
+              <>
+                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                Procesando...
+              </>
+            ) : (
+              "Recuperar Contraseña"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

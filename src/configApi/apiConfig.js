@@ -1,7 +1,9 @@
 import { get } from "react-hook-form";
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+
 const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
+
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -175,6 +177,8 @@ export const APIURL = {
 
   // Cambiar contraseña del usuario
   cambiarClave: () => `${API_BASE_URL}usuarios/cambiar-clave`,
+  recuperarClave: () => `${API_BASE_URL}usuarios/recuperar-clave`, 
+
 
   patch_ClientesVerifTerren: (id) => `${API_BASE_URL}clientes-verificacion-terrena/update/${id}`,
   get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}` 
