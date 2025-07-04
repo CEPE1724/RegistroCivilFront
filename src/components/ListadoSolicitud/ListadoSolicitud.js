@@ -89,6 +89,7 @@ import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmac
 import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
 import ListVerifLaboralModal from "./ListVerifLaboralModal"
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 export function ListadoSolicitud() {
   const {
@@ -2276,6 +2277,8 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Laborales</TableCell>
                   <TableCell align="center">Analista</TableCell>
                   <TableCell align="center">Operador</TableCell>
+                  <TableCell align="center">Informe Operador</TableCell>
+				  
                 </TableRow>
               </TableHead>
 
@@ -3074,6 +3077,13 @@ export function ListadoSolicitud() {
                           </span>
                         </Box>
                       </TableCell>
+
+					  {/* Informes Operador */}
+					  <TableCell align="center">
+						<IconButton size="large">
+							<DescriptionIcon/>
+                        </IconButton>
+					  </TableCell>
 
 
 
