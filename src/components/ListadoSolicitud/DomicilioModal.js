@@ -5,12 +5,36 @@ import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import Modal from "react-modal";
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 import { useAuth } from "../AuthContext/AuthContext";
+import jsPDF from "jspdf";
+import DownloadIcon from '@mui/icons-material/Download';
 export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
     width: "100%",
     height: "100%",
     borderRadius: "1rem",
+  };
+
+  const generatePDF = (latitude, longitude) => {
+	const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&scale=2&maptype=hybrid&markers=color:red|${latitude},${longitude}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+  
+	const pdf = new jsPDF();
+  
+	//titulo
+	pdf.setFontSize(18);
+	pdf.text("Croquis", 80, 20);
+	
+	// Cargar la imagen en el PDF
+	const img = new Image();
+	img.src = mapImageUrl;
+	
+	img.onload = () => {
+	  // Añadir la imagen al PDF 
+	  pdf.addImage(img, 'JPEG', 17, 45, 180, 120);
+	  
+	  // Guardar el PDF
+	  pdf.save('ubicacion.pdf');
+	};
   };
 
 
@@ -41,6 +65,15 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
             <Marker position={center} />
           </GoogleMap>
         </LoadScript>
+		<div className="absolute bottom-4 left-4">
+			<button
+			onClick= {() => generatePDF(lat, lng)}
+				className="bg-primaryBlue text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition"
+			>
+				<DownloadIcon/>
+				Descargar
+			</button>
+		</div>
       </div>
     </div>
   );

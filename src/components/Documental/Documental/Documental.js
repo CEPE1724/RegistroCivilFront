@@ -179,9 +179,10 @@ export function Documental({
 
             previews[sectionName].push(fileUrl);
 
-            if (file.idEstadoDocumento == 4 && file.idTipoDocumentoWEB <= 15) {
+            if (file.idEstadoDocumento == 4 && file.idTipoDocumentoWEB <= 15 ) {
             //  alert(`El campo ${sectionName} está en corrección.`);
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
+			  console.log("corrections", corrections)
             } else {
               //alert(`El campo ${sectionName} no está en corrección.`);
               // si sectionname es respaldo # 1 no entre
@@ -247,7 +248,7 @@ export function Documental({
       10: "Consentimiento",
       11: "Autorización",
       12: "Foto del Cliente",  //Servicio Basico
-      13: "Casa",   //Casa
+      13: "Foto Casa",   //Casa
       14: "Servicio Basico",   //Croquis
       15: "Foto del Cliente Firmando",
       16: "Respaldo 1", // Respaldo 1
@@ -260,6 +261,7 @@ export function Documental({
       23: "Respaldo 8", // Respaldo 8
       24: "Respaldo 9", // Respaldo 9
       25: "Respaldo 10", // Respaldo 10
+	  26: "Foto Trabajo"
     };
     return documentoIds[id] || null;
   };
@@ -318,7 +320,7 @@ export function Documental({
       return (completedCorrections / totalCorrections) * 100;
     } else {
       // Modo Normal: Progreso basado en los 11 campos totales
-      const totalFields = 14;
+      const totalFields = 15;
       const completedFieldsCount = completedFields2.length;
 
       return (completedFieldsCount / totalFields) * 100;
@@ -522,7 +524,7 @@ export function Documental({
       10: "Consentimiento",
       11: "Autorización",
       12: "Foto del Cliente",   //Servicio Basico
-      13: "Casa",   //Foto del Cliente
+      13: "Foto Casa",   //Foto del Cliente
       14: "Servicio Basico",   //Croquis
       15: "Foto del Cliente Firmando",
       16: "Respaldo 1", // Respaldo 1
@@ -535,6 +537,7 @@ export function Documental({
       23: "Respaldo 8", // Respaldo 8
       24: "Respaldo 9", // Respaldo 9
       25: "Respaldo 10", // Respaldo 10
+	  26: "Foto Trabajo"
     };
 
     // Buscamos la clave (número) correspondiente al nombre
@@ -668,7 +671,7 @@ export function Documental({
         Consentimiento: 10,
         Autorización: 11,
         "Foto del Cliente": 12,
-        "Casa": 13,
+        "Foto Casa": 13,
         "Servicio Basico": 14,
         "Foto del Cliente Firmando": 15,
         "Respaldo 1": 16,
@@ -681,6 +684,7 @@ export function Documental({
         "Respaldo 8": 23,
         "Respaldo 9": 24,
         "Respaldo 10": 25,
+		"Foto Trabajo": 26
       };
 
       const idTipoDocumentoWEB = documentoIds[activeTab] || null; // Si no encuentra, asigna null o un valor por defecto
@@ -781,7 +785,8 @@ export function Documental({
     "Autorización",
     "Servicio Basico",
     "Foto del Cliente",
-    "Casa",
+    "Foto Casa",
+	"Foto Trabajo",
     "Foto del Cliente Firmando",
     "Respaldo 1",
     "Respaldo 2",
