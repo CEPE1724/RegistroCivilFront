@@ -27,6 +27,8 @@ import { useAuth } from "../../AuthContext/AuthContext";
 import { Facebook } from "@mui/icons-material";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 import ModalConfirmacionRechazo from "./ModalConfirmacionRechazo";
+import ModalCorreccion from "./ModalCorreccion";
+
 export function Cabecera() {
   const { userData, userUsuario } = useAuth();
   const { state } = useLocation();
@@ -1201,6 +1203,25 @@ export function Cabecera() {
       console.error("Error al guardar los datos del cliente", error);
     }
   };
+
+
+   const fetchInsertarDatosCorreccion = async (tipo , observacion) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+        idCre_SolicitudWeb: clienteData.idCre_SolicitudWeb,
+        Tipo: 1,
+        idEstadoVerificacionDocumental: tipo,
+        Usuario: userData.Nombre,
+        Telefono: observacion,
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+
   const fetchValidaDomicilio = async (tipo) => {
     try {
       const url = APIURL.getCoordenadasprefacturaPorId(
@@ -1555,6 +1576,7 @@ export function Cabecera() {
   };
 
   const [showModalRechazo, setShowModalRechazo] = useState(false);
+   const [showModalCorrecion, setShowModalCorrecion] = useState(false);
 
   const handleRechazar = async (Observacion) => {
     patchSolicitudRechazar(idSolicitud );
@@ -1576,9 +1598,9 @@ export function Cabecera() {
     // Lógica para rechazar la solicitud
   };
 
-  const handleCorreccion = async () => {
+  const handleCorreccion = async (observacion) => {
     patchSolicitudCorrecion(idSolicitud);
-    fetchInsertarDatos(11);
+    fetchInsertarDatosCorreccion(11, observacion);
 
     await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Se envio a corregir la solicitud grande! ✍️",
@@ -1650,15 +1672,15 @@ export function Cabecera() {
 
                 <button
                  onClick={() => setShowModalRechazo(true)}
-                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-red-600 hover:text-white transition duration-200"
                 >
                   ❌ Rechazar
                 </button>
 
                 <button
-                  onClick={() => handleCorreccion()}
-                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+               onClick={() => setShowModalCorrecion(true)}
+                   className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-yellow-50 hover:text-white transition duration-200"
                 >
                   ✏️ Corrección
@@ -1751,7 +1773,14 @@ export function Cabecera() {
   onClose={() => setShowModalRechazo(false)}
   onConfirm={handleRechazar}
   solicitudData={data}
-/>
+/> 
+
+      <ModalCorreccion
+            isOpen={showModalCorrecion}
+            onClose={() => setShowModalCorrecion(false)}
+            onConfirm={handleCorreccion}
+            solicitudData={data}
+          />
         </div>
       )}
     </>
