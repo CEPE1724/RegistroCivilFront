@@ -89,7 +89,13 @@ import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmac
 import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
 import ListVerifLaboralModal from "./ListVerifLaboralModal"
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DescriptionIcon from '@mui/icons-material/Description';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
+import { DocumentoDescarga } from './DocumentoDescarga';
+import { Description } from "@mui/icons-material";
+
 
 export function ListadoSolicitud() {
   const {
@@ -154,10 +160,11 @@ export function ListadoSolicitud() {
   const inputFileRef = useRef(null);
   const [showModalRechazo, setShowModalRechazo] = useState(false);
   const [listVerifDomiciModal, setListVerifDomiModal] = useState(false);
-  const handleCloseVerifDomModal = () => setListVerifDomiModal(false); 
+  const handleCloseVerifDomModal = () => setListVerifDomiModal(false);
   const [listVerifLaborModal, setListVerifLaborModal] = useState(false);
-  const handleCloseVerifLabModal = () => setListVerifLaborModal(false); 
-  
+  const handleCloseVerifLabModal = () => setListVerifLaborModal(false);
+  const [isOpenPDf, setIsOpenPdf] = useState(false);
+  const [ dataInforme, setDataInforme ] = useState(null);
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -672,15 +679,15 @@ export function ListadoSolicitud() {
   };
 
   const handleApproveEstado = async (data) => {
-	try {
-		await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-    	await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    	await fetchInsertarDatos(6, data.id, 1);
-    	setRecargar(true);
-    	setShowModalRechazo(false)
-	} catch (error) {
-		console.error("Error al pre-aprobar estado:", error);
-	}
+    try {
+      await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
+      await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+      await fetchInsertarDatos(6, data.id, 1);
+      setRecargar(true);
+      setShowModalRechazo(false)
+    } catch (error) {
+      console.error("Error al pre-aprobar estado:", error);
+    }
   };
 
   const handleApproveResultado = (data) => {
@@ -776,10 +783,10 @@ export function ListadoSolicitud() {
     return !permiso || !permiso.Activo;
   };
 
-  
 
 
- 
+
+
 
   const estadoColores = {
     1: "#d0160e", // Rojo para Revisión
@@ -822,9 +829,9 @@ export function ListadoSolicitud() {
           fecthAnalista(),
           fetchOperador()
         ]);
-          if (userData?.idUsuario && idMenu) {
-        await permissionscomponents(idMenu, userData.idUsuario);
-      }
+        if (userData?.idUsuario && idMenu) {
+          await permissionscomponents(idMenu, userData.idUsuario);
+        }
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
       }
@@ -1063,7 +1070,7 @@ export function ListadoSolicitud() {
         if (idsTerrenas.idTerrenaGestionDomicilio > 0) {
           setDomicilioData({ ...idsTerrenas, idSolicitud: data.id, cliente: data });
           //setDomicilioModalOpen(true);
-		  setListVerifDomiModal(true);
+          setListVerifDomiModal(true);
         } else if (idsTerrenas.idTerrenaGestionDomicilio === 0) {
           await fetchtiemposolicitudesweb(data.id, 4);
           setOpenModalPendiente(true);
@@ -1075,7 +1082,7 @@ export function ListadoSolicitud() {
         if (idsTerrenas.idTerrenaGestionTrabajo > 0) {
           setTrabajoData({ ...idsTerrenas, idSolicitud: data.id, cliente: data });
           //setTrabajoModalOpen(true);
-		  setListVerifLaborModal(true)
+          setListVerifLaborModal(true)
         } else if (idsTerrenas.idTerrenaGestionTrabajo === 0) {
           await fetchtiemposolicitudesweb(data.id, 5);
           setOpenModalPendiente(true);
@@ -1229,64 +1236,64 @@ export function ListadoSolicitud() {
   };*/
 
   const getIconDomicilio = (estadoId) => {
-  switch (estadoId) {
-    case 0: // Sin verificar
-      return <HomeIcon sx={{ color: "gray" }} />;
+    switch (estadoId) {
+      case 0: // Sin verificar
+        return <HomeIcon sx={{ color: "gray" }} />;
 
-    case 1: // Dirección incorrecta
-      return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+      case 1: // Dirección incorrecta
+        return <LocationOffIcon sx={{ color: "#FFC107" }} />;
 
-    case 2: // Aprobado
-      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      case 2: // Aprobado
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
 
-    case 3: // Malas referencias
-      return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
+      case 3: // Malas referencias
+        return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
 
-    case 4: // No vive ahí
-      return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
+      case 4: // No vive ahí
+        return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
 
-    case 5: // Datos falsos
-      return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
+      case 5: // Datos falsos
+        return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
 
-    case 6: // Zona vetada
-      return <BlockIcon sx={{ color: "#6c757d" }} />;
+      case 6: // Zona vetada
+        return <BlockIcon sx={{ color: "#6c757d" }} />;
 
-    case 7: // No sustenta ingresos
-      return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
+      case 7: // No sustenta ingresos
+        return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
 
-    default:
-      return <HomeIcon sx={{ color: "gray" }} />;
-  }
-};
+      default:
+        return <HomeIcon sx={{ color: "gray" }} />;
+    }
+  };
 
   const getIconLaboral = (estadoId) => {
     switch (estadoId) {
-       case 0: // Sin verificar
-      return <HomeIcon sx={{ color: "gray" }} />;
+      case 0: // Sin verificar
+        return <HomeIcon sx={{ color: "gray" }} />;
 
-    case 1: // Dirección incorrecta
-      return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+      case 1: // Dirección incorrecta
+        return <LocationOffIcon sx={{ color: "#FFC107" }} />;
 
-    case 2: // Aprobado
-      return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+      case 2: // Aprobado
+        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
 
-    case 3: // Malas referencias
-      return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
+      case 3: // Malas referencias
+        return <ReportProblemIcon sx={{ color: "#DC3545" }} />;
 
-    case 4: // No vive ahí
-      return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
+      case 4: // No vive ahí
+        return <NotListedLocationIcon sx={{ color: "#DC3545" }} />;
 
-    case 5: // Datos falsos
-      return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
+      case 5: // Datos falsos
+        return <DoNotDisturbIcon sx={{ color: "#DC3545" }} />;
 
-    case 6: // Zona vetada
-      return <BlockIcon sx={{ color: "#6c757d" }} />;
+      case 6: // Zona vetada
+        return <BlockIcon sx={{ color: "#6c757d" }} />;
 
-    case 7: // No sustenta ingresos
-      return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
+      case 7: // No sustenta ingresos
+        return <MoneyOffIcon sx={{ color: "#FFC107" }} />;
 
-    default:
-      return <HomeIcon sx={{ color: "gray" }} />;
+      default:
+        return <HomeIcon sx={{ color: "gray" }} />;
     }
   };
 
@@ -1674,19 +1681,19 @@ export function ListadoSolicitud() {
               idEstadoVerificacionDomicilio: item.idEstadoVerificacionDomicilio,
               idAnalista: item.idAnalista,
               Operador: item.idOperador,
-			  idProducto: item.idProductos == 1 
-			  ? "COMBOS" 
-			  : item.idProductos == 2 
-			  ? "LAVADORA" 
-			  : item.idProductos == 3
-			  ? "MOVILIDAD" 
-			  : item.idProductos == 4
-			  ? "PORTATIL"
-			  : item.idProductos == 5
-			  ? "REFRIGERADOR"
-			  : item.idProductos == 6
-			  ? "TELEVISOR"
-			  : "DESCONOCIDO"
+              idProducto: item.idProductos == 1
+                ? "COMBOS"
+                : item.idProductos == 2
+                  ? "LAVADORA"
+                  : item.idProductos == 3
+                    ? "MOVILIDAD"
+                    : item.idProductos == 4
+                      ? "PORTATIL"
+                      : item.idProductos == 5
+                        ? "REFRIGERADOR"
+                        : item.idProductos == 6
+                          ? "TELEVISOR"
+                          : "DESCONOCIDO"
             };
           })
         );
@@ -1955,17 +1962,17 @@ export function ListadoSolicitud() {
 
   useEffect(() => {
     fetchSolicitudes();
-  }, [itemsPerPage, currentPage , recargar]);
+  }, [itemsPerPage, currentPage, recargar]);
 
   const handleRechazar = async (observacion) => {
     patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
     patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
-   // fetchInsertarDatos(6, selectedRow?.id, 4);
-     fetchInsertarDatosRechazo(6, selectedRow?.id, 4 ,observacion ) 
-   handleCloseDialog()
-     setShowModalRechazo(false); // <-- Cierra el modal de rechazo siempre que abras el de detalles
+    // fetchInsertarDatos(6, selectedRow?.id, 4);
+    fetchInsertarDatosRechazo(6, selectedRow?.id, 4, observacion)
+    handleCloseDialog()
+    setShowModalRechazo(false); // <-- Cierra el modal de rechazo siempre que abras el de detalles
 
-   setRecargar(prev => !prev);
+    setRecargar(prev => !prev);
   }
 
   return (
@@ -2278,7 +2285,7 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Analista</TableCell>
                   <TableCell align="center">Operador</TableCell>
                   <TableCell align="center">Informe Operador</TableCell>
-				  
+
                 </TableRow>
               </TableHead>
 
@@ -2890,7 +2897,7 @@ export function ListadoSolicitud() {
                               size="small"
                               sx={{
                                 opacity:
-                                    data.Laboral === false
+                                  data.Laboral === false
                                     ? 0
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#fff1f5f9",
@@ -3078,13 +3085,19 @@ export function ListadoSolicitud() {
                         </Box>
                       </TableCell>
 
-					  {/* Informes Operador */}
-					  <TableCell align="center">
-						<IconButton size="large">
-							<DescriptionIcon/>
-                        </IconButton>
-					  </TableCell>
+                      {/* Informes Operador */}
+                      <TableCell align="center">
+                        <button
+                          onClick={() => {
+                            setIsOpenPdf(true);
+                            setDataInforme(data);
 
+                          }}
+                          className="bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-900 transition-all duration-200 rounded-full p-2"
+                        >
+                          <TwoWheelerIcon className="text-blue-700" />
+                        </button>
+                      </TableCell>
 
 
                     </TableRow>
@@ -4135,14 +4148,14 @@ export function ListadoSolicitud() {
                     <p>{selectedRow.afiliado}</p>
                   </div>
 
-				  <div className="flex items-center gap-2">
-					<ShoppingCartIcon
-					className="text-blue-500"
-                    fontSize="medium"
-					/>
-					<p className="font-semibold">Producto:</p>
-					<p> {selectedRow.idProducto} </p>
-				  </div>
+                  <div className="flex items-center gap-2">
+                    <ShoppingCartIcon
+                      className="text-blue-500"
+                      fontSize="medium"
+                    />
+                    <p className="font-semibold">Producto:</p>
+                    <p> {selectedRow.idProducto} </p>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     <BusinessIcon className="text-blue-500" fontSize="medium" />
@@ -4150,7 +4163,7 @@ export function ListadoSolicitud() {
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    { permitirEquifax() && (
+                    {permitirEquifax() && (
                       <button
                         onClick={() => handleEquifax(data)}
                         className="py-2 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
@@ -4337,90 +4350,90 @@ export function ListadoSolicitud() {
         </DialogActions>
       </Dialog>
 
-     {totalPages > 1 && (
-  <div className="mt-6">
-    {/* Layout para escritorio - horizontal */}
-    <div className="hidden md:flex justify-between items-center">
-      {/* Espacio vacío para alineación */}
-      <div className="w-1/3" />
+      {totalPages > 1 && (
+        <div className="mt-6">
+          {/* Layout para escritorio - horizontal */}
+          <div className="hidden md:flex justify-between items-center">
+            {/* Espacio vacío para alineación */}
+            <div className="w-1/3" />
 
-      {/* Navegación centrada */}
-      <div className="flex justify-center items-center gap-4 w-1/3">
-        <button
-          onClick={() => changePage(Math.max(currentPage - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-        >
-          <SkipPreviousIcon />
-        </button>
-        <span className="font-semibold text-gray-600">
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-        >
-          <SkipNextIcon />
-        </button>
-      </div>
+            {/* Navegación centrada */}
+            <div className="flex justify-center items-center gap-4 w-1/3">
+              <button
+                onClick={() => changePage(Math.max(currentPage - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+              >
+                <SkipPreviousIcon />
+              </button>
+              <span className="font-semibold text-gray-600">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+              >
+                <SkipNextIcon />
+              </button>
+            </div>
 
-      {/* Select en el extremo derecho */}
-      <div className="w-1/3 flex justify-end">
-        <select
-          value={itemsPerPage}
-          onChange={handleItemsPerPageChange}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-        >
-          {[5, 10, 15, 20].map((value) => (
-            <option key={value} value={value}>
-              {value} por página
-            </option>
-          ))}
-        </select>
-      </div>
-    </div>
+            {/* Select en el extremo derecho */}
+            <div className="w-1/3 flex justify-end">
+              <select
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                {[5, 10, 15, 20].map((value) => (
+                  <option key={value} value={value}>
+                    {value} por página
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-    {/* Layout para móvil - vertical */}
-    <div className="flex md:hidden flex-col gap-4 items-center">
-      {/* Select arriba */}
-      <div className="w-full flex justify-center">
-        <select
-          value={itemsPerPage}
-          onChange={handleItemsPerPageChange}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-        >
-          {[5, 10, 15, 20].map((value) => (
-            <option key={value} value={value}>
-              {value} por página
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Layout para móvil - vertical */}
+          <div className="flex md:hidden flex-col gap-4 items-center">
+            {/* Select arriba */}
+            <div className="w-full flex justify-center">
+              <select
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                {[5, 10, 15, 20].map((value) => (
+                  <option key={value} value={value}>
+                    {value} por página
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {/* Navegación abajo */}
-      <div className="flex justify-center items-center gap-4">
-        <button
-          onClick={() => changePage(Math.max(currentPage - 1, 1))}
-          disabled={currentPage === 1}
-          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-        >
-          <SkipPreviousIcon />
-        </button>
-        <span className="font-semibold text-gray-600">
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
-        >
-          <SkipNextIcon />
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            {/* Navegación abajo */}
+            <div className="flex justify-center items-center gap-4">
+              <button
+                onClick={() => changePage(Math.max(currentPage - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+              >
+                <SkipPreviousIcon />
+              </button>
+              <span className="font-semibold text-gray-600">
+                Página {currentPage} de {totalPages}
+              </span>
+              <button
+                onClick={() => changePage(Math.min(currentPage + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-2 py-1 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition disabled:invisible"
+              >
+                <SkipNextIcon />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <LocationModal
         isOpen={() => handleOpenModal()}
         openLocationModal={openLocationModal}
@@ -4485,7 +4498,7 @@ export function ListadoSolicitud() {
         closeModal={handleCloseDomicilioModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={domicilioData?.idSolicitud}
-		datosCliente={domicilioData?.cliente}
+        datosCliente={domicilioData?.cliente}
       />
 
       <TrabajoModal
@@ -4493,20 +4506,20 @@ export function ListadoSolicitud() {
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={idsTerrenas}
         idSolicitud={trabajoData?.idSolicitud}
-		datosCliente={trabajoData?.cliente}
+        datosCliente={trabajoData?.cliente}
       />
 
-	  <ListVerifDomicilioModal
-	  openModal={listVerifDomiciModal}
-	  closeModal={handleCloseVerifDomModal} 
-	  datosCliente={domicilioData}
-	  />
+      <ListVerifDomicilioModal
+        openModal={listVerifDomiciModal}
+        closeModal={handleCloseVerifDomModal}
+        datosCliente={domicilioData}
+      />
 
-	  <ListVerifLaboralModal
-	  openModal={listVerifLaborModal}
-	  closeModal={handleCloseVerifLabModal} 
-	  datosCliente={trabajoData}
-	  />
+      <ListVerifLaboralModal
+        openModal={listVerifLaborModal}
+        closeModal={handleCloseVerifLabModal}
+        datosCliente={trabajoData}
+      />
 
       <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
         <DialogTitle>Verificación Pendiente</DialogTitle>
@@ -4633,7 +4646,7 @@ export function ListadoSolicitud() {
 
         </DialogActions>
       </Dialog>
-
+      <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data ={dataInforme} />
     </div>
   );
 }
