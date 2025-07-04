@@ -111,7 +111,8 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
       8: /// Resultado
       {
-        1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] }
+        1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] },
+        2: { label: "ASIGNADO", icon: <PersonIcon />, color: red[500] }
 
       },
 

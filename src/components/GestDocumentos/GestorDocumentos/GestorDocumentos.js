@@ -67,7 +67,7 @@ export function GestorDocumentos({
     // mostrar botones
     useEffect(() => {
         if (allDocuments.length > 0) {
-            const filteredDocs = allDocuments.filter(doc => doc.type >= 1 && doc.type <= 15);
+            const filteredDocs = allDocuments.filter(doc => doc.type >= 1 && doc.type <= 15 || doc.type > 25);
             if (filteredDocs.length > 0) {
                 const allReviewed = filteredDocs.every(doc => doc.estado === 3 || doc.estado === 4);
                 if (allReviewed) {
@@ -100,7 +100,6 @@ export function GestorDocumentos({
                 setMapLng(lng);
                 setMapTitle(tipo === 1 ? "Croquis Domicilio" : "Croquis Laboral");
                 setShowMapModal(true);
-				generatePDF(lat, lng);
             } else {
                 enqueueSnackbar("No hay coordenadas registradas para este croquis.", { variant: "warning" });
             }
@@ -112,7 +111,6 @@ export function GestorDocumentos({
     const [showMapModal, setShowMapModal] = useState(false);
     const [mapLat, setMapLat] = useState(null);
     const [mapLng, setMapLng] = useState(null);
-	console.log(mapLat, mapLng)
     const [mapTitle, setMapTitle] = useState(""); // Para saber cuál croquis se está mostrando
     // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
@@ -230,29 +228,6 @@ export function GestorDocumentos({
             console.error("Error al obtener archivos:", error);
         }
     };
-
-	const generatePDF = (latitude, longitude) => {
-  const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&markers=color:red|${latitude},${longitude}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
-
-  const pdf = new jsPDF();
-
-  //titulo
-  pdf.setFontSize(18);
-  pdf.text("Croquis", 80, 20);
-  
-  // Cargar la imagen en el PDF
-  const img = new Image();
-  img.src = mapImageUrl;
-  
-  img.onload = () => {
-    // Añadir la imagen al PDF 
-    pdf.addImage(img, 'JPEG', 10, 45, 180, 120);
-    
-    // Guardar el PDF
-    pdf.save('ubicacion.pdf');
-  };
-};
-
 
     useEffect(() => {
         if (clientInfo.id) {
@@ -513,7 +488,7 @@ export function GestorDocumentos({
             10: "Consentimiento",
             11: "Autorización",
             12: "Foto del Cliente",  //Servicio Basico
-            13: "Casa",  //Foto del Cliente
+            13: "Foto Casa",  //Foto del Cliente
             14: "Servicio Basico",  //Croquis
             15: "Foto del Cliente Firmando",
             16: "Respaldo 1",
@@ -526,6 +501,7 @@ export function GestorDocumentos({
             23: "Respaldo 8",
             24: "Respaldo 9",
             25: "Respaldo 10",
+			26: "Foto Trabajo"
         };
         return documentoIds[id] || `Documento Tipo ${id}`;
     };
@@ -643,7 +619,7 @@ export function GestorDocumentos({
     const renderActionButtons = (document) => {
         //habilitar botones cuando estadoVerifD = 2
         if (clientInfo.estadoVerifD === 2) {
-            if (document.idTipoDocumento >= 1 && document.idTipoDocumento <= 15) {
+            if (document.idTipoDocumento >= 1 && document.idTipoDocumento <= 15 || document.idTipoDocumento > 25) {
                 switch (document.estado) {
                     case 2: // Pendiente - mostrar ambos botones
                         return (
