@@ -504,9 +504,13 @@ export function ListadoSolicitud() {
   const [domicilioChecked, setDomicilioChecked] = useState(false);
   const [entrada, setEntrada] = useState("");
 
+
+
+  const [justificacion, setJustificacion] = useState("");
+
   const handleConfirm = async () => {
     if (currentAction === "estado") {
-      handleApproveEstado(currentData);
+      handleApproveEstado(currentData , justificacion );
       if (laboralChecked) await patchLaboral(currentData.id);
       if (domicilioChecked) await patchDomicilio(currentData.id);
       if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
@@ -521,6 +525,8 @@ export function ListadoSolicitud() {
     setLaboralChecked(false);
     setDomicilioChecked(false);
     setEntrada("");
+    setJustificacion("");
+    setRecargar(true)
   };
 
   const patchEntrada = async (idSolicitud, valor) => {
@@ -617,6 +623,28 @@ export function ListadoSolicitud() {
       console.error("Error al guardar los datos del cliente", error);
     }
   };
+
+  const fetchInsertarDatosAprobarEstado = async (tipo, data, estado , observacion ) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+        idCre_SolicitudWeb: data,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: observacion 
+
+
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+
+
+
   const fetchInsertarDatosRechazo = async (tipo, data, estado, observacion) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
@@ -670,11 +698,11 @@ export function ListadoSolicitud() {
     }
   };
 
-  const handleApproveEstado = async (data) => {
+  const handleApproveEstado = async (data , justificacion) => {
 	try {
 		await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
     	await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    	await fetchInsertarDatos(6, data.id, 1);
+    await fetchInsertarDatosAprobarEstado(6, data.id, 1,justificacion); // ✅ Usar la nueva función con observación
     	setRecargar(true);
     	setShowModalRechazo(false)
 	} catch (error) {
@@ -4545,84 +4573,123 @@ export function ListadoSolicitud() {
       </Dialog>
 
       {/* Dialog de confirmación */}
-      <Dialog open={openDialog2} onClose={() => setOpenDialog2(false)}>
-        <DialogTitle>Confirmar acción</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de cambiar el{" "}
-            {currentAction === "estado" ? "estado" : "resultado"}?
-          </Typography>
+     <Dialog open={openDialog2} onClose={() => {
+  // Limpiar todos los campos cuando se cierre el modal
+  setOpenDialog2(false);
+  setLaboralChecked(false);
+  setDomicilioChecked(false);
+  setEntrada("");
+  setJustificacion("");
+}}>
+  <DialogTitle>Confirmar acción</DialogTitle>
+  <DialogContent>
+    <Typography>
+      ¿Estás seguro de cambiar el{" "}
+      {currentAction === "estado" ? "estado" : "resultado"}?
+    </Typography>
 
-          {currentAction === "estado" && (
-            <div style={{ marginTop: '1rem' }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={laboralChecked}
-                    onChange={(e) => setLaboralChecked(e.target.checked)}
-                  />
-                }
-                label="Laboral"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={domicilioChecked}
-                    onChange={(e) => setDomicilioChecked(e.target.checked)}
-                  />
-                }
-                label="Domicilio"
-              />
-              <TextField
-                label="Digite la entrada"
-                fullWidth
-                margin="normal"
-                value={entrada}
-                onChange={(e) => {
-                  const val = e.target.value;
+    {currentAction === "estado" && (
+      <div style={{ marginTop: '1rem' }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={laboralChecked}
+              onChange={(e) => setLaboralChecked(e.target.checked)}
+            />
+          }
+          label="Laboral"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={domicilioChecked}
+              onChange={(e) => setDomicilioChecked(e.target.checked)}
+            />
+          }
+          label="Domicilio"
+        />
+        <TextField
+          label="Digite la entrada"
+          fullWidth
+          margin="normal"
+          value={entrada}
+          onChange={(e) => {
+            const val = e.target.value;
 
-                  // Solo permitir números positivos con hasta 7 enteros y 2 decimales
-                  const regex = /^\d{0,7}(\.\d{0,2})?$/;
+            // Solo permitir números positivos con hasta 7 enteros y 2 decimales
+            const regex = /^\d{0,7}(\.\d{0,2})?$/;
 
-                  if (val === "" || regex.test(val)) {
-                    setEntrada(val);
-                  }
-                }}
-                inputProps={{
-                  inputMode: "decimal", // para móviles
-                  pattern: "^[0-9]{1,7}(\\.[0-9]{0,2})?$",
-                  maxLength: 10,
-                }}
-                error={
-                  entrada !== "" &&
-                  (isNaN(parseFloat(entrada)) ||
-                    parseFloat(entrada) > 9999999.99)
-                }
-                helperText={
-                  entrada !== "" && parseFloat(entrada) > 9999999.99
-                    ? "Máximo permitido: 9,999,999.99"
-                    : ""
-                }
-              />
-            </div>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog2(false)} color="primary">
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            color="primary"
-            disabled={
-              currentAction === "estado" && !laboralChecked && !domicilioChecked
+            if (val === "" || regex.test(val)) {
+              setEntrada(val);
             }
-          >
-            Confirmar
-          </Button>
-
-        </DialogActions>
-      </Dialog>
+          }}
+          inputProps={{
+            inputMode: "decimal", // para móviles
+            pattern: "^[0-9]{1,7}(\\.[0-9]{0,2})?$",
+            maxLength: 10,
+          }}
+          error={
+            entrada !== "" &&
+            (isNaN(parseFloat(entrada)) ||
+              parseFloat(entrada) > 9999999.99)
+          }
+          helperText={
+            entrada !== "" && parseFloat(entrada) > 9999999.99
+              ? "Máximo permitido: 9,999,999.99"
+              : ""
+          }
+        />
+        <TextField
+          label="Justificación / Motivo *"
+          fullWidth
+          margin="normal"
+          value={justificacion}
+          onChange={(e) => setJustificacion(e.target.value)}
+          multiline
+          rows={3}
+          placeholder="Ingrese la justificación para este cambio (mínimo 10 caracteres)..."
+          required
+          error={justificacion.length > 0 && justificacion.length < 10}
+          inputProps={{
+            maxLength: 500,
+          }}
+          helperText={
+            justificacion.length > 0 && justificacion.length < 10
+              ? `Mínimo 10 caracteres. Actual: ${justificacion.length}/500`
+              : `${justificacion.length}/500 caracteres`
+          }
+        />
+      </div>
+    )}
+  </DialogContent>
+  <DialogActions>
+    <Button 
+      onClick={() => {
+        // Limpiar todos los campos cuando se cancele
+        setOpenDialog2(false);
+        setLaboralChecked(false);
+        setDomicilioChecked(false);
+        setEntrada("");
+        setJustificacion("");
+      }} 
+      color="primary"
+    >
+      Cancelar
+    </Button>
+    <Button
+      onClick={handleConfirm}
+      color="primary"
+      disabled={
+        currentAction === "estado" && (
+          !laboralChecked && !domicilioChecked || // Debe seleccionar al menos uno
+          justificacion.length < 10 // Justificación obligatoria de mínimo 10 caracteres
+        )
+      }
+    >
+      Confirmar
+    </Button>
+  </DialogActions>
+</Dialog>
 
     </div>
   );
