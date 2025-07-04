@@ -179,10 +179,9 @@ export function Documental({
 
             previews[sectionName].push(fileUrl);
 
-            if (file.idEstadoDocumento == 4 && file.idTipoDocumentoWEB <= 15 ) {
+            if (file.idEstadoDocumento == 4 || file.idEstadoDocumento == 5 ) {
             //  alert(`El campo ${sectionName} está en corrección.`);
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
-			  console.log("corrections", corrections)
             } else {
               //alert(`El campo ${sectionName} no está en corrección.`);
               // si sectionname es respaldo # 1 no entre

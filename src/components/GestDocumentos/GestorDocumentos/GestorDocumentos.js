@@ -111,7 +111,6 @@ export function GestorDocumentos({
     const [showMapModal, setShowMapModal] = useState(false);
     const [mapLat, setMapLat] = useState(null);
     const [mapLng, setMapLng] = useState(null);
-	console.log(mapLat, mapLng)
     const [mapTitle, setMapTitle] = useState(""); // Para saber cuál croquis se está mostrando
     // Función para obtener todos los documentos
     const fetchAllDocuments = async () => {
