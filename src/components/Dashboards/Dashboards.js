@@ -42,11 +42,11 @@ export function Dashboards() {
 
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
 const [doughnutData, setDoughnutData] = useState({
-  labels: ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"], // ✅ Cambiar aquí
+  labels: ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"],
   datasets: [
     {
-      data: [0, 0, 0, 0, 0, 0, 0], // ✅ Agregar más ceros
-      backgroundColor: ["#007bff", "#00c853", "#ffab00", "#ff3d00", "#9c27b0", "#4caf50", "#f44336"], // ✅ Agregar más colores
+      data: [0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"], // ✅ Colores más representativos
     },
   ],
 });
@@ -88,12 +88,6 @@ const [fechaFin, setFechaFin] = useState(today);
     }
   }, [userData]);
 
-  useEffect(() => {
-    if (bodegas.length > 0 && fechaInicio && fechaFin) {
-      fetchSolicitudes();
-    }
-  }, [bodegas, fechaInicio, fechaFin]);
-
   const handleBodegaChange = (event) => {
     setSelectedBodega(event.target.value);
   };
@@ -112,10 +106,9 @@ const [fechaFin, setFechaFin] = useState(today);
     }
   };
 
-
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
 
-  const fetchSolicitudes = async (fechaInicio, fechaFin, bodega) => {
+  const fetchSolicitudes = async () => {
     let bodegasId = [];
 
     try {
@@ -130,13 +123,13 @@ const [fechaFin, setFechaFin] = useState(today);
 
       const token = localStorage.getItem("token");
       
-      // Construir parámetros igual que en ListadoSolicitud
+      // ✅ Usar siempre fechaInicio y fechaFin del estado, no parámetros
       const params = {
         limit: 100,
-        fechaInicio,
-        fechaFin,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
         bodega: bodegasId,
-        estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro), // Convertir a número
+        estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
       };
       
       // Agregar timestamp para identificar cada llamada
@@ -174,7 +167,8 @@ const [fechaFin, setFechaFin] = useState(today);
         const totalRecords = response.data.total;
         setTotalSolicitudes(totalRecords);
 
-        const bodegaCounts = {}; // Aseguramos que siempre está definido
+        const bodegaCounts = {}; // Para contar total por bodega
+        const bodegaEstadoCounts = {}; // Para contar por bodega y estado
         const vendedoresSet = new Set(); // Para contar vendedores únicos
 
         response.data.data.forEach((item) => {
@@ -189,6 +183,7 @@ const [fechaFin, setFechaFin] = useState(today);
           if (item.idVendedor) {
             vendedoresSet.add(item.idVendedor);
           }
+          
           // Contamos las solicitudes por bodega
           const bodegaId = item.Bodega;
           if (bodegaCounts[bodegaId]) {
@@ -196,6 +191,27 @@ const [fechaFin, setFechaFin] = useState(today);
           } else {
             bodegaCounts[bodegaId] = 1;
           }
+
+          // Contamos por bodega y estado para el gráfico de barras
+          if (!bodegaEstadoCounts[bodegaId]) {
+            bodegaEstadoCounts[bodegaId] = {
+              PENDIENTE: 0,
+              APROBADO: 0,
+              ANULADO: 0,
+              RECHAZADO: 0,
+              NO_APLICA: 0,
+              FACTURADO: 0,
+              RECHAZADO_LN: 0,
+            };
+          }
+          
+          if (item.Estado === 1) bodegaEstadoCounts[bodegaId].PENDIENTE++;
+          else if (item.Estado === 2) bodegaEstadoCounts[bodegaId].APROBADO++;
+          else if (item.Estado === 3) bodegaEstadoCounts[bodegaId].ANULADO++;
+          else if (item.Estado === 4) bodegaEstadoCounts[bodegaId].RECHAZADO++;
+          else if (item.Estado === 5) bodegaEstadoCounts[bodegaId].NO_APLICA++;
+          else if (item.Estado === 6) bodegaEstadoCounts[bodegaId].FACTURADO++;
+          else if (item.Estado === 7) bodegaEstadoCounts[bodegaId].RECHAZADO_LN++;
         });
 
         setUniqueVendedores(vendedoresSet.size); // Guardamos la cantidad de vendedores únicos
@@ -217,7 +233,7 @@ const [fechaFin, setFechaFin] = useState(today);
             estadoCounts.FACTURADO,
             estadoCounts.RECHAZADO_LN,
           ];
-          doughnutColors = ["#007bff", "#00c853", "#ffab00", "#ff3d00", "#9c27b0", "#4caf50", "#f44336"];
+          doughnutColors = ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"]; // ✅ Colores más representativos
         } else {
           // Mostrar solo el estado filtrado
           const estadoSeleccionado = estadosOpciones.find(e => e.value == estadoFiltro);
@@ -226,13 +242,13 @@ const [fechaFin, setFechaFin] = useState(today);
             doughnutValues = [totalRecords]; // Usar el total de registros
             // Asignar el color correspondiente según el estado
             const colorMap = {
-              1: "#007bff", // PRE-APROBADO
-              2: "#00c853", // APROBADO
-              3: "#ffab00", // ANULADO
-              4: "#ff3d00", // RECHAZADO
-              5: "#9c27b0", // NO APLICA
-              6: "#4caf50", // FACTURADO
-              7: "#f44336", // RECHAZADO-LN
+              1: "#3b82f6", // PRE-APROBADO (azul)
+              2: "#10b981", // APROBADO (verde esmeralda)
+              3: "#6b7280", // ANULADO (gris)
+              4: "#ef4444", // RECHAZADO (rojo)
+              5: "#f59e0b", // NO APLICA (amarillo/naranja)
+              6: "#059669", // FACTURADO (verde oscuro)
+              7: "#dc2626", // RECHAZADO-LN (rojo oscuro)
             };
             doughnutColors = [colorMap[estadoFiltro]];
           }
@@ -247,24 +263,35 @@ const [fechaFin, setFechaFin] = useState(today);
             },
           ],
         });
+        
+        // Crear datos para el gráfico de barras apiladas
         const bodegaLabels = Object.keys(bodegaCounts).map((codigo) => {
           const bodegaEncontrada = bodegas.find((b) => b.b_Bodega === Number(codigo));
           return bodegaEncontrada ? bodegaEncontrada.b_Nombre : `Bodega ${codigo}`;
         });
 
+        // Crear datasets para cada estado
+        const estadosParaBarras = [
+          { key: 'PENDIENTE', label: 'PRE-APROBADO', color: '#3b82f6' }, // ✅ Azul
+          { key: 'APROBADO', label: 'APROBADO', color: '#10b981' }, // ✅ Verde esmeralda
+          { key: 'ANULADO', label: 'ANULADO', color: '#6b7280' }, // ✅ Gris
+          { key: 'RECHAZADO', label: 'RECHAZADO', color: '#ef4444' }, // ✅ Rojo
+          { key: 'NO_APLICA', label: 'NO APLICA', color: '#f59e0b' }, // ✅ Amarillo/naranja
+          { key: 'FACTURADO', label: 'FACTURADO', color: '#059669' }, // ✅ Verde oscuro
+          { key: 'RECHAZADO_LN', label: 'RECHAZADO-LN', color: '#dc2626' }, // ✅ Rojo oscuro
+        ];
 
-        const bodegaValues = Object.values(bodegaCounts);
-
+        const datasets = estadosParaBarras.map(estado => ({
+          label: estado.label,
+          data: Object.keys(bodegaCounts).map(bodegaId => 
+            bodegaEstadoCounts[bodegaId] ? bodegaEstadoCounts[bodegaId][estado.key] : 0
+          ),
+          backgroundColor: estado.color,
+        }));
 
         setBarData({
           labels: bodegaLabels,
-          datasets: [
-            {
-              label: "Solicitudes por Bodega",
-              data: bodegaValues,
-              backgroundColor: "#007bff",
-            },
-          ],
+          datasets: datasets,
         });
       }
     } catch (error) {
@@ -272,17 +299,11 @@ const [fechaFin, setFechaFin] = useState(today);
     }
   };
 
-
-
-
-
-
-
-
+  // ✅ Modificar este useEffect para que solo se ejecute cuando todo esté listo
   useEffect(() => {
     // Solo llamar a fetchSolicitudes si las fechas son válidas Y las bodegas están cargadas
     if (fechaInicio && fechaFin && bodegas.length > 0) {
-      fetchSolicitudes(fechaInicio, fechaFin);
+      fetchSolicitudes();
     }
   }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas]);
 
@@ -339,8 +360,6 @@ const [fechaFin, setFechaFin] = useState(today);
 
         {/* Input Fecha Fin */}
         <div className="w-full md:w-1/4">
-
-
           <label className="block text-gray-700 font-semibold mb-1">Fecha Fin</label>
           <input
             type="date"
@@ -364,10 +383,6 @@ const [fechaFin, setFechaFin] = useState(today);
             ))}
           </select>
         </div>
-
-
-
-
       </div>
 
       {/* Sección de tarjetas */}
@@ -401,16 +416,34 @@ const [fechaFin, setFechaFin] = useState(today);
       {/* Sección de gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Detalles grafico de barras</h3>
-
-          <Bar data={barData} />
-
+          <h3 className="text-xl font-semibold mb-4">Detalles gráfico de barras</h3>
+          <Bar 
+            data={barData} 
+            options={{
+              responsive: true,
+              scales: {
+                x: {
+                  stacked: true,
+                },
+                y: {
+                  stacked: true,
+                },
+              },
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'top',
+                },
+              },
+            }}
+          />
         </div>
         <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Detallaes diagrama de pastel</h3>
+          <h3 className="text-xl font-semibold mb-4">Detalles diagrama de pastel</h3>
           <Doughnut data={doughnutData} />
         </div>
       </div>
     </div>
   );
 }
+
