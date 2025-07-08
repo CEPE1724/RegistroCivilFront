@@ -179,7 +179,8 @@ export function Documental({
 
             previews[sectionName].push(fileUrl);
 
-            if (file.idEstadoDocumento == 4 || file.idEstadoDocumento == 5 ) {
+            if ( (file.idEstadoDocumento === 4 || file.idEstadoDocumento === 5) &&
+			((file.idTipoDocumentoWEB >= 1 && file.idTipoDocumentoWEB <= 15) || file.idTipoDocumentoWEB > 25)  ) {
             //  alert(`El campo ${sectionName} está en corrección.`);
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
             } else {
@@ -438,6 +439,22 @@ export function Documental({
 
     const { field, index, id } = fileToDelete; // ✅ Extraemos el ID
 
+	if (clientInfo.idEstadoVerificacionDocumental == 1) {
+		try {
+			const response = await axios.patch(APIURL.patch_documentos(id), {
+          idEstadoDocumento: 6,
+        });
+		if (response.status === 200) {
+          enqueueSnackbar("Documento eliminado correctamente.", {
+            variant: "success",
+          });
+        }	
+		} catch (error) {
+			enqueueSnackbar("Error al eliminar el documento en la BD.", {variant: "error",});
+			console.error("Error en la actualización:", error);
+			return;
+		}
+	} else if (clientInfo.idEstadoVerificacionDocumental == 2 || clientInfo.idEstadoVerificacionDocumental == 3) {
     if (id) {
       try {
         // 1️⃣ Enviar PATCH a la API para actualizar el estado del documento
@@ -460,6 +477,7 @@ export function Documental({
         return; // ❌ Evitamos seguir eliminando localmente si hay error en la API
       }
     }
+}
 
     // 2️⃣ Eliminar el archivo del estado local, ya sea que tenga ID o no
     setFiles((prevFiles) => {

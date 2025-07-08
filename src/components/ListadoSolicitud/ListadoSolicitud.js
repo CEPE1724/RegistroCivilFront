@@ -707,16 +707,18 @@ export function ListadoSolicitud() {
   };
 
 
-  const handleApproveEstado = async (data, justificacion) => {
-    try {
-      await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-      await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-      await fetchInsertarDatosAprobarEstado(6, data.id, 1, justificacion); // ✅ Usar la nueva función con observación
-      setRecargar(true);
-      setShowModalRechazo(false)
-    } catch (error) {
-      console.error("Error al pre-aprobar estado:", error);
-    }
+
+  const handleApproveEstado = async (data , justificacion) => {
+	try {
+		await patchSolicitudEstadoyResultado(data.id, { Estado: 1, Resultado: 1 });
+    	//await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+    await fetchInsertarDatosAprobarEstado(6, data.id, 1,justificacion); // ✅ Usar la nueva función con observación
+    	setRecargar(true);
+    	setShowModalRechazo(false)
+	} catch (error) {
+		console.error("Error al pre-aprobar estado:", error);
+	}
+
 
   };
 
@@ -1996,8 +1998,8 @@ export function ListadoSolicitud() {
   }, [itemsPerPage, currentPage, recargar]);
 
   const handleRechazar = async (observacion) => {
-    patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4 });
-    patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
+    patchSolicitudEstadoyResultado(selectedRow?.id, { Estado: 4, Resultado: 0 });
+    //patchSolicitudEstadoyResultado(selectedRow?.id, { Resultado: 0 });
     // fetchInsertarDatos(6, selectedRow?.id, 4);
     fetchInsertarDatosRechazo(6, selectedRow?.id, 4, observacion)
     handleCloseDialog()
