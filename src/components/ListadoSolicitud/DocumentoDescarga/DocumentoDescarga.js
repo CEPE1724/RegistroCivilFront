@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HomeIcon from '@mui/icons-material/Home';
@@ -7,14 +8,51 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 export function DocumentoDescarga({ isOpen, onClose, data }) {
+    const [isLoading, setIsLoading] = useState(false);
+   const [pdfUrl, setPdfUrl] = useState(data?.PDFTerrena || '');
+
+   useEffect(() => {
+    if (data?.PDFTerrena) {
+        setPdfUrl(data.PDFTerrena);
+    }
+}, [data]);
+
+    
     if (!isOpen) return null;
+
+    const generarPDF = async () => {
+        try {
+           
+            setIsLoading(true);
+
+            const url = `https://appservices.com.ec/cobranza/api/v1/point/TerrenaGestionDomicilio/PDF/${data?.id}`;
+        
+
+            const response = await axios.get(url); // No necesitas blob, solo JSON
+            if (response.data?.url) {
+                setPdfUrl(response.data.url);
+                console.log("PDF URL generada:", response.data.url);
+            } else {
+                throw new Error('No se recibió URL del documento');
+            }
+
+        } catch (error) {
+            console.error('Error generando PDF:', error);
+            alert('No se pudo generar el PDF. Intente más tarde.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
             <div className="relative bg-white w-full max-w-md rounded-lg shadow-lg p-6 mx-4">
-                {/* Botón cerrar */}
+
                 <button
-                    onClick={onClose}
+                    onClick={() => {
+                        setPdfUrl(null);
+                        onClose();
+                    }}
                     className="absolute top-2 right-2 text-gray-400 hover:text-gray-700"
                 >
                     ✕
@@ -77,6 +115,8 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
                 </p>
 
                 {/* Contenedor del documento */}
+                {/* Contenedor del documento PDF */}
+                {/* Contenedor del documento PDF */}
                 <div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
                     <div className="p-3 bg-[#E0ECF9] text-[#063970] rounded-full">
                         <DescriptionIcon className="text-3xl" />
@@ -85,15 +125,30 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
                         <span className="text-sm font-semibold text-gray-800">
                             motorizado-informe.pdf
                         </span>
-                        <span className="text-xs text-gray-500">Haz clic para descargar</span>
+                        {pdfUrl ? (
+                            <span className="text-xs text-gray-500">Haz clic para descargar</span>
+                        ) : (
+                            <span className="text-xs text-gray-500">Haz clic para generar el PDF</span>
+                        )}
                     </div>
-                    <a
-                        href="/docs/motorizado-informe.pdf"
-                        download
-                        className="text-white bg-[#063970] hover:bg-[#052c5e] font-medium rounded-lg text-sm px-4 py-2 transition-all"
-                    >
-                        Descargar
-                    </a>
+
+                    {pdfUrl ? (
+                        <a
+                            href={pdfUrl}
+                            download
+                            className="text-white bg-[#063970] hover:bg-[#052c5e] font-medium rounded-lg text-sm px-4 py-2 transition-all"
+                        >
+                            Descargar
+                        </a>
+                    ) : (
+                        <button
+                            onClick={generarPDF}
+                            disabled={isLoading}
+                            className={`text-white ${isLoading ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-600'} font-medium rounded-lg text-sm px-4 py-2 transition-all`}
+                        >
+                            {isLoading ? 'Generando...' : 'Generar PDF'}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

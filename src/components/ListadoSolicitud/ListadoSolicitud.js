@@ -164,7 +164,7 @@ export function ListadoSolicitud() {
   const [listVerifLaborModal, setListVerifLaborModal] = useState(false);
   const handleCloseVerifLabModal = () => setListVerifLaborModal(false);
   const [isOpenPDf, setIsOpenPdf] = useState(false);
-  const [ dataInforme, setDataInforme ] = useState(null);
+  const [dataInforme, setDataInforme] = useState(null);
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -518,7 +518,7 @@ export function ListadoSolicitud() {
 
   const handleConfirm = async () => {
     if (currentAction === "estado") {
-      handleApproveEstado(currentData , justificacion );
+      handleApproveEstado(currentData, justificacion);
       if (laboralChecked) await patchLaboral(currentData.id);
       if (domicilioChecked) await patchDomicilio(currentData.id);
       if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
@@ -632,7 +632,7 @@ export function ListadoSolicitud() {
     }
   };
 
-  const fetchInsertarDatosAprobarEstado = async (tipo, data, estado , observacion ) => {
+  const fetchInsertarDatosAprobarEstado = async (tipo, data, estado, observacion) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
@@ -641,7 +641,7 @@ export function ListadoSolicitud() {
         Tipo: tipo,
         idEstadoVerificacionDocumental: estado,
         Usuario: userData.Nombre,
-        Telefono: observacion 
+        Telefono: observacion
 
 
       });
@@ -707,16 +707,16 @@ export function ListadoSolicitud() {
   };
 
 
-  const handleApproveEstado = async (data , justificacion) => {
-	try {
-		await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
-    	await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    await fetchInsertarDatosAprobarEstado(6, data.id, 1,justificacion); // ✅ Usar la nueva función con observación
-    	setRecargar(true);
-    	setShowModalRechazo(false)
-	} catch (error) {
-		console.error("Error al pre-aprobar estado:", error);
-	}
+  const handleApproveEstado = async (data, justificacion) => {
+    try {
+      await patchSolicitudEstadoyResultado(data.id, { Estado: 1 });
+      await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+      await fetchInsertarDatosAprobarEstado(6, data.id, 1, justificacion); // ✅ Usar la nueva función con observación
+      setRecargar(true);
+      setShowModalRechazo(false)
+    } catch (error) {
+      console.error("Error al pre-aprobar estado:", error);
+    }
 
   };
 
@@ -1659,6 +1659,7 @@ export function ListadoSolicitud() {
             const vendedorNombre = await fetchVendedor(item.idVendedor);
             return {
               id: item.idCre_SolicitudWeb,
+              PDFTerrena: item.PDFTerrena,
               NumeroSolicitud: item.NumeroSolicitud,
               nombre: `${item.PrimerNombre} ${item.SegundoNombre} ${item.ApellidoPaterno} ${item.ApellidoMaterno}`,
               PrimerNombre: item.PrimerNombre,
@@ -1727,7 +1728,7 @@ export function ListadoSolicitud() {
             };
           })
         );
-
+        console.log("edison", datos)
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
@@ -2314,7 +2315,7 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Laborales</TableCell>
                   <TableCell align="center">Analista</TableCell>
                   <TableCell align="center">Operador</TableCell>
-                  <TableCell align="center">Informe Operador</TableCell>
+                  <TableCell align="center"></TableCell>
 
                 </TableRow>
               </TableHead>
@@ -3116,19 +3117,28 @@ export function ListadoSolicitud() {
                       </TableCell>
 
                       {/* Informes Operador */}
-                      <TableCell align="center">
-                        <button
-                          onClick={() => {
-                            setIsOpenPdf(true);
-                            setDataInforme(data);
+                      {(
+                        // Ambos activos: ambos estados deben ser 2
+                        
 
-                          }}
-                          className="bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-900 transition-all duration-200 rounded-full p-2"
-                        >
-                          <TwoWheelerIcon className="text-blue-700" />
-                        </button>
-                      </TableCell>
+                        // Solo Domicilio activo
+                        ((data?.Domicilio == 1 ) &&
+                          data?.idEstadoVerificacionDomicilio == 2)
 
+                        
+                      ) && (
+                          <TableCell align="center">
+                            <button
+                              onClick={() => {
+                                setIsOpenPdf(true);
+                                setDataInforme(data);
+                              }}
+                              className="bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-900 transition-all duration-200 rounded-full p-2"
+                            >
+                              <TwoWheelerIcon className="text-blue-700" />
+                            </button>
+                          </TableCell>
+                        )}
 
                     </TableRow>
                   );
@@ -4598,127 +4608,127 @@ export function ListadoSolicitud() {
       </Dialog>
 
       {/* Dialog de confirmación */}
-     <Dialog open={openDialog2} onClose={() => {
-  // Limpiar todos los campos cuando se cierre el modal
-  setOpenDialog2(false);
-  setLaboralChecked(false);
-  setDomicilioChecked(false);
-  setEntrada("");
-  setJustificacion("");
-}}>
-  <DialogTitle>Confirmar acción</DialogTitle>
-  <DialogContent>
-    <Typography>
-      ¿Estás seguro de cambiar el{" "}
-      {currentAction === "estado" ? "estado" : "resultado"}?
-    </Typography>
-
-    {currentAction === "estado" && (
-      <div style={{ marginTop: '1rem' }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={laboralChecked}
-              onChange={(e) => setLaboralChecked(e.target.checked)}
-            />
-          }
-          label="Laboral"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={domicilioChecked}
-              onChange={(e) => setDomicilioChecked(e.target.checked)}
-            />
-          }
-          label="Domicilio"
-        />
-        <TextField
-          label="Digite la entrada"
-          fullWidth
-          margin="normal"
-          value={entrada}
-          onChange={(e) => {
-            const val = e.target.value;
-
-            // Solo permitir números positivos con hasta 7 enteros y 2 decimales
-            const regex = /^\d{0,7}(\.\d{0,2})?$/;
-
-            if (val === "" || regex.test(val)) {
-              setEntrada(val);
-            }
-
-          }}
-          inputProps={{
-            inputMode: "decimal", // para móviles
-            pattern: "^[0-9]{1,7}(\\.[0-9]{0,2})?$",
-            maxLength: 10,
-          }}
-          error={
-            entrada !== "" &&
-            (isNaN(parseFloat(entrada)) ||
-              parseFloat(entrada) > 9999999.99)
-          }
-          helperText={
-            entrada !== "" && parseFloat(entrada) > 9999999.99
-              ? "Máximo permitido: 9,999,999.99"
-              : ""
-          }
-        />
-        <TextField
-          label="Justificación / Motivo *"
-          fullWidth
-          margin="normal"
-          value={justificacion}
-          onChange={(e) => setJustificacion(e.target.value)}
-          multiline
-          rows={3}
-          placeholder="Ingrese la justificación para este cambio (mínimo 10 caracteres)..."
-          required
-          error={justificacion.length > 0 && justificacion.length < 10}
-          inputProps={{
-            maxLength: 500,
-          }}
-          helperText={
-            justificacion.length > 0 && justificacion.length < 10
-              ? `Mínimo 10 caracteres. Actual: ${justificacion.length}/500`
-              : `${justificacion.length}/500 caracteres`
-          }
-        />
-      </div>
-    )}
-  </DialogContent>
-  <DialogActions>
-    <Button 
-      onClick={() => {
-        // Limpiar todos los campos cuando se cancele
+      <Dialog open={openDialog2} onClose={() => {
+        // Limpiar todos los campos cuando se cierre el modal
         setOpenDialog2(false);
         setLaboralChecked(false);
         setDomicilioChecked(false);
         setEntrada("");
         setJustificacion("");
-      }} 
-      color="primary"
-    >
-      Cancelar
-    </Button>
-    <Button
-      onClick={handleConfirm}
-      color="primary"
-      disabled={
-        currentAction === "estado" && (
-          !laboralChecked && !domicilioChecked || // Debe seleccionar al menos uno
-          justificacion.length < 10 // Justificación obligatoria de mínimo 10 caracteres
-        )
-      }
-    >
-      Confirmar
-    </Button>
-  </DialogActions>
-</Dialog>
- <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data ={dataInforme} />
+      }}>
+        <DialogTitle>Confirmar acción</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de cambiar el{" "}
+            {currentAction === "estado" ? "estado" : "resultado"}?
+          </Typography>
 
-          
+          {currentAction === "estado" && (
+            <div style={{ marginTop: '1rem' }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={laboralChecked}
+                    onChange={(e) => setLaboralChecked(e.target.checked)}
+                  />
+                }
+                label="Laboral"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={domicilioChecked}
+                    onChange={(e) => setDomicilioChecked(e.target.checked)}
+                  />
+                }
+                label="Domicilio"
+              />
+              <TextField
+                label="Digite la entrada"
+                fullWidth
+                margin="normal"
+                value={entrada}
+                onChange={(e) => {
+                  const val = e.target.value;
+
+                  // Solo permitir números positivos con hasta 7 enteros y 2 decimales
+                  const regex = /^\d{0,7}(\.\d{0,2})?$/;
+
+                  if (val === "" || regex.test(val)) {
+                    setEntrada(val);
+                  }
+
+                }}
+                inputProps={{
+                  inputMode: "decimal", // para móviles
+                  pattern: "^[0-9]{1,7}(\\.[0-9]{0,2})?$",
+                  maxLength: 10,
+                }}
+                error={
+                  entrada !== "" &&
+                  (isNaN(parseFloat(entrada)) ||
+                    parseFloat(entrada) > 9999999.99)
+                }
+                helperText={
+                  entrada !== "" && parseFloat(entrada) > 9999999.99
+                    ? "Máximo permitido: 9,999,999.99"
+                    : ""
+                }
+              />
+              <TextField
+                label="Justificación / Motivo *"
+                fullWidth
+                margin="normal"
+                value={justificacion}
+                onChange={(e) => setJustificacion(e.target.value)}
+                multiline
+                rows={3}
+                placeholder="Ingrese la justificación para este cambio (mínimo 10 caracteres)..."
+                required
+                error={justificacion.length > 0 && justificacion.length < 10}
+                inputProps={{
+                  maxLength: 500,
+                }}
+                helperText={
+                  justificacion.length > 0 && justificacion.length < 10
+                    ? `Mínimo 10 caracteres. Actual: ${justificacion.length}/500`
+                    : `${justificacion.length}/500 caracteres`
+                }
+              />
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              // Limpiar todos los campos cuando se cancele
+              setOpenDialog2(false);
+              setLaboralChecked(false);
+              setDomicilioChecked(false);
+              setEntrada("");
+              setJustificacion("");
+            }}
+            color="primary"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            color="primary"
+            disabled={
+              currentAction === "estado" && (
+                !laboralChecked && !domicilioChecked || // Debe seleccionar al menos uno
+                justificacion.length < 10 // Justificación obligatoria de mínimo 10 caracteres
+              )
+            }
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
+
+
 
     </div>
   );
