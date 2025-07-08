@@ -27,7 +27,6 @@ const ModalCorreccion = ({
     };
 
     const handleConfirm = async () => {
-        console.log("Observaciones a enviar:", observaciones);
 
         // Validar antes de confirmar
         if (observaciones.length < 10) {

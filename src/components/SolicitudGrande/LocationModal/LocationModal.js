@@ -6,7 +6,7 @@ import {
   Marker,
   Autocomplete,
 } from "@react-google-maps/api";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { APIURL } from "../../../configApi/apiConfig";
 
 
@@ -26,6 +26,7 @@ export function LocationModal({
     longitude: "",
   };
   const initialLocation = locationData || defaultLocation;
+  const [posicionActual, setPosicionActual ] = useState({lat: -1.8312, lng: -78.1834,})
 
   const [localLocation, setLocalLocation] = useState(initialLocation);
   const [errors, setErrors] = useState({
@@ -250,17 +251,35 @@ export function LocationModal({
     }
   };
 
+  useEffect(()=> {
+	if(isOpen && navigator.geolocation){
+		navigator.geolocation.getCurrentPosition(
+			(position)=> {
+				setPosicionActual({
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				});
+			}, 
+			(error)=>{
+				console.error("Error al obtener la ubicacion", error);
+			}
+		);
+	} else {
+		console.warn("La geolocalización no está disponible en este navegador.");
+	}
+  }, [isOpen]);
+
   if (!openLocationModal) return null;
 
   const mapCenter = {
     lat:
       localLocation.latitude !== ""
         ? parseFloat(localLocation.latitude)
-        : -1.8312,
+        : posicionActual.lat,
     lng:
       localLocation.longitude !== ""
         ? parseFloat(localLocation.longitude)
-        : -78.1834,
+        : posicionActual.lng,
   };
 
   const mapOptions = {
@@ -294,14 +313,14 @@ export function LocationModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
-      <div className="bg-white rounded-xl w-full max-w-2xl p-2 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl w-full max-w-5xl p-4 relative shadow-2xl max-h-[90vh] overflow-y-auto">
         {/* Botón de cierre en la esquina superior derecha */}
         <button
-          className="absolute top-2 right-2 p-1 text-gray-600 hover:text-gray-900"
+          className="absolute top-2 right-2 p-1 text-gray-600 hover:text-gray-900 z-50"
           onClick={() => isOpen()}
           title="Cerrar"
         >
-          <span className="text-xl">&times;</span>
+          ❌
         </button>
 
         {/* Mapa con Autocomplete alineado a la derecha */}
@@ -313,7 +332,7 @@ export function LocationModal({
             <GoogleMap
               mapContainerStyle={containerStyle}
               center={mapCenter}
-              zoom={13}
+              zoom={20}
               onClick={onMapClick}
               options={{
                 ...mapOptions,
@@ -334,18 +353,20 @@ export function LocationModal({
                     <input
                       type="text"
                       placeholder="Buscar dirección"
-                      className="w-48 p-1.5 bg-transparent border-none focus:outline-none text-xs pac-target-input"
+                      className="w-96 p-2 bg-transparent border-none focus:outline-none text-sm pac-target-input"
                     />
                   </Autocomplete>
-                  <button
-                    onClick={handleGetCurrentLocation}
-                    className="bg-white p-1.5 rounded-full hover:bg-gray-100 transition-all duration-300 ease-in-out"
-                    title="Obtener mi ubicación"
-                  >
-                    <LocationOnIcon className="text-blue-600 w-4 h-4" />
-                  </button>
                 </div>
               </div>
+			  <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-10">
+				<button
+    			  onClick={handleGetCurrentLocation}
+    			  className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-all duration-300 ease-in-out"
+    			  title="Obtener mi ubicación"
+    			>
+      			<MyLocationIcon className="text-black w-5 h-5" />
+    			</button>
+  				</div>
               <Marker position={mapCenter} />
             </GoogleMap>
           </LoadScript>
