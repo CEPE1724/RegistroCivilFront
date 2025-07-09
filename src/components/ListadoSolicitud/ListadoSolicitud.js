@@ -520,7 +520,7 @@ export function ListadoSolicitud() {
     if (currentAction === "estado") {
       handleApproveEstado(currentData, justificacion);
       if (laboralChecked) await patchLaboral(currentData.id);
-      if (domicilioChecked) await patchDomicilio(currentData.id);
+      if (true) await patchDomicilio(currentData.id);
       if (entrada.trim() !== "") await patchEntrada(currentData.id, entrada);
     } else if (currentAction === "resultado") {
       handleApproveResultado(currentData);
@@ -1730,7 +1730,6 @@ export function ListadoSolicitud() {
             };
           })
         );
-        console.log("edison", datos)
         setDatos(datos);
         setTotal(totalRecords);
         setTotalPages(totalPages);
@@ -4629,6 +4628,16 @@ export function ListadoSolicitud() {
 
           {currentAction === "estado" && (
             <div style={{ marginTop: '1rem' }}>
+				<FormControlLabel
+                control={
+                  <Checkbox
+                    checked={true}
+					disabled={true}
+                    onChange={(e) => setDomicilioChecked(e.target.checked)}
+                  />
+                }
+                label="Domicilio"
+              />
               <FormControlLabel
                 control={
                   <Checkbox
@@ -4637,15 +4646,6 @@ export function ListadoSolicitud() {
                   />
                 }
                 label="Laboral"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={domicilioChecked}
-                    onChange={(e) => setDomicilioChecked(e.target.checked)}
-                  />
-                }
-                label="Domicilio"
               />
               <TextField
                 label="Digite la entrada"
@@ -4721,7 +4721,7 @@ export function ListadoSolicitud() {
             color="primary"
             disabled={
               currentAction === "estado" && (
-                !laboralChecked && !domicilioChecked || // Debe seleccionar al menos uno
+                 // Debe seleccionar al menos uno
                 justificacion.length < 10 // Justificación obligatoria de mínimo 10 caracteres
               )
             }

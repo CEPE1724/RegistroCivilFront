@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../../configApi/axiosConfig';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HomeIcon from '@mui/icons-material/Home';
 import WorkIcon from '@mui/icons-material/Work';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import jsPDF from "jspdf";
+import { APIURL } from "../../../configApi/apiConfig";
+import { enqueueSnackbar } from "notistack";
 
 export function DocumentoDescarga({ isOpen, onClose, data }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +35,6 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
             const response = await axios.get(url); // No necesitas blob, solo JSON
             if (response.data?.url) {
                 setPdfUrl(response.data.url);
-                console.log("PDF URL generada:", response.data.url);
             } else {
                 throw new Error('No se recibió URL del documento');
             }
@@ -43,6 +46,83 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
             setIsLoading(false);
         }
     };
+
+	const fetchCoordenadas = async (id) => {
+		try {
+			const response = await axios.get(APIURL.get_CoordenadasInforme(id));
+			if (response.data && response.data.length > 0) {
+				generarCroquisPDF(response.data);
+			} else {
+				enqueueSnackbar("No existen coordenadas.", { variant: "error",})
+			}			
+		} catch (error) {
+			
+		}
+	}
+
+	const generarCroquisPDF = (registros) => {
+    const registroDomicilio = registros.find(r => r.bDomicilio && r.gestionDomicilio);
+    const registroTrabajo = registros.find(r => r.bTrabajo && r.gestionTrabajo);
+
+    const pdf = new jsPDF();
+    
+    const loadImage = (src) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    };
+
+    const generatePDF = async () => {
+        let currentY = 20;
+
+        // DOMICILIO
+        if (registroDomicilio) {
+            const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${registroDomicilio.gestionDomicilio.Latitud},${registroDomicilio.gestionDomicilio.Longitud}&zoom=17&size=600x400&scale=2&maptype=roadmap&markers=color:red|${registroDomicilio.gestionDomicilio.Latitud},${registroDomicilio.gestionDomicilio.Longitud}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+            
+            // Título domicilio
+            pdf.setFontSize(18);
+            pdf.text("Croquis Domicilio", 80, currentY);
+            currentY += 10;
+            
+            try {
+                // Cargar imagen domicilio
+                const imgDomicilio = await loadImage(mapImageUrl);
+                pdf.addImage(imgDomicilio, 'JPEG', 17, currentY, 180, 120);
+                currentY += 130; // Espacio después de la imagen
+            } catch (error) {
+                console.error("Error cargando imagen del domicilio:", error);
+            }
+        }
+
+        // TRABAJO
+        if (registroTrabajo) {
+            const mapImageUrlTrabajo = `https://maps.googleapis.com/maps/api/staticmap?center=${registroTrabajo.gestionTrabajo.Latitud},${registroTrabajo.gestionTrabajo.Longitud}&zoom=17&size=600x400&scale=2&maptype=roadmap&markers=color:red|${registroTrabajo.gestionTrabajo.Latitud},${registroTrabajo.gestionTrabajo.Longitud}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+            
+            // Título trabajo
+            pdf.setFontSize(18);
+            pdf.text("Croquis Trabajo", 80, currentY);
+            currentY += 10;
+            
+            try {
+                // Cargar imagen trabajo
+                const imgTrabajo = await loadImage(mapImageUrlTrabajo);
+                pdf.addImage(imgTrabajo, 'JPEG', 17, currentY, 180, 120);
+            } catch (error) {
+                console.error("Error cargando imagen del trabajo:", error);
+            }
+        }
+
+        // Guardar el PDF
+        pdf.save('Croquis-ubicaciones.pdf');
+    };
+
+    generatePDF().catch(error => {
+        console.error("Error generando PDF:", error);
+    });
+};
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
@@ -150,6 +230,26 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
                         </button>
                     )}
                 </div>
+				
+				<div className="flex items-center gap-4 p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+					<div className="p-3 bg-[#E0ECF9] text-[#063970] rounded-full">
+                        <HomeWorkIcon className="text-3xl" />
+                    </div>
+					<div className="flex flex-col flex-1">
+                        <span className="text-sm font-semibold text-gray-800">
+                            Croquis-ubicaciones.pdf
+                        </span>
+						<span className="text-xs text-gray-500">Haz clic para descargar el PDF</span>           
+                    </div>
+					<button
+                        onClick={()=> {fetchCoordenadas(data?.id)}}
+                        //disabled={isLoading}
+                        className= "text-white bg-yellow-500 hover:bg-yellow-600 font-medium rounded-lg text-sm px-4 py-2 transition-all"
+                    >
+                        Descargar
+                    </button>
+
+				</div>
             </div>
         </div>
     );
