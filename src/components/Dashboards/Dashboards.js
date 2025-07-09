@@ -18,10 +18,13 @@ export function Dashboards() {
 
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
-    { label: "Pendiente", value: 1 },
-    { label: "Aprobado", value: 2 },
-    { label: "Anulado", value: 3 },
-    { label: "Rechazado", value: 4 },
+    { label: "PRE-APROBADO", value: 1 },
+    { label: "APROBADO", value: 2 },
+    { label: "ANULADO", value: 3 },
+    { label: "RECHAZADO", value: 4 },
+    { label: "NO APLICA", value: 5 },
+    { label: "FACTURADO", value: 6 },
+    { label: "RECHAZADO-LN", value: 7 },
   ];
   const [estadoFiltro, setEstadoFiltro] = useState("todos");
 
@@ -35,18 +38,18 @@ export function Dashboards() {
     return !isNaN(date.getTime()); // Verifica si la fecha es válida
   };
 
-const [uniqueVendedores, setUniqueVendedores] = useState(0);
+  const [uniqueVendedores, setUniqueVendedores] = useState(0);
 
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
-  const [doughnutData, setDoughnutData] = useState({
-    labels: ["Pendiente", "Aprobado", "Anulado", "Rechazado"],
-    datasets: [
-      {
-        data: [0, 0, 0, 0],
-        backgroundColor: ["#007bff", "#00c853", "#ffab00", "#ff3d00"],
-      },
-    ],
-  });
+const [doughnutData, setDoughnutData] = useState({
+  labels: ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"],
+  datasets: [
+    {
+      data: [0, 0, 0, 0, 0, 0, 0],
+      backgroundColor: ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"], // ✅ Colores más representativos
+    },
+  ],
+});
 
   const [barData, setBarData] = useState({
     labels: [],
@@ -59,11 +62,20 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
     ],
   });
   const [totalSolicitudes, setTotalSolicitudes] = useState(0);
-  const [fechaInicio, setFechaInicio] = useState(today);
-  const [fechaFin, setFechaFin] = useState(today);
+
+// ✅ Agregar estas líneas para el rango de 15 días
+const date15DaysAgo = new Date();
+date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
+
+// ✅ Cambiar estos estados
+const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr); // Cambiar de today a date15DaysAgoStr
+const [fechaFin, setFechaFin] = useState(today);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
-  const { userData , idMenu} = useAuth();
+  const { userData, idMenu } = useAuth();
+
+  
 
   const [bodegass, setBodegass] = useState([]);
 
@@ -72,15 +84,9 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
 
   useEffect(() => {
     if (userData && userData.idUsuario) {
-    fetchBodega(); // Llamar a la API para obtener las bodegas
-    } // Llamar a la API para obtener las solicitudes
-  }, [userData]);
-
-  useEffect(() => {
-    if (bodegas.length > 0) {
-      fetchSolicitudes()
+      fetchBodega(); // Llamar a la API para obtener las bodegas
     }
-  }, [bodegas]);
+  }, [userData]);
 
   const handleBodegaChange = (event) => {
     setSelectedBodega(event.target.value);
@@ -100,54 +106,69 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
     }
   };
 
-
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
 
-  const fetchSolicitudes = async (fechaInicio, fechaFin, bodega) => {
-  
-  let bodegasId = [];
+  const fetchSolicitudes = async () => {
+    let bodegasId = [];
 
     try {
-
-  // Si selectedBodega es "todos", pasar un array vacío (esto también se puede ajustar según el comportamiento deseado)
-  if (selectedBodega !== "todos") {
-    // Si selectedBodega tiene un valor específico, tomarlo como un array
-    bodegasId = [selectedBodega];
-  } else {
-    // Si es "todos", se puede pasar un array vacío o la lógica que desees
-    bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
-  }
-
+      // Si selectedBodega es "todos", pasar un array vacío (esto también se puede ajustar según el comportamiento deseado)
+      if (selectedBodega !== "todos") {
+        // Si selectedBodega tiene un valor específico, tomarlo como un array
+        bodegasId = [selectedBodega];
+      } else {
+        // Si es "todos", se puede pasar un array vacío o la lógica que desees
+        bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
+      }
 
       const token = localStorage.getItem("token");
+      
+      // ✅ Usar siempre fechaInicio y fechaFin del estado, no parámetros
+      const params = {
+        limit: 100,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        bodega: bodegasId,
+        estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
+      };
+      
+      // Agregar timestamp para identificar cada llamada
+      const timestamp = new Date().toISOString();
+      console.log(`[${timestamp}] Parámetros enviados a la API:`, params);
+      console.log(`[${timestamp}] Estado filtro actual:`, estadoFiltro);
+      console.log(`[${timestamp}] Tipo de estadoFiltro:`, typeof estadoFiltro);
+      console.log(`[${timestamp}] Valor de estado en params:`, params.estado);
+      console.log(`[${timestamp}] Fechas:`, { fechaInicio, fechaFin });
+      console.log(`[${timestamp}] Bodegas:`, bodegasId);
+      
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        params: {
-          limit: 100,
-          fechaInicio,
-          fechaFin,
-          bodega: bodegasId, // Si es "todos", no se envía el parámetro
-          estado: estadoFiltro === "todos" ? 0 : estadoFiltro,
-        },
-
-
-        
+        params,
       });
-  
+
       if (response.status === 200) {
+        console.log(`[${timestamp}] Respuesta de la API:`, response.data);
+        console.log(`[${timestamp}] Total de registros:`, response.data.total);
+        console.log(`[${timestamp}] Datos recibidos:`, response.data.data);
+        console.log(`[${timestamp}] Cantidad de datos:`, response.data.data.length);
+
         const estadoCounts = {
           PENDIENTE: 0,
           APROBADO: 0,
           ANULADO: 0,
           RECHAZADO: 0,
+          NO_APLICA: 0,
+          FACTURADO: 0,
+          RECHAZADO_LN: 0,
         };
         const totalRecords = response.data.total;
         setTotalSolicitudes(totalRecords);
-  
-        const bodegaCounts = {}; // Aseguramos que siempre está definido
+
+        const bodegaCounts = {}; // Para contar total por bodega
+        const bodegaEstadoCounts = {}; // Para contar por bodega y estado
         const vendedoresSet = new Set(); // Para contar vendedores únicos
 
         response.data.data.forEach((item) => {
@@ -155,82 +176,143 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
           else if (item.Estado === 2) estadoCounts.APROBADO++;
           else if (item.Estado === 3) estadoCounts.ANULADO++;
           else if (item.Estado === 4) estadoCounts.RECHAZADO++;
-  
-
+          else if (item.Estado === 5) estadoCounts.NO_APLICA++;
+          else if (item.Estado === 6) estadoCounts.FACTURADO++;
+          else if (item.Estado === 7) estadoCounts.RECHAZADO_LN++;
 
           if (item.idVendedor) {
             vendedoresSet.add(item.idVendedor);
           }
-        // Contamos las solicitudes por bodega
-        const bodegaId = item.Bodega; 
-        if (bodegaCounts[bodegaId]) {
-          bodegaCounts[bodegaId]++;
+          
+          // Contamos las solicitudes por bodega
+          const bodegaId = item.Bodega;
+          if (bodegaCounts[bodegaId]) {
+            bodegaCounts[bodegaId]++;
+          } else {
+            bodegaCounts[bodegaId] = 1;
+          }
+
+          // Contamos por bodega y estado para el gráfico de barras
+          if (!bodegaEstadoCounts[bodegaId]) {
+            bodegaEstadoCounts[bodegaId] = {
+              PENDIENTE: 0,
+              APROBADO: 0,
+              ANULADO: 0,
+              RECHAZADO: 0,
+              NO_APLICA: 0,
+              FACTURADO: 0,
+              RECHAZADO_LN: 0,
+            };
+          }
+          
+          if (item.Estado === 1) bodegaEstadoCounts[bodegaId].PENDIENTE++;
+          else if (item.Estado === 2) bodegaEstadoCounts[bodegaId].APROBADO++;
+          else if (item.Estado === 3) bodegaEstadoCounts[bodegaId].ANULADO++;
+          else if (item.Estado === 4) bodegaEstadoCounts[bodegaId].RECHAZADO++;
+          else if (item.Estado === 5) bodegaEstadoCounts[bodegaId].NO_APLICA++;
+          else if (item.Estado === 6) bodegaEstadoCounts[bodegaId].FACTURADO++;
+          else if (item.Estado === 7) bodegaEstadoCounts[bodegaId].RECHAZADO_LN++;
+        });
+
+        setUniqueVendedores(vendedoresSet.size); // Guardamos la cantidad de vendedores únicos
+
+        // Si hay un filtro de estado específico, ajustar los datos del gráfico circular
+        let doughnutLabels = [];
+        let doughnutValues = [];
+        let doughnutColors = [];
+
+        if (estadoFiltro === "todos") {
+          // Mostrar todos los estados
+          doughnutLabels = ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"];
+          doughnutValues = [
+            estadoCounts.PENDIENTE,
+            estadoCounts.APROBADO,
+            estadoCounts.ANULADO,
+            estadoCounts.RECHAZADO,
+            estadoCounts.NO_APLICA,
+            estadoCounts.FACTURADO,
+            estadoCounts.RECHAZADO_LN,
+          ];
+          doughnutColors = ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"]; // ✅ Colores más representativos
         } else {
-          bodegaCounts[bodegaId] = 1;
+          // Mostrar solo el estado filtrado
+          const estadoSeleccionado = estadosOpciones.find(e => e.value == estadoFiltro);
+          if (estadoSeleccionado) {
+            doughnutLabels = [estadoSeleccionado.label];
+            doughnutValues = [totalRecords]; // Usar el total de registros
+            // Asignar el color correspondiente según el estado
+            const colorMap = {
+              1: "#3b82f6", // PRE-APROBADO (azul)
+              2: "#10b981", // APROBADO (verde esmeralda)
+              3: "#6b7280", // ANULADO (gris)
+              4: "#ef4444", // RECHAZADO (rojo)
+              5: "#f59e0b", // NO APLICA (amarillo/naranja)
+              6: "#059669", // FACTURADO (verde oscuro)
+              7: "#dc2626", // RECHAZADO-LN (rojo oscuro)
+            };
+            doughnutColors = [colorMap[estadoFiltro]];
+          }
         }
-      });
 
-      setUniqueVendedores(vendedoresSet.size); // Guardamos la cantidad de vendedores únicos
-
-  
         setDoughnutData({
-          labels: ["Pendiente", "Aprobado", "Anulado", "Rechazado"],
+          labels: doughnutLabels,
           datasets: [
             {
-              data: [
-                estadoCounts.PENDIENTE,
-                estadoCounts.APROBADO,
-                estadoCounts.ANULADO,
-                estadoCounts.RECHAZADO,
-              ],
-              backgroundColor: ["#007bff", "#00c853", "#ffab00", "#ff3d00"],
+              data: doughnutValues,
+              backgroundColor: doughnutColors,
             },
           ],
         });
+        
+        // Crear datos para el gráfico de barras apiladas
         const bodegaLabels = Object.keys(bodegaCounts).map((codigo) => {
           const bodegaEncontrada = bodegas.find((b) => b.b_Bodega === Number(codigo));
           return bodegaEncontrada ? bodegaEncontrada.b_Nombre : `Bodega ${codigo}`;
         });
 
+        // Crear datasets para cada estado
+        const estadosParaBarras = [
+          { key: 'PENDIENTE', label: 'PRE-APROBADO', color: '#3b82f6' }, // ✅ Azul
+          { key: 'APROBADO', label: 'APROBADO', color: '#10b981' }, // ✅ Verde esmeralda
+          { key: 'ANULADO', label: 'ANULADO', color: '#6b7280' }, // ✅ Gris
+          { key: 'RECHAZADO', label: 'RECHAZADO', color: '#ef4444' }, // ✅ Rojo
+          { key: 'NO_APLICA', label: 'NO APLICA', color: '#f59e0b' }, // ✅ Amarillo/naranja
+          { key: 'FACTURADO', label: 'FACTURADO', color: '#059669' }, // ✅ Verde oscuro
+          { key: 'RECHAZADO_LN', label: 'RECHAZADO-LN', color: '#dc2626' }, // ✅ Rojo oscuro
+        ];
 
-      const bodegaValues = Object.values(bodegaCounts);
+        const datasets = estadosParaBarras.map(estado => ({
+          label: estado.label,
+          data: Object.keys(bodegaCounts).map(bodegaId => 
+            bodegaEstadoCounts[bodegaId] ? bodegaEstadoCounts[bodegaId][estado.key] : 0
+          ),
+          backgroundColor: estado.color,
+        }));
 
-
-      setBarData({
-        labels: bodegaLabels,
-        datasets: [
-          {
-            label: "Solicitudes por Bodega",
-            data: bodegaValues,
-            backgroundColor: "#007bff",
-          },
-        ],
-      });
+        setBarData({
+          labels: bodegaLabels,
+          datasets: datasets,
+        });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
-  
 
-
-
-
-
-
-
+  // ✅ Modificar este useEffect para que solo se ejecute cuando todo esté listo
   useEffect(() => {
-    // Solo llamar a fetchSolicitudes si las fechas son válidas
-      fetchSolicitudes(fechaInicio, fechaFin );
-    
-  }, [fechaInicio, fechaFin , selectedBodega , estadoFiltro] );
+    // Solo llamar a fetchSolicitudes si las fechas son válidas Y las bodegas están cargadas
+    if (fechaInicio && fechaFin && bodegas.length > 0) {
+      fetchSolicitudes();
+    }
+  }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas]);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-{/* Sección de filtros */}
+      {/* Sección de filtros */}
       {/* Contenedor de los filtros y botón alineados en una sola fila */}
       <div className="flex flex-col md:flex-row items-center gap-4">
-        
+
         {/* Select de bodegas */}
         <div className="w-full md:w-1/4">
           <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-1">
@@ -264,7 +346,7 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
             value={fechaInicio}
             onChange={(e) => {
               const nuevaFechaInicio = e.target.value;
-    
+
               // Validar que la fecha de inicio sea válida
               if (isValidDate(nuevaFechaInicio)) {
                 setFechaInicio(nuevaFechaInicio);
@@ -273,13 +355,11 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
                 setFechaInicio(today);
               }
             }}
-/>
+          />
         </div>
 
         {/* Input Fecha Fin */}
         <div className="w-full md:w-1/4">
-
-
           <label className="block text-gray-700 font-semibold mb-1">Fecha Fin</label>
           <input
             type="date"
@@ -303,10 +383,6 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
             ))}
           </select>
         </div>
-
-
-    
-
       </div>
 
       {/* Sección de tarjetas */}
@@ -340,16 +416,34 @@ const [uniqueVendedores, setUniqueVendedores] = useState(0);
       {/* Sección de gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Detalles grafico de barras</h3>
-          
-              <Bar data={barData} />
-          
+          <h3 className="text-xl font-semibold mb-4">Detalles gráfico de barras</h3>
+          <Bar 
+            data={barData} 
+            options={{
+              responsive: true,
+              scales: {
+                x: {
+                  stacked: true,
+                },
+                y: {
+                  stacked: true,
+                },
+              },
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'top',
+                },
+              },
+            }}
+          />
         </div>
         <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Detallaes diagrama de pastel</h3>
+          <h3 className="text-xl font-semibold mb-4">Detalles diagrama de pastel</h3>
           <Doughnut data={doughnutData} />
         </div>
       </div>
     </div>
   );
 }
+
