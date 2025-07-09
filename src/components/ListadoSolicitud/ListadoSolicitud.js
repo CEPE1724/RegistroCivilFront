@@ -3124,7 +3124,9 @@ export function ListadoSolicitud() {
                         
 
                         // Solo Domicilio activo
-                        ((data?.Domicilio == 1 ) &&
+                        (
+                          data.Estado !== 5 && data.Estado !== 4 &&
+                          data?.Domicilio == 1  &&
                           data?.idEstadoVerificacionDomicilio == 2)
 
                         
