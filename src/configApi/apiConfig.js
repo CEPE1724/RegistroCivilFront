@@ -2,7 +2,10 @@ import { get } from "react-hook-form";
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
+
+
+
+const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
@@ -179,7 +182,16 @@ export const APIURL = {
   cambiarClave: () => `${API_BASE_URL}usuarios/cambiar-clave`,
   recuperarClave: () => `${API_BASE_URL}usuarios/recuperar-clave`, 
   patch_ClientesVerifTerren: (id) => `${API_BASE_URL}clientes-verificacion-terrena/update/${id}`,
-  get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}`,
+
+  get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}` ,
   get_CoordenadasInforme: (id) => `${API_BASE_URL}clientes-verificacion-terrena/coordInforme/${id}`,
+  
+  // Endpoints para Lista Negra de Emails
+  getEmails: () => `${API_BASE_URL}lista-negra-email`,
+  postEmail: () => `${API_BASE_URL}lista-negra-email`,
+  updateEmail: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
+  deleteEmail: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
+  getEmailById: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
+  validarEmail: (email) => `${API_BASE_URL}lista-negra-email/email/${email}`,
 
 };

@@ -34,6 +34,7 @@ import Equifax from "./pages/Equifax";
 
 import DepositoPendiente from "./pages/DepositoPendiente";
 import ListaNegraCedula from "./pages/ListaNegraCedulas";
+import ListaNegraEmail from "./pages/ListaNegraEmails";
 
 function App() {
 
@@ -86,7 +87,8 @@ function App() {
         <Route path="/depositoPendiente" element={<PrivateRouteWrapper title="Deposito Pendiente" element={<DepositoPendiente />} />} />
         <Route path="/notificaciones" element={<PrivateRouteWrapper title="Notificaciones" element={<NotificacionesCli />} />} />
         <Route path="/ListaNegraCedulas" element={<PrivateRouteWrapper title="ListaNegraCedula" element={<ListaNegraCedula />} />} />
-      
+        <Route path="/ListaNegraEmails" element={<PrivateRouteWrapper title="ListaNegraEmail" element={<ListaNegraEmail />} />} />
+
       </Routes>
 
       {isSessionExpired && (

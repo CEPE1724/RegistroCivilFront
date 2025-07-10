@@ -4,10 +4,10 @@ import { APIURL } from "../../configApi/apiConfig";
 import { useSnackbar } from 'notistack';
 import { useAuth } from "../AuthContext/AuthContext";
 
-export function ListaNegraCedulas() {
-    const [cedulas, setCedulas] = useState([]);
+export function ListaNegraEmails() {
+    const [emails, setEmails] = useState([]);
     const [filtro, setFiltro] = useState('');
-    const [nuevaCedula, setNuevaCedula] = useState('');
+    const [nuevoEmail, setNuevoEmail] = useState('');
     const [nuevaDescripcion, setNuevaDescripcion] = useState('');
     const [mostrarFormulario, setMostrarFormulario] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -20,41 +20,41 @@ export function ListaNegraCedulas() {
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     useEffect(() => {
-        fetchCedulas();
+        fetchEmails();
     }, []);
 
-    const fetchCedulas = async () => {
+    const fetchEmails = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(APIURL.getCedulas());
-            const cedulasMapeadas = response.data.map(item => ({
-                id: item.idListaNegraCedula,
-                cedula: item.Cedula,
+            const response = await axios.get(APIURL.getEmails());
+            const emailsMapeados = response.data.map(item => ({
+                id: item.idListaNegraEmail,
+                email: item.Email,
                 descripcion: item.Observacion,
                 activo: item.Activo,
                 Usuario: item.Usuario,
                 FechaSistema: item.FechaSistema,
             }));
-            setCedulas(cedulasMapeadas);
+            setEmails(emailsMapeados);
             setError(null);
         } catch (err) {
-            console.error("Error al cargar cédulas:", err);
-            setError("No se pudieron cargar las cédulas. Intente de nuevo más tarde.");
+            console.error("Error al cargar emails:", err);
+            setError("No se pudieron cargar los emails. Intente de nuevo más tarde.");
         } finally {
             setLoading(false);
         }
     };
 
-    const cedulasFiltradas = cedulas.filter(item =>
-        item.cedula?.includes(filtro) ||
+    const emailsFiltrados = emails.filter(item =>
+        item.email?.toLowerCase().includes(filtro.toLowerCase()) ||
         item.descripcion?.toLowerCase().includes(filtro.toLowerCase())
     );
 
     // Lógica de paginación
-    const totalPages = Math.ceil(cedulasFiltradas.length / itemsPerPage);
+    const totalPages = Math.ceil(emailsFiltrados.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const cedulasPaginadas = cedulasFiltradas.slice(startIndex, endIndex);
+    const emailsPaginados = emailsFiltrados.slice(startIndex, endIndex);
 
     // Resetear página cuando cambie el filtro
     useEffect(() => {
@@ -72,38 +72,45 @@ export function ListaNegraCedulas() {
 
     const toggleActivo = async (id) => {
         try {
-            const cedulaToUpdate = cedulas.find(c => c.id === id);
-            if (!cedulaToUpdate) return;
+            const emailToUpdate = emails.find(e => e.id === id);
+            if (!emailToUpdate) return;
 
-            const nuevoEstado = !cedulaToUpdate.activo;
+            const nuevoEstado = !emailToUpdate.activo;
 
-            await axios.patch(`${APIURL.updateCedula(id)}`, { activo: nuevoEstado });
+            await axios.patch(APIURL.updateEmail(id), { activo: nuevoEstado });
 
-            setCedulas(cedulas.map(c =>
-                c.id === id ? { ...c, activo: nuevoEstado } : c
+            setEmails(emails.map(e =>
+                e.id === id ? { ...e, activo: nuevoEstado } : e
             ));
+
+            enqueueSnackbar(
+                `Email ${nuevoEstado ? 'activado' : 'desactivado'} correctamente.`,
+                { variant: 'success' }
+            );
+
         } catch (err) {
             console.error("Error al actualizar estado:", err);
-            alert("No se pudo actualizar el estado de la cédula.");
+            const mensaje = err.response?.data?.message || "No se pudo actualizar el estado del email.";
+            enqueueSnackbar(mensaje, { variant: 'error' });
         }
     };
 
-    const agregarCedula = async () => {
-        const cedula = nuevaCedula.trim();
+    const validarEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const agregarEmail = async () => {
+        const email = nuevoEmail.trim().toLowerCase();
         const descripcion = nuevaDescripcion.trim();
 
-        if (!cedula) {
-            enqueueSnackbar("La cédula es obligatoria.", { variant: 'warning' });
+        if (!email) {
+            enqueueSnackbar("El email es obligatorio.", { variant: 'warning' });
             return;
         }
 
-        if (!/^[0-9]+$/.test(cedula)) {
-            enqueueSnackbar("La cédula solo debe contener dígitos numéricos.", { variant: 'warning' });
-            return;
-        }
-
-        if (cedula.length !== 10) {
-            enqueueSnackbar("La cédula debe tener exactamente 10 dígitos.", { variant: 'warning' });
+        if (!validarEmail(email)) {
+            enqueueSnackbar("El formato del email no es válido.", { variant: 'warning' });
             return;
         }
 
@@ -118,29 +125,48 @@ export function ListaNegraCedulas() {
         }
 
         try {
-            await axios.post(APIURL.postCedula(), {
-                Cedula: cedula,
-                Observacion: descripcion,
+            const response = await axios.post(APIURL.postEmail(), {
+                Email: email,
+                Descripcion: descripcion, // ✅ Cambiar de "Observacion" a "Descripcion"
                 Activo: true,
                 Usuario: userData.Nombre,
             });
 
-            await fetchCedulas();
-            setNuevaCedula('');
-            setNuevaDescripcion('');
-            setMostrarFormulario(false);
+            if (response.status === 200 || response.status === 201) {
+                await fetchEmails();
+                setNuevoEmail('');
+                setNuevaDescripcion('');
+                setMostrarFormulario(false);
 
-            enqueueSnackbar("Cédula agregada exitosamente a la lista negra.", { variant: 'success' });
+                enqueueSnackbar("Email agregado exitosamente a la lista negra.", { variant: 'success' });
+            }
 
         } catch (err) {
-            console.error("❌ Error al agregar cédula:", err.response?.data || err);
-            const mensaje = err.response?.data?.message || "No se pudo agregar la cédula a la lista negra.";
-            enqueueSnackbar(mensaje, { variant: 'error' });
+            console.error("❌ Error al agregar email:", err);
+            
+            // Manejo específico de errores del servidor
+            if (err.response) {
+                const { status, data } = err.response;
+                
+                if (status === 400) {
+                    enqueueSnackbar(data.message || "Datos inválidos. Verifique la información ingresada.", { variant: 'error' });
+                } else if (status === 409) {
+                    enqueueSnackbar("Este email ya existe en la lista negra.", { variant: 'warning' });
+                } else if (status === 500) {
+                    enqueueSnackbar("Error interno del servidor. Intente nuevamente.", { variant: 'error' });
+                } else {
+                    enqueueSnackbar(data.message || "Error desconocido del servidor.", { variant: 'error' });
+                }
+            } else if (err.request) {
+                enqueueSnackbar("No se pudo conectar con el servidor. Verifique su conexión.", { variant: 'error' });
+            } else {
+                enqueueSnackbar("Ocurrió un error inesperado. Intente nuevamente.", { variant: 'error' });
+            }
         }
     };
 
     const cancelarFormulario = () => {
-        setNuevaCedula('');
+        setNuevoEmail('');
         setNuevaDescripcion('');
         setMostrarFormulario(false);
     };
@@ -158,9 +184,9 @@ export function ListaNegraCedulas() {
         </svg>
     );
 
-    const IdIcon = () => (
+    const EmailIcon = () => (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V4a2 2 0 114 0v2m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
     );
 
@@ -200,44 +226,44 @@ export function ListaNegraCedulas() {
         </svg>
     );
 
-return (
+    return (
         <div className="bg-gray-900 min-h-screen p-6">
             <div className="max-w-6xl mx-auto bg-gray-800 rounded-lg shadow-2xl p-6 border-t-4 border-red-600">
                 <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
                     <div className="flex items-center space-x-3">
                         <div className="p-2 bg-red-600 rounded-full">
-                            <BlockedIcon />
+                            <EmailIcon />
                         </div>
-                        <h1 className="text-3xl font-bold text-white">Lista Negra de Cédulas</h1>
+                        <h1 className="text-3xl font-bold text-white">Lista Negra de Emails</h1>
                     </div>
                     <button
                         onClick={() => setMostrarFormulario(!mostrarFormulario)}
                         className="flex items-center bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-all duration-200 transform hover:scale-105"
                     >
                         <AddIcon />
-                        <span className="ml-2">Bloquear Cédula</span>
+                        <span className="ml-2">Bloquear Email</span>
                     </button>
                 </div>
 
                 {mostrarFormulario && (
                     <div className="mb-8 p-6 border rounded-md bg-gray-700 border-red-500 shadow-md animate-fadeIn">
                         <h2 className="text-xl font-semibold mb-4 text-white flex items-center">
-                            <IdIcon />
-                            <span className="ml-2">Nueva Cédula para Bloquear</span>
+                            <EmailIcon />
+                            <span className="ml-2">Nuevo Email para Bloquear</span>
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Número de Cédula</label>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Dirección de Email</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <IdIcon />
+                                        <EmailIcon />
                                     </div>
                                     <input
-                                        type="text"
-                                        value={nuevaCedula}
-                                        onChange={(e) => setNuevaCedula(e.target.value)}
+                                        type="email"
+                                        value={nuevoEmail}
+                                        onChange={(e) => setNuevoEmail(e.target.value)}
                                         className="w-full p-3 pl-10 bg-gray-600 border border-gray-500 rounded-md text-white placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                                        placeholder="10 dígitos"
+                                        placeholder="usuario@ejemplo.com"
                                     />
                                 </div>
                             </div>
@@ -260,7 +286,7 @@ return (
                                 Cancelar
                             </button>
                             <button
-                                onClick={agregarCedula}
+                                onClick={agregarEmail}
                                 className="py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center"
                             >
                                 <AddIcon />
@@ -276,7 +302,7 @@ return (
                     </div>
                     <input
                         type="text"
-                        placeholder="Buscar por cédula o descripción..."
+                        placeholder="Buscar por email o descripción..."
                         className="pl-12 p-3 w-full bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         value={filtro}
                         onChange={(e) => setFiltro(e.target.value)}
@@ -286,14 +312,14 @@ return (
                 {loading ? (
                     <div className="text-center py-16">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-solid border-red-600 border-t-transparent"></div>
-                        <p className="mt-4 text-gray-300 text-lg">Cargando lista de cédulas bloqueadas...</p>
+                        <p className="mt-4 text-gray-300 text-lg">Cargando lista de emails bloqueados...</p>
                     </div>
                 ) : error ? (
                     <div className="text-center py-12 bg-gray-700 rounded-lg">
                         <div className="text-red-500 text-5xl mb-4">⚠️</div>
                         <p className="text-xl text-red-400">{error}</p>
                         <button
-                            onClick={fetchCedulas}
+                            onClick={fetchEmails}
                             className="mt-4 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md"
                         >
                             Reintentar
@@ -304,7 +330,7 @@ return (
                         {/* Información de resultados */}
                         <div className="mb-4 flex justify-between items-center text-gray-300 text-sm">
                             <span>
-                                Mostrando {startIndex + 1}-{Math.min(endIndex, cedulasFiltradas.length)} de {cedulasFiltradas.length} cédulas
+                                Mostrando {startIndex + 1}-{Math.min(endIndex, emailsFiltrados.length)} de {emailsFiltrados.length} emails
                             </span>
                             <div className="flex items-center space-x-2">
                                 <label className="text-gray-300">Mostrar:</label>
@@ -327,39 +353,38 @@ return (
                                 <thead className="bg-gray-700">
                                     <tr>
                                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
-                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cédula</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
                                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Motivo del Bloqueo</th>
                                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Estado</th>
                                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Usuario</th>
                                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fecha</th>
-                                        {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th> */}
                                     </tr>
                                 </thead>
                                 <tbody className="bg-gray-800 divide-y divide-gray-700">
-                                    {cedulasPaginadas.length > 0 ? (
-                                        cedulasPaginadas.map((cedula, index) => (
-                                            <tr key={cedula.id} className="hover:bg-gray-700 transition-colors">
+                                    {emailsPaginados.length > 0 ? (
+                                        emailsPaginados.map((email, index) => (
+                                            <tr key={email.id} className="hover:bg-gray-700 transition-colors">
                                                 <td className="px-6 py-4 text-sm font-medium text-gray-300">
                                                     {startIndex + index + 1}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-gray-300">
                                                     <div className="flex items-center">
                                                         <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-600 mr-3">
-                                                            <IdIcon />
+                                                            <EmailIcon />
                                                         </span>
-                                                        <span className="font-mono">{cedula.cedula}</span>
+                                                        <span className="font-mono">{email.email}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-300">{cedula.descripcion}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{email.descripcion}</td>
                                                 <td className="px-6 py-4 text-sm">
                                                     <button
-                                                        onClick={() => toggleActivo(cedula.id)}
-                                                        className={`inline-flex items-center px-3 py-1 rounded-full ${cedula.activo
+                                                        onClick={() => toggleActivo(email.id)}
+                                                        className={`inline-flex items-center px-3 py-1 rounded-full ${email.activo
                                                                 ? 'bg-red-900 text-red-200'
                                                                 : 'bg-gray-700 text-gray-400'
                                                             }`}
                                                     >
-                                                        {cedula.activo ? (
+                                                        {email.activo ? (
                                                             <>
                                                                 <CheckCircleIcon />
                                                                 <span className="ml-2">Bloqueado</span>
@@ -372,25 +397,17 @@ return (
                                                         )}
                                                     </button>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-gray-300">{cedula.Usuario}</td>
-                                                <td className="px-6 py-4 text-sm text-gray-300">{new Date(cedula.FechaSistema).toLocaleDateString()}</td>
-                                                {/*    <td className="px-6 py-4 text-sm font-medium">
-                                                    <button 
-                                                        onClick={() => eliminarCedula(cedula.id)}
-                                                        className="text-yellow-400 hover:text-yellow-600 transition-colors"
-                                                    >
-                                                        <DeleteIcon />
-                                                    </button>
-                                                </td>*/}
+                                                <td className="px-6 py-4 text-sm text-gray-300">{email.Usuario}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{new Date(email.FechaSistema).toLocaleDateString()}</td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
                                             <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
                                                 <div className="flex flex-col items-center justify-center">
-                                                    <BlockedIcon />
-                                                    <p className="mt-2 text-lg">No se encontraron cédulas en la lista negra.</p>
-                                                    <p className="text-sm text-gray-500">Añada una cédula utilizando el botón "Bloquear Cédula"</p>
+                                                    <EmailIcon />
+                                                    <p className="mt-2 text-lg">No se encontraron emails en la lista negra.</p>
+                                                    <p className="text-sm text-gray-500">Añada un email utilizando el botón "Bloquear Email"</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -422,6 +439,7 @@ return (
                                             const pageNumber = index + 1;
                                             const isCurrentPage = pageNumber === currentPage;
                                             
+                                            // Mostrar solo páginas cercanas para no saturar la UI
                                             if (
                                                 pageNumber === 1 ||
                                                 pageNumber === totalPages ||
@@ -468,9 +486,10 @@ return (
                 )}
 
                 <div className="mt-6 text-xs text-gray-500 text-center">
-                    Sistema de Lista Negra - Protegiendo contra cédulas fraudulentas
+                    Sistema de Lista Negra - Protegiendo contra emails fraudulentos
                 </div>
             </div>
         </div>
     );
 }
+

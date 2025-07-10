@@ -103,10 +103,10 @@ const ListVerifLaboralModal = ({ openModal, closeModal, datosCliente }) => {
                             {verificacion.iEstado === 0
                               ? "Sin respuesta"
                               : verificacion.iEstado === 1
-                              ? "Con respuesta"
-                              : verificacion.iEstado === 2
-                              ? "Reasignado"
-                              : "Desconocido"}
+                                ? "Con respuesta"
+                                : verificacion.iEstado === 2
+                                  ? "Reasignado"
+                                  : "Desconocido"}
                           </td>
                           <td className="py-3 px-6 border-b">
                             {verificadores.find(
@@ -159,7 +159,7 @@ const ListVerifLaboralModal = ({ openModal, closeModal, datosCliente }) => {
         closeModal={handleCloseTrabajoModal}
         idsTerrenas={selectedVerificacion}
         idSolicitud={datosCliente?.idSolicitud}
-		datosCliente={datosCliente?.cliente}
+        datosCliente={datosCliente?.cliente}
       />
 
       <Dialog

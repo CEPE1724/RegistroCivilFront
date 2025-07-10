@@ -24,38 +24,38 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import SettingsIcon from "@mui/icons-material/Settings";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
-
+import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 import EventIcon from "@mui/icons-material/Event";
 import InfoIcon from "@mui/icons-material/Info";
 import { PhoneCallback } from "@mui/icons-material";
-
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
   const obtenerEstadoVerificacion = (estado) => {
     // Definir los estados según el Tipo de solicitud de crédito
- 
+
     const estadosPorTipo = {
       1: { // Documental
-         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
-      2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
-      3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
-      4: { label: "Conyuge", icon: <FavoriteIcon />, color: purple[300] },
-      5: { label: "Referencias", icon: <ContactsIcon />, color: orange[500] },
-      6: { label: "Negocios", icon: <StorefrontIcon />, color: teal[600] },
-      7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[300] },
-      8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[700] },
-      9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[700] },
-      10: { label: "Revisión", icon: <CheckCircleIcon />, color: green[500] },
-      11: { label: "Corrección", icon: <EventIcon />, color: red[400] },
-      12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[700] },
-      13: { label: "Rechazado", icon: <InfoIcon />, color: red[600] },
-      14: { label: "Foto", icon: <PersonIcon />, color: grey[700] },
-      15: { label: "Creación de Prefactura", icon: <SettingsIcon />, color: grey[600] },
-      16: { label: "Anulación de Prefactura", icon: <CancelIcon />, color: red[500] },
-      17: { label: "Aprobación Prefactura", icon: <VerifiedIcon />, color: green[600] },
-      18: { label: "Rechazo Prefactura", icon: <CancelIcon />, color: red[700] },
-      19: { label: "Facturado", icon: <CheckCircleIcon />, color: green[800] },
+        1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
+        2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
+        3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
+        4: { label: "Conyuge", icon: <FavoriteIcon />, color: purple[300] },
+        5: { label: "Referencias", icon: <ContactsIcon />, color: orange[500] },
+        6: { label: "Negocios", icon: <StorefrontIcon />, color: teal[600] },
+        7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[300] },
+        8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[700] },
+        9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[700] },
+        10: { label: "Revisión", icon: <CheckCircleIcon />, color: green[500] },
+        11: { label: "Corrección", icon: <EventIcon />, color: red[400] },
+        12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[700] },
+        13: { label: "Rechazado", icon: <InfoIcon />, color: red[600] },
+        14: { label: "Foto", icon: <PersonIcon />, color: grey[700] },
+        15: { label: "Creación de Prefactura", icon: <SettingsIcon />, color: grey[600] },
+        16: { label: "Anulación de Prefactura", icon: <CancelIcon />, color: red[500] },
+        17: { label: "Aprobación Prefactura", icon: <VerifiedIcon />, color: green[600] },
+        18: { label: "Rechazo Prefactura", icon: <CancelIcon />, color: red[700] },
+        19: { label: "Facturado", icon: <CheckCircleIcon />, color: green[800] },
 
 
 
@@ -80,13 +80,60 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       },
       4:
       {
-        1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
-
+       1: {
+          label: "Asignado",
+          icon: <TwoWheelerIcon />,
+          color: blue[600]   // Verde medio: indica que ya fue asignado y está en proceso
+        },
+        2: {
+          label: "Aprobado",
+          icon: <VerifiedIcon />,
+          color: green[600]    // Azul más fuerte: aprobado, estado positivo
+        },
+        3: {
+          label: "Reasignación Supervisor",
+          icon: <SupervisorAccountIcon />,
+          color: orange[800]  // Naranja fuerte: cambio manual por supervisor
+        },
+        4: {
+          label: "Reasignación APP",
+          icon: <AutorenewIcon />,
+          color: orange[500]  // Naranja medio: reasignación automática
+        },
+        5: {
+          label: "Rechazado",
+          icon: <CancelIcon />,
+          color: red[600]     // Rojo fuerte: claramente un estado negativo
+        }
       },
 
       5:
       {
-        1: { label: "Pendiente", icon: <SettingsIcon />, color: grey[500] },
+        1: {
+          label: "Asignado",
+          icon: <TwoWheelerIcon />,
+          color: blue[600]   // Verde medio: indica que ya fue asignado y está en proceso
+        },
+        2: {
+          label: "Aprobado",
+          icon: <VerifiedIcon />,
+          color: green[600]   // Azul más fuerte: aprobado, estado positivo
+        },
+        3: {
+          label: "Reasignación Supervisor",
+          icon: <SupervisorAccountIcon />,
+          color: orange[800]  // Naranja fuerte: cambio manual por supervisor
+        },
+        4: {
+          label: "Reasignación APP",
+          icon: <AutorenewIcon />,
+          color: orange[500]  // Naranja medio: reasignación automática
+        },
+        5: {
+          label: "Rechazado",
+          icon: <CancelIcon />,
+          color: red[600]     // Rojo fuerte: claramente un estado negativo
+        }
 
       },
 

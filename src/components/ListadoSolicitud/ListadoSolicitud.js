@@ -96,6 +96,7 @@ import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import { DocumentoDescarga } from './DocumentoDescarga';
 import { Description } from "@mui/icons-material";
 import ApartmentIcon from '@mui/icons-material/Apartment';
+import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
 
 
 export function ListadoSolicitud() {
@@ -709,16 +710,16 @@ export function ListadoSolicitud() {
 
 
 
-  const handleApproveEstado = async (data , justificacion) => {
-	try {
-		await patchSolicitudEstadoyResultado(data.id, { Estado: 1, Resultado: 1 });
-    	//await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
-    await fetchInsertarDatosAprobarEstado(6, data.id, 1,justificacion); // ✅ Usar la nueva función con observación
-    	setRecargar(true);
-    	setShowModalRechazo(false)
-	} catch (error) {
-		console.error("Error al pre-aprobar estado:", error);
-	}
+  const handleApproveEstado = async (data, justificacion) => {
+    try {
+      await patchSolicitudEstadoyResultado(data.id, { Estado: 1, Resultado: 1 });
+      //await patchSolicitudEstadoyResultado(data.id, { Resultado: 1 });
+      await fetchInsertarDatosAprobarEstado(6, data.id, 1, justificacion); // ✅ Usar la nueva función con observación
+      setRecargar(true);
+      setShowModalRechazo(false)
+    } catch (error) {
+      console.error("Error al pre-aprobar estado:", error);
+    }
 
 
   };
@@ -3123,15 +3124,15 @@ export function ListadoSolicitud() {
                       {/* Informes Operador */}
                       {(
                         // Ambos activos: ambos estados deben ser 2
-                        
+
 
                         // Solo Domicilio activo
                         (
                           data.Estado !== 5 && data.Estado !== 4 &&
-                          data?.Domicilio == 1  &&
+                          data?.Domicilio == 1 &&
                           data?.idEstadoVerificacionDomicilio == 2)
 
-                        
+
                       ) && (
                           <TableCell align="center">
                             <button
@@ -4496,125 +4497,20 @@ export function ListadoSolicitud() {
       </Dialog>
 
       {/* Dialog de confirmación */}
-      <Dialog open={openDialog2} onClose={() => {
-        // Limpiar todos los campos cuando se cierre el modal
-        setOpenDialog2(false);
-        setLaboralChecked(false);
-        setDomicilioChecked(false);
-        setEntrada("");
-        setJustificacion("");
-      }}>
-        <DialogTitle>Confirmar acción</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de cambiar el{" "}
-            {currentAction === "estado" ? "estado" : "resultado"}?
-          </Typography>
-
-          {currentAction === "estado" && (
-            <div style={{ marginTop: '1rem' }}>
-				<FormControlLabel
-                control={
-                  <Checkbox
-                    checked={true}
-					disabled={true}
-                    onChange={(e) => setDomicilioChecked(e.target.checked)}
-                  />
-                }
-                label="Domicilio"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={laboralChecked}
-                    onChange={(e) => setLaboralChecked(e.target.checked)}
-                  />
-                }
-                label="Laboral"
-              />
-              <TextField
-                label="Digite la entrada"
-                fullWidth
-                margin="normal"
-                value={entrada}
-                onChange={(e) => {
-                  const val = e.target.value;
-
-                  // Solo permitir números positivos con hasta 7 enteros y 2 decimales
-                  const regex = /^\d{0,7}(\.\d{0,2})?$/;
-
-                  if (val === "" || regex.test(val)) {
-                    setEntrada(val);
-                  }
-
-                }}
-                inputProps={{
-                  inputMode: "decimal", // para móviles
-                  pattern: "^[0-9]{1,7}(\\.[0-9]{0,2})?$",
-                  maxLength: 10,
-                }}
-                error={
-                  entrada !== "" &&
-                  (isNaN(parseFloat(entrada)) ||
-                    parseFloat(entrada) > 9999999.99)
-                }
-                helperText={
-                  entrada !== "" && parseFloat(entrada) > 9999999.99
-                    ? "Máximo permitido: 9,999,999.99"
-                    : ""
-                }
-              />
-              <TextField
-                label="Justificación / Motivo *"
-                fullWidth
-                margin="normal"
-                value={justificacion}
-                onChange={(e) => setJustificacion(e.target.value)}
-                multiline
-                rows={3}
-                placeholder="Ingrese la justificación para este cambio (mínimo 10 caracteres)..."
-                required
-                error={justificacion.length > 0 && justificacion.length < 10}
-                inputProps={{
-                  maxLength: 500,
-                }}
-                helperText={
-                  justificacion.length > 0 && justificacion.length < 10
-                    ? `Mínimo 10 caracteres. Actual: ${justificacion.length}/500`
-                    : `${justificacion.length}/500 caracteres`
-                }
-              />
-            </div>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              // Limpiar todos los campos cuando se cancele
-              setOpenDialog2(false);
-              setLaboralChecked(false);
-              setDomicilioChecked(false);
-              setEntrada("");
-              setJustificacion("");
-            }}
-            color="primary"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            color="primary"
-            disabled={
-              currentAction === "estado" && (
-                 // Debe seleccionar al menos uno
-                justificacion.length < 10 // Justificación obligatoria de mínimo 10 caracteres
-              )
-            }
-          >
-            Confirmar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmarAccionModal
+        open={openDialog2}
+        onClose={() => setOpenDialog2(false)}
+        onConfirm={handleConfirm}
+        currentAction={currentAction}
+        entrada={entrada}
+        setEntrada={setEntrada}
+        justificacion={justificacion}
+        setJustificacion={setJustificacion}
+        domicilioChecked={domicilioChecked}
+        setDomicilioChecked={setDomicilioChecked}
+        laboralChecked={laboralChecked}
+        setLaboralChecked={setLaboralChecked}
+      />
       <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
 
 

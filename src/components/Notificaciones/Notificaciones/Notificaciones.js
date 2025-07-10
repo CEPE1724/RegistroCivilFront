@@ -281,7 +281,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-6">
       <h1 className="text-3xl font-bold text-center mb-6 mt-4 text-gray-800">
-        Envío de Notificaciones
+       📢 Envío de Notificaciones
       </h1>
 
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">

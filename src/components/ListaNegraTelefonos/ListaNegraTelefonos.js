@@ -15,6 +15,10 @@ export function ListaNegraTelefonos() {
     const { enqueueSnackbar } = useSnackbar();
     const { userData } = useAuth();
 
+    // Estados para paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
     useEffect(() => {
         fetchTelefonos();
     }, []);
@@ -45,6 +49,26 @@ export function ListaNegraTelefonos() {
         tel.numero?.includes(filtro) ||
         tel.descripcion?.toLowerCase().includes(filtro.toLowerCase())
     );
+
+    // Lógica de paginación
+    const totalPages = Math.ceil(telefonosFiltrados.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const telefonosPaginados = telefonosFiltrados.slice(startIndex, endIndex);
+
+    // Resetear página cuando cambie el filtro
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filtro]);
+
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1);
+    };
 
     const toggleActivo = async (id) => {
         try {
@@ -160,9 +184,15 @@ export function ListaNegraTelefonos() {
         </svg>
     );
 
-    const BlockedIcon = () => (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+    const ChevronLeftIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+    );
+
+    const ChevronRightIcon = () => (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
     );
 
@@ -266,84 +296,175 @@ export function ListaNegraTelefonos() {
                         </button>
                     </div>
                 ) : (
-                    <div className="overflow-hidden rounded-lg shadow border border-gray-700">
-                        <table className="min-w-full divide-y divide-gray-700">
-                            <thead className="bg-gray-700">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Teléfono</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Motivo del Bloqueo</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Estado</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Usuario</th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fecha</th>
-                                    {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th> */}
-                                </tr>
-                            </thead>
-                            <tbody className="bg-gray-800 divide-y divide-gray-700">
-                                {telefonosFiltrados.length > 0 ? (
-                                    telefonosFiltrados.map(telefono => (
-                                        <tr key={telefono.id} className="hover:bg-gray-700 transition-colors">
-                                            <td className="px-6 py-4 text-sm font-medium text-gray-300">{telefono.id}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">
-                                                <div className="flex items-center">
-                                                    <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-600 mr-3">
-                                                        <PhoneIcon />
-                                                    </span>
-                                                    <span className="font-mono">{telefono.numero}</span>
+                    <>
+                        {/* Información de resultados */}
+                        <div className="mb-4 flex justify-between items-center text-gray-300 text-sm">
+                            <span>
+                                Mostrando {startIndex + 1}-{Math.min(endIndex, telefonosFiltrados.length)} de {telefonosFiltrados.length} teléfonos
+                            </span>
+                            <div className="flex items-center space-x-2">
+                                <label className="text-gray-300">Mostrar:</label>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                                    className="bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white"
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                </select>
+                                <span className="text-gray-300">por página</span>
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg shadow border border-gray-700">
+                            <table className="min-w-full divide-y divide-gray-700">
+                                <thead className="bg-gray-700">
+                                    <tr>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Teléfono</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Motivo del Bloqueo</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Estado</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Usuario</th>
+                                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Fecha</th>
+                                        {/* <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th> */}
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                                    {telefonosPaginados.length > 0 ? (
+                                        telefonosPaginados.map((telefono, index) => (
+                                            <tr key={telefono.id} className="hover:bg-gray-700 transition-colors">
+                                                <td className="px-6 py-4 text-sm font-medium text-gray-300">
+                                                    {startIndex + index + 1}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">
+                                                    <div className="flex items-center">
+                                                        <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-600 mr-3">
+                                                            <PhoneIcon />
+                                                        </span>
+                                                        <span className="font-mono">{telefono.numero}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{telefono.descripcion}</td>
+                                                <td className="px-6 py-4 text-sm">
+                                                    <button
+                                                        onClick={() => toggleActivo(telefono.id)}
+                                                        className={`inline-flex items-center px-3 py-1 rounded-full ${telefono.activo
+                                                                ? 'bg-red-900 text-red-200'
+                                                                : 'bg-gray-700 text-gray-400'
+                                                            }`}
+                                                    >
+                                                        {telefono.activo ? (
+                                                            <>
+                                                                <CheckCircleIcon />
+                                                                <span className="ml-2">Bloqueado</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <CancelIcon />
+                                                                <span className="ml-2">Inactivo</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{telefono.Usuario}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{new Date(telefono.FechaSistema).toLocaleDateString()}</td>
+                                                {/*    <td className="px-6 py-4 text-sm font-medium">
+                                                    <button 
+                                                        onClick={() => eliminarTelefono(telefono.id)}
+                                                        className="text-red-400 hover:text-red-600 transition-colors"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </button>
+                                                </td>*/}
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
+                                                <div className="flex flex-col items-center justify-center">
+                                                    <PhoneIcon />
+                                                    <p className="mt-2 text-lg">No se encontraron teléfonos en la lista negra.</p>
+                                                    <p className="text-sm text-gray-500">Añada un teléfono utilizando el botón "Bloquear Teléfono"</p>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{telefono.descripcion}</td>
-                                            <td className="px-6 py-4 text-sm">
-                                                <button
-                                                    onClick={() => toggleActivo(telefono.id)}
-                                                    className={`inline-flex items-center px-3 py-1 rounded-full ${telefono.activo
-                                                            ? 'bg-red-900 text-red-200'
-                                                            : 'bg-gray-700 text-gray-400'
-                                                        }`}
-                                                >
-                                                    {telefono.activo ? (
-                                                        <>
-                                                            <CheckCircleIcon />
-                                                            <span className="ml-2">Bloqueado</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <CancelIcon />
-                                                            <span className="ml-2">Inactivo</span>
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{telefono.Usuario}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{new Date(telefono.FechaSistema).toLocaleDateString()}</td>
-                                            {/*    <td className="px-6 py-4 text-sm font-medium">
-                                                <button 
-                                                    onClick={() => eliminarTelefono(telefono.id)}
-                                                    className="text-red-400 hover:text-red-600 transition-colors"
-                                                >
-                                                    <DeleteIcon />
-                                                </button>
-                                            </td>*/}
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400">
-                                            <div className="flex flex-col items-center justify-center">
-                                                <BlockedIcon />
-                                                <p className="mt-2 text-lg">No se encontraron teléfonos en la lista negra.</p>
-                                                <p className="text-sm text-gray-500">Añada un número utilizando el botón "Bloquear Número"</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Paginación */}
+                        {totalPages > 1 && (
+                            <div className="mt-6 flex items-center justify-between">
+                                <div className="text-sm text-gray-300">
+                                    Página {currentPage} de {totalPages}
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
+                                    <button
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage === 1}
+                                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-l-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeftIcon />
+                                        Anterior
+                                    </button>
+
+                                    {/* Números de página */}
+                                    <div className="flex items-center space-x-1">
+                                        {[...Array(totalPages)].map((_, index) => {
+                                            const pageNumber = index + 1;
+                                            const isCurrentPage = pageNumber === currentPage;
+                                            
+                                            if (
+                                                pageNumber === 1 ||
+                                                pageNumber === totalPages ||
+                                                (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2)
+                                            ) {
+                                                return (
+                                                    <button
+                                                        key={pageNumber}
+                                                        onClick={() => handlePageChange(pageNumber)}
+                                                        className={`px-3 py-2 text-sm font-medium border ${isCurrentPage
+                                                                ? 'bg-red-600 text-white border-red-600'
+                                                                : 'text-gray-300 bg-gray-700 border-gray-600 hover:bg-gray-600'
+                                                            }`}
+                                                    >
+                                                        {pageNumber}
+                                                    </button>
+                                                );
+                                            } else if (
+                                                pageNumber === currentPage - 3 ||
+                                                pageNumber === currentPage + 3
+                                            ) {
+                                                return (
+                                                    <span key={pageNumber} className="px-2 py-2 text-gray-400">
+                                                        ...
+                                                    </span>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                    </div>
+
+                                    <button
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage === totalPages}
+                                        className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-r-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Siguiente
+                                        <ChevronRightIcon />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <div className="mt-6 text-xs text-gray-500 text-center">
-                    Sistema de Lista Negra - Protegiendo contra llamadas no deseadas
+                    Sistema de Lista Negra - Protegiendo contra teléfonos fraudulentos
                 </div>
             </div>
         </div>

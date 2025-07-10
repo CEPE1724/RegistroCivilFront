@@ -71,8 +71,16 @@ const FormField = ({
     }
   };
 
-
-
+  const comprobEmail = async (email) => {
+    try {
+      const url = APIURL.validarEmail(email);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el email:", error);
+      return false;
+    }
+  };
 
   const handleInputChange = async (e) => {
     let { name, value } = e.target;
@@ -131,6 +139,24 @@ const FormField = ({
         }
 
         setIsBlacklisted(false);
+      }
+    }
+
+    // Agregar validación para email
+    if (name === "Email" && value.includes('@')) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(value)) {
+        const existe = await comprobEmail(value);
+
+        if (existe === 1) {
+          enqueueSnackbar(`El email ${value} se encuentra en la lista negra`, {
+            variant: 'warning'
+          });
+          setIsBlacklisted(true);
+          return;
+        } else {
+          setIsBlacklisted(false);
+        }
       }
     }
 
