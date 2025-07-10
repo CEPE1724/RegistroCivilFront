@@ -372,6 +372,17 @@ export default function CreditoForm() {
     }
   };
 
+  const comprobEmail = async (email) => {
+    try {
+      const url = APIURL.validarEmail(email);
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      console.error("Error al validar el email:", error);
+      return false;
+    }
+  };
+
   const validationSchema = Yup.object()
     .shape({
       NumeroSolicitud: Yup.number()
@@ -449,7 +460,18 @@ export default function CreditoForm() {
         ),
 
 
-      Email: Yup.string().email("Correo inválido").required("Ingresa un correo válido"),
+      Email: Yup.string()
+        .email("Correo inválido")
+        .required("Ingresa un correo válido")
+        .test(
+          "not-blacklisted",
+          "El email ${value} se encuentra en la lista negra",
+          async (value) => {
+            if (!value) return false;            // ya cubierto por .required()
+            const res = await comprobEmail(value);
+            return res !== 1;                    // false → lanza el mensaje
+          }
+        ),
 
       idSituacionLaboral: Yup.number()
         .nullable()

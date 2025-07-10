@@ -179,7 +179,16 @@ export const APIURL = {
   cambiarClave: () => `${API_BASE_URL}usuarios/cambiar-clave`,
   recuperarClave: () => `${API_BASE_URL}usuarios/recuperar-clave`, 
   patch_ClientesVerifTerren: (id) => `${API_BASE_URL}clientes-verificacion-terrena/update/${id}`,
-  get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}`,
+
+  get_ClientesVerifTerrenporId: (id) => `${API_BASE_URL}clientes-verificacion-terrena/allbyID/${id}` ,
   get_CoordenadasInforme: (id) => `${API_BASE_URL}clientes-verificacion-terrena/coordInforme/${id}`,
+  
+  // Endpoints para Lista Negra de Emails
+  getEmails: () => `${API_BASE_URL}lista-negra-email`,
+  postEmail: () => `${API_BASE_URL}lista-negra-email`,
+  updateEmail: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
+  deleteEmail: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
+  getEmailById: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
+  validarEmail: (email) => `${API_BASE_URL}lista-negra-email/email/${email}`,
 
 };
