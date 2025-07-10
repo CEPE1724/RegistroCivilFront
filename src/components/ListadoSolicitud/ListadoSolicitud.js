@@ -95,7 +95,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import { DocumentoDescarga } from './DocumentoDescarga';
 import { Description } from "@mui/icons-material";
+import ApartmentIcon from '@mui/icons-material/Apartment';
 import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
+
 
 export function ListadoSolicitud() {
   const {
@@ -1878,15 +1880,17 @@ export function ListadoSolicitud() {
   const handleOpenDialog = async (row) => {
     setSelectedRow(row);
     setView(true);
-    const [tipo1, tipo2, tipo3] = await Promise.all([
-      fetchTiempSolicweb(1, row.id, "1,12"), //solicitudes
-      fetchTiempSolicweb(2, row.id, "2,3"),  //telefonica 
-      fetchTiempSolicweb(3, row.id, "2,4")   //documental
+    const [tipo1, tipo2, tipo3, tipo4, tipo5] = await Promise.all([
+      fetchTiempSolicweb(1, row.id, "10,12"),  //solicitudes
+      fetchTiempSolicweb(2, row.id, "2,3"),    //telefonica 
+      fetchTiempSolicweb(3, row.id, "2,4"),    //documental
+	  fetchTiempSolicweb(4, row.id, "1"),      //domicilio
+	  fetchTiempSolicweb(5, row.id, "1")       //laboral
     ]);
 
 
     const resultados = {
-      tipo1, tipo2, tipo3
+      tipo1, tipo2, tipo3, tipo4, tipo5
     }
     setfechaTiempos(resultados);
   };
@@ -3309,7 +3313,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos?.tipo1[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo1[0]?.FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -3536,7 +3540,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 2) && (
+                    {fechaTiempos?.tipo1?.length > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -3549,7 +3553,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo1[1].FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -3612,7 +3616,7 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema,
+                            fechaTiempos?.tipo1[1]?.FechaSistema,
                             fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema
                           )}
                         </Typography>
@@ -3623,248 +3627,8 @@ export function ListadoSolicitud() {
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-
-            {/* <TimelineItem>
-              <TimelineSeparator
-                sx={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "relative",
-                  height: "100%",
-                }}
-              >
-                <Box
-                  sx={{
-                    position: "relative",
-                    height: "40px", // Altura del icono
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: "100%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "auto",
-                      textAlign: "center",
-                      marginBottom: "8px",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {fechaTiempos[0] && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: "inline-block",
-                          color: "text.primary",
-                          fontSize: "0.7rem",
-                          fontWeight: 600,
-                          backgroundColor: "#f0f4f8",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        {formatDateTime(fechaTiempos[0].FechaSistema)}
-                      </Typography>
-                    )}
-                  </Box>
-
-                 
-                  <TimelineDot
-                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
-                  >
-                    <StoreIcon
-                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
-                    />
-                  </TimelineDot>
-
-                  
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: "100%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "auto",
-                      textAlign: "center",
-                      marginTop: "8px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    {fechaTiempos[1] && (
-                      <>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            display: "inline-block",
-                            color: "text.primary",
-                            fontSize: "0.7rem",
-                            fontWeight: 600,
-                            backgroundColor: "#f0f4f8",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {formatDateTime(fechaTiempos[1].FechaSistema)}
-                        </Typography>
-                        
-                        <Typography
-                          variant="caption"
-                          className="tiempo-transcurrido"
-                          sx={{
-                            display: "block",
-                            color: "#2d3689",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            border: "1px solid #2d3689",
-                            backgroundColor: "#e8eaf6",
-                            padding: "1px 6px",
-                            borderRadius: "12px",
-                          }}
-                        >
-                          {calcularTiempoTranscurrido(
-                            fechaTiempos[0]?.FechaSistema,
-                            fechaTiempos[1]?.FechaSistema
-                          )}
-                        </Typography>
-                      </>
-                    )}
-                  </Box>
-                </Box>
-                <TimelineConnector />
-              </TimelineSeparator>
-            </TimelineItem> */}
-
-            {/* <TimelineItem>
-              <TimelineSeparator
-                sx={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "relative",
-                  height: "100%",
-                }}
-              >
-                <Box
-                  sx={{
-                    position: "relative",
-                    height: "40px", // Altura del icono
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      bottom: "100%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "auto",
-                      textAlign: "center",
-                      marginBottom: "8px",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {fechaTiempos[0] && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: "inline-block",
-                          color: "text.primary",
-                          fontSize: "0.7rem",
-                          fontWeight: 600,
-                          backgroundColor: "#f0f4f8",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        {formatDateTime(fechaTiempos[0].FechaSistema)}
-                      </Typography>
-                    )}
-                  </Box>
-
-                 
-                  <TimelineDot
-                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
-                  >
-                    <HouseIcon
-                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
-                    />
-                  </TimelineDot>
-
-                  
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: "100%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "auto",
-                      textAlign: "center",
-                      marginTop: "8px",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    {fechaTiempos[1] && (
-                      <>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            display: "inline-block",
-                            color: "text.primary",
-                            fontSize: "0.7rem",
-                            fontWeight: 600,
-                            backgroundColor: "#f0f4f8",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            marginBottom: "8px",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {formatDateTime(fechaTiempos[1].FechaSistema)}
-                        </Typography>
-                        
-                        <Typography
-                          variant="caption"
-                          className="tiempo-transcurrido"
-                          sx={{
-                            display: "block",
-                            color: "#2d3689",
-                            fontSize: "0.75rem",
-                            fontWeight: 700,
-                            border: "1px solid #2d3689",
-                            backgroundColor: "#e8eaf6",
-                            padding: "1px 6px",
-                            borderRadius: "12px",
-                          }}
-                        >
-                          {calcularTiempoTranscurrido(
-                            fechaTiempos[0]?.FechaSistema,
-                            fechaTiempos[1]?.FechaSistema
-                          )}
-                        </Typography>
-                      </>
-                    )}
-                  </Box>
-                </Box>
-                <TimelineConnector />
-              </TimelineSeparator>
-            </TimelineItem> */}
-
-            <TimelineItem>
+			{/* Domicilio */}
+			<TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3896,7 +3660,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos[0] && (
+                    {fechaTiempos?.tipo4?.length > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -3909,7 +3673,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos[0].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -3918,7 +3682,7 @@ export function ListadoSolicitud() {
                   <TimelineDot
                     sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
                   >
-                    <PersonIcon
+                    <HouseIcon
                       sx={{ color: "#2d3689", fontSize: "1.2rem" }}
                     />
                   </TimelineDot>
@@ -3938,7 +3702,7 @@ export function ListadoSolicitud() {
                       alignItems: "center",
                     }}
                   >
-                    {fechaTiempos[1] && (
+                    {fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental === 2) && (
                       <>
                         <Typography
                           variant="caption"
@@ -3954,7 +3718,7 @@ export function ListadoSolicitud() {
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {formatDateTime(fechaTiempos[1].FechaSistema)}
+                          {formatDateTime(fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
                         </Typography>
                         {/* Tiempo transcurrido */}
                         <Typography
@@ -3972,8 +3736,8 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos[0]?.FechaSistema,
-                            fechaTiempos[1]?.FechaSistema
+                            (fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema),
+                            (fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)
                           )}
                         </Typography>
                       </>
@@ -3983,6 +3747,128 @@ export function ListadoSolicitud() {
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
+			{/* Trabajo */}
+			<TimelineItem>
+              <TimelineSeparator
+                sx={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    height: "40px", // Altura del icono
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Contenedor fecha superior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginBottom: "8px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+					{/* tiempo que necesito */ }
+                    {fechaTiempos?.tipo5?.length > 0 && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "inline-block",
+                          color: "text.primary",
+                          fontSize: "0.7rem",
+                          fontWeight: 600,
+                          backgroundColor: "#f0f4f8",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {formatDateTime(fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema)}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  {/* Icono */}
+                  <TimelineDot
+                    sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.2)", zIndex: 2 }}
+                  >
+                    <ApartmentIcon
+                      sx={{ color: "#2d3689", fontSize: "1.2rem" }}
+                    />
+                  </TimelineDot>
+
+                  {/* Contenedor fecha inferior */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      width: "auto",
+                      textAlign: "center",
+                      marginTop: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    }}
+                  >
+                    {fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema && (
+                      <>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "inline-block",
+                            color: "text.primary",
+                            fontSize: "0.7rem",
+                            fontWeight: 600,
+                            backgroundColor: "#f0f4f8",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            marginBottom: "8px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatDateTime(fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
+                        </Typography>
+                        {/* Tiempo transcurrido */}
+                        <Typography
+                          variant="caption"
+                          className="tiempo-transcurrido"
+                          sx={{
+                            display: "block",
+                            color: "#2d3689",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            border: "1px solid #2d3689",
+                            backgroundColor: "#e8eaf6",
+                            padding: "1px 6px",
+                            borderRadius: "12px",
+                          }}
+                        >
+                          {calcularTiempoTranscurrido(
+                            fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema,
+                            fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema
+                          )}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Box>
+                <TimelineConnector />
+              </TimelineSeparator>
+            </TimelineItem>
+
           </Timeline>
         </DialogTitle>
 
