@@ -107,8 +107,8 @@ const SeccionA = forwardRef((props, ref) => {
     celular: data.CelularNegocio || "",
   });
   const [showMapModal, setShowMapModal] = useState(false);
-  const [ Latitud, setLatitud ] = useState("")
-  const [ Longitud, setLongitud ] = useState ("")
+  const [Latitud, setLatitud] = useState("")
+  const [Longitud, setLongitud] = useState("")
 
   useEffect(() => {
     fetchTiempoVivienda(enqueueSnackbar, setTiempoNegocio);
@@ -160,20 +160,20 @@ const SeccionA = forwardRef((props, ref) => {
 
 
     const camposBase = [
-    //   { dataKey: "NombreNegocio", formKey: "nombreNegocio" },
-    //   { dataKey: "idCre_TiempoNegocio", formKey: "tiempoNegocio" },
-    //   { dataKey: "MetrosCuadrados", formKey: "metros" },
-    //   { dataKey: "IngresosNegosio", formKey: "ingresos" },
-    //   { dataKey: "EgresosNegocio", formKey: "gastos" },
-    //   { dataKey: "idProvinciaNegocio", formKey: "provincia" },
-    //   { dataKey: "idCantonNegocio", formKey: "canton" },
-    //   { dataKey: "idParroquiaNegocio", formKey: "parroquia" },
-    //   { dataKey: "idBarrioNegocio", formKey: "barrio" },
-    //   { dataKey: "CallePrincipalNegocio", formKey: "callePrincipal" },
-    //   { dataKey: "NumeroCasaNegocio", formKey: "numeroCasa" },
-    //   { dataKey: "CalleSecundariaNegocio", formKey: "calleSecundaria" },
-    //   { dataKey: "ReferenciaUbicacionNegocio", formKey: "referenciaUbicacion" },
-    //   { dataKey: "ActividadEconomicaNegocio", formKey: "actividadNegocio" },
+      //   { dataKey: "NombreNegocio", formKey: "nombreNegocio" },
+      //   { dataKey: "idCre_TiempoNegocio", formKey: "tiempoNegocio" },
+      //   { dataKey: "MetrosCuadrados", formKey: "metros" },
+      //   { dataKey: "IngresosNegosio", formKey: "ingresos" },
+      //   { dataKey: "EgresosNegocio", formKey: "gastos" },
+      //   { dataKey: "idProvinciaNegocio", formKey: "provincia" },
+      //   { dataKey: "idCantonNegocio", formKey: "canton" },
+      //   { dataKey: "idParroquiaNegocio", formKey: "parroquia" },
+      //   { dataKey: "idBarrioNegocio", formKey: "barrio" },
+      //   { dataKey: "CallePrincipalNegocio", formKey: "callePrincipal" },
+      //   { dataKey: "NumeroCasaNegocio", formKey: "numeroCasa" },
+      //   { dataKey: "CalleSecundariaNegocio", formKey: "calleSecundaria" },
+      //   { dataKey: "ReferenciaUbicacionNegocio", formKey: "referenciaUbicacion" },
+      //   { dataKey: "ActividadEconomicaNegocio", formKey: "actividadNegocio" },
     ];
 
     const camposInvalidos = camposBase.filter(
@@ -415,23 +415,35 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
-	if ( formData.telefono !== "") {
-		if(formData.telefono.length !== 9){
-			newErrors.telefono = "El teléfono debe tener 9 dígitos";
-			if (!showSnackbar) {
-        	enqueueSnackbar("El teléfono debe tener 9 dígitos", {variant: "error",});
-        	showSnackbar = true;
-			}
-		}
-	}
+    if (formData.telefono !== "") {
+      if (formData.telefono.length !== 9) {
+        newErrors.telefono = "El teléfono debe tener 9 dígitos";
+        if (!showSnackbar) {
+          enqueueSnackbar("El teléfono debe tener 9 dígitos", { variant: "error", });
+          showSnackbar = true;
+        }
+      }
+    }
 
-	if (formData.celular && formData.celular.length !==10 ){
-		newErrors.celular = "El celular debe tener 10 dígitos";
-		if (!showSnackbar) {
-        enqueueSnackbar("El celular debe tener 10 dígitos", {variant: "error",});
+
+
+    if (!formData.celular || formData.celular.trim() === "") {
+      newErrors.celular = "El celular es obligatorio";
+      if (!showSnackbar) {
+        enqueueSnackbar("El celular es obligatorio", { variant: "error" });
         showSnackbar = true;
-      }	
-	}
+      }
+    } else if (!/^\d{10}$/.test(formData.celular)) {
+      newErrors.celular = "El celular debe tener exactamente 10 dígitos numéricos";
+      if (!showSnackbar) {
+        enqueueSnackbar("El celular debe tener exactamente 10 dígitos numéricos", {
+          variant: "error",
+        });
+        showSnackbar = true;
+      }
+    }
+
+
 
     if (!formData.callePrincipal) {
       newErrors.callePrincipal = "Este campo es obligatorio";
@@ -544,18 +556,18 @@ const SeccionA = forwardRef((props, ref) => {
   }));
 
   const fetchLatyLon = async () => {
-	try {
-		const id = clientInfo?.data?.id
-		console.log("id", id)
-		const response = await axios.get(APIURL.getCoordenadasId(id, 2))
-		setLatitud(response.data[0].latitud)
-		setLongitud(response.data[0].longitud)
-		setShowMapModal(true)
-	}  catch (error) {
-	console.error("Error al obtener coordenadas", error);
-	enqueueSnackbar("Error al obtener coordenadas", { variant: "error" });
+    try {
+      const id = clientInfo?.data?.id
+      console.log("id", id)
+      const response = await axios.get(APIURL.getCoordenadasId(id, 2))
+      setLatitud(response.data[0].latitud)
+      setLongitud(response.data[0].longitud)
+      setShowMapModal(true)
+    } catch (error) {
+      console.error("Error al obtener coordenadas", error);
+      enqueueSnackbar("Error al obtener coordenadas", { variant: "error" });
+    }
   }
-}
 
   return (
     <div className="p-6">
@@ -689,47 +701,47 @@ const SeccionA = forwardRef((props, ref) => {
           />
         </div>
 
-        {(clientInfo?.data?.idEstadoVerificacionSolicitud == 1 || clientInfo?.data?.idEstadoVerificacionSolicitud == 11 ) && (
-		<div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
-            <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-            Ubicacion Trabajo
-          </label>
-          <button
-            type="button"
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
-            name="verubicacionDomicilio"
-            onClick={() => handleOpenModal("ubicacionDomicilio")}
-          >
-            Ubicacion Trabajo
-          </button>
-          {ubicacionError && (
-            <p className="mt-1 text-sm text-red-500 border-red-500">
-              No se han registrado coordenadas para este domicilio.
-            </p>
-          )}
-        </div>)}
+        {(clientInfo?.data?.idEstadoVerificacionSolicitud == 1 || clientInfo?.data?.idEstadoVerificacionSolicitud == 11) && (
+          <div className="col-span-1">
+            <label className="text-xs font-medium mb-1 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+              Ubicacion Trabajo
+            </label>
+            <button
+              type="button"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
+              name="verubicacionDomicilio"
+              onClick={() => handleOpenModal("ubicacionDomicilio")}
+            >
+              Ubicacion Trabajo
+            </button>
+            {ubicacionError && (
+              <p className="mt-1 text-sm text-red-500 border-red-500">
+                No se han registrado coordenadas para este domicilio.
+              </p>
+            )}
+          </div>)}
 
-		{(clientInfo?.data.idEstadoVerificacionSolicitud == 12 || clientInfo?.data.idEstadoVerificacionSolicitud == 10 || clientInfo?.data?.idEstadoVerificacionSolicitud == 13) && (
-			<div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
-            <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
-            Ver Ubicacion Trabajo
-          </label>
-          <button
-            type="button"
-            className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
-            name="ubicacionDomicilio"
-            onClick={fetchLatyLon}
-          >
-            Ver Ubicacion Trabajo
-          </button>
-          {ubicacionError && (
-            <p className="mt-1 text-sm text-red-500 border-red-500">
-              No se han registrado coordenadas para este domicilio.
-            </p>
-          )}
-        </div>)}
+        {(clientInfo?.data.idEstadoVerificacionSolicitud == 12 || clientInfo?.data.idEstadoVerificacionSolicitud == 10 || clientInfo?.data?.idEstadoVerificacionSolicitud == 13) && (
+          <div className="col-span-1">
+            <label className="text-xs font-medium mb-1 flex items-center">
+              <FaMapMarkerAlt className="mr-2 text-primaryBlue" />
+              Ver Ubicacion Trabajo
+            </label>
+            <button
+              type="button"
+              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 mb-4"
+              name="ubicacionDomicilio"
+              onClick={fetchLatyLon}
+            >
+              Ver Ubicacion Trabajo
+            </button>
+            {ubicacionError && (
+              <p className="mt-1 text-sm text-red-500 border-red-500">
+                No se han registrado coordenadas para este domicilio.
+              </p>
+            )}
+          </div>)}
 
 
         <div className="lg:col-span-1">
@@ -743,8 +755,8 @@ const SeccionA = forwardRef((props, ref) => {
             value={formData.telefono}
             onChange={handleFormChange}
             className="solcitudgrande-style"
-			onInput={(e) => {e.target.value = e.target.value.replace(/[^0-9]/g, "");}}
-			maxLength={10}
+            onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
+            maxLength={10}
           />
           {errors.telefono && (
             <span className="text-red-500 text-xs">{errors.telefono}</span>
@@ -762,8 +774,8 @@ const SeccionA = forwardRef((props, ref) => {
             value={formData.celular}
             onChange={handleFormChange}
             className="solcitudgrande-style"
-			onInput={(e) => {e.target.value = e.target.value.replace(/[^0-9]/g, "");}}
-			maxLength={10}
+            onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
+            maxLength={10}
           />
           {errors.celular && (
             <span className="text-red-500 text-xs">{errors.celular}</span>
@@ -888,15 +900,15 @@ const SeccionA = forwardRef((props, ref) => {
         tipo={2}
         userData={userData}
       />
-	  {/* MAP MODAL */}
-		{showMapModal && Latitud && Longitud && (
-		  <GoogleMapModal
-			lat={Latitud}
-			lng={Longitud}
-			apiKey={GOOGLE_MAPS_API_KEY}
-			onClose={() => setShowMapModal(false)}
-		  />
-		)}
+      {/* MAP MODAL */}
+      {showMapModal && Latitud && Longitud && (
+        <GoogleMapModal
+          lat={Latitud}
+          lng={Longitud}
+          apiKey={GOOGLE_MAPS_API_KEY}
+          onClose={() => setShowMapModal(false)}
+        />
+      )}
     </div>
   );
 });
