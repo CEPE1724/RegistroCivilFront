@@ -134,12 +134,6 @@ const [fechaFin, setFechaFin] = useState(today);
       
       // Agregar timestamp para identificar cada llamada
       const timestamp = new Date().toISOString();
-      console.log(`[${timestamp}] Parámetros enviados a la API:`, params);
-      console.log(`[${timestamp}] Estado filtro actual:`, estadoFiltro);
-      console.log(`[${timestamp}] Tipo de estadoFiltro:`, typeof estadoFiltro);
-      console.log(`[${timestamp}] Valor de estado en params:`, params.estado);
-      console.log(`[${timestamp}] Fechas:`, { fechaInicio, fechaFin });
-      console.log(`[${timestamp}] Bodegas:`, bodegasId);
       
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
@@ -150,10 +144,6 @@ const [fechaFin, setFechaFin] = useState(today);
       });
 
       if (response.status === 200) {
-        console.log(`[${timestamp}] Respuesta de la API:`, response.data);
-        console.log(`[${timestamp}] Total de registros:`, response.data.total);
-        console.log(`[${timestamp}] Datos recibidos:`, response.data.data);
-        console.log(`[${timestamp}] Cantidad de datos:`, response.data.data.length);
 
         const estadoCounts = {
           PENDIENTE: 0,

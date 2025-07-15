@@ -97,6 +97,8 @@ import { DocumentoDescarga } from './DocumentoDescarga';
 import { Description } from "@mui/icons-material";
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 
 
 export function ListadoSolicitud() {
@@ -147,6 +149,8 @@ export function ListadoSolicitud() {
   const [idsTerrenas, setIdsTerrenas] = useState([]);
   const navigate = useNavigate();
   const { userData, idMenu, socket } = useAuth();
+  const editarCodDac = userData?.idGrupo === 1 || userData?.idGrupo === 16 || userData?.idGrupo === 18;
+  const editarCodDac2 = selectedRow?.Estado === 1;
   const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
   ///const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
   const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
@@ -167,6 +171,52 @@ export function ListadoSolicitud() {
   const handleCloseVerifLabModal = () => setListVerifLaborModal(false);
   const [isOpenPDf, setIsOpenPdf] = useState(false);
   const [dataInforme, setDataInforme] = useState(null);
+  const [openModalCodDag, setOpenModalCodDag] = useState(false);
+  const [openConfirmModalCodDac, setOpenConfirmModalCodDac] = useState(false);
+  const [codDact, setCodDact] = useState("");
+
+  const handleOpenEditModal = () => {
+	setCodDact(selectedRow.CodigoDactilar);
+	setOpenModalCodDag(true);
+  };
+
+  const handleUpdateClick = () => {
+	if (codDact === null || codDact.length !== 10) {
+		enqueueSnackbar("El código dactilar debe tener mínimo 10 dígitos.", { variant: "error" });
+		return;
+	}
+	setOpenConfirmModalCodDac(true);
+  };
+
+  const handleConfirmUpdate = () => {
+	console.log("Actualizando código dactilar a:", codDact);
+	fetchCodDact(selectedRow)
+  
+    // Cerrar modales
+    setOpenConfirmModalCodDac(false);
+    setOpenModalCodDag(false);
+    setView(false);
+  };
+
+  const fetchCodDact = async (selectedRow) => {
+	try {
+	  const url = APIURL.patch_codDactil(selectedRow.id);
+	  const response = await axios.patch(url, {
+		CodDactilar: codDact,
+	  }, {
+		headers: {
+		  "Content-Type": "application/json",
+		},
+	  });
+	  enqueueSnackbar("Código dactilar actualizado correctamente.", {variant: "success"})
+	  return response.data;
+	} catch (error) {
+	  console.error("Error al actualizar el código dactilar", error);
+	  enqueueSnackbar("Error al actualizar el código dactilar.", {variant: "error"});
+	  return null;
+	}
+  };
+
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -4091,6 +4141,15 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Tiene RUC:</p>
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
+
+				  <div className="flex items-center gap-2">
+					<FingerprintIcon className="text-blue-500" fontSize="medium" />
+					<p className="font-semibold">Codigo Dactilar: </p>
+					<p>{selectedRow.CodigoDactilar}</p>
+					{ editarCodDac && editarCodDac2 &&
+					(<button onClick={handleOpenEditModal}><BorderColorIcon/></button>)}
+				  </div>
+
                   <div className="flex items-center gap-2">
                     {permitirEquifax() && (
                       <button
@@ -4513,6 +4572,54 @@ export function ListadoSolicitud() {
       />
       <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
 
+		{/* Modal codigo dactilar */}
+		<Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>
+			<DialogTitle>Cambiar codigo Dactilar</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Ingresa el nuevo código dactilar:
+          </Typography>
+		  <TextField
+          fullWidth
+          variant="outlined"
+          value={codDact}
+          onChange={(e) => setCodDact(e.target.value)}
+          placeholder="Ingresa el código dactilar"
+          autoFocus
+        />
+
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModalCodDag(false)} color="primary">
+            Cerrar
+          </Button>
+		  <Button onClick={handleUpdateClick} color="primary" variant="contained">
+			Actualizar
+		  </Button>
+        </DialogActions>
+		</Dialog>
+
+		{/* Modal de confirmación */}
+		<Dialog 
+    	  open={openConfirmModalCodDac} 
+    	  onClose={() => setOpenConfirmModalCodDac(false)}
+    	  maxWidth="xs"
+    	>
+    	  <DialogTitle>Confirmar actualización</DialogTitle>
+    	  <DialogContent>
+    	    <Typography>
+    	      ¿Está seguro de actualizar el código dactilar?
+    	    </Typography>
+    	  </DialogContent>
+    	  <DialogActions>
+    	    <Button onClick={() => setOpenConfirmModalCodDac(false)} color="primary">
+    	      Cancelar
+    	    </Button>
+    	    <Button onClick={handleConfirmUpdate} color="primary" variant="contained">
+    	      Confirmar
+    	    </Button>
+    	  </DialogActions>
+    	</Dialog>
 
 
     </div>

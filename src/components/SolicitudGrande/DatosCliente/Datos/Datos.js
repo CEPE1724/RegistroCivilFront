@@ -134,6 +134,32 @@ const Datos = forwardRef((props, ref) => {
         }
     }, [formErrors, enqueueSnackbar]);
 
+	function validarCodigoDactilar(codigo) {
+    if (!codigo || codigo.length !== 10) return false;
+
+    const esLetra = (char) => /^[A-Z]$/.test(char);
+    const esNumero = (char) => /^[0-9]$/.test(char);
+
+    // Validar primero y quinto caracteres como letras obligatorias
+    if (!esLetra(codigo[0]) || !esLetra(codigo[5])) return false;
+
+    // grupo 2–4: números y solo una letra
+    const grupo1 = codigo.slice(1, 4);
+    const letrasGrupo1 = [...grupo1].filter(c => esLetra(c)).length;
+    if (letrasGrupo1 > 1) return false;
+
+    // grupo 6–10:números y solo una letra
+    const grupo2 = codigo.slice(6, 10);
+    const letrasGrupo2 = [...grupo2].filter(c => esLetra(c)).length;
+    if (letrasGrupo2 > 1) return false;
+
+    // Todos los caracteres deben ser números o letras
+    if (![...codigo].every(c => esLetra(c) || esNumero(c))) return false;
+
+    return true;
+}
+
+
     // Validación del formulario
     const validateForm = useCallback(() => {
         const requiredFieldMessages = {
@@ -206,7 +232,7 @@ const Datos = forwardRef((props, ref) => {
             errors.fechaNacimiento = 'Formato de fecha inválido';
         }
 
-        if (formData.codigoDactilar && !/^[A-Z]{1}[A-Z0-9]{1}[0-9]{3}[A-Z]{1}[0-9]{3}[A-Z0-9]{1}$/.test(formData.codigoDactilar)) {
+        if (formData.codigoDactilar && !validarCodigoDactilar(formData.codigoDactilar.toUpperCase())) {
             errors.codigoDactilar = 'Formato de codigo dactilar invalido';
         }
 
