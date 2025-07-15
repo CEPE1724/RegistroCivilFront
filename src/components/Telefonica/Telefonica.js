@@ -10,7 +10,7 @@ import { useAuth } from "../AuthContext/AuthContext";
 import { fetchConsultaYNotifica } from "../Utils";
 import ModalConfirmacionRechazo from '../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import { saveAs } from 'file-saver';
+
 
 import { APIURL } from "../../configApi/apiConfig";
 import {
@@ -606,22 +606,10 @@ export function TelefonicaList({
     }
   }
 
-  const ReporteTelefonicoButton = ({ solicitudId, nombre, solicitud }) => {
-    const handleDownloadPDF = async () => {
-      try {
-        const response = await axios.get(
-          `${APIURL.store_reports_phone_verification(solicitudId)}`,
-          {
-            responseType: 'blob', // Muy importante para manejar PDF
-          }
-        );
-
-        const blob = new Blob([response.data], { type: 'application/pdf' });
-        saveAs(blob, `${nombre}_${solicitud}.pdf`);
-      } catch (error) {
-        console.error('Error descargando el reporte PDF:', error);
-        alert('No se pudo generar el reporte.');
-      }
+  const ReporteTelefonicoButton = ({ solicitudId }) => {
+    const handleDownloadPDF = () => {
+      const url = `${APIURL.store_reports_phone_verification(solicitudId)}`;
+      window.open(url, '_blank');
     };
 
     return (
@@ -630,7 +618,7 @@ export function TelefonicaList({
         startIcon={<PictureAsPdfIcon />}
         onClick={handleDownloadPDF}
         sx={{
-          backgroundColor: '#2563eb',
+          backgroundColor: '#2563eb', // Azul Tailwind 600
           '&:hover': { backgroundColor: '#1d4ed8' },
           borderRadius: '8px',
           textTransform: 'none',
@@ -723,7 +711,7 @@ export function TelefonicaList({
                       Regresar
                     </button>
                     {clientInfo.idEstadoVerificacionTelefonica === 3 && (
-                      <ReporteTelefonicoButton solicitudId={clientInfo.id} nombre={clientInfo.nombre} solicitud={clientInfo.NumeroSolicitud} />
+                      <ReporteTelefonicoButton solicitudId={clientInfo.id} />
                     )}
 
                   </div>
