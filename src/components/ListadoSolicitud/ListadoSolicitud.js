@@ -233,9 +233,10 @@ export function ListadoSolicitud() {
           // Si falla GET, intentar POST
           const postResponse = await axios.post(
             "dactilar/consulta",
-            { cedula, dactilar, usuario: "ECEPEDA" },
+            { cedula, dactilar, usuario: userData.Nombre  },
             config
           );
+          
           if (postResponse.data.data) {
             return postResponse.data.data.FOTO;
           }
@@ -667,7 +668,9 @@ export function ListadoSolicitud() {
     }
   };
 
-  const fetchInsertarDatos = async (tipo, data, estado) => {
+  const 
+  
+  fetchInsertarDatos = async (tipo, data, estado) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
@@ -4538,6 +4541,7 @@ export function ListadoSolicitud() {
           dactilar={dactilar}
           imagenSubida={selectedRow?.imagen}
           estadoSolicitud={selectedRow?.Estado}
+          idSolicitud={selectedRow?.id}
           onAceptar={() => {
             // Acción al aceptar
             patchSolicitud(selectedRow?.id, 2);
