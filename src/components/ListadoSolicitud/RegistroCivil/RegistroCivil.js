@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../configApi/axiosConfig";
 import { CircularProgress, Alert, Button } from "@mui/material";
+import { useAuth } from "../../AuthContext/AuthContext";
+import { APIURL } from "../../../configApi/apiConfig";
 
 export function RegistroCivil({
   cedula,
@@ -11,9 +13,12 @@ export function RegistroCivil({
   resultadoVerificacion,
   permisos,
   estadoSolicitud,
+  idSolicitud,
 }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const { userData} = useAuth();
+  
   // Calcular porcentaje de similitud basado en el threshold
   const distance = resultadoVerificacion?.distance || 0;
   const threshold = resultadoVerificacion?.threshold || 1;
@@ -22,11 +27,29 @@ export function RegistroCivil({
 
   const hanldeResetInputs = () => setError(null);
 
+  const fetchInsertarDatos = async (tipo, data, estado) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+        idCre_SolicitudWeb: data,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData?.Nombre,
+        Telefono: dactilar, // Código dactilar
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
 
   const handleQuery = async () => {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
+
+      console.log("userData:", userData);
+      console.log("userData.Nombre:", userData?.Nombre);
 
       try {
         const getResponse = await axios.get(`dactilar/${cedula}`, config);
@@ -37,16 +60,25 @@ export function RegistroCivil({
           throw new Error("Data not found for the provided cedula.");
         }
       } catch (err) {
+        // Si el GET da 500, hacer el POST
         if (err.response && err.response.status === 500) {
           const postResponse = await axios.post(
             "dactilar/consulta",
-            { cedula, dactilar, usuario: "ECEPEDA" },
+            { 
+              cedula, 
+              dactilar, 
+              Usuario: userData?.Nombre
+            },
             config
           );
           if (postResponse.data.data) {
             setData(postResponse.data.data);
             hanldeResetInputs();
+            
+            // Registrar consulta exitosa
+            await fetchInsertarDatos(1, idSolicitud, 20);
           } else {
+            // No registrar error aquí - simplemente no hay datos
             throw new Error("Data query failed");
           }
         } else {
@@ -54,6 +86,7 @@ export function RegistroCivil({
         }
       }
     } catch (err) {
+      // Este catch maneja errores del POST
       if (err.response && err.response.status === 500) {
         const errorMessage = err.response.data.message;
         let parsedMessage;
@@ -62,6 +95,9 @@ export function RegistroCivil({
             errorMessage.replace("Error en la consulta: ", "")
           );
           parsedMessage = errorObject.mensaje?.mensaje;
+          
+          // Solo registrar como fallida cuando hay un error real del POST
+          await fetchInsertarDatos(1, idSolicitud, 21);
         } catch (parseError) {
           parsedMessage = "Error desconocido";
         }
@@ -360,3 +396,5 @@ export function RegistroCivil({
     </div>
   );
 }
+
+

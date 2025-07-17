@@ -28,6 +28,8 @@ import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import EventIcon from "@mui/icons-material/Event";
 import InfoIcon from "@mui/icons-material/Info";
+import FaceIcon from "@mui/icons-material/Face";
+import ErrorIcon from "@mui/icons-material/Error";
 import { PhoneCallback } from "@mui/icons-material";
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
@@ -56,8 +58,8 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         17: { label: "Aprobación Prefactura", icon: <VerifiedIcon />, color: green[600] },
         18: { label: "Rechazo Prefactura", icon: <CancelIcon />, color: red[700] },
         19: { label: "Facturado", icon: <CheckCircleIcon />, color: green[800] },
-
-
+        20: { label: "Verificación Facial Exitosa", icon: <FaceIcon />, color: green[600] },
+        21: { label: "Verificación Facial Fallida", icon: <ErrorIcon />, color: red[600] },
 
 
         /*11: "CORRECIÓN",
