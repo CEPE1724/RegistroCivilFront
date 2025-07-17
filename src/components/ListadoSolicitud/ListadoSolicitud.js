@@ -3593,7 +3593,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos?.tipo1?.length > 0 && (
+                    {fechaTiempos?.tipo1?.length > 1 && (
                       <Typography
                         variant="caption"
                         sx={{
