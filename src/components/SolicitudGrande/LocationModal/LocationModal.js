@@ -269,6 +269,49 @@ export function LocationModal({
 	}
   }, [isOpen]);
 
+  // NUEVO: función para extraer lat/lng de una URL tipo https://maps.google.com/?q=-0.139652,-78.437134
+  const extractLatLngFromUrl = (text) => {
+    const regex = /maps\.google\.com\/\?q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const match = text.match(regex);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    return null;
+  };
+
+  // NUEVO: función para actualizar dirección desde lat/lng
+  const updateAddressFromLatLng = async (lat, lng) => {
+    try {
+      const { data } = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleMapsApiKey}`
+      );
+      if (data.results && data.results.length > 0) {
+        setLocalLocation((prev) => ({
+          ...prev,
+          address: data.results[0].formatted_address,
+        }));
+      }
+    } catch (error) {
+      console.error("Error obteniendo dirección desde coordenadas:", error);
+    }
+  };
+
+  // NUEVO: handler para el input de búsqueda
+  const handleSearchInputChange = async (e) => {
+    const value = e.target.value;
+    // Si es una URL de Google Maps, extraer lat/lng
+    const coords = extractLatLngFromUrl(value);
+    if (coords) {
+      setLocalLocation((prev) => ({
+        ...prev,
+        latitude: coords.lat.toFixed(6),
+        longitude: coords.lng.toFixed(6),
+      }));
+      await updateAddressFromLatLng(coords.lat, coords.lng);
+    }
+    // ...si quieres, puedes guardar el texto en un estado para el input de búsqueda...
+  };
+
   if (!openLocationModal) return null;
 
   const mapCenter = {
@@ -346,14 +389,16 @@ export function LocationModal({
                 style={{ top: "10px", left: "250px" }}
               >
                 <div className="bg-white rounded-lg shadow-md flex items-center space-x-2 p-1 pointer-events-auto">
+                  {/* MODIFICADO: input de búsqueda editable */}
                   <Autocomplete
                     onLoad={handleAutocompleteLoad}
                     onPlaceChanged={handlePlaceChanged}
                   >
                     <input
                       type="text"
-                      placeholder="Buscar dirección"
+                      placeholder="Buscar dirección o pega URL Google Maps"
                       className="w-96 p-2 bg-transparent border-none focus:outline-none text-sm pac-target-input"
+                      onChange={handleSearchInputChange}
                     />
                   </Autocomplete>
                 </div>
@@ -372,7 +417,7 @@ export function LocationModal({
           </LoadScript>
         </div>
 
-        {/* Campos de latitud y longitud */}
+        {/* Campos de latitud y longitud EDITABLES */}
         <div className="mb-4 grid grid-cols-2 gap-4">
           <div>
             <label className="block mb-1 text-xs font-medium text-gray-700">
@@ -382,9 +427,15 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="latitude"
-              disabled
               value={localLocation.latitude}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e);
+                // Si el valor es válido, actualizar dirección y marcador
+                const val = e.target.value;
+                if (/^-?\d+\.\d+$/.test(val) && localLocation.longitude) {
+                  updateAddressFromLatLng(parseFloat(val), parseFloat(localLocation.longitude));
+                }
+              }}
               onBlur={handleBlur}
               placeholder="Latitud"
             />
@@ -400,9 +451,15 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="longitude"
-              disabled
               value={localLocation.longitude}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e);
+                // Si el valor es válido, actualizar dirección y marcador
+                const val = e.target.value;
+                if (/^-?\d+\.\d+$/.test(val) && localLocation.latitude) {
+                  updateAddressFromLatLng(parseFloat(localLocation.latitude), parseFloat(val));
+                }
+              }}
               onBlur={handleBlur}
               placeholder="Longitud"
             />
