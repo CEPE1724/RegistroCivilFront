@@ -8,6 +8,7 @@ import { Visibility } from "@mui/icons-material";
 import { TicketMinus } from "lucide-react";
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 import { useAuth } from "../AuthContext/AuthContext";
+import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
 const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
@@ -48,7 +49,7 @@ const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   );
 };
 
-const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente }) => {
+const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente, onAprobar }) => {
   const [trabajoInfo, setTrabajoInfo] = useState(null); // Estado para almacenar los datos del trabajo
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
@@ -56,7 +57,32 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
   const [showImageModal, setShowImageModal] = useState(false);
   const [verificador, setVerificador] = useState(null);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
-  const { userData } = useAuth();
+  const { userData, idMenu } = useAuth();
+  const [permisos, setPermisos] = useState([]);
+  const [showObsDialog, setShowObsDialog] = useState(false);
+  const [obsAprobar, setObsAprobar] = useState("");
+
+  // Cargar permisos al abrir el modal (igual que en Cabecera)
+  useEffect(() => {
+    const fetchPermisos = async () => {
+      try {
+        if (userData?.idUsuario && idMenu) {
+          const url = APIURL.getacces(idMenu, userData.idUsuario);
+          const response = await axios.get(url, {
+            headers: { "Content-Type": "application/json" },
+          });
+          if (response.status === 200) {
+            setPermisos(response.data);
+          } else {
+            console.error(`Error: ${response.status} - ${response.statusText}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching permisos:", error);
+      }
+    };
+    if (openModal) fetchPermisos();
+  }, [openModal, userData?.idUsuario, idMenu]);
 
   const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
 
@@ -156,6 +182,63 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
 	const handleAbrirModalVerificador = () => {
 		setOpenVerificacionModal(true)
 	}
+
+  // Permiso para aprobar tipo de verificación laboral
+  const tienePermisoEditarTipoVerificacionLaboral = () => {
+    const permiso = permisos.find((p) => p.Permisos === "ANALISTA EDITAR TIPO VERIFICACION LABORAL");
+    return permiso && permiso.Activo;
+  };
+
+  // NUEVO: función para registrar la aprobación con observación
+  const fetchInsertarDatosAprobarEstado = async (tipo, data, estado, observacion) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+      await axios.post(url, {
+        idCre_SolicitudWeb: idSolicitud,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: observacion
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+  // NUEVO: función para aprobar tipo de verificación con observación
+  const handleAprobarVerificacion = () => {
+    setShowObsDialog(true);
+  };
+
+  const handleConfirmAprobar = async () => {
+    try {
+      // 1. Actualiza tipo de verificación en backend
+      await axios.patch(APIURL.patchTipoVerificacionDomicilio(trabajoInfo.idTerrenaGestionTrabajo), {}, {
+        headers: { "Content-Type": "application/json" }
+      });
+      // 2. Registra en tiemposolicitudesweb (tipo=5, estado=6)
+      await fetchInsertarDatosAprobarEstado(5, idSolicitud, 6, obsAprobar.toUpperCase());
+      // 3. Actualiza el estado local
+      setTrabajoInfo((prev) => ({
+        ...prev,
+        tipoVerificacion: 2
+      }));
+      // 4. Actualiza el estado de la solicitud principal
+      await axios.patch(APIURL.update_solicitud(idSolicitud), {
+        idEstadoVerificacionTerrena: 2
+      }, {
+        headers: { "Content-Type": "application/json" }
+      });
+      setShowObsDialog(false);
+      setObsAprobar("");
+      // Notificar al padre para recargar datos
+      if (typeof onAprobar === "function") {
+        onAprobar();
+      }
+    } catch (error) {
+      console.error("Error al aprobar la verificación:", error);
+    }
+  };
 
   // Si el modal no está abierto, retornamos null
   if (!openModal) return null;
@@ -305,13 +388,24 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
                   <label className="font-semibold flex items-center mb-2">
                     <TicketMinus className="mr-2 w-5 h-5" /> Tipo Verificación
                   </label>
-                  <input
-                    type="text"
-                    placeholder="¿Tipo Verificación?"
-                    value={tipoVerificacionMap[trabajoInfo.tipoVerificacion] || ""}
-                    className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
-                    readOnly
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="¿Tipo Verificación?"
+                      value={tipoVerificacionMap[trabajoInfo.tipoVerificacion] || ""}
+                      className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
+                      readOnly
+                    />
+                    {(trabajoInfo.tipoVerificacion !== 2 &&
+                      tienePermisoEditarTipoVerificacionLaboral() && idsTerrenas?.iEstado == 1) && (
+                      <button
+                        className="ml-2 px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 transition"
+                        onClick={handleAprobarVerificacion}
+                      >
+                        Aprobar Verificación
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 			  
@@ -410,6 +504,35 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
 	  tipoSeleccionado={"trabajo"}
 	  idClienteVerificacion={trabajoInfo?.idClienteVerificacion}
 	  />
+
+      {/* Modal para observación al aprobar */}
+      <Dialog open={showObsDialog} onClose={() => setShowObsDialog(false)}>
+        <DialogTitle>Observación para aprobar verificación laboral</DialogTitle>
+        <DialogContent>
+          <input
+            type="text"
+            className="w-full border rounded p-2"
+            placeholder="Ingrese una observación"
+            value={obsAprobar}
+            onChange={e => setObsAprobar(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <button
+            className="px-4 py-2 rounded bg-gray-300 text-gray-700"
+            onClick={() => setShowObsDialog(false)}
+          >
+            Cancelar
+          </button>
+          <button
+            className="px-4 py-2 rounded bg-green-600 text-white"
+            onClick={handleConfirmAprobar}
+            disabled={!obsAprobar.trim()}
+          >
+            Aprobar
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

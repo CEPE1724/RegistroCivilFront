@@ -31,6 +31,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import FaceIcon from "@mui/icons-material/Face";
 import ErrorIcon from "@mui/icons-material/Error";
 import { PhoneCallback } from "@mui/icons-material";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
@@ -106,6 +107,11 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           label: "Rechazado",
           icon: <CancelIcon />,
           color: red[600]     // Rojo fuerte: claramente un estado negativo
+        },
+        6: {
+          label: "Aprobación Verificación Física Analista",
+          icon: <ThumbUpIcon />,
+          color: green[800]    // Azul más fuerte: aprobado, estado positivo
         }
       },
 
@@ -114,29 +120,33 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         1: {
           label: "Asignado",
           icon: <TwoWheelerIcon />,
-          color: blue[600]   // Verde medio: indica que ya fue asignado y está en proceso
+          color: blue[600]
         },
         2: {
           label: "Aprobado",
           icon: <VerifiedIcon />,
-          color: green[600]   // Azul más fuerte: aprobado, estado positivo
+          color: green[600]
         },
         3: {
           label: "Reasignación Supervisor",
           icon: <SupervisorAccountIcon />,
-          color: orange[800]  // Naranja fuerte: cambio manual por supervisor
+          color: orange[800]
         },
         4: {
           label: "Reasignación APP",
           icon: <AutorenewIcon />,
-          color: orange[500]  // Naranja medio: reasignación automática
+          color: orange[500]
         },
         5: {
           label: "Rechazado",
           icon: <CancelIcon />,
-          color: red[600]     // Rojo fuerte: claramente un estado negativo
+          color: red[600]
+        },
+        6: {
+          label: "Aprobación Verificación Física Analista",
+          icon: <ThumbUpIcon />,
+          color: green[800]
         }
-
       },
 
       6: { //// ESTADo
@@ -174,7 +184,16 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
     };
 
     // Buscar el estado correspondiente según el tipo de solicitud y estado
-    return estadosPorTipo[estado.Tipo]?.[estado.idEstadoVerificacionDocumental] || { label: "Desconocido", icon: null, color: grey[500] };
+    // Si no encuentra por idEstadoVerificacionDocumental, intenta por tipoVerificacion
+    let estadoTipo = estadosPorTipo[estado.Tipo];
+    let estadoObj = estadoTipo?.[estado.idEstadoVerificacionDocumental];
+
+    // Si no encuentra, intenta con tipoVerificacion para tipo 5 (laboral)
+    if (!estadoObj && estado.Tipo === 5 && typeof estado.tipoVerificacion !== "undefined") {
+      estadoObj = estadoTipo?.[estado.tipoVerificacion];
+    }
+
+    return estadoObj || { label: "Desconocido", icon: null, color: grey[500] };
   };
 
 

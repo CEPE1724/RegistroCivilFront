@@ -30,7 +30,7 @@ import ModalConfirmacionRechazo from "./ModalConfirmacionRechazo";
 import ModalCorreccion from "./ModalCorreccion";
 
 export function Cabecera() {
-  const { userData, userUsuario } = useAuth();
+  const { userData, idMenu } = useAuth();
   const { state } = useLocation();
   const { data } = state || {};
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/cerrar el modal
@@ -50,9 +50,6 @@ export function Cabecera() {
       }
     }
   }, [location.state]);
-
-
-
 
   const [activeTab, setActiveTab] = useState("Datos Cliente");
   const [fecha, setFecha] = useState(
@@ -100,6 +97,33 @@ export function Cabecera() {
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
 
+  const [permisos, setPermisos] = useState([]);
+
+  const tienePermisoEditarAnalista = () => {
+    const permiso = permisos.find((p) => p.Permisos === "EDITAR ANALISTA");
+    return permiso && permiso.Activo;
+  };
+
+  const permissionscomponents = async (idMenu, idUsuario) => {
+    try {
+      const url = APIURL.getacces(idMenu, idUsuario);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setPermisos(data);
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching permissions components:", error);
+    }
+  };
+
+  // Cargar datos iniciales y permisos
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -109,8 +133,12 @@ export function Cabecera() {
           // Asignamos los datos al estado
           setClienteData(datosCliente);
         }
+
+        if (userData?.idUsuario && idMenu) {
+          await permissionscomponents(idMenu, userData.idUsuario);
+        }
       } catch (error) {
-        console.error("Error al cargar los datos:", error);
+        console.error("Error al cargar los datos iniciales:", error);
       }
     };
 
@@ -1739,17 +1767,17 @@ export function Cabecera() {
               {renderTabContent(clienteData)}
             </div>
             <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-              {data?.idEstadoVerificacionSolicitud < 12 && (
-                <div className="flex items-center">
-                  <button
-                    onClick={handleSubmit}
-                    className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-                  >
-                    <SaveIcon className="text-lg" />
-                    <span className="text-xs">Guardar</span>
-                  </button>
-                </div>
-              )}
+            {(data?.idEstadoVerificacionSolicitud < 12 || tienePermisoEditarAnalista()) && (
+              <div className="flex items-center">
+                <button
+                  onClick={handleSubmit}
+                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                >
+                  <SaveIcon className="text-lg" />
+                  <span className="text-xs">Guardar</span>
+                </button>
+              </div>
+            )}
 
               <div className="flex items-center">
                 <button
