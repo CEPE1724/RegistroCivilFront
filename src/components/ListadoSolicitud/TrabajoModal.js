@@ -213,7 +213,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
   const handleConfirmAprobar = async () => {
     try {
       // 1. Actualiza tipo de verificación en backend
-      await axios.patch(APIURL.patchTipoVerificacionDomicilio(trabajoInfo.idTerrenaGestionTrabajo), {}, {
+      await axios.patch(APIURL.patchTipoVerificacionTrabajo(trabajoInfo.idTerrenaGestionTrabajo), {}, {
         headers: { "Content-Type": "application/json" }
       });
       // 2. Registra en tiemposolicitudesweb (tipo=5, estado=6)

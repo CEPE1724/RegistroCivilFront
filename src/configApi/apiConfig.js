@@ -196,4 +196,7 @@ export const APIURL = {
   validarEmail: (email) => `${API_BASE_URL}lista-negra-email/email/${email}`,
   store_reports_phone_verification: (id) => `${API_BASE_URL}store-reports-phone-verification/cre-solicitud/${id}`,
   patchTipoVerificacionDomicilio: (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}/tipo-verificacion`,
+  patchTipoVerificacionTrabajo: (id) => `${API_BASE_URL}terrena-gestion-trabajo/${id}/tipo-verificacion`,
+
+
 };

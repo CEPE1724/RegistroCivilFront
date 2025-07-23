@@ -1524,8 +1524,7 @@ export function ListadoSolicitud() {
   const [openDialogConfirmar, setOpenDialogConfirmar] = useState(false); // Confirmación
   const [openDialogOperador, setOpenDialogOperador] = useState(false);
   const [operadorSeleccionado, setOperadorSeleccionado] = useState(null);
-
-  // Nuevo: Confirmar asignación de operador y notificar
+  const [openDialogConfirmarOperador, setOpenDialogConfirmarOperador] = useState(false); // Confirmación operador  // Nuevo: Confirmar asignación de operador y notificar
  
   const handleConfirmarAsignacion = async () => {
     try {
@@ -4352,7 +4351,7 @@ export function ListadoSolicitud() {
             variant="contained"
             onClick={() => {
               setOpenDialogOperador(false);
-              setOpenDialogConfirmar(true); // Mostrar diálogo de confirmación de operador
+              setOpenDialogConfirmarOperador(true); // Mostrar diálogo de confirmación de operador
             }}
             disabled={!operadorSeleccionado}
           >
@@ -4362,7 +4361,7 @@ export function ListadoSolicitud() {
       </Dialog>
 
       {/* confirmacion de cambiar operador */}
-      <Dialog open={openDialogConfirmar} onClose={() => setOpenDialogConfirmar(false)}>
+      <Dialog open={openDialogConfirmarOperador} onClose={() => setOpenDialogConfirmarOperador(false)}>
         <DialogTitle>Confirmar acción</DialogTitle>
         <DialogContent>
           <Typography>
@@ -4370,13 +4369,13 @@ export function ListadoSolicitud() {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialogConfirmar(false)} color="primary">
+          <Button onClick={() => setOpenDialogConfirmarOperador(false)} color="primary">
             Cancelar
           </Button>
           <Button
             onClick={() => {
               handleConfirmarAsignacionOperador();
-              setOpenDialogConfirmar(false);
+              setOpenDialogConfirmarOperador(false);
             }}
             color="primary"
             variant="contained"
