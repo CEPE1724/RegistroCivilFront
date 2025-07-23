@@ -100,7 +100,7 @@ export function Cabecera() {
   const [permisos, setPermisos] = useState([]);
 
   const tienePermisoEditarAnalista = () => {
-    const permiso = permisos.find((p) => p.Permisos === "EDITAR ANALISTA");
+    const permiso = permisos.find((p) => p.Permisos === "ANALISTA EDITAR SOLICITUD GRANDE");
     return permiso && permiso.Activo;
   };
 
