@@ -6,7 +6,7 @@ import { get } from "react-hook-form";
 
 
 //const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
-const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
+const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
@@ -194,9 +194,8 @@ export const APIURL = {
   deleteEmail: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
   getEmailById: (id) => `${API_BASE_URL}lista-negra-email/${id}`,
   validarEmail: (email) => `${API_BASE_URL}lista-negra-email/email/${email}`,
+
   store_reports_phone_verification: (id) => `${API_BASE_URL}store-reports-phone-verification/cre-solicitud/${id}`,
   patchTipoVerificacionDomicilio: (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}/tipo-verificacion`,
-  patchTipoVerificacionTrabajo: (id) => `${API_BASE_URL}terrena-gestion-trabajo/${id}/tipo-verificacion`,
-
 
 };

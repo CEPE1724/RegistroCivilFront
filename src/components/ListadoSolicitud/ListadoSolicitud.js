@@ -233,7 +233,10 @@ export function ListadoSolicitud() {
           // Si falla GET, intentar POST
           const postResponse = await axios.post(
             "dactilar/consulta",
+
+
             { cedula, dactilar, usuario: userData.Nombre  },
+
             config
           );
           
@@ -1621,9 +1624,12 @@ export function ListadoSolicitud() {
   };
 
   const updateAnalista = async (fila, numero) => {
+    console.log("Fila actual:", fila);
     console.log(fila.id)
     console.log(numero)
     try {
+      console.log("Actualizando analista para la solicitud:", fila.id, "con analista:", numero);
+      console.log("URL de actualización:", APIURL.update_solicitud(fila.id));
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
         {

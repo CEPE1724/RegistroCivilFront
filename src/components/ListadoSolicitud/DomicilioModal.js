@@ -18,25 +18,25 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   };
 
   const generatePDF = (latitude, longitude) => {
-	const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&scale=2&maptype=hybrid&markers=color:red|${latitude},${longitude}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
-  
-	const pdf = new jsPDF();
-  
-	//titulo
-	pdf.setFontSize(18);
-	pdf.text("Croquis", 80, 20);
-	
-	// Cargar la imagen en el PDF
-	const img = new Image();
-	img.src = mapImageUrl;
-	
-	img.onload = () => {
-	  // Añadir la imagen al PDF 
-	  pdf.addImage(img, 'JPEG', 17, 45, 180, 120);
-	  
-	  // Guardar el PDF
-	  pdf.save('ubicacion.pdf');
-	};
+    const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&scale=2&maptype=hybrid&markers=color:red|${latitude},${longitude}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+
+    const pdf = new jsPDF();
+
+    //titulo
+    pdf.setFontSize(18);
+    pdf.text("Croquis", 80, 20);
+
+    // Cargar la imagen en el PDF
+    const img = new Image();
+    img.src = mapImageUrl;
+
+    img.onload = () => {
+      // Añadir la imagen al PDF 
+      pdf.addImage(img, 'JPEG', 17, 45, 180, 120);
+
+      // Guardar el PDF
+      pdf.save('ubicacion.pdf');
+    };
   };
 
 
@@ -67,15 +67,15 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
             <Marker position={center} />
           </GoogleMap>
         </LoadScript>
-		<div className="absolute bottom-4 left-4">
-			<button
-			onClick= {() => generatePDF(lat, lng)}
-				className="bg-primaryBlue text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition"
-			>
-				<DownloadIcon/>
-				Descargar
-			</button>
-		</div>
+        <div className="absolute bottom-4 left-4">
+          <button
+            onClick={() => generatePDF(lat, lng)}
+            className="bg-primaryBlue text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition"
+          >
+            <DownloadIcon />
+            Descargar
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -330,9 +330,9 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
       </div>
     ) : null;
 
-	const handleAbrirModalVerificador = () => {
-		setOpenVerificacionModal(true)
-	}
+  const handleAbrirModalVerificador = () => {
+    setOpenVerificacionModal(true)
+  }
 
   // Permiso para aprobar tipo de verificación
   const tienePermisoEditarTipoVerificacion = () => {
@@ -392,25 +392,26 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
               "Tipo de Verificación",
               tipoVerificacionMap[tipoVerificacion],
               // Mostrar botón solo si tiene permiso
-              (tipoVerificacion !== 2 && 
+              (tipoVerificacion !== 2 &&
                 tienePermisoEditarTipoVerificacion() && idsTerrenas?.iEstado == 1) ? (
                 <button
-                  className="ml-2 px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 transition"
+                  className="ml-2 px-4 py-2 rounded-md bg-gradient-to-r from-green-500 to-green-700 text-white text-sm font-medium shadow-md hover:from-green-600 hover:to-green-800 transition-all duration-200"
+
                   onClick={handleAprobarVerificacion}
                 >
                   Aprobar Verificación
                 </button>
               ) : null
             )}
-			  { verificacionData?.tipoVerificacion !==2 && idsTerrenas.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
-			  <div className="col-span-full flex justify-end mt-2">
-				<button
-				  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
-				  onClick={handleAbrirModalVerificador}
-				>
-				  Reasignar verificador
-				</button>
-			  </div>)}
+            {verificacionData?.tipoVerificacion !== 2 && idsTerrenas.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
+              <div className="col-span-full flex justify-end mt-2">
+                <button
+                  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
+                  onClick={handleAbrirModalVerificador}
+                >
+                  Reasignar verificador
+                </button>
+              </div>)}
             {Array.isArray(domicilioImages) && domicilioImages.length > 0 && (
               <div className="col-span-full mt-6">
                 <h3 className="text-lg font-semibold mb-2">Fotos del domicilio</h3>
@@ -501,43 +502,57 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
         />
       )}
 
-	  <VerificacionTerrenaModal
-	  isOpen={openVerificacionModal}
-	  onClose={() => setOpenVerificacionModal(false)}
-	  userSolicitudData={datosCliente}
-	  userData={userData}
-	  tipoSeleccionado={"domicilio"}
-	  idClienteVerificacion={verificacionData?.idClienteVerificacion}
-	  />
+      <VerificacionTerrenaModal
+        isOpen={openVerificacionModal}
+        onClose={() => setOpenVerificacionModal(false)}
+        userSolicitudData={datosCliente}
+        userData={userData}
+        tipoSeleccionado={"domicilio"}
+        idClienteVerificacion={verificacionData?.idClienteVerificacion}
+      />
 
       {/* Modal para observación al aprobar */}
       <Dialog open={showObsDialog} onClose={() => setShowObsDialog(false)}>
-        <DialogTitle>Observación para aprobar verificación</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="text-lg font-semibold text-gray-800">
+          Aprobar verificación
+        </DialogTitle>
+
+        <DialogContent className="pt-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Observación
+          </label>
           <input
             type="text"
-            className="w-full border rounded p-2"
-            placeholder="Ingrese una observación"
+            className="w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none px-3 py-2 text-gray-800"
+            placeholder="Escribe una observación..."
             value={obsAprobar}
-            onChange={e => setObsAprobar(e.target.value)}
+            onChange={e => setObsAprobar(e.target.value.toUpperCase())}
           />
+          {obsAprobar.trim().length > 0 && obsAprobar.trim().length < 10 && (
+            <p className="mt-1 text-sm text-red-500">Debe tener al menos 10 caracteres.</p>
+          )}
         </DialogContent>
-        <DialogActions>
+
+        <DialogActions className="flex justify-end gap-2 px-6 pb-4">
           <button
-            className="px-4 py-2 rounded bg-gray-300 text-gray-700"
+            className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition"
             onClick={() => setShowObsDialog(false)}
           >
             Cancelar
           </button>
           <button
-            className="px-4 py-2 rounded bg-green-600 text-white"
+            className={`px-4 py-2 rounded-md text-white transition ${obsAprobar.trim()
+              ? 'bg-green-600 hover:bg-green-700'
+              : 'bg-green-300 cursor-not-allowed'
+              }`}
             onClick={handleConfirmAprobar}
-            disabled={!obsAprobar.trim()}
+            disabled={obsAprobar.trim().length < 10}
           >
             Aprobar
           </button>
         </DialogActions>
       </Dialog>
+
     </>
   );
 };

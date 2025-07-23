@@ -64,11 +64,14 @@ export function RegistroCivil({
         if (err.response && err.response.status === 500) {
           const postResponse = await axios.post(
             "dactilar/consulta",
+
+
             { 
               cedula, 
               dactilar, 
               Usuario: userData?.Nombre
             },
+
             config
           );
           if (postResponse.data.data) {
