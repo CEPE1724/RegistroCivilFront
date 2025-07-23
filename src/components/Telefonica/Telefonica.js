@@ -9,7 +9,7 @@ import axios from "../../configApi/axiosConfig";
 import { useAuth } from "../AuthContext/AuthContext";
 import { fetchConsultaYNotifica } from "../Utils";
 import ModalConfirmacionRechazo from '../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
-
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 
 import { APIURL } from "../../configApi/apiConfig";
@@ -29,7 +29,7 @@ import {
   DialogActions,
   Alert,
 } from "@mui/material";
-
+import PrintIcon from '@mui/icons-material/Print';
 export function TelefonicaList({
   id,
   NumeroSolicitud,
@@ -43,7 +43,7 @@ export function TelefonicaList({
 }) {
   const { userData, idMenu } = useAuth();
   const [files, setFiles] = useState({});
-  const [apiResponseData, setApiResponseData] = useState([]); 
+  const [apiResponseData, setApiResponseData] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,7 +68,7 @@ export function TelefonicaList({
   const [filePreviews, setFilePreviews] = useState({});
   const [selectedRow, setSelectedRow] = useState(null);
   const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
-  const [ soliParen, setSoliParen] = useState([])
+  const [soliParen, setSoliParen] = useState([])
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -203,17 +203,17 @@ export function TelefonicaList({
   const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
   const contactedDocs = tablaDatos.filter((doc) => doc.idEstadoOrigenTelefonica == 4 && doc.idEstadoGestns === 11); //numeros contactados que son referencia
 
-const titulares = tablaDatos.filter((item) => {
-	const match = soliParen.find(p => p.Celular == item.Telefono);
-	const nombreParentesco = match
-		? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
-		: 'TITULAR';
-	return nombreParentesco === 'TITULAR';
-});
+  const titulares = tablaDatos.filter((item) => {
+    const match = soliParen.find(p => p.Celular == item.Telefono);
+    const nombreParentesco = match
+      ? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
+      : 'TITULAR';
+    return nombreParentesco === 'TITULAR';
+  });
 
-const todosTitularesContactados = titulares.every((item) => item.idEstadoGestns === 11);  //numeros TITUlAR contactados
+  const todosTitularesContactados = titulares.every((item) => item.idEstadoGestns === 11);  //numeros TITUlAR contactados
 
-const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
+  const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
   const resultContactedDocs = contactedDocs.length >= 2 ? contactedDocs : [];
   useEffect(() => {
     if (clientInfo.id) {
@@ -230,7 +230,7 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
       };
 
       fetchData();
-	  fetchParentesco();
+      fetchParentesco();
 
     }
   }, [clientInfo.id, shouldReload]);
@@ -239,11 +239,11 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
   const handleOpenDialog = async (index, item) => {
     const selectedItem = tablaDatos[index];
     setSelectedRow(item);
-	const match = soliParen.find(p => p.Celular === item.Telefono);
-	setSelectedRow({
-		...item,
-		idParentesco: match ? match.idParentesco : ''
-	});
+    const match = soliParen.find(p => p.Celular === item.Telefono);
+    setSelectedRow({
+      ...item,
+      idParentesco: match ? match.idParentesco : ''
+    });
     const idCre_VerificacionTelefonicaMaestro =
       selectedItem.idCre_VerificacionTelefonicaMaestro;
 
@@ -597,14 +597,43 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
   };
 
   const fetchParentesco = async () => {
-	try {
-		const response = await axios.get(APIURL.get_cre_referenciasclientesweb_id(clientInfo.id))
-		setSoliParen(response.data);
-	}  catch (error) {
-	console.error("Error al obtener los datos de parentesco:", error);
-	enqueueSnackbar("Error al obtener los datos de parentesco", { variant: "error" });
+    try {
+      const response = await axios.get(APIURL.get_cre_referenciasclientesweb_id(clientInfo.id))
+      setSoliParen(response.data);
+    } catch (error) {
+      console.error("Error al obtener los datos de parentesco:", error);
+      enqueueSnackbar("Error al obtener los datos de parentesco", { variant: "error" });
+    }
   }
-}
+
+  const ReporteTelefonicoButton = ({ solicitudId }) => {
+    const handleDownloadPDF = () => {
+      const url = `${APIURL.store_reports_phone_verification(solicitudId)}`;
+      window.open(url, '_blank');
+    };
+
+    return (
+      <Button
+        variant="contained"
+        startIcon={<PictureAsPdfIcon />}
+        onClick={handleDownloadPDF}
+        sx={{
+          backgroundColor: '#2563eb', // Azul Tailwind 600
+          '&:hover': { backgroundColor: '#1d4ed8' },
+          borderRadius: '8px',
+          textTransform: 'none',
+          fontWeight: '600',
+          px: 2,
+          py: 1.5,
+        }}
+      >
+        Ver Reporte
+      </Button>
+    );
+  };
+
+
+
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -646,7 +675,8 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                     ["Nombre", clientInfo.nombre],
                     ["Cédula", clientInfo.cedula],
                     ["Fecha", new Date(clientInfo.fecha).toLocaleString('es-EC', {
-  					day: 'numeric',month: 'numeric',year: 'numeric',hour: 'numeric',minute: '2-digit',hour12: true,})],
+                      day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+                    })],
                     ["Vendedor", clientInfo.vendedor],
                     ["Tipo de consulta", clientInfo.consulta],
                     ["Almacén", clientInfo.almacen],
@@ -657,7 +687,7 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-4 items-center">
-                    {puedeAprobar && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !== 3 &&(
+                    {puedeAprobar && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
                       <button
                         onClick={handleSubmit}
                         className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-300 ease-in-out"
@@ -680,6 +710,10 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                     >
                       Regresar
                     </button>
+                    {clientInfo.idEstadoVerificacionTelefonica === 3 && (
+                      <ReporteTelefonicoButton solicitudId={clientInfo.id} />
+                    )}
+
                   </div>
                 </div>
               </div>
@@ -694,7 +728,7 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                   <tr>
                     <th className="px-4 py-2 text-center font-bold">#</th>
                     <th className="px-4 py-2 text-center font-bold">Nombre</th>
-					<th className="px-4 py-2 text-center font-bold">Parentesco</th>
+                    <th className="px-4 py-2 text-center font-bold">Parentesco</th>
                     <th className="px-4 py-2 text-center font-bold">Origen</th>
                     <th className="px-4 py-2 text-center font-bold">Fecha</th>
                     <th className="px-4 py-2 text-center font-bold">Telefono</th>
@@ -704,14 +738,14 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                 </thead>
                 <tbody>
                   {tablaDatos.map((item, index) => {
-					const match = soliParen.find(p => p.Celular == item.Telefono);
-					const nombreParentesco = match
-     				? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
-     				: 'TITULAR';
+                    const match = soliParen.find(p => p.Celular == item.Telefono);
+                    const nombreParentesco = match
+                      ? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
+                      : 'TITULAR';
                     return (<tr key={index}>
                       <td className="px-4 py-2 text-center">{index + 1}</td>
                       <td className="px-4 py-2 text-center">{item.idEstadoOrigenTelefonica === 4 ? item.Observacion : ""}</td>
-					  <td className="px-4 py-2 text-center">{nombreParentesco}</td>
+                      <td className="px-4 py-2 text-center">{nombreParentesco}</td>
                       {/* Mostrar origen como Estacion */}
                       <td className="px-4 py-2 text-center">
                         {origenMap[item.idEstadoOrigenTelefonica] ||
@@ -737,7 +771,7 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                         </IconButton>
                       </td>
                     </tr>)
-					})}
+                  })}
                 </tbody>
               </table>
             </div>
@@ -754,7 +788,7 @@ const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
                 <PersonIcon className="text-blue-500" fontSize="medium" />
                 <span>
                   Verificación Telefónica de {selectedRow?.Observacion}{" "}
-                  {selectedRow?.Telefono} - {selectedRow?.idParentesco ? datoParentesco.find(item => item.idParentesco === selectedRow.idParentesco)?.Nombre || 'Titular'	: 'Titular'}
+                  {selectedRow?.Telefono} - {selectedRow?.idParentesco ? datoParentesco.find(item => item.idParentesco === selectedRow.idParentesco)?.Nombre || 'Titular' : 'Titular'}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">

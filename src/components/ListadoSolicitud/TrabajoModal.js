@@ -110,8 +110,8 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
     1: "Coincide",
     2: "No Coincide",
   };
-  
-    const tipoVerificacionMap = {
+
+  const tipoVerificacionMap = {
     1: "Dirección incorrecta",
     2: "Aprobado",
     3: "Malas referencias",
@@ -130,10 +130,10 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
   }, [openModal, idsTerrenas.idTerrenaGestionTrabajo]); // Se ejecuta cuando cambia openModal o idsTerrenas.idTerrenaGestionTrabajo
 
   useEffect(() => {
-	  if (!openModal) {
-		setTrabajoInfo("");
-	  }
-	}, [openModal]);
+    if (!openModal) {
+      setTrabajoInfo("");
+    }
+  }, [openModal]);
 
   // Función para obtener la información del trabajo
   const fetchTrabajoInfo = async (id) => {
@@ -179,9 +179,9 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
       </div>
     ) : null;
 
-	const handleAbrirModalVerificador = () => {
-		setOpenVerificacionModal(true)
-	}
+  const handleAbrirModalVerificador = () => {
+    setOpenVerificacionModal(true)
+  }
 
   // Permiso para aprobar tipo de verificación laboral
   const tienePermisoEditarTipoVerificacionLaboral = () => {
@@ -398,26 +398,27 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
                     />
                     {(trabajoInfo.tipoVerificacion !== 2 &&
                       tienePermisoEditarTipoVerificacionLaboral() && idsTerrenas?.iEstado == 1) && (
-                      <button
-                        className="ml-2 px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 transition"
-                        onClick={handleAprobarVerificacion}
-                      >
-                        Aprobar Verificación
-                      </button>
-                    )}
+                        <button
+                           className="ml-2 px-4 py-2 rounded-md bg-gradient-to-r from-green-500 to-green-700 text-white text-sm font-medium shadow-md hover:from-green-600 hover:to-green-800 transition-all duration-200"
+ 
+                          onClick={handleAprobarVerificacion}
+                        >
+                          Aprobar Verificación
+                        </button>
+                      )}
                   </div>
                 </div>
               </div>
-			  
-			{trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !==2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
-			<div className="col-span-full flex justify-end mt-2">
-			<button
-			  className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
-			  onClick={handleAbrirModalVerificador}
-			>
-			  Reasignar verificador
-			</button>
-			</div>)}
+
+              {trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
+                <div className="col-span-full flex justify-end mt-2">
+                  <button
+                    className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
+                    onClick={handleAbrirModalVerificador}
+                  >
+                    Reasignar verificador
+                  </button>
+                </div>)}
               {Array.isArray(trabajoInfo.trabajoImages) && trabajoInfo.trabajoImages.length > 0 && (
                 <div className="col-span-full mt-6">
                   <h3 className="text-lg font-semibold mb-2">Imágenes del Trabajo</h3>
@@ -496,43 +497,57 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
         />
       )}
 
-	  <VerificacionTerrenaModal
-	  isOpen={openVerificacionModal}
-	  onClose={() => setOpenVerificacionModal(false)}
-	  userSolicitudData={datosCliente}
-	  userData={userData}
-	  tipoSeleccionado={"trabajo"}
-	  idClienteVerificacion={trabajoInfo?.idClienteVerificacion}
-	  />
+      <VerificacionTerrenaModal
+        isOpen={openVerificacionModal}
+        onClose={() => setOpenVerificacionModal(false)}
+        userSolicitudData={datosCliente}
+        userData={userData}
+        tipoSeleccionado={"trabajo"}
+        idClienteVerificacion={trabajoInfo?.idClienteVerificacion}
+      />
 
       {/* Modal para observación al aprobar */}
       <Dialog open={showObsDialog} onClose={() => setShowObsDialog(false)}>
-        <DialogTitle>Observación para aprobar verificación laboral</DialogTitle>
-        <DialogContent>
+        <DialogTitle className="text-lg font-semibold text-gray-800">
+          Aprobar verificación laboral
+        </DialogTitle>
+
+        <DialogContent className="pt-2">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Observación
+          </label>
           <input
             type="text"
-            className="w-full border rounded p-2"
-            placeholder="Ingrese una observación"
+            className="w-full rounded-md border border-gray-300 focus:ring-2 focus:ring-green-500 focus:outline-none px-3 py-2 text-gray-800"
+            placeholder="Ingrese una observación..."
             value={obsAprobar}
-            onChange={e => setObsAprobar(e.target.value)}
+            onChange={e => setObsAprobar(e.target.value.toUpperCase())}
           />
+           {obsAprobar.trim().length > 0 && obsAprobar.trim().length < 10 && (
+      <p className="mt-1 text-sm text-red-500">Debe tener al menos 10 caracteres.</p>
+    )}
         </DialogContent>
-        <DialogActions>
+
+        <DialogActions className="flex justify-end gap-2 px-6 pb-4">
           <button
-            className="px-4 py-2 rounded bg-gray-300 text-gray-700"
+            className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition"
             onClick={() => setShowObsDialog(false)}
           >
             Cancelar
           </button>
           <button
-            className="px-4 py-2 rounded bg-green-600 text-white"
+            className={`px-4 py-2 rounded-md text-white transition ${obsAprobar.trim()
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-green-300 cursor-not-allowed'
+              }`}
             onClick={handleConfirmAprobar}
-            disabled={!obsAprobar.trim()}
+             disabled={obsAprobar.trim().length < 10}
           >
             Aprobar
           </button>
         </DialogActions>
       </Dialog>
+
     </div>
   );
 };
