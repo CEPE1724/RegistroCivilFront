@@ -7,6 +7,8 @@ import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 import { useAuth } from "../AuthContext/AuthContext";
 import jsPDF from "jspdf";
 import DownloadIcon from '@mui/icons-material/Download';
+import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+
 export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   const center = { lat, lng };
   const mapContainerStyle = {
@@ -79,8 +81,9 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   );
 };
 
-const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente }) => {
-  const { userData } = useAuth();
+// Cambia la firma del componente para aceptar onAprobar
+const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente, onAprobar }) => {
+  const { userData, idMenu } = useAuth();
   const [verificacionData, setVerificacionData] = useState("");
   const [showMapModal, setShowMapModal] = useState(false);
   const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
@@ -88,6 +91,10 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
   const [showImageModal, setShowImageModal] = useState(false);
   const [verificador, setVerificador] = useState(null);
   const [openVerificacionModal, setOpenVerificacionModal] = useState(false);
+  const [permisos, setPermisos] = useState([]);
+  const [showObsDialog, setShowObsDialog] = useState(false);
+  const [obsAprobar, setObsAprobar] = useState("");
+  const [estadoVerificacion, setEstadoVerificacion] = useState(null);
 
   const fetchVerificador = async (idCre_SolicitudWeb, estado) => {
     try {
@@ -153,6 +160,28 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
       setVerificacionData("");
     }
   }, [openModal]);
+
+  // Cargar permisos al abrir el modal (ajustado como en Cabecera)
+  useEffect(() => {
+    const fetchPermisos = async () => {
+      try {
+        if (userData?.idUsuario && idMenu) {
+          const url = APIURL.getacces(idMenu, userData.idUsuario);
+          const response = await axios.get(url, {
+            headers: { "Content-Type": "application/json" },
+          });
+          if (response.status === 200) {
+            setPermisos(response.data);
+          } else {
+            console.error(`Error: ${response.status} - ${response.statusText}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching permisos:", error);
+      }
+    };
+    if (openModal) fetchPermisos();
+  }, [openModal, userData?.idUsuario, idMenu]);
 
   if (!openModal || !verificacionData) return null;
 
@@ -239,17 +268,77 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
     tipoVerificacion,
   } = verificacionData;
 
-  const renderField = (label, value) =>
+  // NUEVO: función para registrar la aprobación con observación
+  const fetchInsertarDatosAprobarEstado = async (tipo, data, estado, observacion) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+      await axios.post(url, {
+        idCre_SolicitudWeb: idSolicitud,
+        Tipo: tipo,
+        idEstadoVerificacionDocumental: estado,
+        Usuario: userData.Nombre,
+        Telefono: observacion
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+  // NUEVO: función para aprobar tipo de verificación con observación
+  const handleAprobarVerificacion = async () => {
+    setShowObsDialog(true);
+  };
+
+  const handleConfirmAprobar = async () => {
+    try {
+      // 1. Actualiza tipo de verificación en backend
+      await axios.patch(APIURL.patchTipoVerificacionDomicilio(verificacionData.idTerrenaGestionDomicilio), {}, {
+        headers: { "Content-Type": "application/json" }
+      });
+      // 2. Registra en tiemposolicitudesweb
+      await fetchInsertarDatosAprobarEstado(4, idSolicitud, 6, obsAprobar.toUpperCase());
+      // 3. Actualiza el estado local
+      setVerificacionData((prev) => ({
+        ...prev,
+        tipoVerificacion: 2
+      }));
+      // 4. Actualiza el estado de la solicitud principal
+      await axios.patch(APIURL.update_solicitud(idSolicitud), {
+        idEstadoVerificacionDomicilio: 2
+      }, {
+        headers: { "Content-Type": "application/json" }
+      });
+      setShowObsDialog(false);
+      setObsAprobar("");
+      // Notificar al padre para recargar datos
+      if (typeof onAprobar === "function") {
+        onAprobar();
+      }
+    } catch (error) {
+      console.error("Error al aprobar la verificación:", error);
+    }
+  };
+
+  const renderField = (label, value, extra = null) =>
     value !== null && value !== "" ? (
       <div>
         <p className="text-sm font-semibold">{label}</p>
-        <p className="text-sm text-gray-700">{value}</p>
+        <p className="text-sm text-gray-700 flex items-center gap-2">
+          {value}
+          {extra}
+        </p>
       </div>
     ) : null;
 
 	const handleAbrirModalVerificador = () => {
 		setOpenVerificacionModal(true)
 	}
+
+  // Permiso para aprobar tipo de verificación
+  const tienePermisoEditarTipoVerificacion = () => {
+    const permiso = permisos.find((p) => p.Permisos === "ANALISTA EDITAR TIPO VERIFICACION DOMICILIO");
+    return permiso && permiso.Activo;
+  };
 
   return (
     <>
@@ -301,7 +390,17 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
             )}
             {renderField(
               "Tipo de Verificación",
-              tipoVerificacionMap[tipoVerificacion]
+              tipoVerificacionMap[tipoVerificacion],
+              // Mostrar botón solo si tiene permiso
+              (tipoVerificacion !== 2 && 
+                tienePermisoEditarTipoVerificacion() && idsTerrenas?.iEstado == 1) ? (
+                <button
+                  className="ml-2 px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700 transition"
+                  onClick={handleAprobarVerificacion}
+                >
+                  Aprobar Verificación
+                </button>
+              ) : null
             )}
 			  { verificacionData?.tipoVerificacion !==2 && idsTerrenas.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
 			  <div className="col-span-full flex justify-end mt-2">
@@ -410,6 +509,35 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
 	  tipoSeleccionado={"domicilio"}
 	  idClienteVerificacion={verificacionData?.idClienteVerificacion}
 	  />
+
+      {/* Modal para observación al aprobar */}
+      <Dialog open={showObsDialog} onClose={() => setShowObsDialog(false)}>
+        <DialogTitle>Observación para aprobar verificación</DialogTitle>
+        <DialogContent>
+          <input
+            type="text"
+            className="w-full border rounded p-2"
+            placeholder="Ingrese una observación"
+            value={obsAprobar}
+            onChange={e => setObsAprobar(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <button
+            className="px-4 py-2 rounded bg-gray-300 text-gray-700"
+            onClick={() => setShowObsDialog(false)}
+          >
+            Cancelar
+          </button>
+          <button
+            className="px-4 py-2 rounded bg-green-600 text-white"
+            onClick={handleConfirmAprobar}
+            disabled={!obsAprobar.trim()}
+          >
+            Aprobar
+          </button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
