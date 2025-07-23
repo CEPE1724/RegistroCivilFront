@@ -189,7 +189,6 @@ export function ListadoSolicitud() {
   };
 
   const handleConfirmUpdate = () => {
-    console.log("Actualizando código dactilar a:", codDact);
     fetchCodDact(selectedRow)
 
     // Cerrar modales
@@ -730,7 +729,7 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"; console.log(data)
+      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"; 
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
@@ -748,7 +747,7 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio"; console.log(data)
+      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio"; 
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
@@ -1624,12 +1623,9 @@ export function ListadoSolicitud() {
   };
 
   const updateAnalista = async (fila, numero) => {
-    console.log("Fila actual:", fila);
-    console.log(fila.id)
-    console.log(numero)
+   
     try {
-      console.log("Actualizando analista para la solicitud:", fila.id, "con analista:", numero);
-      console.log("URL de actualización:", APIURL.update_solicitud(fila.id));
+     
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
         {
@@ -1653,8 +1649,7 @@ export function ListadoSolicitud() {
   };
 
   const updateOperador = async (fila, numero) => {
-    console.log(fila.id)
-    console.log(numero)
+   
     try {
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
@@ -2008,12 +2003,7 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
-  const handleApprove = (rowData) => {
-    // aquí tu lógica para aprobar...
-    console.log("Aprobando fila:", rowData);
-
-  };
-
+ 
 
   const handleEquifax = () => {
     navigate("/equifaxx", {

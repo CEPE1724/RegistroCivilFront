@@ -290,7 +290,7 @@ const Datos = forwardRef((props, ref) => {
                 data.NumeroSolicitud,
                 "Foto"
             );
-			console.log("updateurl", updatedUrl)
+		
             if (fileUploadResponse) {
                 updatedUrl = fileUploadResponse.url;
                 // Actualizar en backend

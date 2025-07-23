@@ -1054,7 +1054,6 @@ export function Cabecera() {
 
       if (isValid) {
         const coordenadas = await fetchValidaDomicilio(1);
-        console.log("coordenadas", clientInfo?.data.Domicilio);
         if (clientInfo?.data.Domicilio === true) {
           if (!coordenadas.exists && data.Domicilio) {
             enqueueSnackbar("Para guardar el domicilio, primero debes registrar la ubicación.", { variant: "error" });

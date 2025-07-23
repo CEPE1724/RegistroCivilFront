@@ -558,7 +558,7 @@ const SeccionA = forwardRef((props, ref) => {
   const fetchLatyLon = async () => {
     try {
       const id = clientInfo?.data?.id
-      console.log("id", id)
+
       const response = await axios.get(APIURL.getCoordenadasId(id, 2))
       setLatitud(response.data[0].latitud)
       setLongitud(response.data[0].longitud)

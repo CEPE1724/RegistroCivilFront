@@ -31,7 +31,7 @@ import axios from "../../../configApi/axiosConfig";
     if (!idSolicitud || isNaN(Number(idSolicitud)) || Number(idSolicitud) === 0) {
       if (expoToken) {
         const enviado = await sendNotification({ tokens: expoToken, title, body, type, empresa });
-        console.log(enviado ? "✅ Notificación enviada." : "❌ Fallo al enviar notificación.");
+  
       }
       throw new Error("ID de solicitud inválido");
     }
@@ -43,7 +43,7 @@ import axios from "../../../configApi/axiosConfig";
 
     const notificar = async (id, callback) => {
       if (id) {
-        console.log(`Enviando notificación al ${tipo}:`, id);
+   
         await callback(id, data, { title, body, type, empresa, url });
       }
     };
@@ -157,7 +157,7 @@ const sendNotification = async ({ tokens, title, body, type = "alert", empresa, 
 
   try {
     const response = await axios.post(APIURL.enviarNotificacion(), payload);
-    console.log("✅ Respuesta del servidor:", response.data);
+  
     return response.status === 200;
   } catch (error) {
     console.error("❌ Error al enviar la notificación:", error.response?.data || error.message);

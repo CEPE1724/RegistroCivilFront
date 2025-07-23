@@ -174,7 +174,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
             return;
         }
 
-        //console.log('🔍 Abriendo preview para:', url, 'Tipo:', tipoId);
+
 
         setPreviewLoading(true);
         setPreviewError(false);
@@ -186,7 +186,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
             fullUrl = url.startsWith('/') ? `${window.location.origin}${url}` : url;
         }
 
-        //console.log('🌐 URL final:', fullUrl);
+
 
         setImagenPreview(fullUrl);
         setCurrentDocType(tipoId);

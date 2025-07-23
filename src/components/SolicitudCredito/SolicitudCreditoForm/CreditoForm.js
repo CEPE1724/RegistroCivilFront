@@ -166,7 +166,7 @@ export default function CreditoForm() {
 
   //   useEffect(() => {
   //     if (dataRecibir) {
-  //       console.log(dataRecibir); // Para verificar qué datos estamos recibiendo
+
 
   //       setInitialValues((prevValues) => ({
   //         // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
@@ -641,7 +641,6 @@ export default function CreditoForm() {
               empresa: "POINT",
             });*/
 
-            //  console.log("Resultado del envío:", notificationSent);
           } else {
             console.warn("No se encontraron tokens para enviar la notificación.");
           }

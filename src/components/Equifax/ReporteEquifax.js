@@ -217,7 +217,7 @@ export function ReporteEquifax({
       if (response.status === 200) {
         const data  = response.data;
         setDatosTablas(data);
-        // console.log("Datos de las tablas:", data);
+     
 		setEncEntConsu(data.entidadesConsultadas.data[0])
 		setTabEntConsu(data.entidadesConsultadas.data.slice(1))
       } else {

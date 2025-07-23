@@ -350,7 +350,7 @@ export function GestorDocumentos({
             const url = APIURL.update_soliciutd_telefonica(clientInfo.id, idEstadoVerificacionDocumental);
 
             const response = await axios.patch(url);
-            console.log("porque no esta imrpiendo 0")
+          
             if (response.status === 200) {
                 // Mensaje de éxito con el estado actualizado
                 const url_estado = APIURL.post_createtiemposolicitudeswebDto();
@@ -1084,7 +1084,7 @@ export function GestorDocumentos({
                         onClose={() => setShowGlobalConfirmModal(false)}
                         onConfirm={(observacionModal) => {
                             setShowGlobalConfirmModal(false);
-                            console.log("onConfirm del ModalConfirmacionRechazo:", observacionModal);
+                         
                             // Aquí va la lógica de rechazo global:
                             updateEstadoVerificacionrechazo(5, observacionModal);
 
