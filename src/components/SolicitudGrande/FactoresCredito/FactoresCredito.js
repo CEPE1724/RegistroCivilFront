@@ -135,23 +135,23 @@ export const FactoresCredito = forwardRef((props, ref) => {
     if (name === "cuotaAsignada") {
       const numValue = Number(value);
       
-      if (numValue < 90) {
-        enqueueSnackbar("La cuota asignada debe ser mínimo 90", { variant: "error" });
+      if (numValue < 0) {
+        enqueueSnackbar("La cuota asignada debe ser mayor a 0", { variant: "error" });
         setFormData(prevData => ({
           ...prevData,
-          [name]: 90,
+          [name]: 0,
         }));
         return;
       }
       
-      if (numValue > 850) {
-        enqueueSnackbar("La cuota asignada no puede ser mayor a 850", { variant: "error" });
-        setFormData(prevData => ({
-          ...prevData,
-          [name]: 850,
-        }));
-        return;
-      }
+    //   if (numValue > 850) {
+    //     enqueueSnackbar("La cuota asignada no puede ser mayor a 850", { variant: "error" });
+    //     setFormData(prevData => ({
+    //       ...prevData,
+    //       [name]: 850,
+    //     }));
+    //     return;
+    //   }
     }
   };
 

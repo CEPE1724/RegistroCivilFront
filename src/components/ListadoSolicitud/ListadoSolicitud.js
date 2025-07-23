@@ -233,7 +233,10 @@ export function ListadoSolicitud() {
           // Si falla GET, intentar POST
           const postResponse = await axios.post(
             "dactilar/consulta",
+
+
             { cedula, dactilar, usuario: userData.Nombre  },
+
             config
           );
           
