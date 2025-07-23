@@ -176,21 +176,21 @@ export function ListadoSolicitud() {
   const [codDact, setCodDact] = useState("");
 
   const handleOpenEditModal = () => {
-	setCodDact(selectedRow.CodigoDactilar);
-	setOpenModalCodDag(true);
+  setCodDact(selectedRow.CodigoDactilar);
+  setOpenModalCodDag(true);
   };
 
   const handleUpdateClick = () => {
-	if (codDact === null || codDact.length !== 10) {
-		enqueueSnackbar("El código dactilar debe tener mínimo 10 dígitos.", { variant: "error" });
-		return;
-	}
-	setOpenConfirmModalCodDac(true);
+  if (codDact === null || codDact.length !== 10) {
+    enqueueSnackbar("El código dactilar debe tener mínimo 10 dígitos.", { variant: "error" });
+    return;
+  }
+  setOpenConfirmModalCodDac(true);
   };
 
   const handleConfirmUpdate = () => {
-	console.log("Actualizando código dactilar a:", codDact);
-	fetchCodDact(selectedRow)
+  console.log("Actualizando código dactilar a:", codDact);
+  fetchCodDact(selectedRow)
   
     // Cerrar modales
     setOpenConfirmModalCodDac(false);
@@ -199,22 +199,22 @@ export function ListadoSolicitud() {
   };
 
   const fetchCodDact = async (selectedRow) => {
-	try {
-	  const url = APIURL.patch_codDactil(selectedRow.id);
-	  const response = await axios.patch(url, {
-		CodDactilar: codDact,
-	  }, {
-		headers: {
-		  "Content-Type": "application/json",
-		},
-	  });
-	  enqueueSnackbar("Código dactilar actualizado correctamente.", {variant: "success"})
-	  return response.data;
-	} catch (error) {
-	  console.error("Error al actualizar el código dactilar", error);
-	  enqueueSnackbar("Error al actualizar el código dactilar.", {variant: "error"});
-	  return null;
-	}
+  try {
+    const url = APIURL.patch_codDactil(selectedRow.id);
+    const response = await axios.patch(url, {
+    CodDactilar: codDact,
+    }, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    });
+    enqueueSnackbar("Código dactilar actualizado correctamente.", {variant: "success"})
+    return response.data;
+  } catch (error) {
+    console.error("Error al actualizar el código dactilar", error);
+    enqueueSnackbar("Error al actualizar el código dactilar.", {variant: "error"});
+    return null;
+  }
   };
 
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
@@ -233,9 +233,13 @@ export function ListadoSolicitud() {
           // Si falla GET, intentar POST
           const postResponse = await axios.post(
             "dactilar/consulta",
-            { cedula, dactilar },
+
+
+            { cedula, dactilar, usuario: userData.Nombre  },
+
             config
           );
+          
           if (postResponse.data.data) {
             return postResponse.data.data.FOTO;
           }
@@ -1524,6 +1528,8 @@ export function ListadoSolicitud() {
   const [openDialogOperador, setOpenDialogOperador] = useState(false);
   const [operadorSeleccionado, setOperadorSeleccionado] = useState(null);
 
+  // Nuevo: Confirmar asignación de operador y notificar
+ 
   const handleConfirmarAsignacion = async () => {
     try {
       setOpenDialogConfirmar(false);
@@ -1540,7 +1546,7 @@ export function ListadoSolicitud() {
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
         title: "¡Nueva solicitud enviada a revisión! 👀",
         body: `Revisa la solicitud de crédito ${filaActual.numeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}
-		Fecha: ${fechaHoraEcuador}`,
+    Fecha: ${fechaHoraEcuador}`,
         type: "success",
         empresa: "CREDI",
         url: "", // Opcional
@@ -1567,8 +1573,40 @@ export function ListadoSolicitud() {
 
   const handleEditarOperador = (fila) => {
     setFilaActual(fila);
-    fetchOperador(); // Ya la tienes definida
+    fetchOperador();
     setOpenDialogOperador(true);
+  };
+
+  // Confirmación de operador, igual que analista
+  const handleConfirmarAsignacionOperador = async () => {
+    try {
+      setOpenDialogOperador(false);
+      console.log(filaActual.NumeroSolicitud , "esto saleee")
+
+      if (operadorSeleccionado === filaActual.idOperador) {
+        enqueueSnackbar("El operador seleccionado es el mismo que el actual.", { variant: "info" });
+        return;
+      }
+
+      await updateOperador(filaActual, operadorSeleccionado);
+      await fetchConsultaYNotifica(filaActual.id, filaActual, {
+        title: "¡Nueva solicitud asignada a operador!",
+        body: `Revisa la solicitud de crédito ${filaActual.NumeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}\nFecha: ${new Date().toLocaleString("es-EC")}`,
+        type: "success",
+        empresa: "POINT",
+        url: "",
+        tipo: "operador",
+      });
+      enqueueSnackbar("Operador actualizado correctamente", {
+        variant: "success",
+      });
+      setOperadorSeleccionado(null);
+    } catch (error) {
+      console.error("Error al confirmar la asignación de operador:", error);
+      enqueueSnackbar("Ocurrió un error al actualizar el operador.", {
+        variant: "error",
+      });
+    }
   };
 
 
@@ -1934,8 +1972,8 @@ export function ListadoSolicitud() {
       fetchTiempSolicweb(1, row.id, "10,12"),  //solicitudes
       fetchTiempSolicweb(2, row.id, "2,3"),    //telefonica 
       fetchTiempSolicweb(3, row.id, "2,4"),    //documental
-	  fetchTiempSolicweb(4, row.id, "1"),      //domicilio
-	  fetchTiempSolicweb(5, row.id, "1")       //laboral
+    fetchTiempSolicweb(4, row.id, "1"),      //domicilio
+    fetchTiempSolicweb(5, row.id, "1")       //laboral
     ]);
 
 
@@ -3677,8 +3715,8 @@ export function ListadoSolicitud() {
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-			{/* Domicilio */}
-			<TimelineItem>
+      {/* Domicilio */}
+      <TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3797,8 +3835,8 @@ export function ListadoSolicitud() {
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-			{/* Trabajo */}
-			<TimelineItem>
+      {/* Trabajo */}
+      <TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3830,7 +3868,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-					{/* tiempo que necesito */ }
+          {/* tiempo que necesito */ }
                     {fechaTiempos?.tipo5?.length > 0 && (
                       <Typography
                         variant="caption"
@@ -4142,13 +4180,13 @@ export function ListadoSolicitud() {
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
 
-				  <div className="flex items-center gap-2">
-					<FingerprintIcon className="text-blue-500" fontSize="medium" />
-					<p className="font-semibold">Codigo Dactilar: </p>
-					<p>{selectedRow.CodigoDactilar}</p>
-					{ editarCodDac && editarCodDac2 &&
-					(<button onClick={handleOpenEditModal}><BorderColorIcon/></button>)}
-				  </div>
+          <div className="flex items-center gap-2">
+          <FingerprintIcon className="text-blue-500" fontSize="medium" />
+          <p className="font-semibold">Codigo Dactilar: </p>
+          <p>{selectedRow.CodigoDactilar}</p>
+          { editarCodDac && editarCodDac2 &&
+          (<button onClick={handleOpenEditModal}><BorderColorIcon/></button>)}
+          </div>
 
                   <div className="flex items-center gap-2">
                     {permitirEquifax() && (
@@ -4317,24 +4355,37 @@ export function ListadoSolicitud() {
             variant="contained"
             onClick={() => {
               setOpenDialogOperador(false);
-              if (filaActual.Operador === operadorSeleccionado) {
-                enqueueSnackbar("El operador seleccionado es el mismo que el actual.", {
-                  variant: "error",
-                });
-                setOperadorSeleccionado(null)
-                return;
-              }
-              updateOperador(filaActual, operadorSeleccionado);
-              enqueueSnackbar("Operador actualizado correctamente.", {
-                variant: "success",
-              });
-              setOperadorSeleccionado(null)
+              setOpenDialogConfirmar(true); // Mostrar diálogo de confirmación de operador
             }}
             disabled={!operadorSeleccionado}
           >
             Asignar
           </Button>
+        </DialogActions>
+      </Dialog>
 
+      {/* confirmacion de cambiar operador */}
+      <Dialog open={openDialogConfirmar} onClose={() => setOpenDialogConfirmar(false)}>
+        <DialogTitle>Confirmar acción</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de asignar este operador a la solicitud?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialogConfirmar(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => {
+              handleConfirmarAsignacionOperador();
+              setOpenDialogConfirmar(false);
+            }}
+            color="primary"
+            variant="contained"
+          >
+            Confirmar
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -4538,6 +4589,7 @@ export function ListadoSolicitud() {
           dactilar={dactilar}
           imagenSubida={selectedRow?.imagen}
           estadoSolicitud={selectedRow?.Estado}
+          idSolicitud={selectedRow?.id}
           onAceptar={() => {
             // Acción al aceptar
             patchSolicitud(selectedRow?.id, 2);
@@ -4572,14 +4624,14 @@ export function ListadoSolicitud() {
       />
       <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
 
-		{/* Modal codigo dactilar */}
-		<Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>
-			<DialogTitle>Cambiar codigo Dactilar</DialogTitle>
+    {/* Modal codigo dactilar */}
+    <Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>
+      <DialogTitle>Cambiar codigo Dactilar</DialogTitle>
         <DialogContent>
           <Typography sx={{ mb: 2 }}>
             Ingresa el nuevo código dactilar:
           </Typography>
-		  <TextField
+      <TextField
           fullWidth
           variant="outlined"
           value={codDact}
@@ -4593,33 +4645,33 @@ export function ListadoSolicitud() {
           <Button onClick={() => setOpenModalCodDag(false)} color="primary">
             Cerrar
           </Button>
-		  <Button onClick={handleUpdateClick} color="primary" variant="contained">
-			Actualizar
-		  </Button>
+      <Button onClick={handleUpdateClick} color="primary" variant="contained">
+      Actualizar
+      </Button>
         </DialogActions>
-		</Dialog>
+    </Dialog>
 
-		{/* Modal de confirmación */}
-		<Dialog 
-    	  open={openConfirmModalCodDac} 
-    	  onClose={() => setOpenConfirmModalCodDac(false)}
-    	  maxWidth="xs"
-    	>
-    	  <DialogTitle>Confirmar actualización</DialogTitle>
-    	  <DialogContent>
-    	    <Typography>
-    	      ¿Está seguro de actualizar el código dactilar?
-    	    </Typography>
-    	  </DialogContent>
-    	  <DialogActions>
-    	    <Button onClick={() => setOpenConfirmModalCodDac(false)} color="primary">
-    	      Cancelar
-    	    </Button>
-    	    <Button onClick={handleConfirmUpdate} color="primary" variant="contained">
-    	      Confirmar
-    	    </Button>
-    	  </DialogActions>
-    	</Dialog>
+    {/* Modal de confirmación */}
+    <Dialog 
+        open={openConfirmModalCodDac} 
+        onClose={() => setOpenConfirmModalCodDac(false)}
+        maxWidth="xs"
+      >
+        <DialogTitle>Confirmar actualización</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Está seguro de actualizar el código dactilar?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirmModalCodDac(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmUpdate} color="primary" variant="contained">
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
 
     </div>

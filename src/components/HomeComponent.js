@@ -8,6 +8,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useAuth } from "./AuthContext/AuthContext";
 
 const DactilarQuery = () => {
   const [cedula, setCedula] = useState("");
@@ -17,6 +18,7 @@ const DactilarQuery = () => {
   const [isCedulaValid, setIsCedulaValid] = useState(false);
   const [isDactilarValid, setIsDactilarValid] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const { userData, idMenu, socket } = useAuth();
 
   const hanldeResetInputs = () => {
     setCedula("");
@@ -47,7 +49,6 @@ const DactilarQuery = () => {
               { cedula: cedula, apiRC: 0 },
               config
             );
-         
           } catch (historicoError) {
             console.error(
               "Error al registrar la consulta en el histórico:",
@@ -61,7 +62,10 @@ const DactilarQuery = () => {
         if (err.response && err.response.status === 500) {
           const postResponse = await axios.post(
             "dactilar/consulta",
-            { cedula, dactilar },
+
+
+            { cedula, dactilar, usuario: userData.Nombre },
+
             config
           );
 
@@ -73,7 +77,6 @@ const DactilarQuery = () => {
                 { cedula: cedula, apiRC: 1 },
                 config
               );
-             
             } catch (historicoError) {
               console.error(
                 "Error al registrar la consulta en el histórico:",
@@ -430,5 +433,4 @@ const DactilarQuery = () => {
     </div>
   );
 };
-
 export default DactilarQuery;

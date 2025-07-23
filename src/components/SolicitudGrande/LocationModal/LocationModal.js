@@ -160,19 +160,19 @@ export function LocationModal({
     if (latError) showSnackbar(latError, "error");
     if (lngError) showSnackbar(lngError, "error");
 
-	try {
-		const { data } = await axios.get(
-		  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${newLat},${newLng}&key=${googleMapsApiKey}`
-		);
-		if (data.results && data.results.length > 0) {
-		  setLocalLocation((prev) => ({
-			...prev,
-			address: data.results[0].formatted_address,
-		  }));
-		}
-	  } catch (error) {
-		console.error("Error obteniendo dirección desde coordenadas:", error);
-	  }
+  try {
+    const { data } = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${newLat},${newLng}&key=${googleMapsApiKey}`
+    );
+    if (data.results && data.results.length > 0) {
+      setLocalLocation((prev) => ({
+      ...prev,
+      address: data.results[0].formatted_address,
+      }));
+    }
+    } catch (error) {
+    console.error("Error obteniendo dirección desde coordenadas:", error);
+    }
   };
 
   const handleAutocompleteLoad = (autocomplete) => {
@@ -194,8 +194,8 @@ export function LocationModal({
   };
 
   const handleSave = async () => {
-	if (isSubmitting) return;
-	setIsSubmitting(true);
+  if (isSubmitting) return;
+  setIsSubmitting(true);
 
     const newErrors = {
       address: validateField("address", localLocation.address),
@@ -212,16 +212,16 @@ export function LocationModal({
     }
 
     const payload = {
-		id: userSolicitudData.idCre_SolicitudWeb,
-		cedula: userSolicitudData.Cedula,
-		latitud: parseFloat(localLocation.latitude),
-		longitud: parseFloat(localLocation.longitude),
-		direccion: localLocation.address,
-		ip: "192.168.2.183",
-		Tipo: tipo,
-		Usuario: userData.Nombre,
-		web:1,
-	  };
+    id: userSolicitudData.idCre_SolicitudWeb,
+    cedula: userSolicitudData.Cedula,
+    latitud: parseFloat(localLocation.latitude),
+    longitud: parseFloat(localLocation.longitude),
+    direccion: localLocation.address,
+    ip: "192.168.2.183",
+    Tipo: tipo,
+    Usuario: userData.Nombre,
+    web:1,
+    };
 
 
     try {
@@ -239,7 +239,7 @@ export function LocationModal({
         if (isOpen) {
           isOpen();
         }
-		setIsSubmitting(false);
+    setIsSubmitting(false);
       }, 3000);
     } catch (error) {
       console.error("Error al guardar la ubicación:", error);
@@ -247,27 +247,100 @@ export function LocationModal({
         "Error al guardar la ubicación. Por favor, intente más tarde.",
         "error"
       );
-		setIsSubmitting(false);
+    setIsSubmitting(false);
     }
   };
 
   useEffect(()=> {
-	if(isOpen && navigator.geolocation){
-		navigator.geolocation.getCurrentPosition(
-			(position)=> {
-				setPosicionActual({
-					lat: position.coords.latitude,
-					lng: position.coords.longitude,
-				});
-			}, 
-			(error)=>{
-				console.error("Error al obtener la ubicacion", error);
-			}
-		);
-	} else {
-		console.warn("La geolocalización no está disponible en este navegador.");
-	}
+  if(isOpen && navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      (position)=> {
+        setPosicionActual({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      }, 
+      (error)=>{
+        console.error("Error al obtener la ubicacion", error);
+      }
+    );
+  } else {
+    console.warn("La geolocalización no está disponible en este navegador.");
+  }
   }, [isOpen]);
+
+
+  // función para extraer lat/lng de una URL tipo https://maps.google.com/?q=-0.139652,-78.437134
+  const extractLatLngFromUrl = (text) => {
+    const regex = /maps\.google\.com\/\?q=(-?\d+\.\d+),(-?\d+\.\d+)/;
+    const match = text.match(regex);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    return null;
+  };
+
+  // NUEVO: función para extraer lat/lng de formato DMS (grados, minutos, segundos)
+  // Ejemplo: 2°12'04.7"S 78°50'51.9"W
+  const extractLatLngFromDMS = (text) => {
+    // Regex para DMS: 2°12'04.7"S 78°50'51.9"W
+    const dmsRegex = /([\d.]+)[°º]\s*(\d+)[']\s*([\d.]+)[\"]?([NSns])\s+([\d.]+)[°º]\s*(\d+)[']\s*([\d.]+)[\"]?([EWew])/;
+    const match = text.match(dmsRegex);
+    if (!match) return null;
+    // Latitud
+    let latDeg = parseFloat(match[1]);
+    let latMin = parseFloat(match[2]);
+    let latSec = parseFloat(match[3]);
+    let latDir = match[4].toUpperCase();
+    // Longitud
+    let lonDeg = parseFloat(match[5]);
+    let lonMin = parseFloat(match[6]);
+    let lonSec = parseFloat(match[7]);
+    let lonDir = match[8].toUpperCase();
+    // Convertir a decimal
+    let lat = latDeg + latMin / 60 + latSec / 3600;
+    let lon = lonDeg + lonMin / 60 + lonSec / 3600;
+    if (latDir === 'S') lat = -lat;
+    if (lonDir === 'W') lon = -lon;
+    return { lat, lng: lon };
+  };
+
+  // NUEVO: función para actualizar dirección desde lat/lng
+  const updateAddressFromLatLng = async (lat, lng) => {
+    try {
+      const { data } = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleMapsApiKey}`
+      );
+      if (data.results && data.results.length > 0) {
+        setLocalLocation((prev) => ({
+          ...prev,
+          address: data.results[0].formatted_address,
+        }));
+      }
+    } catch (error) {
+      console.error("Error obteniendo dirección desde coordenadas:", error);
+    }
+  };
+
+  // NUEVO: handler para el input de búsqueda
+  const handleSearchInputChange = async (e) => {
+    const value = e.target.value;
+    // Si es una URL de Google Maps, extraer lat/lng
+    let coords = extractLatLngFromUrl(value);
+    // Si no es URL, intentar extraer DMS
+    if (!coords) {
+      coords = extractLatLngFromDMS(value);
+    }
+    if (coords) {
+      setLocalLocation((prev) => ({
+        ...prev,
+        latitude: coords.lat.toFixed(6),
+        longitude: coords.lng.toFixed(6),
+      }));
+      await updateAddressFromLatLng(coords.lat, coords.lng);
+    }
+    // ...si quieres, puedes guardar el texto en un estado para el input de búsqueda...
+  };
 
   if (!openLocationModal) return null;
 
@@ -346,33 +419,35 @@ export function LocationModal({
                 style={{ top: "10px", left: "250px" }}
               >
                 <div className="bg-white rounded-lg shadow-md flex items-center space-x-2 p-1 pointer-events-auto">
+                  {/* MODIFICADO: input de búsqueda editable */}
                   <Autocomplete
                     onLoad={handleAutocompleteLoad}
                     onPlaceChanged={handlePlaceChanged}
                   >
                     <input
                       type="text"
-                      placeholder="Buscar dirección"
+                      placeholder="Buscar dirección o pega URL Google Maps"
                       className="w-96 p-2 bg-transparent border-none focus:outline-none text-sm pac-target-input"
+                      onChange={handleSearchInputChange}
                     />
                   </Autocomplete>
                 </div>
               </div>
-			  <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-10">
-				<button
-    			  onClick={handleGetCurrentLocation}
-    			  className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-all duration-300 ease-in-out"
-    			  title="Obtener mi ubicación"
-    			>
-      			<MyLocationIcon className="text-black w-5 h-5" />
-    			</button>
-  				</div>
+        <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-10">
+        <button
+            onClick={handleGetCurrentLocation}
+            className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-all duration-300 ease-in-out"
+            title="Obtener mi ubicación"
+          >
+            <MyLocationIcon className="text-black w-5 h-5" />
+          </button>
+          </div>
               <Marker position={mapCenter} />
             </GoogleMap>
           </LoadScript>
         </div>
 
-        {/* Campos de latitud y longitud */}
+        {/* Campos de latitud y longitud EDITABLES */}
         <div className="mb-4 grid grid-cols-2 gap-4">
           <div>
             <label className="block mb-1 text-xs font-medium text-gray-700">
@@ -382,9 +457,15 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="latitude"
-              disabled
               value={localLocation.latitude}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e);
+                // Si el valor es válido, actualizar dirección y marcador
+                const val = e.target.value;
+                if (/^-?\d+\.\d+$/.test(val) && localLocation.longitude) {
+                  updateAddressFromLatLng(parseFloat(val), parseFloat(localLocation.longitude));
+                }
+              }}
               onBlur={handleBlur}
               placeholder="Latitud"
             />
@@ -400,9 +481,15 @@ export function LocationModal({
               className="w-full p-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
               type="text"
               name="longitude"
-              disabled
               value={localLocation.longitude}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e);
+                // Si el valor es válido, actualizar dirección y marcador
+                const val = e.target.value;
+                if (/^-?\d+\.\d+$/.test(val) && localLocation.latitude) {
+                  updateAddressFromLatLng(parseFloat(localLocation.latitude), parseFloat(val));
+                }
+              }}
               onBlur={handleBlur}
               placeholder="Longitud"
             />
