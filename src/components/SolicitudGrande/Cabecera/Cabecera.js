@@ -963,7 +963,7 @@ export function Cabecera() {
     await fetchInsertarDatos(10);
     await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Solicitud enviada a revisión! 👀 ",
-      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+      body: `Revisa la solicitud de crédito de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno} con CI ${data.cedula}
 	   📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "CREDI",
@@ -1590,7 +1590,7 @@ export function Cabecera() {
     fetchInsertarDatos(12);
     await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Se acepto la solicitud grande! 🎉 ",
-      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno} con CI ${data.cedula}
 	   📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "POINT",
@@ -1611,7 +1611,7 @@ export function Cabecera() {
     fetchInsertarDatosRechazar(13 , Observacion); 
      await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Se rechazo la Solicitud grande ! 🚫 ",
-      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno} con CI ${data.cedula}
 	  📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "POINT",
@@ -1632,7 +1632,7 @@ export function Cabecera() {
 
     await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Se envio a corregir la solicitud grande! ✍️",
-      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno}
+      body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno} con CI ${data.cedula}
 	  📅 Fecha: ${fechaHoraEcuador}`,
       type: "alert",
       empresa: "POINT",

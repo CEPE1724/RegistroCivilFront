@@ -704,7 +704,7 @@ export function GestorDocumentos({
                 updateEstadoVerificacion(5);
                 fetchConsultaYNotifica(clientInfo.id, clientInfo, {
                     title: "¡Documentos rechazados! 🚫",
-                    body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
+                    body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} con CI ${clientInfo.cedula} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
 					Fecha: ${fechaHoraEcuador}`,
                     type: "success",
                     empresa: "CREDI",
@@ -717,7 +717,7 @@ export function GestorDocumentos({
                 updateEstadoVerificacion(4);
                 fetchConsultaYNotifica(clientInfo.id, clientInfo, {
                     title: "¡Documentos aprobados! 🎉",
-                    body: `¡Excelente noticia! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} han sido revisados y aprobados 📂. Ya puedes avanzar al siguiente paso del proceso. ¡Gracias!
+                    body: `¡Excelente noticia! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} con CI ${clientInfo.cedula} han sido revisados y aprobados 📂. Ya puedes avanzar al siguiente paso del proceso. ¡Gracias!
 					Fecha: ${fechaHoraEcuador}`,
                     type: "success",
                     empresa: "CREDI",
@@ -730,7 +730,7 @@ export function GestorDocumentos({
                 updateEstadoVerificacion(3);
                 fetchConsultaYNotifica(clientInfo.id, clientInfo, {
                     title: "¡Documentos enviados a corrección! ✏️",
-                    body: `¡Hola! Algunos documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron enviados a corrección ⚠️. Revisa los comentarios para realizar los ajustes necesarios. ¡Gracias!
+                    body: `¡Hola! Algunos documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} con CI ${clientInfo.cedula} fueron enviados a corrección ⚠️. Revisa los comentarios para realizar los ajustes necesarios. ¡Gracias!
 					Fecha: ${fechaHoraEcuador}`,
                     type: "success",
                     empresa: "CREDI",
@@ -1090,7 +1090,7 @@ export function GestorDocumentos({
 
                             fetchConsultaYNotifica(clientInfo.id, clientInfo, {
                                 title: "¡Documentos rechazados! 🚫",
-                                body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
+                                body: `¡Hola! Todos los documentos de la solicitud ${clientInfo.NumeroSolicitud} de ${clientInfo.nombre} con con CI ${clientInfo.cedula} fueron rechazados ☹️. Por favor, revisa los comentarios y da seguimiento al caso. ¡Gracias!
                     Fecha: ${fechaHoraEcuador}`,
                                 type: "success",
                                 empresa: "CREDI",
