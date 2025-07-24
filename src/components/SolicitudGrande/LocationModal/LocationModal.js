@@ -280,7 +280,16 @@ export function LocationModal({
     return null;
   };
 
-  // NUEVO: función para extraer lat/lng de formato DMS (grados, minutos, segundos)
+  // Ejemplo: -0.2134171255355895, -78.50336508272733
+  const extractLatLngFromDecimal = (text) => {
+    const regex = /(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/;
+    const match = text.match(regex);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+    }
+    return null;
+  };
+
   // Ejemplo: 2°12'04.7"S 78°50'51.9"W
   const extractLatLngFromDMS = (text) => {
     // Regex para DMS: 2°12'04.7"S 78°50'51.9"W
@@ -330,6 +339,10 @@ export function LocationModal({
     // Si no es URL, intentar extraer DMS
     if (!coords) {
       coords = extractLatLngFromDMS(value);
+    }
+    // Si no es DMS, intentar extraer decimal
+    if (!coords) {
+      coords = extractLatLngFromDecimal(value);
     }
     if (coords) {
       setLocalLocation((prev) => ({
