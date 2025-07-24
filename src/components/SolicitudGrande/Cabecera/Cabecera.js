@@ -28,6 +28,14 @@ import { Facebook } from "@mui/icons-material";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 import ModalConfirmacionRechazo from "./ModalConfirmacionRechazo";
 import ModalCorreccion from "./ModalCorreccion";
+import HomeIcon from '@mui/icons-material/Home';
+import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import StoreIcon from '@mui/icons-material/Store';
+import BusinessIcon from '@mui/icons-material/Business';
+import EmojiPeopleIcon from '@mui/icons-material/EmojiPeople';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
 
 export function Cabecera() {
   const { userData, idMenu } = useAuth();
@@ -734,49 +742,49 @@ export function Cabecera() {
   const tabs = [
     {
       name: "Datos Cliente",
-      icon: <ManageSearchIcon fontSize="small" />,
+      icon: <EmojiPeopleIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkDatos,
     },
     {
       name: "Domicilio",
-      icon: <PrintIcon fontSize="small" />,
+      icon: <HomeIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkDomicilio,
     },
     {
       name: "Datos Conyuge",
-      icon: <SaveIcon fontSize="small" />,
+      icon: <VolunteerActivismIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkConyuge,
     },
     {
       name: "Referencias",
-      icon: <PrintIcon fontSize="small" />,
+      icon: <LocalPhoneIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkReferencias,
     },
     {
       name: "Negocio",
-      icon: <ManageSearchIcon fontSize="small" />,
+      icon: <StoreIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkNegocio,
     },
     {
       name: "Dependiente",
-      icon: <LogoutIcon fontSize="small" />,
+      icon: <BusinessIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkTrabajo,
     },
     {
       name: "Información de Crédito",
-      icon: <SaveIcon fontSize="small" />,
+      icon: <AttachMoneyIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkInformacionCredito,
     },
     {
       name: "Factores de Crédito",
-      icon: <PrintIcon fontSize="small" />,
+      icon: <CreditCardIcon fontSize="small" />,
       icons_2: <CircleIcon fontSize="small" />,
       check: checkFactoresCredito,
     },
@@ -1659,6 +1667,20 @@ export function Cabecera() {
     });
   };
 
+  const fetchImprimir = async (id) => {
+    try {
+		const response = await axios.get(APIURL.get_reporteCeditoDirecto(id), {responseType: 'blob'});
+
+		const blob = response.data
+
+		const url = window.URL.createObjectURL(blob);
+
+		window.open(url, '_blank');
+    } catch (error) {
+		console.error("Error al imprimir el informe", error);
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -1787,6 +1809,19 @@ export function Cabecera() {
                   <span className="text-xs">Salir</span>
                 </button>
               </div>
+
+			  {data?.Estado == 6 && (
+			  <div className="flex items-center">
+                <button
+                  onClick={() => fetchImprimir(data?.id)}
+                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                >
+                  <PrintIcon className="text-lg" />
+                  <span className="text-xs">Imprimir</span>
+                </button>
+              </div>
+				)}
+
             </div>
           </div>
           <ModalConfirm

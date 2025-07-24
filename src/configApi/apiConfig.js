@@ -194,5 +194,6 @@ export const APIURL = {
 
   store_reports_phone_verification: (id) => `${API_BASE_URL}store-reports-phone-verification/cre-solicitud/${id}`,
   patchTipoVerificacionDomicilio: (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}/tipo-verificacion`,
+  get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`
 
 };
