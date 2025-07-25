@@ -4,9 +4,12 @@ import {
   People,
   ShoppingCart,
   ConfirmationNumber,
+  Visibility,
+  VisibilityOff,
+  Close,
 } from "@mui/icons-material";
-import { Doughnut, Bar, Radar } from "react-chartjs-2";
-import { Bar as BarChart } from "react-chartjs-2";
+import { Doughnut, Bar, Radar, PolarArea } from "react-chartjs-2";
+import { Bar as BarChart, PolarArea as PolarChart } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { APIURL } from "../../configApi/apiConfig";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
@@ -34,10 +37,14 @@ const doughnutCenterText = {
   id: 'doughnutCenterText',
   afterDraw: (chart) => {
     if (chart.config.type !== 'doughnut') return;
+    // Si el tooltip está visible, no dibujar el total
+    if (chart.tooltip && chart.tooltip.opacity > 0) {
+      return;
+    }
     const { ctx, chartArea } = chart;
     const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
     ctx.save();
-    ctx.font = 'bold 22px Arial';
+    ctx.font = 'bold 18px Arial';
     ctx.fillStyle = '#3b82f6';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -49,13 +56,23 @@ const doughnutCenterText = {
   }
 };
 
-// ...existing code...
-
-// ...existing code...
-
 export function Dashboards() {
 
+  // Estado para el gráfico PolarArea de solicitudes por tipo de cliente
+  const [polarTipoClienteData, setPolarTipoClienteData] = useState({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: [
+          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#059669', '#6b7280', '#dc2626', '#a21caf', '#f472b6', '#22d3ee', '#fbbf24'
+        ],
+      },
+    ],
+  });
+
   // Estado para productos y radar chart
+  const [filtersVisible, setFiltersVisible] = useState(false);
   const [productos, setProductos] = useState([]);
   const [radarData, setRadarData] = useState({
     labels: [],
@@ -354,6 +371,31 @@ const [fechaFin, setFechaFin] = useState(today);
         params,
       });
       if (response.status === 200) {
+        // --- PolarArea Chart: solicitudes por tipo de cliente ---
+        const tipoClienteCounts = {};
+        response.data.data.forEach((item) => {
+          if (item.idTipoCliente) {
+            tipoClienteCounts[item.idTipoCliente] = (tipoClienteCounts[item.idTipoCliente] || 0) + 1;
+          }
+        });
+        const polarLabels = tipoCliente
+          .filter(tc => tc.idTipoCliente !== undefined && tc.Nombre)
+          .map(tc => tc.Nombre);
+        const polarValues = tipoCliente
+          .filter(tc => tc.idTipoCliente !== undefined && tc.Nombre)
+          .map(tc => tipoClienteCounts[tc.idTipoCliente] || 0);
+        const polarColors = polarLabels.map((_, i) => [
+          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#059669', '#6b7280', '#dc2626', '#a21caf', '#f472b6', '#22d3ee', '#fbbf24'
+        ][i % 12]);
+        setPolarTipoClienteData({
+          labels: polarLabels,
+          datasets: [
+            {
+              data: polarValues,
+              backgroundColor: polarColors,
+            },
+          ],
+        });
         // --- Pie Situacion Laboral ---
         // Contar por idSituacionLaboral
         const counts = {};
@@ -589,169 +631,305 @@ const [fechaFin, setFechaFin] = useState(today);
         </select>
       </div>
 
-  return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Sección de filtros */}
-      {/* Primera fila: Fechas, Bodega, Vendedor */}
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        {/* Input Fecha Inicio */}
-        <div className="w-full md:w-1/4">
-          <label className="block text-gray-700 font-semibold mb-1">Fecha Inicio</label>
-          <input
-            type="date"
-            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={fechaInicio}
-            onChange={(e) => {
-              const nuevaFechaInicio = e.target.value;
-              if (isValidDate(nuevaFechaInicio)) {
-                setFechaInicio(nuevaFechaInicio);
-              } else {
-                setFechaInicio(today);
-              }
-            }}
-          />
-        </div>
-        {/* Input Fecha Fin */}
-        <div className="w-full md:w-1/4">
-          <label className="block text-gray-700 font-semibold mb-1">Fecha Fin</label>
-          <input
-            type="date"
-            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
-          />
-        </div>
-        {/* Select de bodegas */}
-        <div className="w-full md:w-1/4">
-          <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-1">
-            Bodega
-          </label>
-          <select
-            id="bodega-select"
-            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedBodega}
-            onChange={handleBodegaChange}
-          >
-            <option value="todos">Todos</option>
-            {bodegas.length > 0 ? (
-              bodegas.map((bodega) => (
-                <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
-                  {bodega.b_Nombre}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>No se encontraron bodegas.</option>
+return (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    {/* Header fijo con filtros colapsables */}
+
+    <div className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-200">
+      <div className="px-6 py-4">
+        {/* Resumen rápido de fechas y botón de filtros en la misma fila */}
+        <div className="flex flex-row flex-wrap items-center justify-between gap-2 text-xs text-gray-700 bg-blue-50 px-4 py-2 rounded-lg mb-2 relative">
+          {/* Filtros activos y periodo a la izquierda */}
+          <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+            <span className="font-medium">Período:</span>
+            <span className="bg-white px-2 py-0.5 rounded border">{fechaInicio}</span>
+            <span>→</span>
+            <span className="bg-white px-2 py-0.5 rounded border">{fechaFin}</span>
+            {/* Mostrar filtros activos */}
+            {selectedBodega !== 'todos' && (
+              <span className="bg-white text-blue-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-blue-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
+                <button
+                  className="static bg-blue-200 hover:bg-blue-300 text-blue-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
+                  onClick={() => setSelectedBodega('todos')}
+                  tabIndex={0}
+                  aria-label="Quitar filtro bodega"
+                >
+                  <Close style={{fontSize:'12px'}} />
+                </button>
+                Bodega: {
+                  (() => {
+                    const bodegaObj = bodegas.find(b => String(b.b_Bodega) === String(selectedBodega));
+                    return bodegaObj ? bodegaObj.b_Nombre : selectedBodega;
+                  })()
+                }
+              </span>
             )}
-          </select>
-        </div>
-        {/* Select de vendedores */}
-        <div className="w-full md:w-1/4">
-          <label htmlFor="vendedor-select" className="block text-gray-700 font-semibold mb-1">
-            Buscar por Vendedor
-          </label>
-          <select
-            id="vendedor-select"
-            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedVendedor}
-            onChange={handleVendedorChange}
-            disabled={selectedBodega === "todos" || vendedores.length === 0}
+            {selectedVendedor !== 'todos' && vendedores.length > 0 && (
+              <span className="bg-white text-green-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-green-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
+                <button
+                  className="static bg-green-200 hover:bg-green-300 text-green-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
+                  onClick={() => setSelectedVendedor('todos')}
+                  tabIndex={0}
+                  aria-label="Quitar filtro vendedor"
+                >
+                  <Close style={{fontSize:'12px'}} />
+                </button>
+                Vendedor: {vendedores.find(v => v.idPersonal == selectedVendedor)?.Nombre || selectedVendedor}
+              </span>
+            )}
+            {selectedTipoCliente !== 'todos' && (
+              <span className="bg-white text-purple-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-purple-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
+                <button
+                  className="static bg-purple-200 hover:bg-purple-300 text-purple-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
+                  onClick={() => setSelectedTipoCliente('todos')}
+                  tabIndex={0}
+                  aria-label="Quitar filtro tipo cliente"
+                >
+                  <Close style={{fontSize:'12px'}} />
+                </button>
+                Tipo Cliente: {tipoCliente.find(tc => tc.idTipoCliente == selectedTipoCliente)?.Nombre || selectedTipoCliente}
+              </span>
+            )}
+            {selectedTipoEncuesta !== 'todos' && (
+              <span className="bg-white text-yellow-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-yellow-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
+                <button
+                  className="static bg-yellow-200 hover:bg-yellow-300 text-yellow-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
+                  onClick={() => setSelectedTipoEncuesta('todos')}
+                  tabIndex={0}
+                  aria-label="Quitar filtro tipo encuesta"
+                >
+                  <Close style={{fontSize:'12px'}} />
+                </button>
+                Tipo Encuesta: {tipoEncuesta.find(te => te.idCompraEncuesta == selectedTipoEncuesta)?.Descripcion || selectedTipoEncuesta}
+              </span>
+            )}
+            {estadoFiltro !== 'todos' && (
+              <span className="bg-white text-gray-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-gray-300 shrink-0" style={{minHeight:'28px', position:'relative'}}>
+                <button
+                  className="static text-gray-700 rounded-full p-0.5 flex items-center justify-center ml-2 hover:bg-gray-100"
+                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px', background:'none'}}
+                  onClick={() => setEstadoFiltro('todos')}
+                  tabIndex={0}
+                  aria-label="Quitar filtro estado"
+                >
+                  <Close style={{fontSize:'12px'}} />
+                </button>
+                Estado: {(() => {
+                  const estado = estadosOpciones.find(e => e.value == estadoFiltro);
+                  return estado ? estado.label : estadoFiltro;
+                })()}
+              </span>
+            )}
+          </div>
+          {/* Botón de filtros fijo a la derecha */}
+          <button
+            onClick={() => setFiltersVisible(!filtersVisible)}
+            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow ml-3"
+            title={filtersVisible ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            style={{ height: '28px', position: 'relative', zIndex: 1 }}
           >
-            <option value="todos">Todos</option>
-            {vendedores.map((vendedor) => (
-              <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
-                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
-              </option>
-            ))}
-          </select>
+            {filtersVisible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+            <span className="hidden sm:inline">{filtersVisible ? 'Ocultar Filtros' : 'Mostrar Filtros'}</span>
+          </button>
         </div>
-      </div>
 
-      {/* Segunda fila: Tipo Cliente, Tipo Encuesta, Estado */}
-      <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
-        {/* Select de tipo cliente */}
-        <div className="w-full md:w-1/4">
-          <label htmlFor="tipo-cliente-select" className="block text-gray-700 font-semibold mb-1">
-            Tipo Cliente
-          </label>
-          <select
-            id="tipo-cliente-select"
-            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedTipoCliente}
-            onChange={e => setSelectedTipoCliente(e.target.value)}
-          >
-            <option value="todos">Todos</option>
-            {tipoCliente.map((tipo) => (
-              <option key={tipo.idTipoCliente} value={tipo.idTipoCliente}>{tipo.Nombre}</option>
-            ))}
-          </select>
-        </div>
-        {/* Select de tipo encuesta */}
-        <div className="w-full md:w-1/4">
-          <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-1">
-            Tipo Encuesta
-          </label>
-          <select
-            id="tipo-encuesta-select"
-            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={selectedTipoEncuesta}
-            onChange={e => setSelectedTipoEncuesta(e.target.value)}
-          >
-            <option value="todos">Todos</option>
-            {tipoEncuesta.map((tipo) => (
-              <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
-            ))}
-          </select>
-        </div>
-        {/* Select de estado */}
-        <div className="w-full md:w-1/4">
-          <label className="block text-gray-700 font-semibold mb-1">Estado</label>
-          <select
-            className="w-full p-2 border-2 border-gray-300 rounded-md"
-            value={estadoFiltro}
-            onChange={(e) => setEstadoFiltro(e.target.value)}
-          >
-            {estadosOpciones.map((estado) => (
-              <option key={estado.value} value={estado.value}>
-                {estado.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+        {/* Panel de filtros colapsable */}
+        {filtersVisible && (
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+            {/* Primera fila: Fechas, Bodega, Vendedor */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              {/* Input Fecha Inicio */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Inicio</label>
+                <input
+                  type="date"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={fechaInicio}
+                  onChange={(e) => {
+                    const nuevaFechaInicio = e.target.value;
+                    if (isValidDate(nuevaFechaInicio)) {
+                      setFechaInicio(nuevaFechaInicio);
+                    } else {
+                      setFechaInicio(today);
+                    }
+                  }}
+                />
+              </div>
+              {/* Input Fecha Fin */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Fin</label>
+                <input
+                  type="date"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={fechaFin}
+                  onChange={(e) => setFechaFin(e.target.value)}
+                />
+              </div>
+              {/* Select de bodegas */}
+              <div>
+                <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                  Bodega
+                </label>
+                <select
+                  id="bodega-select"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={selectedBodega}
+                  onChange={handleBodegaChange}
+                >
+                  <option value="todos">Todos</option>
+                  {bodegas.length > 0 ? (
+                    bodegas.map((bodega) => (
+                      <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
+                        {bodega.b_Nombre}
+                      </option>
+                    ))
+                  ) : (
+                    <option value="" disabled>No se encontraron bodegas.</option>
+                  )}
+                </select>
+              </div>
+              {/* Select de vendedores */}
+              <div>
+                <label htmlFor="vendedor-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                  Buscar por Vendedor
+                </label>
+                <select
+                  id="vendedor-select"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={selectedVendedor}
+                  onChange={handleVendedorChange}
+                  disabled={selectedBodega === "todos" || vendedores.length === 0}
+                >
+                  <option value="todos">Todos</option>
+                  {vendedores.map((vendedor) => (
+                    <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
+                      {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
-      {/* Sección de tarjetas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bt-6 mt-6">
-        <div className="bg-white p-4 rounded shadow-md">
+            {/* Segunda fila: Tipo Cliente, Tipo Encuesta, Estado */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Select de tipo cliente */}
+              <div>
+                <label htmlFor="tipo-cliente-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                  Tipo Cliente
+                </label>
+                <select
+                  id="tipo-cliente-select"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={selectedTipoCliente}
+                  onChange={e => setSelectedTipoCliente(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  {tipoCliente.map((tipo) => (
+                    <option key={tipo.idTipoCliente} value={tipo.idTipoCliente}>{tipo.Nombre}</option>
+                  ))}
+                </select>
+              </div>
+              {/* Select de tipo encuesta */}
+              <div>
+                <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                  Tipo Encuesta
+                </label>
+                <select
+                  id="tipo-encuesta-select"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={selectedTipoEncuesta}
+                  onChange={e => setSelectedTipoEncuesta(e.target.value)}
+                >
+                  <option value="todos">Todos</option>
+                  {tipoEncuesta.map((tipo) => (
+                    <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
+                  ))}
+                </select>
+              </div>
+              {/* Select de estado */}
+              <div>
+                <label className="block text-gray-700 font-semibold mb-2 text-sm">Estado</label>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  value={estadoFiltro}
+                  onChange={(e) => setEstadoFiltro(e.target.value)}
+                >
+                  {estadosOpciones.map((estado) => (
+                    <option key={estado.value} value={estado.value}>
+                      {estado.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Contenido principal */}
+    <div className="px-6 py-6">
+      {/* Sección de tarjetas métricas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Total solicitudes */}
+        <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs font-medium text-gray-600 mb-1">
                 Número de solicitudes de crédito
               </p>
-              <h2 className="text-xl font-semibold">{totalSolicitudes}</h2>
+              <h2 className="text-xl font-bold text-gray-900">{totalSolicitudes}</h2>
             </div>
-            <div className="text-4xl text-blue-600">
-              <MonetizationOn />
+            <div className="p-2 bg-blue-100 rounded-full">
+              <MonetizationOn className="text-blue-600 text-lg" />
             </div>
           </div>
         </div>
-        <div className="bg-white p-4 rounded shadow-md">
+
+        {/* Vendedores involucrados */}
+        <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-500">Vendedores involucrados </p>
-              <h2 className="text-xl font-semibold">{uniqueVendedores}</h2>
+              <p className="text-xs font-medium text-gray-600 mb-1">Vendedores involucrados</p>
+              <h2 className="text-xl font-bold text-gray-900">{uniqueVendedores}</h2>
             </div>
-            <div className="text-4xl text-green-500">
-              <People />
+            <div className="p-2 bg-green-100 rounded-full">
+              <People className="text-green-600 text-lg" />
+            </div>
+          </div>
+        </div>
+
+        {/* Total aprobadas vs rechazadas */}
+        <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow col-span-1 sm:col-span-2">
+          <p className="text-xs font-medium text-gray-600 mb-2">Aprobadas vs Rechazadas</p>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="text-center p-2 bg-green-50 rounded">
+              <div className="flex items-center justify-center mb-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>
+                <span className="text-xs font-semibold text-green-700">Aprobadas</span>
+              </div>
+              <span className="text-lg font-bold text-green-800">{doughnutData.datasets[0].data[1] || 0}</span>
+            </div>
+            <div className="text-center p-2 bg-red-50 rounded">
+              <div className="flex items-center justify-center mb-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></span>
+                <span className="text-xs font-semibold text-red-700">Rechazadas</span>
+              </div>
+              <span className="text-lg font-bold text-red-800">{doughnutData.datasets[0].data[3] || 0}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sección de gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
-          <h3 className="text-lg font-semibold mb-2">Número de solicitudes de crédito por Almacen </h3>
-          <div className="w-full h-full flex-1 flex items-center justify-center">
+      {/* Sección de gráficos principales */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Número de solicitudes de crédito por Almacén</h3>
+          <div className="h-80">
             <Bar 
               data={barData} 
               options={{
@@ -760,44 +938,63 @@ const [fechaFin, setFechaFin] = useState(today);
                 scales: {
                   x: {
                     stacked: true,
+                    grid: { display: false }
                   },
                   y: {
                     stacked: true,
+                    grid: { color: '#f3f4f6' }
                   },
                 },
                 plugins: {
                   legend: {
                     display: true,
                     position: 'top',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20
+                    }
                   },
                 },
               }}
-              height={220}
             />
           </div>
         </div>
-        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
-          <h3 className="text-lg font-semibold mb-2">Solicitudes de crédito por Estado</h3>
-          <div className="w-full h-full flex-1 flex items-center justify-center">
-            <Doughnut data={doughnutData} options={{ maintainAspectRatio: false }} height={220} />
+
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes de crédito por Estado</h3>
+          <div className="h-80 flex items-center justify-center">
+            <Doughnut 
+              data={doughnutData} 
+              options={{ 
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: 'bottom',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20
+                    }
+                  }
+                }
+              }} 
+            />
           </div>
         </div>
       </div>
 
       {/* Gráficos adicionales en fila inferior: día de la semana, productos más solicitados y situación laboral */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
-          <h3 className="text-lg font-semibold mb-2">Solicitudes por Día de la Semana</h3>
-          <div className="w-full h-full flex-1 flex items-center justify-center">
-            <BarChart
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Día de la semana */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Solicitudes por Día de la Semana</h3>
+          <div className="h-64">
+            <Bar
               data={barDiasSemanaData}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: {
-                    display: false,
-                  },
+                  legend: { display: false },
                   tooltip: {
                     mode: 'index',
                     intersect: false,
@@ -809,6 +1006,7 @@ const [fechaFin, setFechaFin] = useState(today);
                       display: true,
                       text: 'Día de la Semana',
                     },
+                    grid: { display: false }
                   },
                   y: {
                     title: {
@@ -816,19 +1014,21 @@ const [fechaFin, setFechaFin] = useState(today);
                       text: 'Cantidad',
                     },
                     beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
                     ticks: {
                       precision: 0,
                     },
                   },
                 },
               }}
-              height={220}
             />
           </div>
         </div>
-        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
-          <h3 className="text-lg font-semibold mb-2">Productos más solicitados </h3>
-          <div className="w-full h-full flex-1 flex items-center justify-center">
+
+        {/* Productos más solicitados */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Productos más solicitados</h3>
+          <div className="h-64">
             <Radar
               data={radarData}
               options={{
@@ -847,8 +1047,9 @@ const [fechaFin, setFechaFin] = useState(today);
                   r: {
                     angleLines: { display: true },
                     suggestedMin: 0,
+                    grid: { color: '#f3f4f6' },
                     pointLabels: {
-                      font: { size: 14 },
+                      font: { size: 12 },
                     },
                     ticks: {
                       precision: 0,
@@ -856,23 +1057,38 @@ const [fechaFin, setFechaFin] = useState(today);
                   },
                 },
               }}
-              height={220}
             />
           </div>
         </div>
-        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
-          <h3 className="text-lg font-semibold mb-2">Situación Laboral</h3>
-          <div className="w-full h-full flex-1 flex items-center justify-center">
+
+        {/* Situación Laboral */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Situación Laboral</h3>
+          <div className="h-64 flex items-center justify-center">
             <div className="flex items-center w-full justify-center">
-              <div style={{ width: 180, height: 180, position: 'relative' }}>
+              <div style={{ width: 140, height: 140, position: 'relative', zIndex: 0 }}>
                 <Doughnut
                   data={doughnutSituacionLaboralData}
                   options={{
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '60%',
                     borderWidth: 8,
                     plugins: {
                       legend: { display: false },
+                      tooltip: {
+                        xPadding: 16,
+                        yPadding: 8,
+                        padding: 12,
+                        caretPadding: 10,
+                        displayColors: true,
+                        boxWidth: 16,
+                        boxHeight: 16,
+                        boxPadding: 10,
+                        callbacks: {},
+                        // Para Chart.js v3+, usar 'padding' y 'caretPadding'
+                        padding: 12,
+                        caretPadding: 10,
+                      },
                     },
                     elements: {
                       arc: {
@@ -882,7 +1098,22 @@ const [fechaFin, setFechaFin] = useState(today);
                       },
                     },
                   }}
-                  plugins={[doughnutCenterText]}
+                  plugins={[
+                    // Modifica el plugin para el texto central para que tenga zIndex bajo
+                    {
+                      ...doughnutCenterText,
+                      beforeDraw: (chart) => {
+                        if (doughnutCenterText && doughnutCenterText.beforeDraw) {
+                          // Llama el original pero baja el z-index del texto central
+                          const ctx = chart.ctx;
+                          ctx.save();
+                          ctx.globalCompositeOperation = 'destination-over';
+                          doughnutCenterText.beforeDraw(chart);
+                          ctx.restore();
+                        }
+                      }
+                    }
+                  ]}
                 />
               </div>
               <SituacionLaboralLegend
@@ -893,7 +1124,50 @@ const [fechaFin, setFechaFin] = useState(today);
           </div>
         </div>
       </div>
+
+      {/* Fila separada para el gráfico PolarArea de tipo de cliente */}
+      <div className="grid grid-cols-1 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes por Tipo de Cliente</h3>
+          <div className="h-80 flex items-center justify-center">
+            <PolarArea
+              data={polarTipoClienteData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20
+                    }
+                  },
+                  tooltip: {
+                    enabled: true,
+                  },
+                },
+                scales: {
+                  r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    grid: { color: '#f3f4f6' },
+                    pointLabels: {
+                      font: { size: 14 },
+                    },
+                    ticks: {
+                      precision: 0,
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  </div>
+);
 }
 
