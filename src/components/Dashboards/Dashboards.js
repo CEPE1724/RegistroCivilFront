@@ -5,16 +5,175 @@ import {
   ShoppingCart,
   ConfirmationNumber,
 } from "@mui/icons-material";
-import { Doughnut, Bar } from "react-chartjs-2";
+import { Doughnut, Bar, Radar } from "react-chartjs-2";
+import { Bar as BarChart } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
 import { APIURL } from "../../configApi/apiConfig";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import { useAuth } from "../AuthContext/AuthContext";
-
 import axios from "../../configApi/axiosConfig";
 Chart.register(...registerables);
+// Leyenda personalizada para el gráfico de situación laboral
+function SituacionLaboralLegend({ labels, colors }) {
+  return (
+    <div className="flex flex-col items-start ml-6">
+      {labels.map((label, i) => (
+        <div key={label} className="flex items-center mb-2">
+          <span
+            className="inline-block w-4 h-4 rounded-full mr-2"
+            style={{ backgroundColor: colors[i], border: '2px solid #fff', boxShadow: '0 0 2px #888' }}
+          ></span>
+          <span className="text-sm font-medium text-gray-700">{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+// Plugin para mostrar el total en el centro del doughnut
+const doughnutCenterText = {
+  id: 'doughnutCenterText',
+  afterDraw: (chart) => {
+    if (chart.config.type !== 'doughnut') return;
+    const { ctx, chartArea } = chart;
+    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+    ctx.save();
+    ctx.font = 'bold 22px Arial';
+    ctx.fillStyle = '#3b82f6';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`Total: ${total}`,
+      (chartArea.left + chartArea.right) / 2,
+      (chartArea.top + chartArea.bottom) / 2
+    );
+    ctx.restore();
+  }
+};
+
+// ...existing code...
+
+// ...existing code...
 
 export function Dashboards() {
+
+  // Estado para productos y radar chart
+  const [productos, setProductos] = useState([]);
+  const [radarData, setRadarData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Productos más solicitados",
+        data: [],
+        backgroundColor: "rgba(59,130,246,0.2)",
+        borderColor: "#3b82f6",
+        pointBackgroundColor: "#3b82f6",
+        pointBorderColor: "#fff",
+      },
+    ],
+  });
+
+  // Estado para opciones de situación laboral y datos del gráfico
+  const [situacionLaboralOpts, setSituacionLaboralOpts] = useState([]);
+  const [doughnutSituacionLaboralData, setDoughnutSituacionLaboralData] = useState({
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: [],
+      },
+    ],
+  });
+
+  // Filtro de tipo cliente
+  const [tipoCliente, setTipoCliente] = useState([]);
+  const [selectedTipoCliente, setSelectedTipoCliente] = useState("todos");
+
+  // Filtro de tipo encuesta
+  const [tipoEncuesta, setTipoEncuesta] = useState([]);
+  const [selectedTipoEncuesta, setSelectedTipoEncuesta] = useState("todos");
+
+  // Obtener productos al montar
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const resp = await axios.get(APIURL.get_Productos(), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (resp.status === 200) {
+          setProductos(resp.data);
+        }
+      } catch (error) {
+        setProductos([]);
+      }
+    };
+    fetchProductos();
+  }, []);
+
+  // Obtener opciones de situación laboral al montar
+  useEffect(() => {
+    const fetchSituacionLaboral = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const resp = await axios.get(APIURL.getActividadEconominasituacionLaboral(), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (resp.status === 200) {
+          setSituacionLaboralOpts(resp.data);
+        }
+      } catch (error) {
+        setSituacionLaboralOpts([]);
+      }
+    };
+    fetchSituacionLaboral();
+  }, []);
+
+  // Obtener tipos de cliente al montar
+  useEffect(() => {
+    const fetchTipoCliente = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const respTipoCliente = await axios.get(APIURL.getTipoCliente(), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (respTipoCliente.status === 200) {
+          setTipoCliente(respTipoCliente.data);
+        }
+      } catch (error) {
+        setTipoCliente([]);
+      }
+    };
+    fetchTipoCliente();
+  }, []);
+
+  // Obtener tipos de encuesta al montar
+  useEffect(() => {
+    const fetchTipoEncuesta = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const respTipoEncuesta = await axios.get(APIURL.get_TipoConsulta(), {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (respTipoEncuesta.status === 200) {
+          setTipoEncuesta(respTipoEncuesta.data);
+        }
+      } catch (error) {
+        setTipoEncuesta([]);
+      }
+    };
+    fetchTipoEncuesta();
+  }, []);
 
   const estadosOpciones = [
     { label: "Todos", value: "todos" },
@@ -61,7 +220,31 @@ const [doughnutData, setDoughnutData] = useState({
       },
     ],
   });
+
+  // Estado para el gráfico de solicitudes por día de la semana
+  const [barDiasSemanaData, setBarDiasSemanaData] = useState({
+    labels: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+    datasets: [
+      {
+        label: "Solicitudes por Día de la Semana",
+        data: [0, 0, 0, 0, 0, 0, 0],
+        backgroundColor: [
+          "#3b82f6",
+          "#10b981",
+          "#f59e0b",
+          "#ef4444",
+          "#6366f1",
+          "#059669",
+          "#6b7280",
+        ],
+      },
+    ],
+  });
   const [totalSolicitudes, setTotalSolicitudes] = useState(0);
+
+  // Filtro de vendedor
+  const [selectedVendedor, setSelectedVendedor] = useState("todos");
+  const [vendedores, setVendedores] = useState([]);
 
 // ✅ Agregar estas líneas para el rango de 15 días
 const date15DaysAgo = new Date();
@@ -72,7 +255,7 @@ const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
 const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr); // Cambiar de today a date15DaysAgoStr
 const [fechaFin, setFechaFin] = useState(today);
   const [selectedBodega, setSelectedBodega] = useState("todos");
-  const { data, loading, error, fetchBodegaUsuario } = useBodegaUsuario();
+  const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor } = useBodegaUsuario();
   const { userData, idMenu } = useAuth();
 
   
@@ -82,14 +265,47 @@ const [fechaFin, setFechaFin] = useState(today);
   const bodegas = data || [];  // Safely access the bodegas data
 
 
+
   useEffect(() => {
     if (userData && userData.idUsuario) {
       fetchBodega(); // Llamar a la API para obtener las bodegas
     }
   }, [userData]);
 
+  // Cargar vendedores cuando cambia la bodega o la fecha
+  useEffect(() => {
+    const fetchVendedores = async () => {
+      if (selectedBodega && selectedBodega !== "todos") {
+        const fecha = fechaInicio;
+        const nivel = 0;
+        await listaVendedoresporBodega(fecha, selectedBodega, nivel);
+      } else {
+        setVendedores([]);
+      }
+    };
+    fetchVendedores();
+  }, [selectedBodega, fechaInicio]);
+
+  // Actualizar vendedores cuando cambia el resultado del hook
+  useEffect(() => {
+    setVendedores(vendedor || []);
+    // Si el vendedor seleccionado ya no está, resetear
+    if (
+      selectedVendedor !== "todos" &&
+      vendedor &&
+      !vendedor.some((v) => v.idPersonal === selectedVendedor)
+    ) {
+      setSelectedVendedor("todos");
+    }
+  }, [vendedor]);
+
   const handleBodegaChange = (event) => {
     setSelectedBodega(event.target.value);
+    setSelectedVendedor("todos");
+  };
+
+  const handleVendedorChange = (event) => {
+    setSelectedVendedor(event.target.value);
   };
 
   const fetchBodega = async () => {
@@ -110,31 +326,26 @@ const [fechaFin, setFechaFin] = useState(today);
 
   const fetchSolicitudes = async () => {
     let bodegasId = [];
-
     try {
-      // Si selectedBodega es "todos", pasar un array vacío (esto también se puede ajustar según el comportamiento deseado)
       if (selectedBodega !== "todos") {
-        // Si selectedBodega tiene un valor específico, tomarlo como un array
         bodegasId = [selectedBodega];
       } else {
-        // Si es "todos", se puede pasar un array vacío o la lógica que desees
-        bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
+        bodegasId = bodegasIds;
       }
-
       const token = localStorage.getItem("token");
-      
-      // ✅ Usar siempre fechaInicio y fechaFin del estado, no parámetros
       const params = {
         limit: 100,
         fechaInicio: fechaInicio,
         fechaFin: fechaFin,
         bodega: bodegasId,
         estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
+        idTipoCliente: selectedTipoCliente === "todos" ? 0 : parseInt(selectedTipoCliente),
+        idCompraEncuesta: selectedTipoEncuesta === "todos" ? 0 : parseInt(selectedTipoEncuesta),
       };
-      
-      // Agregar timestamp para identificar cada llamada
-      const timestamp = new Date().toISOString();
-      
+      // Si hay filtro de vendedor, agregarlo
+      if (selectedVendedor && selectedVendedor !== "todos") {
+        params.vendedor = selectedVendedor;
+      }
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
           "Content-Type": "application/json",
@@ -142,9 +353,63 @@ const [fechaFin, setFechaFin] = useState(today);
         },
         params,
       });
-
       if (response.status === 200) {
-
+        // --- Pie Situacion Laboral ---
+        // Contar por idSituacionLaboral
+        const counts = {};
+        response.data.data.forEach((item) => {
+          if (item.idSituacionLaboral) {
+            counts[item.idSituacionLaboral] = (counts[item.idSituacionLaboral] || 0) + 1;
+          }
+        });
+        // Mapear a formato Doughnut
+        const labels = situacionLaboralOpts.map(opt => opt.Descripcion);
+        const data = situacionLaboralOpts.map(opt => counts[opt.idSituacionLaboral] || 0);
+        // Colores generados automáticamente
+        const baseColors = [
+          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#059669', '#6b7280', '#dc2626', '#a21caf', '#f472b6', '#22d3ee', '#fbbf24'
+        ];
+        const backgroundColor = labels.map((_, i) => baseColors[i % baseColors.length]);
+        setDoughnutSituacionLaboralData({
+          labels,
+          datasets: [
+            {
+              data,
+              backgroundColor,
+            },
+          ],
+        });
+        // --- Radar Chart: productos más solicitados ---
+        // Mapear productos a su cantidad en solicitudes
+        const productosCount = {};
+        response.data.data.forEach((item) => {
+          if (item.idProductos) {
+            productosCount[item.idProductos] = (productosCount[item.idProductos] || 0) + 1;
+          }
+        });
+        // Ordenar productos por cantidad y tomar los top N (ej: 6)
+        const topN = 6;
+        const productosOrdenados = Object.entries(productosCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, topN);
+        const radarLabels = productosOrdenados.map(([id]) => {
+          const prod = productos.find((p) => p.idCre_ProductoSolicitud === Number(id));
+          return prod ? prod.Producto : `Producto ${id}`;
+        });
+        const radarValues = productosOrdenados.map(([_, count]) => count);
+        setRadarData({
+          labels: radarLabels,
+          datasets: [
+            {
+              label: "Productos más solicitados",
+              data: radarValues,
+              backgroundColor: "rgba(59,130,246,0.2)",
+              borderColor: "#3b82f6",
+              pointBackgroundColor: "#3b82f6",
+              pointBorderColor: "#fff",
+            },
+          ],
+        });
         const estadoCounts = {
           PENDIENTE: 0,
           APROBADO: 0,
@@ -156,10 +421,12 @@ const [fechaFin, setFechaFin] = useState(today);
         };
         const totalRecords = response.data.total;
         setTotalSolicitudes(totalRecords);
+        const bodegaCounts = {};
+        const bodegaEstadoCounts = {};
+        const vendedoresSet = new Set();
 
-        const bodegaCounts = {}; // Para contar total por bodega
-        const bodegaEstadoCounts = {}; // Para contar por bodega y estado
-        const vendedoresSet = new Set(); // Para contar vendedores únicos
+        // Agrupación por día de la semana
+        const diasSemana = [0, 0, 0, 0, 0, 0, 0]; // Lunes a Domingo
 
         response.data.data.forEach((item) => {
           if (item.Estado === 1) estadoCounts.PENDIENTE++;
@@ -169,20 +436,15 @@ const [fechaFin, setFechaFin] = useState(today);
           else if (item.Estado === 5) estadoCounts.NO_APLICA++;
           else if (item.Estado === 6) estadoCounts.FACTURADO++;
           else if (item.Estado === 7) estadoCounts.RECHAZADO_LN++;
-
           if (item.idVendedor) {
             vendedoresSet.add(item.idVendedor);
           }
-          
-          // Contamos las solicitudes por bodega
           const bodegaId = item.Bodega;
           if (bodegaCounts[bodegaId]) {
             bodegaCounts[bodegaId]++;
           } else {
             bodegaCounts[bodegaId] = 1;
           }
-
-          // Contamos por bodega y estado para el gráfico de barras
           if (!bodegaEstadoCounts[bodegaId]) {
             bodegaEstadoCounts[bodegaId] = {
               PENDIENTE: 0,
@@ -194,7 +456,6 @@ const [fechaFin, setFechaFin] = useState(today);
               RECHAZADO_LN: 0,
             };
           }
-          
           if (item.Estado === 1) bodegaEstadoCounts[bodegaId].PENDIENTE++;
           else if (item.Estado === 2) bodegaEstadoCounts[bodegaId].APROBADO++;
           else if (item.Estado === 3) bodegaEstadoCounts[bodegaId].ANULADO++;
@@ -202,17 +463,20 @@ const [fechaFin, setFechaFin] = useState(today);
           else if (item.Estado === 5) bodegaEstadoCounts[bodegaId].NO_APLICA++;
           else if (item.Estado === 6) bodegaEstadoCounts[bodegaId].FACTURADO++;
           else if (item.Estado === 7) bodegaEstadoCounts[bodegaId].RECHAZADO_LN++;
+
+          // Agrupar por día de la semana
+          if (item.Fecha) {
+            const fechaObj = new Date(item.Fecha);
+            let dia = fechaObj.getDay(); // 0=Domingo, 1=Lunes, ...
+            dia = dia === 0 ? 6 : dia - 1; // Convertir a 0=Lunes, 6=Domingo
+            diasSemana[dia]++;
+          }
         });
-
-        setUniqueVendedores(vendedoresSet.size); // Guardamos la cantidad de vendedores únicos
-
-        // Si hay un filtro de estado específico, ajustar los datos del gráfico circular
+        setUniqueVendedores(vendedoresSet.size);
         let doughnutLabels = [];
         let doughnutValues = [];
         let doughnutColors = [];
-
         if (estadoFiltro === "todos") {
-          // Mostrar todos los estados
           doughnutLabels = ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"];
           doughnutValues = [
             estadoCounts.PENDIENTE,
@@ -223,27 +487,24 @@ const [fechaFin, setFechaFin] = useState(today);
             estadoCounts.FACTURADO,
             estadoCounts.RECHAZADO_LN,
           ];
-          doughnutColors = ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"]; // ✅ Colores más representativos
+          doughnutColors = ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"];
         } else {
-          // Mostrar solo el estado filtrado
           const estadoSeleccionado = estadosOpciones.find(e => e.value == estadoFiltro);
           if (estadoSeleccionado) {
             doughnutLabels = [estadoSeleccionado.label];
-            doughnutValues = [totalRecords]; // Usar el total de registros
-            // Asignar el color correspondiente según el estado
+            doughnutValues = [totalRecords];
             const colorMap = {
-              1: "#3b82f6", // PRE-APROBADO (azul)
-              2: "#10b981", // APROBADO (verde esmeralda)
-              3: "#6b7280", // ANULADO (gris)
-              4: "#ef4444", // RECHAZADO (rojo)
-              5: "#f59e0b", // NO APLICA (amarillo/naranja)
-              6: "#059669", // FACTURADO (verde oscuro)
-              7: "#dc2626", // RECHAZADO-LN (rojo oscuro)
+              1: "#3b82f6",
+              2: "#10b981",
+              3: "#6b7280",
+              4: "#ef4444",
+              5: "#f59e0b",
+              6: "#059669",
+              7: "#dc2626",
             };
             doughnutColors = [colorMap[estadoFiltro]];
           }
         }
-
         setDoughnutData({
           labels: doughnutLabels,
           datasets: [
@@ -253,35 +514,49 @@ const [fechaFin, setFechaFin] = useState(today);
             },
           ],
         });
-        
-        // Crear datos para el gráfico de barras apiladas
         const bodegaLabels = Object.keys(bodegaCounts).map((codigo) => {
           const bodegaEncontrada = bodegas.find((b) => b.b_Bodega === Number(codigo));
           return bodegaEncontrada ? bodegaEncontrada.b_Nombre : `Bodega ${codigo}`;
         });
-
-        // Crear datasets para cada estado
         const estadosParaBarras = [
-          { key: 'PENDIENTE', label: 'PRE-APROBADO', color: '#3b82f6' }, // ✅ Azul
-          { key: 'APROBADO', label: 'APROBADO', color: '#10b981' }, // ✅ Verde esmeralda
-          { key: 'ANULADO', label: 'ANULADO', color: '#6b7280' }, // ✅ Gris
-          { key: 'RECHAZADO', label: 'RECHAZADO', color: '#ef4444' }, // ✅ Rojo
-          { key: 'NO_APLICA', label: 'NO APLICA', color: '#f59e0b' }, // ✅ Amarillo/naranja
-          { key: 'FACTURADO', label: 'FACTURADO', color: '#059669' }, // ✅ Verde oscuro
-          { key: 'RECHAZADO_LN', label: 'RECHAZADO-LN', color: '#dc2626' }, // ✅ Rojo oscuro
+          { key: 'PENDIENTE', label: 'PRE-APROBADO', color: '#3b82f6' },
+          { key: 'APROBADO', label: 'APROBADO', color: '#10b981' },
+          { key: 'ANULADO', label: 'ANULADO', color: '#6b7280' },
+          { key: 'RECHAZADO', label: 'RECHAZADO', color: '#ef4444' },
+          { key: 'NO_APLICA', label: 'NO APLICA', color: '#f59e0b' },
+          { key: 'FACTURADO', label: 'FACTURADO', color: '#059669' },
+          { key: 'RECHAZADO_LN', label: 'RECHAZADO-LN', color: '#dc2626' },
         ];
-
         const datasets = estadosParaBarras.map(estado => ({
           label: estado.label,
-          data: Object.keys(bodegaCounts).map(bodegaId => 
+          data: Object.keys(bodegaCounts).map(bodegaId =>
             bodegaEstadoCounts[bodegaId] ? bodegaEstadoCounts[bodegaId][estado.key] : 0
           ),
           backgroundColor: estado.color,
         }));
-
         setBarData({
           labels: bodegaLabels,
           datasets: datasets,
+        });
+
+        // Actualizar gráfico de barras por día de la semana
+        setBarDiasSemanaData({
+          labels: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+          datasets: [
+            {
+              label: "Solicitudes por Día de la Semana",
+              data: diasSemana,
+              backgroundColor: [
+                "#3b82f6",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#6366f1",
+                "#059669",
+                "#6b7280",
+              ],
+            },
+          ],
         });
       }
     } catch (error) {
@@ -295,14 +570,57 @@ const [fechaFin, setFechaFin] = useState(today);
     if (fechaInicio && fechaFin && bodegas.length > 0) {
       fetchSolicitudes();
     }
-  }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas]);
+  }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas, selectedVendedor, selectedTipoCliente, selectedTipoEncuesta]);
+      {/* Select de tipo encuesta */}
+      <div className="w-full md:w-1/4">
+        <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-1">
+          Tipo Encuesta
+        </label>
+        <select
+          id="tipo-encuesta-select"
+          className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={selectedTipoEncuesta}
+          onChange={e => setSelectedTipoEncuesta(e.target.value)}
+        >
+          <option value="todos">Todos</option>
+          {tipoEncuesta.map((tipo) => (
+            <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
+          ))}
+        </select>
+      </div>
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       {/* Sección de filtros */}
-      {/* Contenedor de los filtros y botón alineados en una sola fila */}
+      {/* Primera fila: Fechas, Bodega, Vendedor */}
       <div className="flex flex-col md:flex-row items-center gap-4">
-
+        {/* Input Fecha Inicio */}
+        <div className="w-full md:w-1/4">
+          <label className="block text-gray-700 font-semibold mb-1">Fecha Inicio</label>
+          <input
+            type="date"
+            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={fechaInicio}
+            onChange={(e) => {
+              const nuevaFechaInicio = e.target.value;
+              if (isValidDate(nuevaFechaInicio)) {
+                setFechaInicio(nuevaFechaInicio);
+              } else {
+                setFechaInicio(today);
+              }
+            }}
+          />
+        </div>
+        {/* Input Fecha Fin */}
+        <div className="w-full md:w-1/4">
+          <label className="block text-gray-700 font-semibold mb-1">Fecha Fin</label>
+          <input
+            type="date"
+            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+          />
+        </div>
         {/* Select de bodegas */}
         <div className="w-full md:w-1/4">
           <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-1">
@@ -326,39 +644,65 @@ const [fechaFin, setFechaFin] = useState(today);
             )}
           </select>
         </div>
-
-        {/* Input Fecha Inicio */}
+        {/* Select de vendedores */}
         <div className="w-full md:w-1/4">
-          <label className="block text-gray-700 font-semibold mb-1">Fecha Inicio</label>
-          <input
-            type="date"
+          <label htmlFor="vendedor-select" className="block text-gray-700 font-semibold mb-1">
+            Buscar por Vendedor
+          </label>
+          <select
+            id="vendedor-select"
             className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={fechaInicio}
-            onChange={(e) => {
-              const nuevaFechaInicio = e.target.value;
-
-              // Validar que la fecha de inicio sea válida
-              if (isValidDate(nuevaFechaInicio)) {
-                setFechaInicio(nuevaFechaInicio);
-              } else {
-                // Si la fecha es inválida, se asigna la fecha de hoy
-                setFechaInicio(today);
-              }
-            }}
-          />
+            value={selectedVendedor}
+            onChange={handleVendedorChange}
+            disabled={selectedBodega === "todos" || vendedores.length === 0}
+          >
+            <option value="todos">Todos</option>
+            {vendedores.map((vendedor) => (
+              <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
+                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+              </option>
+            ))}
+          </select>
         </div>
+      </div>
 
-        {/* Input Fecha Fin */}
+      {/* Segunda fila: Tipo Cliente, Tipo Encuesta, Estado */}
+      <div className="flex flex-col md:flex-row items-center gap-4 mt-4">
+        {/* Select de tipo cliente */}
         <div className="w-full md:w-1/4">
-          <label className="block text-gray-700 font-semibold mb-1">Fecha Fin</label>
-          <input
-            type="date"
+          <label htmlFor="tipo-cliente-select" className="block text-gray-700 font-semibold mb-1">
+            Tipo Cliente
+          </label>
+          <select
+            id="tipo-cliente-select"
             className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
-          />
+            value={selectedTipoCliente}
+            onChange={e => setSelectedTipoCliente(e.target.value)}
+          >
+            <option value="todos">Todos</option>
+            {tipoCliente.map((tipo) => (
+              <option key={tipo.idTipoCliente} value={tipo.idTipoCliente}>{tipo.Nombre}</option>
+            ))}
+          </select>
         </div>
-
+        {/* Select de tipo encuesta */}
+        <div className="w-full md:w-1/4">
+          <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-1">
+            Tipo Encuesta
+          </label>
+          <select
+            id="tipo-encuesta-select"
+            className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={selectedTipoEncuesta}
+            onChange={e => setSelectedTipoEncuesta(e.target.value)}
+          >
+            <option value="todos">Todos</option>
+            {tipoEncuesta.map((tipo) => (
+              <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
+            ))}
+          </select>
+        </div>
+        {/* Select de estado */}
         <div className="w-full md:w-1/4">
           <label className="block text-gray-700 font-semibold mb-1">Estado</label>
           <select
@@ -404,33 +748,149 @@ const [fechaFin, setFechaFin] = useState(today);
       </div>
 
       {/* Sección de gráficos */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Detalles gráfico de barras</h3>
-          <Bar 
-            data={barData} 
-            options={{
-              responsive: true,
-              scales: {
-                x: {
-                  stacked: true,
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
+          <h3 className="text-lg font-semibold mb-2">Número de solicitudes de crédito por Almacen </h3>
+          <div className="w-full h-full flex-1 flex items-center justify-center">
+            <Bar 
+              data={barData} 
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    stacked: true,
+                  },
+                  y: {
+                    stacked: true,
+                  },
                 },
-                y: {
-                  stacked: true,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top',
+                  },
                 },
-              },
-              plugins: {
-                legend: {
-                  display: true,
-                  position: 'top',
-                },
-              },
-            }}
-          />
+              }}
+              height={220}
+            />
+          </div>
         </div>
-        <div className="bg-white p-4 rounded shadow-md">
-          <h3 className="text-xl font-semibold mb-4">Detalles diagrama de pastel</h3>
-          <Doughnut data={doughnutData} />
+        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
+          <h3 className="text-lg font-semibold mb-2">Solicitudes de crédito por Estado</h3>
+          <div className="w-full h-full flex-1 flex items-center justify-center">
+            <Doughnut data={doughnutData} options={{ maintainAspectRatio: false }} height={220} />
+          </div>
+        </div>
+      </div>
+
+      {/* Gráficos adicionales en fila inferior: día de la semana, productos más solicitados y situación laboral */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
+          <h3 className="text-lg font-semibold mb-2">Solicitudes por Día de la Semana</h3>
+          <div className="w-full h-full flex-1 flex items-center justify-center">
+            <BarChart
+              data={barDiasSemanaData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                  },
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Día de la Semana',
+                    },
+                  },
+                  y: {
+                    title: {
+                      display: true,
+                      text: 'Cantidad',
+                    },
+                    beginAtZero: true,
+                    ticks: {
+                      precision: 0,
+                    },
+                  },
+                },
+              }}
+              height={220}
+            />
+          </div>
+        </div>
+        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
+          <h3 className="text-lg font-semibold mb-2">Productos más solicitados </h3>
+          <div className="w-full h-full flex-1 flex items-center justify-center">
+            <Radar
+              data={radarData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top',
+                  },
+                  tooltip: {
+                    enabled: true,
+                  },
+                },
+                scales: {
+                  r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    pointLabels: {
+                      font: { size: 14 },
+                    },
+                    ticks: {
+                      precision: 0,
+                    },
+                  },
+                },
+              }}
+              height={220}
+            />
+          </div>
+        </div>
+        <div className="bg-white p-2 rounded shadow-md min-h-0 flex flex-col items-center" style={{ minHeight: 0, height: '320px', maxHeight: '340px' }}>
+          <h3 className="text-lg font-semibold mb-2">Situación Laboral</h3>
+          <div className="w-full h-full flex-1 flex items-center justify-center">
+            <div className="flex items-center w-full justify-center">
+              <div style={{ width: 180, height: 180, position: 'relative' }}>
+                <Doughnut
+                  data={doughnutSituacionLaboralData}
+                  options={{
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    borderWidth: 8,
+                    plugins: {
+                      legend: { display: false },
+                    },
+                    elements: {
+                      arc: {
+                        borderWidth: 8,
+                        borderColor: '#fff',
+                        spacing: 4,
+                      },
+                    },
+                  }}
+                  plugins={[doughnutCenterText]}
+                />
+              </div>
+              <SituacionLaboralLegend
+                labels={doughnutSituacionLaboralData.labels}
+                colors={doughnutSituacionLaboralData.datasets[0].backgroundColor}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
