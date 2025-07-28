@@ -200,7 +200,6 @@ export function Dashboards() {
     { label: "RECHAZADO", value: 4 },
     { label: "NO APLICA", value: 5 },
     { label: "FACTURADO", value: 6 },
-    { label: "RECHAZADO-LN", value: 7 },
   ];
   const [estadoFiltro, setEstadoFiltro] = useState("todos");
 
@@ -217,15 +216,15 @@ export function Dashboards() {
   const [uniqueVendedores, setUniqueVendedores] = useState(0);
 
   const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
-const [doughnutData, setDoughnutData] = useState({
-  labels: ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"],
-  datasets: [
-    {
-      data: [0, 0, 0, 0, 0, 0, 0],
-      backgroundColor: ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"], // ✅ Colores más representativos
-    },
-  ],
-});
+  const [doughnutData, setDoughnutData] = useState({
+    labels: ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO"],
+    datasets: [
+      {
+        data: [0, 0, 0, 0, 0, 0, 0],
+        backgroundColor: ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"], // ✅ Colores más representativos
+      },
+    ],
+  });
 
   const [barData, setBarData] = useState({
     labels: [],
@@ -263,19 +262,19 @@ const [doughnutData, setDoughnutData] = useState({
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
   const [vendedores, setVendedores] = useState([]);
 
-// ✅ Agregar estas líneas para el rango de 15 días
-const date15DaysAgo = new Date();
-date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
-const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
+  // ✅ Agregar estas líneas para el rango de 15 días
+  const date15DaysAgo = new Date();
+  date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+  const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
 
-// ✅ Cambiar estos estados
-const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr); // Cambiar de today a date15DaysAgoStr
-const [fechaFin, setFechaFin] = useState(today);
+  // ✅ Cambiar estos estados
+  const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr); // Cambiar de today a date15DaysAgoStr
+  const [fechaFin, setFechaFin] = useState(today);
   const [selectedBodega, setSelectedBodega] = useState("todos");
   const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor } = useBodegaUsuario();
   const { userData, idMenu } = useAuth();
 
-  
+
 
   const [bodegass, setBodegass] = useState([]);
 
@@ -351,7 +350,7 @@ const [fechaFin, setFechaFin] = useState(today);
       }
       const token = localStorage.getItem("token");
       const params = {
-        limit: 100,
+
         fechaInicio: fechaInicio,
         fechaFin: fechaFin,
         bodega: bodegasId,
@@ -519,7 +518,7 @@ const [fechaFin, setFechaFin] = useState(today);
         let doughnutValues = [];
         let doughnutColors = [];
         if (estadoFiltro === "todos") {
-          doughnutLabels = ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO", "RECHAZADO-LN"];
+          doughnutLabels = ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO"];
           doughnutValues = [
             estadoCounts.PENDIENTE,
             estadoCounts.APROBADO,
@@ -567,7 +566,6 @@ const [fechaFin, setFechaFin] = useState(today);
           { key: 'RECHAZADO', label: 'RECHAZADO', color: '#ef4444' },
           { key: 'NO_APLICA', label: 'NO APLICA', color: '#f59e0b' },
           { key: 'FACTURADO', label: 'FACTURADO', color: '#059669' },
-          { key: 'RECHAZADO_LN', label: 'RECHAZADO-LN', color: '#dc2626' },
         ];
         const datasets = estadosParaBarras.map(estado => ({
           label: estado.label,
@@ -606,6 +604,77 @@ const [fechaFin, setFechaFin] = useState(today);
     }
   };
 
+
+  const estadoItems = [
+    {
+      label: "PRE-APROBADO",
+      value: doughnutData.datasets[0].data[0] || 0,
+      styles: {
+        bg: "bg-blue-50",
+        border: "border-blue-100",
+        dot: "bg-blue-500",
+        text: "text-blue-700",
+        value: "text-blue-800",
+      },
+    },
+    {
+      label: "APROBADO",
+      value: doughnutData.datasets[0].data[1] || 0,
+      styles: {
+        bg: "bg-green-50",
+        border: "border-green-100",
+        dot: "bg-green-500",
+        text: "text-green-700",
+        value: "text-green-800",
+      },
+    },
+    {
+      label: "ANULADO",
+      value: doughnutData.datasets[0].data[2] || 0,
+      styles: {
+        bg: "bg-gray-50",
+        border: "border-gray-200",
+        dot: "bg-gray-500",
+        text: "text-gray-700",
+        value: "text-gray-800",
+      },
+    },
+    {
+      label: "RECHAZADO",
+      value: doughnutData.datasets[0].data[3] || 0,
+      styles: {
+        bg: "bg-red-50",
+        border: "border-red-100",
+        dot: "bg-red-500",
+        text: "text-red-700",
+        value: "text-red-800",
+      },
+    },
+    {
+      label: "NO APLICA",
+      value: doughnutData.datasets[0].data[4] || 0,
+      styles: {
+        bg: "bg-yellow-50",
+        border: "border-yellow-100",
+        dot: "bg-yellow-500",
+        text: "text-yellow-700",
+        value: "text-yellow-800",
+      },
+    },
+    {
+      label: "FACTURADO",
+      value: doughnutData.datasets[0].data[5] || 0,
+      styles: {
+        bg: "bg-emerald-50",
+        border: "border-emerald-100",
+        dot: "bg-emerald-500",
+        text: "text-emerald-700",
+        value: "text-emerald-800",
+      },
+    },
+  ];
+
+
   // ✅ Modificar este useEffect para que solo se ejecute cuando todo esté listo
   useEffect(() => {
     // Solo llamar a fetchSolicitudes si las fechas son válidas Y las bodegas están cargadas
@@ -613,561 +682,564 @@ const [fechaFin, setFechaFin] = useState(today);
       fetchSolicitudes();
     }
   }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas, selectedVendedor, selectedTipoCliente, selectedTipoEncuesta]);
-      {/* Select de tipo encuesta */}
-      <div className="w-full md:w-1/4">
-        <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-1">
-          Tipo Encuesta
-        </label>
-        <select
-          id="tipo-encuesta-select"
-          className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedTipoEncuesta}
-          onChange={e => setSelectedTipoEncuesta(e.target.value)}
-        >
-          <option value="todos">Todos</option>
-          {tipoEncuesta.map((tipo) => (
-            <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
-          ))}
-        </select>
-      </div>
+  {/* Select de tipo encuesta */ }
+  <div className="w-full md:w-1/4">
+    <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-1">
+      Tipo Encuesta
+    </label>
+    <select
+      id="tipo-encuesta-select"
+      className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      value={selectedTipoEncuesta}
+      onChange={e => setSelectedTipoEncuesta(e.target.value)}
+    >
+      <option value="todos">Todos</option>
+      {tipoEncuesta.map((tipo) => (
+        <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
+      ))}
+    </select>
+  </div>
 
-return (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-    {/* Header fijo con filtros colapsables */}
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Header fijo con filtros colapsables */}
 
-    <div className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-200">
-      <div className="px-6 py-4">
-        {/* Resumen rápido de fechas y botón de filtros en la misma fila */}
-        <div className="flex flex-row flex-wrap items-center justify-between gap-2 text-xs text-gray-700 bg-blue-50 px-4 py-2 rounded-lg mb-2 relative">
-          {/* Filtros activos y periodo a la izquierda */}
-          <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
-            <span className="font-medium">Período:</span>
-            <span className="bg-white px-2 py-0.5 rounded border">{fechaInicio}</span>
-            <span>→</span>
-            <span className="bg-white px-2 py-0.5 rounded border">{fechaFin}</span>
-            {/* Mostrar filtros activos */}
-            {selectedBodega !== 'todos' && (
-              <span className="bg-white text-blue-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-blue-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
-                <button
-                  className="static bg-blue-200 hover:bg-blue-300 text-blue-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
-                  onClick={() => setSelectedBodega('todos')}
-                  tabIndex={0}
-                  aria-label="Quitar filtro bodega"
-                >
-                  <Close style={{fontSize:'12px'}} />
-                </button>
-                Bodega: {
-                  (() => {
-                    const bodegaObj = bodegas.find(b => String(b.b_Bodega) === String(selectedBodega));
-                    return bodegaObj ? bodegaObj.b_Nombre : selectedBodega;
-                  })()
-                }
-              </span>
-            )}
-            {selectedVendedor !== 'todos' && vendedores.length > 0 && (
-              <span className="bg-white text-green-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-green-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
-                <button
-                  className="static bg-green-200 hover:bg-green-300 text-green-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
-                  onClick={() => setSelectedVendedor('todos')}
-                  tabIndex={0}
-                  aria-label="Quitar filtro vendedor"
-                >
-                  <Close style={{fontSize:'12px'}} />
-                </button>
-                Vendedor: {vendedores.find(v => v.idPersonal == selectedVendedor)?.Nombre || selectedVendedor}
-              </span>
-            )}
-            {selectedTipoCliente !== 'todos' && (
-              <span className="bg-white text-purple-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-purple-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
-                <button
-                  className="static bg-purple-200 hover:bg-purple-300 text-purple-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
-                  onClick={() => setSelectedTipoCliente('todos')}
-                  tabIndex={0}
-                  aria-label="Quitar filtro tipo cliente"
-                >
-                  <Close style={{fontSize:'12px'}} />
-                </button>
-                Tipo Cliente: {tipoCliente.find(tc => tc.idTipoCliente == selectedTipoCliente)?.Nombre || selectedTipoCliente}
-              </span>
-            )}
-            {selectedTipoEncuesta !== 'todos' && (
-              <span className="bg-white text-yellow-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-yellow-200 shrink-0" style={{minHeight:'28px', position:'relative'}}>
-                <button
-                  className="static bg-yellow-200 hover:bg-yellow-300 text-yellow-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px'}}
-                  onClick={() => setSelectedTipoEncuesta('todos')}
-                  tabIndex={0}
-                  aria-label="Quitar filtro tipo encuesta"
-                >
-                  <Close style={{fontSize:'12px'}} />
-                </button>
-                Tipo Encuesta: {tipoEncuesta.find(te => te.idCompraEncuesta == selectedTipoEncuesta)?.Descripcion || selectedTipoEncuesta}
-              </span>
-            )}
-            {estadoFiltro !== 'todos' && (
-              <span className="bg-white text-gray-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-gray-300 shrink-0" style={{minHeight:'28px', position:'relative'}}>
-                <button
-                  className="static text-gray-700 rounded-full p-0.5 flex items-center justify-center ml-2 hover:bg-gray-100"
-                  style={{width:'16px',height:'16px',fontSize:'12px',lineHeight:'12px', marginLeft:'8px', background:'none'}}
-                  onClick={() => setEstadoFiltro('todos')}
-                  tabIndex={0}
-                  aria-label="Quitar filtro estado"
-                >
-                  <Close style={{fontSize:'12px'}} />
-                </button>
-                Estado: {(() => {
-                  const estado = estadosOpciones.find(e => e.value == estadoFiltro);
-                  return estado ? estado.label : estadoFiltro;
-                })()}
-              </span>
-            )}
-          </div>
-          {/* Botón de filtros fijo a la derecha */}
-          <button
-            onClick={() => setFiltersVisible(!filtersVisible)}
-            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow ml-3"
-            title={filtersVisible ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-            style={{ height: '28px', position: 'relative', zIndex: 1 }}
-          >
-            {filtersVisible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-            <span className="hidden sm:inline">{filtersVisible ? 'Ocultar Filtros' : 'Mostrar Filtros'}</span>
-          </button>
-        </div>
-
-        {/* Panel de filtros colapsable */}
-        {filtersVisible && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
-            {/* Primera fila: Fechas, Bodega, Vendedor */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              {/* Input Fecha Inicio */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Inicio</label>
-                <input
-                  type="date"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={fechaInicio}
-                  onChange={(e) => {
-                    const nuevaFechaInicio = e.target.value;
-                    if (isValidDate(nuevaFechaInicio)) {
-                      setFechaInicio(nuevaFechaInicio);
-                    } else {
-                      setFechaInicio(today);
-                    }
-                  }}
-                />
-              </div>
-              {/* Input Fecha Fin */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Fin</label>
-                <input
-                  type="date"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                />
-              </div>
-              {/* Select de bodegas */}
-              <div>
-                <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2 text-sm">
-                  Bodega
-                </label>
-                <select
-                  id="bodega-select"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={selectedBodega}
-                  onChange={handleBodegaChange}
-                >
-                  <option value="todos">Todos</option>
-                  {bodegas.length > 0 ? (
-                    bodegas.map((bodega) => (
-                      <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
-                        {bodega.b_Nombre}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="" disabled>No se encontraron bodegas.</option>
-                  )}
-                </select>
-              </div>
-              {/* Select de vendedores */}
-              <div>
-                <label htmlFor="vendedor-select" className="block text-gray-700 font-semibold mb-2 text-sm">
-                  Buscar por Vendedor
-                </label>
-                <select
-                  id="vendedor-select"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  value={selectedVendedor}
-                  onChange={handleVendedorChange}
-                  disabled={selectedBodega === "todos" || vendedores.length === 0}
-                >
-                  <option value="todos">Todos</option>
-                  {vendedores.map((vendedor) => (
-                    <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
-                      {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Segunda fila: Tipo Cliente, Tipo Encuesta, Estado */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Select de tipo cliente */}
-              <div>
-                <label htmlFor="tipo-cliente-select" className="block text-gray-700 font-semibold mb-2 text-sm">
-                  Tipo Cliente
-                </label>
-                <select
-                  id="tipo-cliente-select"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={selectedTipoCliente}
-                  onChange={e => setSelectedTipoCliente(e.target.value)}
-                >
-                  <option value="todos">Todos</option>
-                  {tipoCliente.map((tipo) => (
-                    <option key={tipo.idTipoCliente} value={tipo.idTipoCliente}>{tipo.Nombre}</option>
-                  ))}
-                </select>
-              </div>
-              {/* Select de tipo encuesta */}
-              <div>
-                <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-2 text-sm">
-                  Tipo Encuesta
-                </label>
-                <select
-                  id="tipo-encuesta-select"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={selectedTipoEncuesta}
-                  onChange={e => setSelectedTipoEncuesta(e.target.value)}
-                >
-                  <option value="todos">Todos</option>
-                  {tipoEncuesta.map((tipo) => (
-                    <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
-                  ))}
-                </select>
-              </div>
-              {/* Select de estado */}
-              <div>
-                <label className="block text-gray-700 font-semibold mb-2 text-sm">Estado</label>
-                <select
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  value={estadoFiltro}
-                  onChange={(e) => setEstadoFiltro(e.target.value)}
-                >
-                  {estadosOpciones.map((estado) => (
-                    <option key={estado.value} value={estado.value}>
-                      {estado.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-
-    {/* Contenido principal */}
-    <div className="px-6 py-6">
-      {/* Sección de tarjetas métricas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Total solicitudes */}
-        <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs font-medium text-gray-600 mb-1">
-                Número de solicitudes de crédito
-              </p>
-              <h2 className="text-xl font-bold text-gray-900">{totalSolicitudes}</h2>
-            </div>
-            <div className="p-2 bg-blue-100 rounded-full">
-              <MonetizationOn className="text-blue-600 text-lg" />
-            </div>
-          </div>
-        </div>
-
-        {/* Vendedores involucrados */}
-        <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs font-medium text-gray-600 mb-1">Vendedores involucrados</p>
-              <h2 className="text-xl font-bold text-gray-900">{uniqueVendedores}</h2>
-            </div>
-            <div className="p-2 bg-green-100 rounded-full">
-              <People className="text-green-600 text-lg" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total aprobadas vs rechazadas */}
-        <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow col-span-1 sm:col-span-2">
-          <p className="text-xs font-medium text-gray-600 mb-2">Aprobadas vs Rechazadas</p>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-center p-2 bg-green-50 rounded">
-              <div className="flex items-center justify-center mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-500 mr-1"></span>
-                <span className="text-xs font-semibold text-green-700">Aprobadas</span>
-              </div>
-              <span className="text-lg font-bold text-green-800">{doughnutData.datasets[0].data[1] || 0}</span>
-            </div>
-            <div className="text-center p-2 bg-red-50 rounded">
-              <div className="flex items-center justify-center mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500 mr-1"></span>
-                <span className="text-xs font-semibold text-red-700">Rechazadas</span>
-              </div>
-              <span className="text-lg font-bold text-red-800">{doughnutData.datasets[0].data[3] || 0}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Sección de gráficos principales */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Número de solicitudes de crédito por Almacén</h3>
-          <div className="h-80">
-            <Bar 
-              data={barData} 
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    stacked: true,
-                    grid: { display: false }
-                  },
-                  y: {
-                    stacked: true,
-                    grid: { color: '#f3f4f6' }
-                  },
-                },
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                      usePointStyle: true,
-                      padding: 20
-                    }
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes de crédito por Estado</h3>
-          <div className="h-80 flex items-center justify-center">
-            <Doughnut 
-              data={doughnutData} 
-              options={{ 
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    position: 'bottom',
-                    labels: {
-                      usePointStyle: true,
-                      padding: 20
-                    }
+      <div className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-200">
+        <div className="px-6 py-4">
+          {/* Resumen rápido de fechas y botón de filtros en la misma fila */}
+          <div className="flex flex-row flex-wrap items-center justify-between gap-2 text-xs text-gray-700 bg-blue-50 px-4 py-2 rounded-lg mb-2 relative">
+            {/* Filtros activos y periodo a la izquierda */}
+            <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
+              <span className="font-medium">Período:</span>
+              <span className="bg-white px-2 py-0.5 rounded border">{fechaInicio}</span>
+              <span>→</span>
+              <span className="bg-white px-2 py-0.5 rounded border">{fechaFin}</span>
+              {/* Mostrar filtros activos */}
+              {selectedBodega !== 'todos' && (
+                <span className="bg-white text-blue-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-blue-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
+                  <button
+                    className="static bg-blue-200 hover:bg-blue-300 text-blue-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
+                    onClick={() => setSelectedBodega('todos')}
+                    tabIndex={0}
+                    aria-label="Quitar filtro bodega"
+                  >
+                    <Close style={{ fontSize: '12px' }} />
+                  </button>
+                  Bodega: {
+                    (() => {
+                      const bodegaObj = bodegas.find(b => String(b.b_Bodega) === String(selectedBodega));
+                      return bodegaObj ? bodegaObj.b_Nombre : selectedBodega;
+                    })()
                   }
-                }
-              }} 
-            />
+                </span>
+              )}
+              {selectedVendedor !== 'todos' && vendedores.length > 0 && (
+                <span className="bg-white text-green-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-green-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
+                  <button
+                    className="static bg-green-200 hover:bg-green-300 text-green-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
+                    onClick={() => setSelectedVendedor('todos')}
+                    tabIndex={0}
+                    aria-label="Quitar filtro vendedor"
+                  >
+                    <Close style={{ fontSize: '12px' }} />
+                  </button>
+                  Vendedor: {vendedores.find(v => v.idPersonal == selectedVendedor)?.Nombre || selectedVendedor}
+                </span>
+              )}
+              {selectedTipoCliente !== 'todos' && (
+                <span className="bg-white text-purple-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-purple-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
+                  <button
+                    className="static bg-purple-200 hover:bg-purple-300 text-purple-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
+                    onClick={() => setSelectedTipoCliente('todos')}
+                    tabIndex={0}
+                    aria-label="Quitar filtro tipo cliente"
+                  >
+                    <Close style={{ fontSize: '12px' }} />
+                  </button>
+                  Tipo Cliente: {tipoCliente.find(tc => tc.idTipoCliente == selectedTipoCliente)?.Nombre || selectedTipoCliente}
+                </span>
+              )}
+              {selectedTipoEncuesta !== 'todos' && (
+                <span className="bg-white text-yellow-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-yellow-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
+                  <button
+                    className="static bg-yellow-200 hover:bg-yellow-300 text-yellow-700 rounded-full p-0.5 flex items-center justify-center ml-2"
+                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
+                    onClick={() => setSelectedTipoEncuesta('todos')}
+                    tabIndex={0}
+                    aria-label="Quitar filtro tipo encuesta"
+                  >
+                    <Close style={{ fontSize: '12px' }} />
+                  </button>
+                  Tipo Encuesta: {tipoEncuesta.find(te => te.idCompraEncuesta == selectedTipoEncuesta)?.Descripcion || selectedTipoEncuesta}
+                </span>
+              )}
+              {estadoFiltro !== 'todos' && (
+                <span className="bg-white text-gray-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-gray-300 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
+                  <button
+                    className="static text-gray-700 rounded-full p-0.5 flex items-center justify-center ml-2 hover:bg-gray-100"
+                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px', background: 'none' }}
+                    onClick={() => setEstadoFiltro('todos')}
+                    tabIndex={0}
+                    aria-label="Quitar filtro estado"
+                  >
+                    <Close style={{ fontSize: '12px' }} />
+                  </button>
+                  Estado: {(() => {
+                    const estado = estadosOpciones.find(e => e.value == estadoFiltro);
+                    return estado ? estado.label : estadoFiltro;
+                  })()}
+                </span>
+              )}
+            </div>
+            {/* Botón de filtros fijo a la derecha */}
+            <button
+              onClick={() => setFiltersVisible(!filtersVisible)}
+              className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow ml-3"
+              title={filtersVisible ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+              style={{ height: '28px', position: 'relative', zIndex: 1 }}
+            >
+              {filtersVisible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+              <span className="hidden sm:inline">{filtersVisible ? 'Ocultar Filtros' : 'Mostrar Filtros'}</span>
+            </button>
           </div>
+
+          {/* Panel de filtros colapsable */}
+          {filtersVisible && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+              {/* Primera fila: Fechas, Bodega, Vendedor */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                {/* Input Fecha Inicio */}
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Inicio</label>
+                  <input
+                    type="date"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={fechaInicio}
+                    onChange={(e) => {
+                      const nuevaFechaInicio = e.target.value;
+                      if (isValidDate(nuevaFechaInicio)) {
+                        setFechaInicio(nuevaFechaInicio);
+                      } else {
+                        setFechaInicio(today);
+                      }
+                    }}
+                  />
+                </div>
+                {/* Input Fecha Fin */}
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Fin</label>
+                  <input
+                    type="date"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                  />
+                </div>
+                {/* Select de bodegas */}
+                <div>
+                  <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                    Bodega
+                  </label>
+                  <select
+                    id="bodega-select"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={selectedBodega}
+                    onChange={handleBodegaChange}
+                  >
+                    <option value="todos">Todos</option>
+                    {bodegas.length > 0 ? (
+                      bodegas.map((bodega) => (
+                        <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
+                          {bodega.b_Nombre}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No se encontraron bodegas.</option>
+                    )}
+                  </select>
+                </div>
+                {/* Select de vendedores */}
+                <div>
+                  <label htmlFor="vendedor-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                    Buscar por Vendedor
+                  </label>
+                  <select
+                    id="vendedor-select"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    value={selectedVendedor}
+                    onChange={handleVendedorChange}
+                    disabled={selectedBodega === "todos" || vendedores.length === 0}
+                  >
+                    <option value="todos">Todos</option>
+                    {vendedores.map((vendedor) => (
+                      <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
+                        {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Segunda fila: Tipo Cliente, Tipo Encuesta, Estado */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Select de tipo cliente */}
+                <div>
+                  <label htmlFor="tipo-cliente-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                    Tipo Cliente
+                  </label>
+                  <select
+                    id="tipo-cliente-select"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={selectedTipoCliente}
+                    onChange={e => setSelectedTipoCliente(e.target.value)}
+                  >
+                    <option value="todos">Todos</option>
+                    {tipoCliente.map((tipo) => (
+                      <option key={tipo.idTipoCliente} value={tipo.idTipoCliente}>{tipo.Nombre}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Select de tipo encuesta */}
+                <div>
+                  <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-2 text-sm">
+                    Tipo Encuesta
+                  </label>
+                  <select
+                    id="tipo-encuesta-select"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={selectedTipoEncuesta}
+                    onChange={e => setSelectedTipoEncuesta(e.target.value)}
+                  >
+                    <option value="todos">Todos</option>
+                    {tipoEncuesta.map((tipo) => (
+                      <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
+                    ))}
+                  </select>
+                </div>
+                {/* Select de estado */}
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-2 text-sm">Estado</label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    value={estadoFiltro}
+                    onChange={(e) => setEstadoFiltro(e.target.value)}
+                  >
+                    {estadosOpciones.map((estado) => (
+                      <option key={estado.value} value={estado.value}>
+                        {estado.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Gráficos adicionales en fila inferior: día de la semana, productos más solicitados y situación laboral */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Día de la semana */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Solicitudes por Día de la Semana</h3>
-          <div className="h-64">
-            <Bar
-              data={barDiasSemanaData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                  },
-                },
-                scales: {
-                  x: {
-                    title: {
-                      display: true,
-                      text: 'Día de la Semana',
-                    },
-                    grid: { display: false }
-                  },
-                  y: {
-                    title: {
-                      display: true,
-                      text: 'Cantidad',
-                    },
-                    beginAtZero: true,
-                    grid: { color: '#f3f4f6' },
-                    ticks: {
-                      precision: 0,
-                    },
-                  },
-                },
-              }}
-            />
+      {/* Contenido principal */}
+      <div className="px-6 py-6">
+        {/* Sección de tarjetas métricas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+
+          {/* Vendedores involucrados */}
+          <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-xs font-medium text-gray-600 mb-1">Vendedores involucrados</p>
+                <h2 className="text-xl font-bold text-gray-900">{uniqueVendedores}</h2>
+              </div>
+              <div className="p-2 bg-green-100 rounded-full">
+                <People className="text-green-600 text-lg" />
+              </div>
+            </div>
           </div>
+
+          {/* Total solicitudes */}
+          <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-xs font-medium text-gray-600 mb-1">
+                  Número de solicitudes de crédito
+                </p>
+                <h2 className="text-xl font-bold text-gray-900">{totalSolicitudes}</h2>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-full">
+                <MonetizationOn className="text-blue-600 text-lg" />
+              </div>
+            </div>
+          </div>
+
+          {/* Total aprobadas vs rechazadas */}
+          <div className="bg-white p-4 rounded-xl shadow border border-gray-200 hover:shadow-lg transition-shadow col-span-1 sm:col-span-2">
+            <p className="text-sm font-semibold text-gray-700 mb-4">Facturados vs Rechazadas</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {estadoItems.map((item, index) => (
+                <div
+                  key={index}
+                  className={`text-center p-3 rounded-lg ${item.styles.bg} ${item.styles.border} shadow-sm`}
+                >
+                  <div className="flex items-center justify-center mb-1">
+                    <span className={`w-2.5 h-2.5 rounded-full ${item.styles.dot} mr-2`}></span>
+                    <span className={`text-xs font-medium ${item.styles.text}`}>{item.label}</span>
+                  </div>
+                  <span className={`text-xl font-bold ${item.styles.value}`}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+
         </div>
 
-        {/* Productos más solicitados */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Productos más solicitados</h3>
-          <div className="h-64">
-            <Radar
-              data={radarData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'top',
-                  },
-                  tooltip: {
-                    enabled: true,
-                  },
-                },
-                scales: {
-                  r: {
-                    angleLines: { display: true },
-                    suggestedMin: 0,
-                    grid: { color: '#f3f4f6' },
-                    pointLabels: {
-                      font: { size: 12 },
+        {/* Sección de gráficos principales */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Número de solicitudes de crédito por Almacén</h3>
+            <div className="h-80">
+              <Bar
+                data={barData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                    x: {
+                      stacked: true,
+                      grid: { display: false }
                     },
-                    ticks: {
-                      precision: 0,
+                    y: {
+                      stacked: true,
+                      grid: { color: '#f3f4f6' }
                     },
                   },
-                },
-              }}
-            />
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: 'top',
+                      labels: {
+                        usePointStyle: true,
+                        padding: 20
+                      }
+                    },
+                  },
+                }}
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Situación Laboral */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Situación Laboral</h3>
-          <div className="h-64 flex items-center justify-center">
-            <div className="flex items-center w-full justify-center">
-              <div style={{ width: 140, height: 140, position: 'relative', zIndex: 0 }}>
-                <Doughnut
-                  data={doughnutSituacionLaboralData}
-                  options={{
-                    maintainAspectRatio: false,
-                    cutout: '60%',
-                    borderWidth: 8,
-                    plugins: {
-                      legend: { display: false },
-                      tooltip: {
-                        xPadding: 16,
-                        yPadding: 8,
-                        padding: 12,
-                        caretPadding: 10,
-                        displayColors: true,
-                        boxWidth: 16,
-                        boxHeight: 16,
-                        boxPadding: 10,
-                        callbacks: {},
-                        // Para Chart.js v3+, usar 'padding' y 'caretPadding'
-                        padding: 12,
-                        caretPadding: 10,
-                      },
-                    },
-                    elements: {
-                      arc: {
-                        borderWidth: 8,
-                        borderColor: '#fff',
-                        spacing: 4,
-                      },
-                    },
-                  }}
-                  plugins={[
-                    // Modifica el plugin para el texto central para que tenga zIndex bajo
-                    {
-                      ...doughnutCenterText,
-                      beforeDraw: (chart) => {
-                        if (doughnutCenterText && doughnutCenterText.beforeDraw) {
-                          // Llama el original pero baja el z-index del texto central
-                          const ctx = chart.ctx;
-                          ctx.save();
-                          ctx.globalCompositeOperation = 'destination-over';
-                          doughnutCenterText.beforeDraw(chart);
-                          ctx.restore();
-                        }
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes de crédito por Estado</h3>
+            <div className="h-80 flex items-center justify-center">
+              <Doughnut
+                data={doughnutData}
+                options={{
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      position: 'bottom',
+                      labels: {
+                        usePointStyle: true,
+                        padding: 20
                       }
                     }
-                  ]}
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Gráficos adicionales en fila inferior: día de la semana, productos más solicitados y situación laboral */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Día de la semana */}
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Solicitudes por Día de la Semana</h3>
+            <div className="h-64">
+              <Bar
+                data={barDiasSemanaData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      mode: 'index',
+                      intersect: false,
+                    },
+                  },
+                  scales: {
+                    x: {
+                      title: {
+                        display: true,
+                        text: 'Día de la Semana',
+                      },
+                      grid: { display: false }
+                    },
+                    y: {
+                      title: {
+                        display: true,
+                        text: 'Cantidad',
+                      },
+                      beginAtZero: true,
+                      grid: { color: '#f3f4f6' },
+                      ticks: {
+                        precision: 0,
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Productos más solicitados */}
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Productos más solicitados</h3>
+            <div className="h-64">
+              <Radar
+                data={radarData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: 'top',
+                    },
+                    tooltip: {
+                      enabled: true,
+                    },
+                  },
+                  scales: {
+                    r: {
+                      angleLines: { display: true },
+                      suggestedMin: 0,
+                      grid: { color: '#f3f4f6' },
+                      pointLabels: {
+                        font: { size: 12 },
+                      },
+                      ticks: {
+                        precision: 0,
+                      },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Situación Laboral */}
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Situación Laboral</h3>
+            <div className="h-64 flex items-center justify-center">
+              <div className="flex items-center w-full justify-center">
+                <div style={{ width: 140, height: 140, position: 'relative', zIndex: 0 }}>
+                  <Doughnut
+                    data={doughnutSituacionLaboralData}
+                    options={{
+                      maintainAspectRatio: false,
+                      cutout: '60%',
+                      borderWidth: 8,
+                      plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                          xPadding: 16,
+                          yPadding: 8,
+                          padding: 12,
+                          caretPadding: 10,
+                          displayColors: true,
+                          boxWidth: 16,
+                          boxHeight: 16,
+                          boxPadding: 10,
+                          callbacks: {},
+                          // Para Chart.js v3+, usar 'padding' y 'caretPadding'
+                          padding: 12,
+                          caretPadding: 10,
+                        },
+                      },
+                      elements: {
+                        arc: {
+                          borderWidth: 8,
+                          borderColor: '#fff',
+                          spacing: 4,
+                        },
+                      },
+                    }}
+                    plugins={[
+                      // Modifica el plugin para el texto central para que tenga zIndex bajo
+                      {
+                        ...doughnutCenterText,
+                        beforeDraw: (chart) => {
+                          if (doughnutCenterText && doughnutCenterText.beforeDraw) {
+                            // Llama el original pero baja el z-index del texto central
+                            const ctx = chart.ctx;
+                            ctx.save();
+                            ctx.globalCompositeOperation = 'destination-over';
+                            doughnutCenterText.beforeDraw(chart);
+                            ctx.restore();
+                          }
+                        }
+                      }
+                    ]}
+                  />
+                </div>
+                <SituacionLaboralLegend
+                  labels={doughnutSituacionLaboralData.labels}
+                  colors={doughnutSituacionLaboralData.datasets[0].backgroundColor}
                 />
               </div>
-              <SituacionLaboralLegend
-                labels={doughnutSituacionLaboralData.labels}
-                colors={doughnutSituacionLaboralData.datasets[0].backgroundColor}
+            </div>
+          </div>
+        </div>
+
+        {/* Fila separada para el gráfico PolarArea de tipo de cliente */}
+        <div className="grid grid-cols-1 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes por Tipo de Cliente</h3>
+            <div className="h-80 flex items-center justify-center">
+              <PolarArea
+                data={polarTipoClienteData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: {
+                      display: true,
+                      position: 'bottom',
+                      labels: {
+                        usePointStyle: true,
+                        padding: 20
+                      }
+                    },
+                    tooltip: {
+                      enabled: true,
+                    },
+                  },
+                  scales: {
+                    r: {
+                      angleLines: { display: true },
+                      suggestedMin: 0,
+                      grid: { color: '#f3f4f6' },
+                      pointLabels: {
+                        font: { size: 14 },
+                      },
+                      ticks: {
+                        precision: 0,
+                      },
+                    },
+                  },
+                }}
               />
             </div>
           </div>
         </div>
       </div>
-
-      {/* Fila separada para el gráfico PolarArea de tipo de cliente */}
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes por Tipo de Cliente</h3>
-          <div className="h-80 flex items-center justify-center">
-            <PolarArea
-              data={polarTipoClienteData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                      usePointStyle: true,
-                      padding: 20
-                    }
-                  },
-                  tooltip: {
-                    enabled: true,
-                  },
-                },
-                scales: {
-                  r: {
-                    angleLines: { display: true },
-                    suggestedMin: 0,
-                    grid: { color: '#f3f4f6' },
-                    pointLabels: {
-                      font: { size: 14 },
-                    },
-                    ticks: {
-                      precision: 0,
-                    },
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
-);
+  );
 }
 

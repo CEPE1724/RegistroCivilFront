@@ -1,10 +1,10 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
 //const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
 
-const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
+const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
 
 

@@ -482,7 +482,7 @@ const Datos = forwardRef((props, ref) => {
                                     options={estadoCivil}
                                     name="estadoCivil"
                                     error={formErrors.estadoCivil}
-                                    readOnly={data.idEdoCivil !== undefined && data.idEdoCivil !== null && data.idEdoCivil !== "" && data.idEdoCivil > 0}
+                                    
                                 />
                             </div>
 
@@ -582,7 +582,12 @@ const Datos = forwardRef((props, ref) => {
                                             readOnly={data.idCantonNacimiento !== undefined && data.idCantonNacimiento !== null && data.idCantonNacimiento !== "" && data.idCantonNacimiento > 0}
                                         />
                                     </div>
-                                    <div className="mb-6">
+                                   
+                                </>
+
+                            )}
+
+                             <div className="mb-6">
                                         <label className="text-xs font-medium mb-1 flex items-center">
                                             <FingerprintIcon sx={{ fontSize: 15 }} className="mr-2 text-primaryBlue" />
                                             Código Dactilar (*)
@@ -602,9 +607,6 @@ const Datos = forwardRef((props, ref) => {
                                             </p>
                                         )}
                                     </div>
-                                </>
-
-                            )}
                             <div className="mb-6">
 
                                 <label className="text-xs font-medium mb-1 flex items-center">
