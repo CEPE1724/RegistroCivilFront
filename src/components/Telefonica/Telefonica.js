@@ -7,9 +7,11 @@ import PersonIcon from "@mui/icons-material/Person";
 import EventIcon from "@mui/icons-material/Event";
 import axios from "../../configApi/axiosConfig";
 import { useAuth } from "../AuthContext/AuthContext";
-import { fetchConsultaYNotifica } from "../Utils";
+import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import ModalConfirmacionRechazo from '../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
+import { Typography } from "@mui/material";
 
 
 import { APIURL } from "../../configApi/apiConfig";
@@ -69,6 +71,8 @@ export function TelefonicaList({
   const [selectedRow, setSelectedRow] = useState(null);
   const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
   const [soliParen, setSoliParen] = useState([])
+  const [showModalCorrecion, setShowModalCorrecion] = useState(false);
+  const [openConfirmModalAsig, setOpenConfirmModalAsig] = useState(false);
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -142,6 +146,25 @@ export function TelefonicaList({
       });
     }
   };
+
+  const handleCorreccion = async (observacion) => {
+	await patchSolicitud( clientInfo.id, 7 ); // actualizar a correccion
+	fetchInsertarDatosCorreccion(7, observacion);
+  
+	await fetchConsultaYNotifica(clientInfo?.id, clientInfo, {
+	title: "¡Se envio a corregir la telefonica! ✍️📞",
+	body: `Revisa la solicitud de crédito ${clientInfo.NumeroSolicitud} de 🧑‍💼 ${clientInfo.nombre} con CI ${clientInfo.cedula}
+	 📅 Fecha: ${fechaHoraEcuador}`,
+	type: "alert",
+	empresa: "POINT",
+	url: "",
+	tipo: "vendedor",
+	 });
+	  navigate("/ListadoSolicitud", {
+		replace: true,
+	  });
+	};
+
 
   const [showRechazoModal, setShowRechazoModal] = useState(false);
   const handleRemove = async () => {
@@ -367,6 +390,41 @@ export function TelefonicaList({
       enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error" });
     }
   };
+
+  const fetchInsertarDatosCorreccion = async (tipo , observacion) => {
+    try {
+      const url = APIURL.post_createtiemposolicitudeswebDto();
+
+      await axios.post(url, {
+        idCre_SolicitudWeb: clientInfo.id,
+        Tipo: 2,
+        idEstadoVerificacionDocumental: tipo,
+        Usuario: userData.Nombre,
+        Telefono: observacion,
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente", error);
+    }
+  };
+
+  const handleAsignar =  async(observacion) => {
+	await patchSolicitud( clientInfo.id, 2 );
+	fetchInsertarDatosCorreccion(2, observacion); 
+
+	await fetchConsultaYNotifica(clientInfo?.id, clientInfo, {
+	title: "¡Se reasigno la verificacion telefonica! 📞",
+	body: `Vuelve a revisar la solicitud de crédito ${clientInfo.NumeroSolicitud} de 🧑‍💼 ${clientInfo.nombre} con CI ${clientInfo.cedula}
+	 📅 Fecha: ${fechaHoraEcuador}`,
+	type: "alert",
+	empresa: "CREDI",
+	url: "",
+	tipo: "analista",
+	 });
+	  navigate("/ListadoSolicitud", {
+		replace: true,
+	  });
+
+  }
 
   const rechazar = async (observacion) => {
     if (clientInfo.id) {
@@ -696,7 +754,7 @@ export function TelefonicaList({
                       </button>
                     )}
 
-                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
+                    {tienePermisoDenegar && clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && clientInfo.idEstadoVerificacionTelefonica !== 7 && (
                       <button
                         onClick={() => setShowRechazoModal(true)}
                         className="px-6 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 transition duration-300 ease-in-out"
@@ -704,6 +762,22 @@ export function TelefonicaList({
                         Rechazar
                       </button>
                     )}
+					
+					{clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && clientInfo.idEstadoVerificacionTelefonica !== 7 && (userData.idGrupo == 1 || userData.idGrupo == 16 || userData.idGrupo == 17) && (
+					<button
+                      onClick={() => setShowModalCorrecion(true)}
+                      className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
+                    >
+                      Correccion
+                    </button>)}
+
+					{ clientInfo.idEstadoVerificacionTelefonica == 7 && (userData.idGrupo == 1 || userData.idGrupo == 23 ) &&(
+					<button
+                      onClick={() => setOpenConfirmModalAsig(true)}
+                      className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
+                    >
+                      Asignar 	
+                    </button>)}
                     <button
                       onClick={() => navigate("/ListadoSolicitud", { replace: true })}
                       className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
@@ -979,6 +1053,24 @@ export function TelefonicaList({
           mensajePrincipal="¿Está seguro de rechazar la verificación telefónica?"
         />
       </div>
+		<ModalCorreccion
+        isOpen={showModalCorrecion}
+        onClose={() => setShowModalCorrecion(false)}
+        onConfirm={handleCorreccion}
+        solicitudData={clientInfo}
+		Titulo='Enviar a Correccion'
+		mensajePrincipal='¿Deseas solicitar una corrección para Telefónica?'
+        />
+
+		<ModalCorreccion
+        isOpen={openConfirmModalAsig}
+        onClose={() => setOpenConfirmModalAsig(false)}
+        onConfirm={handleAsignar}
+        solicitudData={clientInfo}
+		Titulo='Enviar Verificacion'
+		mensajePrincipal='¿Deseas volver a enviar a revisión la Telefónica?'
+        />
+
     </div>
   );
 }
