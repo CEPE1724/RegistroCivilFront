@@ -126,7 +126,7 @@ export function TelefonicaList({
       );
       await fetchConsultaYNotifica(clientInfo.id, clientInfo, {
         title: "Se aprobo la verificacion telefonica! 👀 ",
-        body: `Revisa la solicitud de crédito de 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+        body: `Revisa la solicitud de crédito de 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud} con CI. ${clientInfo.cedula}` ,
         type: "alert",
         empresa: "CREDI",
         url: "", // Opcional
@@ -152,7 +152,7 @@ export function TelefonicaList({
     );
     await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
       title: "Se rechazo la verificación telefonica! 👀 ",
-      body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+      body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud} con CI. ${clientInfo.cedula}`,
       type: "alert",
       empresa: "POINT",
       url: "", // Opcional
@@ -172,7 +172,7 @@ export function TelefonicaList({
     );
     await fetchConsultaYNotifica(clientInfo.NumeroSolicitud, clientInfo, {
       title: "Se rechazo la verificación telefonica! 👀 ",
-      body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud}`,
+      body: `Revisa la solicitud de crédito 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud} con CI. ${clientInfo.cedula}`,
       type: "alert",
       empresa: "POINT",
       url: "",

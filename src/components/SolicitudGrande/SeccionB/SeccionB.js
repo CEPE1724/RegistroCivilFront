@@ -312,11 +312,7 @@ const SeccionB = forwardRef((props, ref) => {
     setOpenLocationModal((prev) => !prev);
   };
 
-  // Función de verificación para el teléfono o celular
-  const handleVerify = (fieldName) => {
-    console.log(`Verificando ${fieldName}: ${formData[fieldName]}`);
-    // Aquí podrías agregar la lógica de verificación
-  };
+
 
   // Función de validación de campos
   const validateForm = () => {

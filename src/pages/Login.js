@@ -152,7 +152,7 @@ const handleOlvidoPassword = async () => {
         const verificacion = await axios.get(APIURL.verificarCambioClave(userName));
         const debeCambiar = !verificacion.data.existe;
 
-        console.log("¿Debe cambiar?", debeCambiar);
+ 
 
         if (debeCambiar) {
           setMostrarCambioClave(true); // muestra el modal

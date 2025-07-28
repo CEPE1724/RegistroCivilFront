@@ -88,7 +88,7 @@ export function Documental({
     patchsolicitudWeb();
     fetchConsultaYNotifica(id, userUsuario, {
       title: "¡Documentos listos para revisar! 🔍",
-      body: `¡Hola! Ya puedes verificar todos documentos de la solicitud ${NumeroSolicitud} de ${nombre}.¡Gracias! 😀
+      body: `¡Hola! Ya puedes verificar todos documentos de la solicitud ${NumeroSolicitud} de ${nombre} con CI. ${cedula} .¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
       type: "success",
       empresa: "CREDI",
@@ -846,7 +846,7 @@ export function Documental({
       if (aprobados) {
         await fetchConsultaYNotifica(id, userUsuario, {
           title: "¡Documentos para revisar! 🔍",
-          body: `¡Hola! Ya puedes verificar los primeros  documentos de la solicitud ${NumeroSolicitud} ( foto del cliente y servicios básicos) de ${nombre}. ¡Gracias! 😀
+          body: `¡Hola! Ya puedes verificar los primeros  documentos de la solicitud ${NumeroSolicitud} ( foto del cliente y servicios básicos) de ${nombre} con CI ${cedula}. ¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
           type: "success",
           empresa: "POINT",

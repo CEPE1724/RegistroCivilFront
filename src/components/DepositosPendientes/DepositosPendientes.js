@@ -75,8 +75,7 @@ export function DepositosPendientes() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Datos enviados:', formData);
-        console.log('Imagen:', imagen);
+       
     };
 
     const bancos = ['Banco Central', 'Banco del Sol', 'Financiera Águila'];

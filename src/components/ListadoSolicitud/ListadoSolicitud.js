@@ -176,22 +176,21 @@ export function ListadoSolicitud() {
   const [codDact, setCodDact] = useState("");
 
   const handleOpenEditModal = () => {
-  setCodDact(selectedRow.CodigoDactilar);
-  setOpenModalCodDag(true);
+    setCodDact(selectedRow.CodigoDactilar);
+    setOpenModalCodDag(true);
   };
 
   const handleUpdateClick = () => {
-  if (codDact === null || codDact.length !== 10) {
-    enqueueSnackbar("El código dactilar debe tener mínimo 10 dígitos.", { variant: "error" });
-    return;
-  }
-  setOpenConfirmModalCodDac(true);
+    if (codDact === null || codDact.length !== 10) {
+      enqueueSnackbar("El código dactilar debe tener mínimo 10 dígitos.", { variant: "error" });
+      return;
+    }
+    setOpenConfirmModalCodDac(true);
   };
 
   const handleConfirmUpdate = () => {
-  console.log("Actualizando código dactilar a:", codDact);
-  fetchCodDact(selectedRow)
-  
+    fetchCodDact(selectedRow)
+
     // Cerrar modales
     setOpenConfirmModalCodDac(false);
     setOpenModalCodDag(false);
@@ -199,22 +198,22 @@ export function ListadoSolicitud() {
   };
 
   const fetchCodDact = async (selectedRow) => {
-  try {
-    const url = APIURL.patch_codDactil(selectedRow.id);
-    const response = await axios.patch(url, {
-    CodDactilar: codDact,
-    }, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    });
-    enqueueSnackbar("Código dactilar actualizado correctamente.", {variant: "success"})
-    return response.data;
-  } catch (error) {
-    console.error("Error al actualizar el código dactilar", error);
-    enqueueSnackbar("Error al actualizar el código dactilar.", {variant: "error"});
-    return null;
-  }
+    try {
+      const url = APIURL.patch_codDactil(selectedRow.id);
+      const response = await axios.patch(url, {
+        CodDactilar: codDact,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      enqueueSnackbar("Código dactilar actualizado correctamente.", { variant: "success" })
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar el código dactilar", error);
+      enqueueSnackbar("Error al actualizar el código dactilar.", { variant: "error" });
+      return null;
+    }
   };
 
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
@@ -235,11 +234,11 @@ export function ListadoSolicitud() {
             "dactilar/consulta",
 
 
-            { cedula, dactilar, usuario: userData.Nombre  },
+            { cedula, dactilar, usuario: userData.Nombre },
 
             config
           );
-          
+
           if (postResponse.data.data) {
             return postResponse.data.data.FOTO;
           }
@@ -730,7 +729,7 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"; console.log(data)
+      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"; 
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
@@ -748,7 +747,7 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio"; console.log(data)
+      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio"; 
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
@@ -1528,7 +1527,7 @@ export function ListadoSolicitud() {
   const [openDialogOperador, setOpenDialogOperador] = useState(false);
   const [operadorSeleccionado, setOperadorSeleccionado] = useState(null);
   const [openDialogConfirmarOperador, setOpenDialogConfirmarOperador] = useState(false); // Confirmación operador  // Nuevo: Confirmar asignación de operador y notificar
- 
+
   const handleConfirmarAsignacion = async () => {
     try {
       setOpenDialogConfirmar(false);
@@ -1544,7 +1543,7 @@ export function ListadoSolicitud() {
       await updateAnalista(filaActual, analistaSeleccionado);
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
         title: "¡Nueva solicitud enviada a revisión! 👀",
-        body: `Revisa la solicitud de crédito ${filaActual.numeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}
+        body: `Revisa la solicitud de crédito ${filaActual.numeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno} con CI. ${filaActual.cedula}
     Fecha: ${fechaHoraEcuador}`,
         type: "success",
         empresa: "CREDI",
@@ -1580,7 +1579,7 @@ export function ListadoSolicitud() {
   const handleConfirmarAsignacionOperador = async () => {
     try {
       setOpenDialogOperador(false);
-      console.log(filaActual.NumeroSolicitud , "esto saleee")
+
 
       if (operadorSeleccionado === filaActual.idOperador) {
         enqueueSnackbar("El operador seleccionado es el mismo que el actual.", { variant: "info" });
@@ -1590,9 +1589,9 @@ export function ListadoSolicitud() {
       await updateOperador(filaActual, operadorSeleccionado);
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
         title: "¡Nueva solicitud asignada a operador!",
-        body: `Revisa la solicitud de crédito ${filaActual.NumeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno}\nFecha: ${new Date().toLocaleString("es-EC")}`,
+        body: `Revisa la solicitud de crédito ${filaActual.NumeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno} con ${filaActual.cedula} \nFecha: ${new Date().toLocaleString("es-EC")}`,
         type: "success",
-        empresa: "POINT",
+        empresa: "CREDI",
         url: "",
         tipo: "operador",
       });
@@ -1624,12 +1623,9 @@ export function ListadoSolicitud() {
   };
 
   const updateAnalista = async (fila, numero) => {
-    console.log("Fila actual:", fila);
-    console.log(fila.id)
-    console.log(numero)
+   
     try {
-      console.log("Actualizando analista para la solicitud:", fila.id, "con analista:", numero);
-      console.log("URL de actualización:", APIURL.update_solicitud(fila.id));
+     
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
         {
@@ -1653,8 +1649,7 @@ export function ListadoSolicitud() {
   };
 
   const updateOperador = async (fila, numero) => {
-    console.log(fila.id)
-    console.log(numero)
+   
     try {
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
@@ -1974,8 +1969,8 @@ export function ListadoSolicitud() {
       fetchTiempSolicweb(1, row.id, "10,12"),  //solicitudes
       fetchTiempSolicweb(2, row.id, "2,3"),    //telefonica 
       fetchTiempSolicweb(3, row.id, "2,4"),    //documental
-    fetchTiempSolicweb(4, row.id, "1"),      //domicilio
-    fetchTiempSolicweb(5, row.id, "1")       //laboral
+      fetchTiempSolicweb(4, row.id, "1"),      //domicilio
+      fetchTiempSolicweb(5, row.id, "1")       //laboral
     ]);
 
 
@@ -2008,12 +2003,7 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
-  const handleApprove = (rowData) => {
-    // aquí tu lógica para aprobar...
-    console.log("Aprobando fila:", rowData);
-
-  };
-
+ 
 
   const handleEquifax = () => {
     navigate("/equifaxx", {
@@ -3717,8 +3707,8 @@ export function ListadoSolicitud() {
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-      {/* Domicilio */}
-      <TimelineItem>
+            {/* Domicilio */}
+            <TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3837,8 +3827,8 @@ export function ListadoSolicitud() {
                 <TimelineConnector />
               </TimelineSeparator>
             </TimelineItem>
-      {/* Trabajo */}
-      <TimelineItem>
+            {/* Trabajo */}
+            <TimelineItem>
               <TimelineSeparator
                 sx={{
                   justifyContent: "center",
@@ -3870,7 +3860,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-          {/* tiempo que necesito */ }
+                    {/* tiempo que necesito */}
                     {fechaTiempos?.tipo5?.length > 0 && (
                       <Typography
                         variant="caption"
@@ -4182,13 +4172,13 @@ export function ListadoSolicitud() {
                     <p>{selectedRow.tieneRuc}</p>
                   </div>
 
-          <div className="flex items-center gap-2">
-          <FingerprintIcon className="text-blue-500" fontSize="medium" />
-          <p className="font-semibold">Codigo Dactilar: </p>
-          <p>{selectedRow.CodigoDactilar}</p>
-          { editarCodDac && editarCodDac2 &&
-          (<button onClick={handleOpenEditModal}><BorderColorIcon/></button>)}
-          </div>
+                  <div className="flex items-center gap-2">
+                    <FingerprintIcon className="text-blue-500" fontSize="medium" />
+                    <p className="font-semibold">Codigo Dactilar: </p>
+                    <p>{selectedRow.CodigoDactilar}</p>
+                    {editarCodDac && editarCodDac2 &&
+                      (<button onClick={handleOpenEditModal}><BorderColorIcon /></button>)}
+                  </div>
 
                   <div className="flex items-center gap-2">
                     {permitirEquifax() && (
@@ -4626,36 +4616,36 @@ export function ListadoSolicitud() {
       />
       <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
 
-    {/* Modal codigo dactilar */}
-    <Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>
-      <DialogTitle>Cambiar codigo Dactilar</DialogTitle>
+      {/* Modal codigo dactilar */}
+      <Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>
+        <DialogTitle>Cambiar codigo Dactilar</DialogTitle>
         <DialogContent>
           <Typography sx={{ mb: 2 }}>
             Ingresa el nuevo código dactilar:
           </Typography>
-      <TextField
-          fullWidth
-          variant="outlined"
-          value={codDact}
-          onChange={(e) => setCodDact(e.target.value)}
-          placeholder="Ingresa el código dactilar"
-          autoFocus
-        />
+          <TextField
+            fullWidth
+            variant="outlined"
+            value={codDact}
+            onChange={(e) => setCodDact(e.target.value)}
+            placeholder="Ingresa el código dactilar"
+            autoFocus
+          />
 
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenModalCodDag(false)} color="primary">
             Cerrar
           </Button>
-      <Button onClick={handleUpdateClick} color="primary" variant="contained">
-      Actualizar
-      </Button>
+          <Button onClick={handleUpdateClick} color="primary" variant="contained">
+            Actualizar
+          </Button>
         </DialogActions>
-    </Dialog>
+      </Dialog>
 
-    {/* Modal de confirmación */}
-    <Dialog 
-        open={openConfirmModalCodDac} 
+      {/* Modal de confirmación */}
+      <Dialog
+        open={openConfirmModalCodDac}
         onClose={() => setOpenConfirmModalCodDac(false)}
         maxWidth="xs"
       >

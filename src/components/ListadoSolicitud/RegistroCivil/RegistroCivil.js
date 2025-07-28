@@ -48,8 +48,7 @@ export function RegistroCivil({
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      console.log("userData:", userData);
-      console.log("userData.Nombre:", userData?.Nombre);
+
 
       try {
         const getResponse = await axios.get(`dactilar/${cedula}`, config);
@@ -134,7 +133,7 @@ export function RegistroCivil({
 
   // 	  const response = await axios.post(APIURL.postCompareFaces(), body, config);
 
-  // 	  console.log("Resultado comparación:", response.data);
+
   // 	  const { verified, distance } = response.data;
 
   // 	  if (verified) {
