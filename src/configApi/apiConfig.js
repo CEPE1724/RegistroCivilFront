@@ -4,6 +4,8 @@ const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
 //const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
 
+const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
+
 
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
@@ -194,6 +196,10 @@ export const APIURL = {
 
   store_reports_phone_verification: (id) => `${API_BASE_URL}store-reports-phone-verification/cre-solicitud/${id}`,
   patchTipoVerificacionDomicilio: (id) => `${API_BASE_URL}terrena-gestion-domicilio/${id}/tipo-verificacion`,
+
+   get_Productos: () => `${API_BASE_URL}cre-producto-solicitud`,
+
   get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`
+
 
 };
