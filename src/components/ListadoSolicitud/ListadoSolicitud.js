@@ -99,6 +99,7 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
+import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 
 
 export function ListadoSolicitud() {
@@ -533,6 +534,7 @@ export function ListadoSolicitud() {
     2: "ASIGNADO",
     3: "APROBADO",
     4: "RECHAZADO",
+	7: "CORRECCION"
   };
 
   const [domicilio, setDomicilio] = useState(sessionStorage.getItem('filtroDomicilio') || "Todos");
@@ -1266,13 +1268,15 @@ export function ListadoSolicitud() {
       case 1: // NO ASIGNADO
         return <PhoneDisabledIcon />;
       case 2: // ASIGNADO
-        return <PhoneInTalkIcon sx={{ color: "#6C757D" }} />;
+        return <ContactPhoneIcon sx={{ color: "#6C757D" }} />;
       case 3: // Aprobado
         return <CheckCircleIcon sx={{ color: "#28A745" }} />;
       case 4: // rechazado
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
       case 5:
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+	  case 7: // correccion
+        return <PhoneDisabledIcon sx={{ color: "#FF5722" }} />;
       default: // Estado no especificado
         return <PhoneIcon />;
     }
@@ -1813,7 +1817,8 @@ export function ListadoSolicitud() {
                         ? "REFRIGERADOR"
                         : item.idProductos == 6
                           ? "TELEVISOR"
-                          : "DESCONOCIDO"
+                          : "DESCONOCIDO",
+			idVendedor: item.idVendedor,
             };
           })
         );
@@ -1949,6 +1954,8 @@ export function ListadoSolicitud() {
         consulta: registro.consulta,
         idEstadoVerificacionTelefonica: registro.idEstadoVerificacionTelefonica,
         permisos: permisos,
+		idVendedor: registro.idVendedor,
+		idAnalista: registro.idAnalista
       },
     });
   };
@@ -3620,7 +3627,7 @@ export function ListadoSolicitud() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {fechaTiempos?.tipo1?.length > 1 && (
+                    {fechaTiempos?.tipo2?.length > 0 && (
                       <Typography
                         variant="caption"
                         sx={{
@@ -3633,7 +3640,7 @@ export function ListadoSolicitud() {
                           borderRadius: "4px",
                         }}
                       >
-                        {formatDateTime(fechaTiempos?.tipo1[1].FechaSistema)}
+                        {formatDateTime(fechaTiempos?.tipo2?.slice().reverse().find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
                       </Typography>
                     )}
                   </Box>
@@ -3696,7 +3703,7 @@ export function ListadoSolicitud() {
                           }}
                         >
                           {calcularTiempoTranscurrido(
-                            fechaTiempos?.tipo1[1]?.FechaSistema,
+                            fechaTiempos?.tipo2?.slice().reverse().find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema,
                             fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema
                           )}
                         </Typography>

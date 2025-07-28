@@ -39,7 +39,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
     // Definir los estados según el Tipo de solicitud de crédito
 
     const estadosPorTipo = {
-      1: { // Documental
+      1: { // Solicitud Grande
         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
         2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
         3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
@@ -67,21 +67,22 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         12: "APROBADO",
         13: "RECHAZADO",*/
       },
-      2: { // Verificación
+      2: { // Telefonica
         1: { label: "No asginado", icon: <SupervisorAccountIcon />, color: grey[500] },
         2: { label: "Asignado", icon: <SearchIcon />, color: green[500] },
         3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
         4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
         5: { label: "Gestionado", icon: <PhoneCallback />, color: grey[500] },
+        7: { label: "Correccion", icon: <EditIcon />, color: grey[500] },
       },
-      3: { // Procesos
+      3: { // Documental
         1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
         2: { label: "Revisión", icon: <VisibilityIcon />, color: grey[500] },
         3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
         4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
         5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
       },
-      4:
+      4:  //Domicilio
       {
        1: {
           label: "Asignado",
@@ -115,7 +116,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         }
       },
 
-      5:
+      5:  //Trabajo
       {
         1: {
           label: "Asignado",

@@ -6,7 +6,8 @@ const ModalCorreccion = ({
     onClose,
     onConfirm,
     solicitudData,
-    mensajePrincipal
+    mensajePrincipal,
+	Titulo
 }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [observaciones, setObservaciones] = useState('');
@@ -67,7 +68,7 @@ const ModalCorreccion = ({
                             <Edit3 className="w-5 h-5 text-orange-600" />
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900">
-                            Solicitar Corrección
+                            {Titulo || 'Solicitar Corrección'}
                         </h3>
                     </div>
                     <button
