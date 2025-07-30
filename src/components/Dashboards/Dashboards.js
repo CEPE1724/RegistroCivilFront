@@ -14,6 +14,7 @@ import { Chart, registerables } from "chart.js";
 import { APIURL } from "../../configApi/apiConfig";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import { useAuth } from "../AuthContext/AuthContext";
+import { Users, CreditCard, CheckCircle, XCircle, Clock, Trash2, Minus, Receipt } from 'lucide-react';
 import axios from "../../configApi/axiosConfig";
 Chart.register(...registerables);
 // Leyenda personalizada para el gráfico de situación laboral
@@ -84,6 +85,18 @@ export function Dashboards() {
         borderColor: "#3b82f6",
         pointBackgroundColor: "#3b82f6",
         pointBorderColor: "#fff",
+      },
+    ],
+  });
+
+  // Estado para el gráfico de barras horizontal de tipos de cliente aprobados
+  const [barHorizontalTipoClienteData, setBarHorizontalTipoClienteData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: "Aprobados por Tipo de Cliente",
+        data: [],
+        backgroundColor: "#10b981",
       },
     ],
   });
@@ -394,6 +407,48 @@ export function Dashboards() {
               backgroundColor: polarColors,
             },
           ],
+        });
+
+        // --- Nuevo gráfico: Aprobados por Tipo de Cliente y por verificación ---
+        const verifKeys = [
+          { key: 'idEstadoVerificacionSolicitud', label: 'Solicitud', color: '#3b82f6', aprobado: 12 },
+          { key: 'idEstadoVerificacionDocumental', label: 'Documental', color: '#10b981', aprobado: 4 },
+          { key: 'idEstadoVerificacionTelefonica', label: 'Telefónica', color: '#f59e0b', aprobado: 3 },
+          { key: 'idEstadoVerificacionTerrena', label: 'Terrena', color: '#ef4444', aprobado: 2 },
+          { key: 'idEstadoVerificacionDomicilio', label: 'Domicilio', color: '#6366f1', aprobado: 2 },
+        ];
+        // Inicializar conteos por tipo de cliente y verificación
+        const aprobadosPorVerificacion = {};
+        tipoCliente.forEach(tc => {
+          if (tc.idTipoCliente !== undefined && tc.Nombre) {
+            aprobadosPorVerificacion[tc.idTipoCliente] = {
+              Nombre: tc.Nombre,
+              Solicitud: 0,
+              Documental: 0,
+              Telefónica: 0,
+              Terrena: 0,
+              Domicilio: 0,
+            };
+          }
+        });
+        response.data.data.forEach(item => {
+          if (item.idTipoCliente && aprobadosPorVerificacion[item.idTipoCliente]) {
+            if (item.idEstadoVerificacionSolicitud === 12) aprobadosPorVerificacion[item.idTipoCliente].Solicitud++;
+            if (item.idEstadoVerificacionDocumental === 4) aprobadosPorVerificacion[item.idTipoCliente].Documental++;
+            if (item.idEstadoVerificacionTelefonica === 3) aprobadosPorVerificacion[item.idTipoCliente].Telefónica++;
+            if (item.idEstadoVerificacionTerrena === 2) aprobadosPorVerificacion[item.idTipoCliente].Terrena++;
+            if (item.idEstadoVerificacionDomicilio === 2) aprobadosPorVerificacion[item.idTipoCliente].Domicilio++;
+          }
+        });
+        const barVerifLabels = Object.values(aprobadosPorVerificacion).map(tc => tc.Nombre);
+        const barVerifDatasets = verifKeys.map(verif => ({
+          label: verif.label,
+          data: Object.values(aprobadosPorVerificacion).map(tc => tc[verif.label]),
+          backgroundColor: verif.color,
+        }));
+        setBarHorizontalTipoClienteData({
+          labels: barVerifLabels,
+          datasets: barVerifDatasets,
         });
         // --- Pie Situacion Laboral ---
         // Contar por idSituacionLaboral
@@ -943,58 +998,93 @@ export function Dashboards() {
       {/* Contenido principal */}
       <div className="px-6 py-6">
         {/* Sección de tarjetas métricas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-
-
-          {/* Vendedores involucrados */}
-          <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
-            <div className="flex justify-between items-center">
-              <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Primera fila: 4 tarjetas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Vendedores involucrados */}
+            <div className="bg-white p-4 rounded-xl shadow border border-gray-100 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-green-100 rounded-full mb-2">
+                  <Users className="text-green-600 w-5 h-5" />
+                </div>
                 <p className="text-xs font-medium text-gray-600 mb-1">Vendedores involucrados</p>
                 <h2 className="text-xl font-bold text-gray-900">{uniqueVendedores}</h2>
               </div>
-              <div className="p-2 bg-green-100 rounded-full">
-                <People className="text-green-600 text-lg" />
-              </div>
             </div>
-          </div>
-
-          {/* Total solicitudes */}
-          <div className="bg-white p-3 rounded-lg shadow border border-gray-100 hover:shadow-lg transition-shadow">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs font-medium text-gray-600 mb-1">
-                  Número de solicitudes de crédito
-                </p>
+            {/* Número de solicitudes de crédito */}
+            <div className="bg-white p-4 rounded-xl shadow border border-gray-100 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-blue-100 rounded-full mb-2">
+                  <CreditCard className="text-blue-600 w-5 h-5" />
+                </div>
+                <p className="text-xs font-medium text-gray-600 mb-1">Solicitudes de crédito</p>
                 <h2 className="text-xl font-bold text-gray-900">{totalSolicitudes}</h2>
               </div>
-              <div className="p-2 bg-blue-100 rounded-full">
-                <MonetizationOn className="text-blue-600 text-lg" />
+            </div>
+            {/* Aprobadas */}
+            <div className="bg-white p-4 rounded-xl shadow border border-green-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-green-100 rounded-full mb-2">
+                  <CheckCircle className="text-green-600 w-5 h-5" />
+                </div>
+                <p className="text-xs font-medium text-green-700 mb-1">Aprobadas</p>
+                <h2 className="text-xl font-bold text-green-700">{estadoItems.find(e => e.label === 'APROBADO')?.value ?? 0}</h2>
+              </div>
+            </div>
+            {/* Rechazadas */}
+            <div className="bg-white p-4 rounded-xl shadow border border-red-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-red-100 rounded-full mb-2">
+                  <XCircle className="text-red-600 w-5 h-5" />
+                </div>
+                <p className="text-xs font-medium text-red-700 mb-1">Rechazadas</p>
+                <h2 className="text-xl font-bold text-red-700">{estadoItems.find(e => e.label === 'RECHAZADO')?.value ?? 0}</h2>
               </div>
             </div>
           </div>
-
-          {/* Total aprobadas vs rechazadas */}
-          <div className="bg-white p-4 rounded-xl shadow border border-gray-200 hover:shadow-lg transition-shadow col-span-1 sm:col-span-2">
-            <p className="text-sm font-semibold text-gray-700 mb-4">Facturados vs Rechazadas</p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {estadoItems.map((item, index) => (
-                <div
-                  key={index}
-                  className={`text-center p-3 rounded-lg ${item.styles.bg} ${item.styles.border} shadow-sm`}
-                >
-                  <div className="flex items-center justify-center mb-1">
-                    <span className={`w-2.5 h-2.5 rounded-full ${item.styles.dot} mr-2`}></span>
-                    <span className={`text-xs font-medium ${item.styles.text}`}>{item.label}</span>
-                  </div>
-                  <span className={`text-xl font-bold ${item.styles.value}`}>{item.value}</span>
+          {/* Segunda fila: 4 tarjetas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Pre-aprobadas */}
+            <div className="bg-white p-4 rounded-xl shadow border border-blue-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-blue-100 rounded-full mb-2">
+                  <Clock className="text-blue-600 w-5 h-5" />
                 </div>
-              ))}
+                <p className="text-xs font-medium text-blue-700 mb-1">Pre-aprobadas</p>
+                <h2 className="text-xl font-bold text-blue-700">{estadoItems.find(e => e.label === 'PRE-APROBADO')?.value ?? 0}</h2>
+              </div>
+            </div>
+            {/* Anuladas */}
+            <div className="bg-white p-4 rounded-xl shadow border border-gray-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-gray-100 rounded-full mb-2">
+                  <Trash2 className="text-gray-600 w-5 h-5" />
+                </div>
+                <p className="text-xs font-medium text-gray-700 mb-1">Anuladas</p>
+                <h2 className="text-xl font-bold text-gray-700">{estadoItems.find(e => e.label === 'ANULADO')?.value ?? 0}</h2>
+              </div>
+            </div>
+            {/* No aplica */}
+            <div className="bg-white p-4 rounded-xl shadow border border-yellow-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-yellow-100 rounded-full mb-2">
+                  <Minus className="text-yellow-600 w-5 h-5" />
+                </div>
+                <p className="text-xs font-medium text-yellow-700 mb-1">No aplica</p>
+                <h2 className="text-xl font-bold text-yellow-700">{estadoItems.find(e => e.label === 'NO APLICA')?.value ?? 0}</h2>
+              </div>
+            </div>
+            {/* Facturadas */}
+            <div className="bg-white p-4 rounded-xl shadow border border-indigo-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="p-2 bg-indigo-100 rounded-full mb-2">
+                  <Receipt className="text-indigo-600 w-5 h-5" />
+                </div>
+                <p className="text-xs font-medium text-indigo-700 mb-1">Facturadas</p>
+                <h2 className="text-xl font-bold text-indigo-700">{estadoItems.find(e => e.label === 'FACTURADO')?.value ?? 0}</h2>
+              </div>
             </div>
           </div>
-
-
         </div>
 
         {/* Sección de gráficos principales */}
@@ -1197,45 +1287,81 @@ export function Dashboards() {
           </div>
         </div>
 
-        {/* Fila separada para el gráfico PolarArea de tipo de cliente */}
-        <div className="grid grid-cols-1 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes por Tipo de Cliente</h3>
-            <div className="h-80 flex items-center justify-center">
-              <PolarArea
-                data={polarTipoClienteData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      display: true,
-                      position: 'bottom',
-                      labels: {
-                        usePointStyle: true,
-                        padding: 20
-                      }
+        {/* Fila separada para los gráficos de tipo de cliente */}
+        {/* PolarArea: Solicitudes por Tipo de Cliente - ocupa todo el ancho */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes por Tipo de Cliente</h3>
+          <div className="h-80 flex items-center justify-center">
+            <PolarArea
+              data={polarTipoClienteData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20
+                    }
+                  },
+                  tooltip: {
+                    enabled: true,
+                  },
+                },
+                scales: {
+                  r: {
+                    angleLines: { display: true },
+                    suggestedMin: 0,
+                    grid: { color: '#f3f4f6' },
+                    pointLabels: {
+                      font: { size: 14 },
                     },
-                    tooltip: {
-                      enabled: true,
+                    ticks: {
+                      precision: 0,
                     },
                   },
-                  scales: {
-                    r: {
-                      angleLines: { display: true },
-                      suggestedMin: 0,
-                      grid: { color: '#f3f4f6' },
-                      pointLabels: {
-                        font: { size: 14 },
-                      },
-                      ticks: {
-                        precision: 0,
-                      },
-                    },
+                },
+              }}
+            />
+          </div>
+        </div>
+        {/* Nuevo gráfico: Aprobados por Tipo de Cliente y por Verificación */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mt-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes  por Tipo de Cliente y por Verificaciones Aprobadas</h3>
+          <div className="h-80 flex items-center justify-center">
+            <Bar
+              data={barHorizontalTipoClienteData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20
+                    }
                   },
-                }}
-              />
-            </div>
+                  tooltip: {
+                    enabled: true,
+                  },
+                },
+                scales: {
+                  x: {
+                    beginAtZero: true,
+                    grid: { color: '#f3f4f6' },
+                    ticks: { precision: 0 },
+                  },
+                  y: {
+                    grid: { display: false },
+                    ticks: { font: { size: 14 } },
+                  },
+                },
+              }}
+            />
           </div>
         </div>
       </div>
