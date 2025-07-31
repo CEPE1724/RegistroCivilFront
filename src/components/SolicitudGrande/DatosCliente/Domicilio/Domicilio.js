@@ -233,7 +233,7 @@ const Domicilio = forwardRef((props, ref) => {
     if (formData.tipoVivienda == 1) {
       camposBase.push(
         "nombreArrendador",
-        "telfArrendador",
+        //"telfArrendador",
         "celularArrendador"
       );
     }
@@ -326,8 +326,7 @@ const Domicilio = forwardRef((props, ref) => {
     if (formData.tipoVivienda == 1) {
       requiredFieldMessages.nombreArrendador = "Nombre Arrendador es requerido";
       ///requiredFieldMessages.telfArrendador = "Telefono Arrendador es requerido";
-      requiredFieldMessages.celularArrendador =
-        "Celular Arrendador es requerido";
+      requiredFieldMessages.celularArrendador = "Celular Arrendador es requerido";
     }
 
     // Validación condicional para inmueble (si tipoVivienda es 3 o 4)
@@ -371,15 +370,11 @@ const Domicilio = forwardRef((props, ref) => {
       isValid = false;
     }
 
-    if (formData.tipoVivienda == 0) {
-      newFormErrors.telfArrendador = "Tipo Vivienda es requerido";
-      isValid = false;
-    }
 
-    if (formData.tiempoVivienda == 0) {
-      newFormErrors.telfArrendador = "Tiempo Vivienda es requerido";
-      isValid = false;
-    }
+    // if (formData.tiempoVivienda == 0) {
+    //   newFormErrors.telfArrendador = "Tiempo Vivienda es requerido";
+    //   isValid = false;
+    // }
 
     // Validar teléfono/celular del arrendador si tipoVivienda es 1
     if (formData.tipoVivienda == 1) {

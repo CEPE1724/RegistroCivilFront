@@ -1592,8 +1592,8 @@ export function ListadoSolicitud() {
 
       await updateOperador(filaActual, operadorSeleccionado);
       await fetchConsultaYNotifica(filaActual.id, filaActual, {
-        title: "¡Nueva solicitud asignada a operador!",
-        body: `Revisa la solicitud de crédito ${filaActual.NumeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno} con ${filaActual.cedula} \nFecha: ${new Date().toLocaleString("es-EC")}`,
+        title: "¡Nueva solicitud asignada!",
+        body: `Revisa la solicitud de crédito ${filaActual.NumeroSolicitud} de 🧑‍💼 ${filaActual.PrimerNombre} ${filaActual.ApellidoPaterno} - ${filaActual.cedula} de ${filaActual.almacen}  \nFecha: ${new Date().toLocaleString("es-EC")}`,
         type: "success",
         empresa: "CREDI",
         url: "",
