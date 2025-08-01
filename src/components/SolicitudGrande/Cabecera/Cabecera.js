@@ -395,9 +395,9 @@ export function Cabecera() {
         isValidaData.NombreArrendador == 0 ||
         isValidaData.NombreArrendador == null ||
         isValidaData.NombreArrendador == undefined ||
-        isValidaData.TelefonoArrendador == 0 ||
-        isValidaData.TelefonoArrendador == null ||
-        isValidaData.TelefonoArrendador == undefined ||
+        //isValidaData.TelefonoArrendador == 0 ||
+        //isValidaData.TelefonoArrendador == null ||
+        //isValidaData.TelefonoArrendador == undefined ||	
         isValidaData.CelularArrendador == 0 ||
         isValidaData.CelularArrendador == null ||
         isValidaData.CelularArrendador == undefined
@@ -1484,15 +1484,15 @@ export function Cabecera() {
         }
       );
       // Si todo sale bien
-      enqueueSnackbar("Datos de nacimiento guardados correctamente.", {
+      enqueueSnackbar("Domicilio guardado correctamente.", {
         variant: "success",
       });
     } catch (error) {
       // Si ocurre algún error
-      enqueueSnackbar("Error al guardar los datos de nacimiento.", {
+      enqueueSnackbar("Error al guardar los datos de Domicilio.", {
         variant: "error",
       });
-      console.error("Error al guardar los datos de nacimiento", error);
+      console.error("Error al guardar los datos del domicilio", error);
     }
   };
 
