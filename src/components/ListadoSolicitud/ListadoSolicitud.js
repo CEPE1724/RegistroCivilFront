@@ -100,6 +100,7 @@ import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
+import { PiMicrosoftExcelLogoBold } from "react-icons/pi";
 
 
 export function ListadoSolicitud() {
@@ -1853,18 +1854,38 @@ export function ListadoSolicitud() {
     }
   };
 
-  // Manejar cambio de bodega
-  //   const handleBodegaChange = (event) => {
-  //     setSelectedBodega(event.target.value);
-  //   };
+  //crear excel 
+  const fetchCrearExcel = async () => {
+	try {
+		const response = await axios.get(APIURL.get_excelSolicitudWeb(), {
+      responseType: 'blob',
+    });
+	console.log("informe creado")
 
-  //   const handleVendedorChange = (event) => {
-  //     setSelectedVendedor(event.target.value);
-  //   };
+	// Crear un objeto URL para el blob recibido
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
 
-  //   const handleAnalistaChange = (event) => {
-  //     setAnalistaSelected(event.target.value);
-  //   };
+	const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'reporte_solicitudesWeb.xlsx'; 
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+	if(response){
+		enqueueSnackbar("Reporte creado.", { variant: "success",});
+	}
+		
+	} catch (error) {
+		console.error("Error al generar el Excel:", error);
+		enqueueSnackbar("Error al generar el reporte.", { variant: "error" });
+		return null;
+	}
+  }
+
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -2353,6 +2374,14 @@ export function ListadoSolicitud() {
         >
           <DeleteIcon /> Limpiar Filtros
         </button>
+
+		{userData?.idGrupo == 1 && (
+		<button
+          className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
+          onClick={fetchCrearExcel}
+        >
+          <PiMicrosoftExcelLogoBold size={45} /> Crear informe
+        </button>)}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">

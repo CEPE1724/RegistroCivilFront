@@ -673,7 +673,7 @@ const Domicilio = forwardRef((props, ref) => {
                   </p>
                 )}
               </div>
-              <div className="col-span-1">
+              {/* <div className="col-span-1">
                 <label className="text-xs font-medium mb-1 flex items-center">
                   <FaPhoneAlt className="mr-2 text-primaryBlue" />
                   Telefono Arrendador
@@ -694,7 +694,7 @@ const Domicilio = forwardRef((props, ref) => {
                     {formErrors.telfArrendador}
                   </p>
                 )}
-              </div>
+              </div> */}
               <div className="col-span-1">
                 <label className="text-xs font-medium mb-1 flex items-center">
                   <FaPhoneAlt className="mr-2 text-primaryBlue" />

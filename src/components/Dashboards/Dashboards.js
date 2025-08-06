@@ -1,169 +1,64 @@
 import React, { useEffect, useState } from "react";
 import {
-  MonetizationOn,
-  People,
-  ShoppingCart,
-  ConfirmationNumber,
   Visibility,
   VisibilityOff,
-  Close,
 } from "@mui/icons-material";
-import { Doughnut, Bar, Radar, PolarArea } from "react-chartjs-2";
-import { Bar as BarChart, PolarArea as PolarChart } from "react-chartjs-2";
-import { Chart, registerables } from "chart.js";
 import { APIURL } from "../../configApi/apiConfig";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import { useAuth } from "../AuthContext/AuthContext";
-import { Users, CreditCard, CheckCircle, XCircle, Clock, Trash2, Minus, Receipt } from 'lucide-react';
 import axios from "../../configApi/axiosConfig";
-Chart.register(...registerables);
-// Leyenda personalizada para el gráfico de situación laboral
-function SituacionLaboralLegend({ labels, colors }) {
-  return (
-    <div className="flex flex-col items-start ml-6">
-      {labels.map((label, i) => (
-        <div key={label} className="flex items-center mb-2">
-          <span
-            className="inline-block w-4 h-4 rounded-full mr-2"
-            style={{ backgroundColor: colors[i], border: '2px solid #fff', boxShadow: '0 0 2px #888' }}
-          ></span>
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-// Plugin para mostrar el total en el centro del doughnut
-const doughnutCenterText = {
-  id: 'doughnutCenterText',
-  afterDraw: (chart) => {
-    if (chart.config.type !== 'doughnut') return;
-    // Si el tooltip está visible, no dibujar el total
-    if (chart.tooltip && chart.tooltip.opacity > 0) {
-      return;
-    }
-    const { ctx, chartArea } = chart;
-    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-    ctx.save();
-    ctx.font = 'bold 18px Arial';
-    ctx.fillStyle = '#3b82f6';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(`Total: ${total}`,
-      (chartArea.left + chartArea.right) / 2,
-      (chartArea.top + chartArea.bottom) / 2
-    );
-    ctx.restore();
-  }
-};
 
 export function Dashboards() {
-
-  // Estado para el gráfico PolarArea de solicitudes por tipo de cliente
-  const [polarTipoClienteData, setPolarTipoClienteData] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [
-          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#059669', '#6b7280', '#dc2626', '#a21caf', '#f472b6', '#22d3ee', '#fbbf24'
-        ],
-      },
-    ],
-  });
-
-  // Estado para productos y radar chart
+  //mostrar/ocultar filtros
   const [filtersVisible, setFiltersVisible] = useState(false);
-  const [productos, setProductos] = useState([]);
-  const [radarData, setRadarData] = useState({
-    labels: [],
-    datasets: [
-      {
-        label: "Productos más solicitados",
-        data: [],
-        backgroundColor: "rgba(59,130,246,0.2)",
-        borderColor: "#3b82f6",
-        pointBackgroundColor: "#3b82f6",
-        pointBorderColor: "#fff",
-      },
-    ],
-  });
-
-  // Estado para el gráfico de barras horizontal de tipos de cliente aprobados
-  const [barHorizontalTipoClienteData, setBarHorizontalTipoClienteData] = useState({
-    labels: [],
-    datasets: [
-      {
-        label: "Aprobados por Tipo de Cliente",
-        data: [],
-        backgroundColor: "#10b981",
-      },
-    ],
-  });
-
-  // Estado para opciones de situación laboral y datos del gráfico
-  const [situacionLaboralOpts, setSituacionLaboralOpts] = useState([]);
-  const [doughnutSituacionLaboralData, setDoughnutSituacionLaboralData] = useState({
-    labels: [],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: [],
-      },
-    ],
-  });
+  
+  // Estado datos solicitudes
+  const [solicitudesData, setSolicitudesData] = useState([]);
 
   // Filtro de tipo cliente
   const [tipoCliente, setTipoCliente] = useState([]);
   const [selectedTipoCliente, setSelectedTipoCliente] = useState("todos");
 
-  // Filtro de tipo encuesta
-  const [tipoEncuesta, setTipoEncuesta] = useState([]);
-  const [selectedTipoEncuesta, setSelectedTipoEncuesta] = useState("todos");
+  // Estados para filtros de fecha
+  const today = new Date().toISOString().split("T")[0]; 
+  const date15DaysAgo = new Date();
+  date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+  const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
+  
+  const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr);
+  const [fechaFin, setFechaFin] = useState(today);
 
-  // Obtener productos al montar
-  useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const resp = await axios.get(APIURL.get_Productos(), {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (resp.status === 200) {
-          setProductos(resp.data);
-        }
-      } catch (error) {
-        setProductos([]);
-      }
-    };
-    fetchProductos();
-  }, []);
+  // Estados para filtros de bodega y vendedor
+  const [selectedBodega, setSelectedBodega] = useState("todos");
+  const [selectedVendedor, setSelectedVendedor] = useState("todos");
+  const [vendedores, setVendedores] = useState([]);
 
-  // Obtener opciones de situación laboral al montar
-  useEffect(() => {
-    const fetchSituacionLaboral = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const resp = await axios.get(APIURL.getActividadEconominasituacionLaboral(), {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (resp.status === 200) {
-          setSituacionLaboralOpts(resp.data);
-        }
-      } catch (error) {
-        setSituacionLaboralOpts([]);
-      }
-    };
-    fetchSituacionLaboral();
-  }, []);
+  // Estados para filtro de estado
+  const estadosOpciones = [
+    { label: "Todos", value: "todos" },
+    { label: "PRE-APROBADO", value: 1 },
+    { label: "APROBADO", value: 2 },
+    { label: "ANULADO", value: 3 },
+    { label: "RECHAZADO", value: 4 },
+    { label: "NO APLICA", value: 5 },
+    { label: "FACTURADO", value: 6 },
+  ];
+  const [estadoFiltro, setEstadoFiltro] = useState("todos");
 
-  // Obtener tipos de cliente al montar
+  // Hooks
+  const { data, fetchBodegaUsuario, listaVendedoresporBodega, vendedor } = useBodegaUsuario();
+  const { userData } = useAuth();
+  const bodegas = data || [];
+
+  // Función para validar fechas
+  const isValidDate = (dateString) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+
+  // Cargar tipos de cliente 
   useEffect(() => {
     const fetchTipoCliente = async () => {
       try {
@@ -184,124 +79,14 @@ export function Dashboards() {
     fetchTipoCliente();
   }, []);
 
-  // Obtener tipos de encuesta al montar
+  // Cargar bodegas
   useEffect(() => {
-    const fetchTipoEncuesta = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const respTipoEncuesta = await axios.get(APIURL.get_TipoConsulta(), {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (respTipoEncuesta.status === 200) {
-          setTipoEncuesta(respTipoEncuesta.data);
-        }
-      } catch (error) {
-        setTipoEncuesta([]);
-      }
-    };
-    fetchTipoEncuesta();
-  }, []);
-
-  const estadosOpciones = [
-    { label: "Todos", value: "todos" },
-    { label: "PRE-APROBADO", value: 1 },
-    { label: "APROBADO", value: 2 },
-    { label: "ANULADO", value: 3 },
-    { label: "RECHAZADO", value: 4 },
-    { label: "NO APLICA", value: 5 },
-    { label: "FACTURADO", value: 6 },
-  ];
-  const [estadoFiltro, setEstadoFiltro] = useState("todos");
-
-
-
-  const isValidDate = (dateString) => {
-    const regex = /^\d{4}-\d{2}-\d{2}$/; // Expresión regular para el formato YYYY-MM-DD
-    if (!regex.test(dateString)) return false; // Si el formato no coincide, es inválido
-
-    const date = new Date(dateString);
-    return !isNaN(date.getTime()); // Verifica si la fecha es válida
-  };
-
-  const [uniqueVendedores, setUniqueVendedores] = useState(0);
-
-  const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
-  const [doughnutData, setDoughnutData] = useState({
-    labels: ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO"],
-    datasets: [
-      {
-        data: [0, 0, 0, 0, 0, 0, 0],
-        backgroundColor: ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"], // ✅ Colores más representativos
-      },
-    ],
-  });
-
-  const [barData, setBarData] = useState({
-    labels: [],
-    datasets: [
-      {
-        label: "Solicitudes por Bodega",
-        data: [],
-        backgroundColor: "#007bff",
-      },
-    ],
-  });
-
-  // Estado para el gráfico de solicitudes por día de la semana
-  const [barDiasSemanaData, setBarDiasSemanaData] = useState({
-    labels: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
-    datasets: [
-      {
-        label: "Solicitudes por Día de la Semana",
-        data: [0, 0, 0, 0, 0, 0, 0],
-        backgroundColor: [
-          "#3b82f6",
-          "#10b981",
-          "#f59e0b",
-          "#ef4444",
-          "#6366f1",
-          "#059669",
-          "#6b7280",
-        ],
-      },
-    ],
-  });
-  const [totalSolicitudes, setTotalSolicitudes] = useState(0);
-
-  // Filtro de vendedor
-  const [selectedVendedor, setSelectedVendedor] = useState("todos");
-  const [vendedores, setVendedores] = useState([]);
-
-  // ✅ Agregar estas líneas para el rango de 15 días
-  const date15DaysAgo = new Date();
-  date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
-  const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
-
-  // ✅ Cambiar estos estados
-  const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr); // Cambiar de today a date15DaysAgoStr
-  const [fechaFin, setFechaFin] = useState(today);
-  const [selectedBodega, setSelectedBodega] = useState("todos");
-  const { data, loading, error, fetchBodegaUsuario, listaVendedoresporBodega, vendedor } = useBodegaUsuario();
-  const { userData, idMenu } = useAuth();
-
-
-
-  const [bodegass, setBodegass] = useState([]);
-
-  const bodegas = data || [];  // Safely access the bodegas data
-
-
-
-  useEffect(() => {
-    if (userData && userData.idUsuario) {
-      fetchBodega(); // Llamar a la API para obtener las bodegas
+    if (userData?.idUsuario) {
+      fetchBodega();
     }
   }, [userData]);
 
-  // Cargar vendedores cuando cambia la bodega o la fecha
+  // Cargar vendedores cuando cambia la bodega
   useEffect(() => {
     const fetchVendedores = async () => {
       if (selectedBodega && selectedBodega !== "todos") {
@@ -318,7 +103,6 @@ export function Dashboards() {
   // Actualizar vendedores cuando cambia el resultado del hook
   useEffect(() => {
     setVendedores(vendedor || []);
-    // Si el vendedor seleccionado ya no está, resetear
     if (
       selectedVendedor !== "todos" &&
       vendedor &&
@@ -328,14 +112,21 @@ export function Dashboards() {
     }
   }, [vendedor]);
 
-  const handleBodegaChange = (event) => {
-    setSelectedBodega(event.target.value);
-    setSelectedVendedor("todos");
-  };
-
-  const handleVendedorChange = (event) => {
-    setSelectedVendedor(event.target.value);
-  };
+  useEffect(() => {
+	if (userData?.idGrupo == 23) {
+		if (bodegas.length > 0) {
+			const primeraBodega = bodegas[0].b_Bodega;
+        	setSelectedBodega(primeraBodega);
+      	}
+		
+		const vendedorAutorizado = vendedores.find(
+        (v) => v.Codigo === userData.Nombre
+      );
+      if (vendedorAutorizado) {
+        setSelectedVendedor(vendedorAutorizado.idPersonal);
+      }
+	}
+  }, [userData?.idGrupo , bodegas, vendedores]);
 
   const fetchBodega = async () => {
     const userId = userData.idUsuario;
@@ -345,33 +136,26 @@ export function Dashboards() {
 
     try {
       await fetchBodegaUsuario(userId, idTipoFactura, fecha, recibeConsignacion);
-      setBodegass(data);
     } catch (err) {
       console.error("Error al obtener los datos de la bodega:", err);
     }
   };
 
-  const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
-
-  const fetchSolicitudes = async () => {
-    let bodegasId = [];
+  // Función obtener datos filtrados
+  const fetchFilteredData = async () => {
+    const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega);
+    let bodegasId = selectedBodega !== "todos" ? [selectedBodega] : bodegasIds;
+    
     try {
-      if (selectedBodega !== "todos") {
-        bodegasId = [selectedBodega];
-      } else {
-        bodegasId = bodegasIds;
-      }
       const token = localStorage.getItem("token");
       const params = {
-
         fechaInicio: fechaInicio,
         fechaFin: fechaFin,
         bodega: bodegasId,
         estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
         idTipoCliente: selectedTipoCliente === "todos" ? 0 : parseInt(selectedTipoCliente),
-        idCompraEncuesta: selectedTipoEncuesta === "todos" ? 0 : parseInt(selectedTipoEncuesta),
       };
-      // Si hay filtro de vendedor, agregarlo
+      
       if (selectedVendedor && selectedVendedor !== "todos") {
         params.vendedor = selectedVendedor;
       }
@@ -382,474 +166,287 @@ export function Dashboards() {
         },
         params,
       });
-      if (response.status === 200) {
-        // --- PolarArea Chart: solicitudes por tipo de cliente ---
-        const tipoClienteCounts = {};
-        response.data.data.forEach((item) => {
-          if (item.idTipoCliente) {
-            tipoClienteCounts[item.idTipoCliente] = (tipoClienteCounts[item.idTipoCliente] || 0) + 1;
-          }
-        });
-        const polarLabels = tipoCliente
-          .filter(tc => tc.idTipoCliente !== undefined && tc.Nombre)
-          .map(tc => tc.Nombre);
-        const polarValues = tipoCliente
-          .filter(tc => tc.idTipoCliente !== undefined && tc.Nombre)
-          .map(tc => tipoClienteCounts[tc.idTipoCliente] || 0);
-        const polarColors = polarLabels.map((_, i) => [
-          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#059669', '#6b7280', '#dc2626', '#a21caf', '#f472b6', '#22d3ee', '#fbbf24'
-        ][i % 12]);
-        setPolarTipoClienteData({
-          labels: polarLabels,
-          datasets: [
-            {
-              data: polarValues,
-              backgroundColor: polarColors,
-            },
-          ],
-        });
 
-        // --- Nuevo gráfico: Aprobados por Tipo de Cliente y por verificación ---
-        const verifKeys = [
-          { key: 'idEstadoVerificacionSolicitud', label: 'Solicitud', color: '#3b82f6', aprobado: 12 },
-          { key: 'idEstadoVerificacionDocumental', label: 'Documental', color: '#10b981', aprobado: 4 },
-          { key: 'idEstadoVerificacionTelefonica', label: 'Telefónica', color: '#f59e0b', aprobado: 3 },
-          { key: 'idEstadoVerificacionTerrena', label: 'Terrena', color: '#ef4444', aprobado: 2 },
-          { key: 'idEstadoVerificacionDomicilio', label: 'Domicilio', color: '#6366f1', aprobado: 2 },
-        ];
-        // Inicializar conteos por tipo de cliente y verificación
-        const aprobadosPorVerificacion = {};
-        tipoCliente.forEach(tc => {
-          if (tc.idTipoCliente !== undefined && tc.Nombre) {
-            aprobadosPorVerificacion[tc.idTipoCliente] = {
-              Nombre: tc.Nombre,
-              Solicitud: 0,
-              Documental: 0,
-              Telefónica: 0,
-              Terrena: 0,
-              Domicilio: 0,
-            };
-          }
-        });
-        response.data.data.forEach(item => {
-          if (item.idTipoCliente && aprobadosPorVerificacion[item.idTipoCliente]) {
-            if (item.idEstadoVerificacionSolicitud === 12) aprobadosPorVerificacion[item.idTipoCliente].Solicitud++;
-            if (item.idEstadoVerificacionDocumental === 4) aprobadosPorVerificacion[item.idTipoCliente].Documental++;
-            if (item.idEstadoVerificacionTelefonica === 3) aprobadosPorVerificacion[item.idTipoCliente].Telefónica++;
-            if (item.idEstadoVerificacionTerrena === 2) aprobadosPorVerificacion[item.idTipoCliente].Terrena++;
-            if (item.idEstadoVerificacionDomicilio === 2) aprobadosPorVerificacion[item.idTipoCliente].Domicilio++;
-          }
-        });
-        const barVerifLabels = Object.values(aprobadosPorVerificacion).map(tc => tc.Nombre);
-        const barVerifDatasets = verifKeys.map(verif => ({
-          label: verif.label,
-          data: Object.values(aprobadosPorVerificacion).map(tc => tc[verif.label]),
-          backgroundColor: verif.color,
-        }));
-        setBarHorizontalTipoClienteData({
-          labels: barVerifLabels,
-          datasets: barVerifDatasets,
-        });
-        // --- Pie Situacion Laboral ---
-        // Contar por idSituacionLaboral
-        const counts = {};
-        response.data.data.forEach((item) => {
-          if (item.idSituacionLaboral) {
-            counts[item.idSituacionLaboral] = (counts[item.idSituacionLaboral] || 0) + 1;
-          }
-        });
-        // Mapear a formato Doughnut
-        const labels = situacionLaboralOpts.map(opt => opt.Descripcion);
-        const data = situacionLaboralOpts.map(opt => counts[opt.idSituacionLaboral] || 0);
-        // Colores generados automáticamente
-        const baseColors = [
-          '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1', '#059669', '#6b7280', '#dc2626', '#a21caf', '#f472b6', '#22d3ee', '#fbbf24'
-        ];
-        const backgroundColor = labels.map((_, i) => baseColors[i % baseColors.length]);
-        setDoughnutSituacionLaboralData({
-          labels,
-          datasets: [
-            {
-              data,
-              backgroundColor,
-            },
-          ],
-        });
-        // --- Radar Chart: productos más solicitados ---
-        // Mapear productos a su cantidad en solicitudes
-        const productosCount = {};
-        response.data.data.forEach((item) => {
-          if (item.idProductos) {
-            productosCount[item.idProductos] = (productosCount[item.idProductos] || 0) + 1;
-          }
-        });
-        // Ordenar productos por cantidad y tomar los top N (ej: 6)
-        const topN = 6;
-        const productosOrdenados = Object.entries(productosCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, topN);
-        const radarLabels = productosOrdenados.map(([id]) => {
-          const prod = productos.find((p) => p.idCre_ProductoSolicitud === Number(id));
-          return prod ? prod.Producto : `Producto ${id}`;
-        });
-        const radarValues = productosOrdenados.map(([_, count]) => count);
-        setRadarData({
-          labels: radarLabels,
-          datasets: [
-            {
-              label: "Productos más solicitados",
-              data: radarValues,
-              backgroundColor: "rgba(59,130,246,0.2)",
-              borderColor: "#3b82f6",
-              pointBackgroundColor: "#3b82f6",
-              pointBorderColor: "#fff",
-            },
-          ],
-        });
-        const estadoCounts = {
-          PENDIENTE: 0,
-          APROBADO: 0,
-          ANULADO: 0,
-          RECHAZADO: 0,
-          NO_APLICA: 0,
-          FACTURADO: 0,
-          RECHAZADO_LN: 0,
-        };
-        const totalRecords = response.data.total;
-        setTotalSolicitudes(totalRecords);
-        const bodegaCounts = {};
-        const bodegaEstadoCounts = {};
-        const vendedoresSet = new Set();
-
-        // Agrupación por día de la semana
-        const diasSemana = [0, 0, 0, 0, 0, 0, 0]; // Lunes a Domingo
-
-        response.data.data.forEach((item) => {
-          if (item.Estado === 1) estadoCounts.PENDIENTE++;
-          else if (item.Estado === 2) estadoCounts.APROBADO++;
-          else if (item.Estado === 3) estadoCounts.ANULADO++;
-          else if (item.Estado === 4) estadoCounts.RECHAZADO++;
-          else if (item.Estado === 5) estadoCounts.NO_APLICA++;
-          else if (item.Estado === 6) estadoCounts.FACTURADO++;
-          else if (item.Estado === 7) estadoCounts.RECHAZADO_LN++;
-          if (item.idVendedor) {
-            vendedoresSet.add(item.idVendedor);
-          }
-          const bodegaId = item.Bodega;
-          if (bodegaCounts[bodegaId]) {
-            bodegaCounts[bodegaId]++;
-          } else {
-            bodegaCounts[bodegaId] = 1;
-          }
-          if (!bodegaEstadoCounts[bodegaId]) {
-            bodegaEstadoCounts[bodegaId] = {
-              PENDIENTE: 0,
-              APROBADO: 0,
-              ANULADO: 0,
-              RECHAZADO: 0,
-              NO_APLICA: 0,
-              FACTURADO: 0,
-              RECHAZADO_LN: 0,
-            };
-          }
-          if (item.Estado === 1) bodegaEstadoCounts[bodegaId].PENDIENTE++;
-          else if (item.Estado === 2) bodegaEstadoCounts[bodegaId].APROBADO++;
-          else if (item.Estado === 3) bodegaEstadoCounts[bodegaId].ANULADO++;
-          else if (item.Estado === 4) bodegaEstadoCounts[bodegaId].RECHAZADO++;
-          else if (item.Estado === 5) bodegaEstadoCounts[bodegaId].NO_APLICA++;
-          else if (item.Estado === 6) bodegaEstadoCounts[bodegaId].FACTURADO++;
-          else if (item.Estado === 7) bodegaEstadoCounts[bodegaId].RECHAZADO_LN++;
-
-          // Agrupar por día de la semana
-          if (item.Fecha) {
-            const fechaObj = new Date(item.Fecha);
-            let dia = fechaObj.getDay(); // 0=Domingo, 1=Lunes, ...
-            dia = dia === 0 ? 6 : dia - 1; // Convertir a 0=Lunes, 6=Domingo
-            diasSemana[dia]++;
-          }
-        });
-        setUniqueVendedores(vendedoresSet.size);
-        let doughnutLabels = [];
-        let doughnutValues = [];
-        let doughnutColors = [];
-        if (estadoFiltro === "todos") {
-          doughnutLabels = ["PRE-APROBADO", "APROBADO", "ANULADO", "RECHAZADO", "NO APLICA", "FACTURADO"];
-          doughnutValues = [
-            estadoCounts.PENDIENTE,
-            estadoCounts.APROBADO,
-            estadoCounts.ANULADO,
-            estadoCounts.RECHAZADO,
-            estadoCounts.NO_APLICA,
-            estadoCounts.FACTURADO,
-            estadoCounts.RECHAZADO_LN,
-          ];
-          doughnutColors = ["#3b82f6", "#10b981", "#6b7280", "#ef4444", "#f59e0b", "#059669", "#dc2626"];
-        } else {
-          const estadoSeleccionado = estadosOpciones.find(e => e.value == estadoFiltro);
-          if (estadoSeleccionado) {
-            doughnutLabels = [estadoSeleccionado.label];
-            doughnutValues = [totalRecords];
-            const colorMap = {
-              1: "#3b82f6",
-              2: "#10b981",
-              3: "#6b7280",
-              4: "#ef4444",
-              5: "#f59e0b",
-              6: "#059669",
-              7: "#dc2626",
-            };
-            doughnutColors = [colorMap[estadoFiltro]];
-          }
-        }
-        setDoughnutData({
-          labels: doughnutLabels,
-          datasets: [
-            {
-              data: doughnutValues,
-              backgroundColor: doughnutColors,
-            },
-          ],
-        });
-        const bodegaLabels = Object.keys(bodegaCounts).map((codigo) => {
-          const bodegaEncontrada = bodegas.find((b) => b.b_Bodega === Number(codigo));
-          return bodegaEncontrada ? bodegaEncontrada.b_Nombre : `Bodega ${codigo}`;
-        });
-        const estadosParaBarras = [
-          { key: 'PENDIENTE', label: 'PRE-APROBADO', color: '#3b82f6' },
-          { key: 'APROBADO', label: 'APROBADO', color: '#10b981' },
-          { key: 'ANULADO', label: 'ANULADO', color: '#6b7280' },
-          { key: 'RECHAZADO', label: 'RECHAZADO', color: '#ef4444' },
-          { key: 'NO_APLICA', label: 'NO APLICA', color: '#f59e0b' },
-          { key: 'FACTURADO', label: 'FACTURADO', color: '#059669' },
-        ];
-        const datasets = estadosParaBarras.map(estado => ({
-          label: estado.label,
-          data: Object.keys(bodegaCounts).map(bodegaId =>
-            bodegaEstadoCounts[bodegaId] ? bodegaEstadoCounts[bodegaId][estado.key] : 0
-          ),
-          backgroundColor: estado.color,
-        }));
-        setBarData({
-          labels: bodegaLabels,
-          datasets: datasets,
-        });
-
-        // Actualizar gráfico de barras por día de la semana
-        setBarDiasSemanaData({
-          labels: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
-          datasets: [
-            {
-              label: "Solicitudes por Día de la Semana",
-              data: diasSemana,
-              backgroundColor: [
-                "#3b82f6",
-                "#10b981",
-                "#f59e0b",
-                "#ef4444",
-                "#6366f1",
-                "#059669",
-                "#6b7280",
-              ],
-            },
-          ],
-        });
+      // Actualizar el estado con los datos recibidos
+      if (response.data && response.data.data) {
+        setSolicitudesData(response.data.data);
       }
+      
     } catch (error) {
       console.error("Error fetching data:", error);
+      setSolicitudesData([]);
     }
   };
 
+  // procesar datos por bodega
+  const procesarDatosPorBodega = () => {
+    const datosPorBodega = {};
+    
+    // Filtrar bodegas
+    const bodegasFiltradas = selectedBodega === "todos" 
+      ? bodegas 
+      : bodegas.filter(bodega => bodega.b_Bodega.toString() === selectedBodega.toString());
+    
+    // Inicializar datos para cada bodega filtrada
+    bodegasFiltradas.forEach(bodega => {
+      datosPorBodega[bodega.b_Bodega] = {
+        nombre: bodega.b_Nombre,
+        totalSolicitudes: 0,
+        preAprobadas: 0, // Total - No Aplica
+        noAplica: 0,     // Estado 5
+        aprobado: 0,     // Estado 2
+        rechazado: 0,    // Estado 4
+        facturadas: 0    // Estado 6
+      };
+    });
+    
+    // Procesar cada solicitud
+    solicitudesData.forEach(solicitud => {
+      const bodegaId = solicitud.Bodega;
+      if (datosPorBodega[bodegaId]) {
+        datosPorBodega[bodegaId].totalSolicitudes++;
+        
+        switch (solicitud.Estado) {
+          case 2: // APROBADO
+            datosPorBodega[bodegaId].aprobado++;
+            datosPorBodega[bodegaId].preAprobadas++;
+            break;
+          case 4: // RECHAZADO
+            datosPorBodega[bodegaId].rechazado++;
+            datosPorBodega[bodegaId].preAprobadas++;
+            break;
+          case 5: // NO APLICA
+            datosPorBodega[bodegaId].noAplica++;
+            break;
+          case 6: // FACTURADO
+            datosPorBodega[bodegaId].facturadas++;
+            datosPorBodega[bodegaId].preAprobadas++;
+            break;
+          default: // Otros estados (1, 3, etc.)
+            datosPorBodega[bodegaId].preAprobadas++;
+            break;
+        }
+      }
+    });
+    
+    return Object.values(datosPorBodega);
+  };
 
-  const estadoItems = [
-    {
-      label: "PRE-APROBADO",
-      value: doughnutData.datasets[0].data[0] || 0,
-      styles: {
-        bg: "bg-blue-50",
-        border: "border-blue-100",
-        dot: "bg-blue-500",
-        text: "text-blue-700",
-        value: "text-blue-800",
-      },
-    },
-    {
-      label: "APROBADO",
-      value: doughnutData.datasets[0].data[1] || 0,
-      styles: {
-        bg: "bg-green-50",
-        border: "border-green-100",
-        dot: "bg-green-500",
-        text: "text-green-700",
-        value: "text-green-800",
-      },
-    },
-    {
-      label: "ANULADO",
-      value: doughnutData.datasets[0].data[2] || 0,
-      styles: {
-        bg: "bg-gray-50",
-        border: "border-gray-200",
-        dot: "bg-gray-500",
-        text: "text-gray-700",
-        value: "text-gray-800",
-      },
-    },
-    {
-      label: "RECHAZADO",
-      value: doughnutData.datasets[0].data[3] || 0,
-      styles: {
-        bg: "bg-red-50",
-        border: "border-red-100",
-        dot: "bg-red-500",
-        text: "text-red-700",
-        value: "text-red-800",
-      },
-    },
-    {
-      label: "NO APLICA",
-      value: doughnutData.datasets[0].data[4] || 0,
-      styles: {
-        bg: "bg-yellow-50",
-        border: "border-yellow-100",
-        dot: "bg-yellow-500",
-        text: "text-yellow-700",
-        value: "text-yellow-800",
-      },
-    },
-    {
-      label: "FACTURADO",
-      value: doughnutData.datasets[0].data[5] || 0,
-      styles: {
-        bg: "bg-emerald-50",
-        border: "border-emerald-100",
-        dot: "bg-emerald-500",
-        text: "text-emerald-700",
-        value: "text-emerald-800",
-      },
-    },
-  ];
+  // Función para procesar datos por segmento (Tipo Cliente)
+  const procesarDatosPorSegmento = () => {
+    const segmentosClientes = {
+      1: "NO BANCARIZADO",
+      2: "BANCARIZADO",
+      3: "CREDI POINT NIVEL",
+      4: "POINT MOVIL",
+      5: "RECURRENTE",
+      6: "BANCARIZADO A",
+      7: "BANCARIZADO B",
+      8: "BANCARIZADO C",
+      9: "RECURRENTE A",
+      10: "RECURRENTE B",
+      11: "RECURRENTE C",
+      12: "RECURRENTE MALO"
+    };
 
-
-  // ✅ Modificar este useEffect para que solo se ejecute cuando todo esté listo
-  useEffect(() => {
-    // Solo llamar a fetchSolicitudes si las fechas son válidas Y las bodegas están cargadas
-    if (fechaInicio && fechaFin && bodegas.length > 0) {
-      fetchSolicitudes();
+    const datosPorSegmento = {};
+    
+    // Filtrar segmentos según la selección del tipo cliente
+    const segmentosAMostrar = selectedTipoCliente === "todos" 
+      ? Object.keys(segmentosClientes)
+      : [selectedTipoCliente.toString()];
+    
+    // Inicializar datos para cada segmento
+    segmentosAMostrar.forEach(segmentoId => {
+      datosPorSegmento[segmentoId] = {
+        nombre: segmentosClientes[segmentoId] || `Segmento ${segmentoId}`,
+        totalSolicitudes: 0,
+        preAprobadas: 0, // Total - No Aplica
+        noAplica: 0,     // Estado 5
+        aprobado: 0,     // Estado 2
+        rechazado: 0,    // Estado 4
+        facturadas: 0    // Estado 6
+      };
+    });
+    
+    // Procesar cada solicitud
+    solicitudesData.forEach(solicitud => {
+      const tipoClienteId = solicitud.TipoCliente || solicitud.idTipoCliente;
+      
+      if (datosPorSegmento[tipoClienteId]) {
+        datosPorSegmento[tipoClienteId].totalSolicitudes++;
+        
+        switch (solicitud.Estado) {
+          case 2: // APROBADO
+            datosPorSegmento[tipoClienteId].aprobado++;
+            datosPorSegmento[tipoClienteId].preAprobadas++;
+            break;
+          case 4: // RECHAZADO
+            datosPorSegmento[tipoClienteId].rechazado++;
+            datosPorSegmento[tipoClienteId].preAprobadas++;
+            break;
+          case 5: // NO APLICA
+            datosPorSegmento[tipoClienteId].noAplica++;
+            break;
+          case 6: // FACTURADO
+            datosPorSegmento[tipoClienteId].facturadas++;
+            datosPorSegmento[tipoClienteId].preAprobadas++;
+            break;
+          default: // Otros estados (1, 3, etc.)
+            datosPorSegmento[tipoClienteId].preAprobadas++;
+            break;
+        }
+      }
+    });
+    
+    // Filtrar solo los segmentos que tienen datos o mostrar todos si selectedTipoCliente es "todos"
+    const resultado = Object.values(datosPorSegmento);
+    
+    // Si hay un tipo de cliente específico seleccionado, mostrar solo ese
+    // Si es "todos", mostrar solo los que tienen datos
+    if (selectedTipoCliente === "todos") {
+      return resultado.filter(segmento => segmento.totalSolicitudes > 0);
     }
-  }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas, selectedVendedor, selectedTipoCliente, selectedTipoEncuesta]);
-  {/* Select de tipo encuesta */ }
-  <div className="w-full md:w-1/4">
-    <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-1">
-      Tipo Encuesta
-    </label>
-    <select
-      id="tipo-encuesta-select"
-      className="w-full p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      value={selectedTipoEncuesta}
-      onChange={e => setSelectedTipoEncuesta(e.target.value)}
-    >
-      <option value="todos">Todos</option>
-      {tipoEncuesta.map((tipo) => (
-        <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
-      ))}
-    </select>
-  </div>
+    
+    return resultado;
+  };
+
+  // Función para procesar datos por vendedor
+  const procesarDatosPorVendedor = () => {
+    const datosPorVendedor = {};
+    
+    // Solo procesar si hay una bodega específica seleccionada
+    if (selectedBodega === "todos") {
+      return [];
+    }
+    
+    // Filtrar vendedores según la selección
+    const vendedoresFiltrados = selectedVendedor === "todos" 
+      ? vendedores 
+      : vendedores.filter(vendedor => vendedor.idPersonal.toString() === selectedVendedor.toString());
+    
+    // Inicializar datos para cada vendedor filtrado
+    vendedoresFiltrados.forEach(vendedor => {
+      datosPorVendedor[vendedor.idPersonal] = {
+        nombre: vendedor.Nombre || "No disponible",
+        totalSolicitudes: 0,
+        preAprobadas: 0, // Total - No Aplica
+        noAplica: 0,     // Estado 5
+        aprobado: 0,     // Estado 2
+        rechazado: 0,    // Estado 4
+        facturadas: 0    // Estado 6
+      };
+    });
+    
+    // Procesar cada solicitud que corresponda a la bodega seleccionada
+    solicitudesData.forEach(solicitud => {
+      // Solo procesar solicitudes de la bodega seleccionada
+      if (solicitud.Bodega.toString() === selectedBodega.toString()) {
+        const vendedorId = solicitud.Vendedor || solicitud.idVendedor;
+        
+        if (datosPorVendedor[vendedorId]) {
+          datosPorVendedor[vendedorId].totalSolicitudes++;
+          
+          switch (solicitud.Estado) {
+            case 2: // APROBADO
+              datosPorVendedor[vendedorId].aprobado++;
+              datosPorVendedor[vendedorId].preAprobadas++;
+              break;
+            case 4: // RECHAZADO
+              datosPorVendedor[vendedorId].rechazado++;
+              datosPorVendedor[vendedorId].preAprobadas++;
+              break;
+            case 5: // NO APLICA
+              datosPorVendedor[vendedorId].noAplica++;
+              break;
+            case 6: // FACTURADO
+              datosPorVendedor[vendedorId].facturadas++;
+              datosPorVendedor[vendedorId].preAprobadas++;
+              break;
+            default: // Otros estados (1, 3, etc.)
+              datosPorVendedor[vendedorId].preAprobadas++;
+              break;
+          }
+        }
+      }
+    });
+    
+    return Object.values(datosPorVendedor);
+  };
+
+  // Función para calcular porcentajes
+  const calcularPorcentajes = (datos) => {
+    const totales = calcularTotales(datos);
+    const total = totales.totalSolicitudes;
+    
+    if (total === 0) {
+      return {
+        preAprobadas: 0,
+        noAplica: 0,
+        aprobado: 0,
+        rechazado: 0,
+        facturadas: 0
+      };
+    }
+    
+    return {
+      preAprobadas: ((totales.preAprobadas / total) * 100).toFixed(1),
+      noAplica: ((totales.noAplica / total) * 100).toFixed(1),
+      aprobado: ((totales.aprobado / total) * 100).toFixed(1),
+      rechazado: ((totales.rechazado / total) * 100).toFixed(1),
+      facturadas: ((totales.facturadas / total) * 100).toFixed(1)
+    };
+  };
+
+  // Función para calcular totales
+  const calcularTotales = (datos) => {
+    return datos.reduce((total, item) => ({
+      totalSolicitudes: total.totalSolicitudes + item.totalSolicitudes,
+      preAprobadas: total.preAprobadas + item.preAprobadas,
+      noAplica: total.noAplica + item.noAplica,
+      aprobado: total.aprobado + item.aprobado,
+      rechazado: total.rechazado + item.rechazado,
+      facturadas: total.facturadas + item.facturadas
+    }), {
+      totalSolicitudes: 0,
+      preAprobadas: 0,
+      noAplica: 0,
+      aprobado: 0,
+      rechazado: 0,
+      facturadas: 0
+    });
+  };
+
+  // Ejecutar cuando cambien los filtros
+  useEffect(() => {
+    if (fechaInicio && fechaFin && bodegas.length > 0) {
+      fetchFilteredData();
+    }
+  }, [fechaInicio, fechaFin, selectedBodega, estadoFiltro, bodegas, selectedVendedor, selectedTipoCliente]);
+
+  // Handlers para cambios en los filtros
+  const handleBodegaChange = (event) => {
+    setSelectedBodega(event.target.value);
+    setSelectedVendedor("todos");
+  };
+
+  const handleVendedorChange = (event) => {
+    setSelectedVendedor(event.target.value);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header fijo con filtros colapsables */}
-
       <div className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-200">
         <div className="px-6 py-4">
-          {/* Resumen rápido de fechas y botón de filtros en la misma fila */}
+          {/* Resumen rápido de fechas y botón de filtros */}
           <div className="flex flex-row flex-wrap items-center justify-between gap-2 text-xs text-gray-700 bg-blue-50 px-4 py-2 rounded-lg mb-2 relative">
-            {/* Filtros activos y periodo a la izquierda */}
             <div className="flex flex-wrap items-center gap-2 min-w-0 flex-1">
               <span className="font-medium">Período:</span>
               <span className="bg-white px-2 py-0.5 rounded border">{fechaInicio}</span>
               <span>→</span>
               <span className="bg-white px-2 py-0.5 rounded border">{fechaFin}</span>
-              {/* Mostrar filtros activos */}
-              {selectedBodega !== 'todos' && (
-                <span className="bg-white text-blue-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-blue-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
-                  <button
-                    className="static bg-blue-200 hover:bg-blue-300 text-blue-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
-                    onClick={() => setSelectedBodega('todos')}
-                    tabIndex={0}
-                    aria-label="Quitar filtro bodega"
-                  >
-                    <Close style={{ fontSize: '12px' }} />
-                  </button>
-                  Bodega: {
-                    (() => {
-                      const bodegaObj = bodegas.find(b => String(b.b_Bodega) === String(selectedBodega));
-                      return bodegaObj ? bodegaObj.b_Nombre : selectedBodega;
-                    })()
-                  }
-                </span>
-              )}
-              {selectedVendedor !== 'todos' && vendedores.length > 0 && (
-                <span className="bg-white text-green-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-green-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
-                  <button
-                    className="static bg-green-200 hover:bg-green-300 text-green-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
-                    onClick={() => setSelectedVendedor('todos')}
-                    tabIndex={0}
-                    aria-label="Quitar filtro vendedor"
-                  >
-                    <Close style={{ fontSize: '12px' }} />
-                  </button>
-                  Vendedor: {vendedores.find(v => v.idPersonal == selectedVendedor)?.Nombre || selectedVendedor}
-                </span>
-              )}
-              {selectedTipoCliente !== 'todos' && (
-                <span className="bg-white text-purple-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-purple-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
-                  <button
-                    className="static bg-purple-200 hover:bg-purple-300 text-purple-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
-                    onClick={() => setSelectedTipoCliente('todos')}
-                    tabIndex={0}
-                    aria-label="Quitar filtro tipo cliente"
-                  >
-                    <Close style={{ fontSize: '12px' }} />
-                  </button>
-                  Tipo Cliente: {tipoCliente.find(tc => tc.idTipoCliente == selectedTipoCliente)?.Nombre || selectedTipoCliente}
-                </span>
-              )}
-              {selectedTipoEncuesta !== 'todos' && (
-                <span className="bg-white text-yellow-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-yellow-200 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
-                  <button
-                    className="static bg-yellow-200 hover:bg-yellow-300 text-yellow-700 rounded-full p-0.5 flex items-center justify-center ml-2"
-                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px' }}
-                    onClick={() => setSelectedTipoEncuesta('todos')}
-                    tabIndex={0}
-                    aria-label="Quitar filtro tipo encuesta"
-                  >
-                    <Close style={{ fontSize: '12px' }} />
-                  </button>
-                  Tipo Encuesta: {tipoEncuesta.find(te => te.idCompraEncuesta == selectedTipoEncuesta)?.Descripcion || selectedTipoEncuesta}
-                </span>
-              )}
-              {estadoFiltro !== 'todos' && (
-                <span className="bg-white text-gray-800 px-2 py-0.5 rounded-full font-medium flex flex-row-reverse items-center mr-1 border border-gray-300 shrink-0" style={{ minHeight: '28px', position: 'relative' }}>
-                  <button
-                    className="static text-gray-700 rounded-full p-0.5 flex items-center justify-center ml-2 hover:bg-gray-100"
-                    style={{ width: '16px', height: '16px', fontSize: '12px', lineHeight: '12px', marginLeft: '8px', background: 'none' }}
-                    onClick={() => setEstadoFiltro('todos')}
-                    tabIndex={0}
-                    aria-label="Quitar filtro estado"
-                  >
-                    <Close style={{ fontSize: '12px' }} />
-                  </button>
-                  Estado: {(() => {
-                    const estado = estadosOpciones.find(e => e.value == estadoFiltro);
-                    return estado ? estado.label : estadoFiltro;
-                  })()}
-                </span>
-              )}
             </div>
-            {/* Botón de filtros fijo a la derecha */}
             <button
               onClick={() => setFiltersVisible(!filtersVisible)}
               className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow ml-3"
@@ -866,7 +463,6 @@ export function Dashboards() {
             <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
               {/* Primera fila: Fechas, Bodega, Vendedor */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                {/* Input Fecha Inicio */}
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Inicio</label>
                   <input
@@ -883,7 +479,6 @@ export function Dashboards() {
                     }}
                   />
                 </div>
-                {/* Input Fecha Fin */}
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2 text-sm">Fecha Fin</label>
                   <input
@@ -893,7 +488,6 @@ export function Dashboards() {
                     onChange={(e) => setFechaFin(e.target.value)}
                   />
                 </div>
-                {/* Select de bodegas */}
                 <div>
                   <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2 text-sm">
                     Bodega
@@ -903,6 +497,7 @@ export function Dashboards() {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     value={selectedBodega}
                     onChange={handleBodegaChange}
+					disabled={userData?.idGrupo === 23}
                   >
                     <option value="todos">Todos</option>
                     {bodegas.length > 0 ? (
@@ -916,7 +511,6 @@ export function Dashboards() {
                     )}
                   </select>
                 </div>
-                {/* Select de vendedores */}
                 <div>
                   <label htmlFor="vendedor-select" className="block text-gray-700 font-semibold mb-2 text-sm">
                     Buscar por Vendedor
@@ -926,7 +520,7 @@ export function Dashboards() {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
                     value={selectedVendedor}
                     onChange={handleVendedorChange}
-                    disabled={selectedBodega === "todos" || vendedores.length === 0}
+                    disabled={selectedBodega === "todos" || vendedores.length === 0 || userData?.idGrupo === 23}
                   >
                     <option value="todos">Todos</option>
                     {vendedores.map((vendedor) => (
@@ -938,9 +532,8 @@ export function Dashboards() {
                 </div>
               </div>
 
-              {/* Segunda fila: Tipo Cliente, Tipo Encuesta, Estado */}
+              {/* Segunda fila: Tipo Cliente, Estado */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Select de tipo cliente */}
                 <div>
                   <label htmlFor="tipo-cliente-select" className="block text-gray-700 font-semibold mb-2 text-sm">
                     Tipo Cliente
@@ -957,24 +550,6 @@ export function Dashboards() {
                     ))}
                   </select>
                 </div>
-                {/* Select de tipo encuesta */}
-                <div>
-                  <label htmlFor="tipo-encuesta-select" className="block text-gray-700 font-semibold mb-2 text-sm">
-                    Tipo Encuesta
-                  </label>
-                  <select
-                    id="tipo-encuesta-select"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    value={selectedTipoEncuesta}
-                    onChange={e => setSelectedTipoEncuesta(e.target.value)}
-                  >
-                    <option value="todos">Todos</option>
-                    {tipoEncuesta.map((tipo) => (
-                      <option key={tipo.idCompraEncuesta} value={tipo.idCompraEncuesta}>{tipo.Descripcion}</option>
-                    ))}
-                  </select>
-                </div>
-                {/* Select de estado */}
                 <div>
                   <label className="block text-gray-700 font-semibold mb-2 text-sm">Estado</label>
                   <select
@@ -996,376 +571,457 @@ export function Dashboards() {
       </div>
 
       {/* Contenido principal */}
-      <div className="px-6 py-6">
-        {/* Sección de tarjetas métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          {/* Primera fila: 4 tarjetas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Vendedores involucrados */}
-            <div className="bg-white p-4 rounded-xl shadow border border-gray-100 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-green-100 rounded-full mb-2">
-                  <Users className="text-green-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-gray-600 mb-1">Vendedores involucrados</p>
-                <h2 className="text-xl font-bold text-gray-900">{uniqueVendedores}</h2>
-              </div>
-            </div>
-            {/* Número de solicitudes de crédito */}
-            <div className="bg-white p-4 rounded-xl shadow border border-gray-100 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-blue-100 rounded-full mb-2">
-                  <CreditCard className="text-blue-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-gray-600 mb-1">Solicitudes de crédito</p>
-                <h2 className="text-xl font-bold text-gray-900">{totalSolicitudes}</h2>
-              </div>
-            </div>
-            {/* Aprobadas */}
-            <div className="bg-white p-4 rounded-xl shadow border border-green-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-green-100 rounded-full mb-2">
-                  <CheckCircle className="text-green-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-green-700 mb-1">Aprobadas</p>
-                <h2 className="text-xl font-bold text-green-700">{estadoItems.find(e => e.label === 'APROBADO')?.value ?? 0}</h2>
-              </div>
-            </div>
-            {/* Rechazadas */}
-            <div className="bg-white p-4 rounded-xl shadow border border-red-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-red-100 rounded-full mb-2">
-                  <XCircle className="text-red-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-red-700 mb-1">Rechazadas</p>
-                <h2 className="text-xl font-bold text-red-700">{estadoItems.find(e => e.label === 'RECHAZADO')?.value ?? 0}</h2>
-              </div>
-            </div>
+      <div className="px-6 py-6 space-y-6">
+        {/* Tabla de solicitudes por bodega */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+            <h3 className="text-xl font-bold text-white">Solicitudes por Local</h3>
           </div>
-          {/* Segunda fila: 4 tarjetas */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Pre-aprobadas */}
-            <div className="bg-white p-4 rounded-xl shadow border border-blue-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-blue-100 rounded-full mb-2">
-                  <Clock className="text-blue-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-blue-700 mb-1">Pre-aprobadas</p>
-                <h2 className="text-xl font-bold text-blue-700">{estadoItems.find(e => e.label === 'PRE-APROBADO')?.value ?? 0}</h2>
-              </div>
-            </div>
-            {/* Anuladas */}
-            <div className="bg-white p-4 rounded-xl shadow border border-gray-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-gray-100 rounded-full mb-2">
-                  <Trash2 className="text-gray-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-gray-700 mb-1">Anuladas</p>
-                <h2 className="text-xl font-bold text-gray-700">{estadoItems.find(e => e.label === 'ANULADO')?.value ?? 0}</h2>
-              </div>
-            </div>
-            {/* No aplica */}
-            <div className="bg-white p-4 rounded-xl shadow border border-yellow-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-yellow-100 rounded-full mb-2">
-                  <Minus className="text-yellow-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-yellow-700 mb-1">No aplica</p>
-                <h2 className="text-xl font-bold text-yellow-700">{estadoItems.find(e => e.label === 'NO APLICA')?.value ?? 0}</h2>
-              </div>
-            </div>
-            {/* Facturadas */}
-            <div className="bg-white p-4 rounded-xl shadow border border-indigo-200 hover:shadow-lg transition-shadow flex flex-col justify-center items-center h-32">
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="p-2 bg-indigo-100 rounded-full mb-2">
-                  <Receipt className="text-indigo-600 w-5 h-5" />
-                </div>
-                <p className="text-xs font-medium text-indigo-700 mb-1">Facturadas</p>
-                <h2 className="text-xl font-bold text-indigo-700">{estadoItems.find(e => e.label === 'FACTURADO')?.value ?? 0}</h2>
-              </div>
-            </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Local
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Solicitudes<br/>Ingresadas
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Pre<br/>Aprobadas
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    No Aplica
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Aprobado
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Rechazado
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Facturadas
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {procesarDatosPorBodega().map((bodega, index) => (
+                  <tr key={index} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-b border-gray-100">
+                      {bodega.nombre}
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 rounded text-xs font-semibold">
+                        {bodega.totalSolicitudes}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                        {bodega.preAprobadas}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-red-100 text-red-800 rounded text-xs font-semibold">
+                        {bodega.noAplica}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-green-100 text-green-800 rounded text-xs font-semibold">
+                        {bodega.aprobado}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-red-300 text-red-800 rounded text-xs font-semibold">
+                        {bodega.rechazado}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-green-300 text-black-800 rounded text-xs font-semibold">
+                        {bodega.facturadas}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                
+                {/* Fila de totales */}
+                <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                    TOTAL
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                    <span className="inline-flex items-center justify-center w-10 h-6 rounded text-xs font-bold">
+                      {calcularTotales(procesarDatosPorBodega()).totalSolicitudes}
+                    </span>
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                    <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-200 text-blue-900 rounded text-xs font-bold">
+                      {calcularTotales(procesarDatosPorBodega()).preAprobadas}
+                    </span>
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                    <span className="inline-flex items-center justify-center w-10 h-6 bg-red-200 text-red-900 rounded text-xs font-bold">
+                      {calcularTotales(procesarDatosPorBodega()).noAplica}
+                    </span>
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                    <span className="inline-flex items-center justify-center w-10 h-6 bg-green-200 text-green-900 rounded text-xs font-bold">
+                      {calcularTotales(procesarDatosPorBodega()).aprobado}
+                    </span>
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                    <span className="inline-flex items-center justify-center w-10 h-6 bg-red-300 text-red-900 rounded text-xs font-bold">
+                      {calcularTotales(procesarDatosPorBodega()).rechazado}
+                    </span>
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                    <span className="inline-flex items-center justify-center w-10 h-6 bg-green-200 text-green-900 rounded text-xs font-bold">
+                      {calcularTotales(procesarDatosPorBodega()).facturadas}
+                    </span>
+                  </td>
+                </tr>
+                
+                {/* Fila de porcentajes */}
+                <tr className="bg-blue-50 border-t border-gray-200">
+                  <td className="px-6 py-2 whitespace-nowrap text-xs font-semibold text-blue-900">
+                    PORCENTAJE
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                    100%
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                    {calcularPorcentajes(procesarDatosPorBodega()).preAprobadas}%
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                    {calcularPorcentajes(procesarDatosPorBodega()).noAplica}%
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                    {calcularPorcentajes(procesarDatosPorBodega()).aprobado}%
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                    {calcularPorcentajes(procesarDatosPorBodega()).rechazado}%
+                  </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                    {calcularPorcentajes(procesarDatosPorBodega()).facturadas}%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+          
+          {/* Mensaje cuando no hay datos */}
+          {solicitudesData.length === 0 && (
+            <div className="px-6 py-8 text-center text-gray-500">
+              <p className="text-lg">No hay datos disponibles para el período seleccionado</p>
+              <p className="text-sm mt-2">Ajusta los filtros para ver los resultados</p>
+            </div>
+          )}
         </div>
 
-        {/* Sección de gráficos principales */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Número de solicitudes de crédito por Almacén</h3>
-            <div className="h-80">
-              <Bar
-                data={barData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    x: {
-                      stacked: true,
-                      grid: { display: false }
-                    },
-                    y: {
-                      stacked: true,
-                      grid: { color: '#f3f4f6' }
-                    },
-                  },
-                  plugins: {
-                    legend: {
-                      display: true,
-                      position: 'top',
-                      labels: {
-                        usePointStyle: true,
-                        padding: 20
-                      }
-                    },
-                  },
-                }}
-              />
+        {/* Tabla de solicitudes por vendedor  */}
+        {selectedBodega !== "todos" && vendedores.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+              <h3 className="text-xl font-bold text-white">
+                Solicitudes por Vendedor - {bodegas.find(b => b.b_Bodega.toString() === selectedBodega.toString())?.b_Nombre}
+              </h3>
             </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes de crédito por Estado</h3>
-            <div className="h-80 flex items-center justify-center">
-              <Doughnut
-                data={doughnutData}
-                options={{
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'bottom',
-                      labels: {
-                        usePointStyle: true,
-                        padding: 20
-                      }
-                    }
-                  }
-                }}
-              />
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      Vendedor
+                    </th>
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      Solicitudes<br/>Ingresadas
+                    </th>
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      Pre<br/>Aprobadas
+                    </th>
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      No Aplica
+                    </th>
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      Aprobado
+                    </th>
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      Rechazado
+                    </th>
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                      Facturadas
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white">
+                  {procesarDatosPorVendedor().map((vendedor, index) => (
+                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-b border-gray-100">
+                        {vendedor.nombre}
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                        <span className="inline-flex items-center justify-center w-10 h-6 rounded text-xs font-semibold">
+                          {vendedor.totalSolicitudes}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                          {vendedor.preAprobadas}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-red-100 text-red-800 rounded text-xs font-semibold">
+                          {vendedor.noAplica}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-green-100 text-green-800 rounded text-xs font-semibold">
+                          {vendedor.aprobado}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-red-300 text-red-800 rounded text-xs font-semibold">
+                          {vendedor.rechazado}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-green-300 text-black-800 rounded text-xs font-semibold">
+                          {vendedor.facturadas}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  
+                  {/* Fila de totales para vendedores */}
+                  {procesarDatosPorVendedor().length > 0 && (
+                    <>
+                      <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                          TOTAL
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                          <span className="inline-flex items-center justify-center w-10 h-6 rounded text-xs font-bold">
+                            {calcularTotales(procesarDatosPorVendedor()).totalSolicitudes}
+                          </span>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                          <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-200 text-blue-900 rounded text-xs font-bold">
+                            {calcularTotales(procesarDatosPorVendedor()).preAprobadas}
+                          </span>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                          <span className="inline-flex items-center justify-center w-10 h-6 bg-red-200 text-red-900 rounded text-xs font-bold">
+                            {calcularTotales(procesarDatosPorVendedor()).noAplica}
+                          </span>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                          <span className="inline-flex items-center justify-center w-10 h-6 bg-green-200 text-green-900 rounded text-xs font-bold">
+                            {calcularTotales(procesarDatosPorVendedor()).aprobado}
+                          </span>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                          <span className="inline-flex items-center justify-center w-10 h-6 bg-red-300 text-red-900 rounded text-xs font-bold">
+                            {calcularTotales(procesarDatosPorVendedor()).rechazado}
+                          </span>
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                          <span className="inline-flex items-center justify-center w-10 h-6 bg-green-200 text-green-900 rounded text-xs font-bold">
+                            {calcularTotales(procesarDatosPorVendedor()).facturadas}
+                          </span>
+                        </td>
+                      </tr>
+                      
+                      {/* Fila de porcentajes para vendedores */}
+                      <tr className="bg-green-50 border-t border-gray-200">
+                        <td className="px-6 py-2 whitespace-nowrap text-xs font-semibold text-green-900">
+                          PORCENTAJE
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                          100%
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                          {calcularPorcentajes(procesarDatosPorVendedor()).preAprobadas}%
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                          {calcularPorcentajes(procesarDatosPorVendedor()).noAplica}%
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                          {calcularPorcentajes(procesarDatosPorVendedor()).aprobado}%
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                          {calcularPorcentajes(procesarDatosPorVendedor()).rechazado}%
+                        </td>
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                          {calcularPorcentajes(procesarDatosPorVendedor()).facturadas}%
+                        </td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
             </div>
-          </div>
-        </div>
-
-        {/* Gráficos adicionales en fila inferior: día de la semana, productos más solicitados y situación laboral */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Día de la semana */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Solicitudes por Día de la Semana</h3>
-            <div className="h-64">
-              <Bar
-                data={barDiasSemanaData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                      mode: 'index',
-                      intersect: false,
-                    },
-                  },
-                  scales: {
-                    x: {
-                      title: {
-                        display: true,
-                        text: 'Día de la Semana',
-                      },
-                      grid: { display: false }
-                    },
-                    y: {
-                      title: {
-                        display: true,
-                        text: 'Cantidad',
-                      },
-                      beginAtZero: true,
-                      grid: { color: '#f3f4f6' },
-                      ticks: {
-                        precision: 0,
-                      },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Productos más solicitados */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Productos más solicitados</h3>
-            <div className="h-64">
-              <Radar
-                data={radarData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      display: true,
-                      position: 'top',
-                    },
-                    tooltip: {
-                      enabled: true,
-                    },
-                  },
-                  scales: {
-                    r: {
-                      angleLines: { display: true },
-                      suggestedMin: 0,
-                      grid: { color: '#f3f4f6' },
-                      pointLabels: {
-                        font: { size: 12 },
-                      },
-                      ticks: {
-                        precision: 0,
-                      },
-                    },
-                  },
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Situación Laboral */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Situación Laboral</h3>
-            <div className="h-64 flex items-center justify-center">
-              <div className="flex items-center w-full justify-center">
-                <div style={{ width: 140, height: 140, position: 'relative', zIndex: 0 }}>
-                  <Doughnut
-                    data={doughnutSituacionLaboralData}
-                    options={{
-                      maintainAspectRatio: false,
-                      cutout: '60%',
-                      borderWidth: 8,
-                      plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                          xPadding: 16,
-                          yPadding: 8,
-                          padding: 12,
-                          caretPadding: 10,
-                          displayColors: true,
-                          boxWidth: 16,
-                          boxHeight: 16,
-                          boxPadding: 10,
-                          callbacks: {},
-                          // Para Chart.js v3+, usar 'padding' y 'caretPadding'
-                          padding: 12,
-                          caretPadding: 10,
-                        },
-                      },
-                      elements: {
-                        arc: {
-                          borderWidth: 8,
-                          borderColor: '#fff',
-                          spacing: 4,
-                        },
-                      },
-                    }}
-                    plugins={[
-                      // Modifica el plugin para el texto central para que tenga zIndex bajo
-                      {
-                        ...doughnutCenterText,
-                        beforeDraw: (chart) => {
-                          if (doughnutCenterText && doughnutCenterText.beforeDraw) {
-                            // Llama el original pero baja el z-index del texto central
-                            const ctx = chart.ctx;
-                            ctx.save();
-                            ctx.globalCompositeOperation = 'destination-over';
-                            doughnutCenterText.beforeDraw(chart);
-                            ctx.restore();
-                          }
-                        }
-                      }
-                    ]}
-                  />
-                </div>
-                <SituacionLaboralLegend
-                  labels={doughnutSituacionLaboralData.labels}
-                  colors={doughnutSituacionLaboralData.datasets[0].backgroundColor}
-                />
+            
+            {/* Mensaje cuando no hay datos de vendedores */}
+            {procesarDatosPorVendedor().length === 0 && (
+              <div className="px-6 py-8 text-center text-gray-500">
+                <p className="text-lg">No hay datos de vendedores disponibles para esta bodega</p>
+                <p className="text-sm mt-2">Verifica que existan vendedores registrados para el período seleccionado</p>
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* Fila separada para los gráficos de tipo de cliente */}
-        {/* PolarArea: Solicitudes por Tipo de Cliente - ocupa todo el ancho */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes por Tipo de Cliente</h3>
-          <div className="h-80 flex items-center justify-center">
-            <PolarArea
-              data={polarTipoClienteData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'bottom',
-                    labels: {
-                      usePointStyle: true,
-                      padding: 20
-                    }
-                  },
-                  tooltip: {
-                    enabled: true,
-                  },
-                },
-                scales: {
-                  r: {
-                    angleLines: { display: true },
-                    suggestedMin: 0,
-                    grid: { color: '#f3f4f6' },
-                    pointLabels: {
-                      font: { size: 14 },
-                    },
-                    ticks: {
-                      precision: 0,
-                    },
-                  },
-                },
-              }}
-            />
+        {/* Tabla de solicitudes por segmento (Tipo Cliente) */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+            <h3 className="text-xl font-bold text-white">Solicitudes por Segmento</h3>
           </div>
-        </div>
-        {/* Nuevo gráfico: Aprobados por Tipo de Cliente y por Verificación */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mt-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Solicitudes  por Tipo de Cliente y por Verificaciones Aprobadas</h3>
-          <div className="h-80 flex items-center justify-center">
-            <Bar
-              data={barHorizontalTipoClienteData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: true,
-                    position: 'top',
-                    labels: {
-                      usePointStyle: true,
-                      padding: 20
-                    }
-                  },
-                  tooltip: {
-                    enabled: true,
-                  },
-                },
-                scales: {
-                  x: {
-                    beginAtZero: true,
-                    grid: { color: '#f3f4f6' },
-                    ticks: { precision: 0 },
-                  },
-                  y: {
-                    grid: { display: false },
-                    ticks: { font: { size: 14 } },
-                  },
-                },
-              }}
-            />
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-2 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Segmento
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Solicitudes<br/>Ingresadas
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Pre<br/>Aprobadas
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    No Aplica
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Aprobado
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Rechazado
+                  </th>
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Facturadas
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {procesarDatosPorSegmento().map((segmento, index) => (
+                  <tr key={index} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-b border-gray-100">
+                      {segmento.nombre}
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 rounded text-xs font-semibold">
+                        {segmento.totalSolicitudes}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                        {segmento.preAprobadas}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-red-100 text-red-800 rounded text-xs font-semibold">
+                        {segmento.noAplica}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-green-100 text-green-800 rounded text-xs font-semibold">
+                        {segmento.aprobado}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-red-300 text-red-800 rounded text-xs font-semibold">
+                        {segmento.rechazado}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <span className="inline-flex items-center justify-center w-10 h-6 bg-green-300 text-black-800 rounded text-xs font-semibold">
+                        {segmento.facturadas}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+                
+                {/* Fila de totales para segmentos */}
+                {procesarDatosPorSegmento().length > 0 && (
+                  <>
+                    <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
+                      <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                        TOTAL
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center w-10 h-6 rounded text-xs font-bold">
+                          {calcularTotales(procesarDatosPorSegmento()).totalSolicitudes}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-200 text-blue-900 rounded text-xs font-bold">
+                          {calcularTotales(procesarDatosPorSegmento()).preAprobadas}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-red-200 text-red-900 rounded text-xs font-bold">
+                          {calcularTotales(procesarDatosPorSegmento()).noAplica}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-green-200 text-green-900 rounded text-xs font-bold">
+                          {calcularTotales(procesarDatosPorSegmento()).aprobado}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-red-300 text-red-900 rounded text-xs font-bold">
+                          {calcularTotales(procesarDatosPorSegmento()).rechazado}
+                        </span>
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <span className="inline-flex items-center justify-center w-10 h-6 bg-green-200 text-green-900 rounded text-xs font-bold">
+                          {calcularTotales(procesarDatosPorSegmento()).facturadas}
+                        </span>
+                      </td>
+                    </tr>
+                    
+                    {/* Fila de porcentajes para segmentos */}
+                    <tr className="bg-purple-50 border-t border-gray-200">
+                      <td className="px-6 py-2 whitespace-nowrap text-xs font-semibold text-purple-900">
+                        PORCENTAJE
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        100%
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        {calcularPorcentajes(procesarDatosPorSegmento()).preAprobadas}%
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        {calcularPorcentajes(procesarDatosPorSegmento()).noAplica}%
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        {calcularPorcentajes(procesarDatosPorSegmento()).aprobado}%
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        {calcularPorcentajes(procesarDatosPorSegmento()).rechazado}%
+                      </td>
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        {calcularPorcentajes(procesarDatosPorSegmento()).facturadas}%
+                      </td>
+                    </tr>
+                  </>
+                )}
+              </tbody>
+            </table>
           </div>
+          
+          {/* Mensaje cuando no hay datos de segmentos */}
+          {procesarDatosPorSegmento().length === 0 && (
+            <div className="px-6 py-8 text-center text-gray-500">
+              <p className="text-lg">No hay datos de segmentos disponibles para el período seleccionado</p>
+              <p className="text-sm mt-2">Ajusta los filtros para ver los resultados</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
