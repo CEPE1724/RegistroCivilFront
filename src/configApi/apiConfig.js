@@ -199,7 +199,7 @@ export const APIURL = {
 
    get_Productos: () => `${API_BASE_URL}cre-producto-solicitud`,
 
-  get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`
+  get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`,
 
-
+  get_excelSolicitudWeb: () => `${API_BASE_URL}excel-solicitudes-web/export-excel`
 };
