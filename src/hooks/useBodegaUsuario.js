@@ -27,14 +27,18 @@ const useBodegaUsuario = () => {
     }
   };
 
-  const listaVendedoresporBodega = async (fecha, bodega, nivel) => {
+   const listaVendedoresporBodega = async (fecha, bodega, nivel) => {
+
+  };
+
+  const listaVendedoresporBodegaparaSolicitudes = async ( bodega) => {
     setLoading(true);  
     setError(null);    
     try {
-      const params = { fecha, bodega, nivel };
+      const params = { bodega };
 
-      const response = await axios.get(APIURL.listaVendedoresporBodega(fecha, bodega, nivel));
-
+      const response = await axios.get(APIURL.listarVendedoresPorBodega( bodega));
+      console.log("Respuesta de la lista de vendedores" ,response)
       setVendedor(response.data);
     } catch (err) {
       setError("Hubo un error al obtener los datos.");
@@ -42,6 +46,20 @@ const useBodegaUsuario = () => {
       setLoading(false);  
     }
   };
+  //   setLoading(true);  
+  //   setError(null);    
+  //   try {
+  //     const params = { fecha, bodega, nivel };
+
+  //     const response = await axios.get(APIURL.listaVendedoresporBodega(fecha, bodega, nivel));
+  //     console.log(response)
+  //     setVendedor(response.data);
+  //   } catch (err) {
+  //     setError("Hubo un error al obtener los datos.");
+  //   } finally {
+  //     setLoading(false);  
+  //   }
+  // };
 
    const listadoAnalista = async () => {
       try {
@@ -61,6 +79,7 @@ const useBodegaUsuario = () => {
     error,
     fetchBodegaUsuario,  
     listaVendedoresporBodega,
+    listaVendedoresporBodegaparaSolicitudes,
     vendedor,
     analista,
     listadoAnalista,

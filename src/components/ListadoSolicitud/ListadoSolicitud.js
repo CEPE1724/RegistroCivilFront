@@ -110,6 +110,7 @@ export function ListadoSolicitud() {
     error,
     fetchBodegaUsuario,
     listaVendedoresporBodega,
+    listaVendedoresporBodegaparaSolicitudes,
     vendedor,
     analista,
     listadoAnalista,
@@ -561,6 +562,21 @@ export function ListadoSolicitud() {
     );
     // Retornar true si no existe el permiso o si no está activo
     return !permiso || !permiso.Activo;
+  };
+
+
+    const tienePermisosDocumentosEnVivo = (data) => {
+    // Verificar si tiene permisos para observar documentos en vivo
+    const permiso = permisos.find(
+      (p) => p.Permisos === `ANALISTA OBSERVAR DOCUMENTOS TIEMPO REAL`
+    );
+    
+    console.log("Buscando permiso:", `ANALISTA OBSERVAR DOCUMENTOS TIEMPO REAL`);
+    console.log("Permiso encontrado:", permiso);
+    console.log("Lista de permisos:", permisos);
+    
+    // Retornar true solo si existe el permiso Y está activo
+    return permiso && permiso.Activo;
   };
 
   const [openDialog2, setOpenDialog2] = useState(false);
@@ -1227,20 +1243,32 @@ export function ListadoSolicitud() {
 
   useEffect(() => {
     if (selectedBodega !== "todos") {
-      fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
+     ///fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
+    fecthaUsuarioBodega(selectedBodega);
     } else {
       fetchSolicitudes();
     }
   }, [selectedBodega, fechaInicio]);
 
-  const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
+  // const fecthaUsuarioBodega = async (fecha , bodega , nivel ) => {
+  //   try {
+  //     /// await listaVendedoresporBodega(bodega);
+  //     await listaVendedoresporBodega(fecha, bodega , nivel);
+  //   } catch (err) {
+  //     console.error("Error al obtener datos de la bodega:", err);
+  //   }
+  // };
+
+
+
+    const fecthaUsuarioBodega = async ( bodega  ) => {
     try {
-      await listaVendedoresporBodega(fecha, bodega, nivel);
+     // await listaVendedoresporBodega(bodega);
+    await listaVendedoresporBodegaparaSolicitudes(bodega);
     } catch (err) {
       console.error("Error al obtener datos de la bodega:", err);
     }
   };
-
   const fecthAnalista = async () => {
     try {
       await listadoAnalista();
@@ -2862,8 +2890,8 @@ export function ListadoSolicitud() {
                               disabled={
                                 //// data.idEstadoVerificacionDocumental === 2 ||
                                 estaDeshabilitado(data) ||
-                                estadoDeshabilitadoDocumental(data) ||
-                                verificacionSolicitud(data)
+                                verificacionSolicitud(data) ||
+                                estadoDeshabilitadoDocumental(data)
                               }
                               size="small"
                               sx={{

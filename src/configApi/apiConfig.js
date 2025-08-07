@@ -2,9 +2,9 @@ import { get } from "react-hook-form";
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-//const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
+const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
 
-const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
+//const API_BASE_URL = "http://192.168.2.67:3025/api/v1/"
 
 
 
@@ -142,6 +142,7 @@ export const APIURL = {
   deleteRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/delete/${idUsuario}/${idmenu_items}`,
   createRolesAccesos: (idUsuario, idmenu_items) => `${API_BASE_URL}menu-item-role/accessroles/create/${idUsuario}/${idmenu_items}`,
   listaVendedoresporBodega: (Fecha, idBodega, inivel) => `${API_BASE_URL}exec-sp/FacturacionListaVendedoresWeb/${Fecha}/${idBodega}/${inivel}`,
+  listarVendedoresPorBodega: (idBodega) => `${API_BASE_URL}exec-sp/vendedores/bodega/${idBodega}`,
   getdocumentosanalista: () => `${API_BASE_URL}cre-solicitud-web/documentosanalista`,
   post_VerificacionTelefonicaMaestro: () => `${API_BASE_URL}cre-verificacion-telefonica-maestro`,
   postCompareFaces: () => `${API_PYTHON_BASE_URL}verify-faces`,

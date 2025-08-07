@@ -52,7 +52,9 @@ export function Documental({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observaciones, setObservaciones] = useState([]);
   const [notificacionEnviada, setNotificacionEnviada] = useState(false);
+  const [permisos, setPermisos] = useState([]);
 
+  
   const patchSolicitud = async (idSolicitud) => {
     try {
       const response = await axios.patch(
@@ -835,6 +837,60 @@ export function Documental({
     }
   };
 
+  const permissionscomponents = async (idMenu, idUsuario) => {
+    try {
+      const url = APIURL.getacces(idMenu, idUsuario);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setPermisos(data);
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching permissions components:", error);
+    }
+  };
+
+  const estadoDeshabilitadoDocumental = () => {
+    // Buscar el permiso correspondiente en la lista de permisos
+    const permiso = permisos.find(
+      (p) => p.Permisos === `EDITAR DOCUMENTAL PROCESO`
+    );
+    // Retornar true si no existe el permiso o si no está activo
+    return !permiso || !permiso.Activo;
+  };
+
+  const esAnalistaGrupo16 = () => {
+    return userData?.idGrupo === 16;
+  };
+
+  const botonesDeshabilitados = () => {
+    const sinPermisos = estadoDeshabilitadoDocumental();
+    const esAnalista = esAnalistaGrupo16();
+    
+    console.log("=== DEBUG DOCUMENTAL PERMISOS ===");
+    console.log("Usuario:", userData);
+    console.log("Lista de permisos:", permisos);
+    console.log("Sin permisos EDITAR DOCUMENTAL PROCESO:", sinPermisos);
+    console.log("Es analista grupo 16:", esAnalista);
+    console.log("Botones deshabilitados:", sinPermisos || esAnalista);
+    console.log("=================================");
+    
+    return sinPermisos || esAnalista;
+  };
+
+  // Cargar permisos al inicializar el componente
+  useEffect(() => {
+    if (userData?.idUsuario && idMenu) {
+      permissionscomponents(idMenu, userData.idUsuario);
+    }
+  }, [userData?.idUsuario, idMenu]);
+
   useEffect(() => {
     async function checkYEnviar() {
       const claveLocal = `notificacion_enviada_${id}`;
@@ -889,7 +945,7 @@ export function Documental({
               ></div>
             </div>
 
-            {calculateProgress() === 100 && (
+            {calculateProgress() === 100 && !botonesDeshabilitados() && (
               <div className="mt-4 text-center">
                 <button
                   onClick={() => setIsModalOpen(true)}
@@ -1155,15 +1211,15 @@ export function Documental({
                           <IconButton onClick={toggleView}>
                             <VisibilityIcon />
                           </IconButton>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleOpenDeleteConfirmation(activeTab, index)
-                            }
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            ❌
-                          </button>
+                          {!botonesDeshabilitados() && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenDeleteConfirmation(activeTab, index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              ❌
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -1186,8 +1242,13 @@ export function Documental({
 
           <div className="flex justify-center items-center mt-6 w-full">
             <button
-              onClick={() => setShowFileInput(true)}
-              class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
+              onClick={() => !botonesDeshabilitados() && setShowFileInput(true)}
+              disabled={botonesDeshabilitados()}
+              class={`cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90 ${
+                botonesDeshabilitados() 
+                  ? 'bg-gray-400 cursor-not-allowed opacity-50' 
+                  : 'bg-[#2563eb]'
+              }`}
             >
               <svg
                 class="w-7 h-7 fill-white delay-50 duration-200 group-hover/button:-translate-y-12 sm:w-20 sm:h-20"
@@ -1236,8 +1297,19 @@ export function Documental({
 
             <div className="ml-4 md:absolute md:right-11">
               <button
-                onClick={handleSubmit}
-                className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+                onClick={(e) => {
+                  if (botonesDeshabilitados()) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleSubmit(e);
+                }}
+                disabled={botonesDeshabilitados()}
+                className={`py-2 px-6 rounded-md shadow-lg transition duration-300 ${
+                  botonesDeshabilitados()
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
               >
                 Enviar archivos
               </button>
@@ -1283,9 +1355,20 @@ export function Documental({
 
                 <div className="flex justify-center">
                   <button
-                    onClick={handleSubmitUpFile}
+                    onClick={(e) => {
+                      if (botonesDeshabilitados()) {
+                        e.preventDefault();
+                        return;
+                      }
+                      handleSubmitUpFile(e);
+                    }}
+                    disabled={botonesDeshabilitados()}
                     type="submit"
-                    className="bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg hover:bg-blue-700 transition duration-300"
+                    className={`py-2 px-6 rounded-md shadow-lg transition duration-300 ${
+                      botonesDeshabilitados()
+                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     Enviar
                   </button>
@@ -1357,8 +1440,19 @@ export function Documental({
                 Cancelar
               </button>
               <button
-                onClick={handleConfirm}
-                className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+                onClick={(e) => {
+                  if (botonesDeshabilitados()) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleConfirm();
+                }}
+                disabled={botonesDeshabilitados()}
+                className={`py-2 px-4 rounded-md ${
+                  botonesDeshabilitados()
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
               >
                 Confirmar
               </button>
