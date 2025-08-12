@@ -535,7 +535,7 @@ export function ListadoSolicitud() {
     2: "ASIGNADO",
     3: "APROBADO",
     4: "RECHAZADO",
-	7: "CORRECCION"
+    7: "CORRECCION"
   };
 
   const [domicilio, setDomicilio] = useState(sessionStorage.getItem('filtroDomicilio') || "Todos");
@@ -732,7 +732,7 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible"; 
+      const analistaNombre = analistas.find((a) => a.idUsuario === data.idAnalista)?.Nombre || "No disponible";
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
@@ -750,7 +750,7 @@ export function ListadoSolicitud() {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
-      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio"; 
+      const operadorNombre = operadores.find((a) => a.idUsuario === data.Operador)?.Nombre || "Vacio";
       await axios.post(url, {
         idCre_SolicitudWeb: data.id,
         Tipo: tipo,
@@ -845,8 +845,8 @@ export function ListadoSolicitud() {
   };
 
   const imprimirInforme = () => {
-	const permiso = permisos.find((p) => p.Permisos === "IMPRIMIR INFORME SOLICITUDES")
-	return permiso && permiso.Activo
+    const permiso = permisos.find((p) => p.Permisos === "IMPRIMIR INFORME SOLICITUDES")
+    return permiso && permiso.Activo
   }
 
   const estadoDeshabilitadoporPermisos = (data) => {
@@ -1281,7 +1281,7 @@ export function ListadoSolicitud() {
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
       case 5:
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
-	  case 7: // correccion
+      case 7: // correccion
         return <PhoneDisabledIcon sx={{ color: "#FF5722" }} />;
       default: // Estado no especificado
         return <PhoneIcon />;
@@ -1633,9 +1633,9 @@ export function ListadoSolicitud() {
   };
 
   const updateAnalista = async (fila, numero) => {
-   
+
     try {
-     
+
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
         {
@@ -1659,7 +1659,7 @@ export function ListadoSolicitud() {
   };
 
   const updateOperador = async (fila, numero) => {
-   
+
     try {
       const response = await axios.patch(
         APIURL.update_solicitud(fila.id),
@@ -1824,7 +1824,7 @@ export function ListadoSolicitud() {
                         : item.idProductos == 6
                           ? "TELEVISOR"
                           : "DESCONOCIDO",
-			idVendedor: item.idVendedor,
+              idVendedor: item.idVendedor,
             };
           })
         );
@@ -1861,34 +1861,34 @@ export function ListadoSolicitud() {
 
   //crear excel 
   const fetchCrearExcel = async () => {
-	try {
-		const response = await axios.get(APIURL.get_excelSolicitudWeb(), {
-      responseType: 'blob',
-    });
-	console.log("informe creado")
+    try {
+      const response = await axios.get(APIURL.get_excelSolicitudWeb(), {
+        responseType: 'blob',
+      });
+      console.log("informe creado")
 
-	// Crear un objeto URL para el blob recibido
-    const blob = new Blob([response.data], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
+      // Crear un objeto URL para el blob recibido
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
 
-	const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = 'reporte_solicitudesWeb.xlsx'; 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'reporte_solicitudesWeb.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
-	if(response){
-		enqueueSnackbar("Reporte creado.", { variant: "success",});
-	}
-		
-	} catch (error) {
-		console.error("Error al generar el Excel:", error);
-		enqueueSnackbar("Error al generar el reporte.", { variant: "error" });
-		return null;
-	}
+      if (response) {
+        enqueueSnackbar("Reporte creado.", { variant: "success", });
+      }
+
+    } catch (error) {
+      console.error("Error al generar el Excel:", error);
+      enqueueSnackbar("Error al generar el reporte.", { variant: "error" });
+      return null;
+    }
   }
 
 
@@ -1980,8 +1980,8 @@ export function ListadoSolicitud() {
         consulta: registro.consulta,
         idEstadoVerificacionTelefonica: registro.idEstadoVerificacionTelefonica,
         permisos: permisos,
-		idVendedor: registro.idVendedor,
-		idAnalista: registro.idAnalista
+        idVendedor: registro.idVendedor,
+        idAnalista: registro.idAnalista
       },
     });
   };
@@ -2036,7 +2036,7 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
- 
+
 
   const handleEquifax = () => {
     navigate("/equifaxx", {
@@ -2380,13 +2380,13 @@ export function ListadoSolicitud() {
           <DeleteIcon /> Limpiar Filtros
         </button>
 
-		{imprimirInforme() && (
-		<button
-          className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
-          onClick={fetchCrearExcel}
-        >
-          <PiMicrosoftExcelLogoBold size={45} /> Crear informe
-        </button>)}
+        {imprimirInforme() && (
+          <button
+            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
+            onClick={fetchCrearExcel}
+          >
+            <PiMicrosoftExcelLogoBold size={45} /> Crear informe
+          </button>)}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">
@@ -4519,7 +4519,7 @@ export function ListadoSolicitud() {
         open={openPreDocumentos}
         onClose={() => setOpenPreDocumentos(false)}
         idSolicitud={preDocumentosData?.data?.id}
-		infoSoli={preDocumentosData}
+        infoSoli={preDocumentosData}
         onContinue={async () => {
           setOpenPreDocumentos(false);
 

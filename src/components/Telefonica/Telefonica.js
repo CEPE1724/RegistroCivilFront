@@ -108,7 +108,7 @@ export function TelefonicaList({
   );
 
   const tienePermisocorreccion = clientInfo.permisos.some(
-	(permiso) => permiso.Permisos === 'EDITAR TELEFONICA CORRECCION' && permiso.Activo
+    (permiso) => permiso.Permisos === 'EDITAR TELEFONICA CORRECCION' && permiso.Activo
   );
 
 
@@ -135,7 +135,7 @@ export function TelefonicaList({
       );
       await fetchConsultaYNotifica(clientInfo.id, clientInfo, {
         title: "Se aprobo la verificacion telefonica! 👀 ",
-        body: `Revisa la solicitud de crédito de 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud} con CI. ${clientInfo.cedula}` ,
+        body: `Revisa la solicitud de crédito de 🧑‍💼 ${clientInfo.nombre} correspondiente a la solicitud  ${clientInfo.NumeroSolicitud} con CI. ${clientInfo.cedula}`,
         type: "alert",
         empresa: "CREDI",
         url: "", // Opcional
@@ -153,22 +153,22 @@ export function TelefonicaList({
   };
 
   const handleCorreccion = async (observacion) => {
-	await patchSolicitud( clientInfo.id, 7 ); // actualizar a correccion
-	fetchInsertarDatosCorreccion(7, observacion);
-  
-	await fetchConsultaYNotifica(clientInfo?.id, clientInfo, {
-	title: "¡Se envio a corregir la telefonica! ✍️📞",
-	body: `Revisa la solicitud de crédito ${clientInfo.NumeroSolicitud} de 🧑‍💼 ${clientInfo.nombre} con CI ${clientInfo.cedula}
+    await patchSolicitud(clientInfo.id, 7); // actualizar a correccion
+    fetchInsertarDatosCorreccion(7, observacion);
+
+    await fetchConsultaYNotifica(clientInfo?.id, clientInfo, {
+      title: "¡Se envio a corregir la telefonica! ✍️📞",
+      body: `Revisa la solicitud de crédito ${clientInfo.NumeroSolicitud} de 🧑‍💼 ${clientInfo.nombre} con CI ${clientInfo.cedula}
 	 📅 Fecha: ${fechaHoraEcuador}`,
-	type: "alert",
-	empresa: "POINT",
-	url: "",
-	tipo: "vendedor",
-	 });
-	  navigate("/ListadoSolicitud", {
-		replace: true,
-	  });
-	};
+      type: "alert",
+      empresa: "POINT",
+      url: "",
+      tipo: "vendedor",
+    });
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
+  };
 
 
   const [showRechazoModal, setShowRechazoModal] = useState(false);
@@ -396,7 +396,7 @@ export function TelefonicaList({
     }
   };
 
-  const fetchInsertarDatosCorreccion = async (tipo , observacion) => {
+  const fetchInsertarDatosCorreccion = async (tipo, observacion) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
@@ -412,22 +412,22 @@ export function TelefonicaList({
     }
   };
 
-  const handleAsignar =  async(observacion) => {
-	await patchSolicitud( clientInfo.id, 2 );
-	fetchInsertarDatosCorreccion(2, observacion); 
+  const handleAsignar = async (observacion) => {
+    await patchSolicitud(clientInfo.id, 2);
+    fetchInsertarDatosCorreccion(2, observacion);
 
-	await fetchConsultaYNotifica(clientInfo?.id, clientInfo, {
-	title: "¡Se reasigno la verificacion telefonica! 📞",
-	body: `Vuelve a revisar la solicitud de crédito ${clientInfo.NumeroSolicitud} de 🧑‍💼 ${clientInfo.nombre} con CI ${clientInfo.cedula}
+    await fetchConsultaYNotifica(clientInfo?.id, clientInfo, {
+      title: "¡Se reasigno la verificacion telefonica! 📞",
+      body: `Vuelve a revisar la solicitud de crédito ${clientInfo.NumeroSolicitud} de 🧑‍💼 ${clientInfo.nombre} con CI ${clientInfo.cedula}
 	 📅 Fecha: ${fechaHoraEcuador}`,
-	type: "alert",
-	empresa: "CREDI",
-	url: "",
-	tipo: "analista",
-	 });
-	  navigate("/ListadoSolicitud", {
-		replace: true,
-	  });
+      type: "alert",
+      empresa: "CREDI",
+      url: "",
+      tipo: "analista",
+    });
+    navigate("/ListadoSolicitud", {
+      replace: true,
+    });
 
   }
 
@@ -767,22 +767,22 @@ export function TelefonicaList({
                         Rechazar
                       </button>
                     )}
-					
-					{clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && clientInfo.idEstadoVerificacionTelefonica !== 7 && tienePermisocorreccion && (
-					<button
-                      onClick={() => setShowModalCorrecion(true)}
-                      className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
-                    >
-                      Correccion
-                    </button>)}
 
-					{ clientInfo.idEstadoVerificacionTelefonica == 7 && (userData.idGrupo == 1 || userData.idGrupo == 23 ) &&(
-					<button
-                      onClick={() => setOpenConfirmModalAsig(true)}
-                      className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
-                    >
-                      Asignar 	
-                    </button>)}
+                    {clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && clientInfo.idEstadoVerificacionTelefonica !== 7 && tienePermisocorreccion && (
+                      <button
+                        onClick={() => setShowModalCorrecion(true)}
+                        className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
+                      >
+                        Correccion
+                      </button>)}
+
+                    {clientInfo.idEstadoVerificacionTelefonica == 7 && (userData.idGrupo == 1 || userData.idGrupo == 23) && (
+                      <button
+                        onClick={() => setOpenConfirmModalAsig(true)}
+                        className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
+                      >
+                        Asignar
+                      </button>)}
                     <button
                       onClick={() => navigate("/ListadoSolicitud", { replace: true })}
                       className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
@@ -1030,7 +1030,7 @@ export function TelefonicaList({
             </DialogContent>
 
             <DialogActions className="bg-gray-100 py-3 px-6">
-              {selectedRow?.idEstadoGestns !== 11 && tienePermisoGuardar && (clientInfo.idEstadoVerificacionTelefonica == 2 || clientInfo.idEstadoVerificacionTelefonica == 7  ) 
+              {selectedRow?.idEstadoGestns !== 11 && tienePermisoGuardar && (clientInfo.idEstadoVerificacionTelefonica == 2 )
                 && (
                   <Button
                     onClick={handleGuardarModal}
@@ -1058,23 +1058,23 @@ export function TelefonicaList({
           mensajePrincipal="¿Está seguro de rechazar la verificación telefónica?"
         />
       </div>
-		<ModalCorreccion
+      <ModalCorreccion
         isOpen={showModalCorrecion}
         onClose={() => setShowModalCorrecion(false)}
         onConfirm={handleCorreccion}
         solicitudData={clientInfo}
-		Titulo='Enviar a Correccion'
-		mensajePrincipal='¿Deseas solicitar una corrección para Telefónica?'
-        />
+        Titulo='Enviar a Correccion'
+        mensajePrincipal='¿Deseas solicitar una corrección para Telefónica?'
+      />
 
-		<ModalCorreccion
+      <ModalCorreccion
         isOpen={openConfirmModalAsig}
         onClose={() => setOpenConfirmModalAsig(false)}
         onConfirm={handleAsignar}
         solicitudData={clientInfo}
-		Titulo='Enviar Verificacion'
-		mensajePrincipal='¿Deseas volver a enviar a revisión la Telefónica?'
-        />
+        Titulo='Enviar Verificacion'
+        mensajePrincipal='¿Deseas volver a enviar a revisión la Telefónica?'
+      />
 
     </div>
   );

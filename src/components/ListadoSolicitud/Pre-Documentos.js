@@ -44,13 +44,14 @@ const getTipoDocumento = (id) => {
         12: "Foto del Cliente",
         13: "Casa",
         14: "Servicio Básico",
-		26: "Trabajo"
-		
+        26: "Trabajo"
+
     };
     return documentoIds[id] || `Documento ${id}`;
 };
 
 const PreDocumentos = ({ open, onClose, onContinue, idSolicitud, infoSoli }) => {
+
     const [estadoDocs, setEstadoDocs] = useState([]);
     const [imagenPreview, setImagenPreview] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -84,31 +85,31 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud, infoSoli }) => 
                 // const todosDocs = response.data || [];
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB
-                const docsFiltrados = infoSoli.tipo == "domicilio" ? 
-				documentos.filter(doc =>
-                    [13 , 12 ,2 ].includes(doc.idTipoDocumentoWEB)
-                ).map(doc => ({
-                    id: doc.idDocumentosSolicitudWeb,
-                    nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
-                    tipoId: doc.idTipoDocumentoWEB,
-                    url: doc.RutaDocumento || '',
-                    tieneX: false, // Cambiar de validado/invalido a tieneX
-                    fechaSubida: doc.FechaSubida,
-                    usuario: doc.Usuario,
-                    estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
-                }))  : 
-				documentos.filter(doc =>
-                    [26 , 12 ,2 ].includes(doc.idTipoDocumentoWEB)
-                ).map(doc => ({
-                    id: doc.idDocumentosSolicitudWeb,
-                    nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
-                    tipoId: doc.idTipoDocumentoWEB,
-                    url: doc.RutaDocumento || '',
-                    tieneX: false, // Cambiar de validado/invalido a tieneX
-                    fechaSubida: doc.FechaSubida,
-                    usuario: doc.Usuario,
-                    estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
-                }));
+                const docsFiltrados = infoSoli.tipo == "domicilio" ?
+                    documentos.filter(doc =>
+                        [13, 12, 2].includes(doc.idTipoDocumentoWEB)
+                    ).map(doc => ({
+                        id: doc.idDocumentosSolicitudWeb,
+                        nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
+                        tipoId: doc.idTipoDocumentoWEB,
+                        url: doc.RutaDocumento || '',
+                        tieneX: false, // Cambiar de validado/invalido a tieneX
+                        fechaSubida: doc.FechaSubida,
+                        usuario: doc.Usuario,
+                        estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
+                    })) :
+                    documentos.filter(doc =>
+                        [26, 12, 2].includes(doc.idTipoDocumentoWEB)
+                    ).map(doc => ({
+                        id: doc.idDocumentosSolicitudWeb,
+                        nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
+                        tipoId: doc.idTipoDocumentoWEB,
+                        url: doc.RutaDocumento || '',
+                        tieneX: false, // Cambiar de validado/invalido a tieneX
+                        fechaSubida: doc.FechaSubida,
+                        usuario: doc.Usuario,
+                        estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
+                    }));
                 setTodosDocs(docsFiltrados);
                 setEstadoDocs(docsFiltrados);
             } catch (error) {
@@ -237,7 +238,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud, infoSoli }) => 
 
     // Validación modificada: botón "Aceptar" se deshabilita si algún documento tiene X
     const hayDocumentosConX = estadoDocs.some(doc => doc.tieneX);
-    const continuarHabilitado = estadoDocs.length > 0 && !hayDocumentosConX;
+    const continuarHabilitado = estadoDocs.length > 2 && !hayDocumentosConX;
     const documentosConX = estadoDocs.filter(doc => doc.tieneX).length;
 
     return (
@@ -421,7 +422,7 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud, infoSoli }) => 
                         variant="contained"
                         color="primary"
                     >
-                        {hayDocumentosConX
+                        {hayDocumentosConX 
                             ? `Aceptar (${documentosConX} )`
                             : `Aceptar (${estadoDocs.length})`
                         }
