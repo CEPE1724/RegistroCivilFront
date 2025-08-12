@@ -77,7 +77,7 @@ function App() {
         <Route path="/georeferencia" element={<PrivateRouteWrapper title="Georeferencia" element={<VerificacionGeoreferencia />} />} />
         <Route path="/solicitudgrande" element={<PrivateRouteWrapper title="SolicitudGrande" element={<SolicitudGrande />} />} />
         <Route path="/ListadoSolicitud" element={<PrivateRouteWrapper title="Tabla" element={<ListaSolicitud />} />} />
-        <Route path="/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
+        <Route path="/point/credito/seguridad" element={<PrivateRouteWrapper title="Seguridad" element={<Seguridad />} />} />
         <Route path="/telefonicaList" element={<PrivateRouteWrapper title="Telefonica Lista Solicitud" element={<TelefonicaListSol />} />} />
         <Route path="/gestorDocumentos" element={<PrivateRouteWrapper title="Gestor Documentos" element={<GestorDocumentosCli />} />} />
         <Route path="/repositorio" element={<PrivateRouteWrapper title="Repositorio" element={<RepositorioCreditos />} />} />
