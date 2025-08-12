@@ -97,27 +97,28 @@ export function Documental({
     });
 
     if (showOnlyCorrections) {
-      try {
-        // 1️⃣ Enviar PATCH a la API para actualizar el estado de los documentos
-        const response = await axios.patch(APIURL.patch_cancelados(id), {
-          idEstadoDocumento: 6, // Enviar el estado 6 en el cuerpo del PATCH
-        });
+  try {
+    // Solo actualizar documentos obligatorios a corregir (1-15 y >25)
+    const response = await axios.patch(APIURL.patch_cancelados(id), {
+      idEstadoDocumento: 6, // Enviar el estado 6 en el cuerpo del PATCH
+      // Solo afectar documentos obligatorios, no los opcionales (16-25)
+    });
 
-        if (response.status === 200) {
-          enqueueSnackbar("Documentos cancelados correctamente.", {
-            variant: "success",
-          });
+    if (response.status === 200) {
+      enqueueSnackbar("Documentos cancelados correctamente.", {
+        variant: "success",
+      });
 
-          setRefreshFiles((prev) => !prev); // Esto recarga los archivos en el useEffect
-        }
-      } catch (error) {
-        enqueueSnackbar("Error al cancelar los documentos.", {
-          variant: "error",
-        });
-        console.error("Error en la actualización:", error);
-        return; // Evitamos seguir si hay error en la API
-      }
+      setRefreshFiles((prev) => !prev); // Esto recarga los archivos en el useEffect
     }
+  } catch (error) {
+    enqueueSnackbar("Error al cancelar los documentos.", {
+      variant: "error",
+    });
+    console.error("Error en la actualización:", error);
+    return; // Evitamos seguir si hay error en la API
+  }
+}
   };
 
   const [newCompletedFields, setCompletedFields] = useState([]);
@@ -140,6 +141,9 @@ export function Documental({
   const [filesToCorrect, setFilesToCorrect] = useState([]);
   const [initialTabSet, setInitialTabSet] = useState(false);
 
+  //punto referencia
+  //Punto referencia
+
   useEffect(() => {
     const fetchUploadedFiles = async () => {
       try {
@@ -159,7 +163,7 @@ export function Documental({
           response.data.forEach((file) => {
             const sectionName = getTipoDocumento(file.idTipoDocumentoWEB);
 
-            if (!uploadedFiles[sectionName]) {
+            if (!uploadedFiles[sectionName]) {	
               uploadedFiles[sectionName] = [];
               previews[sectionName] = [];
             }
@@ -173,7 +177,6 @@ export function Documental({
               name: fileName,
               url: fileUrl,
               type: fileUrl.endsWith(".pdf") ? "application/pdf" : "image/jpeg",
-
               estado: file.idEstadoDocumento,
             });
 
@@ -181,10 +184,8 @@ export function Documental({
 
             if ( (file.idEstadoDocumento === 4 || file.idEstadoDocumento === 5) &&
 			((file.idTipoDocumentoWEB >= 1 && file.idTipoDocumentoWEB <= 15) || file.idTipoDocumentoWEB > 25)  ) {
-            //  alert(`El campo ${sectionName} está en corrección.`);
               corrections.add(sectionName); // Agrupa en "Campos a Corregir" si estado === 4
             } else {
-              //alert(`El campo ${sectionName} no está en corrección.`);
               // si sectionname es respaldo # 1 no entre
               if (sectionName !== "Respaldo 1" &&
                 sectionName !== "Respaldo 2" &&
@@ -199,6 +200,18 @@ export function Documental({
                 completed.add(sectionName); // Agrupa en "Campos Completados" si estado < 4
             }
           });
+
+		  // Agregar documentos opcionales (16-25) al modo corrección
+			if (corrections.size > 0) {
+			  const documentosOpcionales = [
+			    "Respaldo 1", "Respaldo 2", "Respaldo 3", "Respaldo 4", "Respaldo 5",
+			    "Respaldo 6", "Respaldo 7", "Respaldo 8", "Respaldo 9", "Respaldo 10"
+			  ];
+			  
+			  documentosOpcionales.forEach(docOpcional => {
+			    corrections.add(docOpcional); // Agregar documentos opcionales al modo corrección
+			  });
+			}
           setFiles(uploadedFiles);
           setFilePreviews(previews);
           setCompletedFields2([...completed]);
@@ -309,16 +322,20 @@ export function Documental({
 
   const calculateProgress = () => {
     if (showOnlyCorrections) {
-      // Modo Correcciones: Progreso basado SOLO en las secciones con estado 4
-      if (!filesToCorrect.length) return 0; // Evita dividir por 0
+  // en el modo correcciones el progreso basado SOLO en documentos OBLIGATORIOS a corregir
+  const documentosObligatorios = filesToCorrect.filter(field => {
+    const numeroDoc = getNumeroDocumento(field);
+    return (numeroDoc >= 1 && numeroDoc <= 15) || numeroDoc > 25;
+  });
+  
+  if (!documentosObligatorios.length) return 0; // Evita dividir por 0
 
-      const totalCorrections = filesToCorrect.length; // Secciones a corregir
-      const completedCorrections = completedFields2.filter((field) =>
-        filesToCorrect.includes(field)
-      ).length;
+  const completedObligatorios = completedFields2.filter((field) =>
+    documentosObligatorios.includes(field)
+  ).length;
 
-      return (completedCorrections / totalCorrections) * 100;
-    } else {
+  return (completedObligatorios / documentosObligatorios.length) * 100;
+} else {
       // Modo Normal: Progreso basado en los 11 campos totales
       const totalFields = 15;
       const completedFieldsCount = completedFields2.length;
@@ -912,6 +929,8 @@ export function Documental({
                   const fileCount =
                     files[item]?.filter((file) => !file?.url).length || 0;
                   const isSelected = activeTab === item;
+				  const numeroDoc = getNumeroDocumento(item);
+				  const esOpcional = numeroDoc >= 16 && numeroDoc <= 25;
 
                   return (
                     <li key={item}>
@@ -925,18 +944,20 @@ export function Documental({
                 ${isSelected && completedFields2.includes(item)
                             ? "bg-green-600 text-white shadow-lg"
                             : isSelected
-                              ? "bg-red-600 text-white shadow-lg"
+                              ? esOpcional ? "bg-yellow-600 text-white shadow-lg" : "bg-red-600 text-white shadow-lg"
                               : completedFields2.includes(item)
                                 ? "text-green-600 hover:bg-green-100 hover:text-green-800"
-                                : "text-red-600 hover:bg-red-100 hover:text-red-800"
+                                : esOpcional 
+                				? "text-yellow-600 hover:bg-yellow-100 hover:text-yellow-800"
+                				: "text-red-600 hover:bg-red-100 hover:text-red-800"
                           }`}
                       >
-                        {item}
+                        {item} {esOpcional && <span className="text-xs">(Opcional)</span>}
                         {fileCount > 0 && (
                           <span
                             className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected
-                              ? "bg-white text-red-600"
-                              : "bg-red-500 text-white"
+                              ? esOpcional ? "bg-white text-yellow-600" : "bg-white text-red-600"
+                			: esOpcional ? "bg-yellow-500 text-white" : "bg-red-500 text-white"
                               }`}
                           >
                             {`+${fileCount}`}

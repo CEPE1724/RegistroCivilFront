@@ -462,12 +462,13 @@ export default function CreditoForm() {
 
       Email: Yup.string()
         .email("Correo inválido")
-        .required("Ingresa un correo válido")
+		.nullable()
+        //.required("Ingresa un correo válido")
         .test(
           "not-blacklisted",
           "El email ${value} se encuentra en la lista negra",
           async (value) => {
-            if (!value) return false;            // ya cubierto por .required()
+            if (!value) return true;            // ya cubierto por .required()
             const res = await comprobEmail(value);
             return res !== 1;                    // false → lanza el mensaje
           }

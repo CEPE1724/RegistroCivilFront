@@ -62,6 +62,7 @@ export function TelefonicaList({
     idEstadoVerificacionTelefonica: "",
     permisos: [],
   });
+  console.log("permisos", clientInfo.permisos)
   const [
     idCre_VerificacionTelefonicaMaestro,
     setIdCre_VerificacionTelefonicaMaestro,
@@ -104,6 +105,10 @@ export function TelefonicaList({
 
   const tienePermisoGuardar = clientInfo.permisos.some(
     (permiso) => permiso.Permisos === 'EDITAR TELEFONICA GUARDAR' && permiso.Activo
+  );
+
+  const tienePermisocorreccion = clientInfo.permisos.some(
+	(permiso) => permiso.Permisos === 'EDITAR TELEFONICA CORRECCION' && permiso.Activo
   );
 
 
@@ -763,7 +768,7 @@ export function TelefonicaList({
                       </button>
                     )}
 					
-					{clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && clientInfo.idEstadoVerificacionTelefonica !== 7 && (userData?.idGrupo == 1 || userData?.idGrupo == 16 || userData?.idGrupo == 17) && (
+					{clientInfo.idEstadoVerificacionTelefonica !== 4 && clientInfo.idEstadoVerificacionTelefonica !== 3 && clientInfo.idEstadoVerificacionTelefonica !== 7 && tienePermisocorreccion && (
 					<button
                       onClick={() => setShowModalCorrecion(true)}
                       className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
