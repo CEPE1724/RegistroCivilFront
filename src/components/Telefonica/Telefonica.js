@@ -423,7 +423,7 @@ export function TelefonicaList({
       type: "alert",
       empresa: "CREDI",
       url: "",
-      tipo: "analista",
+      tipo: "analista-operador",
     });
     navigate("/ListadoSolicitud", {
       replace: true,
