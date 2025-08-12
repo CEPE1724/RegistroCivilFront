@@ -51,7 +51,6 @@ const getTipoDocumento = (id) => {
 };
 
 const PreDocumentos = ({ open, onClose, onContinue, idSolicitud, infoSoli }) => {
-	console.log("infoSoli", infoSoli)
     const [estadoDocs, setEstadoDocs] = useState([]);
     const [imagenPreview, setImagenPreview] = useState(null);
     const [loading, setLoading] = useState(false);

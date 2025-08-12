@@ -189,6 +189,11 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
     return permiso && permiso.Activo;
   };
 
+  const permisoReasignarVerificador = () => {
+	 const permiso = permisos.find((p) => p.Permisos === "REASIGNAR VERIFICADOR");
+    return permiso && permiso.Activo;
+  }
+
   // NUEVO: función para registrar la aprobación con observación
   const fetchInsertarDatosAprobarEstado = async (tipo, data, estado, observacion) => {
     try {
@@ -410,7 +415,7 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
                 </div>
               </div>
 
-              {trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
+              {permisoReasignarVerificador() && trabajoInfo?.tipoVerificacion !== 2 && idsTerrenas?.iEstado !== 2 && datosCliente?.Estado !== 3 && datosCliente?.Estado !== 4 && datosCliente?.Estado !== 5 && (
                 <div className="col-span-full flex justify-end mt-2">
                   <button
                     className="rounded-full bg-yellow-500 text-white px-6 py-2 text-sm hover:bg-yellow-600 transition"
