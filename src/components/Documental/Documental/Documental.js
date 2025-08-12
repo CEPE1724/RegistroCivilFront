@@ -866,7 +866,7 @@ export function Documental({
           body: `¡Hola! Ya puedes verificar los primeros  documentos de la solicitud ${NumeroSolicitud} ( foto del cliente y servicios básicos) de ${nombre} con CI ${cedula}. ¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
           type: "success",
-          empresa: "POINT",
+          empresa: "CREDI",
           url: "",
           tipo: "analista",
         });

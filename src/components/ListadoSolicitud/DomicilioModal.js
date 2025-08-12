@@ -224,6 +224,8 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
     5: "Datos falsos",
     6: "Zona Vetada",
     7: "No sustenta ingresos",
+    8: "Cliente desiste de la compra",
+    9: "Cliente pospone verificación"
   };
 
   const accesoMap = {
