@@ -4519,6 +4519,7 @@ export function ListadoSolicitud() {
         open={openPreDocumentos}
         onClose={() => setOpenPreDocumentos(false)}
         idSolicitud={preDocumentosData?.data?.id}
+		infoSoli={preDocumentosData}
         onContinue={async () => {
           setOpenPreDocumentos(false);
 

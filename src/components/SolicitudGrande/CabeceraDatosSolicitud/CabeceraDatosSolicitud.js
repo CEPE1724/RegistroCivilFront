@@ -82,7 +82,7 @@ export function CabeceraDatosSolicitud({ datosConsulta, data, setData, handleInp
         icon={<FaEnvelope />}
         value={data.email}
         onChange={handleInputChange(setData.setEmail)}
-        readOnly={isReadOnly(datosConsulta?.email)}
+        readOnly= {true} // {isReadOnly(datosConsulta?.email)}
       />
 
       {/* Celular */}

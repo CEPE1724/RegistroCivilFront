@@ -43,12 +43,15 @@ const getTipoDocumento = (id) => {
         11: "Autorización",
         12: "Foto del Cliente",
         13: "Casa",
-        14: "Servicio Básico"
+        14: "Servicio Básico",
+		26: "Trabajo"
+		
     };
     return documentoIds[id] || `Documento ${id}`;
 };
 
-const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
+const PreDocumentos = ({ open, onClose, onContinue, idSolicitud, infoSoli }) => {
+	console.log("infoSoli", infoSoli)
     const [estadoDocs, setEstadoDocs] = useState([]);
     const [imagenPreview, setImagenPreview] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -82,8 +85,21 @@ const PreDocumentos = ({ open, onClose, onContinue, idSolicitud }) => {
                 // const todosDocs = response.data || [];
 
                 // Filtrar solo los documentos que nos interesan según idTipoDocumentoWEB
-                const docsFiltrados = documentos.filter(doc =>
+                const docsFiltrados = infoSoli.tipo == "domicilio" ? 
+				documentos.filter(doc =>
                     [13 , 12 ,2 ].includes(doc.idTipoDocumentoWEB)
+                ).map(doc => ({
+                    id: doc.idDocumentosSolicitudWeb,
+                    nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
+                    tipoId: doc.idTipoDocumentoWEB,
+                    url: doc.RutaDocumento || '',
+                    tieneX: false, // Cambiar de validado/invalido a tieneX
+                    fechaSubida: doc.FechaSubida,
+                    usuario: doc.Usuario,
+                    estadoOriginal: doc.idEstadoDocumento || 3 // Guardar el estado original
+                }))  : 
+				documentos.filter(doc =>
+                    [26 , 12 ,2 ].includes(doc.idTipoDocumentoWEB)
                 ).map(doc => ({
                     id: doc.idDocumentosSolicitudWeb,
                     nombre: getTipoDocumento(doc.idTipoDocumentoWEB),
