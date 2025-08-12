@@ -152,7 +152,7 @@ const DatosConyuge = forwardRef((props, ref) => {
                     <input
                         type="text"
                         className="solcitudgrande-style"
-                        name="callePrincipal"
+                        name="apellidoPaterno"
                         onChange={handleChange}
                         value={formData.apellidoPaterno}
                         readOnly={data.ApellidoPaternoConyuge !== undefined && data.ApellidoPaternoConyuge !== null && data.ApellidoPaternoConyuge !== "" }

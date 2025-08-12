@@ -809,7 +809,7 @@ export function Cabecera() {
       case "Domicilio":
         return <Domicilio ref={datosDomicilioRef} data={clienteData} comprobTelf={comprobTelf} />;
       case "Datos Conyuge":
-        return clienteData.idEdoCivil === 1 ? (
+        return (clienteData.idEdoCivil !== 2 && clienteData.idEdoCivil !== 5 )  ? (
           <DatosConyuge ref={datosConyuge} data={clienteData} />
         ) : null;
       case "Referencias":
@@ -1021,12 +1021,12 @@ export function Cabecera() {
       );
       return false;
     }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      enqueueSnackbar("El email no tiene un formato válido.", {
-        variant: "error",
-      });
-      return false;
-    }
+    // if (!/\S+@\S+\.\S+/.test(email)) {
+    //   enqueueSnackbar("El email no tiene un formato válido.", {
+    //     variant: "error",
+    //   });
+    //   return false;
+    // }
     if (!/^\d{10}$/.test(celular)) {
       enqueueSnackbar("El celular debe ser un número de 10 dígitos.", {
         variant: "error",
@@ -1085,7 +1085,7 @@ export function Cabecera() {
         });
       }
     }
-    if (activeTab === "Datos Conyuge" && clienteData.idEdoCivil === 1) {
+    if (activeTab === "Datos Conyuge" && (clienteData.idEdoCivil === 1 || clienteData.idEdoCivil === 4 || clienteData.idEdoCivil === 6)) {
       tipoDato = 4;
       const formData = datosConyuge.current.getFormData();
       const isValid = datosConyuge.current.validateForm(); // Llamamos a validateForm del componente Datos

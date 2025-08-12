@@ -844,6 +844,11 @@ export function ListadoSolicitud() {
     return permiso && permiso.Activo;
   };
 
+  const imprimirInforme = () => {
+	const permiso = permisos.find((p) => p.Permisos === "IMPRIMIR INFORME SOLICITUDES")
+	return permiso && permiso.Activo
+  }
+
   const estadoDeshabilitadoporPermisos = (data) => {
     // Obtener el estado correspondiente al ID
     const estado = estadoMap[data.idEstadoVerificacionSolicitud];
@@ -2375,7 +2380,7 @@ export function ListadoSolicitud() {
           <DeleteIcon /> Limpiar Filtros
         </button>
 
-		{userData?.idGrupo == 1 && (
+		{imprimirInforme() && (
 		<button
           className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
           onClick={fetchCrearExcel}
