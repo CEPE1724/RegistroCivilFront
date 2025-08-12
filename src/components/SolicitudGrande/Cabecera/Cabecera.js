@@ -166,7 +166,7 @@ export function Cabecera() {
       validarcaposdataDomicilio();
 
       // Verificar si el estado civil es 1, si es así, validar los datos del cónyuge
-      if (clienteData.idEdoCivil === 1) {
+      if ([1, 4, 6].includes(clienteData.idEdoCivil)) {
         validarcaposdataConyuge();
       }
 
@@ -809,7 +809,7 @@ export function Cabecera() {
       case "Domicilio":
         return <Domicilio ref={datosDomicilioRef} data={clienteData} comprobTelf={comprobTelf} />;
       case "Datos Conyuge":
-        return (clienteData.idEdoCivil !== 2 && clienteData.idEdoCivil !== 5 )  ? (
+        return (![2, 3, 5].includes(clienteData.idEdoCivil)) ? (
           <DatosConyuge ref={datosConyuge} data={clienteData} />
         ) : null;
       case "Referencias":
@@ -1223,7 +1223,7 @@ export function Cabecera() {
     }
   };
 
- const fetchInsertarDatosRechazar = async (tipo , observacion) => {
+  const fetchInsertarDatosRechazar = async (tipo, observacion) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
@@ -1240,7 +1240,7 @@ export function Cabecera() {
   };
 
 
-   const fetchInsertarDatosCorreccion = async (tipo , observacion) => {
+  const fetchInsertarDatosCorreccion = async (tipo, observacion) => {
     try {
       const url = APIURL.post_createtiemposolicitudeswebDto();
 
@@ -1302,8 +1302,8 @@ export function Cabecera() {
           NumeroCasaNegocio: formData.numeroCasa,
           CalleSecundariaNegocio: formData.calleSecundaria,
           ReferenciaUbicacionNegocio: formData.referenciaUbicacion,
-		  TelefonoNegocio: formData.telefono,
-		  CelularNegocio: formData.celular,
+          TelefonoNegocio: formData.telefono,
+          CelularNegocio: formData.celular,
           IngresosNegosio: IngresosTrabajoString,
           EgresosNegocio: EgresosTrabajoString,
           ActividadEconomicaNegocio: formData.actividadNegocio,
@@ -1604,19 +1604,19 @@ export function Cabecera() {
       url: "", // Opcional
       tipo: "vendedor",
     });
-     
+
     navigate("/ListadoSolicitud", {
       replace: true,
     });
   };
 
   const [showModalRechazo, setShowModalRechazo] = useState(false);
-   const [showModalCorrecion, setShowModalCorrecion] = useState(false);
+  const [showModalCorrecion, setShowModalCorrecion] = useState(false);
 
   const handleRechazar = async (Observacion) => {
-    patchSolicitudRechazar(idSolicitud );
-    fetchInsertarDatosRechazar(13 , Observacion); 
-     await fetchConsultaYNotifica(idSolicitud, data, {
+    patchSolicitudRechazar(idSolicitud);
+    fetchInsertarDatosRechazar(13, Observacion);
+    await fetchConsultaYNotifica(idSolicitud, data, {
       title: "¡Se rechazo la Solicitud grande ! 🚫 ",
       body: `Revisa la solicitud de crédito ${data.NumeroSolicitud} de 🧑‍💼 ${data.PrimerNombre} ${data.ApellidoPaterno} con CI ${data.cedula}
 	  📅 Fecha: ${fechaHoraEcuador}`,
@@ -1669,15 +1669,15 @@ export function Cabecera() {
 
   const fetchImprimir = async (id) => {
     try {
-		const response = await axios.get(APIURL.get_reporteCeditoDirecto(id), {responseType: 'blob'});
+      const response = await axios.get(APIURL.get_reporteCeditoDirecto(id), { responseType: 'blob' });
 
-		const blob = response.data
+      const blob = response.data
 
-		const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(blob);
 
-		window.open(url, '_blank');
+      window.open(url, '_blank');
     } catch (error) {
-		console.error("Error al imprimir el informe", error);
+      console.error("Error al imprimir el informe", error);
     }
   };
 
@@ -1720,16 +1720,16 @@ export function Cabecera() {
                 </button>
 
                 <button
-                 onClick={() => setShowModalRechazo(true)}
-                className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                  onClick={() => setShowModalRechazo(true)}
+                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-red-600 hover:text-white transition duration-200"
                 >
                   ❌ Rechazar
                 </button>
 
                 <button
-               onClick={() => setShowModalCorrecion(true)}
-                   className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
+                  onClick={() => setShowModalCorrecion(true)}
+                  className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-yellow-50 hover:text-white transition duration-200"
                 >
                   ✏️ Corrección
@@ -1788,17 +1788,17 @@ export function Cabecera() {
               {renderTabContent(clienteData)}
             </div>
             <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-            {(data?.idEstadoVerificacionSolicitud < 12 || tienePermisoEditarAnalista()) && (
-              <div className="flex items-center">
-                <button
-                  onClick={handleSubmit}
-                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-                >
-                  <SaveIcon className="text-lg" />
-                  <span className="text-xs">Guardar</span>
-                </button>
-              </div>
-            )}
+              {(data?.idEstadoVerificacionSolicitud < 12 || (tienePermisoEditarAnalista() && data?.Estado !== 6)) && (
+                <div className="flex items-center">
+                  <button
+                    onClick={handleSubmit}
+                    className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                  >
+                    <SaveIcon className="text-lg" />
+                    <span className="text-xs">Guardar</span>
+                  </button>
+                </div>
+              )}
 
               <div className="flex items-center">
                 <button
@@ -1810,17 +1810,17 @@ export function Cabecera() {
                 </button>
               </div>
 
-			  {data?.Estado == 6 && (
-			  <div className="flex items-center">
-                <button
-                  onClick={() => fetchImprimir(data?.id)}
-                  className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
-                >
-                  <PrintIcon className="text-lg" />
-                  <span className="text-xs">Imprimir</span>
-                </button>
-              </div>
-				)}
+              {data?.Estado == 6 && (
+                <div className="flex items-center">
+                  <button
+                    onClick={() => fetchImprimir(data?.id)}
+                    className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2"
+                  >
+                    <PrintIcon className="text-lg" />
+                    <span className="text-xs">Imprimir</span>
+                  </button>
+                </div>
+              )}
 
             </div>
           </div>
@@ -1831,13 +1831,13 @@ export function Cabecera() {
           />
 
           <ModalConfirmacionRechazo
-  isOpen={showModalRechazo}
-  onClose={() => setShowModalRechazo(false)}
-  onConfirm={handleRechazar}
-  solicitudData={data}
-/> 
+            isOpen={showModalRechazo}
+            onClose={() => setShowModalRechazo(false)}
+            onConfirm={handleRechazar}
+            solicitudData={data}
+          />
 
-      <ModalCorreccion
+          <ModalCorreccion
             isOpen={showModalCorrecion}
             onClose={() => setShowModalCorrecion(false)}
             onConfirm={handleCorreccion}
