@@ -863,7 +863,7 @@ export function Documental({
       if (aprobados) {
         await fetchConsultaYNotifica(id, userUsuario, {
           title: "¡Documentos para revisar! 🔍",
-          body: `¡Hola! Ya puedes verificar los primeros  documentos de la solicitud ${NumeroSolicitud} ( foto del cliente y servicios básicos) de ${nombre} con CI ${cedula}. ¡Gracias! 😀
+          body: `¡Hola! Ya están disponibles los documentos necesarios para la verificación de terreno/domicilio de la solicitud ${NumeroSolicitud} (Foto del cliente, Cédula del Cliente y foto del trabajo o domicilio de ${nombre} con CI ${cedula}. ¡Gracias! 😀
 		   📅 Fecha: ${fechaHoraEcuador}`,
           type: "success",
           empresa: "CREDI",
