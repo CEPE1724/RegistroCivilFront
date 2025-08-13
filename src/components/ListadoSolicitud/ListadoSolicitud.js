@@ -53,8 +53,6 @@ import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
 import HourglassFullIcon from "@mui/icons-material/HourglassFull";
 import PendingIcon from "@mui/icons-material/Pending";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PhoneDisabledIcon from "@mui/icons-material/PhoneDisabled";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import LocationModal from "./LocationModal";
@@ -101,8 +99,14 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import { PiMicrosoftExcelLogoBold } from "react-icons/pi";
-
-
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import WorkIcon from '@mui/icons-material/Work';
 export function ListadoSolicitud() {
   const {
     data,
@@ -1254,16 +1258,16 @@ export function ListadoSolicitud() {
     }
   };
 
-  const getIconByEstado = (estadoId) => {
+  const getIconByEstadoDocumental = (estadoId) => {
     switch (estadoId) {
       case 1: // Estado "Aprobado"
-        return <FolderIcon sx={{ color: "#6C757D" }} />; // Estado por defecto
+        return <UploadFileIcon sx={{ color: "rgb(117, 117, 117)" }} />; // Estado por defecto
       case 2: // Estado "En revisión"
-        return <PendingIcon sx={{ color: "#FFC107" }} />;
+        return <FactCheckIcon sx={{ color: "rgb(30, 136, 229)" }} />;
       case 3: // Estado "Corrección"
-        return <ReportProblemIcon sx={{ color: "#FF5722" }} />;
+        return <ReportProblemIcon sx={{ color: "rgb(251, 140, 0)" }} />;
       case 4: // Estado "Aprobado"
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+        return <CheckCircleIcon sx={{ color: "rgb(56, 142, 60)" }} />;
       case 5: // Estado "Rechazado"
         return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
     }
@@ -1274,15 +1278,15 @@ export function ListadoSolicitud() {
       case 1: // NO ASIGNADO
         return <PhoneDisabledIcon />;
       case 2: // ASIGNADO
-        return <ContactPhoneIcon sx={{ color: "#6C757D" }} />;
+        return <PersonSearchIcon sx={{ color: "rgb(10, 80, 106)" }} />;
       case 3: // Aprobado
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+        return <CheckCircleIcon sx={{ color: "rgb(56, 142, 60)" }} />;
       case 4: // rechazado
-        return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+        return <CallEndIcon sx={{ color: "rgb(239, 83, 80)" }} />;
       case 5:
-        return <HighlightOffIcon sx={{ color: "#DC3545" }} />;
+        return <PhoneInTalkIcon sx={{ color: "#DC3545" }} />;
       case 7: // correccion
-        return <PhoneDisabledIcon sx={{ color: "#FF5722" }} />;
+        return <EditNoteIcon sx={{ color: "rgb(251, 140, 0)" }} />;
       default: // Estado no especificado
         return <PhoneIcon />;
     }
@@ -1291,7 +1295,7 @@ export function ListadoSolicitud() {
   const getSolicitudIconByEstado = (estado) => {
     switch (estado) {
       case 1: // PENDIENTE
-        return <PendingActionsIcon sx={{ color: "gray" }} />;
+        return <SupervisorAccountIcon sx={{ color: "gray" }} />;
       case 2: // DATOS CLIENTE
         return <PersonIcon sx={{ color: "gray" }} />;
       case 3: // DATOS DOMICILIO
@@ -1309,13 +1313,13 @@ export function ListadoSolicitud() {
       case 9: // FACTORES DE CRÉDITO
         return <AssessmentIcon sx={{ color: "gray" }} />;
       case 10: // verificaciomn
-        return <VerifiedIcon sx={{ color: "gray" }} />;
+        return <CheckCircleIcon sx={{ color: "rgb(30, 136, 229)" }} />;
       case 11:
-        return <SettingsPhoneIcon sx={{ color: "#FFC107" }} />; // Amarillo para GESTIONANDO
+        return <EditNoteIcon sx={{ color: "rgb(251, 140, 0)" }} />; // Azul para CORRECCIÓN
       case 12:
-        return <CheckCircleIcon sx={{ color: "#28A745" }} />;
+        return <CheckCircleIcon sx={{ color: "rgb(56, 142, 60)" }} />;
       case 13:
-        return <PendingActionsIcon sx={{ color: "#DC3545" }} />; // Rojo para RECHAZADO
+        return <BlockIcon sx={{ color: "rgb(211, 47, 47)" }} />; // Rojo para RECHAZADO
       // Verde para COMPLETADO
       default: // Default icon si el estado es desconocido
         return <HourglassEmptyIcon sx={{ color: "gray" }} />; // Fallback icon
@@ -1338,7 +1342,7 @@ export function ListadoSolicitud() {
         return <HomeIcon sx={{ color: "gray" }} />;
 
       case 1: // Dirección incorrecta
-        return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+        return <TwoWheelerIcon sx={{ color: "rgb(30, 136, 229)" }} />;
 
       case 2: // Aprobado
         return <CheckCircleIcon sx={{ color: "#28A745" }} />;
@@ -1366,10 +1370,10 @@ export function ListadoSolicitud() {
   const getIconLaboral = (estadoId) => {
     switch (estadoId) {
       case 0: // Sin verificar
-        return <HomeIcon sx={{ color: "gray" }} />;
+        return <WorkIcon sx={{ color: "gray" }} />;
 
       case 1: // Dirección incorrecta
-        return <LocationOffIcon sx={{ color: "#FFC107" }} />;
+        return <TwoWheelerIcon sx={{ color: "rgb(30, 136, 229)" }} />;
 
       case 2: // Aprobado
         return <CheckCircleIcon sx={{ color: "#28A745" }} />;
@@ -2881,7 +2885,7 @@ export function ListadoSolicitud() {
                                 transition: "all 0.2s ease",
                               }}
                             >
-                              {getIconByEstado(
+                              {getIconByEstadoDocumental(
                                 data.idEstadoVerificacionDocumental
                               )}
                             </IconButton>
@@ -3057,7 +3061,7 @@ export function ListadoSolicitud() {
                                   data.Laboral === false
                                     ? 0
                                     : 1,
-                                bgcolor: isError ? "#fee2e2" : "#fff1f5f9",
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
                                 "&:hover": {
                                   bgcolor: isError ? "#fca5a5" : "#e2e8f0",
                                   transform: "scale(1.1)",

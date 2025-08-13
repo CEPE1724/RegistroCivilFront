@@ -9,7 +9,7 @@ import TimelineDot from '@mui/lab/TimelineDot';
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { green, blue, red, yellow, grey, purple, orange, teal } from '@mui/material/colors';
+import { green, blue, red, yellow, grey, purple, orange, teal, amber } from '@mui/material/colors';
 import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 import PersonIcon from "@mui/icons-material/Person";
 import HomeIcon from "@mui/icons-material/Home";
@@ -22,16 +22,28 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import SearchIcon from "@mui/icons-material/Search";
 import CancelIcon from "@mui/icons-material/Cancel";
 import SettingsIcon from "@mui/icons-material/Settings";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import EditIcon from "@mui/icons-material/Edit";
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import EventIcon from "@mui/icons-material/Event";
 import InfoIcon from "@mui/icons-material/Info";
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import FaceIcon from "@mui/icons-material/Face";
 import ErrorIcon from "@mui/icons-material/Error";
-import { PhoneCallback } from "@mui/icons-material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import BlockIcon from '@mui/icons-material/Block';
+import PersonOffIcon from '@mui/icons-material/PersonOff';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import CallMadeIcon from '@mui/icons-material/CallMade';
+import CallEndIcon from '@mui/icons-material/CallEnd';
+import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
@@ -43,17 +55,17 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         1: { label: "Pendiente", icon: <SupervisorAccountIcon />, color: grey[500] },
         2: { label: "Datos Cliente", icon: <PersonIcon />, color: blue[500] },
         3: { label: "Domicilio", icon: <HomeIcon />, color: green[500] },
-        4: { label: "Conyuge", icon: <FavoriteIcon />, color: purple[300] },
+        4: { label: "Cónyuge", icon: <FavoriteIcon />, color: purple[300] },
         5: { label: "Referencias", icon: <ContactsIcon />, color: orange[500] },
         6: { label: "Negocios", icon: <StorefrontIcon />, color: teal[600] },
         7: { label: "Dependiente", icon: <ChildCareIcon />, color: blue[300] },
-        8: { label: "Información De Crédito", icon: <CreditScoreIcon />, color: green[700] },
-        9: { label: "Factores De Crédito", icon: <AssessmentIcon />, color: yellow[700] },
-        10: { label: "Revisión", icon: <CheckCircleIcon />, color: green[500] },
-        11: { label: "Corrección", icon: <EventIcon />, color: red[400] },
-        12: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[700] },
-        13: { label: "Rechazado", icon: <InfoIcon />, color: red[600] },
-        14: { label: "Foto", icon: <PersonIcon />, color: grey[700] },
+        8: { label: "Información de Crédito", icon: <CreditScoreIcon />, color: green[700] },
+        9: { label: "Factores de Crédito", icon: <AssessmentIcon />, color: yellow[700] },
+        10: { label: "Revisión", icon: <CheckCircleIcon />, color: blue[600] },
+        11: { label: "Corrección", icon: <EditNoteIcon />, color: orange[600] },
+        12: { label: "Aprobado", icon: <VerifiedIcon />, color: green[700] },
+        13: { label: "Rechazado", icon: <BlockIcon />, color: red[600] },
+        14: { label: "Foto", icon: <PhotoCameraIcon />, color: grey[700] },
         15: { label: "Creación de Prefactura", icon: <SettingsIcon />, color: grey[600] },
         16: { label: "Anulación de Prefactura", icon: <CancelIcon />, color: red[500] },
         17: { label: "Aprobación Prefactura", icon: <VerifiedIcon />, color: green[600] },
@@ -61,30 +73,53 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         19: { label: "Facturado", icon: <CheckCircleIcon />, color: green[800] },
         20: { label: "Verificación Facial Exitosa", icon: <FaceIcon />, color: green[600] },
         21: { label: "Verificación Facial Fallida", icon: <ErrorIcon />, color: red[600] },
+        22: { label: "Creación de Cliente", icon: <PersonAddIcon />, color: yellow[600] }
 
 
         /*11: "CORRECIÓN",
         12: "APROBADO",
         13: "RECHAZADO",*/
       },
-      2: { // Telefonica
-        1: { label: "No asginado", icon: <SupervisorAccountIcon />, color: grey[500] },
-        2: { label: "Asignado", icon: <SearchIcon />, color: green[500] },
-        3: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-        4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
-        5: { label: "Gestionado", icon: <PhoneCallback />, color: grey[500] },
-        7: { label: "Correccion", icon: <EditIcon />, color: grey[500] },
+      2: { // Telefónica
+        1: { label: "No asignado", icon: <PersonOffIcon />, color: grey[500] },         // Sin operador asignado
+        2: { label: "Asignado", icon: <PersonSearchIcon />, color: green[400] },        // Operador asignado
+        3: { label: "Aprobado", icon: <CallMadeIcon />, color: green[600] },            // Llamada realizada y aprobada
+        4: { label: "Rechazado", icon: <CallEndIcon />, color: red[500] },              // Rechazado tras contacto
+        5: { label: "Gestionado", icon: <PhoneInTalkIcon />, color: blue[500] },        // Gestión realizada con llamada
+        7: { label: "Corrección", icon: <EditNoteIcon />, color: orange[600] }          // Requiere corrección
       },
-      3: { // Documental
-        1: { label: "Procesos", icon: <SettingsIcon />, color: grey[500] },
-        2: { label: "Revisión", icon: <VisibilityIcon />, color: grey[500] },
-        3: { label: "Corrección", icon: <EditIcon />, color: grey[500] },
-        4: { label: "Aprobación", icon: <VerifiedIcon />, color: blue[500] },
-        5: { label: "Rechazo", icon: <CancelIcon />, color: red[500] },
+
+      3: { // Revisión Documental de Crédito
+        1: {
+          label: "Carga de Documentos",
+          icon: <UploadFileIcon />,
+          color: "rgb(117, 117, 117)" // grey[600] = #757575
+        },
+        2: {
+          label: "En Revisión",
+          icon: <FactCheckIcon />,
+          color: "rgb(30, 136, 229)" // blue[600] = #1E88E5
+        },
+        3: {
+          label: "Corrección",
+          icon: <ReportProblemIcon />,
+          color: "rgb(251, 140, 0)" // orange[600] = #FB8C00
+        },
+        4: {
+          label: "Aprobado",
+          icon: <CheckCircleIcon />,
+          color: "rgb(56, 142, 60)" // green[700] = #388E3C
+        },
+        5: {
+          label: "Rechazado",
+          icon: <HighlightOffIcon />,
+          color: "rgb(211, 47, 47)" // red[700] = #D32F2F
+        }
       },
+
       4:  //Domicilio
       {
-       1: {
+        1: {
           label: "Asignado",
           icon: <TwoWheelerIcon />,
           color: blue[600]   // Verde medio: indica que ya fue asignado y está en proceso
