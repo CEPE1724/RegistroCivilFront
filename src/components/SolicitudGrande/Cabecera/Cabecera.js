@@ -611,7 +611,7 @@ export function Cabecera() {
     // Actualizamos el estado de checkTrabajo con el resultado de la validación
     setCheckTrabajo(valid);
   };
-console.log("clienteData", clienteData);
+
   const validarcaposdataNegocio = () => {
     let valid = true; // Inicializamos la validación como verdadera
 
