@@ -92,7 +92,15 @@ import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import { DocumentoDescarga } from './DocumentoDescarga';
+import { MotivoContinuidad } from './MotivoContinuidad';
 import { Description } from "@mui/icons-material";
+import CommentIcon from '@mui/icons-material/Comment';
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
+import FeedbackIcon from '@mui/icons-material/Feedback';
+
+
+
+
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -176,6 +184,7 @@ export function ListadoSolicitud() {
   const [listVerifLaborModal, setListVerifLaborModal] = useState(false);
   const handleCloseVerifLabModal = () => setListVerifLaborModal(false);
   const [isOpenPDf, setIsOpenPdf] = useState(false);
+  const [isOpenMotivo, setIsOpenMotivo] = useState(false);
   const [dataInforme, setDataInforme] = useState(null);
   const [openModalCodDag, setOpenModalCodDag] = useState(false);
   const [openConfirmModalCodDac, setOpenConfirmModalCodDac] = useState(false);
@@ -2426,6 +2435,7 @@ export function ListadoSolicitud() {
                     },
                   }}
                 >
+                  <TableCell align="center"> <span style={{ color: '#ec4899' }}></span> </TableCell>
                   <TableCell align="center">N° Solicitud</TableCell>
                   <TableCell align="center">Cliente</TableCell>
                   <TableCell align="center">Cédula</TableCell>
@@ -2501,6 +2511,23 @@ export function ListadoSolicitud() {
                         cursor: "pointer",
                       }}
                     >
+                      <TableCell align="center">
+                        {(data.Estado === 1 || data.Estado === 2) ? (
+                          <button
+                            onClick={() => {
+                              setIsOpenMotivo(true);
+                              setDataInforme(data);
+                            }}
+                            className="bg-pink-100 text-pink-800 hover:bg-pink-200 hover:text-pink-900 transition-all duration-200 rounded-full p-2"
+                          >
+                            <NoteAltIcon className="text-pink-800" />
+                          </button>
+                        ) : (
+                          ""
+                        )}
+                      </TableCell>
+
+
                       <TableCell align="center">
                         {data.NumeroSolicitud}
                       </TableCell>
@@ -3061,7 +3088,7 @@ export function ListadoSolicitud() {
                                   data.Laboral === false
                                     ? 0
                                     : 1,
-                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
                                 "&:hover": {
                                   bgcolor: isError ? "#fca5a5" : "#e2e8f0",
                                   transform: "scale(1.1)",
@@ -4661,6 +4688,7 @@ export function ListadoSolicitud() {
         setLaboralChecked={setLaboralChecked}
       />
       <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
+      <MotivoContinuidad isOpen={isOpenMotivo} onClose={() => setIsOpenMotivo(false)} data={dataInforme} />
 
       {/* Modal codigo dactilar */}
       <Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>
