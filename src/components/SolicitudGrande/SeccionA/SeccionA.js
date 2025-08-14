@@ -106,8 +106,8 @@ const SeccionA = forwardRef((props, ref) => {
     ObligadoContabilidad: data.ObligadoContabilidad || false,
     telefono: data.TelefonoNegocio || "",
     celular: data.CelularNegocio || "",
-	jefeInmediato: data.JefeInmediatoIndependiente || "",
-	numeroJefe: data.CelularInmediatoIndependiente || ""
+    jefeInmediato: data.JefeInmediatoIndependiente || "",
+    numeroJefe: data.CelularInmediatoIndependiente || ""
   });
   const [showMapModal, setShowMapModal] = useState(false);
   const [Latitud, setLatitud] = useState("")
@@ -338,15 +338,15 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
-	if (formData.numeroJefe.length !== 10) {
-        newErrors.numeroJefe = "El teléfono debe tener 10 dígitos";
-        if (!showSnackbar) {
-          enqueueSnackbar("El teléfono debe tener 10 dígitos", { variant: "error", });
-          showSnackbar = true;
-        }
+    if (formData.numeroJefe.length !== 10) {
+      newErrors.numeroJefe = "El teléfono debe tener 10 dígitos";
+      if (!showSnackbar) {
+        enqueueSnackbar("El teléfono debe tener 10 dígitos", { variant: "error", });
+        showSnackbar = true;
+      }
     }
 
-	if (!formData.jefeInmediato || formData.jefeInmediato.length <= 3) {
+    if (!formData.jefeInmediato || formData.jefeInmediato.length <= 3) {
       newErrors.jefeInmediato = "Este campo es obligatorio";
       if (!showSnackbar) {
         enqueueSnackbar("El nombre del jefe inmediato debe tener más de 3 caracteres", { variant: "error" });
@@ -640,49 +640,49 @@ const SeccionA = forwardRef((props, ref) => {
           )}
         </div>
 
-		<div className="col-span-1">
-		  <label className={`text-xs font-medium mb-1 flex items-center text-gray-500`}>
-			<FaCity className="mr-2 text-primaryBlue" />
-			Jefe Inmediato
-		  </label>
-		  <input
-			type="text"
-			name="jefeInmediato"
-			autoComplete="off"
-			value={formData.jefeInmediato}
-			onChange={(e) => {
-			  const onlyLetters = e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase();
-			  setFormData(prev => ({
-				...prev,
-				jefeInmediato: onlyLetters
-			  }));
-			}}
-			className="block w-full solcitudgrande-style"
-		  />
-		  {errors.jefeInmediato && (
-			<span className="text-red-500 text-xs">{errors.jefeInmediato}</span>
-		  )}
-		</div>
-		<div className="col-span-1">
-		  <label className={`text-xs font-medium mb-1 flex items-center text-gray-500`}>
-			<FaMobileAlt className="mr-2 text-primaryBlue" />
-			Número Jefe
-		  </label>
-		  <input
-			type="text"
-			name="numeroJefe"
-			value={formData.numeroJefe}
-			onChange={handleFormChange}
-			//onBlur={handleBlur}
-			className="block w-full solcitudgrande-style"
-			onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
+        <div className="col-span-1">
+          <label className={`text-xs font-medium mb-1 flex items-center text-gray-500`}>
+            <FaCity className="mr-2 text-primaryBlue" />
+            Jefe Inmediato
+          </label>
+          <input
+            type="text"
+            name="jefeInmediato"
+            autoComplete="off"
+            value={formData.jefeInmediato}
+            onChange={(e) => {
+              const onlyLetters = e.target.value.replace(/[^A-Za-z\s]/g, '').toUpperCase();
+              setFormData(prev => ({
+                ...prev,
+                jefeInmediato: onlyLetters
+              }));
+            }}
+            className="block w-full solcitudgrande-style"
+          />
+          {errors.jefeInmediato && (
+            <span className="text-red-500 text-xs">{errors.jefeInmediato}</span>
+          )}
+        </div>
+        <div className="col-span-1">
+          <label className={`text-xs font-medium mb-1 flex items-center text-gray-500`}>
+            <FaMobileAlt className="mr-2 text-primaryBlue" />
+            Número Jefe
+          </label>
+          <input
+            type="text"
+            name="numeroJefe"
+            value={formData.numeroJefe}
+            onChange={handleFormChange}
+            //onBlur={handleBlur}
+            className="block w-full solcitudgrande-style"
+            onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
             maxLength={10}
-		  />
-		  {errors.numeroJefe && (
-			<span className="text-red-500 text-xs">{errors.numeroJefe}</span>
-		  )}
-		</div>
-		
+          />
+          {errors.numeroJefe && (
+            <span className="text-red-500 text-xs">{errors.numeroJefe}</span>
+          )}
+        </div>
+
         <div className="flex flex-col">
           <label className="text-xs font-medium mb-1 flex items-center">
             <FaMoneyBillWave className="mr-2 text-primaryBlue" />
@@ -823,7 +823,7 @@ const SeccionA = forwardRef((props, ref) => {
           )}
         </div>
 
-		{(clientInfo?.data?.idEstadoVerificacionSolicitud == 1 || clientInfo?.data?.idEstadoVerificacionSolicitud == 11) && (
+        {(clientInfo?.data?.idEstadoVerificacionSolicitud == 1 || clientInfo?.data?.idEstadoVerificacionSolicitud == 11) && (
           <div className="col-span-1">
             <label className="text-xs font-medium mb-1 flex items-center">
               <FaMapMarkerAlt className="mr-2 text-primaryBlue" />

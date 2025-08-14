@@ -611,7 +611,7 @@ export function Cabecera() {
     // Actualizamos el estado de checkTrabajo con el resultado de la validación
     setCheckTrabajo(valid);
   };
-
+console.log("clienteData", clienteData);
   const validarcaposdataNegocio = () => {
     let valid = true; // Inicializamos la validación como verdadera
 
@@ -695,6 +695,12 @@ export function Cabecera() {
       clienteData.ActividadEconomicaNegocio === 0 ||
       clienteData.ActividadEconomicaNegocio == null
     ) {
+      valid = false;
+    }
+    if ( clienteData.JefeInmediatoIndependiente === 0 || clienteData.JefeInmediatoIndependiente == null  || clienteData.JefeInmediatoIndependiente === undefined  || clienteData.JefeInmediatoIndependiente === "") {
+      valid = false;
+    }
+    if ( clienteData.CelularInmediatoIndependiente === 0 || clienteData.CelularInmediatoIndependiente == null  || clienteData.CelularInmediatoIndependiente === undefined || clienteData.CelularInmediatoIndependiente === "") {
       valid = false;
     }
     // Actualizamos el estado de checkNegocio con el resultado de la validación
