@@ -1875,6 +1875,8 @@ export function ListadoSolicitud() {
   //crear excel 
   const fetchCrearExcel = async () => {
     try {
+		setLoadingVerificacion(true);
+		enqueueSnackbar("Construyendo Reporte 👨‍💻...", { variant: "warning", });
       const response = await axios.get(APIURL.get_excelSolicitudWeb(), {
         responseType: 'blob',
       });
@@ -1901,6 +1903,8 @@ export function ListadoSolicitud() {
       console.error("Error al generar el Excel:", error);
       enqueueSnackbar("Error al generar el reporte.", { variant: "error" });
       return null;
+    } finally {
+      setLoadingVerificacion(false);
     }
   }
 
@@ -2400,6 +2404,7 @@ export function ListadoSolicitud() {
           >
             <PiMicrosoftExcelLogoBold size={45} /> Crear informe
           </button>)}
+		  {loadingVerificacion && <Loader />}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">

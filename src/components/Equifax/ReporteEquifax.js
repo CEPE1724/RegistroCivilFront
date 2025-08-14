@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "../../configApi/axiosConfig";
 import { APIURL } from "../../configApi/apiConfig";
+import { useAuth } from "../AuthContext/AuthContext";
 import {
   LineChart, Line,
   RadialBarChart, RadialBar,
@@ -28,6 +29,8 @@ export function ReporteEquifax({
   const navigate = useNavigate();
   const [encEntConsu, setEncEntConsu] = useState([])
   const [tabEntConsu, setTabEntConsu] = useState([]) 
+  const { userData, idMenu, socket } = useAuth();
+  const [permisos, setPermisos] = useState([]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -100,9 +103,6 @@ export function ReporteEquifax({
           ...prev,
           informacion: data,
         }));
-        // fetchEqfxSegmentacion(data.idEQFX_IdentificacionConsultada);
-        // fetchEqfxPoliticas(data.idEQFX_IdentificacionConsultada);
-        // fetchEqfxScorev3(data.idEQFX_IdentificacionConsultada);
         fecthDatosCogno(data.NumeroDocumento);
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
@@ -112,77 +112,39 @@ export function ReporteEquifax({
     }
   };
 
+  const permisosComponente = async (idMenu, idUsuario) => {
+    try {
+      const url = APIURL.getacces(idMenu, idUsuario);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status === 200) {
+        const data = response.data;
+        setPermisos(data);
+      } else {
+        console.error(`Error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error fetching permissions components:", error);
+    }
+  };
+
+  const permisoVerTablas = () => {
+    const permiso = permisos.find((p) => p.Permisos === `EQUIFAX VER TABLAS`);
+    return permiso && permiso.Activo;
+  };
+
   useEffect(() => {
     if (cedula) {
       fetchEqfxInformacion(cedula);
     }
+
+	if (userData?.idUsuario && idMenu) {
+		permisosComponente(idMenu, userData.idUsuario);
+    }
   }, []);
-
-  // const fetchEqfxSegmentacion = async (id) => {
-  //   try {
-  //     const url = APIURL.getEqfxResultSegment(id);
-  //     const response = await axios.get(url, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     if (response.status === 200) {
-  //       const { data } = response.data;
-  //       setClienteDatos(prev => ({
-  //         ...prev,
-  //         segmentacion: data,
-  //       }));
-  //     } else {
-  //       console.error(`Error: ${response.status} - ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching equifax data:", error);
-  //   }
-  // };
-
-  // const fetchEqfxPoliticas = async (id) => {
-  //   try {
-  //     const url = APIURL.getEqfxResultPliticas(id);
-  //     const response = await axios.get(url, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     if (response.status === 200) {
-  //       const { data } = response.data;
-  //       setClienteDatos(prev => ({
-  //         ...prev,
-  //         politicas: data,
-  //       }));
-  //     } else {
-  //       console.error(`Error: ${response.status} - ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching equifax data:", error);
-  //   }
-  // };
-
-  // const fetchEqfxScorev3 = async (id) => {
-  //   try {
-  //     const url = APIURL.getEqfxScorePuntaje(id);
-  //     const response = await axios.get(url, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //     });
-  //     if (response.status === 200) {
-  //       const { data } = response.data;
-  //       setClienteDatos(prev => ({
-  //         ...prev,
-  //         scorev3: data,
-  //       }));
-  //     } else {
-  //       console.error(`Error: ${response.status} - ${response.statusText}`);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching equifax data:", error);
-  //   }
-  // };
 
   const fecthDatosCogno = async (cedula) => {
     try {
@@ -596,6 +558,7 @@ export function ReporteEquifax({
       </div>
 
       {/* Deuda Reportada por el Sistema Financiero */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -643,9 +606,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Detalle de Tarjetas */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -681,9 +645,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Detalle Operaciones */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -729,9 +694,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Indicadores de Perfil de Riesgo */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -757,9 +723,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Central de Infocom */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -799,9 +766,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Deuda Histórica */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -851,9 +819,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Evolución Deuda Total y Vencida */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -921,10 +890,11 @@ export function ReporteEquifax({
           </div>
         </div>
       </div>
-    </div>
+    </div> )}
       
       
       {/* DEUDA TOTAL REPORTADA FINANCIERO, REGULADO SB, SEPS Y COMERCIAL*/}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -958,9 +928,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/*ANÁLISIS SALDOS POR VENCER SISTEMA */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -996,9 +967,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/*COMPOSICIÓN ESTRUCTURA DEL VENCIMIENTO */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -1036,9 +1008,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/*CRÉDITOS OTORGADOS ÚLTIMOS 12 MESES */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -1076,9 +1049,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}	
 
       {/*ULTIMAS 10 OPERACIONES CANCELADAS */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -1106,9 +1080,10 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/*ENTIDADES CONSULTADAS */}
+	  {permisoVerTablas() && (
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -1155,7 +1130,7 @@ export function ReporteEquifax({
             </tbody>
           </table>
         </div>
-      </div>
+      </div> )}
 
       {/* Botón de impresión mejorado (solo visible en web) */}
       <div className={`p-6 flex justify-end ${imprimiendo ? 'hidden' : ''}`}>

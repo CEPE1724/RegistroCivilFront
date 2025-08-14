@@ -62,7 +62,6 @@ export function TelefonicaList({
     idEstadoVerificacionTelefonica: "",
     permisos: [],
   });
-  console.log("permisos", clientInfo.permisos)
   const [
     idCre_VerificacionTelefonicaMaestro,
     setIdCre_VerificacionTelefonicaMaestro,

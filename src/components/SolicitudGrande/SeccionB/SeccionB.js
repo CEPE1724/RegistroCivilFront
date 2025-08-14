@@ -95,7 +95,7 @@ const SeccionB = forwardRef((props, ref) => {
     empresa: data.NombreEmpresa || "",
     tipoEmpresa: data.idTipoEmpresa || 0,
     jefeInmediato: data.JefeInmediato || "",
-    numeroJefe: data.CelularInmediato || "",
+    //numeroJefe: data.CelularInmediato || "",
     fechaIngreso: data.FechaIngresoEmpresa || "",
     ingresos: data.IngresosTrabajo || 0,
     gastos: data.EgresosTrabajo || 0,
@@ -422,15 +422,15 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-    if (!formData.numeroJefe || formData.numeroJefe === "" || formData.numeroJefe.length < 9) {
-      newErrors.numeroJefe = "Este campo es obligatorio"
-      if (!showSnackbar) {
-        enqueueSnackbar("Por favor, ingresa un número", {
-          variant: "error",
-        });
-        showSnackbar = true;
-      }
-    }
+    // if (!formData.numeroJefe || formData.numeroJefe === "" || formData.numeroJefe.length < 9) {
+    //   newErrors.numeroJefe = "Este campo es obligatorio"
+    //   if (!showSnackbar) {
+    //     enqueueSnackbar("Por favor, ingresa un número", {
+    //       variant: "error",
+    //     });
+    //     showSnackbar = true;
+    //   }
+    // }
 
     if (!formData.departamento) {
       newErrors.departamento = "Este campo es obligatorio";
@@ -677,7 +677,7 @@ const SeccionB = forwardRef((props, ref) => {
           )}
         </div>
 
-        <div className="col-span-1">
+        {/* <div className="col-span-1">
           <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroJefe.length < 9 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaHouseUser className="mr-2 text-primaryBlue" />
             (*)Número Jefe
@@ -695,7 +695,7 @@ const SeccionB = forwardRef((props, ref) => {
           {errors.numeroJefe && (
             <span className="text-red-500 text-xs">{errors.numeroJefe}</span>
           )}
-        </div>
+        </div> */}
 
         <div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
