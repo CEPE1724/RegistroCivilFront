@@ -1309,6 +1309,8 @@ export function Cabecera() {
           ActividadEconomicaNegocio: formData.actividadNegocio,
           AfiliadoTributario: formData.AfiliadoTributario,
           OblidagoLlevarContabilidad: formData.ObligadoContabilidad,
+		  JefeInmediatoIndependiente: formData.jefeInmediato,
+		  CelularInmediatoIndependiente: formData.numeroJefe
         },
         {
           headers: {
@@ -1364,7 +1366,7 @@ export function Cabecera() {
           NombreEmpresa: formData.empresa,
           idTipoEmpresa: getParsedValue(formData.tipoEmpresa),
           JefeInmediato: formData.jefeInmediato,
-          CelularInmediato: formData.numeroJefe,
+          //CelularInmediato: formData.numeroJefe,
           FechaIngresoEmpresa: formData.fechaIngreso,
           IngresosTrabajo: IngresosTrabajoString,
           EgresosTrabajo: EgresosTrabajoString,
