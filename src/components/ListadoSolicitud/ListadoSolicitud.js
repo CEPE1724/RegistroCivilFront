@@ -470,7 +470,7 @@ export function ListadoSolicitud() {
     { label: "RECHAZADO", value: 4 },
     { label: "NO APLICA", value: 5 },
     { label: "FACTURADO", value: 6 },
-    { label: "RECHAZADO-LN", value: 7 },
+    { label: "CADUCADO", value: 7 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -1791,7 +1791,7 @@ export function ListadoSolicitud() {
                           : item.Estado === 6
                             ? "FACTURADO"
                             : item.Estado === 7
-                              ? "RECHAZADO-LN"
+                              ? "CADUCADO"
                               : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
@@ -2452,7 +2452,7 @@ export function ListadoSolicitud() {
 
               <TableBody sx={{ marginTop: 0 }}>
                 {datos.map((data, index) => {
-                  const isError = (data.Estado === 4 || data.Estado === 5);
+                  const isError = (data.Estado === 4 || data.Estado === 5 || data.Estado === 7);
                   const bgColor = isError
                     ? "#fee2e2"
                     : index % 2 === 0

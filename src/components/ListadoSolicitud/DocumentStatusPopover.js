@@ -187,11 +187,12 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
 
       6: { //// ESTADo
         1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
-        1: { label: "Pre-Aprobado", icon: <SettingsIcon />, color: grey[500] },
-        2: { label: "Aprobado", icon: <VerifiedIcon />, color: blue[500] },
-        4: { label: "Rechazado", icon: <CancelIcon />, color: red[500] },
-
-
+        2: { label: "Aprobado", icon: <VerifiedIcon />, color: green[500] },
+        3: { label: "Anulado", icon: <CancelIcon />, color: red[500] },
+        4: { label: "Rechazado", icon: <BlockIcon />, color: red[700] },
+        5: { label: "No Aplica", icon: <CancelIcon />, color: grey[700] },
+        6: { label: "Facturado", icon: <CheckCircleIcon />, color: green[700] },
+        7: { label: "Caducado", icon: <ErrorIcon />, color: orange[700] }
       },
 
 
