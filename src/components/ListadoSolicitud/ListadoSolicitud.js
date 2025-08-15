@@ -1838,6 +1838,8 @@ export function ListadoSolicitud() {
                           ? "TELEVISOR"
                           : "DESCONOCIDO",
               idVendedor: item.idVendedor,
+              idMotivoContinuidad: item.idMotivoContinuidad
+
             };
           })
         );
@@ -1875,8 +1877,8 @@ export function ListadoSolicitud() {
   //crear excel 
   const fetchCrearExcel = async () => {
     try {
-		setLoadingVerificacion(true);
-		enqueueSnackbar("Construyendo Reporte 👨‍💻...", { variant: "warning", });
+      setLoadingVerificacion(true);
+      enqueueSnackbar("Construyendo Reporte 👨‍💻...", { variant: "warning", });
       const response = await axios.get(APIURL.get_excelSolicitudWeb(), {
         responseType: 'blob',
       });
@@ -2404,7 +2406,7 @@ export function ListadoSolicitud() {
           >
             <PiMicrosoftExcelLogoBold size={45} /> Crear informe
           </button>)}
-		  {loadingVerificacion && <Loader />}
+        {loadingVerificacion && <Loader />}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">
@@ -2711,108 +2713,93 @@ export function ListadoSolicitud() {
                         />
                       </TableCell>
                       <TableCell align="center">{data.tipoCliente}</TableCell>
+
                       <TableCell align="center">
                         {data.resultado === 0 ? (
+                          // Ícono ❌ cuando resultado === 0
                           <Box
                             sx={{
                               position: "relative",
-                              width: 24,
-                              height: 24,
+                              width: 28,
+                              height: 28,
                               display: "inline-block",
-                              ...(permisoAprobarResultado(data)
-                                ? {} // Sin efectos si no tiene permiso
-                                : {
-                                  "&:hover .approveOverlay": {
-                                    opacity: 1,
-                                    transform: "translateY(0)",
-                                  },
-                                }),
                             }}
                           >
-                            {/* Ícono ❌ */}
                             <HighlightOffIcon
                               sx={{
                                 color: "#DC3545",
                                 position: "absolute",
                                 top: 0,
                                 left: 0,
-                                width: 24,
-                                height: 24,
+                                width: 28,
+                                height: 28,
                               }}
                             />
-
-
-                            {/* Overlay solo si tiene permiso */}
-                            {/* !permisoAprobarResultado(data) && (
-
+                            {data.idMotivoContinuidad > 0 && (
                               <Box
-                                className="approveOverlay"
-                                onClick={() => {
-                                  if (data.Estado == 5) {
-                                    setCurrentAction("resultado");
-                                    setCurrentData(data);
-                                    setOpenDialog2(true);
-                                  } else {
-                                    enqueueSnackbar("Accion permitida solo cuando el estado es No - Aplica.", { variant: "warning", });
-                                  }
-                                }}
                                 sx={{
                                   position: "absolute",
-                                  top: 0,
-                                  left: 0,
-                                  width: 24,
-                                  height: 24,
+                                  top: -6,
+                                  right: -6,
+                                  backgroundColor: "#9c154d",
+                                  borderRadius: "50%",
+                                  fontSize: 12,
+                                  width: 10,
+                                  height: 10,
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  borderRadius: "50%",
-                                  backgroundColor: "#28A745",
-                                  color: "#fff",
-                                  cursor: "pointer",
-                                  opacity: 0,
-                                  transform: "translateY(100%)",
-                                  transition:
-                                    "opacity 0.3s ease, transform 0.3s ease",
+                                  fontWeight: "bold",
+                                  zIndex: 1,
                                 }}
-                              >
-                                <CheckCircleIcon sx={{ fontSize: 20 }} />
-                              </Box>
-
-                            ) */}
-
+                              />                               
+                            )}
                           </Box>
                         ) : data.resultado === 1 ? (
-                          <CheckCircleIcon sx={{ color: "#28A745" }} />
+
+                          <Box sx={{ position: "relative", display: "inline-block", width: 28, height: 28 }}>
+                            <CheckCircleIcon sx={{ color: "#28A745", fontSize: 28 }} />
+                            {data.idMotivoContinuidad > 0 && (
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: -6,
+                                  right: -6,
+                                  backgroundColor: "#9c154d",
+                                  borderRadius: "50%",
+                                  fontSize: 12,
+                                  width: 10,
+                                  height: 10,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontWeight: "bold",
+                                  zIndex: 1,
+                                }}
+                              />
+                                
+                            )}
+                          </Box>
                         ) : null}
 
-                        {/* Ícono de acciones y popover */}
-                        <span
-                        /* style={{
-                           pointerEvents: estaDeshabilitado(data)
-                             ? "none"
-                             : "auto",
-                           opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                         }}*/
-                        >
+                        {/* Ícono de acciones */}
+                        <span>
                           <MoreVertIcon
-                            onClick={(event) =>
-                              handlePopoverOpen(event, 7, data)
-                            } // identificador para "resultado"
+                            onClick={(event) => handlePopoverOpen(event, 7, data)}
                             style={{ cursor: "pointer" }}
                           />
                         </span>
 
+                        {/* Popover */}
                         <DocumentStatusPopover
-                          open={
-                            popoverData.open &&
-                            popoverData.selectedRowId === data.id
-                          }
+                          open={popoverData.open && popoverData.selectedRowId === data.id}
                           anchorEl={popoverData.anchorEl}
                           onClose={handlePopoverClose}
                           clienteEstados={clienteEstados}
                           estadoColores={estadoColores}
                         />
                       </TableCell>
+
 
                       <TableCell align="center">{data.entrada}</TableCell>
 
@@ -4693,7 +4680,7 @@ export function ListadoSolicitud() {
         setLaboralChecked={setLaboralChecked}
       />
       <DocumentoDescarga isOpen={isOpenPDf} onClose={() => setIsOpenPdf(false)} data={dataInforme} />
-      <MotivoContinuidad isOpen={isOpenMotivo} onClose={() => setIsOpenMotivo(false)} data={dataInforme} />
+      <MotivoContinuidad isOpen={isOpenMotivo} onClose={() => setIsOpenMotivo(false)} data={dataInforme} userData={userData} />
 
       {/* Modal codigo dactilar */}
       <Dialog open={openModalCodDag} onClose={() => setOpenModalCodDag(false)}>

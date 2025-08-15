@@ -1,44 +1,83 @@
 
-
-
-       import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../../../configApi/axiosConfig';
-import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
-import DescriptionIcon from '@mui/icons-material/Description';
-import HomeIcon from '@mui/icons-material/Home';
-import WorkIcon from '@mui/icons-material/Work';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import HomeWorkIcon from '@mui/icons-material/HomeWork';
-import jsPDF from "jspdf";
 import { APIURL } from "../../../configApi/apiConfig";
 import { enqueueSnackbar } from "notistack";
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import PersonIcon from '@mui/icons-material/Person';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-const motivos = [
-    { id: 1, label: 'CLIENTE SOLO AVERIGUA SI APLICA' },
-    { id: 2, label: 'NO TIENE DOCUMENTACIÓN COMPLETA' },
-    { id: 3, label: 'NO TIENE INGRESOS SUFICIENTES' },
-    { id: 4, label: 'TIENE MAL BURÓ' },
-    { id: 5, label: 'DECIDIÓ NO COMPRAR' },
-    { id: 6, label: 'SE FUE A OTRA CASA COMERCIAL' },
-    { id: 7, label: 'NO CONTESTA / NO SE LOGRÓ CONTACTAR' },
-    { id: 8, label: 'OTRA RAZÓN' },
-];
 
-export function MotivoContinuidad({ isOpen, onClose, data }) {
+export function MotivoContinuidad({ isOpen, onClose, data, userData }) {
+    console.log("Datos del cliente en MotivoContinuidad:", data);
+    console.log("Datos del usuario en MotivoContinuidad:", userData);
     const [motivoSeleccionado, setMotivoSeleccionado] = useState('');
+    const [motivos, setMotivos] = useState([]);
+
+    useEffect(() => {
+        const fetchMotivos = async () => {
+            try {
+                const response = await axios.get(APIURL.get_motivosContinuidad());
+                setMotivos(response.data);
+            } catch (error) {
+                console.error('Error al obtener los motivos de continuidad:', error);
+            }
+        };
+
+        fetchMotivos();
+    }, []);
 
     if (!isOpen) return null;
 
-    const handleGuardar = () => {
-        if (!motivoSeleccionado) return alert('Por favor selecciona un motivo.');
-        // Aquí puedes hacer un POST o update con el motivo seleccionado
-        console.log('Motivo seleccionado:', motivoSeleccionado);
-        onClose();
-    };
+
+
+    // Manejo del guardado del motivo seleccionado
+    const handleGuardar = async () => {
+
+        if (!motivoSeleccionado) {
+            enqueueSnackbar("Por favor, selecciona un motivo.", { variant: "warning" });
+            return;
+        }
+        try {
+            const response = await axios.patch(APIURL.update_solicitud(data.id), {
+                idMotivoContinuidad: parseInt(motivoSeleccionado, 10)
+
+            });
+
+            if (response.data) {
+                await patchTiempo(data.id, userData.Nombre, parseInt(motivoSeleccionado, 10));
+
+                enqueueSnackbar("Motivo de continuidad guardado correctamente.", { variant: "success" });
+                setMotivoSeleccionado('');
+                onClose();
+            }
+        } catch (error) {
+            console.error("Error al guardar el motivo de continuidad:", error);
+            enqueueSnackbar("Error al guardar el motivo de continuidad.", { variant: "error" });
+        }
+
+    }
+
+    const patchTiempo = async (idSolicitud, Usuario, idMotivoContinuidad) => {
+        try {
+            const response = await axios.post(url, {
+                idCre_SolicitudWeb: idSolicitud,
+                Tipo: 7,
+                idEstadoVerificacionDocumental: idMotivoContinuidad,
+                Usuario: Usuario,
+                Telefono: `MOTIVO `,
+            });
+
+            if (response.data) {
+                console.log("Tiempo de solicitud registrado:", response.data);
+            }
+        }
+        catch (error) {
+            console.error("Error al registrar el tiempo de solicitud:", error);
+        }
+    }
+
+    const url = APIURL.post_createtiemposolicitudeswebDto();
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
@@ -85,8 +124,8 @@ export function MotivoContinuidad({ isOpen, onClose, data }) {
                 >
                     <option value="">-- Selecciona un motivo --</option>
                     {motivos.map((motivo) => (
-                        <option key={motivo.id} value={motivo.id}>
-                            {motivo.label}
+                        <option key={motivo.idMotivoContinuidad} value={motivo.idMotivoContinuidad}>
+                            {motivo.Nombre}
                         </option>
                     ))}
                 </select>

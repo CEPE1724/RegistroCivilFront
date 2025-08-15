@@ -1,8 +1,8 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-//const API_BASE_URL = "http://192.168.2.25:3008/api/v1/"
+const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
 //const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
@@ -201,5 +201,6 @@ export const APIURL = {
 
   get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`,
 
-  get_excelSolicitudWeb: () => `${API_BASE_URL}excel-solicitudes-web/export-excel`
+  get_excelSolicitudWeb: () => `${API_BASE_URL}excel-solicitudes-web/export-excel`,
+  get_motivosContinuidad: () => `${API_BASE_URL}motivo-continuidad`,
 };

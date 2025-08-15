@@ -200,7 +200,17 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       7: /// Resultado
       {
         0: { label: "No aplica", icon: <CancelIcon />, color: red[500] },
-        1: { label: "APlica", icon: <VerifiedIcon />, color: blue[500] }
+        1: { label: "APlica", icon: <VerifiedIcon />, color: blue[500] },
+        2: { label: "NO TIENE DOCUMENTACIÓN COMPLETA", icon: <CancelIcon />, color: red[500] },
+        3: { label: "NO TIENE INGRESOS SUFICIENTES", icon: <CancelIcon />, color: red[500] },
+        4: { label: "TIENE MAL BURÓ", icon: <BlockIcon />, color: red[700] },
+        5: { label: "DECIDIÓ NO COMPRAR", icon: <CancelIcon />, color: grey[700] },
+        6: { label: "SE FUE A OTRA CASA COMERCIAL", icon: <CancelIcon />, color: grey[700] },
+        7: { label: "NO CONTESTA / NO SE LOGRÓ CONTACTAR", icon: <PersonOffIcon />, color: orange[700] },
+        8: { label: "COMPRA EN EFECTIVO", icon: <CheckCircleIcon />, color: green[600] },
+        9: { label: "OTRA RAZÓN", icon: <InfoIcon />, color: blue[400] },
+        10: { label: "CLIENTE SOLO AVERIGUA SI APLICA", icon: <SearchIcon />, color: amber[700] }
+
 
       },
 
