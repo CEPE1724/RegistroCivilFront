@@ -10,7 +10,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 export function MotivoContinuidad({ isOpen, onClose, data, userData }) {
     console.log("Datos del cliente en MotivoContinuidad:", data);
-    console.log("Datos del usuario en MotivoContinuidad:", userData);
+
     const [motivoSeleccionado, setMotivoSeleccionado] = useState('');
     const [motivos, setMotivos] = useState([]);
 

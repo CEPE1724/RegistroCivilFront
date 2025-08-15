@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
+import { useAuth } from "./AuthContext/AuthContext";
 import OTPModal from '../components/SolicitudCredito/SolicitudCreditoForm/OTPModal';
 import { APIURL } from "../configApi/apiConfig";
 import axios from "../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { Loader } from "../components/Utils/Loader";
-
+import { set } from "react-hook-form";
+import { data } from "autoprefixer";
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
+import { MotivoContinuidad } from "../components/ListadoSolicitud";
 const FormField = ({
   label,
   name,
@@ -175,6 +179,8 @@ const FormField = ({
   };
 
 
+
+
   if (type === "button") {
     return (
       <div className="w-full place-items-center mt-8">
@@ -235,10 +241,13 @@ const FormField = ({
   }
 
   return (
+
     <div className="py-2 w-full">
+
       <label htmlFor={name} className="text-sm block mb-1">
         {label}
       </label>
+
 
       {Component ? (
         <Component
@@ -331,12 +340,18 @@ const ReusableForm = ({
   onExternalUpdate,
 }) => {
   const navigate = useNavigate();
+  const { userData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false); // Estado para controlar la apertura del modal de OTP
   const [isOtpVerified, setIsOtpVerified] = useState(false); // Estado para verificar si el OTP es válido
+  const [dataMotivos, setDataMotivos] = useState([]);
+  const [dataInforme, setDataInforme] = useState(null);
   const { enqueueSnackbar } = useSnackbar();
+  const [isOpenMotivo, setIsOpenMotivo] = useState(false);
+  // captura a valores de inicialValues
+  const [iidPersona] = useState(initialValues.idVendedor || null);
   // Inicializar valores por defecto para campos select
   const selectDefaults = Object.fromEntries(
     formConfig
@@ -344,9 +359,19 @@ const ReusableForm = ({
       .map((field) => [field.name, ""])
   );
 
+
+
+
   useEffect(() => {
-    // console.log('initialValues updated:', initialValues);
-  }, [initialValues]);
+    if (initialValues) {
+      // Si initialValues tiene un idVendedor, asignarlo a iidPersona
+      if (initialValues.idVendedor) {
+        verificarMotivosPendientes(initialValues.idVendedor);
+      }
+    }
+
+  }, [initialValues, isOpenMotivo]);
+
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema,
@@ -377,25 +402,25 @@ const ReusableForm = ({
     }
   }, [onExternalUpdate]);
 
-const requestOtp = async () => {
-  try {
-    const url = APIURL.generateOTP();
-    const response = await axios.post(url, {
-      phoneNumber: formik.values.Celular,
-      email: formik.values.Email,
-      nombreCompleto: `${formik.values.PrimerNombre || ''} ${formik.values.SegundoNombre || ''} ${formik.values.ApellidoPaterno || ''} ${formik.values.ApellidoMaterno || ''}`.trim(),
-    });
+  const requestOtp = async () => {
+    try {
+      const url = APIURL.generateOTP();
+      const response = await axios.post(url, {
+        phoneNumber: formik.values.Celular,
+        email: formik.values.Email,
+        nombreCompleto: `${formik.values.PrimerNombre || ''} ${formik.values.SegundoNombre || ''} ${formik.values.ApellidoPaterno || ''} ${formik.values.ApellidoMaterno || ''}`.trim(),
+      });
 
-    if (response.data.success) {
-      setIsOtpModalOpen(true);
-    } else {
-      alert(response.data.message || "No se pudo generar el OTP");
+      if (response.data.success) {
+        setIsOtpModalOpen(true);
+      } else {
+        alert(response.data.message || "No se pudo generar el OTP");
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Hubo un error al generar el OTP');
     }
-  } catch (error) {
-    console.error(error);
-    alert('Hubo un error al generar el OTP');
-  }
-};
+  };
 
 
   // Sistema unificado para mostrar el primer error en el submit
@@ -458,12 +483,36 @@ const requestOtp = async () => {
     setIsOtpVerified(isVerified);
   };
 
+  const verificarMotivosPendientes = async (vendedor) => {
+    try {
+      console.log("Verificando motivos pendientes para el vendedor:", vendedor);
+      const response = await axios.get(APIURL.get_Count_get_motivosContinuidad(vendedor));
+      const { totalCount, data } = response.data;
+      if (totalCount > 0) {
+
+        setDataMotivos(response.data);
+      } else {
+
+        setDataMotivos({
+          totalCount: 0,
+          data: []
+        });
+
+      }
+    } catch (error) {
+      console.error("Error al verificar motivos pendientes:", error);
+      enqueueSnackbar("Error al verificar motivos pendientes", { variant: "error" });
+      setDataMotivos({
+        totalCount: 0,
+        data: []
+      });
+    }
+  };
 
 
   // Separar el campo de archivo y otros campos
   const fileField = formConfig.find((field) => field.type === "file");
   const otherFields = formConfig.filter((field) => field.type !== "file");
-
   return (
     <div className="relative">
       {isSubmitting && (
@@ -471,154 +520,212 @@ const requestOtp = async () => {
           <Loader />
         </div>
       )}
-      <form
-        className="w-full bg-white p-4 rounded-lg grid"
-        onSubmit={(e) => {
-          e.preventDefault();
-          // Validar y mostrar el primer error si hay alguno
-          formik.validateForm().then((errors) => {
-            if (Object.keys(errors).length > 0) {
-              formik.setTouched(
-                Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
-                false
-              );
-              showFirstError();
-            } else {
-              formik.handleSubmit(e);
-            }
-          });
-        }}
-      >
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
-          {fileField && (
-            <div className="md:col-span-1 order-2 md:order-1">
-              <div className="w-30">
-                <FormField
-                  key={fileField.name}
-                  {...fileField}
-                  formik={formik}
-                  previewUrl={previewUrl}
-                  setPreviewUrl={setPreviewUrl}
-                />
+     
+      {parseInt(dataMotivos.totalCount) > 0 && (
+        <>
+          <label className="text-lg font-semibold text-primaryBlue mb-4">
+            <span className="text-red-500 ml-2">
+              Pendientes de Ingresar el motivo de continuidad {dataMotivos.totalCount} motivo(s) pendiente(s)
+            </span>
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {dataMotivos.data && dataMotivos.data.map((motivo, idx) => (
+              <div key={idx} className="bg-white shadow-md rounded-lg p-4 mb-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
+                      {motivo.NumeroSolicitud}
+                    </span>
+                    <span className="text-gray-500 text-sm">({new Date(motivo.Fecha).toLocaleDateString()})</span>
+                  </div>
+                  <div className="text-xs text-gray-400">🕒 {new Date(motivo.Fecha).toLocaleTimeString()}</div>
+                </div>
+
+                <div className="flex items-center gap-3">
+
+                  <div className="text-sm text-gray-800">
+                    <div><strong>Cédula:</strong> {motivo.Cedula}</div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsOpenMotivo(true);
+                      setDataInforme({
+                        id: motivo.idCre_SolicitudWeb,
+                        PrimerNombre: motivo.PrimerNombre,
+                        SegundoNombre: motivo.SegundoNombre,
+                        ApellidoPaterno: motivo.ApellidoPaterno,
+                        ApellidoMaterno: motivo.ApellidoMaterno,
+                        cedula: motivo.Cedula,
+                        NumeroSolicitud: motivo.NumeroSolicitud,
+                        Fecha: motivo.Fecha,
+                      });
+                    }}
+                    className="bg-pink-100 text-pink-800 hover:bg-pink-200 hover:text-pink-900 transition-all duration-200 rounded-full p-2"
+                  >
+                    <NoteAltIcon className="text-pink-800" />
+                  </button>
+                </div>
               </div>
+
+            ))}
+          </div>
+        </>
+      )}
+      {Number(dataMotivos?.totalCount) === 0 && (
+        <form
+          className="w-full bg-white p-4 rounded-lg grid"
+          onSubmit={(e) => {
+            e.preventDefault();
+            // Validar y mostrar el primer error si hay alguno
+            formik.validateForm().then((errors) => {
+              if (Object.keys(errors).length > 0) {
+                formik.setTouched(
+                  Object.keys(errors).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+                  false
+                );
+                showFirstError();
+              } else {
+                formik.handleSubmit(e);
+              }
+            });
+          }}
+        >
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
+            {fileField && (
+              <div className="md:col-span-1 order-2 md:order-1">
+                <div className="w-30">
+                  <FormField
+                    key={fileField.name}
+                    {...fileField}
+                    formik={formik}
+                    previewUrl={previewUrl}
+                    setPreviewUrl={setPreviewUrl}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div
+              className={`grid gap-4 order-1 md:order-2 ${fileField ? "md:col-span-3" : "md:col-span-4"
+                } ${columns === 2
+                  ? "grid-cols-1 md:grid-cols-2"
+                  : columns === 3
+                    ? "grid-cols-1 md:grid-cols-3"
+                    : columns === 4
+                      ? "grid-cols-1 md:grid-cols-4"
+                      : "grid-cols-1"
+                }`}
+            >
+              {otherFields.map((field) => (
+                <FormField key={field.name} {...field} formik={formik} />
+              ))}
+            </div>
+          </div>
+
+          {/* Términos y condiciones */}
+          {includeTermsAndConditions && (
+            <div className="flex justify-center gap-4 mt-4 mb-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="bTerminosYCondiciones"
+                  id="bTerminosYCondiciones"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  checked={formik.values.bTerminosYCondiciones}
+                  className="text-fontRed accent-fontRed rounded"
+                />
+                <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
+                  Acepto los{" "}
+                  <a
+                    href="https://point.com.ec/terminos-y-condiciones"
+                    className="underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    términos y condiciones
+                  </a>
+                </label>
+              </div>
+              {formik.errors.bTerminosYCondiciones &&
+                formik.touched.bTerminosYCondiciones && (
+                  <p className="text-red-500 text-xs mt-1 text-center">
+                    {formik.errors.bTerminosYCondiciones}
+                  </p>
+                )}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="bPoliticas"
+                  id="bPoliticas"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  checked={formik.values.bPoliticas}
+                  className="text-fontRed accent-fontRed rounded"
+                />
+                <label htmlFor="bPoliticas" className="text-lightGrey text-xs">
+                  Acepto las{" "}
+                  <a
+                    href="https://point.com.ec/politicas-de-privacidad"
+                    className="underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    políticas de privacidad
+                  </a>
+                </label>
+              </div>
+              {formik.errors.bPoliticas && formik.touched.bPoliticas && (
+                <p className="text-red-500 text-xs mt-1 text-center">
+                  {formik.errors.bPoliticas}
+                </p>
+              )}
             </div>
           )}
 
-          <div
-            className={`grid gap-4 order-1 md:order-2 ${fileField ? "md:col-span-3" : "md:col-span-4"
-              } ${columns === 2
-                ? "grid-cols-1 md:grid-cols-2"
-                : columns === 3
-                  ? "grid-cols-1 md:grid-cols-3"
-                  : columns === 4
-                    ? "grid-cols-1 md:grid-cols-4"
-                    : "grid-cols-1"
-              }`}
-          >
-            {otherFields.map((field) => (
-              <FormField key={field.name} {...field} formik={formik} />
-            ))}
-          </div>
-        </div>
-
-        {/* Términos y condiciones */}
-        {includeTermsAndConditions && (
-          <div className="flex justify-center gap-4 mt-4 mb-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="bTerminosYCondiciones"
-                id="bTerminosYCondiciones"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                checked={formik.values.bTerminosYCondiciones}
-                className="text-fontRed accent-fontRed rounded"
-              />
-              <label htmlFor="bTerminosYCondiciones" className="text-lightGrey text-xs">
-                Acepto los{" "}
-                <a
-                  href="https://point.com.ec/terminos-y-condiciones"
-                  className="underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  términos y condiciones
-                </a>
-              </label>
+          {includeButtons && (
+            <div className="py-2 flex justify-center gap-2">
+              <button
+                type="submit"
+                className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? <Loader /> : submitButtonText}
+              </button>
+              <button
+                type="button"
+                className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
+                onClick={handleCancel}
+                disabled={isCanceling}
+              >
+                {isCanceling ? "Cancelando..." : cancelButtonText}
+              </button>
+              <button
+                type="submit"
+                className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
+                onClick={() => navigate("/ListadoSolicitud", { replace: true })}
+              >
+                {returnButtonText}
+              </button>
             </div>
-            {formik.errors.bTerminosYCondiciones &&
-              formik.touched.bTerminosYCondiciones && (
-                <p className="text-red-500 text-xs mt-1 text-center">
-                  {formik.errors.bTerminosYCondiciones}
-                </p>
-              )}
+          )}
+          {
+            <OTPModal
+              isOpen={isOtpModalOpen}
+              onClose={() => setIsOtpModalOpen(false)}
+              onVerifyOtp={handleOtpVerification}
+              phoneNumberOTP={formik.values.Celular}
+            />
+          }
+        </form>
+      )}
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="bPoliticas"
-                id="bPoliticas"
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                checked={formik.values.bPoliticas}
-                className="text-fontRed accent-fontRed rounded"
-              />
-              <label htmlFor="bPoliticas" className="text-lightGrey text-xs">
-                Acepto las{" "}
-                <a
-                  href="https://point.com.ec/politicas-de-privacidad"
-                  className="underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  políticas de privacidad
-                </a>
-              </label>
-            </div>
-            {formik.errors.bPoliticas && formik.touched.bPoliticas && (
-              <p className="text-red-500 text-xs mt-1 text-center">
-                {formik.errors.bPoliticas}
-              </p>
-            )}
-          </div>
-        )}
 
-        {includeButtons && (
-          <div className="py-2 flex justify-center gap-2">
-            <button
-              type="submit"
-              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? <Loader /> : submitButtonText}
-            </button>
-            <button
-              type="button"
-              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-gray-400 text-white border border-white hover:bg-white hover:text-gray-400 hover:border-gray-400 text-xs px-6 py-2.5"
-              onClick={handleCancel}
-              disabled={isCanceling}
-            >
-              {isCanceling ? "Cancelando..." : cancelButtonText}
-            </button>
-            <button
-              type="submit"
-              className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-              onClick={() => navigate("/ListadoSolicitud", { replace: true })}
-            >
-              {returnButtonText}
-            </button>
-          </div>
-        )}
-        {
-          <OTPModal
-            isOpen={isOtpModalOpen}
-            onClose={() => setIsOtpModalOpen(false)}
-            onVerifyOtp={handleOtpVerification}
-            phoneNumberOTP={formik.values.Celular}
-          />
-        }
-      </form>
+      <MotivoContinuidad isOpen={isOpenMotivo} onClose={() => setIsOpenMotivo(false)} data={dataInforme} userData={userData} />
+
     </div>
+
   );
 
 };
