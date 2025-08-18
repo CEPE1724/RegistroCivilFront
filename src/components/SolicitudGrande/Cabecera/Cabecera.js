@@ -318,7 +318,7 @@ export function Cabecera() {
     setCheckDatos(valid);
   };
 
-  const validarcaposdataDomicilio = () => {
+  const validarcaposdataDomicilio = async () => {
     let valid = true;
 
     // Obtener los datos de cliente
@@ -423,6 +423,14 @@ export function Cabecera() {
       }
     }
 
+     // VALIDA COORDENADAS
+    const coordenadas = await fecthValidaDomicilio();
+    if (coordenadas) {
+      if (coordenadas.exists === false || coordenadas.count === 0) {
+        console.log("Coordenadas inválidas o no encontradas.");
+        valid = false;
+      }
+    }
     // Actualizamos el estado de checkDomicilio con el resultado de la validación
     setCheckDomicilio(valid);
   };
@@ -506,7 +514,28 @@ export function Cabecera() {
     setCheckConyuge(valid);
   };
 
-  const validarcaposdataTrabajo = () => {
+  const fecthValidaDomicilio = async () => {
+      try {
+        const idCre_SolicitudWeb = clienteData.idCre_SolicitudWeb;
+        const url = APIURL.getCoordenadasprefacturaPorId(idCre_SolicitudWeb, 1);
+        const response = await axios.get(url, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.data) {
+          return response.data; // Return the fetched data
+        } else {
+          console.error("No se encontraron datos para la solicitud.");
+          return null; // Return null if no data is found
+        }
+      } catch (error) {
+        console.error("Error al obtener los datos del cliente", error);
+        return null; // Return null in case of an error
+      }
+    };
+
+  const validarcaposdataTrabajo = async () => {
     let valid = true; // Inicializamos la validación como verdadera
 
     // Validación de cada campo en clienteData según la estructura solicitada
@@ -608,11 +637,17 @@ export function Cabecera() {
       valid = false;
     }
 
+    const coordenadas = await fetchValidaDomicilio(2);
+    if (coordenadas) {
+      if (coordenadas.exists === false || coordenadas.count === 0) {
+        valid = false;
+      }
+    }
     // Actualizamos el estado de checkTrabajo con el resultado de la validación
     setCheckTrabajo(valid);
-  };
+  }; 
 
-  const validarcaposdataNegocio = () => {
+  const validarcaposdataNegocio = async () => {
     let valid = true; // Inicializamos la validación como verdadera
 
     // Validación de cada campo en clienteData según la estructura solicitada
@@ -702,6 +737,13 @@ export function Cabecera() {
     }
     if ( clienteData.CelularInmediatoIndependiente === 0 || clienteData.CelularInmediatoIndependiente == null  || clienteData.CelularInmediatoIndependiente === undefined || clienteData.CelularInmediatoIndependiente === "") {
       valid = false;
+    }
+
+    const coordenadas = await fetchValidaDomicilio(2);
+    if (coordenadas) {
+      if (coordenadas.exists === false || coordenadas.count === 0) {
+        valid = false;
+      }
     }
     // Actualizamos el estado de checkNegocio con el resultado de la validación
     setCheckNegocio(valid);
