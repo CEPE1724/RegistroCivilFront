@@ -552,7 +552,7 @@ const Datos = forwardRef((props, ref) => {
                                     options={actividadEconomica}
                                     name="actividadEconomica"
                                     error={formErrors.actividadEconomica}
-                                    readOnly={data.idActEconomica !== undefined && data.idActEconomica !== null && data.idActEconomica !== "" && data.idActEconomica > 0}
+                                   // readOnly={data.idActEconomica !== undefined && data.idActEconomica !== null && data.idActEconomica !== "" && data.idActEconomica > 0}
                                 />
                             </div>
                             {data.idNacionalidad == 54 && (
