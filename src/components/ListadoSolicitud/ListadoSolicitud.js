@@ -3004,7 +3004,7 @@ export function ListadoSolicitud() {
                               }
                               disabled={
                                 verificacionSolicitud(data) ||
-                                data.Domicilio === false || !docAprobados[data.id]
+                                data.Domicilio === false //|| !docAprobados[data.id]
                               }
                               size="small"
                               sx={{
