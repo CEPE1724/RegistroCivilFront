@@ -83,6 +83,7 @@ export function TelefonicaList({
     6: "TELEFONO TRABAJO",
     7: "CELULAR NEGOCIO",
     8: "TELEFONO NEGOCIO",
+    10: "JEFE INMEDIATO"
   };
 
   const EstadoMap = {

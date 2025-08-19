@@ -161,7 +161,9 @@ const filteredVerificadores = verificadores.filter((v) =>
   useEffect(() => {
     const fetchVerificadores = async () => {
       try {
-        const response = await axios.get(APIURL.get_ingresoCobrador());
+        let tipo = tipoVerificacion === "domicilio" ? 1 : 2;
+
+        const response = await axios.get(APIURL.get_ingresoCobradorZona(userSolicitudData.id, tipo));
 
         setVerificadores(response.data);
       } catch (error) {

@@ -127,6 +127,7 @@ export const APIURL = {
   get_TiempSolicWeb: (tipo, id, estado) => `${API_BASE_URL}tiemposolicitudesweb/tiempo/${tipo}/${id}/${estado}`,
   get_Verificador: (id) => `${API_BASE_URL}tiemposolicitudesweb/tiempo/${id}`,
   get_ingresoCobrador: () => `${API_BASE_URL}ingreso-cobrador`,
+  get_ingresoCobradorZona: (idCre_SolicitudWeb, iDomicilio) => `${API_BASE_URL}ingreso-cobrador/zona/${idCre_SolicitudWeb}/${iDomicilio}`,
   post_clientesVerificacionTerrenaBasica: () =>`${API_BASE_URL}clientes-verificacion-terrena/basica`,
   getCoordenadasprefacturaPorId: (id, Tipo) => `${API_BASE_URL}coordenadasprefactura/find/${id}/${Tipo}`,
   get_cre_referenciasclientesweb_id_all: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/count/${id}`,
