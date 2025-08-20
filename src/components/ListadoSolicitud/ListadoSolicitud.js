@@ -162,7 +162,6 @@ export function ListadoSolicitud() {
   const editarCodDac = userData?.idGrupo === 1 || userData?.idGrupo === 16 || userData?.idGrupo === 18;
   const editarCodDac2 = selectedRow?.Estado === 1;
   const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
-  ///const verEquifax = userData?.idGrupo === 22 || userData?.idGrupo === 21;
   const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
@@ -1239,13 +1238,23 @@ export function ListadoSolicitud() {
 
   // si cambia la bodega llamae a fecthUsuariobodega
 
-  useEffect(() => {
-    if (selectedBodega !== "todos") {
-      fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
-    } else {
-      fetchSolicitudes();
-    }
-  }, [selectedBodega, fechaInicio]);
+	  useEffect(() => {
+ 		if (!userData?.FechaIngreso) return
+ 		const fechaIngreso = new Date(userData.FechaIngreso).toISOString().split('T')[0];
+ 		const idGrupo = userData?.idGrupo
+
+    	if (selectedBodega !== "todos") {
+ 			if(idGrupo == 23 && fechaIngreso >= fechaInicio){
+ 				fecthaUsuarioBodega(fechaIngreso, selectedBodega, 0);
+  				setFechaInicio(fechaIngreso)
+ 			} else {
+ 				fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
+ 			}
+    	} else {
+    	  fetchSolicitudes();
+    	}
+   }, [selectedBodega, fechaInicio, userData]);
+
 
   const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
     try {
@@ -1731,6 +1740,21 @@ export function ListadoSolicitud() {
         bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
       }
 
+	  if (userData?.idGrupo === 23) {
+	    const vendedorFiltrado = vendedores.find(
+	      (v) => v?.Codigo?.trim() === userData?.Nombre?.trim()
+	    );
+  
+	    if (!vendedorFiltrado) {
+	      // Si no hay vendedor valido no se hace la consulta 
+	      setDatos([]); 
+	      setTotal(0);
+	      setTotalPages(1);
+	      return;
+	    }
+	  }
+
+
       // Realizar la consulta con los parámetros ajustados
       const response = await axios.get(APIURL.getCreSolicitudCredito(), {
         headers: {
@@ -1834,7 +1858,9 @@ export function ListadoSolicitud() {
                           ? "TELEVISOR"
                           : "DESCONOCIDO",
               idVendedor: item.idVendedor,
-              idMotivoContinuidad: item.idMotivoContinuidad
+              idMotivoContinuidad: item.idMotivoContinuidad,
+			  FechaAfiliacionIngreso: item.FechaIngreso,
+			  FechaAfiliacionHasta: item.FechaAfiliacionHasta
 
             };
           })
@@ -2150,9 +2176,14 @@ export function ListadoSolicitud() {
           onChange={(e) => { const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); sessionStorage.setItem('filtroIniFecha', fechaIniFiltro); }}
           fullWidth
           size="small"
-          InputLabelProps={{
-            shrink: true,
-          }}
+		  slotProps={{
+			inputLabel: { shrink: true },
+			  input: {
+			    min: userData?.FechaIngreso
+			      ? new Date(userData.FechaIngreso).toISOString().split('T')[0]
+			      : undefined,
+			  },
+		  }}
         />
         <TextField
           label="Fecha Hasta"
@@ -2193,10 +2224,9 @@ export function ListadoSolicitud() {
             disabled={userData?.idGrupo === 23}
           >
             {userData?.idGrupo !== 23 && (<MenuItem value="todos">Todos</MenuItem>)}
-            {(userData?.idGrupo === 23 ? vendedores.filter(
-              (vendedor) => vendedor?.Codigo === userData?.Nombre)
-              : vendedores
-            ).map((vendedor) => (
+            {userData?.idGrupo === 23 && vendedores.filter(
+              (vendedor) => vendedor?.Codigo?.trim() === userData?.Nombre?.trim())
+            .map((vendedor) => (
               <MenuItem key={vendedor.idPersonal} value={vendedor.idPersonal}>
                 {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
               </MenuItem>
@@ -4158,6 +4188,15 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Cédula:</p>
                     <p>{selectedRow.cedula}</p>
                   </div>
+				  <div className="flex items-center gap-2">
+                    <p className="font-semibold">Ingreso Afiliacion:</p>
+                    <p>{selectedRow.FechaAfiliacionIngreso}</p>
+                  </div>
+				  {selectedRow.FechaAfiliacionHasta !== '1970-01-01' &&
+				  <div className="flex items-center gap-2">
+                    <p className="font-semibold">Afiliacion Hasta:</p>
+                    <p>{selectedRow.FechaAfiliacionHasta }</p>
+                  </div>}
                   <div className="flex items-center gap-2">
                     <StoreIcon className="text-blue-500" fontSize="medium" />
                     <p className="font-semibold">Almacén:</p>
@@ -4294,31 +4333,6 @@ export function ListadoSolicitud() {
             Cerrar
           </Button>
 
-          {/* {selectedRow &&
-            selectedRow.imagen &&
-            selectedRow.imagen !== "prueba" &&
-            puedeAprobar(selectedRow) && (
-              <Button
-                onClick={async () => {
-                  setCedula(selectedRow?.cedula);
-                  setDactilar(selectedRow?.CodigoDactilar);
-                  const dataFOTO = await fetchImagenRegistroCivil(
-                    selectedRow?.cedula,
-                    selectedRow?.CodigoDactilar
-                  );
-                  if (dataFOTO) {
-                    await handleVerificarIdentidad(
-                      selectedRow.imagen,
-                      dataFOTO
-                    );
-                  }
-                }}
-                color="primary"
-                className="text-base font-semibold"
-              >
-                Aprobar
-              </Button>
-            )} */}
         </DialogActions>
         {loadingVerificacion && <Loader />}
       </Dialog>
