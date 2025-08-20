@@ -203,5 +203,6 @@ export const APIURL = {
 
   get_excelSolicitudWeb: () => `${API_BASE_URL}excel-solicitudes-web/export-excel`,
   get_motivosContinuidad: () => `${API_BASE_URL}motivo-continuidad`,
-  get_Count_get_motivosContinuidad : (vendedor) => `${API_BASE_URL}cre-solicitud-web/MotivoContinuidad/${vendedor}`
+  get_Count_get_motivosContinuidad : (vendedor) => `${API_BASE_URL}cre-solicitud-web/MotivoContinuidad/${vendedor}`,
+  patchTipoVerificacionTrabajo : (id) => `${API_BASE_URL}terrena-gestion-trabajo/tipo-verificacion/${id}`
 };

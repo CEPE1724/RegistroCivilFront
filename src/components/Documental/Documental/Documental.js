@@ -141,8 +141,6 @@ export function Documental({
   const [filesToCorrect, setFilesToCorrect] = useState([]);
   const [initialTabSet, setInitialTabSet] = useState(false);
 
-  //punto referencia
-  //Punto referencia
 
   useEffect(() => {
     const fetchUploadedFiles = async () => {
@@ -861,6 +859,8 @@ export function Documental({
 
       const aprobados = await laboralYDomicilioAprobados(id);
       if (aprobados) {
+		localStorage.setItem(claveLocal, "true");
+		
         await fetchConsultaYNotifica(id, userUsuario, {
           title: "¡Documentos para revisar! 🔍",
           body: `¡Hola! Ya están disponibles los documentos necesarios para la verificación de terreno/domicilio de la solicitud ${NumeroSolicitud} (Foto del cliente, Cédula del Cliente y foto del trabajo o domicilio de ${nombre} con CI ${cedula}. ¡Gracias! 😀
@@ -870,7 +870,7 @@ export function Documental({
           url: "",
           tipo: "analista",
         });
-        localStorage.setItem(claveLocal, "true");
+        //localStorage.setItem(claveLocal, "true");
       }
     }
 
