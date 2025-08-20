@@ -12,8 +12,9 @@ export default function VerificacionTerrenaModal({
   data,
   idClienteVerificacion
 }) {
-  const { enqueueSnackbar } = useSnackbar();
 
+  const { enqueueSnackbar } = useSnackbar();
+  
   const [verificador, setVerificador] = useState("");
   const [verificadores, setVerificadores] = useState([]);
   const [tipoVerificacion, setTipoVerificacion] = useState(null); // 'domicilio' o 'trabajo'
@@ -161,7 +162,8 @@ const filteredVerificadores = verificadores.filter((v) =>
   useEffect(() => {
     const fetchVerificadores = async () => {
       try {
-        let tipo = tipoVerificacion === "domicilio" ? 1 : 2;
+   
+        let tipo = tipoSeleccionado === "domicilio" ? 1 : 2;
 
         const response = await axios.get(APIURL.get_ingresoCobradorZona(userSolicitudData.id, tipo));
 
