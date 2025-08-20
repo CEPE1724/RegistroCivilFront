@@ -2748,7 +2748,7 @@ export function ListadoSolicitud() {
                                   fontWeight: "bold",
                                   zIndex: 1,
                                 }}
-                              />                               
+                              />
                             )}
                           </Box>
                         ) : data.resultado === 1 ? (
@@ -2773,7 +2773,7 @@ export function ListadoSolicitud() {
                                   zIndex: 1,
                                 }}
                               />
-                                
+
                             )}
                           </Box>
                         ) : null}
@@ -3009,7 +3009,7 @@ export function ListadoSolicitud() {
                               size="small"
                               sx={{
                                 opacity:
-                                  estaDeshabilitado(data)
+                                  data.Domicilio === false
                                     ? 0
                                     : 1,
                                 bgcolor: isError ? "#fee2e2" : "#f1f5f9",

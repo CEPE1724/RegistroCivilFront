@@ -73,7 +73,10 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         19: { label: "Facturado", icon: <CheckCircleIcon />, color: green[800] },
         20: { label: "Verificación Facial Exitosa", icon: <FaceIcon />, color: green[600] },
         21: { label: "Verificación Facial Fallida", icon: <ErrorIcon />, color: red[600] },
-        22: { label: "Creación de Cliente", icon: <PersonAddIcon />, color: yellow[600] }
+        22: { label: "Creación de Cliente", icon: <PersonAddIcon />, color: yellow[600] },
+        23: { label: "Por Caducidad", icon: <ErrorIcon />, color: orange[500] },
+        24: { label: "Registro Duplicado", icon: <SearchIcon />, color: amber[700] },
+        25: { label: "Excepción Domicilio", icon: <HomeIcon />, color: teal[500] },
 
 
         /*11: "CORRECIÓN",
