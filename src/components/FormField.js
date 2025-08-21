@@ -358,6 +358,7 @@ const ReusableForm = ({
       .filter((field) => field.type === "select")
       .map((field) => [field.name, ""])
   );
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 
 
@@ -390,6 +391,7 @@ const ReusableForm = ({
       //   } else {
       // Si el OTP no es verificado, muestra el modal
 
+	  setIsButtonDisabled(true)
       requestOtp();
       //setIsOtpModalOpen(true);
       //   }
@@ -414,10 +416,12 @@ const ReusableForm = ({
       if (response.data.success) {
         setIsOtpModalOpen(true);
       } else {
+		setIsButtonDisabled(false)
         alert(response.data.message || "No se pudo generar el OTP");
       }
     } catch (error) {
       console.error(error);
+	  setIsButtonDisabled(false)
       alert('Hubo un error al generar el OTP');
     }
   };
@@ -475,17 +479,19 @@ const ReusableForm = ({
       } catch (error) {
         enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
         console.error("Error en envío:", error);
+		setIsButtonDisabled(false)
       } finally {
         setIsSubmitting(false);
       }
-    }
+    } else {
+		setIsButtonDisabled(false)
+	}
     setIsOtpModalOpen(false);
     setIsOtpVerified(isVerified);
   };
 
   const verificarMotivosPendientes = async (vendedor) => {
     try {
-      console.log("Verificando motivos pendientes para el vendedor:", vendedor);
       const response = await axios.get(APIURL.get_Count_get_motivosContinuidad(vendedor));
       const { totalCount, data } = response.data;
       if (totalCount > 0) {
@@ -684,12 +690,13 @@ const ReusableForm = ({
             </div>
           )}
 
+{/*boton enviar */}
           {includeButtons && (
             <div className="py-2 flex justify-center gap-2">
               <button
                 type="submit"
                 className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-                disabled={isSubmitting}
+                disabled={isButtonDisabled || isSubmitting}
               >
                 {isSubmitting ? <Loader /> : submitButtonText}
               </button>

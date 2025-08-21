@@ -111,6 +111,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import WorkIcon from '@mui/icons-material/Work';
+import ExcelModal from './ExcelModal'
 export function ListadoSolicitud() {
   const {
     data,
@@ -184,6 +185,7 @@ export function ListadoSolicitud() {
   const [openModalCodDag, setOpenModalCodDag] = useState(false);
   const [openConfirmModalCodDac, setOpenConfirmModalCodDac] = useState(false);
   const [codDact, setCodDact] = useState("");
+  const [openModalExcel, setOpenModalExcel ] = useState(false);
 
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
@@ -1896,43 +1898,6 @@ export function ListadoSolicitud() {
     }
   };
 
-  //crear excel 
-  const fetchCrearExcel = async () => {
-    try {
-      setLoadingVerificacion(true);
-      enqueueSnackbar("Construyendo Reporte 👨‍💻...", { variant: "warning", });
-      const response = await axios.get(APIURL.get_excelSolicitudWeb(), {
-        responseType: 'blob',
-      });
-      console.log("informe creado")
-
-      // Crear un objeto URL para el blob recibido
-      const blob = new Blob([response.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.download = 'reporte_solicitudesWeb.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-
-      if (response) {
-        enqueueSnackbar("Reporte creado.", { variant: "success", });
-      }
-
-    } catch (error) {
-      console.error("Error al generar el Excel:", error);
-      enqueueSnackbar("Error al generar el reporte.", { variant: "error" });
-      return null;
-    } finally {
-      setLoadingVerificacion(false);
-    }
-  }
-
-
   useEffect(() => {
     if (data && data.length > 0) {
       setDataBodega(
@@ -2428,11 +2393,10 @@ export function ListadoSolicitud() {
         {imprimirInforme() && (
           <button
             className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={fetchCrearExcel}
+            onClick={()=> setOpenModalExcel(true)}
           >
             <PiMicrosoftExcelLogoBold size={45} /> Crear informe
           </button>)}
-        {loadingVerificacion && <Loader />}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-xl">
@@ -4741,6 +4705,11 @@ export function ListadoSolicitud() {
         </DialogActions>
       </Dialog>
 
+	  <ExcelModal
+	  open={openModalExcel}
+	  onClose={()=> setOpenModalExcel(false)}
+	  bodegas={dataBodega}
+	  />
 
     </div>
   );
