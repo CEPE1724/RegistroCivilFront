@@ -202,7 +202,19 @@ export const APIURL = {
 
   get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`,
 
-  get_excelSolicitudWeb: () => `${API_BASE_URL}excel-solicitudes-web/export-excel`,
+  get_excelSolicitudWeb: ({ BodegaId, Fecha } = {}) => {
+	let url = `${API_BASE_URL}excel-solicitudes-web/export-excel`
+	const params = [];
+
+  	if (BodegaId) params.push(`BodegaId=${BodegaId}`);
+  	if (Fecha) params.push(`Fecha=${Fecha}`);
+
+  	if (params.length > 0) {
+  	  url += `?${params.join("&")}`;
+  	}
+
+  	return url;
+  },
   get_motivosContinuidad: () => `${API_BASE_URL}motivo-continuidad`,
   get_Count_get_motivosContinuidad : (vendedor) => `${API_BASE_URL}cre-solicitud-web/MotivoContinuidad/${vendedor}`,
   patchTipoVerificacionTrabajo : (id) => `${API_BASE_URL}terrena-gestion-trabajo/tipo-verificacion/${id}`

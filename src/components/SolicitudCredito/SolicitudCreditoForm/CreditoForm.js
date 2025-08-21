@@ -8,12 +8,6 @@ import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
-// import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
-// import WbSunnyIcon from '@mui/icons-material/WbSunny';
-// import CapturarCamara from "../../CapturarCamara/CapturarCamara";
-// import { Dialog, DialogTitle, DialogContent, Button } from "@mui/material";
-// import { BurstMode } from "@mui/icons-material";
-// import Point from "../SolicitudCreditoForm/img/SmartSelect_20250526_163023_WhatsApp_1748295060875.jpg"
 
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
@@ -24,13 +18,6 @@ export default function CreditoForm() {
   const [dataRecibir, setDataRecibir] = useState(null);
   const [loading, setLoading] = useState(false);  // Estado para mostrar el loading
   const [cedula, setCedula] = useState("");  // Estado para la cédula
-  //   const [showIdentityModal, setShowIdentityModal] = useState(false); 
-  //   const [openCameraModal, setOpenCameraModal] = useState(false);
-  //   const [openModal, setOpenModal] = useState(false);
-  //   const [imagenCapturada, setImagenCapturada] = useState(null);
-  //   const [previewUrl, setPreviewUrl] = useState(null);
-  //   const [fileToUpload, setFileToUpload] = useState(null);
-
   const IdVendedor = userUsuario?.idPersonal;
   const [actividadLaboral, setActividadLaboral] = useState([]);
   const [estabilidadLaboral, setEstabilidadLaboral] = useState([]);
@@ -162,46 +149,6 @@ export default function CreditoForm() {
       }
     }
   };
-
-
-  //   useEffect(() => {
-  //     if (dataRecibir) {
-
-
-  //       setInitialValues((prevValues) => ({
-  //         // Actualizamos los valores desde dataRecibir si existen, de lo contrario, usamos prevValues
-  // 		...prevValues,
-  //         PrimerNombre: dataRecibir.primerNombre || prevValues.PrimerNombre || '',
-  //         SegundoNombre: dataRecibir.segundoNombre || prevValues.SegundoNombre || '',
-  //         ApellidoPaterno: dataRecibir.apellidoPaterno || prevValues.ApellidoPaterno || '',
-  //         ApellidoMaterno: dataRecibir.apellidoMaterno || prevValues.ApellidoMaterno || '',
-  //         FechaNacimeinto: dataRecibir.fechaNacimiento || prevValues.FechaNacimeinto || '',  // Fecha de nacimiento
-  //         Edad: dataRecibir.edad || prevValues.Edad || '',  // Edad
-  //         Cedula: dataRecibir.identificacion || prevValues.Cedula || '',  // Edad
-  //         // Los siguientes valores siempre se toman de prevValues ya que no vienen de dataRecibir
-  //         NumeroSolicitud: prevValues.NumeroSolicitud || '',  // Mantener el valor previo
-  //         Bodega: Number(prevValues.Bodega) || '',  // Mantener el valor previo
-
-  //         // Estos valores se mantienen con los valores previos si no se actualizan desde dataRecibir
-  //         idVendedor: prevValues.idVendedor || null,  // Si no vienen de dataRecibir, mantenemos prevValues
-  //         idCompraEncuesta: prevValues.idCompraEncuesta || null,  // Siempre tomar el valor previo
-  //         // CodDactilar: prevValues.CodDactilar || '',  // Siempre tomar el valor previo
-  //         Celular: prevValues.Celular || '',  // Siempre tomar el valor previo
-  //         Email: prevValues.Email || '',  // Siempre tomar el valor previo
-  //         idSituacionLaboral: prevValues.idSituacionLaboral || null,  // Siempre tomar el valor previo
-  //         idActEconomina: prevValues.idActEconomina || null,  // Siempre tomar el valor previo
-  //         idCre_Tiempo: prevValues.idCre_Tiempo || null,  // Siempre tomar el valor previo
-  //         bAfiliado: prevValues.bAfiliado || false,  // Siempre tomar el valor previo
-  //         bTieneRuc: prevValues.bTieneRuc || false,  // Siempre tomar el valor previo
-  //         Foto: prevValues.Foto || '',  // Siempre tomar el valor previo
-  //         bTerminosYCondiciones: prevValues.bTerminosYCondiciones || false,  // Siempre tomar el valor previo
-  //         bPoliticas: prevValues.bPoliticas || false,  // Siempre tomar el valor previo
-  //         idProductos: prevValues.idProductos || null,  // Siempre tomar el valor previo
-  //         idCre_TiempoVivienda: prevValues.idCre_TiempoVivienda || null,  // Siempre tomar el valor previo
-  //         otp_code: prevValues.otp_code || '',  // Siempre tomar el valor previo
-  //       }));
-  //     }
-  //   }, [dataRecibir]);  // Este useEffect se ejecuta cada vez que `dataRecibir` cambia
 
   const handleSituacionLaboralChange = (selectedOption) => {
     fetchActEconomina(selectedOption);  // Llamada API
@@ -633,14 +580,6 @@ export default function CreditoForm() {
               url: "",
               expoToken: tokens,  // Opcional
             });
-            /*
-            const notificationSent = await sendNotification({
-              tokens, 
-              title,
-              body,
-              type: "alert",
-              empresa: "POINT",
-            });*/
 
           } else {
             console.warn("No se encontraron tokens para enviar la notificación.");
@@ -690,40 +629,6 @@ export default function CreditoForm() {
     }
   };
 
-  //   const handleUploadClick = async () => {
-  // 	  if (!fileToUpload) {
-  // 		alert("Primero selecciona una imagen");
-  // 		return;
-  // 	  }
-
-  // 	  try {
-  // 		let updatedUrl = ""; 
-  // 		const fileUploadResponse = await uploadFile(
-  // 		  fileToUpload,
-  // 		//   selectedRow.almacen,
-  // 		//   selectedRow.cedula,
-  // 		//   selectedRow.NumeroSolicitud,
-  // 		  "Foto"
-  // 		);
-
-  // 		if (fileUploadResponse) {
-  // 		  updatedUrl = fileUploadResponse.url;
-
-  // 		  // Actualizar en backend
-  // 		  const updatedData = { Foto: updatedUrl };
-  // 		  await fetchActualizaSolicitud(1, updatedData);
-
-  // 		  setUrlCloudstorage();
-  // 		  setFileToUpload(null);
-
-  // 		  enqueueSnackbar("Foto subida correctamente", {
-  // 			variant: "success",
-  // 		  });
-  // 		}
-  // 	  } catch (error) {
-  // 		alert(error.message);
-  // 	  }
-  // 	};
 
   return (
     <div>
@@ -737,88 +642,6 @@ export default function CreditoForm() {
           </div>
         </div>
       )}
-      {/* <Dialog
-	     open={openCameraModal}
-	     onClose={() => setOpenCameraModal(false)}
-	     maxWidth="sm"
-	     fullWidth
-	   >
-	     <DialogTitle>Captura de foto 😊</DialogTitle>
-	     <DialogContent>
-	   	<CapturarCamara
-	   	  onCapture={(imgBase64) => {
-	   		setImagenCapturada(imgBase64);
-	   		setPreviewUrl(imgBase64);
-	   		setOpenCameraModal(false);
-	   		// Convertir base64 a objeto File para permitir subir
-	   		const blob = fetch(imgBase64)
-	   		  .then((res) => res.blob())
-	   		  .then((blobData) => {
-	   			const file = new File([blobData], "captura.jpg", {
-	   			  type: "image/jpeg",
-	   			});
-	   			setFileToUpload(file); // ✅ Esto habilita el botón de "Subir imagen"
-	   		  });
-	   	  }}
-	   	/>
-	     </DialogContent>
-	   </Dialog>
-
-	   <Dialog open={openModal}>
-		<div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Validaremos la identidad de la cédula
-        </h3>
-      </div>
-	  <button onClick={() => setOpenModal(false)} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-		x
-	  </button>
-      
-      <div className="flex items-center justify-center mb-6">
-        <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-          <img 
-            src={Point} 
-            alt="Avatar del usuario" 
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4 mb-6">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 mt-1">
-            <SentimentSatisfiedAltIcon className="text-blue-500" />
-          </div>
-          <p className="text-gray-700 text-sm">
-            Mantén los ojos abiertos y evita usar lentes o gafas.
-          </p>
-        </div>
-        
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 mt-1">
-            <WbSunnyIcon className="text-yellow-500" />
-          </div>
-          <p className="text-gray-700 text-sm">
-            Busca un lugar iluminado y evita ponerte de espaldas a la luz.
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-4">
-        <button className="text-blue-600 text-sm underline hover:text-blue-800">
-          Términos de uso ▼
-        </button>
-      </div>
-	  <Button onClick={() => setOpenCameraModal(true)}>
-			Tomar Foto
-		</Button>
-    </div>
-	   </Dialog> */}
-
-      {/* <button open={openModal} onClick={() => setOpenModal(true)} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 cursor-pointer inline-block text-center">
-		foto
-	   </button>  */}
 
       <ReusableForm
         formConfig={formConfig}
