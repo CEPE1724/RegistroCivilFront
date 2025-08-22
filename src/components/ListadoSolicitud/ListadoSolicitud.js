@@ -2189,9 +2189,10 @@ export function ListadoSolicitud() {
             disabled={userData?.idGrupo === 23}
           >
             {userData?.idGrupo !== 23 && (<MenuItem value="todos">Todos</MenuItem>)}
-            {userData?.idGrupo === 23 && vendedores.filter(
-              (vendedor) => vendedor?.Codigo?.trim() === userData?.Nombre?.trim())
-            .map((vendedor) => (
+            {(userData?.idGrupo === 23 ? vendedores.filter(
+              (vendedor) => vendedor?.Codigo === userData?.Nombre)
+              : vendedores
+            ).map((vendedor) => (
               <MenuItem key={vendedor.idPersonal} value={vendedor.idPersonal}>
                 {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
               </MenuItem>
