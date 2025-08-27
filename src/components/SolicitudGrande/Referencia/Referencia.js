@@ -276,12 +276,12 @@ const Referencias = forwardRef((props, ref) => {
     try {
       setIsLoading(true);
       const isValid = await comprobTelf(formData.celular);
-      if (isValid === 1) { 
-      enqueueSnackbar(`El número ${formData.celular} se encuentra en la lista negra`, { variant: "error" });
-      setIsLoading(false);
-      
-      return;
-    }
+      if (isValid === 1) {
+        enqueueSnackbar(`El número ${formData.celular} se encuentra en la lista negra`, { variant: "error" });
+        setIsLoading(false);
+
+        return;
+      }
       // 1. Guardar referencia en la API
       await fecthSave(formData);
       //  agregar tambien a telefonica
@@ -324,9 +324,9 @@ const Referencias = forwardRef((props, ref) => {
   //api guardar referencias en VerificacionTelefonicaMaestro
   const fecthVerifTelfMaestr = async () => {
     try {
-    if (!data.Fecha) {
-      throw new Error("La fecha no está definida");
-    }
+      if (!data.Fecha) {
+        throw new Error("La fecha no está definida");
+      }
       const fechaFormateada = data.Fecha.split('T')[0];
       const url = APIURL.post_VerificacionTelefonicaMaestro();
       await axios.post(url, {
@@ -336,17 +336,17 @@ const Referencias = forwardRef((props, ref) => {
         idCre_SolicitudWeb: data.idCre_SolicitudWeb,
         idWeb_SolicitudGrande: data.idWeb_SolicitudGrande,
         Observacion: formData.primerNombre + " " + formData.apellidoPaterno,
-        },{
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     } catch (error) {
-      console.error("Error al guardar los datos del cliente:",{
-      errorResponse: error.response?.data,
-      status: error.response?.status,
-      config: error.config
-      } );
+      console.error("Error al guardar los datos del cliente:", {
+        errorResponse: error.response?.data,
+        status: error.response?.status,
+        config: error.config
+      });
       throw new Error(`Error al guardar en VerificacionTelefonicaMaestro: ${error.message}`);
     }
   };

@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { useSnackbar } from "notistack";
 import { useLocation } from "react-router-dom";
 import CallIcon from "@mui/icons-material/Call";
+import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import EventIcon from "@mui/icons-material/Event";
@@ -11,6 +12,7 @@ import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import ModalConfirmacionRechazo from '../SolicitudGrande/Cabecera/ModalConfirmacionRechazo'; // Ajusta la ruta si es necesario
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
+import { UpdateTelefonica } from "../UpdateTelefonica";
 import { Typography } from "@mui/material";
 
 
@@ -32,6 +34,8 @@ import {
   Alert,
 } from "@mui/material";
 import PrintIcon from '@mui/icons-material/Print';
+import { Icon } from "lucide-react";
+import { set } from "react-hook-form";
 export function TelefonicaList({
   id,
   NumeroSolicitud,
@@ -49,6 +53,8 @@ export function TelefonicaList({
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
   const navigate = useNavigate();
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [modalData, setModalData] = useState(null);
   const [clientInfo, setClientInfo] = useState({
     id: null,
     nombre: "",
@@ -73,6 +79,7 @@ export function TelefonicaList({
   const [soliParen, setSoliParen] = useState([])
   const [showModalCorrecion, setShowModalCorrecion] = useState(false);
   const [openConfirmModalAsig, setOpenConfirmModalAsig] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -83,7 +90,8 @@ export function TelefonicaList({
     6: "TELEFONO TRABAJO",
     7: "CELULAR NEGOCIO",
     8: "TELEFONO NEGOCIO",
-    10: "JEFE INMEDIATO"
+    10: "JEFE INMEDIATO",
+    11: "CAMBIO DE NÚMERO",
   };
 
   const EstadoMap = {
@@ -111,6 +119,89 @@ export function TelefonicaList({
     (permiso) => permiso.Permisos === 'EDITAR TELEFONICA CORRECCION' && permiso.Activo
   );
 
+  const handleGuardar = async (data) => {
+    console.log("Datos guardados:", data.idWeb_SolicitudGrande);
+    console.log("Datos guardados:", data.Campo);
+    console.log("Datos guardados:", data.TelefonoOrigen);
+    console.log("Datos guardados:", data);
+    await fetchSaveDatosTrabajo(data);
+    await fetchVerifTelfMaestr(data);
+    await fecthUpdateVerifTelfMaestr(data);
+    // Aquí puedes hacer una llamada a tu API o lógica adicional
+  };
+
+  const fetchSaveDatosTrabajo = async (data) => {
+    try {
+      const url = APIURL.puth_web_solicitudgrande_listadosolicitud(data.idWeb_SolicitudGrande);
+
+      const response = await axios.patch(
+        url,
+        {
+          [data.Campo]: data.Telefono
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      // Si todo sale bien
+      enqueueSnackbar("Número actualizado correctamente.", {
+        variant: "success",
+      });
+    } catch (error) {
+      // Si ocurre algún error
+      enqueueSnackbar("Error al guardar los datos del Dependiente.", {
+        variant: "error",
+      });
+      console.error("Error al guardar los datos del Dependiente.", error);
+    }
+  };
+
+  const fetchVerifTelfMaestr = async (data) => {
+    try {
+
+      const url = APIURL.post_VerificacionTelefonicaMaestro();
+      await axios.post(url, {
+        Telefono: data.Telefono,
+        idEstadoOrigenTelefonica: data.idEstadoOrigenTelefonica,
+        idCre_SolicitudWeb: data.idCre_SolicitudWeb,
+        idWeb_SolicitudGrande: data.idWeb_SolicitudGrande,
+        Observacion: data.Observacion,
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Error al guardar los datos del cliente:", {
+        errorResponse: error.response?.data,
+        status: error.response?.status,
+        config: error.config
+      });
+      throw new Error(`Error al guardar en VerificacionTelefonicaMaestro: ${error.message}`);
+    }
+  };
+  const fecthUpdateVerifTelfMaestr = async (data) => {
+    try {
+      console.log("Data para actualizar VerificacionTelefonicaMaestro:", data);
+      const url = APIURL.update_VerificacionTelefonicaMaestro(data.idCre_VerificacionTelefonicaMaestroOrigen);
+      await axios.patch(url, {
+        idEstadoOrigenTelefonica: 11
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (error) {
+      console.error("Error al actualizar los datos del cliente:", {
+        errorResponse: error.response?.data,
+        status: error.response?.status,
+        config: error.config
+      });
+      throw new Error(`Error al actualizar en VerificacionTelefonicaMaestro: ${error.message}`);
+    }
+  };
 
   const handleSubmit = async () => {
     const todosContactados = tablaDatos.filter(
@@ -246,16 +337,7 @@ export function TelefonicaList({
   useEffect(() => {
     if (clientInfo.id) {
       // Llamada a la API para obtener los datos
-      const fetchData = async () => {
-        try {
-          const response = await axios.get(
-            APIURL.getCreVerificacionTelefonicaMaestro(clientInfo.id)
-          );
-          setTablaDatos(response.data);
-        } catch (error) {
-          console.error("Error al obtener los datos de la API", error);
-        }
-      };
+
 
       fetchData();
       fetchParentesco();
@@ -263,6 +345,21 @@ export function TelefonicaList({
     }
   }, [clientInfo.id, shouldReload]);
 
+  useEffect(() => {
+    fetchData();
+  }, [handleGuardar]);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(
+        APIURL.getCreVerificacionTelefonicaMaestro(clientInfo.id)
+      );
+      console.log("Respuesta de la API:", response.data); // Verifica la respuesta completa
+      setTablaDatos(response.data);
+    } catch (error) {
+      console.error("Error al obtener los datos de la API", error);
+    }
+  };
   //Abrir modal
   const handleOpenDialog = async (index, item) => {
     const selectedItem = tablaDatos[index];
@@ -669,11 +766,20 @@ export function TelefonicaList({
     }
   }
 
+  const ModalActualizarTelefonica = (data, open) => {
+    // Lógica para abrir el modal y pasar los datos
+    setModalData(data);
+    setModalOpen(open);
+
+  };
+
   const ReporteTelefonicoButton = ({ solicitudId }) => {
     const handleDownloadPDF = () => {
       const url = `${APIURL.store_reports_phone_verification(solicitudId)}`;
       window.open(url, '_blank');
     };
+
+
 
     return (
       <Button
@@ -813,43 +919,69 @@ export function TelefonicaList({
                     <th className="px-4 py-2 text-center font-bold">Telefono</th>
                     <th className="px-4 py-2 text-center font-bold">Estado</th>
                     <th className="px-4 py-2 text-center font-bold">....</th>
+                    {(clientInfo.idEstadoVerificacionTelefonica == 7) && (<th className="px-4 py-2 text-center font-bold">Acción</th>)}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-200">
                   {tablaDatos.map((item, index) => {
                     const match = soliParen.find(p => p.Celular == item.Telefono);
                     const nombreParentesco = match
                       ? datoParentesco.find(d => d.idParentesco == match.idParentesco)?.Nombre
                       : 'TITULAR';
-                    return (<tr key={index}>
-                      <td className="px-4 py-2 text-center">{index + 1}</td>
-                      <td className="px-4 py-2 text-center">{item.idEstadoOrigenTelefonica === 4 ? item.Observacion : ""}</td>
-                      <td className="px-4 py-2 text-center">{nombreParentesco}</td>
-                      {/* Mostrar origen como Estacion */}
-                      <td className="px-4 py-2 text-center">
-                        {origenMap[item.idEstadoOrigenTelefonica] ||
-                          "Desconocido"}
-                      </td>{" "}
-                      {/* Formatear la fecha para que se muestre de forma legible */}
-                      <td className="px-4 py-2 text-center">
-                        {new Date(item.Fecha).toLocaleString()}{" "}
-                        {/* Formatea la fecha */}
-                      </td>
-                      {/* Mostrar teléfono */}
-                      <td className="px-4 py-2 text-center">{item.Telefono}</td>
-                      <td className="px-4 py-2 text-center">
-                        {EstadoMap[item.idEstadoGestns] || "Desconocido"}
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <IconButton
-                          color="primary"
-                          aria-label="call"
-                          onClick={() => handleOpenDialog(index, item)}
-                        >
-                          <CallIcon />
-                        </IconButton>
-                      </td>
-                    </tr>)
+
+                    const isVerde = item.idEstadoGestns === 11;
+                    const isRojo = item.idEstadoGestns === 13;
+
+                    return (
+
+                      <tr
+                        key={index}
+                        className={`
+                               ${isRojo ? "bg-red-600" : ""}
+                               ${isVerde ? "bg-green-600" : ""}  hover:bg-gray-100 transition-colors duration-300`}
+                      >
+                        <td className="px-4 py-2 text-center">{index + 1}</td>
+                        <td className="px-4 py-2 text-center">{item.idEstadoOrigenTelefonica === 4 ? item.Observacion : ""}</td>
+                        <td className="px-4 py-2 text-center">{nombreParentesco}</td>
+                        {/* Mostrar origen como Estacion */}
+                        <td className="px-4 py-2 text-center">
+                          {origenMap[item.idEstadoOrigenTelefonica] ||
+                            "Desconocido"}
+                        </td>{" "}
+                        {/* Formatear la fecha para que se muestre de forma legible */}
+                        <td className="px-4 py-2 text-center">
+                          {new Date(item.Fecha).toLocaleString()}{" "}
+                          {/* Formatea la fecha */}
+                        </td>
+                        {/* Mostrar teléfono */}
+                        <td className="px-4 py-2 text-center">{item.Telefono}</td>
+                        <td className="px-4 py-2 text-center">
+                          {EstadoMap[item.idEstadoGestns] || "Desconocido"}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          <IconButton
+                            color="primary"
+                            aria-label="call"
+                            onClick={() => handleOpenDialog(index, item)}
+                          >
+                            <CallIcon />
+                          </IconButton>
+                        </td>
+                        {(clientInfo.idEstadoVerificacionTelefonica === 7 && item.idEstadoOrigenTelefonica != 11) && (
+                          <td className="px-4 py-2 text-center">
+                            {(item.idEstadoGestns === 13 && nombreParentesco === 'TITULAR') && (
+                              /* actualizar telefono*/
+                              <IconButton
+                                color="success"
+                                aria-label="edit"
+                                onClick={() => ModalActualizarTelefonica(item, true, tablaDatos)}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            )}
+                          </td>
+                        )}
+                      </tr>)
                   })}
                 </tbody>
               </table>
@@ -1030,7 +1162,7 @@ export function TelefonicaList({
             </DialogContent>
 
             <DialogActions className="bg-gray-100 py-3 px-6">
-              {selectedRow?.idEstadoGestns !== 11 && tienePermisoGuardar && (clientInfo.idEstadoVerificacionTelefonica == 2 )
+              {(selectedRow?.idEstadoGestns !== 11 && selectedRow?.idEstadoGestns !== 13) && tienePermisoGuardar && (clientInfo.idEstadoVerificacionTelefonica == 2)
                 && (
                   <Button
                     onClick={handleGuardarModal}
@@ -1048,6 +1180,7 @@ export function TelefonicaList({
                 Cerrar
               </Button>
             </DialogActions>
+
           </Dialog>
         </div>
         <ModalConfirmacionRechazo
@@ -1074,6 +1207,14 @@ export function TelefonicaList({
         solicitudData={clientInfo}
         Titulo='Enviar Verificacion'
         mensajePrincipal='¿Deseas volver a enviar a revisión la Telefónica?'
+      />
+
+      <UpdateTelefonica
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleGuardar}
+        data={modalData}
+        tablaDatos={tablaDatos}
       />
 
     </div>
