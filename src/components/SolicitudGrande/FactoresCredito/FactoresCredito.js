@@ -12,6 +12,7 @@ import { APIURL } from "../../../configApi/apiConfig";
 import { enqueueSnackbar } from "notistack";
 import { FaListAlt, FaMoneyBillWave, FaMoneyCheckAlt,FaCommentDots } from "react-icons/fa";
 import {useAuth} from "../../AuthContext/AuthContext"
+import { Dialog, DialogTitle, DialogContent, Typography, DialogActions, Button } from "@mui/material";
 
 
 
@@ -19,7 +20,8 @@ import {useAuth} from "../../AuthContext/AuthContext"
 export const FactoresCredito = forwardRef((props, ref) => {
   const { data, fetchCuotaCupo, estSol } = props;
   const [tipo, setTipo] = useState([]);
-    const { userData, idMenu } = useAuth();
+  const { userData, idMenu } = useAuth();
+  const [openConfirmModal, setOpenConfirmModal] = useState(false);
   
   const [formData, setFormData] = useState({
     tipoCliente: data.idTipoCliente || 0,
@@ -39,6 +41,26 @@ export const FactoresCredito = forwardRef((props, ref) => {
     };
   };
 
+  const [cuotaOriginal, setCuotaOriginal] = useState("")
+  const [cuotaActualizada, setCuotaActualizada] = useState("")
+  const [cupoOriginal, setCupoOriginal] = useState("")
+  const [cupoActualizado, setCupoActualizado] = useState("")
+ 	
+	useEffect(() => {
+	  if (data?.CuotaAsignada && cuotaOriginal === "") {
+	    setCuotaOriginal(data.CuotaAsignada);
+	  }
+
+	  if (data?.Cupo && cupoOriginal === "") {
+	    setCupoOriginal(data.Cupo);
+	  }
+	}, [data]);
+
+	useEffect(() => {
+	  setCuotaActualizada(formData?.cuotaAsignada || "");
+	  setCupoActualizado(formData?.cupo || "");
+	}, [formData]);
+ 
 ///// permisos 
   const [permisos, setPermisos] = useState([]);
 
@@ -261,6 +283,41 @@ export const FactoresCredito = forwardRef((props, ref) => {
     }
   }));
 
+  const fetchInsertarDatos = async (data) => {
+	
+	  try {
+		const url = APIURL.post_createtiemposolicitudeswebDto();
+  
+		await axios.post(url, {
+		  idCre_SolicitudWeb: data.idCre_SolicitudWeb,
+		  Tipo: 1,
+		  idEstadoVerificacionDocumental: 26,
+		  Usuario: userData.Nombre,
+		  Telefono: `Se actualizo Cuota de ${cuotaOriginal} a ${cuotaActualizada} y Cupo de ${cupoOriginal} a ${cupoActualizado}`
+  
+		});
+	  } catch (error) {
+		console.error("Error al guardar los datos del cliente", error);
+	  }
+	};
+
+  const handleActualizar = async () => {
+    try {
+      const formData = getFormData(); 
+      if (!validateForm()) { 
+		enqueueSnackbar("Datos incorrectos", { variant: "error" });
+		return;
+      }
+      await fetchCuotaCupo(formData);
+	  fetchInsertarDatos(data)
+	  setOpenConfirmModal(false)
+      enqueueSnackbar("Cuota/Cupo actualizados correctamente", { variant: "success" });
+    } catch (error) {
+      enqueueSnackbar("Error al actualizar los datos", { variant: "error" });
+      console.error("Error al guardar:", error);
+      }
+  }
+
   return (
     <div>
       {/* Botón de impresión y selects superiores */}
@@ -334,19 +391,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
 
           {(estSol === 12 || estSol===10) && !permisoEditar() && (<div className="flex items-center">           
             <button
-              onClick={async () => {
-                try {
-                  const formData = getFormData(); 
-                  if (!validateForm()) { 
-                   return;
-                  }
-                  await fetchCuotaCupo(formData);
-                  enqueueSnackbar("Datos guardados correctamente", { variant: "success" });
-                } catch (error) {
-                  enqueueSnackbar("Error al guardar los datos", { variant: "error" });
-                  console.error("Error al guardar:", error);
-                  }
-                  }}
+				  onClick={()=> setOpenConfirmModal(true)}
                   className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2">
                     <SaveIcon className="text-lg" />
                     <span className="text-xs">Actualizar</span>
@@ -354,6 +399,28 @@ export const FactoresCredito = forwardRef((props, ref) => {
           </div>)}
         </div>
       </div>
+
+	  {/* Modal de confirmación */}
+		<Dialog
+		  open={openConfirmModal}
+		  onClose={() => setOpenConfirmModal(false)}
+		  maxWidth="xs"
+		>
+		  <DialogTitle>Confirmar actualización</DialogTitle>
+		  <DialogContent>
+			<Typography>
+				{`¿Está seguro de actualizar la Cuota a ${formData.cuotaAsignada} y el Cupo a ${formData.cupo}?`}
+			</Typography>
+		  </DialogContent>
+		  <DialogActions>
+			<Button onClick={() => setOpenConfirmModal(false)} color="primary">
+			  Cancelar
+			</Button>
+			<Button onClick={handleActualizar} color="primary" variant="contained">
+			  Confirmar
+			</Button>
+		  </DialogActions>
+		</Dialog>
     </div>
   );
 
