@@ -77,6 +77,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         23: { label: "Por Caducidad", icon: <ErrorIcon />, color: orange[500] },
         24: { label: "Registro Duplicado", icon: <SearchIcon />, color: amber[700] },
         25: { label: "Excepción Domicilio", icon: <HomeIcon />, color: teal[500] },
+        26: { label: "Actualizar Cuota/Cupo", icon: <AutorenewIcon />, color: orange[600] },
 
 
         /*11: "CORRECIÓN",
@@ -151,6 +152,11 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           label: "Aprobación Verificación Física Analista",
           icon: <ThumbUpIcon />,
           color: green[800]    // Azul más fuerte: aprobado, estado positivo
+        },
+		7: {
+          label: "Reasignado Verificador por Analista",
+          icon: <AutorenewIcon />,
+          color: orange[600]    
         }
       },
 
@@ -185,6 +191,11 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           label: "Aprobación Verificación Física Analista",
           icon: <ThumbUpIcon />,
           color: green[800]
+        },
+		7: {
+          label: "Reasignado Verificador por Analista",
+          icon: <AutorenewIcon />,
+          color: orange[600]    
         }
       },
 

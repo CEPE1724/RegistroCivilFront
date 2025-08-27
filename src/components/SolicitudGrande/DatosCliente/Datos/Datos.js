@@ -449,7 +449,7 @@ const Datos = forwardRef((props, ref) => {
                                     className="solcitudgrande-style"
                                     name="fechaNacimiento"
                                     onChange={handleFormChange}
-                                    readOnly={data.FechaNacimiento !== undefined && data.FechaNacimiento !== null && data.FechaNacimiento !== "" && data.FechaNacimiento.length > 0}
+                                    readOnly={data?.FechaNacimiento !== undefined && data?.FechaNacimiento !== null && data?.FechaNacimiento !== "" && data.FechaNacimiento?.length > 0}
                                 />
                                 {formErrors.fechaNacimiento && (
                                     <p className="mt-1 text-sm text-red-500 border-red-500">

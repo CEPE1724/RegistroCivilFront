@@ -4,6 +4,7 @@ import { APIURL } from "../../configApi/apiConfig";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useSnackbar } from "notistack";
 import DomicilioModal from "./DomicilioModal";
+import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
 import {
   Button,
   Dialog,
@@ -13,7 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 
-const ListVerifDomicilioModal = ({ openModal, closeModal, datosCliente }) => {
+const ListVerifDomicilioModal = ({ openModal, closeModal, datosCliente, userData, permisos }) => {
   const { enqueueSnackbar } = useSnackbar();
   const [verificaciones, setVerificaciones] = useState([]);
   const [verificadores, setVerificadores] = useState([]);
@@ -21,6 +22,8 @@ const ListVerifDomicilioModal = ({ openModal, closeModal, datosCliente }) => {
   const handleCloseDomicilioModal = () => setDomicilioModalOpen(false);
   const [selectedVerificacion, setSelectedVerificacion] = useState("");
   const [openModalPendiente, setOpenModalPendiente] = useState(false);
+  const [openVerificacionModal2, setOpenVerificacionModal2] = useState(false);
+  const idClienteVerificacion = verificaciones.find(verificacion => verificacion.iEstado === 0); 
 
   const fetchVerificaciones = async (id) => {
     try {
@@ -61,6 +64,11 @@ const ListVerifDomicilioModal = ({ openModal, closeModal, datosCliente }) => {
       setSelectedVerificacion("");
     }
   }, [openModal]);
+
+  const permisoReasignarVerificador = () => {
+	 const permiso = permisos.find((p) => p.Permisos === "REASIGNAR VERIFICADOR");
+    return permiso && permiso.Activo;
+  }
 
   if (!openModal) return null;
 
@@ -183,6 +191,12 @@ const ListVerifDomicilioModal = ({ openModal, closeModal, datosCliente }) => {
               )?.Nombre || "Sin asignar"}
             </strong>
           </Typography>
+		  {permisoReasignarVerificador() && (
+		  	<div style={{ display: 'flex', justifyContent: 'right', padding: '10px' }}>
+				<Button onClick={()=> {setOpenVerificacionModal2(true); setOpenModalPendiente(false);}} color="primary" variant="contained"  >
+					Reasignar
+				</Button>
+			</div>)}
         </DialogContent>
         <DialogActions>
           <Button
@@ -196,6 +210,17 @@ const ListVerifDomicilioModal = ({ openModal, closeModal, datosCliente }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+	  {/* reasignar verificador */}
+		<VerificacionTerrenaModal
+		isOpen={openVerificacionModal2}
+		onClose={() => setOpenVerificacionModal2(false)}
+		userSolicitudData={datosCliente?.cliente}
+		userData={userData}
+		tipoSeleccionado={"domicilio"}
+		idClienteVerificacion={idClienteVerificacion?.idClienteVerificacion}
+		reasignacion={true}
+		/>
     </>
   );
 };

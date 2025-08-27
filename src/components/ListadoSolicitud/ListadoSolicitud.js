@@ -144,6 +144,7 @@ export function ListadoSolicitud() {
   const [tipo, setTipo] = useState([]);
   const [tipoClienteMap, setTipoClienteMap] = useState({});
   const [tipoVerificacionSeleccionada, setTipoVerificacionSeleccionada] = useState(null);
+  const [tipoVerificacionSeleccionada2, setTipoVerificacionSeleccionada2] = useState(null);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const date15DaysAgo = new Date();
   date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
@@ -186,6 +187,7 @@ export function ListadoSolicitud() {
   const [openConfirmModalCodDac, setOpenConfirmModalCodDac] = useState(false);
   const [codDact, setCodDact] = useState("");
   const [openModalExcel, setOpenModalExcel ] = useState(false);
+  const [openVerificacionModal2, setOpenVerificacionModal2] = useState(false);
 
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
@@ -859,6 +861,11 @@ export function ListadoSolicitud() {
     return permiso && permiso.Activo
   }
 
+  const permisoReasignarVerificador = () => {
+	 const permiso = permisos.find((p) => p.Permisos === "REASIGNAR VERIFICADOR");
+    return permiso && permiso.Activo;
+  }
+
   const estadoDeshabilitadoporPermisos = (data) => {
     // Obtener el estado correspondiente al ID
     const estado = estadoMap[data.idEstadoVerificacionSolicitud];
@@ -922,6 +929,7 @@ export function ListadoSolicitud() {
   };
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
+  const [userSolicitudData2, setUserSolicitudData2] = useState([]);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -1161,6 +1169,8 @@ export function ListadoSolicitud() {
       }));
 
       setIdsTerrenas(idsTerrenas);
+	  setUserSolicitudData2(data);
+	  setTipoVerificacionSeleccionada2(tipo)
 
       if (!idsTerrenas || idsTerrenas.length === 0) {
         // No hay datos, abrir PreDocumentos (nuevo componente)
@@ -4563,6 +4573,17 @@ export function ListadoSolicitud() {
         tipoSeleccionado={tipoVerificacionSeleccionada}
       />
 
+		{/* reasignar verificador */}
+	  <VerificacionTerrenaModal
+        isOpen={openVerificacionModal2}
+        onClose={() => setOpenVerificacionModal2(false)}
+        userSolicitudData={userSolicitudData2}
+        userData={userData}
+        tipoSeleccionado={tipoVerificacionSeleccionada2}
+		idClienteVerificacion={idsTerrenas.idClienteVerificacion}
+		reasignacion={true}
+      />
+
       <DomicilioModal
         openModal={isDomicilioModalOpen}
         closeModal={handleCloseDomicilioModal}
@@ -4583,12 +4604,16 @@ export function ListadoSolicitud() {
         openModal={listVerifDomiciModal}
         closeModal={handleCloseVerifDomModal}
         datosCliente={domicilioData}
+		userData={userData}
+		permisos={permisos}
       />
 
       <ListVerifLaboralModal
         openModal={listVerifLaborModal}
         closeModal={handleCloseVerifLabModal}
         datosCliente={trabajoData}
+		userData={userData}
+		permisos={permisos}
       />
 
       <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
@@ -4600,6 +4625,12 @@ export function ListadoSolicitud() {
               {clienteEstados.length > 0 ? clienteEstados[0].Telefono : "N/A"}
             </strong>
           </Typography>
+		  { permisoReasignarVerificador() && (
+		  	<div style={{ display: 'flex', justifyContent: 'right', padding: '10px' }}>
+				<Button onClick={()=> {setOpenVerificacionModal2(true); setOpenModalPendiente(false); }} color="primary" variant="contained"  >
+					Reasignar
+				</Button>
+			</div> )} 
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenModalPendiente(false)} color="primary">

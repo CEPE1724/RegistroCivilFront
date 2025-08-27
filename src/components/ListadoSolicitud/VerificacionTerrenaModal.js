@@ -10,7 +10,8 @@ export default function VerificacionTerrenaModal({
   userData,
   tipoSeleccionado,
   data,
-  idClienteVerificacion
+  idClienteVerificacion,
+  reasignacion
 }) {
 
   const { enqueueSnackbar } = useSnackbar();
@@ -114,6 +115,54 @@ const filteredVerificadores = verificadores.filter((v) =>
     }
   };
 
+  const handleReasignar = async () => {
+	if (!isFormValid) return;
+
+	const payload = {
+      tokens: [tokenVerificador],
+      notification: {
+        type: "alert",
+        title: "VERIFICACIÓN TERRENA REQUERIDA",
+        body: `📍 ${userSolicitudData.almacen} | Solicitante: ${userSolicitudData?.PrimerNombre} ${userSolicitudData.SegundoNombre} ${userSolicitudData?.ApellidoPaterno} ${userSolicitudData.ApellidoMaterno} 🪪 ${userSolicitudData.cedula}  | Solicitud activa de inspección en terreno.`,
+        url: "",
+        empresa: "CREDI",
+      }
+    }
+
+	try {
+		const response = await axios.patch(APIURL.patch_ClientesVerifTerren(idClienteVerificacion), {idVerificador: Number(verificador)});
+		if (response.status !== 200){
+			throw new Error("Error al agregar el registro.");
+		}
+		enqueueSnackbar("Verificador reasignado correctamente", { variant: "success" });
+		
+      if (tokenVerificador) {
+		try {
+			const responseNoti = await axios.post(APIURL.enviarNotificacion(), payload );
+			if (responseNoti.status !== 200) {
+				throw new Error("Error al enviar la notificación");
+			}
+			enqueueSnackbar("Notificación enviada", { variant: "success" });
+		} catch (notiError) {
+			console.error("❌ Error al enviar notificación:", notiError);
+		}
+      }
+
+      resetForm();
+      onClose(); // Cierra el modal
+
+	  if (tipoVerificacion === "domicilio") {
+      await fetchInsertarDatos(4, userSolicitudData.id, verificadorNombre, 7)
+    } else if (tipoVerificacion === "trabajo") {
+      await fetchInsertarDatos(5, userSolicitudData.id, verificadorNombre, 7);
+    }
+
+    } catch (error) {
+      console.error("❌ Error al enviar verificación:", error);
+      enqueueSnackbar("Error, no se pudo actualizar el verificador", { variant: "error" });
+    }
+
+  }
 
   const fetchInsertarDatos = async (tipo, idSolicitudWeb, telefono, estado) => {
     try {
@@ -275,6 +324,7 @@ const filteredVerificadores = verificadores.filter((v) =>
           >
             Cancelar
           </button>
+		  {( !reasignacion &&
           <button
             className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${!isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
               }`}
@@ -283,6 +333,17 @@ const filteredVerificadores = verificadores.filter((v) =>
           >
             Aceptar
           </button>
+		)}
+
+		  {reasignacion && (
+		  <button
+            className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${!isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+              }`}
+			  onClick={handleReasignar}
+			  disabled={!isFormValid}
+          >
+            Reasignar
+          </button>)}
         </div>
 
       </div>
