@@ -14,8 +14,6 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
 import { UpdateTelefonica } from "../UpdateTelefonica";
 import { Typography } from "@mui/material";
-
-
 import { APIURL } from "../../configApi/apiConfig";
 import {
   IconButton,
@@ -55,6 +53,31 @@ export function TelefonicaList({
   const navigate = useNavigate();
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalData, setModalData] = useState(null);
+  const [filePreviews, setFilePreviews] = useState({});
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
+  const [soliParen, setSoliParen] = useState([])
+  const [showModalCorrecion, setShowModalCorrecion] = useState(false);
+  const [openConfirmModalAsig, setOpenConfirmModalAsig] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [idCre_VerificacionTelefonicaMaestro, setIdCre_VerificacionTelefonicaMaestro] = useState(null);
+  const [showRechazoModal, setShowRechazoModal] = useState(false);
+  //almacenar datos modal
+  const [formDataModal, setFormDataModal] = useState({
+    contactoEfectivo: "",
+    estado: "",
+    referencia: "",
+    observaciones: "",
+  });
+  const [view, setView] = useState(false);
+  const [tablaDatos, setTablaDatos] = useState([]); //almacenar datos tabla
+  const [tablaModal, setTablaModal] = useState([]); //estado datos tabla modal
+  const [datoEstado, setDatoEstado] = useState([]); //estado para api Estado
+  const [idToTextMapEstado, setIdToTextMapEstado] = useState({}); //estado para mapear IDs a textos de api Estado
+  const [datoParentesco, setDatoParentesco] = useState([]); //estado parentesco
+  const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
+  const contactedDocs = tablaDatos.filter((doc) => doc.idEstadoOrigenTelefonica == 4 && doc.idEstadoGestns === 11); //numeros contactados que son referencia
+
   const [clientInfo, setClientInfo] = useState({
     id: null,
     nombre: "",
@@ -68,18 +91,52 @@ export function TelefonicaList({
     idEstadoVerificacionTelefonica: "",
     permisos: [],
   });
-  const [
-    idCre_VerificacionTelefonicaMaestro,
-    setIdCre_VerificacionTelefonicaMaestro,
-  ] = useState(null);
 
-  const [filePreviews, setFilePreviews] = useState({});
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [shouldReload, setShouldReload] = useState(false); // Indica si se debe recargar el componente
-  const [soliParen, setSoliParen] = useState([])
-  const [showModalCorrecion, setShowModalCorrecion] = useState(false);
-  const [openConfirmModalAsig, setOpenConfirmModalAsig] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  // 1. Cargar datos de cliente desde location o localStorage
+  useEffect(() => {
+    const locationClientInfo = location.state;
+
+    if (locationClientInfo) {
+      localStorage.setItem("clientInfo", JSON.stringify(locationClientInfo));
+      setClientInfo(locationClientInfo);
+    } else {
+      const savedClientInfo = localStorage.getItem("clientInfo");
+      if (savedClientInfo) {
+        setClientInfo(JSON.parse(savedClientInfo));
+      }
+    }
+  }, [location.state]);
+
+  // 2. Cargar datos relacionados al cliente cuando esté listo
+  useEffect(() => {
+    if (!clientInfo.id) return;
+    fetchData();
+    fetchParentesco();
+  }, [clientInfo.id, shouldReload]);
+
+  // 3. Generar previews de archivos seleccionados
+  useEffect(() => {
+    const updatedPreviews = {};
+
+    Object.entries(files).forEach(([field, fileList]) => {
+      updatedPreviews[field] = fileList.map(file => URL.createObjectURL(file));
+    });
+
+    setFilePreviews(updatedPreviews);
+
+    return () => {
+      Object.values(updatedPreviews).flat().forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [files]);
+
+  // 4. Obtener datos de estado y datos generales una vez
+  useEffect(() => {
+    fetchDatoEstado();
+    fetchDato();
+  }, []);
+
+
+
 
   const origenMap = {
     1: "DOMICILIO # 1",
@@ -123,10 +180,12 @@ export function TelefonicaList({
     console.log("Datos guardados:", data.idWeb_SolicitudGrande);
     console.log("Datos guardados:", data.Campo);
     console.log("Datos guardados:", data.TelefonoOrigen);
-    console.log("Datos guardados:", data);
+    console.log("Datos guardados:", data.Telefono);
+    const Observacion = ` TELEFONO ACTUALIZADO ${data.Telefono} POR ${data.TelefonoOrigen}. NOTA: ${data.Observaciones}`;
     await fetchSaveDatosTrabajo(data);
     await fetchVerifTelfMaestr(data);
     await fecthUpdateVerifTelfMaestr(data);
+    await fetchInsertarDatosCorreccion(6, Observacion);
     // Aquí puedes hacer una llamada a tu API o lógica adicional
   };
 
@@ -262,7 +321,6 @@ export function TelefonicaList({
   };
 
 
-  const [showRechazoModal, setShowRechazoModal] = useState(false);
   const handleRemove = async () => {
     rechazar();
     patchSolicitud(
@@ -303,25 +361,6 @@ export function TelefonicaList({
     });
   };
 
-
-
-
-  //almacenar datos modal
-  const [formDataModal, setFormDataModal] = useState({
-    contactoEfectivo: "",
-    estado: "",
-    referencia: "",
-    observaciones: "",
-  });
-  const [view, setView] = useState(false);
-  const [tablaDatos, setTablaDatos] = useState([]); //almacenar datos tabla
-  const [tablaModal, setTablaModal] = useState([]); //estado datos tabla modal
-  const [datoEstado, setDatoEstado] = useState([]); //estado para api Estado
-  const [idToTextMapEstado, setIdToTextMapEstado] = useState({}); //estado para mapear IDs a textos de api Estado
-  const [datoParentesco, setDatoParentesco] = useState([]); //estado parentesco
-  const [idToTextMap, setIdToTextMap] = useState({}); //estado para mapear IDs a textos de api parentesco
-  const contactedDocs = tablaDatos.filter((doc) => doc.idEstadoOrigenTelefonica == 4 && doc.idEstadoGestns === 11); //numeros contactados que son referencia
-
   const titulares = tablaDatos.filter((item) => {
     const match = soliParen.find(p => p.Celular == item.Telefono);
     const nombreParentesco = match
@@ -330,24 +369,11 @@ export function TelefonicaList({
     return nombreParentesco === 'TITULAR';
   });
 
-  const todosTitularesContactados = titulares.every((item) => item.idEstadoGestns === 11);  //numeros TITUlAR contactados
+  const todosTitularesContactados = titulares.every(
+    (item) => item.idEstadoGestns === 11 || item.idEstadoGestns === 13);  //numeros TITUlAR contactados
 
   const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
-  const resultContactedDocs = contactedDocs.length >= 2 ? contactedDocs : [];
-  useEffect(() => {
-    if (clientInfo.id) {
-      // Llamada a la API para obtener los datos
 
-
-      fetchData();
-      fetchParentesco();
-
-    }
-  }, [clientInfo.id, shouldReload]);
-
-  useEffect(() => {
-    fetchData();
-  }, [handleGuardar]);
 
   const fetchData = async () => {
     try {
@@ -630,49 +656,7 @@ export function TelefonicaList({
     }
   };
 
-  useEffect(() => {
-    if (location.state) {
-      // Si hay datos en `location.state`, los guardamos en localStorage
-      localStorage.setItem("clientInfo", JSON.stringify(location.state));
-      setClientInfo(location.state);
-    } else {
-      // Si no hay datos en `location.state`, intentamos recuperar de localStorage
-      const savedClientInfo = localStorage.getItem("clientInfo");
-      if (savedClientInfo) {
-        setClientInfo(JSON.parse(savedClientInfo));
-      }
-    }
-  }, [location.state]);
 
-  useEffect(() => {
-    // Actualiza la información del cliente cuando cambie location.state
-    // Optimiza la vista previa de los archivos seleccionados
-    const updatedFilePreviews = {};
-    Object.keys(files).forEach((field) => {
-      updatedFilePreviews[field] = files[field].map((file) => {
-        if (file.type === "application/pdf") {
-          // Crea URL para vista previa de archivos PDF
-          return URL.createObjectURL(file);
-        }
-        // Si no es PDF, puede que quieras otra lógica para imágenes o diferentes tipos de archivo
-        return URL.createObjectURL(file);
-      });
-    });
-
-    setFilePreviews(updatedFilePreviews);
-
-    // Cleanup: Elimina las URLs de los archivos cuando el componente se desmonte o cambie
-    return () => {
-      Object.values(updatedFilePreviews).forEach((previewUrls) =>
-        previewUrls.forEach((url) => URL.revokeObjectURL(url))
-      );
-    };
-  }, [location.state, files]); // Se ejecuta cuando 'location.state' o 'files' cambian
-
-  //api estado
-  useEffect(() => {
-    fetchDatoEstado();
-  }, []);
 
   const fetchDatoEstado = async () => {
     try {
@@ -698,10 +682,6 @@ export function TelefonicaList({
     }
   };
 
-  //api referencias
-  useEffect(() => {
-    fetchDato();
-  }, []);
 
   const fetchDato = async () => {
     try {
@@ -937,8 +917,8 @@ export function TelefonicaList({
                       <tr
                         key={index}
                         className={`
-                               ${isRojo ? "bg-red-600" : ""}
-                               ${isVerde ? "bg-green-600" : ""}  hover:bg-gray-100 transition-colors duration-300`}
+                               ${isRojo ? "bg-red-300" : ""}
+                               ${isVerde ? "bg-green-300" : ""}  hover:bg-gray-100 transition-colors duration-300`}
                       >
                         <td className="px-4 py-2 text-center">{index + 1}</td>
                         <td className="px-4 py-2 text-center">{item.idEstadoOrigenTelefonica === 4 ? item.Observacion : ""}</td>

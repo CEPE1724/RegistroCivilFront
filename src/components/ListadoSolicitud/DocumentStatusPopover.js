@@ -90,6 +90,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         3: { label: "Aprobado", icon: <CallMadeIcon />, color: green[600] },            // Llamada realizada y aprobada
         4: { label: "Rechazado", icon: <CallEndIcon />, color: red[500] },              // Rechazado tras contacto
         5: { label: "Gestionado", icon: <PhoneInTalkIcon />, color: blue[500] },        // Gestión realizada con llamada
+        6: { label: "Número Actualizado", icon: <AutorenewIcon />, color: orange[600] }, // Número telefónico actualizado
         7: { label: "Corrección", icon: <EditNoteIcon />, color: orange[600] }          // Requiere corrección
       },
 

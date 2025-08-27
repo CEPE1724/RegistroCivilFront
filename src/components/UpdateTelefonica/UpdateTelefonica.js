@@ -6,6 +6,8 @@ export function UpdateTelefonica({ isOpen, onClose, onSave, data, tablaDatos }) 
     const [observacion, setObservacion] = useState("");
     const [errors, setErrors] = useState({});
     const [isFormValid, setIsFormValid] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+
     console.log("data recibida en UpdateTelefonica:", data);
     const opciones = [
         { id: 1, nombre: "DOMICILIO # 1", campo: "Telefono", mumcaracteres: 9 },
@@ -56,8 +58,10 @@ export function UpdateTelefonica({ isOpen, onClose, onSave, data, tablaDatos }) 
     };
 
 
-    const handleSave = () => {
-        if (!isFormValid) return;
+    const handleSave = async () => {
+        if (!isFormValid || isSaving) return;
+
+        setIsSaving(true);
 
         // Buscar el campo dinámico a actualizar
         const opcionSeleccionada = opciones.find(
@@ -67,6 +71,7 @@ export function UpdateTelefonica({ isOpen, onClose, onSave, data, tablaDatos }) 
         // Si no se encuentra una opción válida, salir
         if (!opcionSeleccionada) {
             alert("No se encontró una opción válida para actualizar.");
+            setIsSaving(false);
             return;
         }
 
@@ -85,15 +90,20 @@ export function UpdateTelefonica({ isOpen, onClose, onSave, data, tablaDatos }) 
             Telefono: telefono,
         };
 
-        onSave(dataEnvio);
-
-        // Limpiar el formulario
-        setOrigen("");
-        setTelefono("");
-        setObservacion("");
-        setErrors({});
-        setIsFormValid(false);
-        onClose();
+        try {
+            await onSave(dataEnvio); // espera si onSave es async
+            // Limpiar formulario
+            setOrigen("");
+            setTelefono("");
+            setObservacion("");
+            setErrors({});
+            setIsFormValid(false);
+            onClose();
+        } catch (error) {
+            console.error("Error al guardar:", error);
+        } finally {
+            setIsSaving(false); // Siempre desbloquea después de terminar
+        }
     };
 
 
@@ -148,13 +158,13 @@ export function UpdateTelefonica({ isOpen, onClose, onSave, data, tablaDatos }) 
                     </button>
                     <button
                         onClick={handleSave}
-                        disabled={!isFormValid}
+                        disabled={!isFormValid || isSaving}
                         className={`px-4 py-2 rounded text-white ${isFormValid
                             ? "bg-blue-600 hover:bg-blue-700"
                             : "bg-blue-300 cursor-not-allowed"
                             }`}
                     >
-                        Guardar
+                         {isSaving ? "Guardando..." : "Guardar"}
                     </button>
                 </div>
             </div>
