@@ -186,6 +186,7 @@ export function TelefonicaList({
     await fetchVerifTelfMaestr(data);
     await fecthUpdateVerifTelfMaestr(data);
     await fetchInsertarDatosCorreccion(6, Observacion);
+    await fetchData();
     // Aquí puedes hacer una llamada a tu API o lógica adicional
   };
 
@@ -369,11 +370,21 @@ export function TelefonicaList({
     return nombreParentesco === 'TITULAR';
   });
 
+  const countTitulares = titulares.length;
+  const lengthTitulares = titulares.filter(item => item.idEstadoGestns === 11).length;
+
   const todosTitularesContactados = titulares.every(
-    (item) => item.idEstadoGestns === 11 || item.idEstadoGestns === 13);  //numeros TITUlAR contactados
+    (item) => item.idEstadoGestns === 11 || item.idEstadoGestns === 13
+  );
+  const countTitularesEquivocados = titulares.filter(item => item.idEstadoGestns === 13).length;
 
-  const puedeAprobar = contactedDocs.length >= 2 && todosTitularesContactados;
-
+  const puedeAprobar = contactedDocs.length >= 2 && (lengthTitulares === (countTitulares - countTitularesEquivocados)) && todosTitularesContactados;
+  console.log("puedeAprobar", puedeAprobar,
+     "contactedDocs.length", contactedDocs.length,
+     "lengthTitulares", lengthTitulares, 
+     "countTitulares", countTitulares, 
+     "countTitularesEquivocados", countTitularesEquivocados,
+      "todosTitularesContactados", todosTitularesContactados);
 
   const fetchData = async () => {
     try {
@@ -836,7 +847,7 @@ export function TelefonicaList({
                     </div>
                   ))}
                   <div className="flex flex-wrap gap-4 items-center">
-                    {puedeAprobar && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica !== 3 && (
+                    {puedeAprobar && tienePermisoValidar && clientInfo.idEstadoVerificacionTelefonica === 2 && (
                       <button
                         onClick={handleSubmit}
                         className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 transition duration-300 ease-in-out"

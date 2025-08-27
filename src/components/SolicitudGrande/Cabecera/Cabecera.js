@@ -861,7 +861,7 @@ export function Cabecera() {
           <DatosConyuge ref={datosConyuge} data={clienteData} />
         ) : null;
       case "Referencias":
-        return (<Referencias data={clienteData} estadoVerificacion={data?.idEstadoVerificacionSolicitud} />);
+        return (<Referencias data={clienteData} estadoVerificacion={data?.idEstadoVerificacionSolicitud} cresolicitud ={data} />);
       case "Dependiente":
         return clienteData.idSituacionLaboral === 1 ? (
           <SeccionB ref={datosTrabajo} data={clienteData} comprobTelf={comprobTelf} />

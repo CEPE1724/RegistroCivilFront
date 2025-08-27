@@ -9,7 +9,9 @@ import {
 import { useAuth } from "../../AuthContext/AuthContext";
 const Referencias = forwardRef((props, ref) => {
   const { userData, userUsuario } = useAuth();
-  const { data, estadoVerificacion } = props;
+  const { data, estadoVerificacion, cresolicitud } = props;
+  console.log("data en referencia:", userData);
+  console.log("estadoVerificacion en referencia:", cresolicitud);
   const { enqueueSnackbar } = useSnackbar();
   const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
   const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias
@@ -523,14 +525,18 @@ const Referencias = forwardRef((props, ref) => {
         </div>
         {/* Botones */}
         <div className="flex items-center justify-center space-x-2">
+          {cresolicitud?.Estado === 1   && (
           <button onClick={handleAgregar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex items-center">
             <FaPlus className="mr-1" />
             Agregar
           </button>
+         )}
+          {cresolicitud?.Estado === 1 && (
           <button onClick={handleLimpiar} className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5 flex items-center">
             <FaTimes className="mr-1" />
             Limpiar
           </button>
+          )}
         </div>
       </div>
 
