@@ -4,6 +4,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
+import { TextField } from "@mui/material";
 import { IconButton } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import PrintIcon from "@mui/icons-material/Print";
@@ -23,7 +24,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
   const [tipo, setTipo] = useState([]);
   const { userData, idMenu } = useAuth();
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
- const [loadingActualizar, setLoadingActualizar] = useState(false);
+  const [loadingActualizar, setLoadingActualizar] = useState(false);
   const [formData, setFormData] = useState({
     tipoCliente: data.idTipoCliente || 0,
     tipo: "",
@@ -45,6 +46,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
   const [cuotaOriginal, setCuotaOriginal] = useState("")
   const [cuotaActualizada, setCuotaActualizada] = useState("")
   const [cupoOriginal, setCupoOriginal] = useState("")
+  const [observacion, setObservacion] = useState("")
   const [cupoActualizado, setCupoActualizado] = useState("")
 
   useEffect(() => {
@@ -137,152 +139,34 @@ export const FactoresCredito = forwardRef((props, ref) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const numericValue = Number(value);
 
-    if (name === "cupo" && value > 2500) {
-      enqueueSnackbar("El cupo no puede ser mayor a 2500", { variant: "error" });
-      setFormData({
-        ...formData,
-        [name]: 2500,
-      });
+    if (name === "cupo" && numericValue > 2500) {
+      enqueueSnackbar("El cupo máximo permitido es 2500", { variant: "warning" });
+      setFormData(prev => ({ ...prev, [name]: 2500 }));
       return;
     }
+
+    setFormData(prev => ({ ...prev, [name]: numericValue }));
   };
+
+
 
   const handleBlur = (e) => {
     const { name, value } = e.target;
+    const numValue = Number(value);
 
-    if (name === "cuotaAsignada") {
-      const numValue = Number(value);
-
-      if (numValue < 0) {
-        enqueueSnackbar("La cuota asignada debe ser mayor a 0", { variant: "error" });
-        setFormData(prevData => ({
-          ...prevData,
-          [name]: 0,
-        }));
-        return;
-      }
-
-      //   if (numValue > 850) {
-      //     enqueueSnackbar("La cuota asignada no puede ser mayor a 850", { variant: "error" });
-      //     setFormData(prevData => ({
-      //       ...prevData,
-      //       [name]: 850,
-      //     }));
-      //     return;
-      //   }
+    if (name === "cuotaAsignada" && numValue < 30) {
+      enqueueSnackbar("La cuota mínima permitida es 30", { variant: "warning" });
+      setFormData(prev => ({
+        ...prev,
+        [name]: 30
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
-    e && e.preventDefault();
-
-    // Validaciones
-    if (!formData.tipo) {
-      enqueueSnackbar("El tipo de actividad laboral es obligatorio", {
-        variant: "error",
-      });
-      return false;
-    }
-
-    if (!formData.tipoCliente) {
-      enqueueSnackbar("El tipo de cliente es obligatorio", {
-        variant: "error",
-      });
-      return;
-    }
-
-    if (!formData.tipoTrabajo) {
-      enqueueSnackbar("El tipo de trabajo es obligatorio", {
-        variant: "error",
-      });
-      return;
-    }
-
-    if (!formData.cuotaAsignada || formData.cuotaAsignada <= 0) {
-      enqueueSnackbar("La cuota asignada debe ser un número mayor a 0", {
-        variant: "error",
-      });
-      if (formData.cuotaAsignada > 10000000) {
-        enqueueSnackbar("La cuota asignada no puede ser mayor a 10000000", {
-          variant: "error",
-        });
-        return;
-      }
-      return;
-    }
-
-    if (!formData.cupo || formData.cupo <= 0) {
-      enqueueSnackbar("El cupo debe ser un número mayor a 0", {
-        variant: "error",
-      });
-      if (formData.cupo > 10000000) {
-        enqueueSnackbar("El cupo no puede ser mayor a 10000000", {
-          variant: "error",
-        });
-        return;
-      }
-      return;
-    }
-
-    if (!formData.calificacion) {
-      enqueueSnackbar("La calificación es obligatoria", { variant: "error" });
-      return;
-    }
-
-    if (!formData.estado) {
-      enqueueSnackbar("El estado es obligatorio", { variant: "error" });
-      return;
-    }
-
-    if (!formData.estadoSolicitud) {
-      enqueueSnackbar("El estado de la solicitud es obligatorio", {
-        variant: "error",
-      });
-      return;
-    }
-
-    if (!formData.observaciones) {
-      enqueueSnackbar("Las observaciones son obligatorias", {
-        variant: "error",
-      });
-      return;
-    }
-
-    if (formData.observaciones.length > 300) {
-      enqueueSnackbar("Las observaciones no deben exceder los 300 caracteres", {
-        variant: "error",
-      });
-      return;
-    }
-
-    // Si todas las validaciones pasan, mostramos el mensaje de éxito
-    enqueueSnackbar("Formulario enviado con éxito", { variant: "success" });
-  };
 
   // Exponer la función handleSubmit al padre
-  useImperativeHandle(ref, () => ({
-    handleSubmit,
-    getFormData: () => ({
-      cuotaAsignada: formData.cuotaAsignada,
-      cupo: formData.cupo,
-    }),
-    validateForm: () => {
-      if (formData.cuotaAsignada === undefined || formData.cuotaAsignada <= 0) {
-        console.error("Validación fallida: cuotaAsignada inválida");
-        return false;
-      }
-      if (formData.cupo === undefined || formData.cupo <= 0) {
-        console.error("Validación fallida: cupo inválido");
-        return false;
-      }
-      return true;
-    }
-  }));
 
   const fetchInsertarDatos = async (data) => {
 
@@ -294,7 +178,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
         Tipo: 1,
         idEstadoVerificacionDocumental: 26,
         Usuario: userData.Nombre,
-        Telefono: `Se actualizo Cuota de ${cuotaOriginal} a ${cuotaActualizada} y Cupo de ${cupoOriginal} a ${cupoActualizado}`
+        Telefono: `Se actualizo Cuota de ${cuotaOriginal} a ${cuotaActualizada} y Cupo de ${cupoOriginal} a ${cupoActualizado}. Obs: ${observacion}`,
 
       });
     } catch (error) {
@@ -324,9 +208,12 @@ export const FactoresCredito = forwardRef((props, ref) => {
       setLoadingActualizar(false); // liberar botón
     }
   };
+  const isObservacionValida = observacion.trim().length >= 10 && observacion.trim().length <= 100;
+
   const hasChanges =
-    Number(cuotaOriginal) !== Number(cuotaActualizada) ||
-    Number(cupoOriginal) !== Number(cupoActualizado);
+  (Number(cuotaOriginal) !== Number(cuotaActualizada) ||
+   Number(cupoOriginal) !== Number(cupoActualizado)) &&
+  isObservacionValida;
 
   return (
     <div>
@@ -448,6 +335,8 @@ export const FactoresCredito = forwardRef((props, ref) => {
             </Box>
           </Box>
 
+
+
           <Box mt={2} bgcolor="#f9f9f9" p={2} borderRadius={2} border="1px solid #ddd">
             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
               Cupo
@@ -461,6 +350,33 @@ export const FactoresCredito = forwardRef((props, ref) => {
               </Typography>
             </Box>
           </Box>
+
+          <Box mt={3} bgcolor="#f9f9f9" p={2} borderRadius={2} border="1px solid #ddd">
+            <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
+              Observación 
+            </Typography>
+
+            <TextField
+              value={observacion}
+              onChange={(e) => setObservacion(e.target.value.toUpperCase())}
+              variant="outlined"
+              fullWidth
+              multiline
+              minRows={2}
+              maxRows={4}
+              inputProps={{ maxLength: 100 }}
+              sx={{ mt: 1 }}
+              placeholder="Escribe una observación clara y concisa"
+              error={observacion.length > 0 && observacion.length < 10}
+              helperText={
+                observacion.length > 0 && observacion.length < 10
+                  ? "La observación debe tener al menos 10 caracteres"
+                  : `${observacion.length}/100 caracteres`
+              }
+            />
+          </Box>
+
+
         </DialogContent>
 
         <DialogActions sx={{ justifyContent: "flex-end", mt: 1 }}>

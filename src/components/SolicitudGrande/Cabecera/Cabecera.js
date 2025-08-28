@@ -1838,7 +1838,7 @@ export function Cabecera() {
               {renderTabContent(clienteData)}
             </div>
             <div className="flex flex-wrap sm:flex-nowrap justify-start mt-6 gap-4">
-              {(data?.idEstadoVerificacionSolicitud < 12 || (tienePermisoEditarAnalista() && data?.Estado !== 6)) && (
+              {(data?.idEstadoVerificacionSolicitud < 12 || (tienePermisoEditarAnalista() && data?.Estado === 1)  && activeTab !=="Factores de Crédito") && (
                 <div className="flex items-center">
                   <button
                     onClick={handleSubmit}
