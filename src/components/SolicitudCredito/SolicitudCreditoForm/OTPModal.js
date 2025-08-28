@@ -3,7 +3,7 @@ import axios from '../../../configApi/axiosConfig';
 import { APIURL } from '../../../configApi/apiConfig';
 import { useSnackbar } from 'notistack';
 
-const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP }) => {
+const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP, cedula, bodega }) => {
   const [otp, setOtp] = useState(Array(5).fill('')); // Array de 5 dígitos
   const [isValid, setIsValid] = useState(null);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutos en segundos
@@ -11,7 +11,9 @@ const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP }) => {
   const [phoneNumber, setPhoneNumber] = useState(phoneNumberOTP);
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpValidated, setOtpValidated] = useState(false);
-  
+  console.log("BODEGA OTPMODAL: ");
+  console.log("CEDULA OTPMODAL: ");
+
   const { enqueueSnackbar } = useSnackbar();
 
   // Maneja el ingreso de cada dígito del OTP
@@ -30,6 +32,8 @@ const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP }) => {
 
   // Función para validar el OTP
   const ValidarCodigo = async () => {
+    console.log("CÉDULA EN OTPMODAL: ", cedula);
+    console.log("BODEGA EN OTPMODAL: ", bodega);
     const otpCode = otp.join('');
     setIsVerifying(true);
     // Muestra el mensaje de Snackbar "Verificando OTP"
@@ -39,6 +43,8 @@ const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP }) => {
       const response = await axios.post(url, {
         phoneNumber: phoneNumberOTP,
         otpCode,
+        cedula: cedula,
+        bodega: bodega
       });
       if (response.data.success) {
         setOtpValidated(true); // Mantiene el botón bloqueado

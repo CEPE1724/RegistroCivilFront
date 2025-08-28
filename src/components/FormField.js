@@ -410,6 +410,8 @@ const ReusableForm = ({
       const response = await axios.post(url, {
         phoneNumber: formik.values.Celular,
         email: formik.values.Email,
+        cedula: formik.values.Cedula,
+        bodega: formik.values.Bodega,
         nombreCompleto: `${formik.values.PrimerNombre || ''} ${formik.values.SegundoNombre || ''} ${formik.values.ApellidoPaterno || ''} ${formik.values.ApellidoMaterno || ''}`.trim(),
       });
 
@@ -723,6 +725,8 @@ const ReusableForm = ({
               onClose={() => setIsOtpModalOpen(false)}
               onVerifyOtp={handleOtpVerification}
               phoneNumberOTP={formik.values.Celular}
+              cedula={formik.values.Cedula}
+              bodega={formik.values.Bodega}
             />
           }
         </form>

@@ -186,7 +186,7 @@ export function ListadoSolicitud() {
   const [openModalCodDag, setOpenModalCodDag] = useState(false);
   const [openConfirmModalCodDac, setOpenConfirmModalCodDac] = useState(false);
   const [codDact, setCodDact] = useState("");
-  const [openModalExcel, setOpenModalExcel ] = useState(false);
+  const [openModalExcel, setOpenModalExcel] = useState(false);
   const [openVerificacionModal2, setOpenVerificacionModal2] = useState(false);
 
   const handleOpenEditModal = () => {
@@ -862,7 +862,7 @@ export function ListadoSolicitud() {
   }
 
   const permisoReasignarVerificador = () => {
-	 const permiso = permisos.find((p) => p.Permisos === "REASIGNAR VERIFICADOR");
+    const permiso = permisos.find((p) => p.Permisos === "REASIGNAR VERIFICADOR");
     return permiso && permiso.Activo;
   }
 
@@ -1169,8 +1169,8 @@ export function ListadoSolicitud() {
       }));
 
       setIdsTerrenas(idsTerrenas);
-	  setUserSolicitudData2(data);
-	  setTipoVerificacionSeleccionada2(tipo)
+      setUserSolicitudData2(data);
+      setTipoVerificacionSeleccionada2(tipo)
 
       if (!idsTerrenas || idsTerrenas.length === 0) {
         // No hay datos, abrir PreDocumentos (nuevo componente)
@@ -1250,22 +1250,22 @@ export function ListadoSolicitud() {
 
   // si cambia la bodega llamae a fecthUsuariobodega
 
-	  useEffect(() => {
- 		if (!userData?.FechaIngreso) return
- 		const fechaIngreso = new Date(userData.FechaIngreso).toISOString().split('T')[0];
- 		const idGrupo = userData?.idGrupo
+  useEffect(() => {
+    if (!userData?.FechaIngreso) return
+    const fechaIngreso = new Date(userData.FechaIngreso).toISOString().split('T')[0];
+    const idGrupo = userData?.idGrupo
 
-    	if (selectedBodega !== "todos") {
- 			if(idGrupo == 23 && fechaIngreso >= fechaInicio){
- 				fecthaUsuarioBodega(fechaIngreso, selectedBodega, 0);
-  				setFechaInicio(fechaIngreso)
- 			} else {
- 				fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
- 			}
-    	} else {
-    	  fetchSolicitudes();
-    	}
-   }, [selectedBodega, fechaInicio, userData]);
+    if (selectedBodega !== "todos") {
+      if (idGrupo == 23 && fechaIngreso >= fechaInicio) {
+        fecthaUsuarioBodega(fechaIngreso, selectedBodega, 0);
+        setFechaInicio(fechaIngreso)
+      } else {
+        fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
+      }
+    } else {
+      fetchSolicitudes();
+    }
+  }, [selectedBodega, fechaInicio, userData]);
 
 
   const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
@@ -1752,19 +1752,19 @@ export function ListadoSolicitud() {
         bodegasId = bodegasIds; // Aquí se asigna el array de bodegas
       }
 
-	  if (userData?.idGrupo === 23) {
-	    const vendedorFiltrado = vendedores.find(
-	      (v) => v?.Codigo?.trim() === userData?.Nombre?.trim()
-	    );
-  
-	    if (!vendedorFiltrado) {
-	      // Si no hay vendedor valido no se hace la consulta 
-	      setDatos([]); 
-	      setTotal(0);
-	      setTotalPages(1);
-	      return;
-	    }
-	  }
+      if (userData?.idGrupo === 23) {
+        const vendedorFiltrado = vendedores.find(
+          (v) => v?.Codigo?.trim() === userData?.Nombre?.trim()
+        );
+
+        if (!vendedorFiltrado) {
+          // Si no hay vendedor valido no se hace la consulta 
+          setDatos([]);
+          setTotal(0);
+          setTotalPages(1);
+          return;
+        }
+      }
 
 
       // Realizar la consulta con los parámetros ajustados
@@ -1871,8 +1871,8 @@ export function ListadoSolicitud() {
                           : "DESCONOCIDO",
               idVendedor: item.idVendedor,
               idMotivoContinuidad: item.idMotivoContinuidad,
-			  FechaAfiliacionIngreso: item.FechaIngreso,
-			  FechaAfiliacionHasta: item.FechaAfiliacionHasta
+              FechaAfiliacionIngreso: item.FechaIngreso,
+              FechaAfiliacionHasta: item.FechaAfiliacionHasta
 
             };
           })
@@ -2151,14 +2151,14 @@ export function ListadoSolicitud() {
           onChange={(e) => { const fechaIniFiltro = e.target.value; setFechaInicio(fechaIniFiltro); sessionStorage.setItem('filtroIniFecha', fechaIniFiltro); }}
           fullWidth
           size="small"
-		  slotProps={{
-			inputLabel: { shrink: true },
-			  input: {
-			    min: userData?.FechaIngreso
-			      ? new Date(userData.FechaIngreso).toISOString().split('T')[0]
-			      : undefined,
-			  },
-		  }}
+          slotProps={{
+            inputLabel: { shrink: true },
+            input: {
+              min: userData?.FechaIngreso
+                ? new Date(userData.FechaIngreso).toISOString().split('T')[0]
+                : undefined,
+            },
+          }}
         />
         <TextField
           label="Fecha Hasta"
@@ -2404,7 +2404,7 @@ export function ListadoSolicitud() {
         {imprimirInforme() && (
           <button
             className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
-            onClick={()=> setOpenModalExcel(true)}
+            onClick={() => setOpenModalExcel(true)}
           >
             <PiMicrosoftExcelLogoBold size={45} /> Crear informe
           </button>)}
@@ -4163,15 +4163,15 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Cédula:</p>
                     <p>{selectedRow.cedula}</p>
                   </div>
-				  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <p className="font-semibold">Ingreso Afiliacion:</p>
                     <p>{selectedRow.FechaAfiliacionIngreso}</p>
                   </div>
-				  {selectedRow.FechaAfiliacionHasta !== '1970-01-01' &&
-				  <div className="flex items-center gap-2">
-                    <p className="font-semibold">Afiliacion Hasta:</p>
-                    <p>{selectedRow.FechaAfiliacionHasta }</p>
-                  </div>}
+                  {selectedRow.FechaAfiliacionHasta !== '1970-01-01' &&
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">Afiliacion Hasta:</p>
+                      <p>{selectedRow.FechaAfiliacionHasta}</p>
+                    </div>}
                   <div className="flex items-center gap-2">
                     <StoreIcon className="text-blue-500" fontSize="medium" />
                     <p className="font-semibold">Almacén:</p>
@@ -4574,15 +4574,15 @@ export function ListadoSolicitud() {
         tipoSeleccionado={tipoVerificacionSeleccionada}
       />
 
-		{/* reasignar verificador */}
-	  <VerificacionTerrenaModal
+      {/* reasignar verificador */}
+      <VerificacionTerrenaModal
         isOpen={openVerificacionModal2}
         onClose={() => setOpenVerificacionModal2(false)}
         userSolicitudData={userSolicitudData2}
         userData={userData}
         tipoSeleccionado={tipoVerificacionSeleccionada2}
-		idClienteVerificacion={idsTerrenas.idClienteVerificacion}
-		reasignacion={true}
+        idClienteVerificacion={idsTerrenas.idClienteVerificacion}
+        reasignacion={true}
       />
 
       <DomicilioModal
@@ -4605,40 +4605,81 @@ export function ListadoSolicitud() {
         openModal={listVerifDomiciModal}
         closeModal={handleCloseVerifDomModal}
         datosCliente={domicilioData}
-		userData={userData}
-		permisos={permisos}
+        userData={userData}
+        permisos={permisos}
       />
 
       <ListVerifLaboralModal
         openModal={listVerifLaborModal}
         closeModal={handleCloseVerifLabModal}
         datosCliente={trabajoData}
-		userData={userData}
-		permisos={permisos}
+        userData={userData}
+        permisos={permisos}
       />
 
-      <Dialog open={openModalPendiente} onClose={() => setOpenModalPendiente(false)}>
-        <DialogTitle>Verificación Pendiente</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Verificación pendiente por el verificador:
-            <strong className="ml-2 text-blue-700">
-              {clienteEstados.length > 0 ? clienteEstados[0].Telefono : "N/A"}
-            </strong>
-          </Typography>
-		  { permisoReasignarVerificador() && (
-		  	<div style={{ display: 'flex', justifyContent: 'right', padding: '10px' }}>
-				<Button onClick={()=> {setOpenVerificacionModal2(true); setOpenModalPendiente(false); }} color="primary" variant="contained"  >
-					Reasignar
-				</Button>
-			</div> )} 
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModalPendiente(false)} color="primary">
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {openModalPendiente && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white w-full max-w-lg rounded-lg shadow-xl p-6 relative">
+
+            {/* Icono y título */}
+            <div className="flex items-center mb-5">
+              <div className="bg-yellow-100 text-yellow-600 rounded-full p-2 mr-3">
+                
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800">
+                Verificación pendiente
+              </h2>
+            </div>
+
+            {/* Cuerpo del mensaje */}
+            <p className="text-sm text-gray-700 mb-4">
+              Esta solicitud está pendiente de verificación por parte del verificador asignado:
+              <span className="ml-2 font-medium text-blue-700">
+                {clienteEstados.length > 0 ? clienteEstados[0].Telefono : "N/A"}
+              </span>
+            </p>
+
+            {/* Acción para reasignar (si tiene permiso) */}
+            {permisoReasignarVerificador() && (
+              <div className="flex justify-end mt-2">
+                <button
+                  onClick={() => {
+                    setOpenVerificacionModal2(true);
+                    setOpenModalPendiente(false);
+                  }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition"
+                >
+                  Reasignar Verificador
+                </button>
+              </div>
+            )}
+
+            {/* Línea divisoria */}
+            <hr className="my-4" />
+
+            {/* Acciones inferiores */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => setOpenModalPendiente(false)}
+                className="text-sm text-gray-600 hover:text-gray-800 hover:underline"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            {/* Botón cerrar (X) */}
+            <button
+              onClick={() => setOpenModalPendiente(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+
 
       {/* Modal para Registro Civil */}
       <Dialog
@@ -4737,11 +4778,11 @@ export function ListadoSolicitud() {
         </DialogActions>
       </Dialog>
 
-	  <ExcelModal
-	  open={openModalExcel}
-	  onClose={()=> setOpenModalExcel(false)}
-	  bodegas={dataBodega}
-	  />
+      <ExcelModal
+        open={openModalExcel}
+        onClose={() => setOpenModalExcel(false)}
+        bodegas={dataBodega}
+      />
 
     </div>
   );
