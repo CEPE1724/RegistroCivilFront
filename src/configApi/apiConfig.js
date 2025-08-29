@@ -1,8 +1,8 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-//const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
+const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -212,5 +212,6 @@ export const APIURL = {
   get_motivosContinuidad: () => `${API_BASE_URL}motivo-continuidad`,
   get_Count_get_motivosContinuidad : (vendedor) => `${API_BASE_URL}cre-solicitud-web/MotivoContinuidad/${vendedor}`,
   patchTipoVerificacionTrabajo : (id) => `${API_BASE_URL}terrena-gestion-trabajo/tipo-verificacion/${id}`,
-  update_VerificacionTelefonicaMaestro: (id) => `${API_BASE_URL}cre-verificacion-telefonica-maestro/${id}`
+  update_VerificacionTelefonicaMaestro: (id) => `${API_BASE_URL}cre-verificacion-telefonica-maestro/${id}`,
+  validaPrefactura: (NumeroIdentificacion, Bodega) => `${API_BASE_URL}compra/ValidaEstadoCompra/${NumeroIdentificacion}/${Bodega}`,
 };

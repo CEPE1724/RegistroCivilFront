@@ -188,7 +188,7 @@ export function ListadoSolicitud() {
   const [codDact, setCodDact] = useState("");
   const [openModalExcel, setOpenModalExcel] = useState(false);
   const [openVerificacionModal2, setOpenVerificacionModal2] = useState(false);
-
+  const [ExistPrefactura, setExistPrefactura] = useState(false);
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
     setOpenModalCodDag(true);
@@ -1012,6 +1012,28 @@ export function ListadoSolicitud() {
     }
   };
 
+  const validaPrefactura = async (Cedula, Bodega) => {
+    try {
+      const url = APIURL.validaPrefactura(Cedula, Bodega);
+      const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log("Response from validaPrefactura:", response.data);
+      if (response.data.success) {
+        console.log("Prefactura found.");
+        setExistPrefactura(true);
+      } else {
+        console.log("No prefactura found.");
+        setExistPrefactura(false);
+      }
+    } catch (error) {
+      console.error("Error fetching tiemposolicitudesweb data:", error);
+      return null;
+    }
+  };
+
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleString("es-ES", {
@@ -1811,6 +1833,7 @@ export function ListadoSolicitud() {
               ApellidoPaterno: item.ApellidoPaterno,
               ApellidoMaterno: item.ApellidoMaterno,
               cedula: item.Cedula,
+              bodega: item.Bodega,
               almacen:
                 dataBodega.find((bodega) => bodega.value === item.Bodega)
                   ?.label || "Desconocido",
@@ -2012,6 +2035,7 @@ export function ListadoSolicitud() {
   };
 
   const handleOpenDialog = async (row) => {
+    console.log("Row seleccionada:", row);
     setSelectedRow(row);
     setView(true);
     const [tipo1, tipo2, tipo3, tipo4, tipo5] = await Promise.all([
@@ -2022,6 +2046,7 @@ export function ListadoSolicitud() {
       fetchTiempSolicweb(5, row.id, "1")       //laboral
     ]);
 
+    await validaPrefactura(row.cedula, row.bodega);
 
     const resultados = {
       tipo1, tipo2, tipo3, tipo4, tipo5
@@ -4052,76 +4077,89 @@ export function ListadoSolicitud() {
 
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
+                  {!ExistPrefactura ? (
+                    <>
+                      {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
+                        <div className="flex flex-col gap-4 mt-4">
+                          {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
+                          <input
+                            type="file"
+                            accept="image/jpeg, image/png"
+                            onChange={handleFileChange}
+                            ref={inputFileRef}
+                            style={{ display: "none" }}
+                          />
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
-                    <div className="flex flex-col gap-4 mt-4">
-                      {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
-                      <input
-                        type="file"
-                        accept="image/jpeg, image/png"
-                        onChange={handleFileChange}
-                        ref={inputFileRef}
-                        style={{ display: "none" }}
-                      />
+                          {/* PRIMERA FILA DE BOTONES */}
+                          <div className="flex flex-col md:flex-row gap-4">
+                            <Button onClick={() => setOpenCameraModal(true)}>
+                              Tomar Foto
+                            </Button>
 
-                      {/* PRIMERA FILA DE BOTONES */}
-                      <div className="flex flex-col md:flex-row gap-4">
-                        <Button onClick={() => setOpenCameraModal(true)}>
-                          Tomar Foto
-                        </Button>
+                            <button
+                              onClick={handleUploadClick}
+                              disabled={!fileToUpload}
+                              className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                                ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                }`}
+                            >
+                              Subir imagen
+                            </button>
 
-                        <button
-                          onClick={handleUploadClick}
-                          disabled={!fileToUpload}
-                          className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
-                            ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            }`}
-                        >
-                          Subir imagen
-                        </button>
+                            <Button onClick={() => inputFileRef.current.click()}>
+                              Cargar foto
+                            </Button>
+                          </div>
 
-                        <Button onClick={() => inputFileRef.current.click()}>
-                          Cargar foto
-                        </Button>
-                      </div>
+                          {/* SEGUNDA FILA: BOTÓN VERIFICAR */}
+                          <div>
+                            <Button
+                              onClick={async () => {
+                                const cedula = selectedRow?.cedula;
+                                const dactilar = selectedRow?.CodigoDactilar;
+                                const imagenSubida = selectedRow?.imagen;
 
-                      {/* SEGUNDA FILA: BOTÓN VERIFICAR */}
-                      <div>
-                        <Button
-                          onClick={async () => {
-                            const cedula = selectedRow?.cedula;
-                            const dactilar = selectedRow?.CodigoDactilar;
-                            const imagenSubida = selectedRow?.imagen;
+                                if (!cedula || !dactilar || !imagenSubida) {
+                                  enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
+                                    variant: "warning",
+                                  });
+                                  return;
+                                }
 
-                            if (!cedula || !dactilar || !imagenSubida) {
-                              enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
-                                variant: "warning",
-                              });
-                              return;
-                            }
+                                const fotoRegistro = await fetchImagenRegistroCivil(cedula, dactilar);
 
-                            const fotoRegistro = await fetchImagenRegistroCivil(cedula, dactilar);
+                                if (fotoRegistro && typeof fotoRegistro === "string" && fotoRegistro.trim() !== "") {
+                                  await handleVerificarIdentidad(imagenSubida, fotoRegistro);
+                                } else {
+                                  enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
+                                    variant: "error",
+                                  });
+                                  setOpenRegistroCivil(true);
+                                }
+                              }}
+                            >
+                              Verificar fotos
+                            </Button>
+                          </div>
+                        </div>
 
-                            if (fotoRegistro && typeof fotoRegistro === "string" && fotoRegistro.trim() !== "") {
-                              await handleVerificarIdentidad(imagenSubida, fotoRegistro);
-                            } else {
-                              enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
-                                variant: "error",
-                              });
-                              setOpenRegistroCivil(true);
-                            }
-                          }}
-                        >
-                          Verificar fotos
-                        </Button>
-                      </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center gap-2 bg-red-50 border border-red-200 p-4 rounded-md text-red-700">
+                      <ReportProblemIcon fontSize="large" className="text-red-500" />
+                      <p className="font-semibold">
+                        No se encontró ninguna <span className="uppercase">pre-factura activa</span> para esta solicitud.
+                      </p>
+                      <span className="text-sm text-red-600">
+                        Si considera que esto es un error, por favor comuníquese con el área de soporte.
+                      </span>
                     </div>
+
                   )}
-
-
-
                 </div>
+
               </div>
 
               <Dialog
@@ -4624,7 +4662,7 @@ export function ListadoSolicitud() {
             {/* Icono y título */}
             <div className="flex items-center mb-5">
               <div className="bg-yellow-100 text-yellow-600 rounded-full p-2 mr-3">
-                
+
               </div>
               <h2 className="text-lg font-semibold text-gray-800">
                 Verificación pendiente
