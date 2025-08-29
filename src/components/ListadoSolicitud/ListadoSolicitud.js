@@ -1020,12 +1020,12 @@ export function ListadoSolicitud() {
           "Content-Type": "application/json",
         },
       });
-    
+
       if (response.data.success) {
- 
+
         setExistPrefactura(true);
       } else {
-    
+
         setExistPrefactura(false);
       }
     } catch (error) {
@@ -4304,17 +4304,22 @@ export function ListadoSolicitud() {
                   </div>
 
 
+                  {!ExistPrefactura && (
+                    <>
+                      {puedeAprobar(selectedRow) && selectedRow.estado !== "RECHAZADO" && (
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "RECHAZADO" && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleAbrirVerificacionManual}
+                            className="py-2 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
+                          >
+                            Verificación Facial
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleAbrirVerificacionManual}
-                        className="py-2 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
-                      >
-                        Verificación Facial
-                      </button>
-                    </div>
                   )}
 
 
