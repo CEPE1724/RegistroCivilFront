@@ -11,8 +11,7 @@ const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP, cedula, bodega
   const [phoneNumber, setPhoneNumber] = useState(phoneNumberOTP);
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpValidated, setOtpValidated] = useState(false);
-  console.log("BODEGA OTPMODAL: ");
-  console.log("CEDULA OTPMODAL: ");
+
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -32,8 +31,6 @@ const OTPModal = ({ isOpen, onClose, onVerifyOtp, phoneNumberOTP, cedula, bodega
 
   // Función para validar el OTP
   const ValidarCodigo = async () => {
-    console.log("CÉDULA EN OTPMODAL: ", cedula);
-    console.log("BODEGA EN OTPMODAL: ", bodega);
     const otpCode = otp.join('');
     setIsVerifying(true);
     // Muestra el mensaje de Snackbar "Verificando OTP"

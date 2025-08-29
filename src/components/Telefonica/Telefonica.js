@@ -177,10 +177,7 @@ export function TelefonicaList({
   );
 
   const handleGuardar = async (data) => {
-    console.log("Datos guardados:", data.idWeb_SolicitudGrande);
-    console.log("Datos guardados:", data.Campo);
-    console.log("Datos guardados:", data.TelefonoOrigen);
-    console.log("Datos guardados:", data.Telefono);
+
     const Observacion = ` TELEFONO ACTUALIZADO ${data.Telefono} POR ${data.TelefonoOrigen}. NOTA: ${data.Observaciones}`;
     await fetchSaveDatosTrabajo(data);
     await fetchVerifTelfMaestr(data);
@@ -244,7 +241,6 @@ export function TelefonicaList({
   };
   const fecthUpdateVerifTelfMaestr = async (data) => {
     try {
-      console.log("Data para actualizar VerificacionTelefonicaMaestro:", data);
       const url = APIURL.update_VerificacionTelefonicaMaestro(data.idCre_VerificacionTelefonicaMaestroOrigen);
       await axios.patch(url, {
         idEstadoOrigenTelefonica: 11
@@ -379,19 +375,13 @@ export function TelefonicaList({
   const countTitularesEquivocados = titulares.filter(item => item.idEstadoGestns === 13).length;
 
   const puedeAprobar = contactedDocs.length >= 2 && (lengthTitulares === (countTitulares - countTitularesEquivocados)) && todosTitularesContactados;
-  console.log("puedeAprobar", puedeAprobar,
-     "contactedDocs.length", contactedDocs.length,
-     "lengthTitulares", lengthTitulares, 
-     "countTitulares", countTitulares, 
-     "countTitularesEquivocados", countTitularesEquivocados,
-      "todosTitularesContactados", todosTitularesContactados);
+
 
   const fetchData = async () => {
     try {
       const response = await axios.get(
         APIURL.getCreVerificacionTelefonicaMaestro(clientInfo.id)
       );
-      console.log("Respuesta de la API:", response.data); // Verifica la respuesta completa
       setTablaDatos(response.data);
     } catch (error) {
       console.error("Error al obtener los datos de la API", error);

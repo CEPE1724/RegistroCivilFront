@@ -427,7 +427,6 @@ export function Cabecera() {
     const coordenadas = await fecthValidaDomicilio();
     if (coordenadas) {
       if (coordenadas.exists === false || coordenadas.count === 0) {
-        console.log("Coordenadas inválidas o no encontradas.");
         valid = false;
       }
     }

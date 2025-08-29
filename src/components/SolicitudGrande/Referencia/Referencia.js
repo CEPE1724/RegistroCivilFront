@@ -10,8 +10,6 @@ import { useAuth } from "../../AuthContext/AuthContext";
 const Referencias = forwardRef((props, ref) => {
   const { userData, userUsuario } = useAuth();
   const { data, estadoVerificacion, cresolicitud } = props;
-  console.log("data en referencia:", userData);
-  console.log("estadoVerificacion en referencia:", cresolicitud);
   const { enqueueSnackbar } = useSnackbar();
   const [datoParentesco, setDatoParentesco] = useState([]);  //estado parentesco
   const [datoProvincia, setDatoProvincia] = useState([]);    //estado provincias

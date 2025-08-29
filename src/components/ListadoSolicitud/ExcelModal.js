@@ -21,7 +21,7 @@ const ExcelModal = ({ open, onClose, bodegas }) => {
 			}), {
 				responseType: 'blob',
 			});
-			console.log("informe creado")
+		
 
 			// Crear un objeto URL para el blob recibido
 			const blob = new Blob([response.data], {

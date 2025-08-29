@@ -1020,12 +1020,12 @@ export function ListadoSolicitud() {
           "Content-Type": "application/json",
         },
       });
-      console.log("Response from validaPrefactura:", response.data);
+    
       if (response.data.success) {
-        console.log("Prefactura found.");
+ 
         setExistPrefactura(true);
       } else {
-        console.log("No prefactura found.");
+    
         setExistPrefactura(false);
       }
     } catch (error) {
@@ -2035,7 +2035,7 @@ export function ListadoSolicitud() {
   };
 
   const handleOpenDialog = async (row) => {
-    console.log("Row seleccionada:", row);
+
     setSelectedRow(row);
     setView(true);
     const [tipo1, tipo2, tipo3, tipo4, tipo5] = await Promise.all([

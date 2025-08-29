@@ -8,7 +8,7 @@ export function UpdateTelefonica({ isOpen, onClose, onSave, data, tablaDatos }) 
     const [isFormValid, setIsFormValid] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
-    console.log("data recibida en UpdateTelefonica:", data);
+
     const opciones = [
         { id: 1, nombre: "DOMICILIO # 1", campo: "Telefono", mumcaracteres: 9 },
         { id: 2, nombre: "DOMICILIO # 2", campo: "TelefonoDomiliarDos", mumcaracteres: 9 },

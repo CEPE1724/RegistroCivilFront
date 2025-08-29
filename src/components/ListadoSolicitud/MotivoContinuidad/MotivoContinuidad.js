@@ -66,10 +66,6 @@ export function MotivoContinuidad({ isOpen, onClose, data, userData }) {
                 Usuario: Usuario,
                 Telefono: `MOTIVO `,
             });
-
-            if (response.data) {
-                console.log("Tiempo de solicitud registrado:", response.data);
-            }
         }
         catch (error) {
             console.error("Error al registrar el tiempo de solicitud:", error);
