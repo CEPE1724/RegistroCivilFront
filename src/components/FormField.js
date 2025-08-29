@@ -391,7 +391,7 @@ const ReusableForm = ({
       //   } else {
       // Si el OTP no es verificado, muestra el modal
 
-	  setIsButtonDisabled(true)
+	    setIsButtonDisabled(true)
       requestOtp();
       //setIsOtpModalOpen(true);
       //   }
@@ -405,14 +405,15 @@ const ReusableForm = ({
   }, [onExternalUpdate]);
 
   const requestOtp = async () => {
+    if (isButtonDisabled) return;
     try {
       const url = APIURL.generateOTP();
       const response = await axios.post(url, {
         phoneNumber: formik.values.Celular,
         email: formik.values.Email,
-        cedula: formik.values.Cedula,
-        bodega: formik.values.Bodega,
         nombreCompleto: `${formik.values.PrimerNombre || ''} ${formik.values.SegundoNombre || ''} ${formik.values.ApellidoPaterno || ''} ${formik.values.ApellidoMaterno || ''}`.trim(),
+        cedula: formik.values.Cedula ,
+        bodega: formik.values.Bodega 
       });
 
       if (response.data.success) {
@@ -698,7 +699,7 @@ const ReusableForm = ({
               <button
                 type="submit"
                 className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-                disabled={isButtonDisabled || isSubmitting}
+                disabled={isButtonDisabled }
               >
                 {isSubmitting ? <Loader /> : submitButtonText}
               </button>
@@ -722,11 +723,9 @@ const ReusableForm = ({
           {
             <OTPModal
               isOpen={isOtpModalOpen}
-              onClose={() => setIsOtpModalOpen(false)}
+              onClose={() => {setIsOtpModalOpen(false); setIsButtonDisabled(false)}}
               onVerifyOtp={handleOtpVerification}
               phoneNumberOTP={formik.values.Celular}
-              cedula={formik.values.Cedula}
-              bodega={formik.values.Bodega}
             />
           }
         </form>
