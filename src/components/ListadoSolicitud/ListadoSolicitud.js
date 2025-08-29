@@ -4077,87 +4077,87 @@ export function ListadoSolicitud() {
 
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
-                  {!ExistPrefactura ? (
-                    <>
-                      {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
-                        <div className="flex flex-col gap-4 mt-4">
-                          {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
-                          <input
-                            type="file"
-                            accept="image/jpeg, image/png"
-                            onChange={handleFileChange}
-                            ref={inputFileRef}
-                            style={{ display: "none" }}
-                          />
 
-                          {/* PRIMERA FILA DE BOTONES */}
-                          <div className="flex flex-col md:flex-row gap-4">
-                            <Button onClick={() => setOpenCameraModal(true)}>
-                              Tomar Foto
-                            </Button>
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
+                    <div className="flex flex-col gap-4 mt-4">
+                      {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
+                      <input
+                        type="file"
+                        accept="image/jpeg, image/png"
+                        onChange={handleFileChange}
+                        ref={inputFileRef}
+                        style={{ display: "none" }}
+                      />
 
-                            <button
-                              onClick={handleUploadClick}
-                              disabled={!fileToUpload}
-                              className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
-                                ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
-                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                }`}
-                            >
-                              Subir imagen
-                            </button>
+                      {/* PRIMERA FILA DE BOTONES */}
+                      <div className="flex flex-col md:flex-row gap-4">
+                        <Button onClick={() => setOpenCameraModal(true)}>
+                          Tomar Foto
+                        </Button>
 
-                            <Button onClick={() => inputFileRef.current.click()}>
-                              Cargar foto
-                            </Button>
-                          </div>
+                        <button
+                          onClick={handleUploadClick}
+                          disabled={!fileToUpload}
+                          className={`flex-1 w-full md:w-auto py-2 px-4 rounded-lg font-semibold shadow-md transition duration-300 ${fileToUpload
+                            ? "bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            }`}
+                        >
+                          Subir imagen
+                        </button>
 
-                          {/* SEGUNDA FILA: BOTÓN VERIFICAR */}
-                          <div>
-                            <Button
-                              onClick={async () => {
-                                const cedula = selectedRow?.cedula;
-                                const dactilar = selectedRow?.CodigoDactilar;
-                                const imagenSubida = selectedRow?.imagen;
+                        <Button onClick={() => inputFileRef.current.click()}>
+                          Cargar foto
+                        </Button>
+                      </div>
+                      {!ExistPrefactura ? (
+                        <div>
+                          <Button
+                            onClick={async () => {
+                              const cedula = selectedRow?.cedula;
+                              const dactilar = selectedRow?.CodigoDactilar;
+                              const imagenSubida = selectedRow?.imagen;
 
-                                if (!cedula || !dactilar || !imagenSubida) {
-                                  enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
-                                    variant: "warning",
-                                  });
-                                  return;
-                                }
+                              if (!cedula || !dactilar || !imagenSubida) {
+                                enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
+                                  variant: "warning",
+                                });
+                                return;
+                              }
 
-                                const fotoRegistro = await fetchImagenRegistroCivil(cedula, dactilar);
+                              const fotoRegistro = await fetchImagenRegistroCivil(cedula, dactilar);
 
-                                if (fotoRegistro && typeof fotoRegistro === "string" && fotoRegistro.trim() !== "") {
-                                  await handleVerificarIdentidad(imagenSubida, fotoRegistro);
-                                } else {
-                                  enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
-                                    variant: "error",
-                                  });
-                                  setOpenRegistroCivil(true);
-                                }
-                              }}
-                            >
-                              Verificar fotos
-                            </Button>
-                          </div>
+                              if (fotoRegistro && typeof fotoRegistro === "string" && fotoRegistro.trim() !== "") {
+                                await handleVerificarIdentidad(imagenSubida, fotoRegistro);
+                              } else {
+                                enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
+                                  variant: "error",
+                                });
+                                setOpenRegistroCivil(true);
+                              }
+                            }}
+                          >
+                            Verificar fotos
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-center gap-2 bg-red-50 border border-red-200 p-4 rounded-md text-red-700">
+                          <ReportProblemIcon fontSize="large" className="text-red-500" />
+                          <p className="font-semibold">
+                            No se encontró ninguna <span className="uppercase">pre-factura activa</span> para esta solicitud.
+                          </p>
+                          <span className="text-sm text-red-600">
+                            Si considera que esto es un error, por favor comuníquese con el área de soporte.
+                          </span>
                         </div>
 
                       )}
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-center gap-2 bg-red-50 border border-red-200 p-4 rounded-md text-red-700">
-                      <ReportProblemIcon fontSize="large" className="text-red-500" />
-                      <p className="font-semibold">
-                        No se encontró ninguna <span className="uppercase">pre-factura activa</span> para esta solicitud.
-                      </p>
-                      <span className="text-sm text-red-600">
-                        Si considera que esto es un error, por favor comuníquese con el área de soporte.
-                      </span>
+
                     </div>
 
                   )}
+
+
                 </div>
 
               </div>
@@ -4318,7 +4318,7 @@ export function ListadoSolicitud() {
                         </div>
                       )}
                     </>
-                  
+
 
                   )}
 
