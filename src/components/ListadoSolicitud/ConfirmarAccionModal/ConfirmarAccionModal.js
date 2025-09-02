@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { XMarkIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 export  function ConfirmarAccionModal ({
@@ -15,14 +15,28 @@ export  function ConfirmarAccionModal ({
   laboralChecked,
   setLaboralChecked,
 }) {
+	const [loading, setLoading] = useState(false);
+
   if (!open) return null;
 
   const handleCancel = () => {
+	if (loading) return;
     setEntrada("");
     setJustificacion("");
     setLaboralChecked(false);
     setDomicilioChecked(false);
     onClose();
+  };
+
+  const handleConfirm = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    try {
+      await onConfirm(); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -137,11 +151,11 @@ export  function ConfirmarAccionModal ({
             Cancelar
           </button>
           <button
-            onClick={onConfirm}
+            onClick={handleConfirm}
             disabled={currentAction === "estado" && justificacion.length < 10}
             className="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Confirmar cambio
+            {loading ? "Procesando..." : "Confirmar cambio"}
           </button>
         </div>
       </div>

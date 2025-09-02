@@ -214,14 +214,14 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-    if (name === 'numeroJefe' || name === 'telefono') {
-      if (value.length < 9 || value.length > 10) {
-        enqueueSnackbar("Ingresa un número valido.", { variant: 'warning' })
+    if (name === 'telefono') {
+      if (value.length !== 9) {
+        enqueueSnackbar("El telefono debe tener 9 caracteres.", { variant: 'warning' })
       }
     }
 
     if (name === 'celular') {
-      if (value.length < 10 || value.length > 10) {
+      if (value.length !== 10) {
         enqueueSnackbar("El número debe tener 10 caracteres.", { variant: 'warning' })
       }
     }
@@ -550,14 +550,36 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-    if (!formData.telefono && !formData.celular || formData.telefono.length < 9 || formData.celular.length < 10) {
-      newErrors.telefono = "Debes proporcionar al menos un teléfono o celular";
-      newErrors.celular = "Debes proporcionar al menos un teléfono o celular";
+	if (!formData.telefono && formData.telefono.length !== 9) {
+      newErrors.telefono = "Debes proporcionar un teléfono";
       if (!showSnackbar) {
-        enqueueSnackbar(
-          "Por favor, proporciona al menos un teléfono o celular",
-          { variant: "error" }
-        );
+        enqueueSnackbar("Por favor, proporciona un teléfono", {variant: "error"});
+        showSnackbar = true;
+      }
+    }
+
+	if (!formData.celular && formData.celular.length !== 10) {
+		newErrors.celular = "Debes proporcionar un celular";
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, proporciona un celular", {variant: "error"});
+        showSnackbar = true;
+      }	
+	}
+
+	if(!formData.celular.startsWith("09")){
+		newErrors.celular = "El celular debe empezar con 09";
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, proporciona un celular valido", {variant: "error"});
+        showSnackbar = true;
+      }
+	}
+
+	const prefijos = ['02', '03', '04', '05', '06', '07']
+	const prefijValid = prefijos.some(prefix => formData.telefono.startsWith(prefix));
+	if(!prefijValid){
+		newErrors.telefono = `El telefono debe empezar con ${prefijos.join(', ')}`;
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, proporciona un telefono valido", {variant: "error"});
         showSnackbar = true;
       }
     }
@@ -637,7 +659,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className={`text-xs font-medium mb-1 flex items-center ${formData.tipoEmpresa === "" ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center ${(formData.tipoEmpresa === "" || formData.tipoEmpresa === 0) ? 'text-red-500' : 'text-gray-500'}`}>
             <FaBriefcase className="mr-2 text-primaryBlue" />
             (*)Tipo Empresa
           </label>
@@ -721,7 +743,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.ingresos == 0 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaMoneyBillWave className="mr-2 text-primaryBlue" />
             Ingresos
           </label>
@@ -743,7 +765,7 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className="text-xs font-medium mb-1 flex items-center">
+          <label className={`text-xs font-medium mb-1 flex items-center ${formData.gastos == 0 ? 'text-red-500' : 'text-gray-500'}`}>
             <FaMoneyCheckAlt className="mr-2 text-primaryBlue" />
             Gastos
           </label>
@@ -1032,8 +1054,8 @@ const SeccionB = forwardRef((props, ref) => {
               onChange={handleInputChange}
               onBlur={handleBlur}
               className="block w-full solcitudgrande-style"
-              maxLength="10"
-              pattern="\d{10}"
+              maxLength="9"
+              pattern="\d{9}"
             />
           </div>
           {errors.telefono && (

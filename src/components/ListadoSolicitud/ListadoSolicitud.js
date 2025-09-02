@@ -128,6 +128,7 @@ export function ListadoSolicitud() {
   const [selectedBodega, setSelectedBodega] = useState(sessionStorage.getItem('filtroBodega') || "todos");
   const [selectedVendedor, setSelectedVendedor] = useState(sessionStorage.getItem('filtroVendedor') || "todos");
   const [analistaSelected, setAnalistaSelected] = useState(sessionStorage.getItem('filtroAnalista') || "todos");
+  const [operadorSelected, setOperadorSelected] = useState(sessionStorage.getItem('filtroOperador') || "todos");
   const [dataBodega, setDataBodega] = useState([]);
   const [estado, setEstado] = useState(sessionStorage.getItem('filtroEstado') || "todos");
   const [datos, setDatos] = useState([]);
@@ -1557,6 +1558,7 @@ export function ListadoSolicitud() {
     numeroSolicitud,
     cedula,
     recargar,
+	operadorSelected
 
   ]);
 
@@ -1812,6 +1814,7 @@ export function ListadoSolicitud() {
           nombres: nombre?.trim() || undefined,
           numeroSolicitud: numeroSolicitud?.trim() || undefined,
           cedula: cedula?.trim() || undefined,
+		  operador: operadorSelected === "todos" ? 0 : operadorSelected
         },
       });
 
@@ -2095,6 +2098,7 @@ export function ListadoSolicitud() {
     setFechaInicio(date15DaysAgoStr);
     setFechaFin(today);
     setAnalistaSelected("todos");
+	setOperadorSelected("todos");
     setEstado("todos");
     setSolicitud("Todos");
     setDocumental("Todos");
@@ -2108,6 +2112,7 @@ export function ListadoSolicitud() {
     sessionStorage.removeItem('filtroIniFecha');
     sessionStorage.removeItem('filtroFinFecha');
     sessionStorage.removeItem('filtroAnalista');
+	sessionStorage.removeItem('filtroOperador');
     sessionStorage.removeItem('filtroEstado');
     sessionStorage.removeItem('filtroSolicitud');
     sessionStorage.removeItem('filtroDocumental');
@@ -2247,6 +2252,22 @@ export function ListadoSolicitud() {
             {analistas.map((vendedor) => (
               <MenuItem key={vendedor.idUsuario} value={vendedor.idUsuario}>
                 {vendedor.Nombre?.trim() || "No disponible"}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" fullWidth>
+          <InputLabel>Operadores</InputLabel>
+          <Select
+            value={operadorSelected}
+            onChange={(e) => { const operadorFiltro = e.target.value; setOperadorSelected(operadorFiltro); sessionStorage.setItem('filtroOperador', operadorFiltro); }}
+            label="Operadores"
+          >
+            <MenuItem value="todos">Todos</MenuItem>
+            {operadores.map((operador) => (
+              <MenuItem key={operador.idUsuario} value={operador.idUsuario}>
+                {operador.Nombre?.trim() || "No disponible"}
               </MenuItem>
             ))}
           </Select>
