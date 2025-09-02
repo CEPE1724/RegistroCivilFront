@@ -350,25 +350,51 @@ const Domicilio = forwardRef((props, ref) => {
       }
     }
 
+	const prefijosTelf = {
+		fijo: ['02', '03', '04', '05', '06', '07'],
+		celular: ['09']
+	} 
+
+	const telfValidos = (telefonoNum, tipo = 'fijo') => {
+		let error = '';
+
+		const lenghtNumeros = tipo === 'celular' ? 10 : 9
+	  if (telefonoNum.length !== lenghtNumeros) {
+	    error = `El teléfono debe tener ${lenghtNumeros} dígitos`;
+	  }
+  
+	  const prefijValid = prefijosTelf[tipo].some(prefix => telefonoNum.startsWith(prefix));
+	  if (!prefijValid) {
+	    error = `El teléfono debe comenzar con ${prefijosTelf[tipo].join(', ')}`;
+	  }
+  
+	  return error;
+	};
+
     // Validar longitud de teléfono y celular
     if (formData.telefonoCasa) {
-      if (formData.telefonoCasa && formData.telefonoCasa.length !== 9) {
-        newFormErrors.telefonoCasa = "El telefono debe tener 9 digitos";
-        isValid = false;
-      }
-    }
+	  const telefonoCasaError = telfValidos(formData.telefonoCasa, 'fijo');
+	  if (telefonoCasaError) {
+	    newFormErrors.telefonoCasa = telefonoCasaError;
+	    isValid = false;
+	  }
+	}
 
     if (formData.telefonoCasa2) {
-      if (formData.telefonoCasa2 && formData.telefonoCasa2.length !== 9) {
-        newFormErrors.telefonoCasa2 = "El telefono debe tener 9 digitos";
-        isValid = false;
-      }
-    }
+	  const telefonoCasa2Error = telfValidos(formData.telefonoCasa2, 'fijo');
+	  if (telefonoCasa2Error) {
+	    newFormErrors.telefonoCasa2 = telefonoCasa2Error;
+	    isValid = false;
+	  }
+	}
 
-    if (formData.celular && formData.celular.length !== 10) {
-      newFormErrors.celular = "El celular debe tener 10 digitos";
-      isValid = false;
-    }
+	if(formData.celular){
+		const celularError = telfValidos(formData.celular, 'celular');
+	  	if (celularError) {
+	  	  newFormErrors.celular = celularError;
+	  	  isValid = false;
+	  	}
+	}
 
 
     // if (formData.tiempoVivienda == 0) {
@@ -378,17 +404,13 @@ const Domicilio = forwardRef((props, ref) => {
 
     // Validar teléfono/celular del arrendador si tipoVivienda es 1
     if (formData.tipoVivienda == 1) {
-      if (
-        formData.telfArrendador &&
-        !(
-          formData.telfArrendador.length === 9 ||
-          formData.telfArrendador.length === 10
-        )
-      ) {
-        newFormErrors.telfArrendador =
-          "El Telefono/Celular debe tener 9 o 10 digitos";
-        isValid = false;
-      }
+		if(formData.celularArrendador){
+			const celularArrendadorError = telfValidos(formData.celularArrendador, 'celular');
+			if (celularArrendadorError) {
+				newFormErrors.celularArrendador = celularArrendadorError
+				isValid = false;
+			}
+		}
     }
     setFormErrors(newFormErrors);
     return isValid;
@@ -578,7 +600,7 @@ const Domicilio = forwardRef((props, ref) => {
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
-              maxLength={10}
+              maxLength={9}
             />
             {formErrors.telefonoCasa && (
               <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -601,7 +623,7 @@ const Domicilio = forwardRef((props, ref) => {
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
-              maxLength={10}
+              maxLength={9}
             />
             {formErrors.telefonoCasa2 && (
               <p className="mt-1 text-sm text-red-500 border-red-500">

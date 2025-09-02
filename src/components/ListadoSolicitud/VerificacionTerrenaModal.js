@@ -24,6 +24,7 @@ export default function VerificacionTerrenaModal({
   const [searchTerm, setSearchTerm] = useState("");
 
   const isFormValid = tipoVerificacion && verificador;
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
 const filteredVerificadores = verificadores.filter((v) =>
   v.Nombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -52,6 +53,7 @@ const filteredVerificadores = verificadores.filter((v) =>
 
   const handleAceptar = async () => {
     if (!isFormValid) return;
+	if (isButtonDisabled) return;
 
     const payload = {
       idCre_solicitud: userSolicitudData?.id,
@@ -78,6 +80,7 @@ const filteredVerificadores = verificadores.filter((v) =>
 	}
 
     try {
+		setIsButtonDisabled(true);
 	  const response = await axios.post(APIURL.post_clientesVerificacionTerrenaBasica(), payload);
 	  if (response.status !== 201){
 		throw new Error("Error al agregar el registro.");
@@ -112,11 +115,13 @@ const filteredVerificadores = verificadores.filter((v) =>
     } catch (error) {
       console.error("❌ Error al enviar verificación:", error);
       enqueueSnackbar("Error, no se pueden crear mas de 3 registros", { variant: "error" });
+	  setIsButtonDisabled(false)
     }
   };
 
   const handleReasignar = async () => {
 	if (!isFormValid) return;
+	if (isButtonDisabled) return;
 
 	const payload = {
       tokens: [tokenVerificador],
@@ -130,6 +135,7 @@ const filteredVerificadores = verificadores.filter((v) =>
     }
 
 	try {
+		setIsButtonDisabled(true)
 		const response = await axios.patch(APIURL.patch_ClientesVerifTerren(idClienteVerificacion), {idVerificador: Number(verificador)});
 		if (response.status !== 200){
 			throw new Error("Error al agregar el registro.");
@@ -158,6 +164,7 @@ const filteredVerificadores = verificadores.filter((v) =>
     }
 
     } catch (error) {
+		setIsButtonDisabled(false)
       console.error("❌ Error al enviar verificación:", error);
       enqueueSnackbar("Error, no se pudo actualizar el verificador", { variant: "error" });
     }
@@ -329,7 +336,7 @@ const filteredVerificadores = verificadores.filter((v) =>
             className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${!isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
               }`}
             onClick={handleAceptar}
-            disabled={!isFormValid}
+            disabled={!isFormValid || isButtonDisabled}
           >
             Aceptar
           </button>
@@ -340,7 +347,7 @@ const filteredVerificadores = verificadores.filter((v) =>
             className={`bg-blue-600 text-white text-sm px-4 py-2 rounded ${!isFormValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
               }`}
 			  onClick={handleReasignar}
-			  disabled={!isFormValid}
+			  disabled={!isFormValid || isButtonDisabled}
           >
             Reasignar
           </button>)}

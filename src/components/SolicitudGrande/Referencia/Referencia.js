@@ -257,7 +257,12 @@ const Referencias = forwardRef((props, ref) => {
       enqueueSnackbar("Cantón es requerido", { variant: "error" });
       return;
     }
-    if (formData.celular.length < 10) {
+	const celularLimpio = formData.celular.replace(/\D/g, '');
+	if (!celularLimpio.startsWith("09")) {
+    enqueueSnackbar("El celular debe empezar con 09", { variant: "error" });
+    return;
+  }	
+    if (formData.celular.length !== 10) {
       enqueueSnackbar("Celular debe tener 10 dígitos", { variant: "error" });
       return;
     }

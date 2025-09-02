@@ -346,6 +346,14 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
+	if(!formData.numeroJefe.startsWith("09")){
+		newErrors.numeroJefe = "El celular debe empezar con 09";
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, proporciona un celular valido", {variant: "error"});
+        showSnackbar = true;
+      }
+	}
+
     if (!formData.jefeInmediato || formData.jefeInmediato.length <= 3) {
       newErrors.jefeInmediato = "Este campo es obligatorio";
       if (!showSnackbar) {
@@ -382,7 +390,7 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
-    if (formData.gastos > formData.ingresos) {
+    if (Number(formData.gastos) > Number(formData.ingresos)) {
       newErrors.gastos = "Los gastos no pueden ser mayores a los ingresos";
       if (!showSnackbar) {
         enqueueSnackbar("Los gastos no pueden ser mayores a los ingresos", {
@@ -444,6 +452,23 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
+	const prefijos = ['02', '03', '04', '05', '06', '07']
+	const prefijValid = prefijos.some(prefix => formData.telefono.startsWith(prefix));
+	if(!prefijValid){
+		newErrors.telefono = `El teléfono debe empezar con ${prefijos.join(', ')}`;
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, proporciona un teléfono valido", {variant: "error"});
+        showSnackbar = true;
+      }
+	}
+
+	if(!formData.celular.startsWith("09")){
+		newErrors.celular = "El celular debe empezar con 09";
+		if (!showSnackbar) {
+        enqueueSnackbar("Por favor, proporciona un celular valido", {variant: "error"});
+        showSnackbar = true;
+      }
+	}
 
 
     if (!formData.celular || formData.celular.trim() === "") {
@@ -776,7 +801,7 @@ const SeccionA = forwardRef((props, ref) => {
             onChange={handleFormChange}
             className="solcitudgrande-style"
             onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
-            maxLength={10}
+            maxLength={9}
           />
           {errors.telefono && (
             <span className="text-red-500 text-xs">{errors.telefono}</span>

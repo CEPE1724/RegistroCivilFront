@@ -104,6 +104,7 @@ export function Cabecera() {
   const factoresCreditoRef = useRef(null); // Referencia para el componente FactoresCredito
   const ref = useRef(); // Create ref for imperative handle
   const navigate = useNavigate();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const [permisos, setPermisos] = useState([]);
 
@@ -427,7 +428,6 @@ export function Cabecera() {
     const coordenadas = await fecthValidaDomicilio();
     if (coordenadas) {
       if (coordenadas.exists === false || coordenadas.count === 0) {
-        console.log("Coordenadas inválidas o no encontradas.");
         valid = false;
       }
     }
@@ -1641,6 +1641,9 @@ export function Cabecera() {
   }));
 
   const handleAceptar = async () => {
+	if (isButtonDisabled) return
+	try {
+		setIsButtonDisabled(true)
     // Lógica para aceptar la solicitud
     enqueueSnackbar("Solicitud aceptada.", { variant: "success" });
     patchSolicitudAceptar(idSolicitud);
@@ -1658,6 +1661,11 @@ export function Cabecera() {
     navigate("/ListadoSolicitud", {
       replace: true,
     });
+	} catch (error) {
+		console.error("Error al actualizar la solicitud:", error);
+		enqueueSnackbar("Error al actualizar la solicitud.", { variant: "error",});	
+		setIsButtonDisabled(false)
+	}
   };
 
   const [showModalRechazo, setShowModalRechazo] = useState(false);
@@ -1765,6 +1773,7 @@ export function Cabecera() {
                   onClick={() => handleAceptar()}
                   className="inline-flex items-center px-4 py-3 rounded-lg w-full bg-gray-50 text-gray-700 text-sm font-semibold 
                  hover:bg-green-600 hover:text-white transition duration-200"
+				 disabled={isButtonDisabled}
                 >
                   ✅ Aceptar
                 </button>

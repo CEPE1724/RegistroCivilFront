@@ -3,6 +3,7 @@ import { APIURL } from "../../configApi/apiConfig";
 import axios from "../../configApi/axiosConfig";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { Home, Work, CalendarToday, AttachMoney, LocationOn, Phone, Person, Map } from '@mui/icons-material';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import Modal from "react-modal";
 import { Visibility } from "@mui/icons-material";
 import { TicketMinus } from "lucide-react";
@@ -418,6 +419,18 @@ const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCl
                         </button>
                       )}
                   </div>
+                </div>
+				<div>
+                  <label className="font-semibold flex items-center mb-2">
+                    <EditNoteIcon className="mr-2 w-5 h-5" /> Observación
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Observación"
+                    value={trabajoInfo.Observacion || ""}
+                    className="block bg-gray-100 w-full rounded-md border border-gray-300 px-4 py-1.5 shadow-sm"
+                    readOnly
+                  />
                 </div>
               </div>
 
