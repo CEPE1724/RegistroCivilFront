@@ -214,10 +214,10 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-    if (name === 'telefono') {
-      if (value.length !== 9) {
+    if (name === 'telefono' && formData.telefono !== "") {
+		if (value.length !== 9) {
         enqueueSnackbar("El telefono debe tener 9 caracteres.", { variant: 'warning' })
-      }
+		}
     }
 
     if (name === 'celular') {
@@ -550,13 +550,15 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
+	if(formData.telefono !== ""){
 	if (!formData.telefono && formData.telefono.length !== 9) {
-      newErrors.telefono = "Debes proporcionar un teléfono";
+      newErrors.telefono = "Debes proporcionar un teléfono valido";
       if (!showSnackbar) {
-        enqueueSnackbar("Por favor, proporciona un teléfono", {variant: "error"});
+        enqueueSnackbar("Por favor, proporciona un teléfono valido", {variant: "error"});
         showSnackbar = true;
       }
     }
+}
 
 	if (!formData.celular && formData.celular.length !== 10) {
 		newErrors.celular = "Debes proporcionar un celular";
@@ -574,6 +576,7 @@ const SeccionB = forwardRef((props, ref) => {
       }
 	}
 
+	if(formData.telefono !== ""){
 	const prefijos = ['02', '03', '04', '05', '06', '07']
 	const prefijValid = prefijos.some(prefix => formData.telefono.startsWith(prefix));
 	if(!prefijValid){
@@ -583,6 +586,7 @@ const SeccionB = forwardRef((props, ref) => {
         showSnackbar = true;
       }
     }
+}
 
     if (!formData.referenciaUbicacion) {
       newErrors.referenciaUbicacion = "Este campo es obligatorio";
@@ -1042,9 +1046,9 @@ const SeccionB = forwardRef((props, ref) => {
         </div>
 
         <div className="col-span-1">
-          <label className={`text-xs font-medium mb-1 flex items-center ${formData.telefono.length < 9 ? 'text-red-500' : 'text-gray-500'}`}>
+          <label className={`text-xs font-medium mb-1 flex items-center text-gray-500`}>
             <FaPhoneAlt className="mr-2 text-primaryBlue" />
-            (*)Telefono
+            Telefono
           </label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <input

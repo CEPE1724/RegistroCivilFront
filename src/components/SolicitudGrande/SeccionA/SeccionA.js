@@ -452,6 +452,7 @@ const SeccionA = forwardRef((props, ref) => {
       }
     }
 
+	if(formData.telefono!== ""){
 	const prefijos = ['02', '03', '04', '05', '06', '07']
 	const prefijValid = prefijos.some(prefix => formData.telefono.startsWith(prefix));
 	if(!prefijValid){
@@ -462,6 +463,9 @@ const SeccionA = forwardRef((props, ref) => {
       }
 	}
 
+}
+	
+	if(formData.celular !== ""){
 	if(!formData.celular.startsWith("09")){
 		newErrors.celular = "El celular debe empezar con 09";
 		if (!showSnackbar) {
@@ -469,15 +473,10 @@ const SeccionA = forwardRef((props, ref) => {
         showSnackbar = true;
       }
 	}
+}
 
-
-    if (!formData.celular || formData.celular.trim() === "") {
-      newErrors.celular = "El celular es obligatorio";
-      if (!showSnackbar) {
-        enqueueSnackbar("El celular es obligatorio", { variant: "error" });
-        showSnackbar = true;
-      }
-    } else if (!/^\d{10}$/.test(formData.celular)) {
+	if(formData.celular !== ""){
+    if (!/^\d{10}$/.test(formData.celular)) {
       newErrors.celular = "El celular debe tener exactamente 10 dígitos numéricos";
       if (!showSnackbar) {
         enqueueSnackbar("El celular debe tener exactamente 10 dígitos numéricos", {
@@ -486,8 +485,7 @@ const SeccionA = forwardRef((props, ref) => {
         showSnackbar = true;
       }
     }
-
-
+}
 
     if (!formData.callePrincipal) {
       newErrors.callePrincipal = "Este campo es obligatorio";
