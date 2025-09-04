@@ -4222,10 +4222,11 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Cédula:</p>
                     <p>{selectedRow.cedula}</p>
                   </div>
+				  {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' &&
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">Ingreso Afiliacion:</p>
                     <p>{selectedRow.FechaAfiliacionIngreso}</p>
-                  </div>
+                  </div>}
                   {selectedRow.FechaAfiliacionHasta !== '1970-01-01' &&
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">Afiliacion Hasta:</p>
