@@ -422,16 +422,6 @@ const SeccionB = forwardRef((props, ref) => {
       }
     }
 
-    // if (!formData.numeroJefe || formData.numeroJefe === "" || formData.numeroJefe.length < 9) {
-    //   newErrors.numeroJefe = "Este campo es obligatorio"
-    //   if (!showSnackbar) {
-    //     enqueueSnackbar("Por favor, ingresa un número", {
-    //       variant: "error",
-    //     });
-    //     showSnackbar = true;
-    //   }
-    // }
-
     if (!formData.departamento) {
       newErrors.departamento = "Este campo es obligatorio";
       if (!showSnackbar) {
@@ -702,26 +692,6 @@ const SeccionB = forwardRef((props, ref) => {
             <span className="text-red-500 text-xs">{errors.jefeInmediato}</span>
           )}
         </div>
-
-        {/* <div className="col-span-1">
-          <label className={`text-xs font-medium mb-1 flex items-center ${formData.numeroJefe.length < 9 ? 'text-red-500' : 'text-gray-500'}`}>
-            <FaHouseUser className="mr-2 text-primaryBlue" />
-            (*)Número Jefe
-          </label>
-          <input
-            type="text"
-            name="numeroJefe"
-            value={formData.numeroJefe}
-            onChange={handleInputChange}
-            onBlur={handleBlur}
-            className="block w-full solcitudgrande-style"
-            maxLength="10"
-            pattern="\d{10}"
-          />
-          {errors.numeroJefe && (
-            <span className="text-red-500 text-xs">{errors.numeroJefe}</span>
-          )}
-        </div> */}
 
         <div className="col-span-1">
           <label className="text-xs font-medium mb-1 flex items-center">
@@ -1060,6 +1030,7 @@ const SeccionB = forwardRef((props, ref) => {
               className="block w-full solcitudgrande-style"
               maxLength="9"
               pattern="\d{9}"
+			  readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud === 12}
             />
           </div>
           {errors.telefono && (
@@ -1099,7 +1070,7 @@ const SeccionB = forwardRef((props, ref) => {
               className="block w-full solcitudgrande-style"
               maxLength="10"
               pattern="\d{10}"
-            //readOnly={data.CelularTrabajo !== "" && data.CelularTrabajo !== null && data.CelularTrabajo !== undefined} // Deshabilitar el campo de celular
+			  readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud === 12}
             />
           </div>
           {errors.celular && (
