@@ -601,6 +601,7 @@ const Domicilio = forwardRef((props, ref) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
               maxLength={9}
+			  readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud == 12}
             />
             {formErrors.telefonoCasa && (
               <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -624,6 +625,7 @@ const Domicilio = forwardRef((props, ref) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
               maxLength={9}
+			  readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud == 12}			  
             />
             {formErrors.telefonoCasa2 && (
               <p className="mt-1 text-sm text-red-500 border-red-500">
@@ -646,6 +648,7 @@ const Domicilio = forwardRef((props, ref) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, "");
               }}
               maxLength={10}
+			  readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud == 12}
             />
             {formErrors.celular && (
               <p className="mt-1 text-sm text-red-500 border-red-500">

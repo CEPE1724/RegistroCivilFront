@@ -700,6 +700,7 @@ const SeccionA = forwardRef((props, ref) => {
             className="block w-full solcitudgrande-style"
             onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
             maxLength={10}
+			readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud === 12}
           />
           {errors.numeroJefe && (
             <span className="text-red-500 text-xs">{errors.numeroJefe}</span>
@@ -800,6 +801,7 @@ const SeccionA = forwardRef((props, ref) => {
             className="solcitudgrande-style"
             onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
             maxLength={9}
+			readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud === 12}
           />
           {errors.telefono && (
             <span className="text-red-500 text-xs">{errors.telefono}</span>
@@ -819,6 +821,7 @@ const SeccionA = forwardRef((props, ref) => {
             className="solcitudgrande-style"
             onInput={(e) => { e.target.value = e.target.value.replace(/[^0-9]/g, ""); }}
             maxLength={10}
+			readOnly={clientInfo?.data?.idEstadoVerificacionSolicitud === 12}
           />
           {errors.celular && (
             <span className="text-red-500 text-xs">{errors.celular}</span>
