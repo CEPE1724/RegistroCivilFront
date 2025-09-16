@@ -541,7 +541,7 @@ const SeccionB = forwardRef((props, ref) => {
     }
 
 	if(formData.telefono !== ""){
-	if (!formData.telefono && formData.telefono.length !== 9) {
+	if (formData.telefono.length !== 9) {
       newErrors.telefono = "Debes proporcionar un teléfono valido";
       if (!showSnackbar) {
         enqueueSnackbar("Por favor, proporciona un teléfono valido", {variant: "error"});
@@ -550,7 +550,7 @@ const SeccionB = forwardRef((props, ref) => {
     }
 }
 
-	if (!formData.celular && formData.celular.length !== 10) {
+	if (!formData.celular || formData.celular.length !== 10) {
 		newErrors.celular = "Debes proporcionar un celular";
 		if (!showSnackbar) {
         enqueueSnackbar("Por favor, proporciona un celular", {variant: "error"});

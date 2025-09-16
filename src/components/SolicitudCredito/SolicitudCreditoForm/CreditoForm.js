@@ -141,12 +141,15 @@ export default function CreditoForm() {
       formik.setFieldValue("Edad", dataRecibir.edad || "");
       formik.setFieldValue("Cedula", dataRecibir.identificacion || "");
 
-      if (bodegaSeleccionada !== null) {
-        formik.setFieldValue("Bodega", bodegaSeleccionada);
-      }
-      if (tipoConsultaSeleccionado !== null) {
-        formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
-      }
+    //   if (bodegaSeleccionada !== null) {
+    //     formik.setFieldValue("Bodega", bodegaSeleccionada);
+    //   }
+    //   if (tipoConsultaSeleccionado !== null) {
+    //     formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
+    //   }
+
+	formik.setFieldValue("Bodega", bodegaSeleccionada ?? formik.values.Bodega);
+    formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado ?? formik.values.idCompraEncuesta);
     }
   };
 
@@ -198,11 +201,11 @@ export default function CreditoForm() {
         if (datosCogno.codigo === "OK") {
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
         } else {
-          enqueueSnackbar("Datos no encontrados o error en la respuesta", { variant: "warning" });
+          enqueueSnackbar("No se encontraron datos para esta cedula", { variant: "warning" });
         }
       } catch (error) {
         console.error("Error al obtener datos de Cogno:", error);
-        enqueueSnackbar("Error al obtener datos de Cogno", { variant: "error" });
+        enqueueSnackbar("Error al obtener datos", { variant: "error" });
       } finally {
         setLoading(false);  // Desactivamos el loading después de la llamada
       }
@@ -586,31 +589,6 @@ export default function CreditoForm() {
           }
         } else {
           console.error("Error al obtener las notificaciones o formato incorrecto.");
-        }
-        // 3. Subir archivo si existe una foto
-        if (fotourl && solicitudData) {
-          const file = fotourl;  // El archivo completo, no solo el nombre
-
-          // 4. Subir la foto
-          const fileUploadResponse = await uploadFile(
-            file,
-            values.Bodega,
-            values.Cedula,
-            solicitudData.NumeroSolicitud,
-            "FOTO",
-          );
-
-          // 5. Si la subida fue exitosa, almacenar la URL de la foto
-          if (fileUploadResponse) {
-            setUrlCloudstorage(fileUploadResponse.url);  // Guardar URL del archivo subido
-
-            // 6. Actualizar la solicitud con la URL de la foto
-            const updatedData = {
-              Foto: fileUploadResponse.url,  // Usamos la URL obtenida del archivo subido
-            };
-            const updatedSolicitud = await fetchActualizaSolicitud(solicitudData.idCre_SolicitudWeb, updatedData);
-
-          }
         }
       }
 

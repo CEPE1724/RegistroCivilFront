@@ -392,7 +392,8 @@ const ReusableForm = ({
       // Si el OTP no es verificado, muestra el modal
 
 	    setIsButtonDisabled(true)
-      requestOtp();
+      //requestOtp();
+	  handleOtpVerification(true);
       //setIsOtpModalOpen(true);
       //   }
     },
@@ -466,11 +467,16 @@ const ReusableForm = ({
   //     setIsOtpModalOpen(false); // Cerrar el modal después de la verificación del OTP
   //   };
 
-  const handleOtpVerification = async (isVerified, otpCode) => {
+  const handleOtpVerification = async (isVerified, otpCode = null) => {
     if (isVerified) {
-      let otpCodeString = String(otpCode);
-      // Se asigna el OTP al objeto de Formik
-      formik.values.otp_code = otpCodeString;
+    //   let otpCodeString = String(otpCode);
+    //   // Se asigna el OTP al objeto de Formik
+    //   formik.values.otp_code = otpCodeString;
+
+	if (otpCode) {
+      formik.values.otp_code = String(otpCode);
+    }
+	
       setIsSubmitting(true);
       try {
         await onSubmit(formik.values);
