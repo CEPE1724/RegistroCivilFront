@@ -286,7 +286,7 @@ function LocationModal({
       .join(" ");
     if (errorMessages) {
       showSnackbar(errorMessages, "error");
-      setIsSubmitting(false);
+     
       return;
     }
   
