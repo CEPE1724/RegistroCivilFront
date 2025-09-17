@@ -26,7 +26,7 @@ export function LocationModal({
     longitude: "",
   };
   const initialLocation = locationData || defaultLocation;
-  const [posicionActual, setPosicionActual ] = useState({lat: -1.8312, lng: -78.1834,})
+  const [posicionActual, setPosicionActual] = useState({ lat: -1.8312, lng: -78.1834, })
 
   const [localLocation, setLocalLocation] = useState(initialLocation);
   const [errors, setErrors] = useState({
@@ -39,7 +39,7 @@ export function LocationModal({
     type: "info",
     visible: false,
   });
-  
+
 
   const autocompleteRef = useRef(null);
 
@@ -59,7 +59,7 @@ export function LocationModal({
 
   useEffect(() => {
     setLocalLocation(initialLocation);
-    setErrors({ address: "", latitude: "", longitude: ""});
+    setErrors({ address: "", latitude: "", longitude: "" });
   }, [isOpen]);
 
   const validateField = (name, value) => {
@@ -160,18 +160,18 @@ export function LocationModal({
     if (latError) showSnackbar(latError, "error");
     if (lngError) showSnackbar(lngError, "error");
 
-  try {
-    const { data } = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${newLat},${newLng}&key=${googleMapsApiKey}`
-    );
-    if (data.results && data.results.length > 0) {
-      setLocalLocation((prev) => ({
-      ...prev,
-      address: data.results[0].formatted_address,
-      }));
-    }
+    try {
+      const { data } = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${newLat},${newLng}&key=${googleMapsApiKey}`
+      );
+      if (data.results && data.results.length > 0) {
+        setLocalLocation((prev) => ({
+          ...prev,
+          address: data.results[0].formatted_address,
+        }));
+      }
     } catch (error) {
-    console.error("Error obteniendo dirección desde coordenadas:", error);
+      console.error("Error obteniendo dirección desde coordenadas:", error);
     }
   };
 
@@ -194,8 +194,8 @@ export function LocationModal({
   };
 
   const handleSave = async () => {
-  if (isSubmitting) return;
-  setIsSubmitting(true);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const newErrors = {
       address: validateField("address", localLocation.address),
@@ -208,19 +208,20 @@ export function LocationModal({
       .join(" ");
     if (errorMessages) {
       showSnackbar(errorMessages, "error");
+      setIsSubmitting(false);
       return;
     }
 
     const payload = {
-    id: userSolicitudData.idCre_SolicitudWeb,
-    cedula: userSolicitudData.Cedula,
-    latitud: parseFloat(localLocation.latitude),
-    longitud: parseFloat(localLocation.longitude),
-    direccion: localLocation.address,
-    ip: "192.168.2.183",
-    Tipo: tipo,
-    Usuario: userData.Nombre,
-    web:1,
+      id: userSolicitudData.idCre_SolicitudWeb,
+      cedula: userSolicitudData.Cedula,
+      latitud: parseFloat(localLocation.latitude),
+      longitud: parseFloat(localLocation.longitude),
+      direccion: localLocation.address,
+      ip: "192.168.2.183",
+      Tipo: tipo,
+      Usuario: userData.Nombre,
+      web: 1,
     };
 
 
@@ -231,7 +232,7 @@ export function LocationModal({
         headers: {
           Authorization: `Bearer ${token}`
         }
-      });      showSnackbar("Ubicación guardada exitosamente.", "success");
+      }); showSnackbar("Ubicación guardada exitosamente.", "success");
       if (onLocationChange) {
         onLocationChange(localLocation);
       }
@@ -239,7 +240,7 @@ export function LocationModal({
         if (isOpen) {
           isOpen();
         }
-    setIsSubmitting(false);
+        setIsSubmitting(false);
       }, 3000);
     } catch (error) {
       console.error("Error al guardar la ubicación:", error);
@@ -247,26 +248,26 @@ export function LocationModal({
         "Error al guardar la ubicación. Por favor, intente más tarde.",
         "error"
       );
-    setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  useEffect(()=> {
-  if(isOpen && navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      (position)=> {
-        setPosicionActual({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      }, 
-      (error)=>{
-        console.error("Error al obtener la ubicacion", error);
-      }
-    );
-  } else {
-    console.warn("La geolocalización no está disponible en este navegador.");
-  }
+  useEffect(() => {
+    if (isOpen && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPosicionActual({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error("Error al obtener la ubicacion", error);
+        }
+      );
+    } else {
+      console.warn("La geolocalización no está disponible en este navegador.");
+    }
   }, [isOpen]);
 
 
@@ -392,8 +393,8 @@ export function LocationModal({
     snackbar.type === "success"
       ? "bg-green-600"
       : snackbar.type === "error"
-      ? "bg-red-600"
-      : "bg-blue-600";
+        ? "bg-red-600"
+        : "bg-blue-600";
 
   const googleMapsApiKey = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
 
@@ -446,15 +447,15 @@ export function LocationModal({
                   </Autocomplete>
                 </div>
               </div>
-        <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-10">
-        <button
-            onClick={handleGetCurrentLocation}
-            className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-all duration-300 ease-in-out"
-            title="Obtener mi ubicación"
-          >
-            <MyLocationIcon className="text-black w-5 h-5" />
-          </button>
-          </div>
+              <div className="absolute top-1/2 right-4 transform -translate-y-1/2 z-10">
+                <button
+                  onClick={handleGetCurrentLocation}
+                  className="bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-all duration-300 ease-in-out"
+                  title="Obtener mi ubicación"
+                >
+                  <MyLocationIcon className="text-black w-5 h-5" />
+                </button>
+              </div>
               <Marker position={mapCenter} />
             </GoogleMap>
           </LoadScript>
@@ -543,11 +544,10 @@ export function LocationModal({
             Cancelar
           </button>
           <button
-            className={`px-3 py-1 text-[10px] bg-blue-600 text-white rounded-md transition duration-200 shadow-md ${
-              isSubmitting
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-700"
-            }`}
+            className={`px-3 py-1 text-[10px] bg-blue-600 text-white rounded-md transition duration-200 shadow-md ${isSubmitting
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-blue-700"
+              }`}
             onClick={handleSave}
             disabled={isSubmitting}
           >
