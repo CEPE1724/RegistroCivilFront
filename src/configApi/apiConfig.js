@@ -107,7 +107,7 @@ export const APIURL = {
   get_cre_referenciasclientesweb_id: (id) => `${API_BASE_URL}cre-referenciasclientesweb/all/${id}`,
   update_soliciutd_telefonica: (id, estado) => `${API_BASE_URL}cre-solicitud-web/updatetelefonica/${id}/${estado}`,
   update_solicitud: (id) => `${API_BASE_URL}cre-solicitud-web/updatetelefonicaEstados/${id}`,
-  verificarRegistroSolicitud: (cedula, bodega) => `${API_BASE_URL}cre-solicitud-web/verificar-cedula-bodega?cedula=${cedula}&bodega=${bodega}`,
+  verificarRegistroSolicitud: (cedula) => `${API_BASE_URL}cre-solicitud-web/verificar-cedula-bodega?cedula=${cedula}`,
   getIdsTerrenas: (id, tipo) => `${API_BASE_URL}clientes-verificacion-terrena/${id}/${tipo}`,
   get_info_trabajo: (id) => `${API_BASE_URL}terrena-gestion-trabajo/${id}`,
   get_horariosanalistas: () => `${API_BASE_URL}horariosanalistas`,
@@ -214,4 +214,5 @@ export const APIURL = {
   patchTipoVerificacionTrabajo : (id) => `${API_BASE_URL}terrena-gestion-trabajo/tipo-verificacion/${id}`,
   update_VerificacionTelefonicaMaestro: (id) => `${API_BASE_URL}cre-verificacion-telefonica-maestro/${id}`,
   validaPrefactura: (NumeroIdentificacion, Bodega) => `${API_BASE_URL}compra/ValidaEstadoCompra/${NumeroIdentificacion}/${Bodega}`,
+  getSolicitudGrandeporId : (id) => `${API_BASE_URL}web-solicitudgrande/${id}`
 };

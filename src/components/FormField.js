@@ -11,6 +11,8 @@ import { set } from "react-hook-form";
 import { data } from "autoprefixer";
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import { MotivoContinuidad } from "../components/ListadoSolicitud";
+import { SolicitudExitosa } from "./MensajeSolicitudExitosa/SolicitudExitosa";
+
 const FormField = ({
   label,
   name,
@@ -28,6 +30,8 @@ const FormField = ({
   const { enqueueSnackbar } = useSnackbar();
 
   const [isBlacklisted, setIsBlacklisted] = useState(false);
+  const [mensajeExitoso, setMensajeExitoso] = useState(false);
+  const [soliExistente, setSoliExistente] = useState(null)
 
   if (hidden) {
     return null;
@@ -132,11 +136,12 @@ const FormField = ({
         // Aquí validamos además la combinación cédula + bodega
         const bodega = formik.values.Bodega; // Asegúrate que este campo exista y se llame así
         if (bodega) {
-          const existeCombo = await verificarCedulaBodega(value, bodega);
+          const existeCombo = await verificarCedulaBodega(value);
           if (existeCombo) {
-            enqueueSnackbar(`Ya existe una solicitud con la cédula ${value} en la bodega seleccionada`, {
+            enqueueSnackbar(`Ya existe una solicitud con la cédula ${value}`, {
               variant: 'warning'
             });
+			setMensajeExitoso(true)
             setIsBlacklisted(true);
             return;
           }
@@ -166,10 +171,11 @@ const FormField = ({
 
     formik.setFieldValue(name, value);
   };
-  const verificarCedulaBodega = async (cedula, bodega) => {
+  const verificarCedulaBodega = async (cedula) => {
     try {
-      const response = await axios.get(APIURL.verificarRegistroSolicitud(cedula, bodega), {
+      const response = await axios.get(APIURL.verificarRegistroSolicitud(cedula), {
       });
+	  setSoliExistente(response.data.solicitud)
 
       return response.data.existe === true;
     } catch (error) {
@@ -319,6 +325,17 @@ const FormField = ({
       {formik.errors[name] && formik.touched[name] && (
         <p className="text-red-500 text-xs mt-1">{formik.errors[name]}</p>
       )}
+
+	  <SolicitudExitosa
+		  isOpen={mensajeExitoso}
+		  onClose={() => setMensajeExitoso(false)}
+		  titulo={`¡TIENES UNA SOLICITUD DE CRÉDITO ACTIVA!`}
+		  subtitulo={`Por favor completa la solicitud de crédito que el cliente ya tiene activa.`}
+		  li1={`Cliente ${`${soliExistente?.PrimerNombre} ${soliExistente?.ApellidoPaterno}`} con cedula ${soliExistente?.Cedula}`}
+		  li2={`Números de solicitud: ${soliExistente?.NumeroSolicitud} `}
+		  color={'bg-red-100'}
+		  ruta={`/ListadoSolicitud`}
+		/>
     </div>
   );
 };
@@ -338,7 +355,11 @@ const ReusableForm = ({
   columns = 1,
   formStatus,
   onExternalUpdate,
+  soliGrande,
+  creSoliWeb
 }) => {
+	console.log("soliGrande", soliGrande)
+	console.log("creSoliWeb", creSoliWeb)
   const navigate = useNavigate();
   const { userData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -359,6 +380,7 @@ const ReusableForm = ({
       .map((field) => [field.name, ""])
   );
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [mensajeExitoso, setMensajeExitoso] = useState(false)
 
 
 
@@ -484,7 +506,11 @@ const ReusableForm = ({
         await new Promise((resolve) => setTimeout(resolve, 2000));
         formik.resetForm();
         setPreviewUrl(null);
-        navigate("/ListadoSolicitud", { replace: true });
+		setMensajeExitoso(true)
+		// setTimeout(() => {
+		// 	navigate("/ListadoSolicitud", { replace: true });
+		// }, 20000);
+
       } catch (error) {
         enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
         console.error("Error en envío:", error);
@@ -739,6 +765,20 @@ const ReusableForm = ({
 
 
       <MotivoContinuidad isOpen={isOpenMotivo} onClose={() => setIsOpenMotivo(false)} data={dataInforme} userData={userData} />
+
+		<SolicitudExitosa
+		  isOpen={mensajeExitoso}
+		  onClose={() => setMensajeExitoso(false)}
+		  soliGrande={soliGrande}
+		  creSoliWeb={creSoliWeb}
+		  titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
+		  subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
+		  color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
+		  li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : ''}
+		  li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data.NumeroSolicitud}` : ''}
+		  li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data.CuotaAsignada} y Cupo: ${soliGrande?.data.Cupo}` : ''}
+		  ruta={'/ListadoSolicitud'}
+		/>
 
     </div>
 
