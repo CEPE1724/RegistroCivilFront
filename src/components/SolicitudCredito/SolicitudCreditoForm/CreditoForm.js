@@ -78,7 +78,6 @@ export default function CreditoForm() {
         headers: { method: "GET", cache: "no-store" },
       });
 
-      console.log("Respuesta de actividad laboral:", response.data);
 
       // Filtrar si Afiliado es false
       const datosFiltrados = response.data.filter(item => {
@@ -224,7 +223,7 @@ export default function CreditoForm() {
         const datosCogno = await fecthDatosCogno(cedula);
 
         if (datosCogno.codigo === "OK") {
-          console.log("Datos recibidos de Cognos:", datosCogno);
+          
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
           setAfiliado(datosCogno.afiliado || false);
         } else {
