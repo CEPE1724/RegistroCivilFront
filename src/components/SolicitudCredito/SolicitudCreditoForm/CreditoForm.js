@@ -8,6 +8,7 @@ import useBodegaUsuario from "../../../hooks/useBodegaUsuario";
 import uploadFile from "../../../hooks/uploadFile";
 import { useAuth } from "../../AuthContext/AuthContext";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
+import { SolicitudExitosa } from "../../MensajeSolicitudExitosa/SolicitudExitosa";
 
 export default function CreditoForm() {
   const { userData, userUsuario } = useAuth();
@@ -27,6 +28,9 @@ export default function CreditoForm() {
   const [ActEconomina, setActEconomina] = useState([]);
   const [bodegaSeleccionada, setBodegaSeleccionada] = useState(null);
   const [tipoConsultaSeleccionado, setTipoConsultaSeleccionado] = useState(null);
+  const [soliGrande, setSoliGrande] = useState(null)
+  const [creSoliWeb, setCreSoliWeb] = useState(null)
+  const [mensajeExitoso, setMensajeExitoso] = useState(false);
 
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
@@ -202,6 +206,7 @@ export default function CreditoForm() {
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
         } else {
           enqueueSnackbar("No se encontraron datos para esta cedula", { variant: "warning" });
+		  setMensajeExitoso(true)
         }
       } catch (error) {
         console.error("Error al obtener datos de Cogno:", error);
@@ -523,6 +528,21 @@ export default function CreditoForm() {
     }
   };
 
+	const fetchSoliGrande = async (id) => {
+		try {
+			const url = APIURL.getSolicitudGrandeporId(id);
+			const response = await axios.get(url, {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			setSoliGrande(response)
+
+		} catch (error) {
+			console.error("Error al consultar la solicitud:", error.message);
+		}
+	}
+
   const handleSubmit = async (values) => {
     const fotourl = values.Foto; // URL de la foto que deseas cargar
     // Formatear los valores para la API, con conversiones necesarias
@@ -561,6 +581,11 @@ export default function CreditoForm() {
         setFormStatus("error");
         return; // ⛔ Detener ejecución
       }
+
+	  if (createResponse.data.data) {
+		setCreSoliWeb(createResponse.data.data)
+		const SolicitudGrande = await fetchSoliGrande(createResponse.data.data.idCre_SolicitudWeb)
+	  }
 
       // 2. Consultar la solicitud recién creada
       if (createResponse.data.idCre_SolicitudWeb) {
@@ -633,7 +658,20 @@ export default function CreditoForm() {
         formStatus={formStatus}
         enableReinitialize={true}
         onExternalUpdate={handleUpdateFromCedula}
+		soliGrande={soliGrande}
+		creSoliWeb={creSoliWeb}
       />
+
+	<SolicitudExitosa
+	  isOpen={mensajeExitoso}
+	  onClose={() => setMensajeExitoso(false)}
+	  titulo={`¡NO SE ENCONTRARON DATOS PARA ESTA CEDULA!`}
+	  subtitulo={`Por favor revisa que se hayan ingresado correctamente los datos.`}
+	  li1={'Si el problema continua comunícate con crédito .'}
+	  color={'bg-red-100'}
+	  ruta={'/solicitud'}
+	  icono={'triste'}
+	/>
     </div>
   );
 }
