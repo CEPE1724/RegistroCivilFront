@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ReusableForm from "../../FormField";
 import * as Yup from "yup";
 import { APIURL } from "../../../configApi/apiConfig";
@@ -31,6 +31,7 @@ export default function CreditoForm() {
   const [soliGrande, setSoliGrande] = useState(null)
   const [creSoliWeb, setCreSoliWeb] = useState(null)
   const [mensajeExitoso, setMensajeExitoso] = useState(false);
+  const [Afiliado, setAfiliado] = useState(false);
 
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
@@ -76,17 +77,33 @@ export default function CreditoForm() {
       const response = await axios.get(APIURL.getActividadEconominasituacionLaboral(), {
         headers: { method: "GET", cache: "no-store" },
       });
+
+      console.log("Respuesta de actividad laboral:", response.data);
+
+      // Filtrar si Afiliado es false
+      const datosFiltrados = response.data.filter(item => {
+        // Si NO está afiliado, excluye idSituacionLaboral 1
+        if (!Afiliado) {
+          return item.idSituacionLaboral !== 1;
+        }
+        // Si está afiliado, incluye todos
+        return true;
+      });
+
+      // Mapear a formato deseado
       setActividadLaboral(
-        response.data.map((item) => ({
+        datosFiltrados.map((item) => ({
           value: item.idSituacionLaboral,
           label: item.Descripcion,
         }))
       );
+
     } catch (error) {
       console.error("Error al obtener actividad laboral", error);
       setActividadLaboral([]);
     }
   };
+
 
   const fetchActEconomina = async (idSituacionLaboral) => {
     try {
@@ -130,10 +147,14 @@ export default function CreditoForm() {
 
   useEffect(() => {
     fetchEstabilidadLaboral();
-    fetchActividadLaboral();
+    // fetchActividadLaboral();
     fetchTipoConsulta();
     fetchBodega();
   }, []);
+  /* afiliado cambia actividad laboral*/
+  useEffect(() => {
+    fetchActividadLaboral();
+  }, [Afiliado]);
 
   const handleUpdateFromCedula = (formik) => {
     if (dataRecibir) {
@@ -145,15 +166,15 @@ export default function CreditoForm() {
       formik.setFieldValue("Edad", dataRecibir.edad || "");
       formik.setFieldValue("Cedula", dataRecibir.identificacion || "");
 
-    //   if (bodegaSeleccionada !== null) {
-    //     formik.setFieldValue("Bodega", bodegaSeleccionada);
-    //   }
-    //   if (tipoConsultaSeleccionado !== null) {
-    //     formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
-    //   }
+      //   if (bodegaSeleccionada !== null) {
+      //     formik.setFieldValue("Bodega", bodegaSeleccionada);
+      //   }
+      //   if (tipoConsultaSeleccionado !== null) {
+      //     formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado);
+      //   }
 
-	formik.setFieldValue("Bodega", bodegaSeleccionada ?? formik.values.Bodega);
-    formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado ?? formik.values.idCompraEncuesta);
+      formik.setFieldValue("Bodega", bodegaSeleccionada ?? formik.values.Bodega);
+      formik.setFieldValue("idCompraEncuesta", tipoConsultaSeleccionado ?? formik.values.idCompraEncuesta);
     }
   };
 
@@ -203,14 +224,16 @@ export default function CreditoForm() {
         const datosCogno = await fecthDatosCogno(cedula);
 
         if (datosCogno.codigo === "OK") {
+          console.log("Datos recibidos de Cognos:", datosCogno);
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
+          setAfiliado(datosCogno.afiliado || false);
         } else {
-          enqueueSnackbar("No se encontraron datos para esta cedula", { variant: "warning" });
-		  setMensajeExitoso(true)
+          //enqueueSnackbar("No se encontraron datos para esta cedula", { variant: "warning" });
+          setMensajeExitoso(true);
         }
       } catch (error) {
-        console.error("Error al obtener datos de Cogno:", error);
         enqueueSnackbar("Error al obtener datos", { variant: "error" });
+        setMensajeExitoso(true);
       } finally {
         setLoading(false);  // Desactivamos el loading después de la llamada
       }
@@ -417,7 +440,7 @@ export default function CreditoForm() {
 
       Email: Yup.string()
         .email("Correo inválido")
-		.nullable()
+        .nullable()
         //.required("Ingresa un correo válido")
         .test(
           "not-blacklisted",
@@ -528,20 +551,20 @@ export default function CreditoForm() {
     }
   };
 
-	const fetchSoliGrande = async (id) => {
-		try {
-			const url = APIURL.getSolicitudGrandeporId(id);
-			const response = await axios.get(url, {
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			})
-			setSoliGrande(response)
+  const fetchSoliGrande = async (id) => {
+    try {
+      const url = APIURL.getSolicitudGrandeporId(id);
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      setSoliGrande(response)
 
-		} catch (error) {
-			console.error("Error al consultar la solicitud:", error.message);
-		}
-	}
+    } catch (error) {
+      console.error("Error al consultar la solicitud:", error.message);
+    }
+  }
 
   const handleSubmit = async (values) => {
     const fotourl = values.Foto; // URL de la foto que deseas cargar
@@ -582,10 +605,10 @@ export default function CreditoForm() {
         return; // ⛔ Detener ejecución
       }
 
-	  if (createResponse.data.data) {
-		setCreSoliWeb(createResponse.data.data)
-		const SolicitudGrande = await fetchSoliGrande(createResponse.data.data.idCre_SolicitudWeb)
-	  }
+      if (createResponse.data.data) {
+        setCreSoliWeb(createResponse.data.data)
+        const SolicitudGrande = await fetchSoliGrande(createResponse.data.data.idCre_SolicitudWeb)
+      }
 
       // 2. Consultar la solicitud recién creada
       if (createResponse.data.idCre_SolicitudWeb) {
@@ -658,20 +681,20 @@ export default function CreditoForm() {
         formStatus={formStatus}
         enableReinitialize={true}
         onExternalUpdate={handleUpdateFromCedula}
-		soliGrande={soliGrande}
-		creSoliWeb={creSoliWeb}
+        soliGrande={soliGrande}
+        creSoliWeb={creSoliWeb}
       />
 
-	<SolicitudExitosa
-	  isOpen={mensajeExitoso}
-	  onClose={() => setMensajeExitoso(false)}
-	  titulo={`¡NO SE ENCONTRARON DATOS PARA ESTA CEDULA!`}
-	  subtitulo={`Por favor revisa que se hayan ingresado correctamente los datos.`}
-	  li1={'Si el problema continua comunícate con crédito .'}
-	  color={'bg-red-100'}
-	  ruta={'/solicitud'}
-	  icono={'triste'}
-	/>
+      <SolicitudExitosa
+        isOpen={mensajeExitoso}
+        onClose={() => setMensajeExitoso(false)}
+        titulo={`¡NO SE ENCONTRARON DATOS PARA ESTA CEDULA!`}
+        subtitulo={`Por favor revisa que se hayan ingresado correctamente los datos.`}
+        li1={'Si el problema continua comunícate con crédito .'}
+        color={'bg-red-100'}
+        ruta={'/solicitud'}
+        icono={'triste'}
+      />
     </div>
   );
 }
