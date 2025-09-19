@@ -358,8 +358,6 @@ const ReusableForm = ({
   soliGrande,
   creSoliWeb
 }) => {
-	console.log("soliGrande", soliGrande)
-	console.log("creSoliWeb", creSoliWeb)
   const navigate = useNavigate();
   const { userData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
