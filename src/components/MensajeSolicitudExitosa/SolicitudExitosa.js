@@ -7,7 +7,9 @@ export const SolicitudExitosa = ({ isOpen, onClose, titulo, subtitulo, color, li
 
 	const handleCerrar = () => {
 		onClose();
-		navigate(`${ruta}`, { replace: true });
+		if (ruta && ruta !== '') {
+			navigate(`${ruta}`, { replace: true });
+		}
 	}
 
 	if (!isOpen) return null;

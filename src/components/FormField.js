@@ -138,10 +138,10 @@ const FormField = ({
         if (bodega) {
           const existeCombo = await verificarCedulaBodega(value);
           if (existeCombo) {
-            enqueueSnackbar(`Ya existe una solicitud con la cédula ${value}`, {
+           /* enqueueSnackbar(`Ya existe una solicitud con la cédula ${value}`, {
               variant: 'warning'
-            });
-			setMensajeExitoso(true)
+            });*/
+            setMensajeExitoso(true)
             setIsBlacklisted(true);
             return;
           }
@@ -175,7 +175,7 @@ const FormField = ({
     try {
       const response = await axios.get(APIURL.verificarRegistroSolicitud(cedula), {
       });
-	  setSoliExistente(response.data.solicitud)
+      setSoliExistente(response.data.solicitud)
 
       return response.data.existe === true;
     } catch (error) {
@@ -326,16 +326,16 @@ const FormField = ({
         <p className="text-red-500 text-xs mt-1">{formik.errors[name]}</p>
       )}
 
-	  <SolicitudExitosa
-		  isOpen={mensajeExitoso}
-		  onClose={() => setMensajeExitoso(false)}
-		  titulo={`¡TIENES UNA SOLICITUD DE CRÉDITO ACTIVA!`}
-		  subtitulo={`Por favor completa la solicitud de crédito que el cliente ya tiene activa.`}
-		  li1={`Cliente ${`${soliExistente?.PrimerNombre} ${soliExistente?.ApellidoPaterno}`} con cedula ${soliExistente?.Cedula}`}
-		  li2={`Números de solicitud: ${soliExistente?.NumeroSolicitud} `}
-		  color={'bg-red-100'}
-		  ruta={`/ListadoSolicitud`}
-		/>
+      <SolicitudExitosa
+        isOpen={mensajeExitoso}
+        onClose={() => setMensajeExitoso(false)}
+        titulo={`¡TIENES UNA SOLICITUD DE CRÉDITO ACTIVA!`}
+        subtitulo={`Por favor completa la solicitud de crédito que el cliente ya tiene activa.`}
+        li1={`Cliente ${`${soliExistente?.PrimerNombre} ${soliExistente?.ApellidoPaterno}`} con cedula ${soliExistente?.Cedula}`}
+        li2={`Números de solicitud: ${soliExistente?.NumeroSolicitud} `}
+        color={'bg-red-100'}
+        ruta={`/solicitud`}
+      />
     </div>
   );
 };
@@ -358,6 +358,7 @@ const ReusableForm = ({
   soliGrande,
   creSoliWeb
 }) => {
+
   const navigate = useNavigate();
   const { userData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -370,7 +371,6 @@ const ReusableForm = ({
   const { enqueueSnackbar } = useSnackbar();
   const [isOpenMotivo, setIsOpenMotivo] = useState(false);
   // captura a valores de inicialValues
-  const [iidPersona] = useState(initialValues.idVendedor || null);
   // Inicializar valores por defecto para campos select
   const selectDefaults = Object.fromEntries(
     formConfig
@@ -385,7 +385,6 @@ const ReusableForm = ({
 
   useEffect(() => {
     if (initialValues) {
-      // Si initialValues tiene un idVendedor, asignarlo a iidPersona
       if (initialValues.idVendedor) {
         verificarMotivosPendientes(initialValues.idVendedor);
       }
@@ -411,9 +410,9 @@ const ReusableForm = ({
       //   } else {
       // Si el OTP no es verificado, muestra el modal
 
-	    setIsButtonDisabled(true)
+      setIsButtonDisabled(true)
       //requestOtp();
-	  handleOtpVerification(true);
+      handleOtpVerification(true);
       //setIsOtpModalOpen(true);
       //   }
     },
@@ -433,19 +432,19 @@ const ReusableForm = ({
         phoneNumber: formik.values.Celular,
         email: formik.values.Email,
         nombreCompleto: `${formik.values.PrimerNombre || ''} ${formik.values.SegundoNombre || ''} ${formik.values.ApellidoPaterno || ''} ${formik.values.ApellidoMaterno || ''}`.trim(),
-        cedula: formik.values.Cedula ,
-        bodega: formik.values.Bodega 
+        cedula: formik.values.Cedula,
+        bodega: formik.values.Bodega
       });
 
       if (response.data.success) {
         setIsOtpModalOpen(true);
       } else {
-		setIsButtonDisabled(false)
+        setIsButtonDisabled(false)
         alert(response.data.message || "No se pudo generar el OTP");
       }
     } catch (error) {
       console.error(error);
-	  setIsButtonDisabled(false)
+      setIsButtonDisabled(false)
       alert('Hubo un error al generar el OTP');
     }
   };
@@ -489,14 +488,14 @@ const ReusableForm = ({
 
   const handleOtpVerification = async (isVerified, otpCode = null) => {
     if (isVerified) {
-    //   let otpCodeString = String(otpCode);
-    //   // Se asigna el OTP al objeto de Formik
-    //   formik.values.otp_code = otpCodeString;
+      //   let otpCodeString = String(otpCode);
+      //   // Se asigna el OTP al objeto de Formik
+      //   formik.values.otp_code = otpCodeString;
 
-	if (otpCode) {
-      formik.values.otp_code = String(otpCode);
-    }
-	
+      if (otpCode) {
+        formik.values.otp_code = String(otpCode);
+      }
+
       setIsSubmitting(true);
       try {
         await onSubmit(formik.values);
@@ -504,21 +503,21 @@ const ReusableForm = ({
         await new Promise((resolve) => setTimeout(resolve, 2000));
         formik.resetForm();
         setPreviewUrl(null);
-		setMensajeExitoso(true)
-		// setTimeout(() => {
-		// 	navigate("/ListadoSolicitud", { replace: true });
-		// }, 20000);
+        setMensajeExitoso(true)
+        // setTimeout(() => {
+        // 	navigate("/ListadoSolicitud", { replace: true });
+        // }, 20000);
 
       } catch (error) {
         enqueueSnackbar("Error al enviar el formulario", { variant: "error" });
         console.error("Error en envío:", error);
-		setIsButtonDisabled(false)
+        setIsButtonDisabled(false)
       } finally {
         setIsSubmitting(false);
       }
     } else {
-		setIsButtonDisabled(false)
-	}
+      setIsButtonDisabled(false)
+    }
     setIsOtpModalOpen(false);
     setIsOtpVerified(isVerified);
   };
@@ -559,7 +558,7 @@ const ReusableForm = ({
           <Loader />
         </div>
       )}
-     
+
       {parseInt(dataMotivos.totalCount) > 0 && (
         <>
           <label className="text-lg font-semibold text-primaryBlue mb-4">
@@ -723,13 +722,13 @@ const ReusableForm = ({
             </div>
           )}
 
-{/*boton enviar */}
+          {/*boton enviar */}
           {includeButtons && (
             <div className="py-2 flex justify-center gap-2">
               <button
                 type="submit"
                 className="rounded-full hover:shadow-md transition duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue text-xs px-6 py-2.5"
-                disabled={isButtonDisabled }
+                disabled={isButtonDisabled}
               >
                 {isSubmitting ? <Loader /> : submitButtonText}
               </button>
@@ -753,7 +752,7 @@ const ReusableForm = ({
           {
             <OTPModal
               isOpen={isOtpModalOpen}
-              onClose={() => {setIsOtpModalOpen(false); setIsButtonDisabled(false)}}
+              onClose={() => { setIsOtpModalOpen(false); setIsButtonDisabled(false) }}
               onVerifyOtp={handleOtpVerification}
               phoneNumberOTP={formik.values.Celular}
             />
@@ -764,19 +763,19 @@ const ReusableForm = ({
 
       <MotivoContinuidad isOpen={isOpenMotivo} onClose={() => setIsOpenMotivo(false)} data={dataInforme} userData={userData} />
 
-		<SolicitudExitosa
-		  isOpen={mensajeExitoso}
-		  onClose={() => setMensajeExitoso(false)}
-		  soliGrande={soliGrande}
-		  creSoliWeb={creSoliWeb}
-		  titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
-		  subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
-		  color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
-		  li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : ''}
-		  li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data.NumeroSolicitud}` : ''}
-		  li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data.CuotaAsignada} y Cupo: ${soliGrande?.data.Cupo}` : ''}
-		  ruta={'/ListadoSolicitud'}
-		/>
+      <SolicitudExitosa
+        isOpen={mensajeExitoso}
+        onClose={() => setMensajeExitoso(false)}
+        soliGrande={soliGrande}
+        creSoliWeb={creSoliWeb}
+        titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
+        subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
+        color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
+        li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : ''}
+        li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data.NumeroSolicitud}` : ''}
+        li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data.CuotaAsignada} y Cupo: ${soliGrande?.data.Cupo}` : ''}
+        ruta={'/ListadoSolicitud'}
+      />
 
     </div>
 
