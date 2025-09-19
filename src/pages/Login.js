@@ -3,12 +3,15 @@ import { TextField, InputAdornment, CircularProgress, IconButton, Alert } from "
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
-import LoginIcon from "@mui/icons-material/Login";
 import { useSnackbar } from "notistack";
 import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
 import crediPointLogo from "../img/credipoint_digital2.png";
+import fondo from "../img/Fondo.png"
+import logoCredi from "../img/logo-credipoint.png"
+import { Eye, EyeOff, User } from 'lucide-react';
+
 import {
   Dialog,
   DialogTitle,
@@ -187,91 +190,119 @@ const handleOlvidoPassword = async () => {
   };
 
   return (
-    <section className="flex items-center justify-center min-h-screen bg-red-600" style={{ background: '#1453C8' }}>
-      <div className="container max-w-4xl p-4 sm:p-6 md:p-10">
-        <div className="flex flex-wrap items-center justify-center text-neutral-800 dark:text-neutral-200">
-          <div className="w-full" style={{ borderRadius: '20px' }}>
-            <div className="block rounded-lg bg-white shadow-lg dark:bg-neutral-800" style={{ borderRadius: '20px' }}>
-              <div className="flex flex-col lg:flex-row relative rounded-lg" style={{ background: 'linear-gradient(to bottom, #1965F2, #D9E6FF)', borderRadius: '20px' }}>
-                <div className="w-full lg:w-6/12 px-4 py-8 md:px-6 relative">
-                  <img className="mx-auto w-[150px] sm:w-[180px] md:w-[200px] lg:w-5/6 mb-2" src={crediPointLogo} alt="logo" />
-                  <div className="md:mx-6 p-8 rounded-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.50)' }}>
+	  <section className="flex items-center justify-center min-h-screen relative" style={{ background: 'linear-gradient(to bottom left, #008fff, #00447a)' }}>
 
-                    {messageError && <div className="text-red-500 text-start mb-4 text-sm">*{messageError}</div>}
-                    <form className="space-y-4" onSubmit={handleSubmit}>
-                      <Box>
-                        <TextField
-                          placeholder="Usuario"
-                          fullWidth
-                          required
-                          value={userName}
-                          variant="outlined"
-                          onChange={(e) => setUserName(e.target.value.toUpperCase())}
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <PersonIcon sx={{ fontSize: '1.3rem', color: '#000' }} />
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Box>
+		
 
-                      <Box sx={{ width: '100%' }}>
-                        <TextField
-                          placeholder="Contraseña"
-                          fullWidth
-                          required
-                          value={password}
-                          variant="outlined"
-                          onChange={(e) => setPassword(e.target.value)}
-                          type={showPassword ? 'text' : 'password'}
-                          InputProps={{
-                            startAdornment: (
-                              <InputAdornment position="start">
-                                <Lock sx={{ fontSize: '1.3rem', color: '#000' }} />
-                              </InputAdornment>
-                            ),
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton onClick={handleTogglePasswordVisibility} edge="end">
-                                  {showPassword ? <VisibilityOff sx={{ fontSize: '1.3rem', color: '#000' }} /> : <Visibility sx={{ fontSize: '1.3rem', color: '#000' }} />}
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Box>
+		  <img
+			  src={fondo}
+			  alt="Imagen centrada"
+			  className="hidden md:block absolute"
+			  style={{
+				  maxWidth: '60%',
+				  objectFit: 'contain',
+				  borderRadius: '24px',
+				  boxShadow: '40px 30px 20px rgba(0, 0, 0, 0.3)',
+			  }}
+		  />
 
-                      <button className="mb-2 w-full text-white py-2 px-4 rounded-md hover:bg-red flex items-center justify-center" style={{ backgroundColor: '#1965F2', pointerEvents: isLoading ? 'none' : 'auto' }} type="submit" disabled={isLoading}>
-                        {isLoading ? <CircularProgress size={24} color="inherit" /> : <span className="flex items-center">Ingresar <LoginIcon className="ml-2" /></span>}
-                      </button>
-                    </form>
+		  {/* login */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 max-w-xs">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl">
+            {/* Título */}
+            <div className="text-center mb-6">
+              <img 
+                src={logoCredi}
+                alt="Credi Point Digital"
+                className="w-36 h-9 mx-auto mb-3"
+              />
+              <h2 className="text-lg font-bold text-blue-900">Iniciar Sesión</h2>
+            </div>
 
-   {/* Enlace para olvidar contraseña */}
-                    <div className="text-center mt-4">
-                      <button
-                        type="button"
-                        onClick={() => setShowOlvidoModal(true)}
-                        className="text-sm text-blue-700 hover:text-blue-900 underline transition-colors duration-200"
-                      >
-                        ¿Olvidaste tu contraseña?
-                      </button>
-                    </div>
+            {/* Formulario */}
+            <div className="space-y-3">
 
+				<form
+				  onSubmit={handleSubmit} // esta función la defines tú para enviar el login
+				  autoComplete="on"
+				  className="space-y-4"
+				>
 
-
-                  </div>
+              {/* Campo Usuario */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <PersonIcon className="h-4 w-4 text-black-400" /> 
                 </div>
-
-                <div className="w-full lg:w-6/12 flex items-center justify-start">
-                  <img className="hidden md:block" src="/img/ponty.png" alt="logo" />
-                </div>
+                <input
+                  type="text"
+				  required
+				  value={userName}
+				  onChange={(e) => setUserName(e.target.value.toUpperCase())}
+                  placeholder="Usuario"
+                  className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 text-sm"
+                />
               </div>
+
+              {/* Campo Contraseña */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-4 w-4 text-black-400" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Contraseña"
+				  required
+				  value={password}
+				  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-16 py-2.5 border border-gray-300 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                >
+                  {showPassword ? (
+    				  <span className="flex items-center space-x-2 text-blue-800 font-semibold hover:text-blue-800 transition-colors duration-200">
+    				    <span>Ocultar</span>
+    				  </span>
+    				) : (
+    				  <span className="flex items-center space-x-2 text-blue-800 font-semibold hover:text-blue-800 transition-colors duration-200">
+    				    <span>Mostrar</span>
+    				  </span>
+    				)}
+                </button>
+              </div>
+
+              {/* Recordarme */}
+              <div className="flex items-center text-sm">
+                
+				<button
+                   type="button"
+                   onClick={() => setShowOlvidoModal(true)}
+                   className="ml-auto text-blue-600 hover:text-blue-800 transition-colorduration-200 whitespace-nowrap"
+                 >
+                   ¿Olvidaste tu contraseña?
+                 </button>
+
+				 {messageError && <div className="text-red-500 text-start mb-4 text-sm">¡{messageError}!</div>}
+
+              </div>
+
+              {/* Botón Iniciar Sesión */}
+              <button
+                type="submit"
+                className="w-full text-white py-2.5 px-4 rounded-xl font-semibold hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 text-sm mt-4"
+				style={{
+  				  backgroundImage: 'linear-gradient(to right, #00447a 0%, #0E5695 5%, #258FEB 50%, #0E5695 95%, #00447a 100%)',
+  				}}
+              >
+                Iniciar Sesión
+              </button>
+			  </form>
             </div>
           </div>
         </div>
-      </div>
+
       
       <Dialog
         open={sessionExpired}
