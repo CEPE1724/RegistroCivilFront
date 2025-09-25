@@ -8,10 +8,10 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
 import crediPointLogo from "../img/credipoint_digital2.png";
-import fondo from "../img/Fondo.webp"
-import logoCredi from "../img/logo-credipoint.webp"
+import fondo from "../assets/img/Fondo.webp";
+import logoCredi from "../assets/img//logo-credipoint.webp"
 import { Eye, EyeOff, User } from 'lucide-react';
-import fondoSinVer from "../img/FondoSinVer.webp"
+import fondoSinVer from "../assets/img/FondoSinVer.webp"
 
 import {
   Dialog,
