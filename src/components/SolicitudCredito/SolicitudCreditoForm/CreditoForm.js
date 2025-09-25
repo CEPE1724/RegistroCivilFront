@@ -115,14 +115,14 @@ export default function CreditoForm() {
 
       let datosFiltrados = [];
 
-      if (Jubilado) {
+      if (Jubilado && idSituacionLaboral == 1) {
         // Si es jubilado, solo incluir el ID 301
         datosFiltrados = response.data.filter(item => item.idActEconomica === 301);
       } else {
         // Si NO es jubilado, excluir solo 301 si quieres, o devolver todos
         datosFiltrados = response.data.filter(item => item.idActEconomica !== 301);
       }
-
+      setActEconomina([]);
       setActEconomina(
         datosFiltrados.map((item) => ({
           value: item.idActEconomica,
@@ -167,7 +167,7 @@ export default function CreditoForm() {
   /* afiliado cambia actividad laboral*/
   useEffect(() => {
     fetchActividadLaboral();
-  }, [Afiliado]);
+  }, [Afiliado, dataRecibir]);
 
   const handleUpdateFromCedula = (formik) => {
     if (dataRecibir) {
@@ -192,6 +192,7 @@ export default function CreditoForm() {
   };
 
   const handleSituacionLaboralChange = (selectedOption) => {
+
     fetchActEconomina(selectedOption);  // Llamada API
 
     const situacion = Number(selectedOption);
@@ -237,10 +238,17 @@ export default function CreditoForm() {
         const datosCogno = await fecthDatosCogno(cedula);
 
         if (datosCogno.codigo === "OK") {
-
+          setActividadLaboral([]);
+          setActEconomina([]);
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
           setAfiliado(datosCogno.afiliado || false);
           setJubilado(datosCogno.jubilado || false);
+          setInitialValues((prev) => ({
+            ...prev,
+            idSituacionLaboral: null,
+            idActEconomina: null,
+          }));
+
         } else {
           //enqueueSnackbar("No se encontraron datos para esta cedula", { variant: "warning" });
           setMensajeExitoso(true);
