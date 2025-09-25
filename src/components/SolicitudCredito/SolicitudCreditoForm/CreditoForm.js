@@ -32,6 +32,7 @@ export default function CreditoForm() {
   const [creSoliWeb, setCreSoliWeb] = useState(null)
   const [mensajeExitoso, setMensajeExitoso] = useState(false);
   const [Afiliado, setAfiliado] = useState(false);
+  const [Jubilado, setJubilado] = useState(false);
 
   const fetchBodega = async () => {
     const userId = userData?.idUsuario;
@@ -106,12 +107,24 @@ export default function CreditoForm() {
 
   const fetchActEconomina = async (idSituacionLaboral) => {
     try {
-      if (!idSituacionLaboral) return; // Si no hay idSituacionLaboral, no hacer la consulta.
+      if (!idSituacionLaboral) return;
+
       const response = await axios.get(APIURL.get_cre_actividadeconomina(idSituacionLaboral), {
         headers: { method: "GET", cache: "no-store" },
       });
+
+      let datosFiltrados = [];
+
+      if (Jubilado) {
+        // Si es jubilado, solo incluir el ID 301
+        datosFiltrados = response.data.filter(item => item.idActEconomica === 301);
+      } else {
+        // Si NO es jubilado, excluir solo 301 si quieres, o devolver todos
+        datosFiltrados = response.data.filter(item => item.idActEconomica !== 301);
+      }
+
       setActEconomina(
-        response.data.map((item) => ({
+        datosFiltrados.map((item) => ({
           value: item.idActEconomica,
           label: item.Nombre,
         }))
@@ -121,6 +134,7 @@ export default function CreditoForm() {
       setActEconomina([]);
     }
   };
+
 
   const fetchTipoConsulta = async () => {
     try {
@@ -223,9 +237,10 @@ export default function CreditoForm() {
         const datosCogno = await fecthDatosCogno(cedula);
 
         if (datosCogno.codigo === "OK") {
-          
+
           setDataRecibir(datosCogno);  // Actualizamos el estado con los datos recibidos
           setAfiliado(datosCogno.afiliado || false);
+          setJubilado(datosCogno.jubilado || false);
         } else {
           //enqueueSnackbar("No se encontraron datos para esta cedula", { variant: "warning" });
           setMensajeExitoso(true);
