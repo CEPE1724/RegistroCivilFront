@@ -8,9 +8,10 @@ import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
 import crediPointLogo from "../img/credipoint_digital2.png";
-import fondo from "../img/Fondo.png"
-import logoCredi from "../img/logo-credipoint.png"
+import fondo from "../img/Fondo.webp"
+import logoCredi from "../img/logo-credipoint.webp"
 import { Eye, EyeOff, User } from 'lucide-react';
+import fondoSinVer from "../img/FondoSinVer.webp"
 
 import {
   Dialog,
@@ -121,6 +122,14 @@ const handleOlvidoPassword = async () => {
   const passwordValidation = validarContrasena(nuevaClave);
 
   useEffect(() => {
+	const preloadImages = [fondoSinVer, fondo];
+        preloadImages.forEach((src) => {
+            const img = new Image();
+            img.src = src;
+        });
+  }, [])
+
+  useEffect(() => {
     if (isSessionExpired2) {
       setShowExpiredModal(true);
     }
@@ -185,18 +194,23 @@ const handleOlvidoPassword = async () => {
     }
   };
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
 	  <section className="flex items-center justify-center min-h-screen relative" style={{ background: 'linear-gradient(to bottom left, #008fff, #00447a)' }}>
 
-		
-
-		  <img
+		{showPassword ? (<img
+			  src={fondoSinVer}
+			  alt="fondo centrado ojos cerrados"
+			  className="hidden md:block absolute"
+			  style={{
+				  maxWidth: '60%',
+				  objectFit: 'contain',
+				  borderRadius: '24px',
+				  boxShadow: '40px 30px 20px rgba(0, 0, 0, 0.3)',
+			  }}
+		  />) : (
+			<img
 			  src={fondo}
-			  alt="Imagen centrada"
+			  alt="fondo centrado"
 			  className="hidden md:block absolute"
 			  style={{
 				  maxWidth: '60%',
@@ -205,6 +219,7 @@ const handleOlvidoPassword = async () => {
 				  boxShadow: '40px 30px 20px rgba(0, 0, 0, 0.3)',
 			  }}
 		  />
+		  )}	  
 
 		  {/* login */}
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 max-w-xs">
@@ -273,7 +288,7 @@ const handleOlvidoPassword = async () => {
                 </button>
               </div>
 
-              {/* Recordarme */}
+              {/* olvidaste contraseña */}
               <div className="flex items-center text-sm">
                 
 				<button
