@@ -22,6 +22,23 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Prueba SSH (diagnóstico)
+        run: |
+          # Guardar la clave privada en un fichero seguro
+          echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+
+          # Mostrar la huella pública derivada de la privada (para comparar con authorized_keys)
+          ssh-keygen -y -f /tmp/deploy_key
+
+          # Probar conexión rápida (no interactivamente). Esto fallará con código !=0 si no autentica.
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i /tmp/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 'echo "OK: Conexión SSH autenticada desde runner" && whoami && pwd' || echo "ERROR: Falló autenticación SSH desde el runner"
+
+          # Borrar la clave del runner por seguridad
+          shred -u /tmp/deploy_key || rm -f /tmp/deploy_key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Conectar al servidor y desplegar
         uses: appleboy/ssh-action@v1.0.0
         with:
