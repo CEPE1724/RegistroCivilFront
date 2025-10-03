@@ -53,7 +53,8 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
-		"tailDev": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/styles.css --watch"
+		"tailDev": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/styles.css --watch",
+		"tailBuild": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/styles.css"
 	},
 	"eslintConfig": {
 		"extends": [
