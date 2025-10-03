@@ -13,6 +13,15 @@ jobs:
       - name: Checkout del repositorio
         uses: actions/checkout@v4
 
+      - name: Mostrar variables de entorno (debug seguro)
+        run: |
+          echo "🔐 HOST: ${{ secrets.SERVER_HOST }}"
+          echo "👤 USUARIO: ${{ secrets.SERVER_USER }}"
+          echo "📦 Puerto SSH: 22"
+          echo "🔑 Longitud clave privada: ${#SSH_PRIVATE_KEY}"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Conectar al servidor y desplegar
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -21,7 +30,11 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            echo "✅ Conectado exitosamente al servidor."
             cd /root/Escritorio/RegistroCivilFront
+            echo "📦 Actualizando código..."
             git pull origin main
+            echo "🧹 Deteniendo contenedores existentes..."
             docker compose down
+            echo "🚀 Reconstruyendo e iniciando contenedores..."
             docker compose up -d --build
