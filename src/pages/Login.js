@@ -311,7 +311,7 @@ const handleOlvidoPassword = async () => {
   				  backgroundImage: 'linear-gradient(to right, #00447a 0%, #0E5695 5%, #258FEB 50%, #0E5695 95%, #00447a 100%)',
   				}}
               >
-                Iniciar Sesión..
+                Iniciar Sesión.
               </button>
 			  </form>
             </div>
