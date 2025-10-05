@@ -3,6 +3,7 @@ import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import { Modal, Box, Button, Typography } from "@mui/material";
 import Login from "./pages/Login";
+import Desayuno from "./pages/Desayuno";
 import Home from "./pages/Home";
 import TitleUpdater from "./components/TitleUpdater";
 import PaginaNotFound from "./pages/PaginaNotFound";
@@ -60,6 +61,7 @@ function App() {
     <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/Point/Desayuno" element={<Desayuno />} />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/*" element={<><TitleUpdater title="Página no encontrada - POINT" /><PaginaNotFound /></>} />
 
