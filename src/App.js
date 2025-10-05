@@ -43,8 +43,9 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Si no hay token, redirige al login automáticamente
-    if (!token) {
+    const currentPath = window.location.pathname;
+
+    if (!token && currentPath !== "/desayuno") {
       navigate("/login");
     }
   }, [token, navigate]);
@@ -61,7 +62,7 @@ function App() {
     <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/Point/Desayuno" element={<Desayuno />} />
+        <Route path="/desayuno" element={<Desayuno />} />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/*" element={<><TitleUpdater title="Página no encontrada - POINT" /><PaginaNotFound /></>} />
 
