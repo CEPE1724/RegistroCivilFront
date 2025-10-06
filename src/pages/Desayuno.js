@@ -99,9 +99,7 @@ const Desayuno = () => {
 
                     {/* Contenido de la invitación */}
                     <div className="p-8 text-center">
-                        <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-3">
-                            🍽️ Desayuno 
-                        </h2>
+                       
 
                         
 
