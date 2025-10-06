@@ -22,19 +22,26 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Debug SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          echo "📌 Fingerprint de clave privada desde GitHub Secret:"
+          ssh-keygen -lf /tmp/deploy_key || echo "❌ ERROR: Clave privada malformada o vacía"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Prueba SSH (diagnóstico)
         run: |
-          # Guardar la clave privada en un fichero seguro
           echo "$SSH_PRIVATE_KEY" > /tmp/deploy_key
           chmod 600 /tmp/deploy_key
 
-          # Mostrar la huella pública derivada de la privada (para comparar con authorized_keys)
-          ssh-keygen -y -f /tmp/deploy_key
+          echo "🔐 Derivando clave pública:"
+          ssh-keygen -y -f /tmp/deploy_key || echo "❌ ERROR: Clave privada inválida"
 
-          # Probar conexión rápida (no interactivamente). Esto fallará con código !=0 si no autentica.
-          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i /tmp/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 'echo "OK: Conexión SSH autenticada desde runner" && whoami && pwd' || echo "ERROR: Falló autenticación SSH desde el runner"
+          echo "🚪 Probar conexión SSH:"
+          ssh -o StrictHostKeyChecking=no -o BatchMode=yes -i /tmp/deploy_key ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 'echo "✅ Conexión SSH autenticada desde runner" && whoami && pwd' || echo "❌ ERROR: Falló autenticación SSH desde el runner"
 
-          # Borrar la clave del runner por seguridad
           shred -u /tmp/deploy_key || rm -f /tmp/deploy_key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -55,4 +62,3 @@ jobs:
             docker compose down
             echo "🚀 Reconstruyendo e iniciando contenedores..."
             docker compose up -d --build
-
