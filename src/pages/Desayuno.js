@@ -103,10 +103,7 @@ const Desayuno = () => {
                             🍽️ Desayuno 
                         </h2>
 
-                        <p className="text-gray-600 text-base md:text-lg leading-relaxed mb-6">
-                            Te invitamos cordialmente a compartir una mañana con el equipo directivo.
-                            Será una excelente oportunidad para dialogar, fortalecer relaciones y disfrutar de un delicioso desayuno.
-                        </p>
+                        
 
                         <p className="text-blue-700 text-lg md:text-xl font-medium mb-8">
                             🕗 <strong>8:00 AM</strong> — Oficina Central
