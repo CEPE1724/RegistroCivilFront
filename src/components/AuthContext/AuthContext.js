@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useRef  } from "react";
+import React, { createContext, useState, useEffect, useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchPerfil } from "../../actions/fetchPerfil"; // Asegúrate de que esta función esté correctamente exportada
 import { APIURL } from "../../configApi/apiConfig";
@@ -22,20 +22,20 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-  if (token && !socketRef.current) {
-    const socket = connectToServer(token);
-    socketRef.current = socket;
+    if (token && !socketRef.current) {
+      const socket = connectToServer(token);
+      socketRef.current = socket;
 
-    socket.on("connect", () => setIsConnected(true));
-    socket.on("disconnect", () => setIsConnected(false));
-    socket.on("clients-updated", (clients) => setConnectedClients(clients));
+      socket.on("connect", () => setIsConnected(true));
+      socket.on("disconnect", () => setIsConnected(false));
+      socket.on("clients-updated", (clients) => setConnectedClients(clients));
 
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }
-}, [token]);
+      return () => {
+        socket.disconnect();
+        socketRef.current = null;
+      };
+    }
+  }, [token]);
 
   // Effect para revisar la expiración del token
   useEffect(() => {
@@ -50,8 +50,13 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setIsSessionExpired(true);
         setIsLoggedIn(false);
-        navigate("/login");
+
+        const currentPath = window.location.pathname;
+        if (currentPath !== "/desayuno") {
+          navigate("/login");
+        }
       }
+
     };
 
     if (token) {
@@ -128,9 +133,9 @@ export const AuthProvider = ({ children }) => {
     setUserData(null); // Limpiar los datos del usuario
     setUserUsuario(null); // Limpiar los datos de 'get_nomina'
     navigate("/login");
-  }; 
+  };
 
-    const logoutinactividad = () => {
+  const logoutinactividad = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
     localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
@@ -156,10 +161,10 @@ export const AuthProvider = ({ children }) => {
         logout,
         logoutinactividad,
         idMenu,
-         setMenuId,
-         isConnected,
-         connectedClients,
-         socket: socketRef.current,
+        setMenuId,
+        isConnected,
+        connectedClients,
+        socket: socketRef.current,
       }}
     >
       {children}
