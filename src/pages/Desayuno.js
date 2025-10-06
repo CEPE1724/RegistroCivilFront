@@ -100,7 +100,7 @@ const Desayuno = () => {
                     {/* Contenido de la invitación */}
                     <div className="p-8 text-center">
                         <h2 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-3">
-                            🍽️ Desayuno Corporativo POINT
+                            🍽️ Desayuno 
                         </h2>
 
                         <p className="text-gray-600 text-base md:text-lg leading-relaxed mb-6">
