@@ -64,7 +64,7 @@ const Desayuno = () => {
                         alt="Logo Point"
                         className="w-32 h-auto mx-auto mb-6 animate-pulse"
                     />
-                    <h1 className="text-3xl font-bold text-gray-800 mb-4">Estás Invitado prueba </h1>
+                    <h1 className="text-3xl font-bold text-gray-800 mb-4">Estás Invitado prueba de sistemas </h1>
                     <p className="text-gray-600 text-lg mb-6">
                         Acompáñanos a un evento especial organizado por el equipo directivo.
                     </p>
