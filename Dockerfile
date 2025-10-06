@@ -17,8 +17,8 @@ COPY .env .env
 # Ejecutar Tailwind para generar styles.css
 RUN npm run tailBuild
 
-# Build de React (usa styles.css)
-RUN npm run build
+# ✅ Aumentar el límite de memoria de Node.js para evitar errores
+RUN NODE_OPTIONS=--max-old-space-size=2048 npm run build
 
 # Etapa 2: Servir con Nginx
 FROM nginx:alpine
