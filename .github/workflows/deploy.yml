@@ -48,7 +48,7 @@ jobs:
           port: 2222
           script: |
             echo "✅ Conectado exitosamente al servidor."
-            cd /root/Escritorio/RegistroCivilFront
+            cd /root/Documentos/dev/RegistroCivilFront
             echo "📦 Actualizando código..."
             git pull origin main
             echo "🧹 Deteniendo contenedores existentes..."
