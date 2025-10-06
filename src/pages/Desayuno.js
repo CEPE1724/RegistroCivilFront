@@ -103,9 +103,7 @@ const Desayuno = () => {
 
                         
 
-                        <p className="text-blue-700 text-lg md:text-xl font-medium mb-8">
-                            🕗 <strong>8:00 AM</strong> — Oficina Central
-                        </p>
+                       
 
                         {/* Botón de confirmación */}
                         <div className="flex justify-center">
