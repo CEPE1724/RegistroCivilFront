@@ -2,23 +2,27 @@
 FROM node:18 AS build
 WORKDIR /app
 
-# Copia los archivos de dependencias y los instala
+# Aumentar límite de memoria para Node.js (4 GB)
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
+# Copiar archivos de dependencias e instalar
 COPY package*.json ./
 RUN npm install
 
-# Copia el resto del código fuente
+# Copiar el resto del código fuente
 COPY . .
 
 # Asegura que la carpeta src/css exista
 RUN mkdir -p src/css
 
+# Copiar variables de entorno (si existen)
 COPY .env .env
 
 # Ejecutar Tailwind para generar styles.css
 RUN npm run tailBuild
 
-# ✅ Aumentar el límite de memoria de Node.js para evitar errores
-RUN NODE_OPTIONS=--max-old-space-size=2048 npm run build
+# Ejecutar build de React (ahora con más memoria disponible)
+RUN npm run build
 
 # Etapa 2: Servir con Nginx
 FROM nginx:alpine
