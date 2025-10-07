@@ -66,7 +66,7 @@ const Desayuno = () => {
                     />
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">prueba de automatizacion </h1>
                     <p className="text-gray-600 text-lg mb-6">
-                        Acompáñanos a un evento especial organizado por el equipo directivo.
+                        Prueba de sistemas
                     </p>
                     <button
                         onClick={() => {
