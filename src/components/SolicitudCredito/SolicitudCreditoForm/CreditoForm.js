@@ -146,8 +146,10 @@ export default function CreditoForm() {
           "Cache": "no-store",
         },
       });
+      // Excluir idCompraEncuesta = 11
+      const filtrados = response.data.filter(item => item.idCompraEncuesta !== 11);
       setTipoConsulta(
-        response.data.map((item) => ({
+        filtrados.map((item) => ({
           value: item.idCompraEncuesta,
           label: item.Descripcion,
         }))

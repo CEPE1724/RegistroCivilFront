@@ -164,7 +164,7 @@ export function ListadoSolicitud() {
   const { userData, idMenu, socket } = useAuth();
   const editarCodDac = userData?.idGrupo === 1 || userData?.idGrupo === 16 || userData?.idGrupo === 18;
   const editarCodDac2 = selectedRow?.Estado === 1;
-  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
+  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23 || userData?.idGrupo === 27;
   const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
