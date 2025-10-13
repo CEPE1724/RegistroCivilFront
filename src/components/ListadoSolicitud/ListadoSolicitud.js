@@ -164,7 +164,7 @@ export function ListadoSolicitud() {
   const { userData, idMenu, socket } = useAuth();
   const editarCodDac = userData?.idGrupo === 1 || userData?.idGrupo === 16 || userData?.idGrupo === 18;
   const editarCodDac2 = selectedRow?.Estado === 1;
-  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23 || userData?.idGrupo === 27;
+  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
   const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
@@ -867,6 +867,15 @@ export function ListadoSolicitud() {
     return permiso && permiso.Activo;
   }
 
+  const permisoReasignarDomicilio = () => {
+    const permiso = permisos.find((p) => p.Permisos === "DESABILITAR DOMICILIO");
+    return permiso && permiso.Activo;
+  }
+  const permisoReasignarLaboral = () => {
+    const permiso = permisos.find((p) => p.Permisos === "DESABILITAR LABORAL");
+    return permiso && permiso.Activo;
+  }
+
   const estadoDeshabilitadoporPermisos = (data) => {
     // Obtener el estado correspondiente al ID
     const estado = estadoMap[data.idEstadoVerificacionSolicitud];
@@ -1558,7 +1567,7 @@ export function ListadoSolicitud() {
     numeroSolicitud,
     cedula,
     recargar,
-	operadorSelected
+    operadorSelected
 
   ]);
 
@@ -1814,7 +1823,7 @@ export function ListadoSolicitud() {
           nombres: nombre?.trim() || undefined,
           numeroSolicitud: numeroSolicitud?.trim() || undefined,
           cedula: cedula?.trim() || undefined,
-		  operador: operadorSelected === "todos" ? 0 : operadorSelected
+          operador: operadorSelected === "todos" ? 0 : operadorSelected
         },
       });
 
@@ -2098,7 +2107,7 @@ export function ListadoSolicitud() {
     setFechaInicio(date15DaysAgoStr);
     setFechaFin(today);
     setAnalistaSelected("todos");
-	setOperadorSelected("todos");
+    setOperadorSelected("todos");
     setEstado("todos");
     setSolicitud("Todos");
     setDocumental("Todos");
@@ -2112,7 +2121,7 @@ export function ListadoSolicitud() {
     sessionStorage.removeItem('filtroIniFecha');
     sessionStorage.removeItem('filtroFinFecha');
     sessionStorage.removeItem('filtroAnalista');
-	sessionStorage.removeItem('filtroOperador');
+    sessionStorage.removeItem('filtroOperador');
     sessionStorage.removeItem('filtroEstado');
     sessionStorage.removeItem('filtroSolicitud');
     sessionStorage.removeItem('filtroDocumental');
@@ -3047,35 +3056,43 @@ export function ListadoSolicitud() {
 
                       {/* Domicilio */}
                       <TableCell align="center">
-                        <div>
+                        <div >
                           <span>
-                            <IconButton
-                              onClick={() =>
-                                handleOpenModalVerificacion(data, "domicilio")
-                              }
-                              disabled={
-                                verificacionSolicitud(data) ||
-                                data.Domicilio === false //|| !docAprobados[data.id]
-                              }
-                              size="small"
-                              sx={{
-                                opacity:
-                                  data.Domicilio === false
-                                    ? 0
-                                    : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                "&:hover": {
-                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              {getIconDomicilio(
-                                data.idEstadoVerificacionDomicilio
+                            <div className="relative inline-block">
+                              <IconButton
+                                onClick={() =>
+                                  handleOpenModalVerificacion(data, "domicilio")
+                                }
+                                disabled={
+                                  verificacionSolicitud(data) ||
+                                  data.Domicilio === false //|| !docAprobados[data.id]
+                                }
+                                size="small"
+                                sx={{
+                                  opacity:
+                                    data.Domicilio === false
+                                      ? 0
+                                      : 1,
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                {getIconDomicilio(
+                                  data.idEstadoVerificacionDomicilio
+                                )}
+                              </IconButton>
+                              {(data.Laboral === true && data.Estado in [1, 2, 6] && permisoReasignarDomicilio()) && (
+                                <EditIcon
+                                  onClick={() => console.log("Editar domicilio")}
+                                  className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
+                                  fontSize="small"
+                                />
                               )}
-                            </IconButton>
-
+                            </div>
                             {/* InfoIcon al lado del IconButton */}
 
                             <span
@@ -3112,31 +3129,40 @@ export function ListadoSolicitud() {
                       <TableCell align="center">
                         <div>
                           <span>
-                            <IconButton
-                              onClick={() =>
-                                handleOpenModalVerificacion(data, "trabajo")
-                              }
-                              disabled={
-                                verificacionSolicitud(data) ||
-                                data.Laboral === false
-
-                              }
-                              size="small"
-                              sx={{
-                                opacity:
+                            <div className="relative inline-block">
+                              <IconButton
+                                onClick={() =>
+                                  handleOpenModalVerificacion(data, "trabajo")
+                                }
+                                disabled={
+                                  verificacionSolicitud(data) ||
                                   data.Laboral === false
-                                    ? 0
-                                    : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                "&:hover": {
-                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              {getIconLaboral(data.idEstadoVerificacionTerrena)}
-                            </IconButton>
+
+                                }
+                                size="small"
+                                sx={{
+                                  opacity:
+                                    data.Laboral === false
+                                      ? 0
+                                      : 1,
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                {getIconLaboral(data.idEstadoVerificacionTerrena)}
+                              </IconButton>
+                              {(data.Laboral === true && data.Estado in [1, 2, 6] && permisoReasignarLaboral()) && (
+                                <EditIcon
+                                  onClick={() => console.log("Editar domicilio")}
+                                  className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
+                                  fontSize="small"
+                                />
+                              )}
+                            </div>
 
                             {/* InfoIcon al lado del IconButton */}
                             <span
@@ -4222,11 +4248,11 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Cédula:</p>
                     <p>{selectedRow.cedula}</p>
                   </div>
-				  {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' &&
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold">Ingreso Afiliacion:</p>
-                    <p>{selectedRow.FechaAfiliacionIngreso}</p>
-                  </div>}
+                  {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' &&
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">Ingreso Afiliacion:</p>
+                      <p>{selectedRow.FechaAfiliacionIngreso}</p>
+                    </div>}
                   {selectedRow.FechaAfiliacionHasta !== '1970-01-01' &&
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">Afiliacion Hasta:</p>

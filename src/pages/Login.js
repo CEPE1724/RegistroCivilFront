@@ -282,7 +282,7 @@ const handleOlvidoPassword = async () => {
     				  </span>
     				) : (
     				  <span className="flex items-center space-x-2 text-blue-800 font-semibold hover:text-blue-800 transition-colors duration-200">
-    				    <span>Mostrar Prueba</span>
+    				    <span>Mostrar</span>
     				  </span>
     				)}
                 </button>
