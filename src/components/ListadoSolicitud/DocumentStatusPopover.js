@@ -154,11 +154,21 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           icon: <ThumbUpIcon />,
           color: green[800]    // Azul más fuerte: aprobado, estado positivo
         },
-		7: {
+        7: {
           label: "Reasignado Verificador por Analista",
           icon: <AutorenewIcon />,
-          color: orange[600]    
-        }
+          color: orange[600]
+        },
+        8: {
+          label: "Activo -> Inactivo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
+        9: {
+          label: "Inactivo -> Activo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
       },
 
       5:  //Trabajo
@@ -193,11 +203,21 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           icon: <ThumbUpIcon />,
           color: green[800]
         },
-		7: {
+        7: {
           label: "Reasignado Verificador por Analista",
           icon: <AutorenewIcon />,
-          color: orange[600]    
-        }
+          color: orange[600]
+        },
+        8: {
+          label: "Activo -> Inactivo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
+        9: {
+          label: "Inactivo -> Activo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
       },
 
       6: { //// ESTADo

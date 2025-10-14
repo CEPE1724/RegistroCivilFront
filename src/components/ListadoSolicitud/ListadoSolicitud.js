@@ -37,7 +37,6 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import StoreIcon from "@mui/icons-material/Store";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import EmailIcon from "@mui/icons-material/Email";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -48,16 +47,12 @@ import { useNavigate } from "react-router-dom";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import HouseIcon from "@mui/icons-material/House";
-import { red, yellow } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
-import HourglassFullIcon from "@mui/icons-material/HourglassFull";
-import PendingIcon from "@mui/icons-material/Pending";
 import PhoneDisabledIcon from "@mui/icons-material/PhoneDisabled";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import LocationModal from "./LocationModal";
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
-import SettingsPhoneIcon from "@mui/icons-material/SettingsPhone";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // PENDIENTE
 import HomeIcon from "@mui/icons-material/Home"; // DATOS DOMICILIO
 import ContactsIcon from "@mui/icons-material/Contacts"; // DATOS REFERENCIAS
@@ -72,8 +67,6 @@ import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
-import { Checkbox, FormControlLabel } from '@mui/material';
-import LocationOffIcon from '@mui/icons-material/LocationOff';
 import NotListedLocationIcon from '@mui/icons-material/NotListedLocation';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import BlockIcon from '@mui/icons-material/Block';
@@ -84,24 +77,18 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
+import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
 import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
 import ListVerifLaboralModal from "./ListVerifLaboralModal"
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import { DocumentoDescarga } from './DocumentoDescarga';
 import { MotivoContinuidad } from './MotivoContinuidad';
-import { Description } from "@mui/icons-material";
-import CommentIcon from '@mui/icons-material/Comment';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import FeedbackIcon from '@mui/icons-material/Feedback';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
-import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import { PiMicrosoftExcelLogoBold } from "react-icons/pi";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -190,6 +177,8 @@ export function ListadoSolicitud() {
   const [openModalExcel, setOpenModalExcel] = useState(false);
   const [openVerificacionModal2, setOpenVerificacionModal2] = useState(false);
   const [ExistPrefactura, setExistPrefactura] = useState(false);
+  const [showModalCorrecion, setShowModalCorrecion] = useState(false);
+  const [TipoVerificacion, setTipoVerificacion] = useState("");
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
     setOpenModalCodDag(true);
@@ -867,10 +856,18 @@ export function ListadoSolicitud() {
     return permiso && permiso.Activo;
   }
 
+  const permisoEditarVerificacionTerreno = () => {
+    const permiso = permisos.find((p) => p.Permisos === "EDITAR VERIFICACION TERRENA");
+    return permiso && permiso.Activo;
+  }
+
   const permisoReasignarDomicilio = () => {
+
     const permiso = permisos.find((p) => p.Permisos === "DESABILITAR DOMICILIO");
     return permiso && permiso.Activo;
   }
+
+
   const permisoReasignarLaboral = () => {
     const permiso = permisos.find((p) => p.Permisos === "DESABILITAR LABORAL");
     return permiso && permiso.Activo;
@@ -2066,6 +2063,13 @@ export function ListadoSolicitud() {
     setfechaTiempos(resultados);
   };
 
+  const handleOpenDialogDomicilioLaboral = async (row, tipo) => {
+
+    setSelectedRow(row);
+    setTipoVerificacion(tipo);
+    setShowModalCorrecion(true);
+  };
+
 
   const handleCloseDialog = () => {
     setView(false);
@@ -2089,6 +2093,28 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
+  const handleCorreccion = async (observacion) => {
+    const isDomicilio = TipoVerificacion === "domicilio";
+
+    // Determinar los valores dinámicos
+    const camposeleccionado = isDomicilio ? "Domicilio" : "Laboral";
+    const campo = isDomicilio ? "TerrenoDomicilio" : "TerrenoLaboral";
+    const idTipo = isDomicilio ? 4 : 5;
+    const valorActual = selectedRow?.[camposeleccionado];
+    // Convertir booleano a número (1 o 0)
+    const nuevoValor = !valorActual ? 1 : 0;
+    const idTipoVerificacion = nuevoValor ? 9 : 8; // 8 para corrección, 9 para aprobado
+
+    // Actualizar estado (activar/desactivar)
+    await patchSolicitudEstadoyResultado(selectedRow?.id, { [campo]: nuevoValor });
+
+    // Insertar datos de rechazo
+    await fetchInsertarDatosRechazo(idTipo, selectedRow?.id, idTipoVerificacion, observacion);
+
+    handleCloseDialog();
+    setShowModalCorrecion(false);
+    setRecargar((prev) => !prev);
+  };
 
 
   const handleEquifax = () => {
@@ -3085,13 +3111,19 @@ export function ListadoSolicitud() {
                                   data.idEstadoVerificacionDomicilio
                                 )}
                               </IconButton>
-                              {(data.Laboral === true && data.Estado in [1, 2, 6] && permisoReasignarDomicilio()) && (
-                                <EditIcon
-                                  onClick={() => console.log("Editar domicilio")}
-                                  className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
-                                  fontSize="small"
-                                />
-                              )}
+                              {[1, 2, 6].includes(data.Estado) && data.idEstadoVerificacionDomicilio === 0 && permisoEditarVerificacionTerreno() &&
+                                (
+                                  data.Domicilio === false ||
+                                  (data.Domicilio === true && permisoReasignarDomicilio())
+                                )
+
+                                && (
+                                  <EditIcon
+                                    onClick={() => handleOpenDialogDomicilioLaboral(data, "domicilio")}
+                                    className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
+                                    fontSize="small"
+                                  />
+                                )}
                             </div>
                             {/* InfoIcon al lado del IconButton */}
 
@@ -3155,13 +3187,15 @@ export function ListadoSolicitud() {
                               >
                                 {getIconLaboral(data.idEstadoVerificacionTerrena)}
                               </IconButton>
-                              {(data.Laboral === true && data.Estado in [1, 2, 6] && permisoReasignarLaboral()) && (
-                                <EditIcon
-                                  onClick={() => console.log("Editar domicilio")}
-                                  className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
-                                  fontSize="small"
-                                />
-                              )}
+                              {[1, 2, 6].includes(data.Estado) && data.idEstadoVerificacionTerrena === 0 && permisoEditarVerificacionTerreno()
+                                && (data.Laboral === false || (data.Laboral === true && permisoReasignarLaboral()))
+                                && (
+                                  <EditIcon
+                                    onClick={() => handleOpenDialogDomicilioLaboral(data, "trabajo")}
+                                    className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
+                                    fontSize="small"
+                                  />
+                                )}
                             </div>
 
                             {/* InfoIcon al lado del IconButton */}
@@ -4706,6 +4740,31 @@ export function ListadoSolicitud() {
         datosCliente={trabajoData}
         userData={userData}
         permisos={permisos}
+      />
+
+      <ModalCorreccion
+        isOpen={showModalCorrecion}
+        onClose={() => setShowModalCorrecion(false)}
+        onConfirm={handleCorreccion}
+        solicitudData={selectedRow}
+        Titulo='Enviar a Corrección'
+        mensajePrincipal={`¿Deseas cambiar la verificación ${TipoVerificacion === "domicilio" ? "domiciliaria" : "laboral"
+          } de ${selectedRow
+            ? (TipoVerificacion === "domicilio"
+              ? selectedRow.Domicilio
+              : selectedRow.Laboral)
+              ? "ACTIVADA"
+              : "DESACTIVADA"
+            : ""
+          } a ${selectedRow
+            ? (TipoVerificacion === "domicilio"
+              ? selectedRow.Domicilio
+              : selectedRow.Laboral)
+              ? "DESACTIVADA"
+              : "ACTIVADA"
+            : ""
+          }?`}
+
       />
 
       {openModalPendiente && (

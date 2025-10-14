@@ -860,7 +860,7 @@ export function TelefonicaList({
                         onClick={() => setShowModalCorrecion(true)}
                         className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
                       >
-                        Correccion
+                        Corrección
                       </button>)}
 
                     {clientInfo.idEstadoVerificacionTelefonica == 7 && (userData.idGrupo == 1 || userData.idGrupo == 23) && (
@@ -1177,7 +1177,7 @@ export function TelefonicaList({
         onClose={() => setShowModalCorrecion(false)}
         onConfirm={handleCorreccion}
         solicitudData={clientInfo}
-        Titulo='Enviar a Correccion'
+        Titulo='Enviar a Corrección'
         mensajePrincipal='¿Deseas solicitar una corrección para Telefónica?'
       />
 
