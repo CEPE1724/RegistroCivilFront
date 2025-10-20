@@ -469,6 +469,7 @@ export function ListadoSolicitud() {
     { label: "NO APLICA", value: 5 },
     { label: "FACTURADO", value: 6 },
     { label: "CADUCADO", value: 7 },
+    { label: "NOTA DE CRÉDITO", value: 8 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -1865,6 +1866,8 @@ export function ListadoSolicitud() {
                             ? "FACTURADO"
                             : item.Estado === 7
                               ? "CADUCADO"
+                             : item.Estado === 8
+                              ? "NOTA DE CRÉDITO"
                               : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
@@ -2732,8 +2735,9 @@ export function ListadoSolicitud() {
                                   case "PENDIENTE":
                                     return "#fef9c3";
                                   case "DATOS CLIENTE":
-
                                     return "#e0f2fe"; // azul muy claro
+                                  case "NOTA DE CRÉDITO":
+                                    return "#e76843"; // azul muy claro
                                   default:
                                     return "#f3f4f6"; // gris por defecto
                                 }
@@ -2755,8 +2759,11 @@ export function ListadoSolicitud() {
                                   case "PENDIENTE":
                                     return "#854d0e";
                                   case "DATOS CLIENTE":
+                                    
 
                                     return "#1e3a8a"; // azul medio
+                                  case "NOTA DE CRÉDITO":
+                                    return "#ffffff"; // blanco
                                   default:
                                     return "#4b5563"; // gris medio
                                 }

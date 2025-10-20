@@ -30,6 +30,7 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import FaceIcon from "@mui/icons-material/Face";
 import ErrorIcon from "@mui/icons-material/Error";
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import BlockIcon from '@mui/icons-material/Block';
@@ -227,7 +228,8 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         4: { label: "Rechazado", icon: <BlockIcon />, color: red[700] },
         5: { label: "No Aplica", icon: <CancelIcon />, color: grey[700] },
         6: { label: "Facturado", icon: <CheckCircleIcon />, color: green[700] },
-        7: { label: "Caducado", icon: <ErrorIcon />, color: orange[700] }
+        7: { label: "Caducado", icon: <ErrorIcon />, color: orange[700] },
+        8: { label: "Nota de Crédito", icon: <NoteAltIcon />, color: "#e76843" }
       },
 
 
