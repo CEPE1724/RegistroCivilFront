@@ -99,6 +99,13 @@ import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import WorkIcon from '@mui/icons-material/Work';
 import ExcelModal from './ExcelModal'
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import ElectricRickshawIcon from '@mui/icons-material/ElectricRickshaw';
+import { BsFillSignStopFill } from "react-icons/bs";
+import { FaPeopleCarryBox } from "react-icons/fa6";
+import { FaTruckFast } from "react-icons/fa6";
+import { FaBoxArchive } from "react-icons/fa6";
 export function ListadoSolicitud() {
   const {
     data,
@@ -1866,9 +1873,9 @@ export function ListadoSolicitud() {
                             ? "FACTURADO"
                             : item.Estado === 7
                               ? "CADUCADO"
-                             : item.Estado === 8
-                              ? "NOTA DE CRÉDITO"
-                              : "Desconocido",
+                              : item.Estado === 8
+                                ? "NOTA DE CRÉDITO"
+                                : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1907,7 +1914,9 @@ export function ListadoSolicitud() {
               idVendedor: item.idVendedor,
               idMotivoContinuidad: item.idMotivoContinuidad,
               FechaAfiliacionIngreso: item.FechaIngreso,
-              FechaAfiliacionHasta: item.FechaAfiliacionHasta
+              FechaAfiliacionHasta: item.FechaAfiliacionHasta,
+              bFirmaElectronica: item.bFirmaElectronica,
+              idEstadoAnalisisDeIdentidad: item.idEstadoAnalisisDeIdentidad
 
             };
           })
@@ -2534,8 +2543,8 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Fecha</TableCell>
                   <TableCell align="center">Almacén</TableCell>
                   <TableCell align="center">Vendedor</TableCell>
-                  <TableCell align="center">Tipo de Consulta</TableCell>
                   <TableCell align="center">Estado</TableCell>
+                  <TableCell align="center">Entrega Producto</TableCell>
                   <TableCell align="center">Tipo de Cliente</TableCell>
                   <TableCell align="center">Resultado</TableCell>
                   <TableCell align="center">Entradas</TableCell>
@@ -2630,7 +2639,7 @@ export function ListadoSolicitud() {
                       </TableCell>
                       <TableCell align="center">{data.almacen}</TableCell>
                       <TableCell align="center">{data.vendedor}</TableCell>
-                      <TableCell align="center">{data.consulta}</TableCell>
+
 
                       <TableCell align="center">
                         {(data.estado === "RECHAZADO" || data.estado === "NO APLICA") ? (
@@ -2759,7 +2768,7 @@ export function ListadoSolicitud() {
                                   case "PENDIENTE":
                                     return "#854d0e";
                                   case "DATOS CLIENTE":
-                                    
+
 
                                     return "#1e3a8a"; // azul medio
                                   case "NOTA DE CRÉDITO":
@@ -2789,7 +2798,7 @@ export function ListadoSolicitud() {
                           />
                         </span>
 
-                        {/* Popover */}
+
                         <DocumentStatusPopover
                           open={
                             popoverData.open &&
@@ -2800,6 +2809,50 @@ export function ListadoSolicitud() {
                           clienteEstados={clienteEstados}
                           estadoColores={estadoColores}
                         />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box component="span" sx={{ display: "inline-flex", gap: 1, ml: 1, alignItems: "center" }}>
+                          {data.estado === "FACTURADO"
+                            ? (
+                              <>
+                                {// Caso 1: Ambos terrenos en 0
+                                  (
+                                    (data.Domicilio === false && data.Laboral === false) ||
+
+                                    // Caso 2: Solo Domicilio activo y aprobado
+                                    (data.Domicilio === true && data.Laboral === false && data.idEstadoVerificacionDomicilio === 2) ||
+
+                                    // Caso 3: Solo Laboral activo y aprobado
+                                    (data.Domicilio === false && data.Laboral === true && data.idEstadoVerificacionTerrena === 2) ||
+
+                                    // Caso 4: Ambos activos y ambos aprobados
+                                    (data.Domicilio === true && data.idEstadoVerificacionDomicilio === 2 &&
+                                      data.Laboral === true && data.idEstadoVerificacionTerrena === 2)
+                                  ) ? (
+                                    <Tooltip title="Puede entregar el producto." arrow placement="top">
+                                      <span>
+                                        <FaTruckFast size={30} color="green" />
+                                      </span>
+                                    </Tooltip>
+                                  ) : (
+                                    <Tooltip title="No se puede entregar el producto sin verificación." arrow placement="top">
+                                      <span>
+                                        <BsFillSignStopFill size={40} color="red" />
+                                      </span>
+                                    </Tooltip>
+                                  )}
+                              </>
+                            ) : (
+                              <>
+                                <Tooltip title="Pendiente" arrow placement="top">
+                                  <span>
+                                    <FaBoxArchive size={20} color="gray" />
+                                  </span>
+                                </Tooltip>
+                              </>
+                            )}
+
+                        </Box>
                       </TableCell>
                       <TableCell align="center">{data.tipoCliente}</TableCell>
 
@@ -2892,30 +2945,87 @@ export function ListadoSolicitud() {
 
                       <TableCell align="center">{data.entrada}</TableCell>
 
-                      {/* Detalles */}
+
                       <TableCell align="center">
-                        <Tooltip title="Ver más" arrow placement="top">
-                          <IconButton
-                            onClick={() => handleOpenDialog(data)}
-                            size="small"
-                            sx={{
-                              bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                              "&:hover": {
-                                bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                transform: "scale(1.1)",
-                              },
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            <VisibilityIcon
-                              fontSize="small"
-                              sx={{ color: isError ? "#b91c1c" : "#475569" }}
-                            />
-                          </IconButton>
-                        </Tooltip>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                          <Tooltip title="Ver más" arrow placement="top">
+                            <IconButton
+                              onClick={() => handleOpenDialog(data)}
+                              size="small"
+                              sx={{
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <VisibilityIcon
+                                fontSize="small"
+                                sx={{ color: isError ? "#b91c1c" : "#475569" }}
+                              />
+                              {data.idMotivoContinuidad > 0 && (
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    top: -6,
+                                    right: -6,
+                                    backgroundColor: "#9c154d",
+                                    borderRadius: "50%",
+                                    fontSize: 12,
+                                    width: 10,
+                                    height: 10,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontWeight: "bold",
+                                    zIndex: 1,
+                                  }}
+                                />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+
+                          {/* Icono de Firma Electrónica */}
+                          <Tooltip title={data.bFirmaElectronica ? "Firma electrónica disponible" : "Sin firma electrónica"} arrow placement="top">
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={!data.bFirmaElectronica}
+
+                                onClick={() => {
+                                  // Acción opcional al hacer click en el icono de firma
+                                  // Por ahora solo muestra notificación
+                                  enqueueSnackbar(
+                                    data.bFirmaElectronica
+                                      ? "Abrir visor de firma electrónica"
+                                      : "No existe firma electrónica para esta solicitud",
+                                    { variant: data.bFirmaElectronica ? "success" : "warning" }
+                                  );
+                                }}
+                                sx={{
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                <BorderColorIcon
+                                  fontSize="small"
+                                  sx={{
+                                    color: data.bFirmaElectronica ? "#16a34a" : "rgba(0,0,0,0.35)",
+                                  }}
+                                />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </div>
                       </TableCell>
 
-                      {/* Solicitudes */}
+
                       <TableCell align="center">
                         <div>
                           <span>
