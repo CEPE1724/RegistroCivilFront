@@ -13,7 +13,7 @@ export default function Layout({ children }) {
     <>
       {userData ? (
         <div className="print:hidden">
-          <Nav  showButton={true} userData={userData} />
+          <Nav showButton={true} userData={userData} />
           <React.Fragment>
             <CssBaseline />
             <Container maxWidth="xl">
@@ -22,7 +22,7 @@ export default function Layout({ children }) {
           </React.Fragment>
         </div>
       ) : (
-        <div>Loading...</div> 
+        <div>Loading...</div>
       )}
     </>
   );

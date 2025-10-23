@@ -1,8 +1,8 @@
 import { get } from "react-hook-form";
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-//const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
+const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec/"
 
@@ -214,5 +214,7 @@ export const APIURL = {
   patchTipoVerificacionTrabajo : (id) => `${API_BASE_URL}terrena-gestion-trabajo/tipo-verificacion/${id}`,
   update_VerificacionTelefonicaMaestro: (id) => `${API_BASE_URL}cre-verificacion-telefonica-maestro/${id}`,
   validaPrefactura: (NumeroIdentificacion, Bodega) => `${API_BASE_URL}compra/ValidaEstadoCompra/${NumeroIdentificacion}/${Bodega}`,
-  getSolicitudGrandeporId : (id) => `${API_BASE_URL}web-solicitudgrande/${id}`
+  getSolicitudGrandeporId : (id) => `${API_BASE_URL}web-solicitudgrande/${id}`,
+  getCliente: (cedula) => `${API_BASE_URL}cliente/cedula/${cedula}`,
+  postGeoreferenciaEntregaDomicilio: () => `${API_BASE_URL}georeferencia-entrega-domicilio`
 };
