@@ -16,16 +16,14 @@ import {
 } from 'recharts';
 import { AlertTriangle, Check, X, FileText, Printer, Undo2 } from 'lucide-react';
 
-export function ReporteEquifax({
-  resultado = {
-    cuotaEstimada: "$0.00"
-  },
-}) {
+export function ReporteEquifax() {
   const [imprimiendo, setImprimiendo] = useState(false);
   const location = useLocation();
   const { nombre, cedula, Fecha } = location.state || {};
   const [clienteDatos, setClienteDatos] = useState([]);
+  console.log("clienteDatos", clienteDatos)
   const [datosTablas, setDatosTablas] = useState([]); 
+  console.log("datosTablas", datosTablas)
   const navigate = useNavigate();
   const [encEntConsu, setEncEntConsu] = useState([])
   const [tabEntConsu, setTabEntConsu] = useState([]) 
@@ -68,26 +66,18 @@ export function ReporteEquifax({
   };
 
   // Porcentaje para visualización
-  const scoreV4Percentage = (datosTablas?.scorev3?.data?.Score / 999) * 100;
-  const sobreendudamientoPercentage = (parseInt(datosTablas?.segmentacion?.data?.ScoreSobreendeudamiento) / 999) * 100;
+  const scoreV4Percentage = (datosTablas?.score?.data?.score / 999) * 100;
+  const sobreendudamientoPercentage = (parseInt(datosTablas?.scoreSobreendeudamiento?.data?.score) / 999) * 100;
 
   // Datos para el gráfico radial de Score V4
   const scoreV4Data = [
     {
       name: 'Score V4',
       value: scoreV4Percentage,
-      fill: getScoreColor(datosTablas?.scorev3?.data?.Score)
+      fill: getScoreColor(datosTablas?.score?.data?.score)
     }
   ];
 
-  // Datos para línea de sobreendeudamiento
-  const sobreendeudamientoData = [
-    { name: 'Muy Alto', value: 0, position: 0 },
-    { name: 'Alto', value: 334, position: 33 },
-    { name: 'Medio', value: 524, position: 52 },
-    { name: 'Bajo', value: 728, position: 73 },
-    { name: 'Muy Bajo', value: 999, position: 100 }
-  ];
 
   const fetchEqfxInformacion = async (cedula) => {
     try {
@@ -170,7 +160,7 @@ export function ReporteEquifax({
 
   const fetchReporteBuro = async (id) => {
     try {
-      const url = APIURL.getReporteBuroCredito(id);
+      const url = APIURL.getUatReporteBuroCredito(id);
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
@@ -189,6 +179,11 @@ export function ReporteEquifax({
       console.error("Error fetching equifax data:", error);
     }
   }
+
+	const datos = datosTablas?.deudaHistorica?.data ?? [];
+	const datosOrdenados = [...datos].sort(
+		(a, b) => new Date(a.fecha_corte) - new Date(b.fecha_corte)
+	);
 
   useEffect(() => {
     if (clienteDatos.informacion) {
@@ -231,6 +226,19 @@ export function ReporteEquifax({
     return null;
   };
 
+  const infoConsolidadaActual = [
+	...(datosTablas?.infoActualSb?.data || []),
+	...(datosTablas?.infoActualSeps?.data || []),
+	...(datosTablas?.infoActualSicom?.data || []),
+  ]
+
+  const infoConsolidadaHistorica = [
+	...(datosTablas?.infoHistoricaSb?.data || []),
+	...(datosTablas?.infoHistoricaSeps?.data || []),
+	...(datosTablas?.infoHistoricaSicom?.data || []),
+  ]
+  console.count("Render ReporteEquifax");
+
   return (
     <div className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-2 px-4 sm:px-6 lg:px-8 py-4">
       {/* Cabecera Mejorada */}
@@ -268,8 +276,8 @@ export function ReporteEquifax({
       {/* Resultado mejorado con iconos */}
       <div className="p-6 border-b border-gray-200 bg-white print-section">
         <div className="flex items-center mb-6">
-          <div className={`p-2 rounded-full ${datosTablas?.segmentacion?.data?.SegmentacionCliente === "RECHAZAR" ? "bg-red-100" : "bg-green-100"} mr-3`}>
-            {datosTablas?.segmentacion?.data?.SegmentacionCliente === "RECHAZAR" ?
+          <div className={`p-2 rounded-full ${datosTablas?.segmentacion?.data?.segmentacion_cliente === "RECHAZAR" ? "bg-red-100" : "bg-green-100"} mr-3`}>
+            {datosTablas?.segmentacion?.data?.segmentacion_cliente === "RECHAZAR" ?
               <X className="w-6 h-6 text-red-600" /> :
               <Check className="w-6 h-6 text-green-600" />
             }
@@ -282,8 +290,8 @@ export function ReporteEquifax({
             <div className="space-y-3">
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <span className="font-semibold">SEGMENTACIÓN:</span>
-                <span className={`font-bold ${datosTablas?.segmentacion?.data?.SegmentacionCliente === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>
-                  {datosTablas?.segmentacion?.data?.SegmentacionCliente}
+                <span className={`font-bold ${datosTablas?.segmentacion?.data?.segmentacion_cliente === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>
+                  {datosTablas?.segmentacion?.data?.segmentacion_cliente}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
@@ -296,14 +304,14 @@ export function ReporteEquifax({
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold">EDAD:</span>
-                <span>{datosTablas?.segmentacion?.data?.Edad === 0 ? clienteDatos.edad?.edad : datosTablas?.segmentacion?.data?.Edad} años</span>
+                <span>{clienteDatos.edad?.edad} años</span>
               </div>
             </div>
           </div>
 
           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg shadow-sm">
             <h3 className="font-semibold text-gray-700 mb-2 text-center">CUOTA ESTIMADA MENSUAL</h3>
-            <div className="text-3xl font-bold text-center text-blue-800">{ datosTablas?.segmentacion?.data?.GastoFinanciero}</div>
+            <div className="text-3xl font-bold text-center text-blue-800">{ datosTablas?.cuotaEstMens?.data?.pago}</div>
             <div className="mt-4 text-center">
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
                 <AlertTriangle className="w-4 h-4 mr-1" />
@@ -314,7 +322,7 @@ export function ReporteEquifax({
         </div>
       </div>
 
-      {/* Indicadores mejorados */}
+      {/* SCORE SOBREENDEUDAMIENTO */}
       <div className="p-2 border-b border-gray-200 bg-gray-50 print-section print-scores">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 print-grid">
           {/* Score Sobreendeudamiento - Simplificado */}
@@ -340,7 +348,7 @@ export function ReporteEquifax({
               </div>
 
               <div className="mt-12 text-center font-bold text-xl">
-                {datosTablas?.segmentacion?.data?.ScoreSobreendeudamiento || 0}
+                {datosTablas?.scoreSobreendeudamiento?.data?.score || 0}
                 <span className="text-sm font-normal text-gray-600 ml-2">puntos</span>
               </div>
 
@@ -384,7 +392,7 @@ export function ReporteEquifax({
                       clockWise
                       dataKey="value"
                       cornerRadius={10}
-                      fill={getScoreColor(datosTablas?.scorev3?.data?.Score)}
+                      fill={getScoreColor(datosTablas?.score?.data?.score)}
                     />
                     <text
                       x="50%"
@@ -393,14 +401,14 @@ export function ReporteEquifax({
                       dominantBaseline="middle"
                       className="font-bold text-xl"
                     >
-                      {datosTablas?.scorev3?.data?.Score > 0 ? datosTablas?.scorev3?.data?.Score : 0}
+                      {datosTablas?.score?.data?.score > 0 ? datosTablas?.score?.data?.score : 0}
                     </text>
                   </RadialBarChart>
                 </ResponsiveContainer>
                 {/* Texto debajo del gráfico */}
                 <div className="w-full max-w-xs text-center  text-xs">
                   <p>
-                    Una persona con un score entre <span className="font-medium">{datosTablas?.scorev3?.data?.ScoreMin} y {datosTablas?.scorev3?.data?.ScoreMax}</span> tiene una probabilidad de <span className="font-medium">29.90%</span> de incurrir en morosidad en el Sistema Crediticio Ecuatoriano.
+                    Una persona con un score entre <span className="font-medium">{datosTablas?.score?.data?.score_min} y {datosTablas?.score?.data?.score_max}</span> tiene una probabilidad de <span className="font-medium"> {datosTablas?.scoreSobreendeudamiento?.data?.porcentaje}% </span> de incurrir en morosidad en el Sistema Crediticio Ecuatoriano.
                   </p>
                   <p className="bg-blue-50 border border-blue-100 rounded ">
                     <span className="font-semibold">Importante:</span> El <span className="font-medium">20%</span> de las personas en el Sistema Crediticio Ecuatoriano tienen un Score menor que el evaluado.
@@ -412,7 +420,7 @@ export function ReporteEquifax({
         </div>
       </div>
 
-      {/* Manejo de cuentas - Empieza en nueva página para impresión */}
+      {/* Manejo de cuentas corrientes */}
       <div className="p-6 border-b border-gray-200 bg-white print-section print-page-break">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
@@ -458,11 +466,12 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-3 text-xs">{datosTablas?.politicas?.data?.Politica}</td>
+				{datosTablas?.politicas?.data?.map((item) => (
+              <tr className="border-b border-gray-100 hover:bg-gray-50" key={item.idEQFX_UAT_resultado_politicas}>
+                <td className="p-3 text-xs">{item.politica}</td>
                 <td className={`p-3 text-xs font-bold ${datosTablas?.politicas?.data?.Resultado === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>{datosTablas?.politicas?.data?.Resultado}</td>
-                <td className="p-3 text-xs">{datosTablas?.politicas?.data?.Valor}</td>
-              </tr>
+                <td className="p-3 text-xs">{item.valor}</td>
+              </tr>))}
             </tbody>
           </table>
         </div>
@@ -492,20 +501,20 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-              {datosTablas?.infoConsolidadaAct?.data?.map((item) => (
-                <tr className="border-b border-gray-100 hover:bg-gray-50" key={item.idEQFX_IndicadoresDeudaActualSbsSicomRfr}>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaCorte}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Segmento}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoDeudor}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoCredito}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NoDevengaInt}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemandaJudicial}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CarteraCastigada}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Total}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DiasVencido}</td>
+              {infoConsolidadaActual?.map((item, index) => (
+                <tr className="border-b border-gray-100 hover:bg-gray-50" key={index}>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_corte}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.segmento}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_riesgo}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_credito}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.ndi}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencido}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.dem_jud}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cart_cast}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_deuda}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.dias_morosidad}</td>
               </tr>
               ))}
             </tbody>
@@ -537,15 +546,15 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-              {datosTablas?.infoConsolidadaHist?.data?.map((item) => (
+              {infoConsolidadaHistorica?.map((item) => (
               <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaCorte}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Segmento}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoRiesgo}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoCredito}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.MayorValorVencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaMayorValor}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_corte}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.segmento}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_riesgo}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_credito}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencido}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_vencimiento}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.MayorPlazoVencido}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaMayorPlazo}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaUltimoVencido}</td>
@@ -585,22 +594,22 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.deudaReportada?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaCorte}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoRiesgo}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoCredito}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CupoMontoOriginal}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaApertura}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaVencimiento}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TotalVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NDI}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TotalVencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemJud}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CartCast}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.SaldoDeuda}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CuotaMensual}</td>
+            {datosTablas?.deudaReportada?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_corte}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_riesgo}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_credito}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cupo_monto_original}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_apertura}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_vencimiento}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.ndi}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.dem_jud}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cart_cast}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_deuda}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cuota_mensual}</td>
               </tr>
               ))}
             </tbody>
@@ -626,20 +635,20 @@ export function ReporteEquifax({
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">SALDO ACTUAL</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">SALDO PROMEDIO 6 MESES</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">PORCENTAJE USO TARJETA</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">PORCENTAJE RELACIÓN DEUDA TC/DEUDA TOTAL</th>
+                {/* <th className="p-2 text-xs font-semibold border border-gray-200 text-center">PORCENTAJE RELACIÓN DEUDA TC/DEUDA TOTAL</th> */}
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.detalleTarj?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Emisor}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Antiguedad}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Cupo}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.SaldoActual}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.SaldoPromedioUltimos6Meses}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorcentajeUsoTarjeta}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorcentajeRelacionDeudaTCDeudaTotal}</td>
+            {datosTablas?.detalleTarj?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.emisor}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.antiguedad}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cupo}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_actual}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_promedio_ultimos_6_meses}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.porcentaje_uso_tarjeta}%</td>
+                {/* <td className="p-2 text-xs border border-gray-200 text-center">{item.PorcentajeRelacionDeudaTCDeudaTotal}</td> */}
               </tr>
             ))}
             </tbody>
@@ -658,7 +667,7 @@ export function ReporteEquifax({
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-100">
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">CONCEPTO</th>
+                {/* <th className="p-2 text-xs font-semibold border border-gray-200 text-center">CONCEPTO</th> */}
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">DE 1 A 30 DÍAS</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">DE 1 A 2 MESES</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">DE 2 A 3 MESES</th>
@@ -670,25 +679,25 @@ export function ReporteEquifax({
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">MAS DE 36 MESES</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">DEMANDA JUDICIAL</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">CARTERA CASTIGADA</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">TOTAL</th>
+                {/* <th className="p-2 text-xs font-semibold border border-gray-200 text-center">TOTAL</th> */}
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.detalleOperaciones?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Titulo}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido0a1}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido1a2}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido2a3}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido3a6}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido6a9}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido9a12}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido12a24}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido24}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido36}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemandaJudicial}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CarteraCastigada}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Total}</td>
+            {datosTablas?.detalleOperaciones?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                {/* <td className="p-2 text-xs border border-gray-200 text-center">{item.Titulo}</td> */}
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_0_a_1}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_1_a_2}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_2_a_3}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_3_a_6}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_6_a_9}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_9_a_12}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_12_a_24}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_24}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_36}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.demanda_judicial}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cartera_castigada}</td>
+                {/* <td className="p-2 text-xs border border-gray-200 text-center">{item.Total}</td> */}
               </tr>
             ))}
             </tbody>
@@ -713,11 +722,11 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.indicadoresPerfilRiesgo?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200">{item.Indicador}</td>
-                <td className="p-2 text-xs border border-gray-200">{item.Valor}</td>
-                <td className="p-2 text-xs border border-gray-200">{new Date(item.Fecha).toLocaleDateString('es-ES')}</td>
+            {datosTablas?.indicadoresPerfilRiesgo?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200">{item.indicador}</td>
+                <td className="p-2 text-xs border border-gray-200">{item.valor}</td>
+                <td className="p-2 text-xs border border-gray-200">{new Date(item.fecha).toLocaleDateString('es-ES')}</td>
               </tr>
             ))}
             </tbody>
@@ -751,16 +760,16 @@ export function ReporteEquifax({
             <tbody>
             {datosTablas?.centralInfocom?.data?.map((item) => (
               <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.FechaCorte).toLocaleDateString('es-ES')}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoDeudor}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Total}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NoDevengaInt}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemandaJudicial}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CarteraCastigada}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DiasVencido}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.fecha_corte).toLocaleDateString('es-ES')}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_riesgo}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_deuda}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.ndi}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencido}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.dem_jud}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cart_cast}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.dias_morosidad}</td>
               </tr>
             ))}
             </tbody>
@@ -797,23 +806,23 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.deudaHistorica?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.FechaCorte).toLocaleDateString('es-ES')}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NoDevengaInt}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido0a1}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido1a2}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido2a3}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido3a6}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido6a9}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido9a12}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido12a24}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido24}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido36}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemandaJudicial}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CarteraCastigada}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.SaldoDeuda}</td>
+            {datosOrdenados.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.fecha_corte).toLocaleDateString('es-ES')}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.no_devenga_int}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_0_a_1}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_1_a_2}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_2_a_3}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_3_a_6}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_6_a_9}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_9_a_12}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_12_a_24}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_24}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido_36}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.demanda_judicial}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cartera_castigada}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_deuda}</td>
               </tr>
             ))}
             </tbody>
@@ -828,16 +837,19 @@ export function ReporteEquifax({
           <div className="w-4 h-4 rounded-full bg-blue-600 mr-2"></div>
           EVOLUCIÓN DEUDA TOTAL Y VENCIDA
         </h2>
-        <div className="w-full h-80 border border-gray-200 p-2">
-        {datosTablas?.deudaHistorica?.data ? (
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full h-80 border border-gray-200 p-2 overflow-x-auto overflow-y-hidden">
+        {datosTablas?.deudaHistorica?.data && datosTablas?.deudaHistorica?.data.length > 0 ? (
+          <div style={{ minWidth: `${datosTablas.deudaHistorica.data.length * 50}px`, height: '100%' }}>
             <LineChart
-              data={datosTablas.deudaHistorica.data}
+			  width={datosTablas.deudaHistorica.data.length * 50}
+      		  height={300}
+              //data={datosTablas.deudaHistorica.data} 
+			  data={datosOrdenados}
               margin={{ top: 5, right: 30, left: 5, bottom: 25 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="FechaCorte" 
+                dataKey="fecha_corte" 
                 tickFormatter={formatoFecha}
                 angle={-45}
                 textAnchor="end"
@@ -854,7 +866,7 @@ export function ReporteEquifax({
               <Legend wrapperStyle={{ bottom: -10 }} />
               <Line
                 type="monotone"
-                dataKey="SaldoDeuda"
+                dataKey="saldo_deuda"
                 stroke="#3B82F6"
                 strokeWidth={2}
                 dot={{ fill: "#3B82F6", r: 5 }}
@@ -864,7 +876,7 @@ export function ReporteEquifax({
               />
               <Line
                 type="monotone"
-                dataKey="PorVencer"
+                dataKey="por_vencer"
                 stroke="#EF4444"
                 strokeWidth={2}
                 dot={{ fill: "#EF4444", r: 5 }}
@@ -873,7 +885,7 @@ export function ReporteEquifax({
                 isAnimationActive={false}
               />
             </LineChart>
-          </ResponsiveContainer>
+          </div>
         ) : (
           <div className="flex justify-center items-center h-full">
             <p className="text-sm text-gray-500">No hay datos disponibles para mostrar</p>
@@ -891,7 +903,6 @@ export function ReporteEquifax({
         </div>
       </div>
     </div> )}
-      
       
       {/* DEUDA TOTAL REPORTADA FINANCIERO, REGULADO SB, SEPS Y COMERCIAL*/}
 	  {permisoVerTablas() && (
@@ -914,15 +925,15 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.deudaTotalRfr?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NoDevengaInt}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemandaJudicial}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CarteraCastigada}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Total}</td>
+            {datosTablas?.deudaTotalRfr?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.no_devenga_int}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.demanda_judicial}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cartera_castigada}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total}</td>
               </tr>
             ))}
             </tbody>
@@ -952,16 +963,16 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.analisisSaldoVencer?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.FechaCorte).toLocaleDateString('es-ES')}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TotalPorVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer0a1}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer1a3}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer3a6}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer6a12}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer12}</td>
+            {datosTablas?.analisisSaldoVencer?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.fecha_corte).toLocaleDateString('es-ES')}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.total_por_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer_0_a_1}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer_1_a_3}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer_3_a_6}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer_6_a_12}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer_12}</td>
               </tr>
             ))}
             </tbody>
@@ -988,21 +999,21 @@ export function ReporteEquifax({
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">SALDO DEUDA</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">DEMANDA JUDICIAL</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">CARTERA CASTIGADA</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">ACUERDO CONCORDATO</th>
+                {/* <th className="p-2 text-xs font-semibold border border-gray-200 text-center">ACUERDO CONCORDATO</th> */}
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.compoEstructuraVenc?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.FechaCorte).toLocaleDateString('es-ES')}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.PorVencer}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Vencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NoDevengaInt}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.SaldoDeuda}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.DemandaJudicial}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.CarteraCastigada}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.AcuerdoConcordatorio}</td>
+            {datosTablas?.compoEstructuraVenc?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.fecha_corte).toLocaleDateString('es-ES')}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.por_vencer}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.vencido}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.no_devenga_int}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_deuda}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.demanda_judicial}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.cartera_castigada}</td>
+                {/* <td className="p-2 text-xs border border-gray-200 text-center">{item.acuerdo_concordatorio}</td> */}
               </tr>
             ))}
             </tbody>
@@ -1033,17 +1044,17 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.creditosOtorgados12m?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.EstadoOperacion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.TipoCredito}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.ValorOperacion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Titular}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Codeudor}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Garante}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaConcesion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaVencimiento}</td>
+            {datosTablas?.creditosOtorgados12m?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.estado_operacion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_credito}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.valor_operacion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.titular}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.codeudor}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.garante}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_concesion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_vencimiento}</td>
               </tr>
             ))}
             </tbody>
@@ -1069,12 +1080,12 @@ export function ReporteEquifax({
               </tr>
             </thead>
             <tbody>
-            {datosTablas?.ultimas10Operaciones?.data?.map((item) => (
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.FechaCorte).toLocaleDateString('es-ES')}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Institucion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NumeroOperacion}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.FechaCancelacion).toLocaleDateString('es-ES')}</td>
+            {datosTablas?.ultimas10Operaciones?.data?.map((item, index) => (
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.fecha_corte).toLocaleDateString('es-ES')}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.institucion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.numero_operacion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{new Date(item.fecha_cancelacion).toLocaleDateString('es-ES')}</td>
               </tr>
             ))}
             </tbody>
@@ -1094,37 +1105,37 @@ export function ReporteEquifax({
             <thead>
 			  { encEntConsu && (
 			  <tr className="bg-gray-100">
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.NombreCliente}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes1}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes2}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes3}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes4}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes5}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes6}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes7}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes8}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes9}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes10}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes11}</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.Mes12}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.nombre_cliente}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes1}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes2}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes3}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes4}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes5}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes6}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes7}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes8}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes9}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes10}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes11}</th>
+                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">{encEntConsu.mes12}</th>
               </tr>)}
             </thead>
             <tbody>
-            {tabEntConsu.map((item) => ( 
-              <tr className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.NombreCliente}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes1}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes2}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes3}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes4}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes5}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes6}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes7}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes8}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes9}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes10}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes11}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Mes12}</td>
+            {tabEntConsu.map((item, index) => ( 
+              <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.nombre_cliente}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes1}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes2}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes3}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes4}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes5}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes6}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes7}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes8}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes9}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes10}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes11}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.mes12}</td>
               </tr>
             ))}
             </tbody>
