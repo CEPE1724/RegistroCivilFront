@@ -31,7 +31,7 @@ const useBodegaUsuario = () => {
     setLoading(true);  
     setError(null);    
     try {
-      const params = { fecha, bodega, nivel };
+  
 
       const response = await axios.get(APIURL.listaVendedoresporBodega(fecha, bodega, nivel));
 

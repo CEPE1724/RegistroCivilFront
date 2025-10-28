@@ -9,6 +9,7 @@ const ModalCorreccion = ({
     mensajePrincipal,
 	Titulo
 }) => {
+    
     const [isLoading, setIsLoading] = useState(false);
     const [observaciones, setObservaciones] = useState('');
     const [error, setError] = useState('');

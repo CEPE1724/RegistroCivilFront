@@ -36,7 +36,7 @@ import Equifax from "./pages/Equifax";
 import DepositoPendiente from "./pages/DepositoPendiente";
 import ListaNegraCedula from "./pages/ListaNegraCedulas";
 import ListaNegraEmail from "./pages/ListaNegraEmails";
-
+import MapaPantalla from "./pages/MapPantalla"
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -45,7 +45,7 @@ function App() {
   useEffect(() => {
     const currentPath = window.location.pathname;
 
-    if (!token && currentPath !== "/desayuno") {
+    if (!token && currentPath !== "/desayuno" && !currentPath.startsWith("/mapScreenLatinium")) {
       navigate("/login");
     }
   }, [token, navigate]);
@@ -63,6 +63,8 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/desayuno" element={<Desayuno />} />
+
+        <Route path="/mapScreenLatinium/:bodega/:cedula/:tipo/:codigoEntrega" element={<MapaPantalla />} />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/*" element={<><TitleUpdater title="Página no encontrada - POINT" /><PaginaNotFound /></>} />
 
@@ -91,7 +93,6 @@ function App() {
         <Route path="/notificaciones" element={<PrivateRouteWrapper title="Notificaciones" element={<NotificacionesCli />} />} />
         <Route path="/ListaNegraCedulas" element={<PrivateRouteWrapper title="ListaNegraCedula" element={<ListaNegraCedula />} />} />
         <Route path="/ListaNegraEmails" element={<PrivateRouteWrapper title="ListaNegraEmail" element={<ListaNegraEmail />} />} />
-
       </Routes>
 
       {isSessionExpired && (

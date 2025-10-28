@@ -30,6 +30,7 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import FaceIcon from "@mui/icons-material/Face";
 import ErrorIcon from "@mui/icons-material/Error";
+import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import BlockIcon from '@mui/icons-material/Block';
@@ -78,6 +79,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         24: { label: "Registro Duplicado", icon: <SearchIcon />, color: amber[700] },
         25: { label: "Excepción Domicilio", icon: <HomeIcon />, color: teal[500] },
         26: { label: "Actualizar Cuota/Cupo", icon: <AutorenewIcon />, color: orange[600] },
+        27: { label: "Actualización de Almacén", icon: <StorefrontIcon />, color: purple[600] }
 
 
         /*11: "CORRECIÓN",
@@ -154,11 +156,21 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           icon: <ThumbUpIcon />,
           color: green[800]    // Azul más fuerte: aprobado, estado positivo
         },
-		7: {
+        7: {
           label: "Reasignado Verificador por Analista",
           icon: <AutorenewIcon />,
-          color: orange[600]    
-        }
+          color: orange[600]
+        },
+        8: {
+          label: "Activo -> Inactivo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
+        9: {
+          label: "Inactivo -> Activo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
       },
 
       5:  //Trabajo
@@ -193,11 +205,21 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
           icon: <ThumbUpIcon />,
           color: green[800]
         },
-		7: {
+        7: {
           label: "Reasignado Verificador por Analista",
           icon: <AutorenewIcon />,
-          color: orange[600]    
-        }
+          color: orange[600]
+        },
+        8: {
+          label: "Activo -> Inactivo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
+        9: {
+          label: "Inactivo -> Activo",
+          icon: <EditNoteIcon />,
+          color: purple[600]
+        },
       },
 
       6: { //// ESTADo
@@ -207,7 +229,8 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         4: { label: "Rechazado", icon: <BlockIcon />, color: red[700] },
         5: { label: "No Aplica", icon: <CancelIcon />, color: grey[700] },
         6: { label: "Facturado", icon: <CheckCircleIcon />, color: green[700] },
-        7: { label: "Caducado", icon: <ErrorIcon />, color: orange[700] }
+        7: { label: "Caducado", icon: <ErrorIcon />, color: orange[700] },
+        8: { label: "Nota de Crédito", icon: <NoteAltIcon />, color: "#e76843" }
       },
 
 
@@ -241,6 +264,10 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       {
         1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] }
 
+      },
+      10: /// Cédula
+      {
+        1: { label: "Observación Agregada", icon: <NoteAltIcon />, color: blue[500] }
       }
 
     };

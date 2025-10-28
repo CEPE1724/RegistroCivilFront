@@ -1,4 +1,4 @@
-import { Manager, Socket } from "socket.io-client";
+import { Manager } from "socket.io-client";
 
 let socket;
 export const connectToServer = (token) => {

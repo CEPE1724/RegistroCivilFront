@@ -37,7 +37,6 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import StoreIcon from "@mui/icons-material/Store";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import EmailIcon from "@mui/icons-material/Email";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -48,16 +47,12 @@ import { useNavigate } from "react-router-dom";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import HouseIcon from "@mui/icons-material/House";
-import { red, yellow } from "@mui/material/colors";
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
-import HourglassFullIcon from "@mui/icons-material/HourglassFull";
-import PendingIcon from "@mui/icons-material/Pending";
 import PhoneDisabledIcon from "@mui/icons-material/PhoneDisabled";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import LocationModal from "./LocationModal";
 import VerificacionTerrenaModal from "./VerificacionTerrenaModal";
-import SettingsPhoneIcon from "@mui/icons-material/SettingsPhone";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // PENDIENTE
 import HomeIcon from "@mui/icons-material/Home"; // DATOS DOMICILIO
 import ContactsIcon from "@mui/icons-material/Contacts"; // DATOS REFERENCIAS
@@ -72,8 +67,6 @@ import { RegistroCivil } from "./RegistroCivil/RegistroCivil";
 import uploadFile from "../../hooks/uploadFile";
 import { Loader } from "../Utils/Loader/Loader";
 import EditIcon from "@mui/icons-material/Edit";
-import { Checkbox, FormControlLabel } from '@mui/material';
-import LocationOffIcon from '@mui/icons-material/LocationOff';
 import NotListedLocationIcon from '@mui/icons-material/NotListedLocation';
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb';
 import BlockIcon from '@mui/icons-material/Block';
@@ -82,26 +75,21 @@ import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
+import { CambioBodega } from "./CambioBodega";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
+import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
 import ListVerifDomicilioModal from "./ListVerifDomicilioModal";
 import ListVerifLaboralModal from "./ListVerifLaboralModal"
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import { DocumentoDescarga } from './DocumentoDescarga';
 import { MotivoContinuidad } from './MotivoContinuidad';
-import { Description } from "@mui/icons-material";
-import CommentIcon from '@mui/icons-material/Comment';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import FeedbackIcon from '@mui/icons-material/Feedback';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import { ConfirmarAccionModal } from "./ConfirmarAccionModal";
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
-import ContactPhoneIcon from '@mui/icons-material/ContactPhone';
 import { PiMicrosoftExcelLogoBold } from "react-icons/pi";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -112,6 +100,13 @@ import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import WorkIcon from '@mui/icons-material/Work';
 import ExcelModal from './ExcelModal'
+import { BsFillSignStopFill } from "react-icons/bs";
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
+import { FaTruckFast } from "react-icons/fa6";
+import { FaBoxArchive } from "react-icons/fa6";
+import { LinkOffOutlined } from "@mui/icons-material";
+import { Pencil, PenIcon } from "lucide-react";
+import { ObservacionCredito } from "./ObservacionCredito/ObservacionCredito";
 export function ListadoSolicitud() {
   const {
     data,
@@ -190,6 +185,10 @@ export function ListadoSolicitud() {
   const [openModalExcel, setOpenModalExcel] = useState(false);
   const [openVerificacionModal2, setOpenVerificacionModal2] = useState(false);
   const [ExistPrefactura, setExistPrefactura] = useState(false);
+  const [showModalCorrecion, setShowModalCorrecion] = useState(false);
+  const [TipoVerificacion, setTipoVerificacion] = useState("");
+  const [open, setOpen] = useState(false);
+  const [observacionModalAbierto, setObservacionModalAbierto] = useState(false);
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
     setOpenModalCodDag(true);
@@ -480,6 +479,7 @@ export function ListadoSolicitud() {
     { label: "NO APLICA", value: 5 },
     { label: "FACTURADO", value: 6 },
     { label: "CADUCADO", value: 7 },
+    { label: "NOTA DE CRÉDITO", value: 8 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -864,6 +864,32 @@ export function ListadoSolicitud() {
 
   const permisoReasignarVerificador = () => {
     const permiso = permisos.find((p) => p.Permisos === "REASIGNAR VERIFICADOR");
+    return permiso && permiso.Activo;
+  }
+
+  const permisoEditarVerificacionTerreno = () => {
+    const permiso = permisos.find((p) => p.Permisos === "EDITAR VERIFICACION TERRENA");
+    return permiso && permiso.Activo;
+  }
+
+  const permisoReasignarDomicilio = () => {
+
+    const permiso = permisos.find((p) => p.Permisos === "DESABILITAR DOMICILIO");
+    return permiso && permiso.Activo;
+  }
+
+  const permisoAgregarObservacionCredito = () => {
+    const permiso = permisos.find((p) => p.Permisos === "AGREGAR OBSERVACION CREDITO");
+    return permiso && permiso.Activo;
+  }
+
+  const permisoReasignarLaboral = () => {
+    const permiso = permisos.find((p) => p.Permisos === "DESABILITAR LABORAL");
+    return permiso && permiso.Activo;
+  }
+
+  const permisoCambiarBodega = () => {
+    const permiso = permisos.find((p) => p.Permisos === "CAMBIAR BODEGA");
     return permiso && permiso.Activo;
   }
 
@@ -1558,7 +1584,7 @@ export function ListadoSolicitud() {
     numeroSolicitud,
     cedula,
     recargar,
-	operadorSelected
+    operadorSelected
 
   ]);
 
@@ -1814,7 +1840,7 @@ export function ListadoSolicitud() {
           nombres: nombre?.trim() || undefined,
           numeroSolicitud: numeroSolicitud?.trim() || undefined,
           cedula: cedula?.trim() || undefined,
-		  operador: operadorSelected === "todos" ? 0 : operadorSelected
+          operador: operadorSelected === "todos" ? 0 : operadorSelected
         },
       });
 
@@ -1859,7 +1885,9 @@ export function ListadoSolicitud() {
                             ? "FACTURADO"
                             : item.Estado === 7
                               ? "CADUCADO"
-                              : "Desconocido",
+                              : item.Estado === 8
+                                ? "NOTA DE CRÉDITO"
+                                : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1898,7 +1926,9 @@ export function ListadoSolicitud() {
               idVendedor: item.idVendedor,
               idMotivoContinuidad: item.idMotivoContinuidad,
               FechaAfiliacionIngreso: item.FechaIngreso,
-              FechaAfiliacionHasta: item.FechaAfiliacionHasta
+              FechaAfiliacionHasta: item.FechaAfiliacionHasta,
+              bFirmaElectronica: item.bFirmaElectronica,
+              idEstadoAnalisisDeIdentidad: item.idEstadoAnalisisDeIdentidad
 
             };
           })
@@ -2057,6 +2087,22 @@ export function ListadoSolicitud() {
     setfechaTiempos(resultados);
   };
 
+  const handleOpenDialogDomicilioLaboral = async (row, tipo) => {
+
+    setSelectedRow(row);
+    setTipoVerificacion(tipo);
+    setShowModalCorrecion(true);
+  };
+
+  const handleOpenCambioBodega = async (row) => {
+    setSelectedRow(row);
+    setOpen(true);
+  }
+
+  const handleOpenObservacionCredito = async (row) => {
+    setSelectedRow(row);
+    setObservacionModalAbierto(true);
+  };
 
   const handleCloseDialog = () => {
     setView(false);
@@ -2080,7 +2126,49 @@ export function ListadoSolicitud() {
     setOpenLocationModal((prevState) => !prevState);
   };
 
+  const handleCorreccion = async (observacion) => {
+    const isDomicilio = TipoVerificacion === "domicilio";
 
+    // Determinar los valores dinámicos
+    const camposeleccionado = isDomicilio ? "Domicilio" : "Laboral";
+    const campo = isDomicilio ? "TerrenoDomicilio" : "TerrenoLaboral";
+    const idTipo = isDomicilio ? 4 : 5;
+    const valorActual = selectedRow?.[camposeleccionado];
+    // Convertir booleano a número (1 o 0)
+    const nuevoValor = !valorActual ? 1 : 0;
+    const idTipoVerificacion = nuevoValor ? 9 : 8; // 8 para corrección, 9 para aprobado
+
+    // Actualizar estado (activar/desactivar)
+    await patchSolicitudEstadoyResultado(selectedRow?.id, { [campo]: nuevoValor });
+
+    // Insertar datos de rechazo
+    await fetchInsertarDatosRechazo(idTipo, selectedRow?.id, idTipoVerificacion, observacion);
+
+    handleCloseDialog();
+    setShowModalCorrecion(false);
+    setRecargar((prev) => !prev);
+  };
+
+  const handleConfirmarBodega = async ({ nota, bodegaSeleccionada }) => {
+    // Lógica para manejar la confirmación de cambio de bodega
+    console.log("Bodega seleccionada:", bodegaSeleccionada);
+    console.log("Nota:", nota);
+
+    await patchSolicitudEstadoyResultado(selectedRow?.id, { Bodega: bodegaSeleccionada });
+    await fetchInsertarDatosRechazo(1, selectedRow?.id, 27, nota);
+
+    setRecargar((prev) => !prev);
+    setOpen(false);
+  };
+
+  const handleConfirmarObservacion = async (observacion) => {
+    // await fetchInsertarDatosRechazo(7, selectedRow?.id, 29, observacion);
+    // console.log("Observacion credito:", observacion.nota);
+
+    await fetchInsertarDatosRechazo(10, selectedRow?.id, 1, observacion.nota);
+    setShowModalRechazo(false);
+    setRecargar((prev) => !prev);
+  }
 
   const handleEquifax = () => {
     navigate("/equifaxx", {
@@ -2098,7 +2186,7 @@ export function ListadoSolicitud() {
     setFechaInicio(date15DaysAgoStr);
     setFechaFin(today);
     setAnalistaSelected("todos");
-	setOperadorSelected("todos");
+    setOperadorSelected("todos");
     setEstado("todos");
     setSolicitud("Todos");
     setDocumental("Todos");
@@ -2112,7 +2200,7 @@ export function ListadoSolicitud() {
     sessionStorage.removeItem('filtroIniFecha');
     sessionStorage.removeItem('filtroFinFecha');
     sessionStorage.removeItem('filtroAnalista');
-	sessionStorage.removeItem('filtroOperador');
+    sessionStorage.removeItem('filtroOperador');
     sessionStorage.removeItem('filtroEstado');
     sessionStorage.removeItem('filtroSolicitud');
     sessionStorage.removeItem('filtroDocumental');
@@ -2496,8 +2584,8 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Fecha</TableCell>
                   <TableCell align="center">Almacén</TableCell>
                   <TableCell align="center">Vendedor</TableCell>
-                  <TableCell align="center">Tipo de Consulta</TableCell>
                   <TableCell align="center">Estado</TableCell>
+                  <TableCell align="center">Entrega Producto</TableCell>
                   <TableCell align="center">Tipo de Cliente</TableCell>
                   <TableCell align="center">Resultado</TableCell>
                   <TableCell align="center">Entradas</TableCell>
@@ -2586,13 +2674,70 @@ export function ListadoSolicitud() {
                         {data.NumeroSolicitud}
                       </TableCell>
                       <TableCell align="center">{data.nombre}</TableCell>
-                      <TableCell align="center">{data.cedula}</TableCell>
+                      <TableCell align="center" className="relative">
+
+                        <div className="flex flex-col items-center justify-start h-[60px]">
+                          <span className="text-gray-800 font-normal mb-2">{data.cedula}</span>
+
+
+                          <div className="flex items-center justify-end w-full space-x-1">
+                            {permisoAgregarObservacionCredito() && (
+                              <button
+                                onClick={() => handleOpenObservacionCredito(data)}
+                                title="Observación de Crédito"
+                                className="flex items-center justify-center h-6 w-6 rounded-full 
+                   bg-white shadow-sm hover:bg-blue-50 hover:shadow-md 
+                   transition-all duration-200 border border-gray-200"
+                              >
+                                <Pencil className="text-[#050771] w-4 h-4" />
+                              </button>
+                            )}
+
+
+                            <button
+                              onClick={(event) => handlePopoverOpen(event, 10, data)}
+                              title="Observaciones"
+                              className="flex items-center justify-center h-6 w-6 rounded-full 
+                   hover:bg-gray-100 transition-colors duration-200"
+                            >
+                              <MoreVertIcon className="text-gray-600 w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Popover de estado */}
+                        <DocumentStatusPopover
+                          open={popoverData.open && popoverData.selectedRowId === data.id}
+                          anchorEl={popoverData.anchorEl}
+                          onClose={handlePopoverClose}
+                          clienteEstados={clienteEstados}
+                          estadoColores={estadoColores}
+                        />
+                      </TableCell>
+
                       <TableCell align="center">
                         {new Date(data.fecha).toLocaleString()}
                       </TableCell>
-                      <TableCell align="center">{data.almacen}</TableCell>
+                      <TableCell align="center">
+                        {data.Estado === 1 && data.almacen == "POINT WEB" && permisoCambiarBodega() ? (
+                          <div className="flex items-center justify-center">
+                            <span>
+                              <div className="relative inline-block">
+                                <SyncAltIcon
+                                  onClick={() => handleOpenCambioBodega(data)}
+                                  className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 transition-colors duration-200"
+                                  fontSize="small"
+                                />
+
+                              </div>
+                            </span>
+                          </div>
+                        ) : null}
+                        {data.almacen}
+                      </TableCell>
+
                       <TableCell align="center">{data.vendedor}</TableCell>
-                      <TableCell align="center">{data.consulta}</TableCell>
+
 
                       <TableCell align="center">
                         {(data.estado === "RECHAZADO" || data.estado === "NO APLICA") ? (
@@ -2697,8 +2842,9 @@ export function ListadoSolicitud() {
                                   case "PENDIENTE":
                                     return "#fef9c3";
                                   case "DATOS CLIENTE":
-
                                     return "#e0f2fe"; // azul muy claro
+                                  case "NOTA DE CRÉDITO":
+                                    return "#e76843"; // azul muy claro
                                   default:
                                     return "#f3f4f6"; // gris por defecto
                                 }
@@ -2721,7 +2867,10 @@ export function ListadoSolicitud() {
                                     return "#854d0e";
                                   case "DATOS CLIENTE":
 
+
                                     return "#1e3a8a"; // azul medio
+                                  case "NOTA DE CRÉDITO":
+                                    return "#ffffff"; // blanco
                                   default:
                                     return "#4b5563"; // gris medio
                                 }
@@ -2747,7 +2896,7 @@ export function ListadoSolicitud() {
                           />
                         </span>
 
-                        {/* Popover */}
+
                         <DocumentStatusPopover
                           open={
                             popoverData.open &&
@@ -2758,6 +2907,50 @@ export function ListadoSolicitud() {
                           clienteEstados={clienteEstados}
                           estadoColores={estadoColores}
                         />
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box component="span" sx={{ display: "inline-flex", gap: 1, ml: 1, alignItems: "center" }}>
+                          {data.estado === "FACTURADO"
+                            ? (
+                              <>
+                                {// Caso 1: Ambos terrenos en 0
+                                  (
+                                    (data.Domicilio === false && data.Laboral === false) ||
+
+                                    // Caso 2: Solo Domicilio activo y aprobado
+                                    (data.Domicilio === true && data.Laboral === false && data.idEstadoVerificacionDomicilio === 2) ||
+
+                                    // Caso 3: Solo Laboral activo y aprobado
+                                    (data.Domicilio === false && data.Laboral === true && data.idEstadoVerificacionTerrena === 2) ||
+
+                                    // Caso 4: Ambos activos y ambos aprobados
+                                    (data.Domicilio === true && data.idEstadoVerificacionDomicilio === 2 &&
+                                      data.Laboral === true && data.idEstadoVerificacionTerrena === 2)
+                                  ) ? (
+                                    <Tooltip title="Puede entregar el producto." arrow placement="top">
+                                      <span>
+                                        <FaTruckFast size={30} color="green" />
+                                      </span>
+                                    </Tooltip>
+                                  ) : (
+                                    <Tooltip title="No se puede entregar el producto sin verificación." arrow placement="top">
+                                      <span>
+                                        <BsFillSignStopFill size={40} color="red" />
+                                      </span>
+                                    </Tooltip>
+                                  )}
+                              </>
+                            ) : (
+                              <>
+                                <Tooltip title="Pendiente" arrow placement="top">
+                                  <span>
+                                    <FaBoxArchive size={20} color="gray" />
+                                  </span>
+                                </Tooltip>
+                              </>
+                            )}
+
+                        </Box>
                       </TableCell>
                       <TableCell align="center">{data.tipoCliente}</TableCell>
 
@@ -2850,30 +3043,87 @@ export function ListadoSolicitud() {
 
                       <TableCell align="center">{data.entrada}</TableCell>
 
-                      {/* Detalles */}
+
                       <TableCell align="center">
-                        <Tooltip title="Ver más" arrow placement="top">
-                          <IconButton
-                            onClick={() => handleOpenDialog(data)}
-                            size="small"
-                            sx={{
-                              bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                              "&:hover": {
-                                bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                transform: "scale(1.1)",
-                              },
-                              transition: "all 0.2s ease",
-                            }}
-                          >
-                            <VisibilityIcon
-                              fontSize="small"
-                              sx={{ color: isError ? "#b91c1c" : "#475569" }}
-                            />
-                          </IconButton>
-                        </Tooltip>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                          <Tooltip title="Ver más" arrow placement="top">
+                            <IconButton
+                              onClick={() => handleOpenDialog(data)}
+                              size="small"
+                              sx={{
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <VisibilityIcon
+                                fontSize="small"
+                                sx={{ color: isError ? "#b91c1c" : "#475569" }}
+                              />
+                              {data.idMotivoContinuidad > 0 && (
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    top: -6,
+                                    right: -6,
+                                    backgroundColor: "#9c154d",
+                                    borderRadius: "50%",
+                                    fontSize: 12,
+                                    width: 10,
+                                    height: 10,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontWeight: "bold",
+                                    zIndex: 1,
+                                  }}
+                                />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+
+                          {/* Icono de Firma Electrónica */}
+                          <Tooltip title={data.bFirmaElectronica ? "Firma electrónica disponible" : "Sin firma electrónica"} arrow placement="top">
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={!data.bFirmaElectronica}
+
+                                onClick={() => {
+                                  // Acción opcional al hacer click en el icono de firma
+                                  // Por ahora solo muestra notificación
+                                  enqueueSnackbar(
+                                    data.bFirmaElectronica
+                                      ? "Abrir visor de firma electrónica"
+                                      : "No existe firma electrónica para esta solicitud",
+                                    { variant: data.bFirmaElectronica ? "success" : "warning" }
+                                  );
+                                }}
+                                sx={{
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                <BorderColorIcon
+                                  fontSize="small"
+                                  sx={{
+                                    color: data.bFirmaElectronica ? "#16a34a" : "rgba(0,0,0,0.35)",
+                                  }}
+                                />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </div>
                       </TableCell>
 
-                      {/* Solicitudes */}
+
                       <TableCell align="center">
                         <div>
                           <span>
@@ -3047,35 +3297,49 @@ export function ListadoSolicitud() {
 
                       {/* Domicilio */}
                       <TableCell align="center">
-                        <div>
+                        <div >
                           <span>
-                            <IconButton
-                              onClick={() =>
-                                handleOpenModalVerificacion(data, "domicilio")
-                              }
-                              disabled={
-                                verificacionSolicitud(data) ||
-                                data.Domicilio === false //|| !docAprobados[data.id]
-                              }
-                              size="small"
-                              sx={{
-                                opacity:
-                                  data.Domicilio === false
-                                    ? 0
-                                    : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                "&:hover": {
-                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              {getIconDomicilio(
-                                data.idEstadoVerificacionDomicilio
-                              )}
-                            </IconButton>
+                            <div className="relative inline-block">
+                              <IconButton
+                                onClick={() =>
+                                  handleOpenModalVerificacion(data, "domicilio")
+                                }
+                                disabled={
+                                  verificacionSolicitud(data) ||
+                                  data.Domicilio === false //|| !docAprobados[data.id]
+                                }
+                                size="small"
+                                sx={{
+                                  opacity:
+                                    data.Domicilio === false
+                                      ? 0
+                                      : 1,
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                {getIconDomicilio(
+                                  data.idEstadoVerificacionDomicilio
+                                )}
+                              </IconButton>
+                              {[1, 2, 6].includes(data.Estado) && data.idEstadoVerificacionDomicilio === 0 && permisoEditarVerificacionTerreno() &&
+                                (
+                                  data.Domicilio === false ||
+                                  (data.Domicilio === true && permisoReasignarDomicilio())
+                                )
 
+                                && (
+                                  <EditIcon
+                                    onClick={() => handleOpenDialogDomicilioLaboral(data, "domicilio")}
+                                    className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
+                                    fontSize="small"
+                                  />
+                                )}
+                            </div>
                             {/* InfoIcon al lado del IconButton */}
 
                             <span
@@ -3112,31 +3376,42 @@ export function ListadoSolicitud() {
                       <TableCell align="center">
                         <div>
                           <span>
-                            <IconButton
-                              onClick={() =>
-                                handleOpenModalVerificacion(data, "trabajo")
-                              }
-                              disabled={
-                                verificacionSolicitud(data) ||
-                                data.Laboral === false
-
-                              }
-                              size="small"
-                              sx={{
-                                opacity:
+                            <div className="relative inline-block">
+                              <IconButton
+                                onClick={() =>
+                                  handleOpenModalVerificacion(data, "trabajo")
+                                }
+                                disabled={
+                                  verificacionSolicitud(data) ||
                                   data.Laboral === false
-                                    ? 0
-                                    : 1,
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                "&:hover": {
-                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              {getIconLaboral(data.idEstadoVerificacionTerrena)}
-                            </IconButton>
+
+                                }
+                                size="small"
+                                sx={{
+                                  opacity:
+                                    data.Laboral === false
+                                      ? 0
+                                      : 1,
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                {getIconLaboral(data.idEstadoVerificacionTerrena)}
+                              </IconButton>
+                              {[1, 2, 6].includes(data.Estado) && data.idEstadoVerificacionTerrena === 0 && permisoEditarVerificacionTerreno()
+                                && (data.Laboral === false || (data.Laboral === true && permisoReasignarLaboral()))
+                                && (
+                                  <EditIcon
+                                    onClick={() => handleOpenDialogDomicilioLaboral(data, "trabajo")}
+                                    className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 bg-white rounded-full shadow-sm p-0.5"
+                                    fontSize="small"
+                                  />
+                                )}
+                            </div>
 
                             {/* InfoIcon al lado del IconButton */}
                             <span
@@ -4222,11 +4497,11 @@ export function ListadoSolicitud() {
                     <p className="font-semibold">Cédula:</p>
                     <p>{selectedRow.cedula}</p>
                   </div>
-				  {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' &&
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold">Ingreso Afiliacion:</p>
-                    <p>{selectedRow.FechaAfiliacionIngreso}</p>
-                  </div>}
+                  {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' &&
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">Ingreso Afiliacion:</p>
+                      <p>{selectedRow.FechaAfiliacionIngreso}</p>
+                    </div>}
                   {selectedRow.FechaAfiliacionHasta !== '1970-01-01' &&
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">Afiliacion Hasta:</p>
@@ -4680,6 +4955,49 @@ export function ListadoSolicitud() {
         datosCliente={trabajoData}
         userData={userData}
         permisos={permisos}
+      />
+
+      <ModalCorreccion
+        isOpen={showModalCorrecion}
+        onClose={() => setShowModalCorrecion(false)}
+        onConfirm={handleCorreccion}
+        solicitudData={selectedRow}
+        Titulo='Enviar a Corrección'
+
+        mensajePrincipal={`¿Deseas cambiar la verificación ${TipoVerificacion === "domicilio" ? "domiciliaria" : "laboral"
+          } de ${selectedRow
+            ? (TipoVerificacion === "domicilio"
+              ? selectedRow.Domicilio
+              : selectedRow.Laboral)
+              ? "ACTIVADA"
+              : "DESACTIVADA"
+            : ""
+          } a ${selectedRow
+            ? (TipoVerificacion === "domicilio"
+              ? selectedRow.Domicilio
+              : selectedRow.Laboral)
+              ? "DESACTIVADA"
+              : "ACTIVADA"
+            : ""
+          }?`}
+      />
+
+
+      <ObservacionCredito
+        isOpen={observacionModalAbierto}
+        onClose={() => setObservacionModalAbierto(false)}
+        onConfirm={handleConfirmarObservacion}
+        solicitudData={selectedRow}
+        mensajePrincipal="Agrega un comentario u observación sobre el crédito seleccionado."
+      />
+      <CambioBodega
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={handleConfirmarBodega}
+        solicitudData={selectedRow}
+        mensajePrincipal="Selecciona la nueva bodega de destino para esta solicitud."
+        Titulo="Cambiar bodega"
+        ListaBodega={bodegas}
       />
 
       {openModalPendiente && (

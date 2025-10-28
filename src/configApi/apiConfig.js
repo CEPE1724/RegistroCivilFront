@@ -1,4 +1,4 @@
-import { get } from "react-hook-form";
+
 
 const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
@@ -216,5 +216,6 @@ export const APIURL = {
   validaPrefactura: (NumeroIdentificacion, Bodega) => `${API_BASE_URL}compra/ValidaEstadoCompra/${NumeroIdentificacion}/${Bodega}`,
   getSolicitudGrandeporId : (id) => `${API_BASE_URL}web-solicitudgrande/${id}` ,
   getUatReporteBuroCredito: (id) => `${API_BASE_URL}uatEqfxReporteBuroCredito/${id}`,
-  getCliente: (cedula) => `${API_BASE_URL}cliente/cedula/${cedula}`
+  getCliente: (cedula) => `${API_BASE_URL}cliente/cedula/${cedula}`,
+  postGeoreferenciaEntregaDomicilio: () => `${API_BASE_URL}georeferencia-entrega-domicilio`
 };

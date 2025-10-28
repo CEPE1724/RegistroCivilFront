@@ -27,7 +27,7 @@ export function ReporteEquifax() {
   const navigate = useNavigate();
   const [encEntConsu, setEncEntConsu] = useState([])
   const [tabEntConsu, setTabEntConsu] = useState([]) 
-  const { userData, idMenu, socket } = useAuth();
+  const { userData, idMenu } = useAuth();
   const [permisos, setPermisos] = useState([]);
 
   const formatDate = (dateString) => {
