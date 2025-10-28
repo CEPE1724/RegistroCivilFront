@@ -7,10 +7,8 @@ import { useSnackbar } from "notistack";
 import PersonIcon from "@mui/icons-material/Person";
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../components/AuthContext/AuthContext";
-import crediPointLogo from "../img/credipoint_digital2.png";
 import fondo from "../assets/img/Fondo.webp";
 import logoCredi from "../assets/img//logo-credipoint.webp"
-import { Eye, EyeOff, User } from 'lucide-react';
 import fondoSinVer from "../assets/img/FondoSinVer.webp"
 
 import {
@@ -29,7 +27,7 @@ import {
 import { APIURL } from "../configApi/apiConfig"; 
 
 const Login = () => {
-  const { login, isLoggedIn, isSessionExpired2,  logout } = useAuth();
+  const { login, isLoggedIn, isSessionExpired2 } = useAuth();
   const [sessionExpired, setShowExpiredModal] = useState(false);
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");

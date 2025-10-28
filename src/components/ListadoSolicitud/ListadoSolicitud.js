@@ -75,6 +75,7 @@ import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
+import { CambioBodega } from "./CambioBodega/CambioBodega";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
 import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
@@ -99,11 +100,8 @@ import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import WorkIcon from '@mui/icons-material/Work';
 import ExcelModal from './ExcelModal'
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import ElectricRickshawIcon from '@mui/icons-material/ElectricRickshaw';
 import { BsFillSignStopFill } from "react-icons/bs";
-import { FaPeopleCarryBox } from "react-icons/fa6";
+import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import { FaTruckFast } from "react-icons/fa6";
 import { FaBoxArchive } from "react-icons/fa6";
 export function ListadoSolicitud() {
@@ -186,6 +184,7 @@ export function ListadoSolicitud() {
   const [ExistPrefactura, setExistPrefactura] = useState(false);
   const [showModalCorrecion, setShowModalCorrecion] = useState(false);
   const [TipoVerificacion, setTipoVerificacion] = useState("");
+  const [open, setOpen] = useState(false);
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
     setOpenModalCodDag(true);
@@ -878,6 +877,11 @@ export function ListadoSolicitud() {
 
   const permisoReasignarLaboral = () => {
     const permiso = permisos.find((p) => p.Permisos === "DESABILITAR LABORAL");
+    return permiso && permiso.Activo;
+  }
+
+  const permisoCambiarBodega = () => {
+    const permiso = permisos.find((p) => p.Permisos === "CAMBIAR BODEGA");
     return permiso && permiso.Activo;
   }
 
@@ -2082,6 +2086,10 @@ export function ListadoSolicitud() {
     setShowModalCorrecion(true);
   };
 
+  const handleOpenCambioBodega = async (row) => {
+    setSelectedRow(row);
+    setOpen(true);
+  }
 
   const handleCloseDialog = () => {
     setView(false);
@@ -2128,6 +2136,17 @@ export function ListadoSolicitud() {
     setRecargar((prev) => !prev);
   };
 
+  const handleConfirmarBodega = async ({ nota, bodegaSeleccionada }) => {
+    // Lógica para manejar la confirmación de cambio de bodega
+    console.log("Bodega seleccionada:", bodegaSeleccionada);
+    console.log("Nota:", nota);
+    
+    await patchSolicitudEstadoyResultado(selectedRow?.id, { Bodega: bodegaSeleccionada });
+    await fetchInsertarDatosRechazo(1, selectedRow?.id, 27, nota);
+   
+    setRecargar((prev) => !prev);
+     setOpen(false);
+  };
 
   const handleEquifax = () => {
     navigate("/equifaxx", {
@@ -2637,7 +2656,24 @@ export function ListadoSolicitud() {
                       <TableCell align="center">
                         {new Date(data.fecha).toLocaleString()}
                       </TableCell>
-                      <TableCell align="center">{data.almacen}</TableCell>
+                      <TableCell align="center">
+                        {data.Estado === 1 && data.almacen == "POINT WEB" && permisoCambiarBodega() ? (
+                          <div className="flex items-center justify-center">
+                            <span>
+                              <div className="relative inline-block">
+                                <SyncAltIcon
+                                  onClick={() => handleOpenCambioBodega(data)}
+                                  className="absolute -top-5 -right-3 text-blue-600 cursor-pointer hover:text-blue-800 transition-colors duration-200"
+                                  fontSize="small"
+                                />
+
+                              </div>
+                            </span>
+                          </div>
+                        ) : null}
+                        {data.almacen}
+                      </TableCell>
+
                       <TableCell align="center">{data.vendedor}</TableCell>
 
 
@@ -4865,6 +4901,7 @@ export function ListadoSolicitud() {
         onConfirm={handleCorreccion}
         solicitudData={selectedRow}
         Titulo='Enviar a Corrección'
+
         mensajePrincipal={`¿Deseas cambiar la verificación ${TipoVerificacion === "domicilio" ? "domiciliaria" : "laboral"
           } de ${selectedRow
             ? (TipoVerificacion === "domicilio"
@@ -4881,7 +4918,17 @@ export function ListadoSolicitud() {
               : "ACTIVADA"
             : ""
           }?`}
+      />
 
+
+      <CambioBodega
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onConfirm={handleConfirmarBodega}
+        solicitudData={selectedRow}
+        mensajePrincipal="Selecciona la nueva bodega de destino para esta solicitud."
+        Titulo="Cambiar bodega"
+        ListaBodega={bodegas}
       />
 
       {openModalPendiente && (

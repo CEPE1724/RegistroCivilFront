@@ -79,6 +79,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         24: { label: "Registro Duplicado", icon: <SearchIcon />, color: amber[700] },
         25: { label: "Excepción Domicilio", icon: <HomeIcon />, color: teal[500] },
         26: { label: "Actualizar Cuota/Cupo", icon: <AutorenewIcon />, color: orange[600] },
+        27: { label: "Actualización de Almacén", icon: <StorefrontIcon />, color: purple[600] }
 
 
         /*11: "CORRECIÓN",
