@@ -176,6 +176,10 @@ export function TelefonicaList({
     (permiso) => permiso.Permisos === 'EDITAR TELEFONICA CORRECCION' && permiso.Activo
   );
 
+  const tienePermisoAsignar = clientInfo.permisos.some(
+    (permiso) => permiso.Permisos === 'ASIGNAR TELEFONICA' && permiso.Activo
+  );
+
   const handleGuardar = async (data) => {
 
     const Observacion = ` TELEFONO ACTUALIZADO ${data.Telefono} POR ${data.TelefonoOrigen}. NOTA: ${data.Observaciones}`;
@@ -863,7 +867,7 @@ export function TelefonicaList({
                         Corrección
                       </button>)}
 
-                    {clientInfo.idEstadoVerificacionTelefonica == 7 && (userData.idGrupo == 1 || userData.idGrupo == 23 || userData.idGrupo == 27) && (
+                    {clientInfo.idEstadoVerificacionTelefonica == 7 && tienePermisoAsignar && (
                       <button
                         onClick={() => setOpenConfirmModalAsig(true)}
                         className="px-6 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-300 ease-in-out"
