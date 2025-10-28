@@ -264,6 +264,10 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       {
         1: { label: "CAMBIO", icon: <VerifiedIcon />, color: blue[500] }
 
+      },
+      10: /// Cédula
+      {
+        1: { label: "Observación Agregada", icon: <NoteAltIcon />, color: blue[500] }
       }
 
     };

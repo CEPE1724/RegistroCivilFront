@@ -17,7 +17,7 @@ import { useAuth } from "../components/AuthContext/AuthContext";
 
 function DropDown() {
   const navigate = useNavigate();
-  const { logout, isLoggedIn , logoutinactividad } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
+  const { logout,   logoutinactividad } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal

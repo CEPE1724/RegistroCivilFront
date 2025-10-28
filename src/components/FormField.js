@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import { useAuth } from "./AuthContext/AuthContext";
@@ -7,8 +7,6 @@ import { APIURL } from "../configApi/apiConfig";
 import axios from "../configApi/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { Loader } from "../components/Utils/Loader";
-import { set } from "react-hook-form";
-import { data } from "autoprefixer";
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import { MotivoContinuidad } from "../components/ListadoSolicitud";
 import { SolicitudExitosa } from "./MensajeSolicitudExitosa/SolicitudExitosa";
@@ -92,7 +90,7 @@ const FormField = ({
 
   const handleInputChange = async (e) => {
     let { name, value } = e.target;
-    let originalValue = value;
+  
 
     if (name === "Cedula" || name === "Celular") {
       value = value.replace(/\D/g, "");

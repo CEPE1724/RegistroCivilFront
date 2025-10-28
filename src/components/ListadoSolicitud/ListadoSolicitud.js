@@ -75,7 +75,7 @@ import PreDocumentos from "./Pre-Documentos";
 import { useRef } from "react";
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../Utils";
-import { CambioBodega } from "./CambioBodega/CambioBodega";
+import { CambioBodega } from "./CambioBodega";
 import CapturarCamara from "../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
 import ModalCorreccion from "../SolicitudGrande/Cabecera/ModalCorreccion";
@@ -104,6 +104,9 @@ import { BsFillSignStopFill } from "react-icons/bs";
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import { FaTruckFast } from "react-icons/fa6";
 import { FaBoxArchive } from "react-icons/fa6";
+import { LinkOffOutlined } from "@mui/icons-material";
+import { Pencil, PenIcon } from "lucide-react";
+import { ObservacionCredito } from "./ObservacionCredito/ObservacionCredito";
 export function ListadoSolicitud() {
   const {
     data,
@@ -185,6 +188,7 @@ export function ListadoSolicitud() {
   const [showModalCorrecion, setShowModalCorrecion] = useState(false);
   const [TipoVerificacion, setTipoVerificacion] = useState("");
   const [open, setOpen] = useState(false);
+  const [observacionModalAbierto, setObservacionModalAbierto] = useState(false);
   const handleOpenEditModal = () => {
     setCodDact(selectedRow.CodigoDactilar);
     setOpenModalCodDag(true);
@@ -874,6 +878,10 @@ export function ListadoSolicitud() {
     return permiso && permiso.Activo;
   }
 
+  const permisoAgregarObservacionCredito = () => {
+    const permiso = permisos.find((p) => p.Permisos === "AGREGAR OBSERVACION CREDITO");
+    return permiso && permiso.Activo;
+  }
 
   const permisoReasignarLaboral = () => {
     const permiso = permisos.find((p) => p.Permisos === "DESABILITAR LABORAL");
@@ -2091,6 +2099,11 @@ export function ListadoSolicitud() {
     setOpen(true);
   }
 
+  const handleOpenObservacionCredito = async (row) => {
+    setSelectedRow(row);
+    setObservacionModalAbierto(true);
+  };
+
   const handleCloseDialog = () => {
     setView(false);
     setSelectedRow(null);
@@ -2140,13 +2153,22 @@ export function ListadoSolicitud() {
     // Lógica para manejar la confirmación de cambio de bodega
     console.log("Bodega seleccionada:", bodegaSeleccionada);
     console.log("Nota:", nota);
-    
+
     await patchSolicitudEstadoyResultado(selectedRow?.id, { Bodega: bodegaSeleccionada });
     await fetchInsertarDatosRechazo(1, selectedRow?.id, 27, nota);
-   
+
     setRecargar((prev) => !prev);
-     setOpen(false);
+    setOpen(false);
   };
+
+  const handleConfirmarObservacion = async (observacion) => {
+    // await fetchInsertarDatosRechazo(7, selectedRow?.id, 29, observacion);
+    // console.log("Observacion credito:", observacion.nota);
+
+    await fetchInsertarDatosRechazo(10, selectedRow?.id, 1, observacion.nota);
+    setShowModalRechazo(false);
+    setRecargar((prev) => !prev);
+  }
 
   const handleEquifax = () => {
     navigate("/equifaxx", {
@@ -2652,7 +2674,47 @@ export function ListadoSolicitud() {
                         {data.NumeroSolicitud}
                       </TableCell>
                       <TableCell align="center">{data.nombre}</TableCell>
-                      <TableCell align="center">{data.cedula}</TableCell>
+                      <TableCell align="center" className="relative">
+
+                        <div className="flex flex-col items-center justify-start h-[60px]">
+                          <span className="text-gray-800 font-normal mb-2">{data.cedula}</span>
+
+
+                          <div className="flex items-center justify-end w-full space-x-1">
+                            {permisoAgregarObservacionCredito() && (
+                              <button
+                                onClick={() => handleOpenObservacionCredito(data)}
+                                title="Observación de Crédito"
+                                className="flex items-center justify-center h-6 w-6 rounded-full 
+                   bg-white shadow-sm hover:bg-blue-50 hover:shadow-md 
+                   transition-all duration-200 border border-gray-200"
+                              >
+                                <Pencil className="text-[#050771] w-4 h-4" />
+                              </button>
+                            )}
+
+
+                            <button
+                              onClick={(event) => handlePopoverOpen(event, 10, data)}
+                              title="Observaciones"
+                              className="flex items-center justify-center h-6 w-6 rounded-full 
+                   hover:bg-gray-100 transition-colors duration-200"
+                            >
+                              <MoreVertIcon className="text-gray-600 w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Popover de estado */}
+                        <DocumentStatusPopover
+                          open={popoverData.open && popoverData.selectedRowId === data.id}
+                          anchorEl={popoverData.anchorEl}
+                          onClose={handlePopoverClose}
+                          clienteEstados={clienteEstados}
+                          estadoColores={estadoColores}
+                        />
+                      </TableCell>
+
                       <TableCell align="center">
                         {new Date(data.fecha).toLocaleString()}
                       </TableCell>
@@ -4921,6 +4983,13 @@ export function ListadoSolicitud() {
       />
 
 
+      <ObservacionCredito
+        isOpen={observacionModalAbierto}
+        onClose={() => setObservacionModalAbierto(false)}
+        onConfirm={handleConfirmarObservacion}
+        solicitudData={selectedRow}
+        mensajePrincipal="Agrega un comentario u observación sobre el crédito seleccionado."
+      />
       <CambioBodega
         isOpen={open}
         onClose={() => setOpen(false)}
