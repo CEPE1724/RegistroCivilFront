@@ -21,9 +21,7 @@ export function ReporteEquifax() {
   const location = useLocation();
   const { nombre, cedula, Fecha } = location.state || {};
   const [clienteDatos, setClienteDatos] = useState([]);
-  console.log("clienteDatos", clienteDatos)
   const [datosTablas, setDatosTablas] = useState([]); 
-  console.log("datosTablas", datosTablas)
   const navigate = useNavigate();
   const [encEntConsu, setEncEntConsu] = useState([])
   const [tabEntConsu, setTabEntConsu] = useState([]) 
@@ -237,7 +235,21 @@ export function ReporteEquifax() {
 	...(datosTablas?.infoHistoricaSeps?.data || []),
 	...(datosTablas?.infoHistoricaSicom?.data || []),
   ]
-  console.count("Render ReporteEquifax");
+
+	const infoConPlazo = infoConsolidadaHistorica.map(item => {
+		const apertura = new Date(item.fecha_apertura);
+		const vencimiento = new Date(item.fecha_vencimiento);
+
+		// Cálculo en meses
+		const diferenciaMeses =
+			(vencimiento.getFullYear() - apertura.getFullYear()) * 12 +
+			(vencimiento.getMonth() - apertura.getMonth());
+
+		return {
+			...item,
+			MayorPlazoVencido: diferenciaMeses
+		};
+	});
 
   return (
     <div className="w-full max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-2 px-4 sm:px-6 lg:px-8 py-4">
@@ -296,11 +308,11 @@ export function ReporteEquifax() {
               </div>
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <span className="font-semibold">RANGO INGRESOS:</span>
-                <span>{datosTablas?.segmentacion?.data?.RangoIngresos}</span>
+                <span>{datosTablas?.ingresos?.data?.ingreso}</span>
               </div>
               <div className="flex justify-between items-center border-b border-gray-200 pb-2">
                 <span className="font-semibold">CAPACIDAD DE PAGO:</span>
-                <span>${datosTablas?.segmentacion?.data?.CapacidaddePago}</span>
+                <span>{datosTablas?.capacidadPago?.data?.resultado}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-semibold">EDAD:</span>
@@ -469,7 +481,7 @@ export function ReporteEquifax() {
 				{datosTablas?.politicas?.data?.map((item) => (
               <tr className="border-b border-gray-100 hover:bg-gray-50" key={item.idEQFX_UAT_resultado_politicas}>
                 <td className="p-3 text-xs">{item.politica}</td>
-                <td className={`p-3 text-xs font-bold ${datosTablas?.politicas?.data?.Resultado === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>{datosTablas?.politicas?.data?.Resultado}</td>
+                <td className={`p-3 text-xs font-bold ${datosTablas?.segmentacion?.data?.segmentacion_cliente === "RECHAZAR" ? "text-red-600" : "text-green-600"}`}>{datosTablas?.segmentacion?.data?.segmentacion_cliente}</td>
                 <td className="p-3 text-xs">{item.valor}</td>
               </tr>))}
             </tbody>
@@ -542,11 +554,11 @@ export function ReporteEquifax() {
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">MAYOR PLAZO</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">FECHA MAYOR PLAZO VENCIDO</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">FECHA ÚLTIMO VENCIDO</th>
-                <th className="p-2 text-xs font-semibold border border-gray-200 text-center">OPERACIÓN</th>
+                {/* <th className="p-2 text-xs font-semibold border border-gray-200 text-center">OPERACIÓN</th> */}
               </tr>
             </thead>
             <tbody>
-              {infoConsolidadaHistorica?.map((item) => (
+              {infoConPlazo?.map((item) => (
               <tr className="border-b border-gray-100 hover:bg-gray-50">
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_corte}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.segmento}</td>
@@ -555,10 +567,10 @@ export function ReporteEquifax() {
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.tipo_credito}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.total_vencido}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_vencimiento}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.MayorPlazoVencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaMayorPlazo}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.FechaUltimoVencido}</td>
-                <td className="p-2 text-xs border border-gray-200 text-center">{item.Operacion}</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.MayorPlazoVencido} meses</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.MayorPlazoVencido} meses</td>
+                <td className="p-2 text-xs border border-gray-200 text-center">{item.fecha_corte}</td>
+                {/* <td className="p-2 text-xs border border-gray-200 text-center">{item.Operacion}</td> */}
               </tr>
               ))}
             </tbody>
