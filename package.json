@@ -55,7 +55,8 @@
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
 		"tailDev": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/styles.css --watch",
-		"tailBuild": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/styles.css"
+		"tailBuild": "npx tailwindcss -i ./src/css/tailwind.css -o ./src/css/styles.css",
+		 "copy-build": "xcopy \"C:\\Users\\dpozo_admin\\Desktop\\Proyectos\\Proyectos\\RegistroCivil\\RegistroCivilFront\\build\\*\" \"C:\\Deployment\\RegistroCivil\\\" /E /I /Y"
 	},
 	"eslintConfig": {
 		"extends": [

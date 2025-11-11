@@ -4,23 +4,26 @@
 
 @layer components {
   .solcitudgrande-style {
-    @apply block bg-[#F9FAFB] w-full  border-2  px-3 py-1 shadow-sm h-8 text-xs  focus:border-primaryBlue focus:ring-2 focus:ring-primaryBlue rounded-md p-2 uppercase;
+    @apply block bg-[#F9FAFB] w-full border-2 px-3 py-1 shadow-sm h-8 text-xs focus:border-primaryBlue focus:ring-2 focus:ring-primaryBlue rounded-md p-2 uppercase;
   }
+
   .Informacioncliente-style {
     @apply text-lightGrey text-xs mb-2;
   }
 
   .label-style {
-    @apply block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2 ;
+    @apply block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2;
   }
+
   body {
     @apply bg-gray-100;
   }
+
   .inputCode {
     @apply uppercase text-center font-semibold w-10 h-10 rounded border border-gray-300 shadow-sm focus:outline-none focus:border-morado;
-    ;
   }
 }
+
 html, body {
   height: 100%;
   margin: 0;
@@ -30,4 +33,85 @@ html, body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* ===================================================== */
+/* 🎃 ESTILOS HALLOWEEN: Telarañas + Arañas Animadas 🎃 */
+/* ===================================================== */
+
+/* === Telarañas decorativas === */
+.spiderweb {
+  background: radial-gradient(circle, transparent 60%, rgba(255, 255, 255, 0.1) 60%),
+              repeating-radial-gradient(circle, transparent 0, transparent 8px, rgba(255, 255, 255, 0.25) 9px, transparent 10px);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* === Arañas animadas === */
+.spider {
+  width: 20px;
+  height: 20px;
+  background: black;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: inset -2px -2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.spider::before,
+.spider::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: black;
+  top: 8px;
+}
+
+.spider::before {
+  left: -14px;
+  transform: rotate(30deg);
+}
+
+.spider::after {
+  right: -14px;
+  transform: rotate(-30deg);
+}
+
+/* Animación de las arañas cayendo */
+@keyframes spider-drop {
+  0% {
+    transform: translateY(-150px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(250px);
+  }
+}
+
+.animate-spider {
+  animation: spider-drop 7s ease-in-out infinite alternate;
+}
+
+.animate-spider.delay-1000 {
+  animation-delay: 2s;
+}
+
+/* === Extra: Brillo y luces tenues para el fondo === */
+.halloween-glow {
+  box-shadow: 0 0 30px 5px rgba(255, 140, 0, 0.4);
+}
+
+.halloween-bg {
+  background: linear-gradient(160deg, #2c003e 0%, #1a001f 100%);
+  color: #ffb84d;
+}
+
+/* === Clase para activar modo Halloween === */
+.halloween-mode {
+  background-color: #0f0f0f !important;
+  color: #ffa500 !important;
+  transition: background-color 1s ease, color 1s ease;
 }
