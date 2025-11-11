@@ -1887,6 +1887,8 @@ export function ListadoSolicitud() {
                               ? "CADUCADO"
                               : item.Estado === 8
                                 ? "NOTA DE CRÉDITO"
+								: item.Estado === 9
+                                ? "NOTA DE CRÉDITO AUTOMÁTICO"
                                 : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,

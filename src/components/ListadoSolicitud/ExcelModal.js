@@ -8,20 +8,21 @@ import { enqueueSnackbar } from "notistack";
 const ExcelModal = ({ open, onClose, bodegas }) => {
 	const [bodega, setBodega] = useState(null)
 	const [fechaInicio, setFechaInicio] = useState(null)
+	const [fechaHasta, setFechaHasta] = useState(null)
 	const [loadingVerificacion, setLoadingVerificacion] = useState(false);
 
-	const fetchCrearExcel = async ({ BodegaId, Fecha }) => {
+	const fetchCrearExcel = async ({ BodegaId, FechaDesde, FechaHasta }) => {
 		try {
 			setLoadingVerificacion(true);
 			enqueueSnackbar("Construyendo Reporte 👨‍💻...", { variant: "warning", });
 
 			const response = await axios.get(APIURL.get_excelSolicitudWeb({
 				BodegaId: BodegaId !== undefined ? BodegaId : bodega,
-				Fecha: Fecha !== undefined ? Fecha : fechaInicio,
+				FechaDesde: FechaDesde !== undefined ? FechaDesde : fechaInicio,
+				FechaHasta: FechaHasta !== undefined ? FechaHasta : fechaHasta
 			}), {
 				responseType: 'blob',
 			});
-		
 
 			// Crear un objeto URL para el blob recibido
 			const blob = new Blob([response.data], {
@@ -57,9 +58,9 @@ const ExcelModal = ({ open, onClose, bodegas }) => {
 				<DialogContent>
 					<div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
 						<Button onClick={() => {
-							fetchCrearExcel({ BodegaId: null, Fecha: null });
+							fetchCrearExcel({ BodegaId: null, FechaDesde: null, FechaHasta: null });
 						}} color="success" variant="contained" sx={{ width: '45%' }} >
-							Crear Informe sin filtros
+							Informe Completo
 						</Button>
 						{loadingVerificacion && <Loader />}
 					</div>
@@ -68,7 +69,7 @@ const ExcelModal = ({ open, onClose, bodegas }) => {
 					</Typography>
 					<div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
 						<Button onClick={fetchCrearExcel} color="success" variant="contained" sx={{ width: '45%' }} >
-							Crear Informe con filtros
+							Informe con filtros
 						</Button>
 						{loadingVerificacion && <Loader />}
 					</div>
@@ -98,6 +99,20 @@ const ExcelModal = ({ open, onClose, bodegas }) => {
 						onChange={(e) => {
 							const value = e.target.value;
 							setFechaInicio(value);
+						}}
+					/>
+					<TextField
+						label="Fecha hasta"
+						type="date"
+						fullWidth
+						margin="normal"
+						slotProps={{
+							inputLabel: { shrink: true }
+						}}
+						value={fechaHasta || ""}
+						onChange={(e) => {
+							const value = e.target.value;
+							setFechaHasta(value);
 						}}
 					/>
 
