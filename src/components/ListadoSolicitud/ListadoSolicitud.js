@@ -480,6 +480,7 @@ export function ListadoSolicitud() {
     { label: "FACTURADO", value: 6 },
     { label: "CADUCADO", value: 7 },
     { label: "NOTA DE CRÉDITO", value: 8 },
+    { label: "NOTA DE CRÉDITO AUTOMATICA", value: 9 },
   ];
   const [clienteEstados, setClienteEstados] = useState([]);
 
@@ -1887,8 +1888,8 @@ export function ListadoSolicitud() {
                               ? "CADUCADO"
                               : item.Estado === 8
                                 ? "NOTA DE CRÉDITO"
-								: item.Estado === 9
-                                ? "NOTA DE CRÉDITO AUTOMÁTICO"
+                                : item.Estado === 9
+                                ? "NOTA DE CRÉDITO AUTOMÁTICA"
                                 : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
@@ -1924,6 +1925,8 @@ export function ListadoSolicitud() {
                         ? "REFRIGERADOR"
                         : item.idProductos == 6
                           ? "TELEVISOR"
+                          : item.idProductos == 8
+                          ? "IPHONE"
                           : "DESCONOCIDO",
               idVendedor: item.idVendedor,
               idMotivoContinuidad: item.idMotivoContinuidad,
@@ -2847,6 +2850,8 @@ export function ListadoSolicitud() {
                                     return "#e0f2fe"; // azul muy claro
                                   case "NOTA DE CRÉDITO":
                                     return "#e76843"; // azul muy claro
+                                    case "NOTA DE CRÉDITO AUTOMÁTICA":
+                                      return "#FF8C00"; // Anaranjado oscuro
                                   default:
                                     return "#f3f4f6"; // gris por defecto
                                 }
@@ -2872,6 +2877,8 @@ export function ListadoSolicitud() {
 
                                     return "#1e3a8a"; // azul medio
                                   case "NOTA DE CRÉDITO":
+                                    return "#ffffff"; // blanco
+                                  case "NOTA DE CRÉDITO AUTOMÁTICA":
                                     return "#ffffff"; // blanco
                                   default:
                                     return "#4b5563"; // gris medio
@@ -4376,7 +4383,7 @@ export function ListadoSolicitud() {
                 {/* Botones debajo de la imagen */}
                 <div className="flex flex-col md:flex-row justify-center items-center gap-3 w-full">
 
-                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && (
+                  {puedeAprobar(selectedRow) && selectedRow.estado !== "APROBADO" && selectedRow.estado !== "RECHAZADO" && selectedRow.estado !== "FACTURADO" && selectedRow.estado !== "NOTA DE CRÉDITO AUTOMÁTICA" && (
                     <div className="flex flex-col gap-4 mt-4">
                       {/* INPUT INVISIBLE PARA CARGAR IMAGEN */}
                       <input

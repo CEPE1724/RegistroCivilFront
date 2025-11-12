@@ -344,6 +344,7 @@ export default function CreditoForm() {
         { value: 4, label: "PORTATIL" },
         { value: 5, label: "REFRIGERADOR " },
         { value: 6, label: "TELEVISOR" },
+        { value: 8, label: "IPHONE" },
       ],
     },
     // { label: "Afiliado", name: "bAfiliado", type: "switch" },
