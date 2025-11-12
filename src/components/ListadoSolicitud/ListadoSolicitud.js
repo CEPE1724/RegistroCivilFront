@@ -159,7 +159,6 @@ export function ListadoSolicitud() {
   const { userData, idMenu, socket } = useAuth();
   const editarCodDac = userData?.idGrupo === 1 || userData?.idGrupo === 16 || userData?.idGrupo === 18;
   const editarCodDac2 = selectedRow?.Estado === 1;
-  const puedeCrearSolicitud = userData?.idGrupo === 1 || userData?.idGrupo === 23;
   const [cedula, setCedula] = useState(sessionStorage.getItem('filtroCedula') || "");
   const [dactilar, setDactilar] = useState("");
   const [fileToUpload, setFileToUpload] = useState(null);
@@ -891,6 +890,11 @@ export function ListadoSolicitud() {
 
   const permisoCambiarBodega = () => {
     const permiso = permisos.find((p) => p.Permisos === "CAMBIAR BODEGA");
+    return permiso && permiso.Activo;
+  }
+
+  const puedeCrearSolicitud = () => {
+    const permiso = permisos.find((p) => p.Permisos === "INGRESAR SOLICITUDES NUEVAS");
     return permiso && permiso.Activo;
   }
 
@@ -2460,7 +2464,7 @@ export function ListadoSolicitud() {
             ))}
           </Select>
         </FormControl>
-        {puedeCrearSolicitud && (
+        {(puedeCrearSolicitud()) && (
           <button
             title="Nueva Solicitud"
             className="group cursor-pointer outline-none hover:rotate-90 transition-transform duration-300 w-[60px] h-[60px] flex items-center justify-center"
