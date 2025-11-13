@@ -46,7 +46,7 @@ function App() {
   useEffect(() => {
     const currentPath = window.location.pathname;
 
-    if (!token && currentPath !== "/desayuno" && !currentPath.startsWith("/mapScreenLatinium")) {
+    if (!token && currentPath !== "/FelizCumpleaños" && !currentPath.startsWith("/mapScreenLatinium")) {
       navigate("/login");
     }
   }, [token, navigate]);
@@ -64,7 +64,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/desayuno" element={<Desayuno />} />
-		<Route path="/FelizCumpleaños" element={<CumpleañosPagina />} />
+		    <Route path="/FelizCumpleaños" element={<CumpleañosPagina />} />
 
         <Route path="/mapScreenLatinium/:bodega/:cedula/:tipo/:codigoEntrega" element={<MapaPantalla />} />
         <Route path="/" element={<Navigate to="/login" />} />

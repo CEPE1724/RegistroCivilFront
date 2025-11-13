@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
         setIsLoggedIn(false);
 
         const currentPath = window.location.pathname;
-        if (currentPath !== "/desayuno" && !currentPath.startsWith("/mapScreenLatinium")) {
+        if (currentPath !== "/FelizCumpleaños" && !currentPath.startsWith("/mapScreenLatinium")) {
           navigate("/login");
         }
 
