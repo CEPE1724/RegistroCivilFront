@@ -37,6 +37,7 @@ import DepositoPendiente from "./pages/DepositoPendiente";
 import ListaNegraCedula from "./pages/ListaNegraCedulas";
 import ListaNegraEmail from "./pages/ListaNegraEmails";
 import MapaPantalla from "./pages/MapPantalla"
+import CumpleañosPagina from "./pages/CumpleañosPag"
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -63,6 +64,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/desayuno" element={<Desayuno />} />
+		<Route path="/FelizCumpleaños" element={<CumpleañosPagina />} />
 
         <Route path="/mapScreenLatinium/:bodega/:cedula/:tipo/:codigoEntrega" element={<MapaPantalla />} />
         <Route path="/" element={<Navigate to="/login" />} />
