@@ -196,12 +196,13 @@ export const APIURL = {
 
   get_reporteCeditoDirecto: (id) => `${API_BASE_URL}basic-reports/credito-directo/${id}`,
 
-  get_excelSolicitudWeb: ({ BodegaId, Fecha } = {}) => {
+  get_excelSolicitudWeb: ({ BodegaId, FechaDesde, FechaHasta } = {}) => {
 	let url = `${API_BASE_URL}excel-solicitudes-web/export-excel`
 	const params = [];
 
   	if (BodegaId) params.push(`BodegaId=${BodegaId}`);
-  	if (Fecha) params.push(`Fecha=${Fecha}`);
+  	if (FechaDesde) params.push(`FechaDesde=${FechaDesde}`);
+	if (FechaHasta) params.push(`FechaHasta=${FechaHasta}`);
 
   	if (params.length > 0) {
   	  url += `?${params.join("&")}`;
