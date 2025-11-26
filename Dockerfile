@@ -1,32 +1,29 @@
-# Etapa 1: Build de la app
-FROM node:18 AS build
+FROM node:19-alpine3.15 as dev-deps
 WORKDIR /app
+COPY package.json package.json
+RUN yarn install --frozen-lockfile
 
-# Aumentar límite de memoria para Node.js (4 GB)
-ENV NODE_OPTIONS=--max-old-space-size=4096
 
-# Copiar archivos de dependencias e instalar
-COPY package*.json ./
-RUN npm install
-
-# Copiar el resto del código fuente
+FROM node:19-alpine3.15 as builder
+WORKDIR /app
+COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
 
 # Asegura que la carpeta src/css exista
 RUN mkdir -p src/css
 
-# Copiar variables de entorno (si existen)
-COPY .env .env
-
 # Ejecutar Tailwind para generar styles.css
-RUN npm run tailBuild
+RUN yarn tailBuild
 
-# Ejecutar build de React (ahora con más memoria disponible)
-RUN npm run build
+# Ejecutar build de React
+RUN yarn build
 
-# Etapa 2: Servir con Nginx
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
 
+FROM nginx:1.23.3 as prod
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+COPY --from=builder /app/build /usr/share/nginx/html
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d
+
+CMD [ "nginx","-g", "daemon off;" ]
