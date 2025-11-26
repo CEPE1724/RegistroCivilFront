@@ -1,7 +1,7 @@
 FROM node:19-alpine3.15 as dev-deps
 WORKDIR /app
-COPY package.json package.json
-RUN yarn install --frozen-lockfile
+COPY package*.json ./
+RUN npm ci --only=production
 
 
 FROM node:19-alpine3.15 as builder
@@ -13,10 +13,10 @@ COPY . .
 RUN mkdir -p src/css
 
 # Ejecutar Tailwind para generar styles.css
-RUN yarn tailBuild
+RUN npm run tailBuild
 
 # Ejecutar build de React
-RUN yarn build
+RUN npm run build
 
 
 FROM nginx:1.23.3 as prod
