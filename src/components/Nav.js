@@ -18,6 +18,7 @@ const Nav = ({ showButton, userData }) => {
   const LogoIco = "/img/logo.webp";
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const pointLike = "/img/ponty.png"
 
   const { idMenu, socket } = useAuth();
 
@@ -99,6 +100,25 @@ const Nav = ({ showButton, userData }) => {
             />
           </Link>
         </div>
+
+			  <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center space-x-6 pointer-events-none">
+				  <img
+					  src={pointLike}
+					  alt="Point Like"
+					  className="w-16 h-16 object-contain"
+					  style={{
+  						  filter: "drop-shadow(20px 0px 12px rgba(0,0,0,0.6))"
+  						}}
+				  />
+
+				  <span className="text-white font-semibold text-base lg:text-base">
+					  MEJORAMOS LAS POLÍTICAS DE{" "}
+					  <span className="text-black bg-white px-2 py-0.5 rounded  text-base lg:text-base">
+						  CLIENTES RECURRENTES
+					  </span>
+				  </span>
+			  </div>
+
 
         {showButton && (
           <div className="flex space-x-6 items-center justify-end flex-shrink-0">
