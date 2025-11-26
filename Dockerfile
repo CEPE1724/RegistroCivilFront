@@ -6,6 +6,10 @@ RUN npm ci --only=production
 
 FROM node:19-alpine3.15 as builder
 WORKDIR /app
+
+# Aumentar límite de memoria para Node.js (4 GB)
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
 
