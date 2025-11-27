@@ -5,7 +5,8 @@ version: '3.8'
 services:
   react-app:
     build: .
-    container_name: RegistroCivilFront
+    container_name: RegistroCivilFrontSSL
     ports:
-      - "3000:80"  # Puedes cambiar el puerto externo si quieres
+      - "80:80"    # HTTP (redirige a HTTPS)
+      - "443:443"  # HTTPS
     restart: unless-stopped
