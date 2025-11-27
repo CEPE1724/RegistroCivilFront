@@ -29,7 +29,7 @@ EXPOSE 80 443
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copiar certificados SSL
-COPY ssl/app.services.crt /etc/nginx/ssl/app.services.crt
+COPY ssl/app.services.full.crt /etc/nginx/ssl/app.services.full.crt
 COPY ssl/app.services.key /etc/nginx/ssl/app.services.key
 
 RUN rm /etc/nginx/conf.d/default.conf
