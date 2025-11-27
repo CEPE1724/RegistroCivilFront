@@ -1,38 +1,33 @@
+# Etapa 1: dependencias de producción
 FROM node:19-alpine3.15 as dev-deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
-
+# Etapa 2: build de React
 FROM node:19-alpine3.15 as builder
 WORKDIR /app
-
-# Aumentar límite de memoria para Node.js (4 GB)
 ENV NODE_OPTIONS=--max-old-space-size=4096
-
 COPY --from=dev-deps /app/node_modules ./node_modules
 COPY . .
-
-# Asegura que la carpeta src/css exista
 RUN mkdir -p src/css
-
-# Ejecutar Tailwind para generar styles.css
 RUN npm run tailBuild
-
-# Ejecutar build de React
 RUN npm run build
 
-
+# Etapa 3: imagen final Nginx
 FROM nginx:1.23.3 as prod
 EXPOSE 80 443
 
+# Copiar build de React
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copiar certificados SSL
-COPY ssl/app.services.full.crt /etc/nginx/ssl/app.services.full.crt
+# Crear carpeta SSL y copiar certificados
+RUN mkdir -p /etc/nginx/ssl
+COPY ssl/app.services.crt /etc/nginx/ssl/app.services.crt
 COPY ssl/app.services.key /etc/nginx/ssl/app.services.key
 
+# Configuración de Nginx
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx/nginx.conf /etc/nginx/conf.d/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-CMD [ "nginx","-g", "daemon off;" ]
+CMD ["nginx", "-g", "daemon off;"]
