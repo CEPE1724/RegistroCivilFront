@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   frontend:
     build:
@@ -12,5 +10,4 @@ services:
     volumes:
       - ./ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
       - ./ssl/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
-      # Si quieres actualizar certificados sin reconstruir, usar volúmenes es ideal
     restart: unless-stopped
