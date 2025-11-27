@@ -33,6 +33,6 @@ COPY ssl/app.services.crt /etc/nginx/ssl/app.services.crt
 COPY ssl/app.services.key /etc/nginx/ssl/app.services.key
 
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx/nginx.conf /etc/nginx/conf.d/
+COPY nginx/nginx.conf /etc/nginx/conf.d/nginx.conf
 
 CMD [ "nginx","-g", "daemon off;" ]
