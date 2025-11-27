@@ -8,6 +8,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-      - ./ssl/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+      - ./ssl/point.cert:/etc/ssl/point.cert:ro
+      - ./ssl/server.key:/etc/ssl/server.key:ro
     restart: unless-stopped
