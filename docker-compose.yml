@@ -1,31 +1,45 @@
+version: '3.9'
+
 services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: React_Frontend
-    expose:
-      - "3000"
+      target: builder
+    container_name: registrocivilfront-frontend
+    volumes:
+      - frontend-build:/app/build
     networks:
-      - app-network
-    restart: unless-stopped
+      - rc_network
 
   nginx:
     image: nginx:1.23.3
     container_name: Nginx_SSL
+    depends_on:
+      - frontend
     ports:
       - "80:80"
       - "443:443"
     volumes:
+      - frontend-build:/usr/share/nginx/html:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./ssl/point.cert:/etc/ssl/point.cert:ro
-      - ./ssl/server.key:/etc/ssl/server.key:ro
-    depends_on:
-      - frontend
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
     networks:
-      - app-network
-    restart: unless-stopped
+      - rc_network
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do sleep 12h & wait $${!}; certbot renew; done"
+
+volumes:
+  frontend-build:
+  certbot-etc:
+  certbot-var:
 
 networks:
-  app-network:
+  rc_network:
     driver: bridge
