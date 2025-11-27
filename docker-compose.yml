@@ -1,12 +1,16 @@
-
-
-version: '3.8'
+version: "3.9"
 
 services:
-  react-app:
-    build: .
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: RegistroCivilFrontSSL
     ports:
-      - "80:80"    # HTTP (redirige a HTTPS)
-      - "443:443"  # HTTPS
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ssl/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+      - ./ssl/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+      # Si quieres actualizar certificados sin reconstruir, usar volúmenes es ideal
     restart: unless-stopped
