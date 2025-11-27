@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: RegistroCivilFrontSSL
+    container_name: Pantera_SSL
     ports:
       - "80:80"
       - "443:443"
