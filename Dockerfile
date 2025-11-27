@@ -21,10 +21,10 @@ EXPOSE 80 443
 # Copiar build de React
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copiar certificados correctos
-RUN mkdir -p /etc/nginx/ssl
-COPY ssl/fullchain.pem /etc/nginx/ssl/fullchain.pem
-COPY ssl/privkey.pem /etc/nginx/ssl/privkey.pem
+# Copiar certificados SSL
+RUN mkdir -p /etc/ssl
+COPY ssl/point.cert /etc/ssl/point.cert
+COPY ssl/server.key /etc/ssl/server.key
 
 # Configuración de Nginx
 RUN rm /etc/nginx/conf.d/default.conf
