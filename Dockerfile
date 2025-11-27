@@ -14,15 +14,16 @@ RUN mkdir -p src/css
 RUN npm run tailBuild
 RUN npm run build
 
-# Etapa 3: imagen final Nginx
-FROM nginx:1.23.3 as prod
-EXPOSE 80 443
+# Etapa 3: servidor Node para servir el build
+FROM node:19-alpine3.15 as prod
+WORKDIR /app
+
+# Instalar serve para servir archivos estáticos
+RUN npm install -g serve
 
 # Copiar build de React
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /app/build ./build
 
-# Configuración de Nginx
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 3000
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "build", "-l", "3000"]
