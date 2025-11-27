@@ -1,11 +1,11 @@
 # Etapa 1: dependencias de producción
-FROM node:19-alpine3.15 as dev-deps
+FROM node:19-alpine3.15 AS dev-deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
 # Etapa 2: build de React
-FROM node:19-alpine3.15 as builder
+FROM node:19-alpine3.15 AS builder
 WORKDIR /app
 ENV NODE_OPTIONS=--max-old-space-size=4096
 COPY --from=dev-deps /app/node_modules ./node_modules
@@ -15,7 +15,7 @@ RUN npm run tailBuild
 RUN npm run build
 
 # Etapa 3: servidor Node para servir el build
-FROM node:19-alpine3.15 as prod
+FROM node:19-alpine3.15 AS prod
 WORKDIR /app
 
 # Instalar serve para servir archivos estáticos
