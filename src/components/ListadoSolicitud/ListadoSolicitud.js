@@ -1568,7 +1568,13 @@ export function ListadoSolicitud() {
   // Obtener solicitudes con filtros aplicados
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
-      fetchSolicitudes();
+      // Debounce: esperar 800ms después de que el usuario deje de escribir
+      const delayDebounceFn = setTimeout(() => {
+        fetchSolicitudes();
+      }, 800);
+
+      // Limpiar el timeout si las dependencias cambian antes de que se ejecute
+      return () => clearTimeout(delayDebounceFn);
     }
   }, [
     currentPage,
