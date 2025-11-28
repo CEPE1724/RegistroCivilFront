@@ -14,8 +14,8 @@ services:
     image: nginx:1.23.3
     container_name: Nginx_SSL
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./ssl/point.cert:/etc/ssl/point.cert:ro
