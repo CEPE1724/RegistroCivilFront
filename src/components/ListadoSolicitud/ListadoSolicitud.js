@@ -99,6 +99,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import WorkIcon from '@mui/icons-material/Work';
+import SearchIcon from '@mui/icons-material/Search';
 import ExcelModal from './ExcelModal'
 import { BsFillSignStopFill } from "react-icons/bs";
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
@@ -120,6 +121,7 @@ export function ListadoSolicitud() {
   } = useBodegaUsuario();
 
   const [recargar, setRecargar] = useState(false);
+  const [loadingConsulta, setLoadingConsulta] = useState(false);
   const [selectedBodega, setSelectedBodega] = useState(sessionStorage.getItem('filtroBodega') || "todos");
   const [selectedVendedor, setSelectedVendedor] = useState(sessionStorage.getItem('filtroVendedor') || "todos");
   const [analistaSelected, setAnalistaSelected] = useState(sessionStorage.getItem('filtroAnalista') || "todos");
@@ -1566,38 +1568,26 @@ export function ListadoSolicitud() {
 
 
   // Obtener solicitudes con filtros aplicados
+  // Solo ejecutar fetchSolicitudes cuando cambien currentPage o recargar
   useEffect(() => {
     if (tipoConsulta.length > 0 && dataBodega.length > 0) {
-      // Debounce: esperar 800ms después de que el usuario deje de escribir
-      const delayDebounceFn = setTimeout(() => {
-        fetchSolicitudes();
-      }, 800);
-
-      // Limpiar el timeout si las dependencias cambian antes de que se ejecute
-      return () => clearTimeout(delayDebounceFn);
+      fetchSolicitudes().finally(() => {
+        setLoadingConsulta(false);
+      });
     }
   }, [
     currentPage,
-    tipoConsulta,
-    dataBodega,
-    selectedBodega,
-    estado,
-    fechaInicio,
-    fechaFin,
-    selectedVendedor,
-    analistaSelected,
-    solicitud,
-    documental,
-    telefonica,
-    domicilio,
-    laboral,
-    nombre,
-    numeroSolicitud,
-    cedula,
     recargar,
-    operadorSelected
-
+    tipoConsulta,
+    dataBodega
   ]);
+
+  // Función para el botón de consultar
+  const handleConsultar = () => {
+    setLoadingConsulta(true);
+    setCurrentPage(1); // Resetear a la primera página
+    setRecargar(prev => !prev); // Forzar recarga
+  };
 
   useEffect(() => {
 
@@ -1899,8 +1889,8 @@ export function ListadoSolicitud() {
                               : item.Estado === 8
                                 ? "NOTA DE CRÉDITO"
                                 : item.Estado === 9
-                                ? "NOTA DE CRÉDITO AUTOMÁTICA"
-                                : "Desconocido",
+                                  ? "NOTA DE CRÉDITO AUTOMÁTICA"
+                                  : "Desconocido",
               imagen: item.Foto,
               Estado: item.Estado,
               celular: item.Celular,
@@ -1936,8 +1926,8 @@ export function ListadoSolicitud() {
                         : item.idProductos == 6
                           ? "TELEVISOR"
                           : item.idProductos == 8
-                          ? "IPHONE"
-                          : "DESCONOCIDO",
+                            ? "IPHONE"
+                            : "DESCONOCIDO",
               idVendedor: item.idVendedor,
               idMotivoContinuidad: item.idMotivoContinuidad,
               FechaAfiliacionIngreso: item.FechaIngreso,
@@ -2470,27 +2460,7 @@ export function ListadoSolicitud() {
             ))}
           </Select>
         </FormControl>
-        {(puedeCrearSolicitud()) && (
-          <button
-            title="Nueva Solicitud"
-            className="group cursor-pointer outline-none hover:rotate-90 transition-transform duration-300 w-[60px] h-[60px] flex items-center justify-center"
-            onClick={handleSolictud}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="50px"
-              height="50px"
-              viewBox="0 0 24 24"
-              className="stroke-indigo-400 fill-none group-hover:fill-indigo-800 group-active:stroke-indigo-200 group-active:fill-indigo-600 group-active:duration-0 duration-300"
-            >
-              <path
-                d="M12 22C17.5 22 22 17.5 22 12C22 6.5 17.5 2 12 2C6.5 2 2 6.5 2 12C2 17.5 6.5 22 12 22Z"
-                strokeWidth="1.5"
-              ></path>
-              <path d="M8 12H16" strokeWidth="1.5"></path>
-              <path d="M12 16V8" strokeWidth="1.5"></path>
-            </svg>
-          </button>)}
+
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 mb-4">
@@ -2543,21 +2513,61 @@ export function ListadoSolicitud() {
             endAdornment: <IconButton></IconButton>,
           }}
         />
+      </div>
+      {/* Botones de acción */}
+      <div className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-6 mb-4">
         <button
-          className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
+          className="group relative flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none min-w-[140px]"
+          onClick={handleConsultar}
+          disabled={loadingConsulta}
+        >
+          {loadingConsulta ? (
+            <>
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>Consultando...</span>
+            </>
+          ) : (
+            <>
+              <SearchIcon className="text-xl group-hover:scale-110 transition-transform duration-300" />
+              <span>Consultar</span>
+            </>
+          )}
+        </button>
+
+        <button
+          className="group relative flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
           onClick={limpiarFiltros}
         >
-          <DeleteIcon /> Limpiar Filtros
+          <DeleteIcon className="text-xl group-hover:rotate-12 transition-transform duration-300" />
+          <span>Limpiar</span>
         </button>
+        {(puedeCrearSolicitud()) && (
+          <button
+            title="Nueva Solicitud"
+            className="group relative flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 overflow-hidden"
+            onClick={handleSolictud}
+          >
+            {/* Efecto de brillo */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 group-hover:animate-shimmer"></div>
+            {/* Texto */}
+            <span className="relative z-10">Nueva Solicitud</span>
+          </button>)}
 
         {imprimirInforme() && (
           <button
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow transition duration-300 ease-in-out transform hover:scale-105"
+            className="group relative flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0"
             onClick={() => setOpenModalExcel(true)}
           >
-            <PiMicrosoftExcelLogoBold size={45} /> Crear informe
-          </button>)}
+            <PiMicrosoftExcelLogoBold size={22} className="group-hover:scale-110 transition-transform duration-300" />
+            <span>Crear Informe</span>
+          </button>
+        )}
+
       </div>
+
 
       <div className="p-6 bg-gray-50 rounded-xl">
         <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
@@ -2860,8 +2870,8 @@ export function ListadoSolicitud() {
                                     return "#e0f2fe"; // azul muy claro
                                   case "NOTA DE CRÉDITO":
                                     return "#e76843"; // azul muy claro
-                                    case "NOTA DE CRÉDITO AUTOMÁTICA":
-                                      return "#FF8C00"; // Anaranjado oscuro
+                                  case "NOTA DE CRÉDITO AUTOMÁTICA":
+                                    return "#FF8C00"; // Anaranjado oscuro
                                   default:
                                     return "#f3f4f6"; // gris por defecto
                                 }
