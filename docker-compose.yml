@@ -18,9 +18,9 @@ services:
       - "8443:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./ssl/cert.pem:/root/SSL/appservices/cert.pem:ro
-      - ./ssl/key.pem:/root/SSL/appservices/key.pem:ro
-      - ./ssl/chain.pem:/root/SSL/appservices/chain.pem:ro
+      - /root/SSL/appservices/cert.pem:/etc/ssl/cert.pem:ro
+      - /root/SSL/appservices/key.pem:/etc/ssl/key.pem:ro
+      - /root/SSL/appservices/chain.pem:/etc/ssl/chain.pem:ro
     depends_on:
       - frontend
     networks:
