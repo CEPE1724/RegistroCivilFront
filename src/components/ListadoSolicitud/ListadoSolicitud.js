@@ -122,6 +122,22 @@ export function ListadoSolicitud() {
 
   const [recargar, setRecargar] = useState(false);
   const [loadingConsulta, setLoadingConsulta] = useState(false);
+  
+  // Caché para consultas que no cambian frecuentemente
+  const [cacheTipoConsulta, setCacheTipoConsulta] = useState(null);
+  const [cacheTipoCliente, setCacheTipoCliente] = useState(null);
+  const [cacheAnalistas, setCacheAnalistas] = useState(null);
+  const [cacheOperadores, setCacheOperadores] = useState(null);
+  
+  // Función para limpiar caché (útil cuando hay actualizaciones)
+  const limpiarCache = () => {
+    setCacheTipoConsulta(null);
+    setCacheTipoCliente(null);
+    setCacheAnalistas(null);
+    setCacheOperadores(null);
+    console.log('Caché limpiado - se recargarán los datos en la próxima consulta');
+  };
+  
   const [selectedBodega, setSelectedBodega] = useState(sessionStorage.getItem('filtroBodega') || "todos");
   const [selectedVendedor, setSelectedVendedor] = useState(sessionStorage.getItem('filtroVendedor') || "todos");
   const [analistaSelected, setAnalistaSelected] = useState(sessionStorage.getItem('filtroAnalista') || "todos");
@@ -145,7 +161,7 @@ export function ListadoSolicitud() {
   const [tipoVerificacionSeleccionada2, setTipoVerificacionSeleccionada2] = useState(null);
   const [tipoConsulta, setTipoConsulta] = useState([]);
   const date15DaysAgo = new Date();
-  date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
+  date15DaysAgo.setDate(date15DaysAgo.getDate() - 2);
   const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
   const [fechaInicio, setFechaInicio] = useState(sessionStorage.getItem('filtroIniFecha') || date15DaysAgoStr);
   const [fechaFin, setFechaFin] = useState(sessionStorage.getItem('filtroFinFecha') || today);
@@ -1498,8 +1514,14 @@ export function ListadoSolicitud() {
   };
 
   const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega); // Obtener los IDs de las bodegas
-  // Obtener tipo de consulta
+  // Obtener tipo de consulta con caché
   const fetchTipoConsulta = async () => {
+    // Verificar si ya existe en caché
+    if (cacheTipoConsulta) {
+      setTipoConsulta(cacheTipoConsulta);
+      return;
+    }
+    
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(APIURL.getTipoConsulta(), {
@@ -1510,12 +1532,12 @@ export function ListadoSolicitud() {
       });
 
       if (response.status === 200) {
-        setTipoConsulta(
-          response.data.map((item) => ({
-            id: item.idCompraEncuesta,
-            descripcion: item.Descripcion,
-          }))
-        );
+        const data = response.data.map((item) => ({
+          id: item.idCompraEncuesta,
+          descripcion: item.Descripcion,
+        }));
+        setTipoConsulta(data);
+        setCacheTipoConsulta(data); // Guardar en caché
       } else {
         console.error(`Error: ${response.status} - ${response.statusText}`);
       }
@@ -1525,9 +1547,28 @@ export function ListadoSolicitud() {
   };
 
   const fetchTipoCliente = async () => {
+    // Verificar si ya existe en caché
+    if (cacheTipoCliente) {
+      const tipoMap = cacheTipoCliente.reduce((acc, item) => {
+        acc[item.idTipoCliente] = item.Nombre;
+        return acc;
+      }, {});
+      setTipoClienteMap(tipoMap);
+      setTipo(
+        cacheTipoCliente.map((item) => ({
+          value: item.idTipoCliente,
+          label: item.Nombre,
+        }))
+      );
+      return;
+    }
+    
     try {
       const response = await axios.get(APIURL.getTipoCliente());
       if (response.status === 200) {
+        // Guardar en caché
+        setCacheTipoCliente(response.data);
+        
         // Crear un mapeo de idTipoCliente a Nombre
         const tipoMap = response.data.reduce((acc, item) => {
           acc[item.idTipoCliente] = item.Nombre;
@@ -1700,11 +1741,22 @@ export function ListadoSolicitud() {
 
 
   const fetchAnalistas = async () => {
+    // Verificar si ya existe en caché
+    if (cacheAnalistas) {
+      const activos = cacheAnalistas.filter((a) => a.Estado === 1);
+      setAnalistasDisponibles(activos);
+      setOpenDialog3(true);
+      return;
+    }
+    
     try {
       const response = await axios.get(APIURL.analistacredito(), {
         headers: { method: "GET", cache: "no-store" },
       });
 
+      // Guardar en caché
+      setCacheAnalistas(response.data);
+      
       const activos = response.data.filter((a) => a.Estado === 1);
       setAnalistasDisponibles(activos);
       setOpenDialog3(true);
@@ -1767,6 +1819,12 @@ export function ListadoSolicitud() {
   const [operadores, setOperadores] = useState([]);
 
   const fetchOperador = async () => {
+    // Verificar si ya existe en caché
+    if (cacheOperadores) {
+      setOperadores(cacheOperadores);
+      return;
+    }
+    
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(APIURL.getUsuarioPorROL(16), {
@@ -1777,7 +1835,9 @@ export function ListadoSolicitud() {
       });
 
       if (response.status === 200) {
-        setOperadores(response.data); // Guarda directamente la lista de operadores
+        // Guardar en caché
+        setCacheOperadores(response.data);
+        setOperadores(response.data);
       }
     } catch (error) {
       console.error("Error al obtener operadores:", error);
