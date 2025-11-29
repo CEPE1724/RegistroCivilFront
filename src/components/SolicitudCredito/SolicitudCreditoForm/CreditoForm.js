@@ -18,6 +18,7 @@ export default function CreditoForm() {
   const [urlCloudstorage, setUrlCloudstorage] = useState(null);
   const [dataRecibir, setDataRecibir] = useState(null);
   const [loading, setLoading] = useState(false);  // Estado para mostrar el loading
+  const [isSubmitting, setIsSubmitting] = useState(false);  // Prevenir envíos duplicados
   const [cedula, setCedula] = useState("");  // Estado para la cédula
   const IdVendedor = userUsuario?.idPersonal;
   const [actividadLaboral, setActividadLaboral] = useState([]);
@@ -592,6 +593,14 @@ export default function CreditoForm() {
   }
 
   const handleSubmit = async (values) => {
+    // Prevenir múltiples envíos
+    if (isSubmitting) {
+      console.log('⚠️ Envío en proceso, por favor espera...');
+      return;
+    }
+
+    setIsSubmitting(true);  // Bloquear nuevos envíos
+
     const fotourl = values.Foto; // URL de la foto que deseas cargar
     // Formatear los valores para la API, con conversiones necesarias
     const formattedValues = {
@@ -677,6 +686,11 @@ export default function CreditoForm() {
         preventDuplicate: true,
       });
       setFormStatus("error");
+    } finally {
+      // Desbloquear envíos después de 2 segundos para evitar clics accidentales rápidos
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 5000);
     }
   };
 
@@ -690,6 +704,18 @@ export default function CreditoForm() {
               <div className="animate-spin rounded-full border-t-4 border-blue-500 w-12 h-12"></div>
             </div>
             <span className="text-lg font-semibold">Consultando cédula...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay cuando se está enviando el formulario */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
+            <div className="mr-4">
+              <div className="animate-spin rounded-full border-t-4 border-green-500 w-12 h-12"></div>
+            </div>
+            <span className="text-lg font-semibold">Guardando solicitud...</span>
           </div>
         </div>
       )}
@@ -708,6 +734,7 @@ export default function CreditoForm() {
         onExternalUpdate={handleUpdateFromCedula}
         soliGrande={soliGrande}
         creSoliWeb={creSoliWeb}
+        isSubmitting={isSubmitting}
       />
 
       <SolicitudExitosa
