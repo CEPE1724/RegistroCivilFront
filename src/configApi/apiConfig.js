@@ -1,8 +1,8 @@
 
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-//const API_BASE_URL = "http://192.168.2.49:3008/api/v1/"
+const API_BASE_URL = "http://192.168.1.97:3008/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec:8443/"
 
@@ -17,7 +17,7 @@ export const APIURL = {
   getCreVerificacionTelefonicaMaestro: (id) => `${API_BASE_URL}cre-verificacion-telefonica-maestro/${id}`,
   getHistorilaVerificacionTelefonica: (id) => `${API_BASE_URL}cre-verificacion-telefonica-historial/${id}`,
   getSearchCreSolicitudVerificacionTelefonica: (idCre_SolicitudWeb, idCre_VerificacionTelefonicaMaestro ) => `${API_BASE_URL}cre-solicitudverificaciontelefonica/search?idCre_SolicitudWeb=${idCre_SolicitudWeb}&idCre_VerificacionTelefonicaMaestro=${idCre_VerificacionTelefonicaMaestro}`,
-  getCreSolicitudCredito: () => `${API_BASE_URL}cre-solicitud-web`,
+  getCreSolicitudCredito: () => `${API_BASE_URL}cre-solicitud-web/all-cresolicitudweb`,
   getActividadEconomina: () => `${API_BASE_URL}cre-actividadeconomina/2`,
   getTipoConsulta: () => `${API_BASE_URL}compraencuesta/1`,
   post_cre_solicitud_web: () => `${API_BASE_URL}cre-solicitud-web`,

@@ -11,7 +11,7 @@ import axios from "../../configApi/axiosConfig";
 export function Dashboards() {
   //mostrar/ocultar filtros
   const [filtersVisible, setFiltersVisible] = useState(false);
-  
+
   // Estado datos solicitudes
   const [solicitudesData, setSolicitudesData] = useState([]);
 
@@ -20,11 +20,11 @@ export function Dashboards() {
   const [selectedTipoCliente, setSelectedTipoCliente] = useState("todos");
 
   // Estados para filtros de fecha
-  const today = new Date().toISOString().split("T")[0]; 
+  const today = new Date().toISOString().split("T")[0];
   const date15DaysAgo = new Date();
   date15DaysAgo.setDate(date15DaysAgo.getDate() - 15);
   const date15DaysAgoStr = date15DaysAgo.toISOString().split("T")[0];
-  
+
   const [fechaInicio, setFechaInicio] = useState(date15DaysAgoStr);
   const [fechaFin, setFechaFin] = useState(today);
 
@@ -114,20 +114,20 @@ export function Dashboards() {
   }, [vendedor]);
 
   useEffect(() => {
-	if (userData?.idGrupo == 23) {
-		if (bodegas.length > 0) {
-			const primeraBodega = bodegas[0].b_Bodega;
-        	setSelectedBodega(primeraBodega);
-      	}
-		
-		const vendedorAutorizado = vendedores.find(
+    if (userData?.idGrupo == 23) {
+      if (bodegas.length > 0) {
+        const primeraBodega = bodegas[0].b_Bodega;
+        setSelectedBodega(primeraBodega);
+      }
+
+      const vendedorAutorizado = vendedores.find(
         (v) => v.Codigo === userData.Nombre
       );
       if (vendedorAutorizado) {
         setSelectedVendedor(vendedorAutorizado.idPersonal);
       }
-	}
-  }, [userData?.idGrupo , bodegas, vendedores]);
+    }
+  }, [userData?.idGrupo, bodegas, vendedores]);
 
   const fetchBodega = async () => {
     const userId = userData.idUsuario;
@@ -143,77 +143,88 @@ export function Dashboards() {
   };
 
   // Función obtener datos filtrados
-  const fetchFilteredData = async () => {
-    const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega);
-    let bodegasId = selectedBodega !== "todos" ? [selectedBodega] : bodegasIds;
-    
-    try {
-      const token = localStorage.getItem("token");
-      const params = {
-        fechaInicio: fechaInicio,
-        fechaFin: fechaFin,
-        bodega: bodegasId,
-        estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
-        idTipoCliente: selectedTipoCliente === "todos" ? 0 : parseInt(selectedTipoCliente),
-      };
-      
-      if (selectedVendedor && selectedVendedor !== "todos") {
-        params.vendedor = selectedVendedor;
-      }
-      const response = await axios.get(APIURL.getCreSolicitudCredito(), {
+const fetchFilteredData = async () => {
+  const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega);
+  const bodegasId = selectedBodega !== "todos" ? [parseInt(selectedBodega)] : bodegasIds;
+
+  try {
+    const token = localStorage.getItem("token");
+
+    // Construir el body exactamente como lo espera el backend
+    const body = {
+      limit: 5, // ejemplo, puedes usar itemsPerPage
+      offset: 0, // ejemplo
+      fechaInicio: fechaInicio ? new Date(fechaInicio).toISOString() : undefined,
+      fechaFin: fechaFin ? new Date(fechaFin).toISOString() : undefined,
+      bodega: bodegasId,
+      estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
+      vendedor: selectedVendedor === "todos" ? 0 : parseInt(selectedVendedor),
+      analista: analistaSelected === "todos" ? 0 : parseInt(analistaSelected),
+      EstadoSolicitud: solicitud === "Todos" ? 0 : parseInt(solicitud),
+      EstadoDocumental: documental === "Todos" ? 0 : parseInt(documental),
+      EstadoTelefonica: telefonica === "Todos" ? 0 : parseInt(telefonica),
+      EstadoDomicilio: domicilio === "Todos" ? 0 : parseInt(domicilio),
+      EstadoLaboral: laboral === "Todos" ? 0 : parseInt(laboral),
+      operador: operadorSelected === "todos" ? 0 : parseInt(operadorSelected),
+    };
+
+    const response = await axios.post(
+      APIURL.getCreSolicitudCredito(),
+      body, // body directo
+      {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        params,
-      });
-
-      // Actualizar el estado con los datos recibidos
-      if (response.data && response.data.data) {
-        setSolicitudesData(response.data.data);
       }
-      
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setSolicitudesData([]);
+    );
+
+    if (response.data && response.data.data) {
+      setSolicitudesData(response.data.data);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    setSolicitudesData([]);
+  }
+};
+
+
 
   // procesar datos por bodega
   const procesarDatosPorBodega = () => {
     const datosPorBodega = {};
-    
+
     // Filtrar bodegas
-    const bodegasFiltradas = selectedBodega === "todos" 
-      ? bodegas 
+    const bodegasFiltradas = selectedBodega === "todos"
+      ? bodegas
       : bodegas.filter(bodega => bodega.b_Bodega.toString() === selectedBodega.toString());
-    
+
     // Inicializar datos para cada bodega filtrada
     bodegasFiltradas.forEach(bodega => {
       datosPorBodega[bodega.b_Bodega] = {
         nombre: bodega.b_Nombre,
         totalSolicitudes: 0,
         preAprobadas: 0, 	// Total - No Aplica -- EN REALIDAD ES GESTIONADO
-		preaprobadoReal: 0, // Estado 1
+        preaprobadoReal: 0, // Estado 1
         noAplica: 0,     	// Estado 5
         aprobado: 0,     	// Estado 2
         rechazado: 0,    	// Estado 4
         facturadas: 0,   	// Estado 6
-		caducadas: 0	  	// Estado 7
+        caducadas: 0	  	// Estado 7
       };
     });
-    
+
     // Procesar cada solicitud
     solicitudesData.forEach(solicitud => {
       const bodegaId = solicitud.Bodega;
       if (datosPorBodega[bodegaId]) {
         datosPorBodega[bodegaId].totalSolicitudes++;
-        
+
         switch (solicitud.Estado) {
-		  case 1: // PRE APROBADO
-			datosPorBodega[bodegaId].preaprobadoReal++;
-            datosPorBodega[bodegaId].preAprobadas++;	
-			break;
+          case 1: // PRE APROBADO
+            datosPorBodega[bodegaId].preaprobadoReal++;
+            datosPorBodega[bodegaId].preAprobadas++;
+            break;
           case 2: // APROBADO
             datosPorBodega[bodegaId].aprobado++;
             datosPorBodega[bodegaId].preAprobadas++;
@@ -229,7 +240,7 @@ export function Dashboards() {
             datosPorBodega[bodegaId].facturadas++;
             datosPorBodega[bodegaId].preAprobadas++;
             break;
-		  case 7: // CADUCADAS
+          case 7: // CADUCADAS
             datosPorBodega[bodegaId].caducadas++;
             datosPorBodega[bodegaId].preAprobadas++;
             break;
@@ -239,7 +250,7 @@ export function Dashboards() {
         }
       }
     });
-    
+
     return Object.values(datosPorBodega);
   };
 
@@ -262,39 +273,39 @@ export function Dashboards() {
     };
 
     const datosPorSegmento = {};
-    
+
     // Filtrar segmentos según la selección del tipo cliente
-    const segmentosAMostrar = selectedTipoCliente === "todos" 
+    const segmentosAMostrar = selectedTipoCliente === "todos"
       ? Object.keys(segmentosClientes)
       : [selectedTipoCliente.toString()];
-    
+
     // Inicializar datos para cada segmento
     segmentosAMostrar.forEach(segmentoId => {
       datosPorSegmento[segmentoId] = {
         nombre: segmentosClientes[segmentoId] || `Segmento ${segmentoId}`,
         totalSolicitudes: 0,
         preAprobadas: 0, // Total - No Aplica -- EN REALIDAD ES GESTIONADO
-		preaprobadoReal: 0, // Estado 1
+        preaprobadoReal: 0, // Estado 1
         noAplica: 0,     // Estado 5
         aprobado: 0,     // Estado 2
         rechazado: 0,    // Estado 4
         facturadas: 0,   // Estado 6
-		caducadas: 0	 // Estado 7
+        caducadas: 0	 // Estado 7
       };
     });
-    
+
     // Procesar cada solicitud
     solicitudesData.forEach(solicitud => {
       const tipoClienteId = solicitud.TipoCliente || solicitud.idTipoCliente;
-      
+
       if (datosPorSegmento[tipoClienteId]) {
         datosPorSegmento[tipoClienteId].totalSolicitudes++;
-        
+
         switch (solicitud.Estado) {
-		  case 1: // PRE APROBADO
-			datosPorSegmento[tipoClienteId].preaprobadoReal++;
-            datosPorSegmento[tipoClienteId].preAprobadas++;	
-			break;
+          case 1: // PRE APROBADO
+            datosPorSegmento[tipoClienteId].preaprobadoReal++;
+            datosPorSegmento[tipoClienteId].preAprobadas++;
+            break;
           case 2: // APROBADO
             datosPorSegmento[tipoClienteId].aprobado++;
             datosPorSegmento[tipoClienteId].preAprobadas++;
@@ -310,7 +321,7 @@ export function Dashboards() {
             datosPorSegmento[tipoClienteId].facturadas++;
             datosPorSegmento[tipoClienteId].preAprobadas++;
             break;
-		  case 7: // CADUCADA
+          case 7: // CADUCADA
             datosPorSegmento[tipoClienteId].caducadas++;
             datosPorSegmento[tipoClienteId].preAprobadas++;
             break;
@@ -320,62 +331,62 @@ export function Dashboards() {
         }
       }
     });
-    
+
     // Filtrar solo los segmentos que tienen datos o mostrar todos si selectedTipoCliente es "todos"
     const resultado = Object.values(datosPorSegmento);
-    
+
     // Si hay un tipo de cliente específico seleccionado, mostrar solo ese
     // Si es "todos", mostrar solo los que tienen datos
     if (selectedTipoCliente === "todos") {
       return resultado.filter(segmento => segmento.totalSolicitudes > 0);
     }
-    
+
     return resultado;
   };
 
   // Función para procesar datos por vendedor
   const procesarDatosPorVendedor = () => {
     const datosPorVendedor = {};
-    
+
     // Solo procesar si hay una bodega específica seleccionada
     if (selectedBodega === "todos") {
       return [];
     }
-    
+
     // Filtrar vendedores según la selección
-    const vendedoresFiltrados = selectedVendedor === "todos" 
-      ? vendedores 
+    const vendedoresFiltrados = selectedVendedor === "todos"
+      ? vendedores
       : vendedores.filter(vendedor => vendedor.idPersonal.toString() === selectedVendedor.toString());
-    
+
     // Inicializar datos para cada vendedor filtrado
     vendedoresFiltrados.forEach(vendedor => {
       datosPorVendedor[vendedor.idPersonal] = {
         nombre: vendedor.Nombre || "No disponible",
         totalSolicitudes: 0,
         preAprobadas: 0, // Total - No Aplica -- EN REALIDAD ES GESTIONADO
-		preaprobadoReal: 0, // Estado 1
+        preaprobadoReal: 0, // Estado 1
         noAplica: 0,     // Estado 5
         aprobado: 0,     // Estado 2
         rechazado: 0,    // Estado 4
         facturadas: 0,   // Estado 6
-		caducadas: 0	 // Estado 7
+        caducadas: 0	 // Estado 7
       };
     });
-    
+
     // Procesar cada solicitud que corresponda a la bodega seleccionada
     solicitudesData.forEach(solicitud => {
       // Solo procesar solicitudes de la bodega seleccionada
       if (solicitud.Bodega.toString() === selectedBodega.toString()) {
         const vendedorId = solicitud.Vendedor || solicitud.idVendedor;
-        
+
         if (datosPorVendedor[vendedorId]) {
           datosPorVendedor[vendedorId].totalSolicitudes++;
-          
+
           switch (solicitud.Estado) {
-			case 1: // PRE APROBADO
-			  datosPorVendedor[vendedorId].preaprobadoReal++;
-              datosPorVendedor[vendedorId].preAprobadas++;	
-			  break;
+            case 1: // PRE APROBADO
+              datosPorVendedor[vendedorId].preaprobadoReal++;
+              datosPorVendedor[vendedorId].preAprobadas++;
+              break;
             case 2: // APROBADO
               datosPorVendedor[vendedorId].aprobado++;
               datosPorVendedor[vendedorId].preAprobadas++;
@@ -391,7 +402,7 @@ export function Dashboards() {
               datosPorVendedor[vendedorId].facturadas++;
               datosPorVendedor[vendedorId].preAprobadas++;
               break;
-			case 7: // CADUCADA
+            case 7: // CADUCADA
               datosPorVendedor[vendedorId].caducadas++;
               datosPorVendedor[vendedorId].preAprobadas++;
               break;
@@ -402,7 +413,7 @@ export function Dashboards() {
         }
       }
     });
-    
+
     return Object.values(datosPorVendedor);
   };
 
@@ -410,27 +421,27 @@ export function Dashboards() {
   const calcularPorcentajes = (datos) => {
     const totales = calcularTotales(datos);
     const total = totales.totalSolicitudes;
-    
+
     if (total === 0) {
       return {
-		preaprobadoReal: 0,
+        preaprobadoReal: 0,
         preAprobadas: 0,
         noAplica: 0,
         aprobado: 0,
         rechazado: 0,
         facturadas: 0,
-		caducadas: 0
+        caducadas: 0
       };
     }
-    
+
     return {
       preAprobadas: ((totales.preAprobadas / total) * 100).toFixed(1),
       noAplica: ((totales.noAplica / total) * 100).toFixed(1),
-	  preaprobadoReal: ((totales.preaprobadoReal / totales.preAprobadas) * 100).toFixed(1),
+      preaprobadoReal: ((totales.preaprobadoReal / totales.preAprobadas) * 100).toFixed(1),
       aprobado: ((totales.aprobado / totales.preAprobadas) * 100).toFixed(1),
       rechazado: ((totales.rechazado / totales.preAprobadas) * 100).toFixed(1),
       facturadas: ((totales.facturadas / totales.preAprobadas) * 100).toFixed(1),
-	  caducadas: ((totales.caducadas / totales.preAprobadas) * 100).toFixed(1)
+      caducadas: ((totales.caducadas / totales.preAprobadas) * 100).toFixed(1)
     };
   };
 
@@ -440,20 +451,20 @@ export function Dashboards() {
       totalSolicitudes: total.totalSolicitudes + item.totalSolicitudes,
       preAprobadas: total.preAprobadas + item.preAprobadas,
       noAplica: total.noAplica + item.noAplica,
-	  preaprobadoReal: total.preaprobadoReal + item.preaprobadoReal,
+      preaprobadoReal: total.preaprobadoReal + item.preaprobadoReal,
       aprobado: total.aprobado + item.aprobado,
       rechazado: total.rechazado + item.rechazado,
       facturadas: total.facturadas + item.facturadas,
-	  caducadas: total.caducadas + item.caducadas
+      caducadas: total.caducadas + item.caducadas
     }), {
       totalSolicitudes: 0,
       preAprobadas: 0,
-	  preaprobadoReal: 0,
+      preaprobadoReal: 0,
       noAplica: 0,
       aprobado: 0,
       rechazado: 0,
       facturadas: 0,
-	  caducadas: 0
+      caducadas: 0
     });
   };
 
@@ -537,7 +548,7 @@ export function Dashboards() {
                     className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     value={selectedBodega}
                     onChange={handleBodegaChange}
-					disabled={userData?.idGrupo === 23}
+                    disabled={userData?.idGrupo === 23}
                   >
                     <option value="todos">Todos</option>
                     {bodegas.length > 0 ? (
@@ -617,7 +628,7 @@ export function Dashboards() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
             <h3 className="text-xl font-bold text-white">Solicitudes por Local</h3>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -626,7 +637,7 @@ export function Dashboards() {
                     Local
                   </th>
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                    Solicitudes<br/>Ingresadas
+                    Solicitudes<br />Ingresadas
                   </th>
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     Gestionados
@@ -634,8 +645,8 @@ export function Dashboards() {
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     No Aplica
                   </th>
-				  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                    Pre<br/>Aprobados
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    Pre<br />Aprobados
                   </th>
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     Aprobado
@@ -646,7 +657,7 @@ export function Dashboards() {
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     Facturadas
                   </th>
-				  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     CADUCADAS
                   </th>
                 </tr>
@@ -672,7 +683,7 @@ export function Dashboards() {
                         {bodega.noAplica}
                       </span>
                     </td>
-					<td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
                       <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
                         {bodega.preaprobadoReal}
                       </span>
@@ -692,14 +703,14 @@ export function Dashboards() {
                         {bodega.facturadas}
                       </span>
                     </td>
-					<td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
                       <span className="inline-flex items-center justify-center w-10 h-6 bg-gray-300 text-black-800 rounded text-xs font-semibold">
                         {bodega.caducadas}
                       </span>
                     </td>
                   </tr>
                 ))}
-                
+
                 {/* Fila de totales */}
                 <tr className="bg-gray-100 font-bold border-t-2 border-gray-300">
                   <td className="px-6 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
@@ -720,7 +731,7 @@ export function Dashboards() {
                       {calcularTotales(procesarDatosPorBodega()).noAplica}
                     </span>
                   </td>
-				  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
                     <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-200 text-blue-900 rounded text-xs font-bold">
                       {calcularTotales(procesarDatosPorBodega()).preaprobadoReal}
                     </span>
@@ -740,13 +751,13 @@ export function Dashboards() {
                       {calcularTotales(procesarDatosPorBodega()).facturadas}
                     </span>
                   </td>
-				  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
                     <span className="inline-flex items-center justify-center w-10 h-6 bg-gray-200 text-gray-900 rounded text-xs font-bold">
                       {calcularTotales(procesarDatosPorBodega()).caducadas}
                     </span>
                   </td>
                 </tr>
-                
+
                 {/* Fila de porcentajes */}
                 <tr className="bg-blue-50 border-t border-gray-200">
                   <td className="px-6 py-2 whitespace-nowrap text-xs font-semibold text-blue-900">
@@ -761,7 +772,7 @@ export function Dashboards() {
                   <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                     {calcularPorcentajes(procesarDatosPorBodega()).noAplica}%
                   </td>
-				  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                     {calcularPorcentajes(procesarDatosPorBodega()).preaprobadoReal}%
                   </td>
                   <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
@@ -773,14 +784,14 @@ export function Dashboards() {
                   <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                     {calcularPorcentajes(procesarDatosPorBodega()).facturadas}%
                   </td>
-				  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                     {calcularPorcentajes(procesarDatosPorBodega()).caducadas}%
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          
+
           {/* Mensaje cuando no hay datos */}
           {solicitudesData.length === 0 && (
             <div className="px-6 py-8 text-center text-gray-500">
@@ -798,7 +809,7 @@ export function Dashboards() {
                 Solicitudes por Vendedor - {bodegas.find(b => b.b_Bodega.toString() === selectedBodega.toString())?.b_Nombre}
               </h3>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -807,7 +818,7 @@ export function Dashboards() {
                       Vendedor
                     </th>
                     <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                      Solicitudes<br/>Ingresadas
+                      Solicitudes<br />Ingresadas
                     </th>
                     <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                       Gestionados
@@ -815,7 +826,7 @@ export function Dashboards() {
                     <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                       No Aplica
                     </th>
-					<th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                       Pre Aprobado
                     </th>
                     <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
@@ -827,7 +838,7 @@ export function Dashboards() {
                     <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                       Facturadas
                     </th>
-					<th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                    <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                       Caducadas
                     </th>
                   </tr>
@@ -853,7 +864,7 @@ export function Dashboards() {
                           {vendedor.noAplica}
                         </span>
                       </td>
-					  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
                         <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
                           {vendedor.preaprobadoReal}
                         </span>
@@ -873,14 +884,14 @@ export function Dashboards() {
                           {vendedor.facturadas}
                         </span>
                       </td>
-					  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
                         <span className="inline-flex items-center justify-center w-10 h-6 bg-gray-300 text-gray-800 rounded text-xs font-semibold">
                           {vendedor.caducadas}
                         </span>
                       </td>
                     </tr>
                   ))}
-                  
+
                   {/* Fila de totales para vendedores */}
                   {procesarDatosPorVendedor().length > 0 && (
                     <>
@@ -903,7 +914,7 @@ export function Dashboards() {
                             {calcularTotales(procesarDatosPorVendedor()).noAplica}
                           </span>
                         </td>
-						<td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
                           <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-200 text-blue-900 rounded text-xs font-bold">
                             {calcularTotales(procesarDatosPorVendedor()).preaprobadoReal}
                           </span>
@@ -923,13 +934,13 @@ export function Dashboards() {
                             {calcularTotales(procesarDatosPorVendedor()).facturadas}
                           </span>
                         </td>
-						<td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
                           <span className="inline-flex items-center justify-center w-10 h-6 bg-gray-200 text-gray-900 rounded text-xs font-bold">
                             {calcularTotales(procesarDatosPorVendedor()).caducadas}
                           </span>
                         </td>
                       </tr>
-                      
+
                       {/* Fila de porcentajes para vendedores */}
                       <tr className="bg-green-50 border-t border-gray-200">
                         <td className="px-6 py-2 whitespace-nowrap text-xs font-semibold text-green-900">
@@ -944,7 +955,7 @@ export function Dashboards() {
                         <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                           {calcularPorcentajes(procesarDatosPorVendedor()).noAplica}%
                         </td>
-						<td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                           {calcularPorcentajes(procesarDatosPorVendedor()).preaprobadoReal}%
                         </td>
                         <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
@@ -956,7 +967,7 @@ export function Dashboards() {
                         <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                           {calcularPorcentajes(procesarDatosPorVendedor()).facturadas}%
                         </td>
-						<td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                        <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                           {calcularPorcentajes(procesarDatosPorVendedor()).caducadas}%
                         </td>
                       </tr>
@@ -965,7 +976,7 @@ export function Dashboards() {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Mensaje cuando no hay datos de vendedores */}
             {procesarDatosPorVendedor().length === 0 && (
               <div className="px-6 py-8 text-center text-gray-500">
@@ -981,7 +992,7 @@ export function Dashboards() {
           <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
             <h3 className="text-xl font-bold text-white">Solicitudes por Segmento</h3>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -990,7 +1001,7 @@ export function Dashboards() {
                     Segmento
                   </th>
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
-                    Solicitudes<br/>Ingresadas
+                    Solicitudes<br />Ingresadas
                   </th>
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     Gestionados
@@ -998,7 +1009,7 @@ export function Dashboards() {
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     No Aplica
                   </th>
-				  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     Pre Aprobado
                   </th>
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
@@ -1010,7 +1021,7 @@ export function Dashboards() {
                   <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     Facturadas
                   </th>
-				  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
+                  <th className="px-6 py-2 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">
                     CADUCADAS
                   </th>
                 </tr>
@@ -1036,7 +1047,7 @@ export function Dashboards() {
                         {segmento.noAplica}
                       </span>
                     </td>
-					<td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
                       <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
                         {segmento.preaprobadoReal}
                       </span>
@@ -1056,14 +1067,14 @@ export function Dashboards() {
                         {segmento.facturadas}
                       </span>
                     </td>
-					<td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-b border-gray-100">
                       <span className="inline-flex items-center justify-center w-10 h-6 bg-gray-300 text-black-800 rounded text-xs font-semibold">
                         {segmento.caducadas}
                       </span>
                     </td>
                   </tr>
                 ))}
-                
+
                 {/* Fila de totales para segmentos */}
                 {procesarDatosPorSegmento().length > 0 && (
                   <>
@@ -1086,7 +1097,7 @@ export function Dashboards() {
                           {calcularTotales(procesarDatosPorSegmento()).noAplica}
                         </span>
                       </td>
-					  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
                         <span className="inline-flex items-center justify-center w-10 h-6 bg-blue-200 text-blue-900 rounded text-xs font-bold">
                           {calcularTotales(procesarDatosPorSegmento()).preaprobadoReal}
                         </span>
@@ -1106,13 +1117,13 @@ export function Dashboards() {
                           {calcularTotales(procesarDatosPorSegmento()).facturadas}
                         </span>
                       </td>
-					  <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
+                      <td className="px-6 py-2 whitespace-nowrap text-sm text-center text-gray-900">
                         <span className="inline-flex items-center justify-center w-10 h-6 bg-gray-200 text-gray-900 rounded text-xs font-bold">
                           {calcularTotales(procesarDatosPorSegmento()).caducadas}
                         </span>
                       </td>
                     </tr>
-                    
+
                     {/* Fila de porcentajes para segmentos */}
                     <tr className="bg-purple-50 border-t border-gray-200">
                       <td className="px-6 py-2 whitespace-nowrap text-xs font-semibold text-purple-900">
@@ -1127,7 +1138,7 @@ export function Dashboards() {
                       <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                         {calcularPorcentajes(procesarDatosPorSegmento()).noAplica}%
                       </td>
-					  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                         {calcularPorcentajes(procesarDatosPorSegmento()).preaprobadoReal}%
                       </td>
                       <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
@@ -1139,7 +1150,7 @@ export function Dashboards() {
                       <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                         {calcularPorcentajes(procesarDatosPorSegmento()).facturadas}%
                       </td>
-					  <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
+                      <td className="px-6 py-2 whitespace-nowrap text-xs text-center font-semibold">
                         {calcularPorcentajes(procesarDatosPorSegmento()).caducadas}%
                       </td>
                     </tr>
@@ -1148,7 +1159,7 @@ export function Dashboards() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Mensaje cuando no hay datos de segmentos */}
           {procesarDatosPorSegmento().length === 0 && (
             <div className="px-6 py-8 text-center text-gray-500">

@@ -9,23 +9,32 @@ const useBodegaUsuario = () => {
   const [analista, setAnalista] = useState(null);
   const [loading, setLoading] = useState(false);  
   const [error, setError] = useState(null);  
-  const fetchBodegaUsuario = async (userId, idTipoFactura, fecha, recibeConsignacion) => {
-    setLoading(true);  
-    setError(null);    
-    try {
-      const params = { userId, idTipoFactura, fecha, recibeConsignacion };
 
-      const response = await axios.get(APIURL.getUsuarioBodega(), { params });
+ const fetchBodegaUsuario = async (userId, idTipoFactura, fecha, recibeConsignacion, bodegas = []) => {
+  setLoading(true);
+  setError(null);
+  
+  try {
+    // Construye el body con los filtros
+    const body = {
+      userId,
+      idTipoFactura,
+      fecha,
+      recibeConsignacion,
+      bodega: bodegas  // array de bodegas
+    };
 
-      setData(response.data);
-    } catch (err) {
+    const response = await axios.post(APIURL.getUsuarioBodega(), body);
 
+    setData(response.data);
+  } catch (err) {
+    console.error(err);
+    setError("Hubo un error al obtener los datos.");
+  } finally {
+    setLoading(false);
+  }
+};
 
-      setError("Hubo un error al obtener los datos.");
-    } finally {
-      setLoading(false);  
-    }
-  };
 
   const listaVendedoresporBodega = async (fecha, bodega, nivel) => {
     setLoading(true);  

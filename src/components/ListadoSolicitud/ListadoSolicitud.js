@@ -122,13 +122,13 @@ export function ListadoSolicitud() {
 
   const [recargar, setRecargar] = useState(false);
   const [loadingConsulta, setLoadingConsulta] = useState(false);
-  
+
   // Caché para consultas que no cambian frecuentemente
   const [cacheTipoConsulta, setCacheTipoConsulta] = useState(null);
   const [cacheTipoCliente, setCacheTipoCliente] = useState(null);
   const [cacheAnalistas, setCacheAnalistas] = useState(null);
   const [cacheOperadores, setCacheOperadores] = useState(null);
-  
+
   // Función para limpiar caché (útil cuando hay actualizaciones)
   const limpiarCache = () => {
     setCacheTipoConsulta(null);
@@ -137,7 +137,7 @@ export function ListadoSolicitud() {
     setCacheOperadores(null);
     console.log('Caché limpiado - se recargarán los datos en la próxima consulta');
   };
-  
+
   const [selectedBodega, setSelectedBodega] = useState(sessionStorage.getItem('filtroBodega') || "todos");
   const [selectedVendedor, setSelectedVendedor] = useState(sessionStorage.getItem('filtroVendedor') || "todos");
   const [analistaSelected, setAnalistaSelected] = useState(sessionStorage.getItem('filtroAnalista') || "todos");
@@ -1521,7 +1521,7 @@ export function ListadoSolicitud() {
       setTipoConsulta(cacheTipoConsulta);
       return;
     }
-    
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(APIURL.getTipoConsulta(), {
@@ -1562,13 +1562,13 @@ export function ListadoSolicitud() {
       );
       return;
     }
-    
+
     try {
       const response = await axios.get(APIURL.getTipoCliente());
       if (response.status === 200) {
         // Guardar en caché
         setCacheTipoCliente(response.data);
-        
+
         // Crear un mapeo de idTipoCliente a Nombre
         const tipoMap = response.data.reduce((acc, item) => {
           acc[item.idTipoCliente] = item.Nombre;
@@ -1748,7 +1748,7 @@ export function ListadoSolicitud() {
       setOpenDialog3(true);
       return;
     }
-    
+
     try {
       const response = await axios.get(APIURL.analistacredito(), {
         headers: { method: "GET", cache: "no-store" },
@@ -1756,7 +1756,7 @@ export function ListadoSolicitud() {
 
       // Guardar en caché
       setCacheAnalistas(response.data);
-      
+
       const activos = response.data.filter((a) => a.Estado === 1);
       setAnalistasDisponibles(activos);
       setOpenDialog3(true);
@@ -1824,7 +1824,7 @@ export function ListadoSolicitud() {
       setOperadores(cacheOperadores);
       return;
     }
-    
+
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(APIURL.getUsuarioPorROL(16), {
@@ -1878,18 +1878,14 @@ export function ListadoSolicitud() {
       }
 
 
-      // Realizar la consulta con los parámetros ajustados
-      const response = await axios.get(APIURL.getCreSolicitudCredito(), {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
+      const response = await axios.post(
+        APIURL.getCreSolicitudCredito(), // URL del endpoint POST
+        {
           limit: itemsPerPage,
           offset: offset,
-          fechaInicio: fechaInicio,
-          fechaFin: fechaFin,
-          bodega: bodegasId, // Pasar el array de bodegas al backend
+          fechaInicio: fechaInicio,       // debe ser string en formato ISO
+          fechaFin: fechaFin,             // debe ser string en formato ISO
+          bodega: bodegasId,              // array de números
           estado: estado === "todos" ? 0 : estado,
           vendedor: selectedVendedor === "todos" ? 0 : selectedVendedor,
           analista: analistaSelected === "todos" ? 0 : analistaSelected,
@@ -1903,9 +1899,17 @@ export function ListadoSolicitud() {
           cedula: cedula?.trim() || undefined,
           operador: operadorSelected === "todos" ? 0 : operadorSelected
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
-      if (response.status === 200) {
+
+      if (response.status === 201) {
+        console.log("Respuesta de solicitudes:", response.data);
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
 

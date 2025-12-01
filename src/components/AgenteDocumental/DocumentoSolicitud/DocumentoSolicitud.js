@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { APIURL } from "../../../configApi/apiConfig";
 import axios from "../../../configApi/axiosConfig";
 export function DocumentoSolicitud() {
-  const { data, loading, error, listaVendedoresporBodega , fetchBodegaUsuario, vendedor , analista , listadoAnalista } = useBodegaUsuario();
+  const { data, loading, error, listaVendedoresporBodega, fetchBodegaUsuario, vendedor, analista, listadoAnalista } = useBodegaUsuario();
   const { userData } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [clientesList, setClientesList] = useState([]);
@@ -21,8 +21,8 @@ export function DocumentoSolicitud() {
   const navigate = useNavigate();
   const [selectedEstado, setSelectedEstado] = useState("");
   const [analistaSelected, setAnalistaSelected] = useState("todos");
-    const [dataBodega, setDataBodega] = useState([]);
-    const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
+  const [dataBodega, setDataBodega] = useState([]);
+  const today = new Date().toISOString().split("T")[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
   const [estado, setEstado] = useState("todos");
 
   const [selectedVendedor, setSelectedVendedor] = useState("todos");
@@ -32,7 +32,7 @@ export function DocumentoSolicitud() {
   const vendedores = vendedor || []; // Safely access the vendedores data
 
   const [selectDeshabilitado, setSelectDeshabilitado] = useState(false);
-const [fechaInicio, setFechaInicio] = useState(today);
+  const [fechaInicio, setFechaInicio] = useState(today);
   const [fechaFin, setFechaFin] = useState(today);
 
 
@@ -76,24 +76,24 @@ const [fechaInicio, setFechaInicio] = useState(today);
   }, [userData?.Nombre, analistas]);
 
 
-     useEffect(() => {
-       if (selectedBodega !== "todos") {
-         fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
-       } else {
-         fetchSolicitudes();
-       }
-     }, [selectedBodega, fechaInicio]);
-   
-     const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
-       try {
-         await listaVendedoresporBodega(fecha, bodega, nivel);
-       } catch (err) {
-         console.error("Error al obtener datos de la bodega:", err);
-       }
-    };
+  useEffect(() => {
+    if (selectedBodega !== "todos") {
+      fecthaUsuarioBodega(fechaInicio, selectedBodega, 0);
+    } else {
+      fetchSolicitudes();
+    }
+  }, [selectedBodega, fechaInicio]);
 
-  
-  
+  const fecthaUsuarioBodega = async (fecha, bodega, nivel) => {
+    try {
+      await listaVendedoresporBodega(fecha, bodega, nivel);
+    } catch (err) {
+      console.error("Error al obtener datos de la bodega:", err);
+    }
+  };
+
+
+
   const fecthAnalista = async () => {
     try {
       await listadoAnalista();
@@ -113,22 +113,22 @@ const [fechaInicio, setFechaInicio] = useState(today);
     const fetchData = async () => {
       try {
         await fetchBodega(); // Fetch the bodega data
-       await fecthAnalista() 
-       //// await fetchClientes();
-         // Fetch the client data based on the selected filters
+        await fecthAnalista()
+        //// await fetchClientes();
+        // Fetch the client data based on the selected filters
       } catch (error) {
         console.error("Error al cargar los datos iniciales:", error);
       }
     };
 
     fetchData();
-  }, [selectedBodega, searchTerm, offset, limit , analistaSelected ]); // Rerun the fetch on these changes
+  }, [selectedBodega, searchTerm, offset, limit, analistaSelected]); // Rerun the fetch on these changes
 
   useEffect(() => {
     if (dataBodega.length > 0 && userData?.idUsuario) {
       fetchSolicitudes();
     }
-  }, [dataBodega, selectedBodega, selectedVendedor, analistaSelected , estado]);
+  }, [dataBodega, selectedBodega, selectedVendedor, analistaSelected, estado]);
 
   const fetchBodega = async () => {
     const userId = userData.idUsuario;
@@ -196,27 +196,24 @@ const [fechaInicio, setFechaInicio] = useState(today);
 
   const fetchSolicitudes = async () => {
     let bodegasId = [];
-  
-    if ( dataBodega.length === 0) return;
-  
 
-    
+    if (dataBodega.length === 0) return;
+
+
+
     if (selectedBodega !== "todos") {
       bodegasId = [selectedBodega];
     } else {
       bodegasId = bodegasIds;
     }
-  
+
     try {
       const token = localStorage.getItem("token");
-    ///  const offset = (currentPage - 1) * itemsPerPage;
-  
-      const response = await axios.get(APIURL.getCreSolicitudCredito(), {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
+      ///  const offset = (currentPage - 1) * itemsPerPage;
+
+      const response = await axios.post(
+        APIURL.getCreSolicitudCredito(), // URL del endpoint POST
+        {
           limit: limit,
           offset: offset,
           fechaInicio: fechaInicio,
@@ -226,17 +223,23 @@ const [fechaInicio, setFechaInicio] = useState(today);
           vendedor: selectedVendedor === "todos" ? 0 : selectedVendedor,
           analista: analistaSelected === "todos" ? 0 : analistaSelected,
         },
-      });
-       // Enriquecer cada cliente con datos del vendedor
-    
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      // Enriquecer cada cliente con datos del vendedor
+
       const result = response.data;
-  
+
       if (result && result.data) {
         // Adaptar aquí igual que antes:
         const filteredClientes = result.data.filter(
           (cliente) => cliente.idEstadoVerificacionDocumental > 1
         );
-  
+
         setClientesList(filteredClientes);
         setTotalCount(result.Total); // O `result.total` si tu backend ahora manda el total real
       } else {
@@ -315,84 +318,84 @@ const [fechaInicio, setFechaInicio] = useState(today);
   return (
 
     <div className="min-h-screen bg-gray-100 py-8 px-6">
-    <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
-  
-      {/* Cargando mientras se obtienen los datos */}
-      {loading && (
-        <div className="text-center py-4">
-          <p className="text-gray-600 font-semibold text-lg">Cargando información...</p>
-        </div>
-      )}
-  
-      {/* Error handling */}
-      {error && (
-        <div className="text-center py-4">
-          <p className="text-red-600 font-semibold text-lg">{error}</p>
-        </div>
-      )}
-  
-      {/* Filtros de selección y búsqueda */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        {/* Select de Bodegas */}
+      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
 
-
-  {/*Select fecha inicio */}
-        <div className="sm:w-full">
-          <label htmlFor="fecha-inicio" className="block text-gray-700 font-semibold mb-2">
-            Fecha Inicio
-          </label>
-          <input
-            type="date"
-            id="fecha-inicio"
-            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
-            value={fechaInicio}
-            onChange={(e) => setFechaInicio(e.target.value)}
-          />
-        </div>
-        {/* Select fecha fin */}
-        <div className="sm:w-full">
-          <label htmlFor="fecha-fin" className="block text-gray-700 font-semibold mb-2">
-            Fecha Fin
-          </label>
-          <input
-            type="date"
-            id="fecha-fin"
-            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
-            value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
-          />
-        </div>
-
-        {/*Select fecha fin */}
-
-        {!loading && (
-          <div className="sm:w-full">
-            <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2">
-              Seleccionar Bodega
-            </label>
-            <select
-              id="bodega-select"
-              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
-              value={selectedBodega}
-              onChange={handleBodegaChange}
-            >
-              <option value="todos">todos</option>
-              {bodegas.length > 0 ? (
-                bodegas.map((bodega) => (
-                  <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
-                    {bodega.b_Nombre}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>No se encontraron bodegas.</option>
-              )}
-            </select>
+        {/* Cargando mientras se obtienen los datos */}
+        {loading && (
+          <div className="text-center py-4">
+            <p className="text-gray-600 font-semibold text-lg">Cargando información...</p>
           </div>
         )}
 
+        {/* Error handling */}
+        {error && (
+          <div className="text-center py-4">
+            <p className="text-red-600 font-semibold text-lg">{error}</p>
+          </div>
+        )}
 
-      
-        {/* Buscador de Clientes 
+        {/* Filtros de selección y búsqueda */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          {/* Select de Bodegas */}
+
+
+          {/*Select fecha inicio */}
+          <div className="sm:w-full">
+            <label htmlFor="fecha-inicio" className="block text-gray-700 font-semibold mb-2">
+              Fecha Inicio
+            </label>
+            <input
+              type="date"
+              id="fecha-inicio"
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+            />
+          </div>
+          {/* Select fecha fin */}
+          <div className="sm:w-full">
+            <label htmlFor="fecha-fin" className="block text-gray-700 font-semibold mb-2">
+              Fecha Fin
+            </label>
+            <input
+              type="date"
+              id="fecha-fin"
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+              value={fechaFin}
+              onChange={(e) => setFechaFin(e.target.value)}
+            />
+          </div>
+
+          {/*Select fecha fin */}
+
+          {!loading && (
+            <div className="sm:w-full">
+              <label htmlFor="bodega-select" className="block text-gray-700 font-semibold mb-2">
+                Seleccionar Bodega
+              </label>
+              <select
+                id="bodega-select"
+                className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+                value={selectedBodega}
+                onChange={handleBodegaChange}
+              >
+                <option value="todos">todos</option>
+                {bodegas.length > 0 ? (
+                  bodegas.map((bodega) => (
+                    <option key={bodega.b_Bodega} value={bodega.b_Bodega}>
+                      {bodega.b_Nombre}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>No se encontraron bodegas.</option>
+                )}
+              </select>
+            </div>
+          )}
+
+
+
+          {/* Buscador de Clientes 
         <div className="sm:w-full">
           <label htmlFor="cliente-search" className="block text-gray-700 font-semibold mb-2">
             Buscar Cliente
@@ -405,147 +408,147 @@ const [fechaInicio, setFechaInicio] = useState(today);
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>*/}
-  
-        {/* Select de Estado */}
-        <div className="sm:w-full">
-          <label className="block text-gray-700 font-semibold mb-2">Estados:</label>
-          <select
-            id="estado-select"
-            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
-            value={estado}
-            onChange={(e) => setEstado(e.target.value)}
-            label="Estado"
 
-          >
-          {estadosOpciones.map((estado) => (
-            <option key={estado.value} value={estado.value}>
-              {estado.label}
-            </option>
-          ))}
-          </select>
-        </div>
+          {/* Select de Estado */}
+          <div className="sm:w-full">
+            <label className="block text-gray-700 font-semibold mb-2">Estados:</label>
+            <select
+              id="estado-select"
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+              value={estado}
+              onChange={(e) => setEstado(e.target.value)}
+              label="Estado"
 
-
-       {/* Select Analista */}
-
-        <div className="sm:w-full">
-          <label className="block text-gray-700 font-semibold mb-2">Analista:</label>
-          <select
-            id="analista-select"
-            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
-            value={analistaSelected}
-            onChange={handleAnalistaChange}
-            disabled={selectDeshabilitado} //  solo si hubo match
-
-          >
-            <option value="">Todos</option>
-            {analistas.map((vendedor) => (
-                  <option key={vendedor.idUsuario} value={vendedor.idUsuario}>
-                  {vendedor.Nombre?.trim() || "No disponible"}
-                  </option>
-                ))
-              }
-          </select>
-      </div>
-
-
-    {/* Select Vendedor */}
-      <div className="sm:w-full">
-          <label className="block text-gray-700 font-semibold mb-2">Vendedor:</label>
-          <select
-            id="vendedor-select"
-            className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
-            value={selectedVendedor}
-            onChange={handleVendedorChange}
-          >
-            <option value="">Todos</option>
-            {vendedores.map((vendedor) => (
-              <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
-                {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
-                </option>
-            ))}
-          </select>
-        </div>
-      </div>
-  
-      {/* Clientes List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredClientes.length > 0 ? (
-          filteredClientes.map((cliente) => (
-            <div
-              key={cliente.idCre_SolicitudWeb}
-              className={`relative p-6 bg-white rounded-lg shadow-lg transition-all duration-300 border-l-4 
-                ${cliente.idEstadoVerificacionDocumental === 2 ? 'border-[#f1c40f]' : // Yellow
-                cliente.idEstadoVerificacionDocumental === 3 ? 'border-[#f39c12]' : // Orange
-                cliente.idEstadoVerificacionDocumental === 4 ? 'border-[#2d3689]' : // Blue
-                'border-[#d0160e]'}`} // Red for "Rejected"
             >
-              {/* Foto del cliente */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  {cliente.Foto ? (
-                    <img
-                      src={cliente.Foto}
-                      alt={`${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 shadow-sm mr-4"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold">
-                      {cliente.PrimerNombre.charAt(0)}{cliente.ApellidoPaterno.charAt(0)}
-                    </div>
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-800">{cliente.PrimerNombre} {cliente.ApellidoPaterno}</h2>
-                    <p className="text-gray-600 text-sm">{cliente.NumeroSolicitud}</p>
-                  </div>
-                </div>
-  
-                {/* Estado */}
-                <p className={`text-sm font-semibold ${cliente.idEstadoVerificacionDocumental === 2 ? 'text-[#f1c40f]' :
-                  cliente.idEstadoVerificacionDocumental === 3 ? 'text-[#f39c12]' :
-                  cliente.idEstadoVerificacionDocumental === 4 ? 'text-[#2d3689]' :
-                  'text-[#d0160e]'}`}>
-                  {cliente.idEstadoVerificacionDocumental === 2 ? 'Revisión' :
-                    cliente.idEstadoVerificacionDocumental === 3 ? 'Corrección' :
-                    cliente.idEstadoVerificacionDocumental === 4 ? 'Aprobado' :
-                    'Rechazado'}
-                </p>
-              </div>
-  
-              {/* Detalles */}
-              <div className="mt-4">
-                <p className="text-gray-600 text-sm flex items-center mb-2">
-                  <NumbersIcon fontSize="small" />  {cliente.NumeroSolicitud}
-                </p>
-                <p className="text-gray-600 text-sm flex items-center mb-2">
-                  <BadgeIcon fontSize="small" />  {cliente.Cedula}
-                </p>
-                <p className="text-gray-600 text-sm flex items-center mb-2">
-                  <AlternateEmailIcon fontSize="small" />  {cliente.Email}
-                </p>
-                <p className="text-gray-600 text-sm flex items-center mb-2">
-                  <PhoneIcon fontSize="small" />  {cliente.Celular}
-                </p>
-              </div>
-  
-              {/* Botón de detalles */}
-              <button
-                onClick={() => handleEyeClick(cliente)}
-                className="mt-4 inline-block text-[#2d3689] hover:text-[#1a2a6c] font-semibold"
+              {estadosOpciones.map((estado) => (
+                <option key={estado.value} value={estado.value}>
+                  {estado.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+
+          {/* Select Analista */}
+
+          <div className="sm:w-full">
+            <label className="block text-gray-700 font-semibold mb-2">Analista:</label>
+            <select
+              id="analista-select"
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+              value={analistaSelected}
+              onChange={handleAnalistaChange}
+              disabled={selectDeshabilitado} //  solo si hubo match
+
+            >
+              <option value="">Todos</option>
+              {analistas.map((vendedor) => (
+                <option key={vendedor.idUsuario} value={vendedor.idUsuario}>
+                  {vendedor.Nombre?.trim() || "No disponible"}
+                </option>
+              ))
+              }
+            </select>
+          </div>
+
+
+          {/* Select Vendedor */}
+          <div className="sm:w-full">
+            <label className="block text-gray-700 font-semibold mb-2">Vendedor:</label>
+            <select
+              id="vendedor-select"
+              className="w-full p-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#2d3689]"
+              value={selectedVendedor}
+              onChange={handleVendedorChange}
+            >
+              <option value="">Todos</option>
+              {vendedores.map((vendedor) => (
+                <option key={vendedor.idPersonal} value={vendedor.idPersonal}>
+                  {`${vendedor.Nombre || ""}`.trim() || "No disponible"}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Clientes List */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredClientes.length > 0 ? (
+            filteredClientes.map((cliente) => (
+              <div
+                key={cliente.idCre_SolicitudWeb}
+                className={`relative p-6 bg-white rounded-lg shadow-lg transition-all duration-300 border-l-4 
+                ${cliente.idEstadoVerificacionDocumental === 2 ? 'border-[#f1c40f]' : // Yellow
+                    cliente.idEstadoVerificacionDocumental === 3 ? 'border-[#f39c12]' : // Orange
+                      cliente.idEstadoVerificacionDocumental === 4 ? 'border-[#2d3689]' : // Blue
+                        'border-[#d0160e]'}`} // Red for "Rejected"
               >
-                Ver detalles
-              </button>
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500 col-span-full">No se encontraron resultados.</p>
-        )}
+                {/* Foto del cliente */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {cliente.Foto ? (
+                      <img
+                        src={cliente.Foto}
+                        alt={`${cliente.PrimerNombre} ${cliente.ApellidoPaterno}`}
+                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 shadow-sm mr-4"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold">
+                        {cliente.PrimerNombre.charAt(0)}{cliente.ApellidoPaterno.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-800">{cliente.PrimerNombre} {cliente.ApellidoPaterno}</h2>
+                      <p className="text-gray-600 text-sm">{cliente.NumeroSolicitud}</p>
+                    </div>
+                  </div>
+
+                  {/* Estado */}
+                  <p className={`text-sm font-semibold ${cliente.idEstadoVerificacionDocumental === 2 ? 'text-[#f1c40f]' :
+                    cliente.idEstadoVerificacionDocumental === 3 ? 'text-[#f39c12]' :
+                      cliente.idEstadoVerificacionDocumental === 4 ? 'text-[#2d3689]' :
+                        'text-[#d0160e]'}`}>
+                    {cliente.idEstadoVerificacionDocumental === 2 ? 'Revisión' :
+                      cliente.idEstadoVerificacionDocumental === 3 ? 'Corrección' :
+                        cliente.idEstadoVerificacionDocumental === 4 ? 'Aprobado' :
+                          'Rechazado'}
+                  </p>
+                </div>
+
+                {/* Detalles */}
+                <div className="mt-4">
+                  <p className="text-gray-600 text-sm flex items-center mb-2">
+                    <NumbersIcon fontSize="small" />  {cliente.NumeroSolicitud}
+                  </p>
+                  <p className="text-gray-600 text-sm flex items-center mb-2">
+                    <BadgeIcon fontSize="small" />  {cliente.Cedula}
+                  </p>
+                  <p className="text-gray-600 text-sm flex items-center mb-2">
+                    <AlternateEmailIcon fontSize="small" />  {cliente.Email}
+                  </p>
+                  <p className="text-gray-600 text-sm flex items-center mb-2">
+                    <PhoneIcon fontSize="small" />  {cliente.Celular}
+                  </p>
+                </div>
+
+                {/* Botón de detalles */}
+                <button
+                  onClick={() => handleEyeClick(cliente)}
+                  className="mt-4 inline-block text-[#2d3689] hover:text-[#1a2a6c] font-semibold"
+                >
+                  Ver detalles
+                </button>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 col-span-full">No se encontraron resultados.</p>
+          )}
+        </div>
+
       </div>
-  
-  </div>
-  </div>
-  
-  
+    </div>
+
+
 
   );
 }
