@@ -143,52 +143,55 @@ export function Dashboards() {
   };
 
   // Función obtener datos filtrados
-const fetchFilteredData = async () => {
-  const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega);
-  const bodegasId = selectedBodega !== "todos" ? [parseInt(selectedBodega)] : bodegasIds;
 
-  try {
-    const token = localStorage.getItem("token");
 
-    // Construir el body exactamente como lo espera el backend
-    const body = {
-      limit: 5, // ejemplo, puedes usar itemsPerPage
-      offset: 0, // ejemplo
-      fechaInicio: fechaInicio ? new Date(fechaInicio).toISOString() : undefined,
-      fechaFin: fechaFin ? new Date(fechaFin).toISOString() : undefined,
-      bodega: bodegasId,
-      estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
-      vendedor: selectedVendedor === "todos" ? 0 : parseInt(selectedVendedor),
-      analista: analistaSelected === "todos" ? 0 : parseInt(analistaSelected),
-      EstadoSolicitud: solicitud === "Todos" ? 0 : parseInt(solicitud),
-      EstadoDocumental: documental === "Todos" ? 0 : parseInt(documental),
-      EstadoTelefonica: telefonica === "Todos" ? 0 : parseInt(telefonica),
-      EstadoDomicilio: domicilio === "Todos" ? 0 : parseInt(domicilio),
-      EstadoLaboral: laboral === "Todos" ? 0 : parseInt(laboral),
-      operador: operadorSelected === "todos" ? 0 : parseInt(operadorSelected),
-    };
+  const fetchFilteredData = async () => {
+    const bodegasIds = bodegas.map((bodega) => bodega.b_Bodega);
+    let bodegasId = selectedBodega !== "todos" ? [selectedBodega] : bodegasIds;
 
-    const response = await axios.post(
-      APIURL.getCreSolicitudCredito(),
-      body, // body directo
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+    try {
+      const token = localStorage.getItem("token");
+      const params = {
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+        bodega: bodegasId,
+        estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
+        idTipoCliente: selectedTipoCliente === "todos" ? 0 : parseInt(selectedTipoCliente),
+      };
+      let filtroVendedor = selectedVendedor && selectedVendedor !== "todos"
+      if (selectedVendedor && selectedVendedor !== "todos") {
+        filtroVendedor = selectedVendedor;
       }
-    );
 
-    if (response.data && response.data.data) {
-      setSolicitudesData(response.data.data);
+      const response = await axios.post(APIURL.getCreSolicitudCredito(),
+
+        {
+          fechaInicio: fechaInicio,
+          fechaFin: fechaFin,
+          bodega: bodegasId,
+          estado: estadoFiltro === "todos" ? 0 : parseInt(estadoFiltro),
+          idTipoCliente: selectedTipoCliente === "todos" ? 0 : parseInt(selectedTipoCliente),
+          vendedor: filtroVendedor || 0
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+
+      // Actualizar el estado con los datos recibidos
+      if (response.data && response.data.data) {
+        setSolicitudesData(response.data.data);
+      }
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setSolicitudesData([]);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    setSolicitudesData([]);
-  }
-};
-
-
+  };
 
   // procesar datos por bodega
   const procesarDatosPorBodega = () => {

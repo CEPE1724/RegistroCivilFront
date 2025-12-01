@@ -547,8 +547,5 @@ export function DocumentoSolicitud() {
 
       </div>
     </div>
-
-
-
   );
 }

@@ -138,7 +138,14 @@ export function ListadoSolicitud() {
     console.log('Caché limpiado - se recargarán los datos en la próxima consulta');
   };
 
-  const [selectedBodega, setSelectedBodega] = useState(sessionStorage.getItem('filtroBodega') || "todos");
+  // Inicialización segura para evitar valores fuera de rango en el Select
+  const getInitialBodega = () => {
+    const saved = sessionStorage.getItem('filtroBodega');
+    if (!saved || saved === 'todos') return 'todos';
+    // Si el valor guardado no está en las opciones, usar 'todos'
+    return 'todos';
+  };
+  const [selectedBodega, setSelectedBodega] = useState(getInitialBodega());
   const [selectedVendedor, setSelectedVendedor] = useState(sessionStorage.getItem('filtroVendedor') || "todos");
   const [analistaSelected, setAnalistaSelected] = useState(sessionStorage.getItem('filtroAnalista') || "todos");
   const [operadorSelected, setOperadorSelected] = useState(sessionStorage.getItem('filtroOperador') || "todos");
@@ -1909,7 +1916,6 @@ export function ListadoSolicitud() {
 
 
       if (response.status === 201) {
-        console.log("Respuesta de solicitudes:", response.data);
         const totalRecords = response.data.total;
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
 

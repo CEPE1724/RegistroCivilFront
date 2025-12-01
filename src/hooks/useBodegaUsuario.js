@@ -24,6 +24,7 @@ const useBodegaUsuario = () => {
       bodega: bodegas  // array de bodegas
     };
 
+    //url de la api
     const response = await axios.post(APIURL.getUsuarioBodega(), body);
 
     setData(response.data);
