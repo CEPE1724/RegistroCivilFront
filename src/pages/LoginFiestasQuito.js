@@ -195,31 +195,38 @@ const handleOlvidoPassword = async () => {
   return (
 	  <section className="flex items-center justify-center min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
 		
-		{/* Confetti animado de fondo */}
-		<div className="absolute inset-0 overflow-hidden pointer-events-none">
-		  {[...Array(50)].map((_, i) => (
-			<div
-			  key={i}
-			  className="absolute animate-fall"
-			  style={{
-				left: `${Math.random() * 100}%`,
-				top: `-${Math.random() * 20}%`,
-				animationDelay: `${Math.random() * 5}s`,
-				animationDuration: `${5 + Math.random() * 5}s`,
-			  }}
-			>
-			  <div
-				className="w-2 h-2 rounded-full"
-				style={{
-				  background: ['#003DA5', '#DC143C', '#0052CC', '#FF1744'][Math.floor(Math.random() * 4)],
-				  transform: `rotate(${Math.random() * 360}deg)`,
-				}}
-			  />
-			</div>
-		  ))}
-		</div>
-
-		{/* Luces de fiesta - Colores de Quito */}
+	{/* Barajas de 40 flotando - Juego del Cuarenta */}
+	<div className="absolute inset-0 overflow-hidden pointer-events-none">
+	  {[...Array(30)].map((_, i) => {
+		const cartas = ['🂡', '🂢', '🂣', '🂤', '🂥', '🂦', '🂧', '🂨', '🂩', '🂪', '🂫', '🂭', '🂮', 
+		                '🂱', '🂲', '🂳', '🂴', '🂵', '🂶', '🂷', '🂸', '🂹', '🂺', '🂻', '🂽', '🂾',
+		                '🃁', '🃂', '🃃', '🃄', '🃅', '🃆', '🃇', '🃈', '🃉', '🃊', '🃋', '🃍', '🃎',
+		                '🃑', '🃒', '🃓', '🃔', '🃕', '🃖', '🃗', '🃘', '🃙', '🃚', '🃛', '🃝', '🃞'];
+		const carta = cartas[Math.floor(Math.random() * cartas.length)];
+		return (
+		  <div
+			key={i}
+			className="absolute animate-fall text-2xl"
+			style={{
+			  left: `${Math.random() * 100}%`,
+			  top: `-${Math.random() * 20}%`,
+			  animationDelay: `${Math.random() * 5}s`,
+			  animationDuration: `${6 + Math.random() * 4}s`,
+			  fontSize: '2.5rem',
+			  opacity: 1,
+			  background: 'white',
+			  borderRadius: '8px',
+			  padding: '6px 10px',
+			  boxShadow: '0 4px 15px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.5)',
+			  border: '2px solid rgba(255,255,255,0.9)',
+			  filter: 'brightness(1.1)',
+			}}
+		  >
+			{carta}
+		  </div>
+		);
+	  })}
+	</div>		{/* Luces de fiesta - Colores de Quito */}
 		<div className="absolute top-0 left-0 right-0 h-20 flex justify-around">
 		  {[...Array(15)].map((_, i) => (
 			<div
