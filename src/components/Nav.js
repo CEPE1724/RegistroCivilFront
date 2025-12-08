@@ -101,22 +101,26 @@ const Nav = ({ showButton, userData }) => {
           </Link>
         </div>
 
-			  <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center space-x-6 pointer-events-none">
+			  <div className="absolute left-1/2 transform -translate-x-1/2 hidden md:flex items-center space-x-6 pointer-events-none overflow-hidden w-[600px]">
+
+				  {/* Imagen fija */}
 				  <img
 					  src={pointLike}
 					  alt="Point Like"
-					  className="w-16 h-16 object-contain"
+					  className="w-16 h-16 object-contain flex-shrink-0"
 					  style={{
-  						  filter: "drop-shadow(20px 0px 12px rgba(0,0,0,0.6))"
-  						}}
+						  filter: "drop-shadow(20px 0px 12px rgba(0,0,0,0.6))"
+					  }}
 				  />
 
-				  <span className="text-white font-semibold text-base lg:text-base">
-					  MEJORAMOS LAS POLÍTICAS DE{" "}
-					  <span className="text-black bg-white px-2 py-0.5 rounded  text-base lg:text-base">
-						  CLIENTES RECURRENTES
-					  </span>
-				  </span>
+				  {/* Texto */}
+				  <div className="marquee-container">
+					  <div className="marquee-text">
+						  <span className="text-white font-bold text-4xl colorCycle">
+							  Mejoramos el crédito para plazos menores, revisa en la cotización
+						  </span>
+					  </div>
+				  </div>
 			  </div>
 
 
@@ -265,27 +269,51 @@ const Nav = ({ showButton, userData }) => {
 
 
       {/* Estilos CSS adicionales agregados internamente */}
-      <style>
-        {`
-    @keyframes shrink {
-      from { width: 100%; }
-      to { width: 0%; }
-    }
-    
-    @keyframes slide-in-right {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    
-    .animate-shrink {
-      animation: shrink 5s linear forwards;
-    }
-    
-    .animate-slide-in-right {
-      animation: slide-in-right 0.3s ease-out forwards;
-    }
+		  <style>
+			  {`
+    /* Contenedor que oculta el exceso */
+  .marquee-container {
+    position: relative;
+    width: 400px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  /* Animación */
+  @keyframes marqueeSlide {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* Texto que se mueve */
+  .marquee-text {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marqueeSlide 15s linear infinite;
+  }
+
+
+  .colorCycle {
+  animation: cycleColor 6s linear infinite;
+}
+
+@keyframes cycleColor {
+  0% { color: #ffffff; }
+  33% { color: #00eaff; }
+  66% { color: #ffe960; }
+  100% { color: #ffffff; }
+}
+
+.bounce {
+  animation: bounceLoop 1s ease-in-out infinite;
+}
+
+@keyframes bounceLoop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
   `}
-      </style>
+		  </style>
 
 
     </>
