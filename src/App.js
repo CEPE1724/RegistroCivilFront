@@ -63,7 +63,7 @@ function App() {
 
     <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
-        <Route path="/login" element={<LoginFiestasQuito />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/desayuno" element={<Desayuno />} />
 		    <Route path="/FelizCumpleaños" element={<CumpleañosPagina />} />
 
