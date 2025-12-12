@@ -4,7 +4,7 @@ let socket;
 
 export const connectToServer = (token) => {
   // ✅ URL CORRECTA - Sin /socket.io/socket.io.js
-  const manager = new Manager("https://backregistrocivil.appservices.com.ec", {
+  const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js", {
     transports: ['polling','websocket'], // ✅ Especificar transports
     secure: true,
     auth: { token: token },
