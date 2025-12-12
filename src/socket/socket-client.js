@@ -8,6 +8,7 @@ export const connectToServer = (token) => {
     transports: ['polling','websocket'], // ✅ Especificar transports
     secure: true,
     auth: { token: token },
+    extraHeaders: { Authorization: `Bearer ${token}` }, // <-- agrega esto
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
@@ -24,3 +25,4 @@ function addListener(socket) {
 }
 
 export const getSocket = () => socket;
+
