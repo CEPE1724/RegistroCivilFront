@@ -1,28 +1,24 @@
-import { Manager } from "socket.io-client";
+import { io } from "socket.io-client";
 
 let socket;
 
 export const connectToServer = (token) => {
-  // ✅ URL CORRECTA - Sin /socket.io/socket.io.js
-  const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js", {
-    transports: ['polling','websocket'], // ✅ Especificar transports
+  socket = io("https://backregistrocivil.appservices.com.ec", {
+    path: "/socket.io",                 // default, pero lo dejo explícito
+    transports: ["polling", "websocket"],
     secure: true,
-    auth: { token: token },
-    extraHeaders: { Authorization: `Bearer ${token}` }, // <-- agrega esto
+    auth: { token },                    // esto sí lo lee Socket.IO
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
   });
 
-  socket = manager.socket("/"); // ✅ Asignar a la variable global
-
   addListener(socket);
   return socket;
-}
+};
 
 function addListener(socket) {
-  // No enviar información por consola ni mostrar mensajes.
+  // listeners
 }
 
 export const getSocket = () => socket;
-
