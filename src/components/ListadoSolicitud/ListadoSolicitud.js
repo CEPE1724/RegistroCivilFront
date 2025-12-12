@@ -108,6 +108,8 @@ import { FaBoxArchive } from "react-icons/fa6";
 import { LinkOffOutlined } from "@mui/icons-material";
 import { Pencil, PenIcon } from "lucide-react";
 import { ObservacionCredito } from "./ObservacionCredito/ObservacionCredito";
+import VerificacionFacialModal from "./VerificacionFacialModal";
+import VerificacionFacialLoadingModal from "./VerificacionFacialLoadingModal";
 export function ListadoSolicitud() {
   const {
     data,
@@ -258,6 +260,11 @@ export function ListadoSolicitud() {
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorModalData, setErrorModalData] = useState({ tipo: '', mensaje: '', detalle: '' });
 
+  // Estados para modal de verificación facial
+  const [verificacionModalOpen, setVerificacionModalOpen] = useState(false);
+  const [verificacionModalTipo, setVerificacionModalTipo] = useState('');
+  const [verificacionModalData, setVerificacionModalData] = useState({});
+
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
@@ -365,7 +372,16 @@ export function ListadoSolicitud() {
       setLoadingVerificacion(true);
 
       if (!imagenSubida || !fotoRegistroCivil) {
-        enqueueSnackbar("Faltan imágenes para comparar.", { variant: "error" });
+        setErrorModalData({
+          tipo: 'datos_incompletos',
+          mensaje: 'Imágenes faltantes',
+          detalle: 'No se puede realizar la verificación facial porque faltan las imágenes necesarias:\n\n' +
+            `• Imagen subida: ${imagenSubida ? 'Disponible ✓' : 'NO DISPONIBLE ✗'}\n` +
+            `• Foto Registro Civil: ${fotoRegistroCivil ? 'Disponible ✓' : 'NO DISPONIBLE ✗'}\n\n` +
+            'Asegúrese de que ambas imágenes estén cargadas correctamente antes de continuar.'
+        });
+        setErrorModalOpen(true);
+        setLoadingVerificacion(false);
         return;
       }
 
@@ -387,39 +403,63 @@ export function ListadoSolicitud() {
         body,
         config
       );
-      const { verified, distance } = response.data;
+
+      console.log("Respuesta de verificación facial:", response.data);
+      
+      // Extraer datos de la respuesta, con valores por defecto seguros
+      const verified = response.data?.verified || false;
+      const distance = response.data?.distance || 0;
+      // threshold puede venir como null o undefined, usar valor por defecto
+      const threshold = response.data?.threshold || response.data?.details?.threshold || 0.3;
 
       // ✅ Guarda los datos de verificación
       setResultadoVerificacion(response.data);
+
+      // Calcular porcentaje de similitud de forma segura
+      const similarityPercent = threshold > 0 
+        ? Math.max(0, Math.min(100, (1 - distance / threshold) * 100))
+        : Math.max(0, Math.min(100, (1 - distance) * 100));
 
       if (verified) {
         await patchSolicitud(selectedRow?.id, 2);
         fetchInsertarDatos(6, selectedRow?.id, 2)
 
-        enqueueSnackbar("Identidad verificada correctamente.", {
-          variant: "success",
+        // Abrir modal de verificación exitosa con nuevo componente
+        setVerificacionModalTipo('aprobado');
+        setVerificacionModalData({
+          distance,
+          threshold,
+          similarity: similarityPercent
         });
+        setVerificacionModalOpen(true);
+        
         setOpenRegistroCivil(false);
         setView(false);
       } else {
-        enqueueSnackbar(
-          `Las fotos no coinciden por favor contactar con el analista `,
-          { variant: "error" }
-          /////Las imágenes no coinciden. Distancia: ${distance.toFixed(3)}
-        );
-        setOpenRegistroCivil(true);
+        // Abrir modal de verificación rechazada con nuevo componente
+        setVerificacionModalTipo('rechazado');
+        setVerificacionModalData({
+          distance,
+          threshold,
+          similarity: similarityPercent
+        });
+        setVerificacionModalOpen(true);
+        setOpenRegistroCivil(false); // Cerrar modal de RegistroCivil cuando no coincide
       }
-
-    } catch (err) {
-      console.error("Error durante la verificación facial:", err);
-      enqueueSnackbar("Error durante la verificación facial.", {
-        variant: "error",
+    } catch (error) {
+      console.error("Error en verificación facial:", error);
+      setErrorModalData({
+        tipo: 'error_verificacion',
+        mensaje: 'Error en verificación',
+        detalle: 'Ocurrió un error al intentar verificar las imágenes. Por favor intente nuevamente más tarde.'
       });
+      setErrorModalOpen(true);
     } finally {
       setLoadingVerificacion(false);
     }
   };
 
+   
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -4786,8 +4826,10 @@ export function ListadoSolicitud() {
           </Button>
 
         </DialogActions>
-        {loadingVerificacion && <Loader />}
       </Dialog>
+
+      {/* Modal de carga para verificación facial */}
+      <VerificacionFacialLoadingModal open={loadingVerificacion} />
 
       <Dialog open={openDialog3} onClose={() => setOpenDialog3(false)}>
         <DialogTitle>Seleccionar Analista</DialogTitle>
@@ -5304,7 +5346,7 @@ export function ListadoSolicitud() {
         bodegas={dataBodega}
       />
 
-      {/* Modal de Error Visual para Registro Civil */}
+      {/* Modal de Error Visual para Registro Civil y Verificación */}
       <Dialog
         open={errorModalOpen}
         onClose={() => setErrorModalOpen(false)}
@@ -5318,12 +5360,20 @@ export function ListadoSolicitud() {
         }}
       >
         <DialogTitle sx={{ 
-          bgcolor: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' 
+          bgcolor: errorModalData.tipo === 'verificacion_exitosa'
+            ? '#d4edda'
+            : errorModalData.tipo === 'verificacion_fallida'
+            ? '#fff3cd'
+            : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' 
             ? '#fff3cd' 
             : errorModalData.tipo === 'datos_incompletos'
             ? '#f8d7da'
             : '#d1ecf1',
-          color: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+          color: errorModalData.tipo === 'verificacion_exitosa'
+            ? '#155724'
+            : errorModalData.tipo === 'verificacion_fallida'
+            ? '#856404'
+            : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
             ? '#856404'
             : errorModalData.tipo === 'datos_incompletos'
             ? '#721c24'
@@ -5333,7 +5383,11 @@ export function ListadoSolicitud() {
           gap: 2,
           pb: 2
         }}>
-          {errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' ? (
+          {errorModalData.tipo === 'verificacion_exitosa' ? (
+            <CheckCircleIcon sx={{ fontSize: 40, color: '#28a745' }} />
+          ) : errorModalData.tipo === 'verificacion_fallida' ? (
+            <ReportProblemIcon sx={{ fontSize: 40, color: '#ffc107' }} />
+          ) : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' ? (
             <PersonSearchIcon sx={{ fontSize: 40 }} />
           ) : errorModalData.tipo === 'datos_incompletos' ? (
             <ReportProblemIcon sx={{ fontSize: 40 }} />
@@ -5347,10 +5401,10 @@ export function ListadoSolicitud() {
         
         <DialogContent sx={{ mt: 3, mb: 2 }}>
           <Box sx={{ 
-            bgcolor: '#f8f9fa', 
+            bgcolor: errorModalData.tipo === 'verificacion_exitosa' ? '#f0f9f4' : '#f8f9fa', 
             p: 3, 
             borderRadius: '8px',
-            border: '1px solid #dee2e6'
+            border: `1px solid ${errorModalData.tipo === 'verificacion_exitosa' ? '#c3e6cb' : '#dee2e6'}`
           }}>
             <Typography 
               variant="body1" 
@@ -5377,6 +5431,32 @@ export function ListadoSolicitud() {
               </Typography>
             </Box>
           )}
+
+          {errorModalData.tipo === 'verificacion_fallida' && (
+            <Box sx={{ mt: 3, p: 2, bgcolor: '#fff3cd', borderRadius: '8px', border: '1px solid #ffc107' }}>
+              <Typography variant="body2" sx={{ color: '#856404', fontWeight: 500, mb: 1 }}>
+                ⚠️ Acciones requeridas:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#856404', pl: 2 }}>
+                • Revise manualmente ambas fotografías<br/>
+                • Contacte al analista asignado a esta solicitud<br/>
+                • Considere solicitar nuevas fotos al cliente<br/>
+                • Documente el motivo del rechazo en el sistema
+              </Typography>
+            </Box>
+          )}
+
+          {errorModalData.tipo === 'verificacion_exitosa' && (
+            <Box sx={{ mt: 3, p: 2, bgcolor: '#d4edda', borderRadius: '8px', border: '1px solid #c3e6cb' }}>
+              <Typography variant="body2" sx={{ color: '#155724', fontWeight: 500, mb: 1 }}>
+                ✓ Verificación completada
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#155724', pl: 2 }}>
+                La solicitud ha sido procesada y aprobada automáticamente.<br/>
+                Puede continuar con el siguiente paso del proceso.
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 3 }}>
@@ -5384,13 +5464,21 @@ export function ListadoSolicitud() {
             onClick={() => setErrorModalOpen(false)} 
             variant="contained"
             sx={{
-              bgcolor: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+              bgcolor: errorModalData.tipo === 'verificacion_exitosa'
+                ? '#28a745'
+                : errorModalData.tipo === 'verificacion_fallida'
+                ? '#ffc107'
+                : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
                 ? '#ffc107'
                 : errorModalData.tipo === 'datos_incompletos'
                 ? '#dc3545'
                 : '#17a2b8',
               '&:hover': {
-                bgcolor: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                bgcolor: errorModalData.tipo === 'verificacion_exitosa'
+                  ? '#218838'
+                  : errorModalData.tipo === 'verificacion_fallida'
+                  ? '#e0a800'
+                  : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
                   ? '#e0a800'
                   : errorModalData.tipo === 'datos_incompletos'
                   ? '#c82333'
@@ -5406,6 +5494,14 @@ export function ListadoSolicitud() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Modal de Verificación Facial con Tailwind CSS */}
+      <VerificacionFacialModal
+        open={verificacionModalOpen}
+        onClose={() => setVerificacionModalOpen(false)}
+        tipo={verificacionModalTipo}
+        data={verificacionModalData}
+      />
 
     </div>
   );
