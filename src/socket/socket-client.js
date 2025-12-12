@@ -1,40 +1,26 @@
 import { Manager } from "socket.io-client";
 
 let socket;
+
 export const connectToServer = (token) => {
+  // ✅ URL CORRECTA - Sin /socket.io/socket.io.js
+  const manager = new Manager("https://backregistrocivil.appservices.com.ec", {
+    transports: ['polling','websocket'], // ✅ Especificar transports
+    secure: true,
+    auth: { token: token },
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  });
 
-  const manager = new Manager("https://backregistrocivil.appservices.com.ec/socket.io/socket.io.js",
-
-    {
-      extraHeaders: {
-        authentication: token,
-      },
-    }
-  );
-
-  const socket = manager.socket("/");
+  socket = manager.socket("/"); // ✅ Asignar a la variable global
 
   addListener(socket);
   return socket;
-
 }
 
 function addListener(socket) {
-  socket.on("connect", () => { });
-
-  socket.on("disconnect", () => {
-  });
-
-  socket.on('clients-updated', (clients) => {
-  });
-
-
-
-
-  ////  socket.on("solicitud-web-changed", (data) => console.log("📩 Evento recibido (cambio solicitud):", data));
-
-
-
+  // No enviar información por consola ni mostrar mensajes.
 }
 
 export const getSocket = () => socket;

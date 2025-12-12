@@ -404,8 +404,7 @@ export function ListadoSolicitud() {
         config
       );
 
-      console.log("Respuesta de verificación facial:", response.data);
-      
+     
       // Extraer datos de la respuesta, con valores por defecto seguros
       const verified = response.data?.verified || false;
       const distance = response.data?.distance || 0;
