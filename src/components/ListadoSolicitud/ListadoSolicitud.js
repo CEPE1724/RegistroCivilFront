@@ -254,41 +254,69 @@ export function ListadoSolicitud() {
     }
   };
 
+  // Estado para modal de error visual
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorModalData, setErrorModalData] = useState({ tipo: '', mensaje: '', detalle: '' });
+
   const fetchImagenRegistroCivil = async (cedula, dactilar) => {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      // Intentar GET primero
-      try {
-        const getResponse = await axios.get(`dactilar/${cedula}`, config);
-        if (getResponse.data.statusCode === 200 && getResponse.data.data) {
-          return getResponse.data.data.FOTO;
-        }
-      } catch (err) {
-        if (err.response && err.response.status === 500) {
-          // Si falla GET, intentar POST
-          const postResponse = await axios.post(
-            "dactilar/consulta",
+      // Validar que userData esté disponible
+      const usuario = userData?.Nombre || 'Sistema';
 
+      // Usar directamente el nuevo endpoint que maneja todo automáticamente
+      const response = await axios.post(
+        "dactilar/reconocimiento-facial",
+        {
+          cedula,
+          dactilar,
+          usuario
+        },
+        config
+      );
 
-            { cedula, dactilar, usuario: userData.Nombre },
-
-            config
-          );
-
-          if (postResponse.data.data) {
-            return postResponse.data.data.FOTO;
-          }
-        }
-        throw new Error("No se pudo obtener imagen del Registro Civil.");
+      // Verificar si fue exitoso
+      if (response.data.success && response.data.data) {
+        return { success: true, foto: response.data.data.FOTO };
+      } else {
+        // No se encontró el ciudadano - mostrar modal visual
+        const mensaje = response.data.message || "No se encontró el ciudadano en el Registro Civil";
+        setErrorModalData({
+          tipo: 'ciudadano_no_encontrado',
+          mensaje: 'Ciudadano no encontrado',
+          detalle: `Los datos ingresados no coinciden con el Registro Civil:\n\n• Cédula: ${cedula}\n• Código Dactilar: ${dactilar}\n\nPor favor verifique que los datos sean correctos.`
+        });
+        setErrorModalOpen(true);
+        return { success: false, error: mensaje };
       }
     } catch (error) {
-      enqueueSnackbar("Error al obtener la imagen del Registro Civil.", {
-        variant: "error",
-      });
-      console.error(error);
-      return null;
+      console.error('Error en fetchImagenRegistroCivil:', error);
+      
+      // Determinar el tipo de error
+      if (error.response?.status === 404) {
+        setErrorModalData({
+          tipo: 'datos_incorrectos',
+          mensaje: 'Datos incorrectos',
+          detalle: `La cédula o código dactilar ingresado no existe en el sistema:\n\n• Cédula: ${cedula}\n• Código Dactilar: ${dactilar}\n\nVerifique los datos e intente nuevamente.`
+        });
+      } else if (error.response?.status === 500) {
+        setErrorModalData({
+          tipo: 'error_servidor',
+          mensaje: 'Error del servidor',
+          detalle: 'El servidor del Registro Civil no está disponible temporalmente. Por favor intente más tarde.'
+        });
+      } else {
+        setErrorModalData({
+          tipo: 'error_conexion',
+          mensaje: 'Error de conexión',
+          detalle: 'No se pudo conectar con el Registro Civil. Verifique su conexión a internet e intente nuevamente.'
+        });
+      }
+      
+      setErrorModalOpen(true);
+      return { success: false, error: error.message };
     }
   };
   const handleAbrirVerificacionManual = async () => {
@@ -297,9 +325,16 @@ export function ListadoSolicitud() {
     const imagenSubida = selectedRow?.imagen;
 
     if (!cedula || !dactilar || !imagenSubida) {
-      enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
-        variant: "warning",
+      setErrorModalData({
+        tipo: 'datos_incompletos',
+        mensaje: 'Datos incompletos',
+        detalle: 'No se pueden verificar las fotos porque faltan datos en la solicitud:\n\n' +
+          `• Cédula: ${cedula || 'NO DISPONIBLE'}\n` +
+          `• Código Dactilar: ${dactilar || 'NO DISPONIBLE'}\n` +
+          `• Imagen: ${imagenSubida ? 'Disponible' : 'NO DISPONIBLE'}\n\n` +
+          'Por favor complete los datos faltantes antes de continuar.'
       });
+      setErrorModalOpen(true);
       return;
     }
 
@@ -307,21 +342,21 @@ export function ListadoSolicitud() {
       setCedula(cedula);
       setDactilar(dactilar);
 
-      const dataFOTO = await fetchImagenRegistroCivil(cedula, dactilar);
+      const result = await fetchImagenRegistroCivil(cedula, dactilar);
 
-      if (dataFOTO && typeof dataFOTO === "string" && dataFOTO.trim() !== "") {
+      if (result.success && result.foto && result.foto.trim() !== "") {
         // Ya tienes todo, abre el componente para mostrar
         setOpenRegistroCivil(true);
-      } else {
-        enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
-          variant: "error",
-        });
       }
+      // Si falla, el modal de error ya se mostró en fetchImagenRegistroCivil
     } catch (error) {
-      console.error(error);
-      enqueueSnackbar("Error al cargar la verificación facial.", {
-        variant: "error",
+      console.error('Error en handleAbrirVerificacionManual:', error);
+      setErrorModalData({
+        tipo: 'error_inesperado',
+        mensaje: 'Error inesperado',
+        detalle: 'Ocurrió un error inesperado al cargar la verificación facial. Por favor intente nuevamente.'
       });
+      setErrorModalOpen(true);
     }
   };
 
@@ -4514,22 +4549,25 @@ export function ListadoSolicitud() {
                               const imagenSubida = selectedRow?.imagen;
 
                               if (!cedula || !dactilar || !imagenSubida) {
-                                enqueueSnackbar("Faltan datos para mostrar la verificación facial.", {
-                                  variant: "warning",
+                                setErrorModalData({
+                                  tipo: 'datos_incompletos',
+                                  mensaje: 'Datos incompletos',
+                                  detalle: 'No se pueden verificar las fotos porque faltan datos en la solicitud:\n\n' +
+                                    `• Cédula: ${cedula || 'NO DISPONIBLE'}\n` +
+                                    `• Código Dactilar: ${dactilar || 'NO DISPONIBLE'}\n` +
+                                    `• Imagen: ${imagenSubida ? 'Disponible' : 'NO DISPONIBLE'}\n\n` +
+                                    'Por favor complete los datos faltantes antes de continuar.'
                                 });
+                                setErrorModalOpen(true);
                                 return;
                               }
 
-                              const fotoRegistro = await fetchImagenRegistroCivil(cedula, dactilar);
+                              const result = await fetchImagenRegistroCivil(cedula, dactilar);
 
-                              if (fotoRegistro && typeof fotoRegistro === "string" && fotoRegistro.trim() !== "") {
-                                await handleVerificarIdentidad(imagenSubida, fotoRegistro);
-                              } else {
-                                enqueueSnackbar("No se pudo obtener la imagen del Registro Civil.", {
-                                  variant: "error",
-                                });
-                                setOpenRegistroCivil(true);
+                              if (result.success && result.foto && result.foto.trim() !== "") {
+                                await handleVerificarIdentidad(imagenSubida, result.foto);
                               }
+                              // Si falla, solo se muestra el modal de error, NO se abre el modal de RegistroCivil
                             }}
                           >
                             Verificar fotos
@@ -5265,6 +5303,109 @@ export function ListadoSolicitud() {
         onClose={() => setOpenModalExcel(false)}
         bodegas={dataBodega}
       />
+
+      {/* Modal de Error Visual para Registro Civil */}
+      <Dialog
+        open={errorModalOpen}
+        onClose={() => setErrorModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          bgcolor: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' 
+            ? '#fff3cd' 
+            : errorModalData.tipo === 'datos_incompletos'
+            ? '#f8d7da'
+            : '#d1ecf1',
+          color: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+            ? '#856404'
+            : errorModalData.tipo === 'datos_incompletos'
+            ? '#721c24'
+            : '#0c5460',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          pb: 2
+        }}>
+          {errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' ? (
+            <PersonSearchIcon sx={{ fontSize: 40 }} />
+          ) : errorModalData.tipo === 'datos_incompletos' ? (
+            <ReportProblemIcon sx={{ fontSize: 40 }} />
+          ) : (
+            <HighlightOffIcon sx={{ fontSize: 40 }} />
+          )}
+          <Typography variant="h6" component="div" fontWeight="bold">
+            {errorModalData.mensaje}
+          </Typography>
+        </DialogTitle>
+        
+        <DialogContent sx={{ mt: 3, mb: 2 }}>
+          <Box sx={{ 
+            bgcolor: '#f8f9fa', 
+            p: 3, 
+            borderRadius: '8px',
+            border: '1px solid #dee2e6'
+          }}>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                whiteSpace: 'pre-line',
+                color: '#495057',
+                lineHeight: 1.8
+              }}
+            >
+              {errorModalData.detalle}
+            </Typography>
+          </Box>
+
+          {(errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado') && (
+            <Box sx={{ mt: 3, p: 2, bgcolor: '#e7f3ff', borderRadius: '8px', border: '1px solid #b3d9ff' }}>
+              <Typography variant="body2" sx={{ color: '#004085', fontWeight: 500, mb: 1 }}>
+                💡 Sugerencias:
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#004085', pl: 2 }}>
+                • Verifique que la cédula esté correctamente digitada<br/>
+                • Confirme que el código dactilar sea el correcto<br/>
+                • Consulte con el cliente si es necesario<br/>
+                • Si el problema persiste, contacte al área técnica
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setErrorModalOpen(false)} 
+            variant="contained"
+            sx={{
+              bgcolor: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                ? '#ffc107'
+                : errorModalData.tipo === 'datos_incompletos'
+                ? '#dc3545'
+                : '#17a2b8',
+              '&:hover': {
+                bgcolor: errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                  ? '#e0a800'
+                  : errorModalData.tipo === 'datos_incompletos'
+                  ? '#c82333'
+                  : '#138496',
+              },
+              px: 4,
+              py: 1,
+              borderRadius: '8px',
+              fontWeight: 'bold'
+            }}
+          >
+            Entendido
+          </Button>
+        </DialogActions>
+      </Dialog>
 
     </div>
   );
