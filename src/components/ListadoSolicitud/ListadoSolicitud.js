@@ -2301,8 +2301,7 @@ export function ListadoSolicitud() {
 
   const handleConfirmarBodega = async ({ nota, bodegaSeleccionada }) => {
     // Lógica para manejar la confirmación de cambio de bodega
-    console.log("Bodega seleccionada:", bodegaSeleccionada);
-    console.log("Nota:", nota);
+
 
     await patchSolicitudEstadoyResultado(selectedRow?.id, { Bodega: bodegaSeleccionada });
     await fetchInsertarDatosRechazo(1, selectedRow?.id, 27, nota);

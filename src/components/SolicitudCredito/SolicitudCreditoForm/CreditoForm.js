@@ -595,7 +595,6 @@ export default function CreditoForm() {
   const handleSubmit = async (values) => {
     // Prevenir múltiples envíos
     if (isSubmitting) {
-      console.log('⚠️ Envío en proceso, por favor espera...');
       return;
     }
 

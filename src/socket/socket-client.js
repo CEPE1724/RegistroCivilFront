@@ -6,8 +6,6 @@ export const connectToServer = (token) => {
   // La URL del WebSocket NO debe incluir /api/v1, solo el host:port
   const SOCKET_URL = "https://backregistrocivil.appservices.com.ec";
   
-  console.log('🔌 Conectando WebSocket a:', SOCKET_URL);
-  console.log('🔑 Token:', token);
   
   socket = io(SOCKET_URL, {
     path: "/socket.io",                 // default, pero lo dejo explícito
@@ -20,7 +18,7 @@ export const connectToServer = (token) => {
 
   // Eventos de conexión para debugging
   socket.on('connect', () => {
-    console.log('✅ WebSocket conectado! ID:', socket.id);
+    console.log('✅ WebSocket conectado! ID:');
   });
   
   socket.on('connect_error', (error) => {
