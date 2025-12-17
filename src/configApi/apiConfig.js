@@ -1,8 +1,8 @@
 
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+//const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-//const API_BASE_URL = "http://192.168.2.20:3008/api/v1/"
+const API_BASE_URL = "https://prueba.appservices.com.ec/api/v1/"
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec:8443/"
 
@@ -21,6 +21,7 @@ export const APIURL = {
   getActividadEconomina: () => `${API_BASE_URL}cre-actividadeconomina/2`,
   getTipoConsulta: () => `${API_BASE_URL}compraencuesta/1`,
   post_cre_solicitud_web: () => `${API_BASE_URL}cre-solicitud-web`,
+  post_cre_solicitud_web_V2: () => `${API_BASE_URL}cre-solicitud-web/Nueva-solicitud-web`,
   get_TipoConsulta: () => `${API_BASE_URL}compraencuesta/1`,
   post_cogno_Token: (ci) => `${API_BASE_URL}auth/cogno/token/${ci}`,
   getCoordenadasprefactura: () => `${API_BASE_URL}coordenadasprefactura/all`,

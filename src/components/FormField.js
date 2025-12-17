@@ -11,7 +11,7 @@ import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import { MotivoContinuidad } from "../components/ListadoSolicitud";
 import { SolicitudExitosa } from "./MensajeSolicitudExitosa/SolicitudExitosa";
 import { ImLeaf } from "react-icons/im";
-import  payjoy  from "../img/payjoy.png"
+import payjoy from "../img/payjoy.png"
 
 const FormField = ({
   label,
@@ -92,7 +92,7 @@ const FormField = ({
 
   const handleInputChange = async (e) => {
     let { name, value } = e.target;
-  
+
 
     if (name === "Cedula" || name === "Celular") {
       value = value.replace(/\D/g, "");
@@ -138,9 +138,9 @@ const FormField = ({
         if (bodega) {
           const existeCombo = await verificarCedulaBodega(value);
           if (existeCombo) {
-           /* enqueueSnackbar(`Ya existe una solicitud con la cédula ${value}`, {
-              variant: 'warning'
-            });*/
+            /* enqueueSnackbar(`Ya existe una solicitud con la cédula ${value}`, {
+               variant: 'warning'
+             });*/
             setMensajeExitoso(true)
             setIsBlacklisted(true);
             return;
@@ -772,19 +772,19 @@ const ReusableForm = ({
         subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
         color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
         li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : 'Recuerda que la compra de tu CELULAR lo aprueba PayJoy'}
-		li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data.NumeroSolicitud}` :
-			(<button
-				onClick={() => window.open("https://app.payjoy.com/merchant3/merchant-login", "_blank")}
-				className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
-			>
-				<span>Consultar</span> 
-				<img
-  				  src={payjoy}
-  				  alt="IconoPayJoy"
-  				  className="w-9 h-9 object-contain"
-  				/>
-			</button>
-			)}
+        li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data.NumeroSolicitud}` :
+          (<button
+            onClick={() => window.open("https://app.payjoy.com/merchant3/merchant-login", "_blank")}
+            className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
+          >
+            <span>Consultar</span>
+            <img
+              src={payjoy}
+              alt="IconoPayJoy"
+              className="w-9 h-9 object-contain"
+            />
+          </button>
+          )}
         li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data.CuotaAsignada} y Cupo: ${soliGrande?.data.Cupo}` : ''}
         ruta={'/ListadoSolicitud'}
       />

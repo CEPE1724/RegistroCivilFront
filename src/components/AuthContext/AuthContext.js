@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchPerfil } from "../../actions/fetchPerfil"; // Asegúrate de que esta función esté correctamente exportada
 import { APIURL } from "../../configApi/apiConfig";
 import { connectToServer } from "../../socket/socket-client"; // Asegúrate de que esta función esté correctamente exportada
+import SessionExpiredModal from "../SessionExpiredModal";
 // Crear el contexto
 const AuthContext = createContext();
 
@@ -18,6 +19,8 @@ export const AuthProvider = ({ children }) => {
 
   const [isConnected, setIsConnected] = useState(false);  // Estado de conexión WebSocket
   const [connectedClients, setConnectedClients] = useState([]); // Almacena los clientes conectados
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [sessionMessage, setSessionMessage] = useState("");
   const socketRef = useRef(null);
   const navigate = useNavigate();
 
@@ -36,6 +39,27 @@ export const AuthProvider = ({ children }) => {
       };
     }
   }, [token]);
+
+  // Effect para escuchar el evento de forzar logout desde el socket
+  useEffect(() => {
+    const handleForceLogout = (event) => {
+      console.warn('🚪 Force logout detectado:', event.detail);
+      const message = event.detail.message || event.detail.reason || 'Tu sesión ha sido cerrada';
+      setSessionMessage(message);
+      setShowSessionModal(true);
+    };
+
+    window.addEventListener('force-logout', handleForceLogout);
+
+    return () => {
+      window.removeEventListener('force-logout', handleForceLogout);
+    };
+  }, []);
+
+  const handleCloseSessionModal = () => {
+    setShowSessionModal(false);
+    logout();
+  };
 
   // Effect para revisar la expiración del token
   useEffect(() => {
@@ -169,6 +193,11 @@ export const AuthProvider = ({ children }) => {
       }}
     >
       {children}
+      <SessionExpiredModal 
+        isOpen={showSessionModal}
+        message={sessionMessage}
+        onClose={handleCloseSessionModal}
+      />
     </AuthContext.Provider>
   );
 };
