@@ -229,6 +229,7 @@ export function ReporteEquifax() {
 	...(datosTablas?.infoActualSeps?.data || []),
 	...(datosTablas?.infoActualSicom?.data || []),
   ]
+  console.log("infoConsolidadaActual", infoConsolidadaActual)
 
   const infoConsolidadaHistorica = [
 	...(datosTablas?.infoHistoricaSb?.data || []),
@@ -510,6 +511,7 @@ export function ReporteEquifax() {
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">CARTERA CASTIGADA</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">SALDO DEUDA</th>
                 <th className="p-2 text-xs font-semibold border border-gray-200 text-center">TIEMPO DÍAS VENCIDO</th>
+				<th className="p-2 text-xs font-semibold border border-gray-200 text-center">CUOTA MENSUAL</th>
               </tr>
             </thead>
             <tbody>
@@ -527,6 +529,7 @@ export function ReporteEquifax() {
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.cart_cast}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.saldo_deuda}</td>
                 <td className="p-2 text-xs border border-gray-200 text-center">{item.dias_morosidad}</td>
+				<td className="p-2 text-xs border border-gray-200 text-center">{item.cuota_mensual}</td>
               </tr>
               ))}
             </tbody>

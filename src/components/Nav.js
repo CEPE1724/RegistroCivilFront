@@ -117,7 +117,7 @@ const Nav = ({ showButton, userData }) => {
 				  <div className="marquee-container">
 					  <div className="marquee-text">
 						  <span className="text-white font-bold text-4xl colorCycle">
-							  Mejoramos el crédito para plazos menores, revisa en la cotización
+							  ¡Buenas noticias! IPHONE ahora disponible a crédito directo. 📲
 						  </span>
 					  </div>
 				  </div>
@@ -281,15 +281,14 @@ const Nav = ({ showButton, userData }) => {
 
   /* Animación */
   @keyframes marqueeSlide {
-    0% { transform: translateX(100%); }
+    0% { transform: translateX(15%); }
     100% { transform: translateX(-100%); }
   }
 
   /* Texto que se mueve */
   .marquee-text {
     display: inline-block;
-    padding-left: 100%;
-    animation: marqueeSlide 15s linear infinite;
+    animation: marqueeSlide 30s linear infinite;
   }
 
 
@@ -299,8 +298,8 @@ const Nav = ({ showButton, userData }) => {
 
 @keyframes cycleColor {
   0% { color: #ffffff; }
-  33% { color: #00eaff; }
-  66% { color: #ffe960; }
+  30% { color: #FF9F45; }
+  60% { color: #9DB4FF; }
   100% { color: #ffffff; }
 }
 
