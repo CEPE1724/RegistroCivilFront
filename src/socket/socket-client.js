@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 let socket;
 
-export const connectToServer = (token) => {
+export const connectToServer = (token, isNewLogin = false) => {
   // La URL del WebSocket NO debe incluir /api/v1, solo el host:port
   const SOCKET_URL = "https://backregistrocivil.appservices.com.ec";
   
@@ -10,7 +10,10 @@ export const connectToServer = (token) => {
   socket = io(SOCKET_URL, {
     path: "/socket.io",                 // default, pero lo dejo explícito
     transports: ["websocket", "polling"], // Intentar websocket primero
-    auth: { token },                    // esto sí lo lee Socket.IO
+    auth: { 
+      token,
+      isNewLogin  // Enviar flag de nuevo login al backend
+    },
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,

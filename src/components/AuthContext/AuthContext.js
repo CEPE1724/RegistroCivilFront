@@ -26,12 +26,39 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token && !socketRef.current) {
-      const socket = connectToServer(token);
+      // Verificar si el login fue reciente (últimos 5 segundos)
+      const loginTimestamp = parseInt(localStorage.getItem("loginTimestamp") || "0");
+      const timeSinceLogin = Date.now() - loginTimestamp;
+      const isNewLogin = timeSinceLogin < 5000; // true si login fue hace menos de 5 segundos
+      
+      console.log(`🔌 Conectando WebSocket | Nuevo Login: ${isNewLogin} | Tiempo desde login: ${timeSinceLogin}ms`);
+      
+      const socket = connectToServer(token, isNewLogin);
       socketRef.current = socket;
 
-      socket.on("connect", () => setIsConnected(true));
-      socket.on("disconnect", () => setIsConnected(false));
+      socket.on("connect", () => {
+        console.log("✅ WebSocket conectado");
+        setIsConnected(true);
+      });
+      
+      socket.on("disconnect", () => {
+        console.log("❌ WebSocket desconectado");
+        setIsConnected(false);
+      });
+      
       socket.on("clients-updated", (clients) => setConnectedClients(clients));
+
+      // Escuchar el evento de sesión terminada por nuevo login
+      socket.on("session-terminated", (data) => {
+        console.warn("⚠️ Sesión terminada:", data);
+        setSessionMessage(data.message || "Tu sesión fue cerrada por un nuevo login");
+        setShowSessionModal(true);
+        
+        setTimeout(() => {
+          setShowSessionModal(false);
+          logout();
+        }, 3000);
+      });
 
       return () => {
         socket.disconnect();
@@ -146,6 +173,7 @@ export const AuthProvider = ({ children }) => {
     setToken(newToken);
     localStorage.setItem("token", newToken);
     localStorage.setItem("tokenExpiration", expirationTime);
+    localStorage.setItem("loginTimestamp", Date.now().toString()); // Guardar timestamp del login
     setIsLoggedIn(true);
     setIsSessionExpired(false);
   };
@@ -158,6 +186,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
     localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
+    localStorage.removeItem("loginTimestamp"); // Limpiar el timestamp del login
     setToken(null);
     setIsSessionExpired(false);
     setIsLoggedIn(false);
@@ -170,6 +199,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
     localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
+    localStorage.removeItem("loginTimestamp"); // Limpiar el timestamp del login
     setToken(null);
     setIsSessionExpired2(true);
     setIsLoggedIn(false);
