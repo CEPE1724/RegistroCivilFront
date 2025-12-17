@@ -12,6 +12,11 @@ import EmailIcon from '@mui/icons-material/Email';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import HomeIcon from '@mui/icons-material/Home';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import SendIcon from '@mui/icons-material/Send';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useSnackbar } from "notistack";
 import { APIURL } from "../../configApi/apiConfig";
 import axios from "../../configApi/axiosConfig";
@@ -20,6 +25,7 @@ import { useAuth } from "../AuthContext/AuthContext";
 import { SolicitudExitosa } from "../MensajeSolicitudExitosa/SolicitudExitosa";
 import { getSocket, connectToServer } from "../../socket/socket-client";
 import { ModalProgreso } from './ModalProgreso';
+import payjoy from '../../img/payjoy.png';
 
 export function CreaSolicitud ({currentStep, setCurrentStep })  {
     const navigate = useNavigate();
@@ -68,6 +74,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
     const [modalAprobado, setModalAprobado] = useState(false);
     const [modalRechazado, setModalRechazado] = useState(false);
     const [datosSolicitudFinal, setDatosSolicitudFinal] = useState(null);
+    const [soliGrande, setSoliGrande] = useState(null);
+    const [creSoliWeb, setCreSoliWeb] = useState(null);
 
     const [dataBodega, setDataBodega] = useState([]);
     const [tipoConsulta, setTipoConsulta] = useState([]);
@@ -541,6 +549,10 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                     setFase('COMPLETADO');
                     setResultadoSolicitud(data);
                     setDatosSolicitudFinal(data);
+                    
+                    // Establecer datos para los modales
+                    setSoliGrande(data.soliGrande || data);
+                    setCreSoliWeb(data.creSoliWeb || data);
 
                     // Cerrar modal de progreso después de 1 segundo
                     setTimeout(() => {
@@ -645,7 +657,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
             console.log('🚀 URL:', `${APIURL.post_cre_solicitud_web()}`);
 
             const response = await axios.post(
-                APIURL.post_cre_solicitud_web(),
+                APIURL.post_cre_solicitud_web_V2(),
                 solicitudData,
                 {
                     headers: {
@@ -829,17 +841,12 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                             >
                                 {loading ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
+                                        <CircularProgress size={20} sx={{ color: 'white' }} />
                                         <span className="hidden sm:inline">Validando...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <CheckCircleOutlineIcon sx={{ fontSize: 20 }} />
                                         <span className="hidden sm:inline">Validar</span>
                                     </>
                                 )}
@@ -847,10 +854,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                         </div>
                         {loading && (
                             <p className="mt-1 text-xs text-blue-600 font-medium flex items-center">
-                                <svg className="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                                <CircularProgress size={16} sx={{ color: '#2563eb', marginRight: '8px' }} />
                                 Consultando datos...
                             </p>
                         )}
@@ -1215,18 +1219,13 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                         >
                             {loading ? (
                                 <>
-                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
+                                    <CircularProgress size={20} sx={{ color: 'white' }} />
                                     <span>Validando...</span>
                                 </>
                             ) : (
                                 <>
                                     <span>Enviar</span>
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
+                                    <SendIcon sx={{ fontSize: 20 }} />
                                 </>
                             )}
                         </button>
@@ -1239,9 +1238,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 }`}
                         >
                             <span>Cancelar</span>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <CancelIcon sx={{ fontSize: 20 }} />
                         </button>
 
                         <button
@@ -1251,9 +1248,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 }`}
                         >
                             <span>Regresar</span>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-                            </svg>
+                            <ArrowBackIcon sx={{ fontSize: 20 }} />
                         </button>
                     </div>
                 )}
@@ -1298,30 +1293,54 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                 onClose={() => {
                     setModalAprobado(false);
                 }}
-                titulo="¡SOLICITUD APROBADA!"
-                subtitulo={`La solicitud ${datosSolicitudFinal?.numeroSolicitud || ''} ha sido aprobada exitosamente.`}
-                li1={`Cliente: ${formData.primerNombre} ${formData.apellidoPaterno}`}
-                li2={`Número de solicitud: ${datosSolicitudFinal?.numeroSolicitud || ''}`}
-                li3={`Estado: APROBADA`}
-                color="bg-green-100"
-                ruta="/ListadoSolicitud"
-                icono="normal"
+                soliGrande={soliGrande}
+                creSoliWeb={creSoliWeb}
+                titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
+                subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
+                color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
+                li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : 'Recuerda que la compra de tu CELULAR lo aprueba PayJoy'}
+                li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data?.NumeroSolicitud || datosSolicitudFinal?.numeroSolicitud || ''}` :
+                    (<button
+                        onClick={() => window.open("https://app.payjoy.com/merchant3/merchant-login", "_blank")}
+                        className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
+                    >
+                        <span>Consultar</span>
+                        <img
+                            src={payjoy}
+                            alt="IconoPayJoy"
+                            className="w-9 h-9 object-contain"
+                        />
+                    </button>
+                    )}
+                li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data?.CuotaAsignada || ''} y Cupo: ${soliGrande?.data?.Cupo || ''}` : ''}
+                ruta={'/ListadoSolicitud'}
             />
 
             {/* Modal de Solicitud Rechazada */}
             <SolicitudExitosa
                 isOpen={modalRechazado}
-                onClose={() => {
-                    setModalRechazado(false);
-                }}
-                titulo="SOLICITUD RECHAZADA"
-                subtitulo={`La solicitud ${datosSolicitudFinal?.numeroSolicitud || ''} no fue aprobada.`}
-                li1={`Cliente: ${formData.primerNombre} ${formData.apellidoPaterno}`}
-                li2={`Número de solicitud: ${datosSolicitudFinal?.numeroSolicitud || ''}`}
-                li3={`Motivo: ${datosSolicitudFinal?.motivo || 'No cumple con los requisitos'}`}
-                color="bg-red-100"
-                ruta="/ListadoSolicitud"
-                icono="triste"
+                onClose={() => setModalRechazado(false)}
+                soliGrande={soliGrande}
+                creSoliWeb={creSoliWeb}
+                titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
+                subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
+                color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
+                li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : 'Recuerda que la compra de tu CELULAR lo aprueba PayJoy'}
+                li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data?.NumeroSolicitud || datosSolicitudFinal?.numeroSolicitud || ''}` :
+                    (<button
+                        onClick={() => window.open("https://app.payjoy.com/merchant3/merchant-login", "_blank")}
+                        className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
+                    >
+                        <span>Consultar</span>
+                        <img
+                            src={payjoy}
+                            alt="IconoPayJoy"
+                            className="w-9 h-9 object-contain"
+                        />
+                    </button>
+                    )}
+                li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data?.CuotaAsignada || ''} y Cupo: ${soliGrande?.data?.Cupo || ''}` : ''}
+                ruta={'/ListadoSolicitud'}
             />
         </div>
     );
