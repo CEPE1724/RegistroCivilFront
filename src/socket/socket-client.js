@@ -4,7 +4,7 @@ let socket;
 
 export const connectToServer = (token) => {
   // La URL del WebSocket NO debe incluir /api/v1, solo el host:port
-  const SOCKET_URL = "https://prueba.appservices.com.ec";
+  const SOCKET_URL = "https://backregistrocivil.appservices.com.ec";
   
   console.log('🔌 Conectando WebSocket a:', SOCKET_URL);
   console.log('🔑 Token:', token);

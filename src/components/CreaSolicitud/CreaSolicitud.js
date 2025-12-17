@@ -497,7 +497,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
         setLoading(false);
 
         if (!isValid) {
-            console.log('Formulario inválido:', errors);
+
             enqueueSnackbar("Por favor corrige los errores en el formulario", { variant: "error" });
             return;
         }
@@ -508,17 +508,16 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
         try {
             // 1. Conectar WebSocket si no está conectado
             let socket = getSocket();
-            console.log('🔌 Socket actual:', socket);
-            console.log('🔌 Socket conectado?:', socket?.connected);
+
 
             if (!socket || !socket.connected) {
                 const token = localStorage.getItem('token'); // Ajustar según tu autenticación
-                console.log('🔌 Conectando WebSocket con token:', token);
+
                 socket = connectToServer(token);
 
                 // Esperar un momento para que se conecte
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                console.log('🔌 Socket después de conectar:', socket?.connected);
+
             }
 
             // 2. Configurar listeners de WebSocket
@@ -527,7 +526,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
             socket.off('solicitud-web-error');
 
             socket.on('solicitud-progreso', (data) => {
-                console.log('📊 Progreso recibido:', data);
+
                 if (data.idSolicitud === idSolicitudCreada || !idSolicitudCreada) {
                     setProgreso(data.progreso || 0);
                     setFase(data.fase || 'PROCESANDO');
@@ -536,7 +535,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
             });
 
             socket.on('solicitud-web-completada', (data) => {
-                console.log('✅ Solicitud completada:', data);
+
                 if (data.idSolicitud === idSolicitudCreada || !idSolicitudCreada) {
                     // Cancelar timeout si existe
                     if (window.solicitudTimeoutId) {
@@ -590,7 +589,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
 
             // Agregar listener genérico para ver todos los eventos
             socket.onAny((eventName, ...args) => {
-                console.log('🔔 Evento WebSocket recibido:', eventName, args);
+                console.log('🔔 Evento WebSocket recibido:');
             });
 
             // 3. Preparar datos para enviar (formato compatible con backend)
@@ -653,8 +652,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
             setEstadoProceso('PROCESANDO');
 
             // 5. Enviar solicitud al endpoint
-            console.log('🚀 Enviando datos de solicitud:', solicitudData);
-            console.log('🚀 URL:', `${APIURL.post_cre_solicitud_web()}`);
+
 
             const response = await axios.post(
                 APIURL.post_cre_solicitud_web_V2(),
@@ -667,8 +665,6 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                 }
             );
 
-            console.log('🚀 Respuesta completa:', response);
-            console.log('🚀 Respuesta data:', response.data);
 
             // Verificar si la respuesta es exitosa
             if (response.data && response.data.success !== false) {
@@ -680,7 +676,6 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
 
                 if (idSolicitud) {
                     setIdSolicitudCreada(idSolicitud);
-                    console.log('✅ Solicitud creada con ID:', idSolicitud);
                     enqueueSnackbar(`Solicitud #${idSolicitud} iniciada. Procesando...`, { variant: "info" });
 
                     // FALLBACK: Si después de 60 segundos no hay respuesta del WebSocket, cerrar modal

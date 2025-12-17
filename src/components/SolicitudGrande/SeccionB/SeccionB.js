@@ -599,7 +599,7 @@ const SeccionB = forwardRef((props, ref) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log("Formulario enviado con éxito", formData);
+      console.log("Formulario enviado con éxito");
     } else {
       console.log("Errores en el formulario", errors);
     }
