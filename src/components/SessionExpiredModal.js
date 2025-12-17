@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './SessionExpiredModal.css';
 
 const SessionExpiredModal = ({ isOpen, message, onClose }) => {
+  const [countdown, setCountdown] = useState(3);
+
+  useEffect(() => {
+    if (isOpen) {
+      setCountdown(3);
+      const timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -29,15 +48,9 @@ const SessionExpiredModal = ({ isOpen, message, onClose }) => {
         
         <div className="session-modal-body">
           <p>{message}</p>
-        </div>
-        
-        <div className="session-modal-footer">
-          <button 
-            onClick={onClose}
-            className="session-modal-button"
-          >
-            Entendido
-          </button>
+          <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+            Cerrando sesión automáticamente en {countdown} segundo{countdown !== 1 ? 's' : ''}...
+          </p>
         </div>
       </div>
     </div>

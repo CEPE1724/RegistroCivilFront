@@ -47,6 +47,12 @@ export const AuthProvider = ({ children }) => {
       const message = event.detail.message || event.detail.reason || 'Tu sesión ha sido cerrada';
       setSessionMessage(message);
       setShowSessionModal(true);
+      
+      // Cerrar automáticamente después de 3 segundos
+      setTimeout(() => {
+        setShowSessionModal(false);
+        logout();
+      }, 3000);
     };
 
     window.addEventListener('force-logout', handleForceLogout);
