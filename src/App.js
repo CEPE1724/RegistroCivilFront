@@ -4,6 +4,7 @@ import { SnackbarProvider } from "notistack";
 import { Modal, Box, Button, Typography } from "@mui/material";
 import Login from "./pages/Login";
 import LoginFiestasQuito from "./pages/LoginFiestasQuito";
+import LoginNavidad from "./pages/LoginNavidad";
 import Desayuno from "./pages/Desayuno";
 import Home from "./pages/Home";
 import TitleUpdater from "./components/TitleUpdater";
@@ -63,7 +64,7 @@ function App() {
 
     <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<LoginNavidad />} />
         <Route path="/desayuno" element={<Desayuno />} />
 		    <Route path="/FelizCumpleaños" element={<CumpleañosPagina />} />
 
