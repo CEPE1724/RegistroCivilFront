@@ -4,7 +4,7 @@ let socket;
 
 export const connectToServer = (token, isNewLogin = false) => {
   // La URL del WebSocket NO debe incluir /api/v1, solo el host:port
-  const SOCKET_URL = "https://backregistrocivil.appservices.com.ec";
+  const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
   
   
   socket = io(SOCKET_URL, {
