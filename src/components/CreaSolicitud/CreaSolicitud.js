@@ -1292,22 +1292,10 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                 creSoliWeb={creSoliWeb}
                 titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
                 subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
-                color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
-                li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : 'Recuerda que la compra de tu CELULAR lo aprueba PayJoy'}
-                li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data?.NumeroSolicitud || datosSolicitudFinal?.numeroSolicitud || ''}` :
-                    (<button
-                        onClick={() => window.open("https://app.payjoy.com/merchant3/merchant-login", "_blank")}
-                        className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
-                    >
-                        <span>Consultar</span>
-                        <img
-                            src={payjoy}
-                            alt="IconoPayJoy"
-                            className="w-9 h-9 object-contain"
-                        />
-                    </button>
-                    )}
-                li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data?.CuotaAsignada || ''} y Cupo: ${soliGrande?.data?.Cupo || ''}` : ''}
+                color="bg-green-100"
+                li1={`Cliente ${creSoliWeb?.PrimerNombre || formData.primerNombre} ${creSoliWeb?.ApellidoPaterno || formData.apellidoPaterno} con cedula ${creSoliWeb?.Cedula || formData.cedula}`}
+                li2={`Numero de solicitud: ${soliGrande?.data?.NumeroSolicitud || datosSolicitudFinal?.numeroSolicitud || ''}`}
+                li3={`Cuota: ${soliGrande?.data?.CuotaAsignada || ''} y Cupo: ${soliGrande?.data?.Cupo || ''}`}
                 ruta={'/ListadoSolicitud'}
             />
 
@@ -1319,9 +1307,9 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                 creSoliWeb={creSoliWeb}
                 titulo={`¡TU SOLICITUD DE CRÉDITO HA SIDO CREADA CON ÉXITO!`}
                 subtitulo={`Ahora puedes revisar el estado de tu solicitud de crédito.`}
-                color={creSoliWeb?.Estado == 1 ? 'bg-green-100' : 'bg-gray-100'}
-                li1={creSoliWeb?.Estado == 1 ? `Cliente ${`${creSoliWeb?.PrimerNombre} ${creSoliWeb?.ApellidoPaterno}`} con cedula ${creSoliWeb?.Cedula}` : 'Recuerda que la compra de tu CELULAR lo aprueba PayJoy'}
-                li2={creSoliWeb?.Estado == 1 ? `Numero de solicitud: ${soliGrande?.data?.NumeroSolicitud || datosSolicitudFinal?.numeroSolicitud || ''}` :
+                color="bg-gray-100"
+                li1="Recuerda que la compra de tu CELULAR lo aprueba PayJoy"
+                li2={
                     (<button
                         onClick={() => window.open("https://app.payjoy.com/merchant3/merchant-login", "_blank")}
                         className="flex items-center justify-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition"
@@ -1334,7 +1322,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                         />
                     </button>
                     )}
-                li3={creSoliWeb?.Estado == 1 ? `Cuota:${soliGrande?.data?.CuotaAsignada || ''} y Cupo: ${soliGrande?.data?.Cupo || ''}` : ''}
+                li3=""
                 ruta={'/ListadoSolicitud'}
             />
         </div>
