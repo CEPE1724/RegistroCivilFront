@@ -131,14 +131,6 @@ export function ListadoSolicitud() {
   const [cacheAnalistas, setCacheAnalistas] = useState(null);
   const [cacheOperadores, setCacheOperadores] = useState(null);
 
-  // Función para limpiar caché (útil cuando hay actualizaciones)
-  const limpiarCache = () => {
-    setCacheTipoConsulta(null);
-    setCacheTipoCliente(null);
-    setCacheAnalistas(null);
-    setCacheOperadores(null);
-    console.log('Caché limpiado - se recargarán los datos en la próxima consulta');
-  };
 
   // Inicialización segura para evitar valores fuera de rango en el Select
   const getInitialBodega = () => {
@@ -300,7 +292,7 @@ export function ListadoSolicitud() {
       }
     } catch (error) {
       console.error('Error en fetchImagenRegistroCivil:', error);
-      
+
       // Determinar el tipo de error
       if (error.response?.status === 404) {
         setErrorModalData({
@@ -321,7 +313,7 @@ export function ListadoSolicitud() {
           detalle: 'No se pudo conectar con el Registro Civil. Verifique su conexión a internet e intente nuevamente.'
         });
       }
-      
+
       setErrorModalOpen(true);
       return { success: false, error: error.message };
     }
@@ -404,7 +396,7 @@ export function ListadoSolicitud() {
         config
       );
 
-     
+
       // Extraer datos de la respuesta, con valores por defecto seguros
       const verified = response.data?.verified || false;
       const distance = response.data?.distance || 0;
@@ -415,7 +407,7 @@ export function ListadoSolicitud() {
       setResultadoVerificacion(response.data);
 
       // Calcular porcentaje de similitud de forma segura
-      const similarityPercent = threshold > 0 
+      const similarityPercent = threshold > 0
         ? Math.max(0, Math.min(100, (1 - distance / threshold) * 100))
         : Math.max(0, Math.min(100, (1 - distance) * 100));
 
@@ -431,7 +423,7 @@ export function ListadoSolicitud() {
           similarity: similarityPercent
         });
         setVerificacionModalOpen(true);
-        
+
         setOpenRegistroCivil(false);
         setView(false);
       } else {
@@ -458,7 +450,7 @@ export function ListadoSolicitud() {
     }
   };
 
-   
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -994,6 +986,11 @@ export function ListadoSolicitud() {
 
   const puedeCrearSolicitud = () => {
     const permiso = permisos.find((p) => p.Permisos === "INGRESAR SOLICITUDES NUEVAS");
+    return permiso && permiso.Activo;
+  }
+
+  const puedeCrearSolicitudNueva = () => {
+    const permiso = permisos.find((p) => p.Permisos === "INGRESAR SOLICITUDES NUEVAS V2");
     return permiso && permiso.Activo;
   }
 
@@ -2264,6 +2261,10 @@ export function ListadoSolicitud() {
     navigate("/solicitud", { replace: true });
   };
 
+  const handleNuevaSolicitud = () => {
+    navigate("/nuevaSolicitud", { replace: true });
+  }
+
   // Función para cambiar de página
   const changePage = (page) => {
     setCurrentPage(page);
@@ -2693,6 +2694,17 @@ export function ListadoSolicitud() {
             title="Nueva Solicitud"
             className="group relative flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 overflow-hidden"
             onClick={handleSolictud}
+          >
+            {/* Efecto de brillo */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 group-hover:animate-shimmer"></div>
+            {/* Texto */}
+            <span className="relative z-10">Nueva Solicitud</span>
+          </button>)}
+        {(puedeCrearSolicitudNueva()) && (
+          <button
+            title="Nueva Solicitud "
+            className="group relative flex items-center gap-2.5 px-6 py-3 bg-gradient-to-r from-fuchsia-600 to-fuchsia-700 hover:from-fuchsia-700 hover:to-fuchsia-800 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 overflow-hidden"
+            onClick={handleNuevaSolicitud}
           >
             {/* Efecto de brillo */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 group-hover:animate-shimmer"></div>
@@ -5358,25 +5370,25 @@ export function ListadoSolicitud() {
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           bgcolor: errorModalData.tipo === 'verificacion_exitosa'
             ? '#d4edda'
             : errorModalData.tipo === 'verificacion_fallida'
-            ? '#fff3cd'
-            : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado' 
-            ? '#fff3cd' 
-            : errorModalData.tipo === 'datos_incompletos'
-            ? '#f8d7da'
-            : '#d1ecf1',
+              ? '#fff3cd'
+              : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                ? '#fff3cd'
+                : errorModalData.tipo === 'datos_incompletos'
+                  ? '#f8d7da'
+                  : '#d1ecf1',
           color: errorModalData.tipo === 'verificacion_exitosa'
             ? '#155724'
             : errorModalData.tipo === 'verificacion_fallida'
-            ? '#856404'
-            : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
-            ? '#856404'
-            : errorModalData.tipo === 'datos_incompletos'
-            ? '#721c24'
-            : '#0c5460',
+              ? '#856404'
+              : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                ? '#856404'
+                : errorModalData.tipo === 'datos_incompletos'
+                  ? '#721c24'
+                  : '#0c5460',
           display: 'flex',
           alignItems: 'center',
           gap: 2,
@@ -5397,17 +5409,17 @@ export function ListadoSolicitud() {
             {errorModalData.mensaje}
           </Typography>
         </DialogTitle>
-        
+
         <DialogContent sx={{ mt: 3, mb: 2 }}>
-          <Box sx={{ 
-            bgcolor: errorModalData.tipo === 'verificacion_exitosa' ? '#f0f9f4' : '#f8f9fa', 
-            p: 3, 
+          <Box sx={{
+            bgcolor: errorModalData.tipo === 'verificacion_exitosa' ? '#f0f9f4' : '#f8f9fa',
+            p: 3,
             borderRadius: '8px',
             border: `1px solid ${errorModalData.tipo === 'verificacion_exitosa' ? '#c3e6cb' : '#dee2e6'}`
           }}>
-            <Typography 
-              variant="body1" 
-              sx={{ 
+            <Typography
+              variant="body1"
+              sx={{
                 whiteSpace: 'pre-line',
                 color: '#495057',
                 lineHeight: 1.8
@@ -5423,9 +5435,9 @@ export function ListadoSolicitud() {
                 💡 Sugerencias:
               </Typography>
               <Typography variant="body2" sx={{ color: '#004085', pl: 2 }}>
-                • Verifique que la cédula esté correctamente digitada<br/>
-                • Confirme que el código dactilar sea el correcto<br/>
-                • Consulte con el cliente si es necesario<br/>
+                • Verifique que la cédula esté correctamente digitada<br />
+                • Confirme que el código dactilar sea el correcto<br />
+                • Consulte con el cliente si es necesario<br />
                 • Si el problema persiste, contacte al área técnica
               </Typography>
             </Box>
@@ -5437,9 +5449,9 @@ export function ListadoSolicitud() {
                 ⚠️ Acciones requeridas:
               </Typography>
               <Typography variant="body2" sx={{ color: '#856404', pl: 2 }}>
-                • Revise manualmente ambas fotografías<br/>
-                • Contacte al analista asignado a esta solicitud<br/>
-                • Considere solicitar nuevas fotos al cliente<br/>
+                • Revise manualmente ambas fotografías<br />
+                • Contacte al analista asignado a esta solicitud<br />
+                • Considere solicitar nuevas fotos al cliente<br />
                 • Documente el motivo del rechazo en el sistema
               </Typography>
             </Box>
@@ -5451,7 +5463,7 @@ export function ListadoSolicitud() {
                 ✓ Verificación completada
               </Typography>
               <Typography variant="body2" sx={{ color: '#155724', pl: 2 }}>
-                La solicitud ha sido procesada y aprobada automáticamente.<br/>
+                La solicitud ha sido procesada y aprobada automáticamente.<br />
                 Puede continuar con el siguiente paso del proceso.
               </Typography>
             </Box>
@@ -5459,29 +5471,29 @@ export function ListadoSolicitud() {
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button 
-            onClick={() => setErrorModalOpen(false)} 
+          <Button
+            onClick={() => setErrorModalOpen(false)}
             variant="contained"
             sx={{
               bgcolor: errorModalData.tipo === 'verificacion_exitosa'
                 ? '#28a745'
                 : errorModalData.tipo === 'verificacion_fallida'
-                ? '#ffc107'
-                : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
-                ? '#ffc107'
-                : errorModalData.tipo === 'datos_incompletos'
-                ? '#dc3545'
-                : '#17a2b8',
+                  ? '#ffc107'
+                  : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                    ? '#ffc107'
+                    : errorModalData.tipo === 'datos_incompletos'
+                      ? '#dc3545'
+                      : '#17a2b8',
               '&:hover': {
                 bgcolor: errorModalData.tipo === 'verificacion_exitosa'
                   ? '#218838'
                   : errorModalData.tipo === 'verificacion_fallida'
-                  ? '#e0a800'
-                  : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
-                  ? '#e0a800'
-                  : errorModalData.tipo === 'datos_incompletos'
-                  ? '#c82333'
-                  : '#138496',
+                    ? '#e0a800'
+                    : errorModalData.tipo === 'datos_incorrectos' || errorModalData.tipo === 'ciudadano_no_encontrado'
+                      ? '#e0a800'
+                      : errorModalData.tipo === 'datos_incompletos'
+                        ? '#c82333'
+                        : '#138496',
               },
               px: 4,
               py: 1,

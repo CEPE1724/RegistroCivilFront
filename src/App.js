@@ -14,6 +14,7 @@ import TimerOffIcon from "@mui/icons-material/TimerOff";
 import DataProtection from "./pages/DataProtection";
 import GestorVirtual from "./pages/GestorVirtual";
 import SolicitudCredito from "./pages/SolicitudCredito";
+import NuevaSolicitud from "./pages/NuevaSolicitud";
 import Documento1 from "./pages/Documento1";
 import VerificacionTelefonica from "./pages/VerificacionTelefonica";
 import ListaSolicitud from "./pages/ListaSolicitud";
@@ -79,6 +80,7 @@ function App() {
         <Route path="/calendar" element={<PrivateRouteWrapper title="calendar Virtual" element={<CalendarioOperador />} />} />
         <Route path="/calendarVerificador" element={<PrivateRouteWrapper title="calendar Virtual" element={<CalendarioVerificador />} />} />
         <Route path="/solicitud" element={<PrivateRouteWrapper title="Solicitud" element={<SolicitudCredito />} />} />
+        <Route path="/nuevasolicitud" element={<PrivateRouteWrapper title="Nueva Solicitud" element={<NuevaSolicitud />} />} />
         <Route path="/documental" element={<PrivateRouteWrapper title="Documentos" element={<Documento1 />} />} />
         <Route path="/telefonica" element={<PrivateRouteWrapper title="Telefonica" element={<VerificacionTelefonica />} />} />
         <Route path="/terrena" element={<PrivateRouteWrapper title="Terrena" element={<VerificacionTerrena />} />} />

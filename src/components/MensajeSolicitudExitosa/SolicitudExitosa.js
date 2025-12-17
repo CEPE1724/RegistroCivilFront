@@ -49,10 +49,25 @@ export const SolicitudExitosa = ({
 	}, [isOpen]);
 
 	const handleCerrar = () => {
-		onClose();
+		console.log('🚪 SolicitudExitosa - handleCerrar llamado');
+		console.log('🚪 Ruta proporcionada:', ruta);
+		console.log('🚪 onClose función:', typeof onClose);
+		
+		// PRIMERO navegar si hay ruta
 		if (ruta && ruta !== "") {
-			navigate(`${ruta}`, { replace: true });
+			console.log('🚪 Navegando a:', ruta);
+			navigate(ruta, { replace: true });
+		} else {
+			console.log('⚠️ No hay ruta para navegar');
 		}
+		
+		// LUEGO cerrar el modal con un pequeño delay para asegurar la navegación
+		setTimeout(() => {
+			if (onClose) {
+				console.log('🚪 Llamando a onClose()');
+				onClose();
+			}
+		}, 100);
 	};
 
 	if (!isOpen) return null;
