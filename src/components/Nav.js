@@ -18,7 +18,7 @@ const Nav = ({ showButton, userData }) => {
   const LogoIco = "/img/logo.webp";
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const pointLike = "/img/ponty.png"
+  const pointLike = "/img/pontyClaus.webp"
 
   const { idMenu, socket } = useAuth();
 
@@ -288,7 +288,7 @@ const Nav = ({ showButton, userData }) => {
   /* Texto que se mueve */
   .marquee-text {
     display: inline-block;
-    animation: marqueeSlide 30s linear infinite;
+    animation: marqueeSlide 20s linear infinite;
   }
 
 
