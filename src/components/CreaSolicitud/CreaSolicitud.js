@@ -27,7 +27,7 @@ import { getSocket, connectToServer } from "../../socket/socket-client";
 import { ModalProgreso } from './ModalProgreso';
 import payjoy from '../../img/payjoy.png';
 
-export function CreaSolicitud ({currentStep, setCurrentStep })  {
+export function CreaSolicitud({ currentStep, setCurrentStep }) {
     const navigate = useNavigate();
     const { userData, userUsuario } = useAuth();
     const { data, fetchBodegaUsuario } = useBodegaUsuario();
@@ -548,7 +548,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                     setFase('COMPLETADO');
                     setResultadoSolicitud(data);
                     setDatosSolicitudFinal(data);
-                    
+
                     // Establecer datos para los modales
                     setSoliGrande(data.soliGrande || data);
                     setCreSoliWeb(data.creSoliWeb || data);
@@ -654,16 +654,11 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
             // 5. Enviar solicitud al endpoint
 
 
-            const response = await axios.post(
-                APIURL.post_cre_solicitud_web_V2(),
-                solicitudData,
-                {
-                    headers: {
-                        method: "POST",
-                        cache: "no-store"
-                    }
-                }
-            );
+            const url = APIURL.post_cre_solicitud_web_V2();
+            const response = await axios.post(url, formattedValues, {
+                headers: { method: "POST", cache: "no-store" },
+            });
+
 
 
             // Verificar si la respuesta es exitosa
@@ -760,8 +755,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                             value={formData.bodega}
                             onChange={handleChange}
                             className={`w-full px-4 py-2.5 rounded-lg border ${errors.bodega
-                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                 } focus:outline-none focus:ring-2 transition-all duration-200`}
                         >
                             <option value="">Selecciona una opción</option>
@@ -787,8 +782,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                             value={formData.tipoConsulta}
                             onChange={handleChange}
                             className={`w-full px-4 py-2.5 rounded-lg border ${errors.tipoConsulta
-                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                 } focus:outline-none focus:ring-2 transition-all duration-200`}
                         >
                             <option value="">Selecciona una opción</option>
@@ -823,8 +818,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 placeholder="Ingresa 10 dígitos"
                                 disabled={loading}
                                 className={`flex-1 px-4 py-2.5 rounded-lg border ${errors.cedula
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200 ${loading ? 'opacity-50 cursor-wait' : ''}`}
                             />
                             <button
@@ -871,8 +866,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 value={formData.apellidoPaterno}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.apellidoPaterno
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             />
                             {errors.apellidoPaterno && (
@@ -912,8 +907,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 value={formData.primerNombre}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.primerNombre
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             />
                             {errors.primerNombre && (
@@ -984,8 +979,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 value={formData.situacionLaboral}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.situacionLaboral
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             >
                                 <option value="">Selecciona una opción</option>
@@ -1014,8 +1009,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 maxLength="10"
                                 placeholder="El celular debe tener 10 dígitos"
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.celular
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             />
                             {errors.celular && (
@@ -1055,8 +1050,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 onChange={handleChange}
                                 disabled={!formData.situacionLaboral}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.actividadEconomica
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200 ${!formData.situacionLaboral ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <option value="">Selecciona una opción</option>
@@ -1082,8 +1077,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 value={formData.estabilidadLaboral}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.estabilidadLaboral
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             >
                                 <option value="">Selecciona una opción</option>
@@ -1109,8 +1104,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 value={formData.tiempoVivienda}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.tiempoVivienda
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             >
                                 <option value="">Selecciona una opción</option>
@@ -1136,8 +1131,8 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                                 value={formData.producto}
                                 onChange={handleChange}
                                 className={`w-full px-4 py-2.5 rounded-lg border ${errors.producto
-                                        ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
-                                        : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
+                                    ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-red-200'
+                                    : 'border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-200'
                                     } focus:outline-none focus:ring-2 transition-all duration-200`}
                             >
                                 <option value="">Selecciona una opción</option>
