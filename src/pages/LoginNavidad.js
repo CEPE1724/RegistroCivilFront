@@ -94,7 +94,7 @@ const LoginNavidad = () => {
 		const minLength = password.length >= 8 && password.length <= 12;
 		const hasUpperCase = /[A-Z]/.test(password);
 		const hasLowerCase = /[a-z]/.test(password);
-		const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+		const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
 
 		return {
 			minLength,
@@ -129,7 +129,7 @@ const LoginNavidad = () => {
 		if (isLoggedIn && !mostrarCambioClave) {
 			navigate("/ciudadanos", { replace: true });
 		}
-	}, [isLoggedIn, mostrarCambioClave]);
+	}, [isLoggedIn, mostrarCambioClave, navigate]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -443,15 +443,23 @@ const LoginNavidad = () => {
 							{/* Botón Iniciar Sesión */}
 							<button
 								type="submit"
-								className="w-full text-white py-2.5 px-4 rounded-xl font-semibold hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-all duration-300 text-sm mt-4 relative overflow-hidden group"
-								style={{
-									backgroundImage: 'linear-gradient(90deg, #DC143C, #228B22, #DC143C, #228B22, #DC143C)',
-									backgroundSize: '200% 100%',
-									animation: 'gradientShift 3s linear infinite',
-								}}
-							>
-								<span className="relative z-10 flex items-center justify-center gap-2">
-									🎄 Iniciar Sesión 🎅
+							disabled={isLoading}
+							className="w-full text-white py-2.5 px-4 rounded-xl font-semibold hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 transition-all duration-300 text-sm mt-4 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+							style={{
+								backgroundImage: 'linear-gradient(90deg, #DC143C, #228B22, #DC143C, #228B22, #DC143C)',
+								backgroundSize: '200% 100%',
+								animation: 'gradientShift 3s linear infinite',
+							}}
+						>
+							<span className="relative z-10 flex items-center justify-center gap-2">
+								{isLoading ? (
+									<>
+										<CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+										Ingresando...
+									</>
+								) : (
+									<>🎄 Iniciar Sesión 🎅</>
+								)}
 								</span>
 							</button>
 						</form>

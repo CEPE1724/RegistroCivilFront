@@ -304,12 +304,20 @@ const handleOlvidoPassword = async () => {
               {/* Botón Iniciar Sesión */}
               <button
                 type="submit"
-                className="w-full text-white py-2.5 px-4 rounded-xl font-semibold hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 text-sm mt-4"
+                disabled={isLoading}
+                className="w-full text-white py-2.5 px-4 rounded-xl font-semibold hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 text-sm mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
 				style={{
   				  backgroundImage: 'linear-gradient(to right, #00447a 0%, #0E5695 5%, #258FEB 50%, #0E5695 95%, #00447a 100%)',
   				}}
               >
-                Iniciar Sesión.
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <CircularProgress size={20} color="inherit" />
+                    Ingresando...
+                  </span>
+                ) : (
+                  "Iniciar Sesión."
+                )}
               </button>
 			  </form>
             </div>

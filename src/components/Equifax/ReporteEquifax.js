@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "../../configApi/axiosConfig";
@@ -77,7 +77,7 @@ export function ReporteEquifax() {
   ];
 
 
-  const fetchEqfxInformacion = async (cedula) => {
+  const fetchEqfxInformacion = useCallback(async (cedula) => {
     try {
       const url = APIURL.getEqfxIdentificacion(cedula);
       const response = await axios.get(url, {
@@ -98,7 +98,7 @@ export function ReporteEquifax() {
     } catch (error) {
       console.error("Error fetching equifax data:", error);
     }
-  };
+  }, []);
 
   const permisosComponente = async (idMenu, idUsuario) => {
     try {
@@ -132,7 +132,7 @@ export function ReporteEquifax() {
 	if (userData?.idUsuario && idMenu) {
 		permisosComponente(idMenu, userData.idUsuario);
     }
-  }, []);
+  }, [cedula, fetchEqfxInformacion, idMenu, userData?.idUsuario]);
 
   const fecthDatosCogno = async (cedula) => {
     try {

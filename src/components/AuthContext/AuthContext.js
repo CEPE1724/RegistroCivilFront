@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useRef } from "react";
+import React, { createContext, useState, useEffect, useContext, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchPerfil } from "../../actions/fetchPerfil"; // Asegúrate de que esta función esté correctamente exportada
 import { APIURL } from "../../configApi/apiConfig";
@@ -23,6 +23,20 @@ export const AuthProvider = ({ children }) => {
   const [sessionMessage, setSessionMessage] = useState("");
   const socketRef = useRef(null);
   const navigate = useNavigate();
+
+  // Función de logout (debe estar antes de los useEffect que la usan)
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiration");
+    localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
+    localStorage.removeItem("loginTimestamp"); // Limpiar el timestamp del login
+    setToken(null);
+    setIsSessionExpired(false);
+    setIsLoggedIn(false);
+    setUserData(null); // Limpiar los datos del usuario
+    setUserUsuario(null); // Limpiar los datos de 'get_nomina'
+    navigate("/login");
+  }, [navigate]);
 
   useEffect(() => {
     if (token && !socketRef.current) {
@@ -65,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         socketRef.current = null;
       };
     }
-  }, [token]);
+  }, [token, logout]);
 
   // Effect para escuchar el evento de forzar logout desde el socket
   useEffect(() => {
@@ -87,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       window.removeEventListener('force-logout', handleForceLogout);
     };
-  }, []);
+  }, [logout]);
 
   const handleCloseSessionModal = () => {
     setShowSessionModal(false);
@@ -124,7 +138,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setIsLoggedIn(false); // Si no hay token, el usuario no está logueado
     }
-  }, [token, navigate]);
+  }, [token, navigate, logout]);
 
   // Effect para obtener datos del perfil una vez que el token está disponible
   useEffect(() => {
@@ -180,19 +194,6 @@ export const AuthProvider = ({ children }) => {
   const setMenuId = (id) => {
     setIdMenu(id);
     localStorage.setItem("rutaUsuario", id); // Guardar el idMenu en localStorage
-  };
-  // Función de logout
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("tokenExpiration");
-    localStorage.removeItem("rutaUsuario"); // Limpiar el idMenu de localStorage
-    localStorage.removeItem("loginTimestamp"); // Limpiar el timestamp del login
-    setToken(null);
-    setIsSessionExpired(false);
-    setIsLoggedIn(false);
-    setUserData(null); // Limpiar los datos del usuario
-    setUserUsuario(null); // Limpiar los datos de 'get_nomina'
-    navigate("/login");
   };
 
   const logoutinactividad = () => {

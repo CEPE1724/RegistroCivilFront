@@ -20,7 +20,7 @@ const Nav = ({ showButton, userData }) => {
   const open = Boolean(anchorEl);
   const pointLike = "/img/pontyClaus.webp"
 
-  const { idMenu, socket } = useAuth();
+  const {  socket } = useAuth();
 
   const [notifications, setNotifications] = useState([]);
   const [showToast, setShowToast] = useState(false);
