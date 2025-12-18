@@ -56,6 +56,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [socketConnecting, setSocketConnecting] = useState(false);
     const [mensajeExitoso, setMensajeExitoso] = useState(false);
     const [soliExistente, setSoliExistente] = useState(null);
     const [solicitudActiva, setSolicitudActiva] = useState(false);
@@ -514,15 +515,23 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                 const token = localStorage.getItem('token');
                 console.log('🔌 Conectando WebSocket...');
 
-                // Ahora connectToServer retorna una Promise que se resuelve cuando está conectado
-                socket = await connectToServer(token);
+                // Mostrar indicador de conexión
+                setSocketConnecting(true);
 
-                // Verificar que realmente se conectó
-                if (!socket.connected) {
-                    throw new Error('No se pudo establecer conexión WebSocket');
+                try {
+                    // Ahora connectToServer retorna una Promise que se resuelve cuando está conectado
+                    socket = await connectToServer(token);
+
+                    // Verificar que realmente se conectó
+                    if (!socket.connected) {
+                        throw new Error('No se pudo establecer conexión WebSocket');
+                    }
+                    
+                    console.log('✅ WebSocket conectado y listo para recibir eventos');
+                } finally {
+                    // Ocultar indicador de conexión
+                    setSocketConnecting(false);
                 }
-                
-                console.log('✅ WebSocket conectado y listo para recibir eventos');
             }
 
             // 2. Configurar listeners de WebSocket (ahora socket está garantizado conectado)
@@ -750,7 +759,36 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full relative">
+
+            {socketConnecting && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+                    <div className="bg-white p-8 rounded-2xl shadow-2xl border border-slate-200 flex flex-col items-center space-y-4">
+                        <div className="relative">
+                            <CircularProgress size={60} thickness={4} className="text-blue-600" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <h3 className="text-lg font-semibold text-slate-800 mb-1">
+                                Estableciendo conexión segura
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                Por favor espere mientras conectamos con el servidor...
+                            </p>
+                        </div>
+                        <div className="flex items-center space-x-2 text-xs text-slate-400">
+                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            <span>Conectando WebSocket...</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Fila 1: Bodega y Tipo de Consulta */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
