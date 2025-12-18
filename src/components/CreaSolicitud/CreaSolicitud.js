@@ -506,21 +506,26 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
         const idempotencyKey = uuidv4();
 
         try {
-            // 1. Conectar WebSocket si no está conectado
+            // 1. Conectar WebSocket y esperar a que esté realmente conectado
             let socket = getSocket();
 
-
+            // ✅ SOLUCIÓN: Esperar explícitamente a que el socket esté conectado
             if (!socket || !socket.connected) {
-                const token = localStorage.getItem('token'); // Ajustar según tu autenticación
+                const token = localStorage.getItem('token');
+                console.log('🔌 Conectando WebSocket...');
 
-                socket = connectToServer(token);
+                // Ahora connectToServer retorna una Promise que se resuelve cuando está conectado
+                socket = await connectToServer(token);
 
-                // Esperar un momento para que se conecte
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
+                // Verificar que realmente se conectó
+                if (!socket.connected) {
+                    throw new Error('No se pudo establecer conexión WebSocket');
+                }
+                
+                console.log('✅ WebSocket conectado y listo para recibir eventos');
             }
 
-            // 2. Configurar listeners de WebSocket
+            // 2. Configurar listeners de WebSocket (ahora socket está garantizado conectado)
             socket.off('solicitud-progreso'); // Limpiar listeners previos
             socket.off('solicitud-web-completada');
             socket.off('solicitud-web-error');

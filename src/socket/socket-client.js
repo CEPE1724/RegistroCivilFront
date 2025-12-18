@@ -3,31 +3,34 @@ import { io } from "socket.io-client";
 let socket;
 
 export const connectToServer = (token, isNewLogin = false) => {
-  // La URL del WebSocket NO debe incluir /api/v1, solo el host:port
-  const SOCKET_URL = process.env.REACT_APP_BASE_URL_SOCKET;
-  
-  
-  socket = io(SOCKET_URL, {
-    path: "/socket.io",                 // default, pero lo dejo explícito
-    transports: ["websocket", "polling"], // Intentar websocket primero
-    auth: { 
-      token,
-      isNewLogin  // Enviar flag de nuevo login al backend
-    },
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-  });
+  return new Promise((resolve, reject) => {
+    // La URL del WebSocket NO debe incluir /api/v1, solo el host:port
+    const SOCKET_URL = process.env.REACT_APP_BASE_URL_SOCKET;
+    
+    socket = io(SOCKET_URL, {
+      path: "/socket.io",                 // default, pero lo dejo explícito
+      transports: ["websocket", "polling"], // Intentar websocket primero
+      auth: { 
+        token,
+        isNewLogin  // Enviar flag de nuevo login al backend
+      },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
 
-  // Eventos de conexión para debugging
-  socket.on('connect', () => {
-    console.log('✅ WebSocket conectado! ID:');
-  });
-  
-  socket.on('connect_error', (error) => {
-    console.error('❌ Error de conexión WebSocket:', error.message);
-    console.error('❌ Error completo:', error);
-  });
+    // ✅ Resolver Promise solo cuando el socket esté realmente conectado
+    socket.on('connect', () => {
+      console.log('✅ WebSocket conectado! ID:', socket.id);
+      resolve(socket); // Resolver la Promise cuando la conexión sea exitosa
+    });
+    
+    // ❌ Rechazar Promise si hay error de conexión
+    socket.on('connect_error', (error) => {
+      console.error('❌ Error de conexión WebSocket:', error.message);
+      console.error('❌ Error completo:', error);
+      reject(error); // Rechazar la Promise si falla la conexión
+    });
   
   // Escuchar evento de sesión terminada por el backend
   socket.on('session-terminated', (data) => {
@@ -50,21 +53,22 @@ export const connectToServer = (token, isNewLogin = false) => {
     }));
   });
   
-  socket.on('disconnect', (reason) => {
-    console.warn('⚠️ WebSocket desconectado. Razón:', reason);
-    
-    // Si el servidor fuerza la desconexión, hacer logout
-    if (reason === 'io server disconnect') {
+    socket.on('disconnect', (reason) => {
+      console.warn('⚠️ WebSocket desconectado. Razón:', reason);
       
-      // Emitir evento personalizado para que AuthContext maneje el logout
-      window.dispatchEvent(new CustomEvent('force-logout', { 
-        detail: { reason: 'Se detecto un inicio de sesión en otro dispositivo' }
-      }));
-    }
-  });
+      // Si el servidor fuerza la desconexión, hacer logout
+      if (reason === 'io server disconnect') {
+        
+        // Emitir evento personalizado para que AuthContext maneje el logout
+        window.dispatchEvent(new CustomEvent('force-logout', { 
+          detail: { reason: 'Se detecto un inicio de sesión en otro dispositivo' }
+        }));
+      }
+    });
 
-  addListener(socket);
-  return socket;
+    // Configurar listeners adicionales
+    addListener(socket);
+  });
 };
 
 function addListener(socket) {

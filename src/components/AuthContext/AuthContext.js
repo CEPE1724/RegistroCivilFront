@@ -47,36 +47,47 @@ export const AuthProvider = ({ children }) => {
       
       console.log(`🔌 Conectando WebSocket | Nuevo Login: ${isNewLogin} | Tiempo desde login: ${timeSinceLogin}ms`);
       
-      const socket = connectToServer(token, isNewLogin);
-      socketRef.current = socket;
+      // ✅ AHORA connectToServer retorna una Promise, necesitamos await
+      const initSocket = async () => {
+        try {
+          const socket = await connectToServer(token, isNewLogin);
+          socketRef.current = socket;
 
-      socket.on("connect", () => {
-        console.log("✅ WebSocket conectado");
-        setIsConnected(true);
-      });
-      
-      socket.on("disconnect", () => {
-        console.log("❌ WebSocket desconectado");
-        setIsConnected(false);
-      });
-      
-      socket.on("clients-updated", (clients) => setConnectedClients(clients));
+          socket.on("connect", () => {
+            console.log("✅ WebSocket conectado en AuthContext");
+            setIsConnected(true);
+          });
+          
+          socket.on("disconnect", () => {
+            console.log("❌ WebSocket desconectado");
+            setIsConnected(false);
+          });
+          
+          socket.on("clients-updated", (clients) => setConnectedClients(clients));
 
-      // Escuchar el evento de sesión terminada por nuevo login
-      socket.on("session-terminated", (data) => {
-        console.warn("⚠️ Sesión terminada:", data);
-        setSessionMessage(data.message || "Tu sesión fue cerrada por un nuevo login");
-        setShowSessionModal(true);
-        
-        setTimeout(() => {
-          setShowSessionModal(false);
-          logout();
-        }, 3000);
-      });
+          // Escuchar el evento de sesión terminada por nuevo login
+          socket.on("session-terminated", (data) => {
+            console.warn("⚠️ Sesión terminada:", data);
+            setSessionMessage(data.message || "Tu sesión fue cerrada por un nuevo login");
+            setShowSessionModal(true);
+            
+            setTimeout(() => {
+              setShowSessionModal(false);
+              logout();
+            }, 3000);
+          });
+        } catch (error) {
+          console.error('❌ Error al conectar WebSocket en AuthContext:', error);
+        }
+      };
+
+      initSocket();
 
       return () => {
-        socket.disconnect();
-        socketRef.current = null;
+        if (socketRef.current) {
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
       };
     }
   }, [token, logout]);
