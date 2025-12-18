@@ -2,7 +2,7 @@
 
 //const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
 
-const API_BASE_URL = "https://backregistrocivil.appservices.com.ec/api/v1/"
+const API_BASE_URL = process.env.REACT_APP_BASE_URL;
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec:8443/"
 
