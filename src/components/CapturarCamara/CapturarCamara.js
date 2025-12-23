@@ -8,7 +8,7 @@ const videoConstraints = {
   facingMode: "user",
 };
 
-export default function CameraCapture({ onCapture }) {
+export default function CapturarCamara({ onCapture }) {
   const webcamRef = useRef(null);
   const [capturedImage, setCapturedImage] = useState(null);
 
