@@ -34,6 +34,7 @@ import ApartmentIcon from '@mui/icons-material/Apartment';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import { FaDollarSign } from "react-icons/fa";
 import CapturarCamara from "../../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
 
@@ -72,6 +73,8 @@ export function VerDetallesModal({
   handleAbrirVerificacionManual,
   handleRechazar,
   data,
+  userData,
+  fetchEstadoRegcivil
 })  {
   // Calcular tiempo total desde fechaTiempos si sumarTodosLosTiempos() devuelve NaN
   const calcularTiempoTotal = () => {
@@ -177,47 +180,49 @@ export function VerDetallesModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth className="backdrop-blur-sm">
-      {/* Header con gradiente moderno */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-4 relative overflow-hidden">
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth className="backdrop-blur-sm">
+	  <DialogContent className="!p-0 max-h-[75vh] overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
+
+		{/* Header con gradiente moderno */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-2 relative overflow-hidden">
         {/* Efecto de brillo */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
         
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-              <PendingActionsIcon className="text-white text-3xl" />
+              <PendingActionsIcon className="text-white text-lg" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Seguimiento de Solicitud</h2>
+              <h2 className="text-lg font-bold text-white">Seguimiento de Solicitud</h2>
              </div>
           </div>
           
           {/* Badge de tiempo total */}
-          <div className="px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 shadow-lg">
+          <div className="px-4 py-1 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 shadow-lg">
             <div className="text-xs font-semibold text-blue-100 uppercase tracking-wide">Tiempo Total</div>
-            <div className="text-2xl font-bold text-white mt-1">{calcularTiempoTotal()}</div>
+            <div className="text-sm font-bold text-white mt-1">{calcularTiempoTotal()}</div>
           </div>
         </div>
       </div>
 
-      {/* Timeline Section */}
-      <div className="bg-gradient-to-b from-gray-50 to-white px-6 py-8 border-b-2 border-gray-200">
-        <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+	{/* Timeline Section */}
+      <div className="bg-gradient-to-b from-gray-50 to-white px-6 py-4 border-b-2 border-gray-200">
+        {/* <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
           <span className="w-1 h-6 bg-blue-600 rounded-full"></span>
           Línea de Tiempo del Proceso
-        </h3>
+        </h3> */}
         
         {/* Timeline Horizontal Moderno */}
         <div className="relative">
           {/* Línea horizontal de fondo */}
-          <div className="absolute left-0 right-0 top-1/2 h-1 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 transform -translate-y-1/2 rounded-full"></div>
+          <div className="absolute left-0 right-0 top-[35%] h-1 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 transform rounded-full"></div>
           
           {/* Grid de etapas */}
           <div className="grid grid-cols-5 gap-4 relative z-10">
             {/* Solicitud */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-col items-center gap-2 mb-4">
+              <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo1?.length > 0 && (
                   <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-200 shadow-sm">
                     {formatDateTime(fechaTiempos?.tipo1[0]?.FechaSistema)}
@@ -225,15 +230,15 @@ export function VerDetallesModal({
                 )}
               </div>
               
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg border-4 border-white transform hover:scale-110 transition-transform duration-300">
-                <PendingActionsIcon className="text-white text-2xl" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-md border-2 border-white transform hover:scale-110 transition-transform duration-300">
+                <PendingActionsIcon sx={{ fontSize: 18, color: 'white' }}/>
               </div>
               
-              <div className="mt-3 text-center">
+              <div className="mt-2 text-center">
                 <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Solicitud</p>
               </div>
               
-              <div className="flex flex-col items-center gap-2 mt-4">
+              <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo1?.length > 1 && (
                   <>
                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-200 shadow-sm">
@@ -252,7 +257,7 @@ export function VerDetallesModal({
 
             {/* Documental */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-col items-center gap-2 mb-4">
+              <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 2) && (
                   <span className="px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-semibold border border-green-200 shadow-sm">
                     {formatDateTime(fechaTiempos?.tipo3?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema)}
@@ -260,15 +265,15 @@ export function VerDetallesModal({
                 )}
               </div>
               
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center shadow-lg border-4 border-white transform hover:scale-110 transition-transform duration-300">
-                <FolderIcon className="text-white text-2xl" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center shadow-md border-2 border-white transform hover:scale-110 transition-transform duration-300">
+                <FolderIcon sx={{ fontSize: 18, color: 'white' }} />
               </div>
               
-              <div className="mt-3 text-center">
+              <div className="mt-2 text-center">
                 <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Documental</p>
               </div>
               
-              <div className="flex flex-col items-center gap-2 mt-4">
+              <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 4) && (
                   <>
                     <span className="px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-semibold border border-green-200 shadow-sm">
@@ -287,7 +292,7 @@ export function VerDetallesModal({
 
             {/* Telefónica */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-col items-center gap-2 mb-4">
+              <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo2?.length > 0 && (
                   <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold border border-purple-200 shadow-sm">
                     {formatDateTime(fechaTiempos?.tipo2?.slice().reverse().find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
@@ -295,15 +300,15 @@ export function VerDetallesModal({
                 )}
               </div>
               
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center shadow-lg border-4 border-white transform hover:scale-110 transition-transform duration-300">
-                <PhoneInTalkIcon className="text-white text-2xl" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-md border-2 border-white transform hover:scale-110 transition-transform duration-300">
+                <PhoneInTalkIcon sx={{ fontSize: 18, color: 'white' }} />
               </div>
               
-              <div className="mt-3 text-center">
+              <div className="mt-2 text-center">
                 <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Telefónica</p>
               </div>
               
-              <div className="flex flex-col items-center gap-2 mt-4">
+              <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 3) && (
                   <>
                     <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold border border-purple-200 shadow-sm">
@@ -322,7 +327,7 @@ export function VerDetallesModal({
 
             {/* Domicilio */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-col items-center gap-2 mb-4">
+              <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo4?.length > 0 && (
                   <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold border border-amber-200 shadow-sm">
                     {formatDateTime(fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema)}
@@ -330,15 +335,15 @@ export function VerDetallesModal({
                 )}
               </div>
               
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg border-4 border-white transform hover:scale-110 transition-transform duration-300">
-                <HouseIcon className="text-white text-2xl" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center shadow-md border-2 border-white transform hover:scale-110 transition-transform duration-300">
+                <HouseIcon sx={{ fontSize: 18, color: 'white' }} />
               </div>
               
-              <div className="mt-3 text-center">
+              <div className="mt-2 text-center">
                 <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Domicilio</p>
               </div>
               
-              <div className="flex flex-col items-center gap-2 mt-4">
+              <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental === 2) && (
                   <>
                     <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold border border-amber-200 shadow-sm">
@@ -357,7 +362,7 @@ export function VerDetallesModal({
 
             {/* Trabajo */}
             <div className="flex flex-col items-center">
-              <div className="flex flex-col items-center gap-2 mb-4">
+              <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo5?.length > 0 && (
                   <span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-lg text-xs font-semibold border border-rose-200 shadow-sm">
                     {formatDateTime(fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema)}
@@ -365,15 +370,15 @@ export function VerDetallesModal({
                 )}
               </div>
               
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center shadow-lg border-4 border-white transform hover:scale-110 transition-transform duration-300">
-                <ApartmentIcon className="text-white text-2xl" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-md border-2 border-white transform hover:scale-110 transition-transform duration-300">
+                <ApartmentIcon sx={{ fontSize: 18, color: 'white' }} />
               </div>
               
-              <div className="mt-3 text-center">
+              <div className="mt-2 text-center">
                 <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Trabajo</p>
               </div>
               
-              <div className="flex flex-col items-center gap-2 mt-4">
+              <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema && (
                   <>
                     <span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-lg text-xs font-semibold border border-rose-200 shadow-sm">
@@ -392,21 +397,19 @@ export function VerDetallesModal({
           </div>
         </div>
       </div>
-
-      {/* Content Section - Imagen y Botones */}
-      <DialogContent className="!p-6 bg-gradient-to-br from-gray-50 to-blue-50">
+	  
         {selectedRow && (
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Sección de Imagen */}
             <div className="lg:w-1/3">
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200">
-                <h4 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                {/* <h4 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
                   Fotografía del Cliente
-                </h4>
+                </h4> */}
                 
                 {/* Contenedor de la imagen */}
                 <div className="relative group">
@@ -574,12 +577,12 @@ export function VerDetallesModal({
             {/* Sección de Información del Cliente */}
             <div className="lg:w-2/3">
               <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-200">
-                <h4 className="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
+                {/* <h4 className="text-sm font-bold text-gray-700 mb-6 flex items-center gap-2">
                   <svg className="w-5 h-5 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   Información de la Solicitud
-                </h4>
+                </h4> */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Nombre */}
@@ -598,38 +601,12 @@ export function VerDetallesModal({
                   {/* Cédula */}
                   <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
                     <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
+                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                         <BadgeIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Cédula</p>
                         <p className="text-sm font-bold text-gray-900">{selectedRow.cedula}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Almacén */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-                        <StoreIcon className="text-white" fontSize="small" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Almacén</p>
-                        <p className="text-sm font-bold text-gray-900 truncate">{selectedRow.almacen}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Vendedor */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-                        <SupervisorAccountIcon className="text-white" fontSize="small" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Vendedor</p>
-                        <p className="text-sm font-bold text-gray-900 truncate">{selectedRow.vendedor}</p>
                       </div>
                     </div>
                   </div>
@@ -647,57 +624,15 @@ export function VerDetallesModal({
                     </div>
                   </div>
 
-                  {/* Estado */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                        <InfoIcon className="text-white" fontSize="small" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Estado</p>
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                            selectedRow.estado === "activo"
-                              ? "bg-green-600 text-white"
-                              : selectedRow.estado === "pendiente"
-                              ? "bg-amber-600 text-white"
-                              : selectedRow.estado === "anulado"
-                              ? "bg-gray-500 text-white"
-                              : selectedRow.estado === "aprobado"
-                              ? "bg-blue-700 text-white"
-                              : selectedRow.estado === "rechazado"
-                              ? "bg-red-700 text-white"
-                              : "bg-slate-700 text-white"
-                          }`}
-                        >
-                          {selectedRow.estado}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Celular */}
                   <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
                     <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
+                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
                         <PhoneIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Celular</p>
                         <p className="text-sm font-bold text-gray-900">{selectedRow.celular}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-                        <EmailIcon className="text-white" fontSize="small" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Email</p>
-                        <p className="text-sm font-bold text-gray-900 truncate">{selectedRow.email}</p>
                       </div>
                     </div>
                   </div>
@@ -806,6 +741,18 @@ export function VerDetallesModal({
                       </div>
                     </div>
                   </div>
+
+				  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
+                          <FaDollarSign className="text-white" fontSize="medium" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Cuota</p>
+                          <p className="text-sm font-bold text-gray-900">{selectedRow.CuotaAsignada}</p>
+                        </div>
+                      </div>
+                    </div>
                 </div>
 
                 {/* Botones de Acción */}
@@ -821,6 +768,16 @@ export function VerDetallesModal({
                       Consultar Equifax
                     </button>
                   )}
+
+				  { selectedRow.estado == "PRE-APROBADO" && (userData?.idGrupo == 16 || userData?.idGrupo == 1 || userData?.idGrupo == 18) &&
+				  (<div className="flex items-center gap-2">
+                          <button
+                            onClick={fetchEstadoRegcivil}
+                            className="py-2 px-6 rounded-xl bg-orange-700 hover:bg-orange-700 text-white font-semibold shadow-md transition duration-300 text-sm md:text-base"
+                          >
+                            Aprobar solicitud 
+                          </button>
+                        </div>)}
 
                   {!ExistPrefactura && puedeAprobar(selectedRow) && selectedRow.estado !== "RECHAZADO" && (
                     <button
@@ -841,12 +798,12 @@ export function VerDetallesModal({
       </DialogContent>
 
       {/* Footer Actions */}
-      <DialogActions className="!p-6 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-200">
+      <DialogActions className="!p-3 bg-gradient-to-r from-gray-50 to-blue-50 border-t-2 border-gray-200">
         <div className="flex items-center justify-between w-full gap-4">
           {selectedRow?.Estado === 1 && (
             <button
               onClick={() => setShowModalRechazo(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+              className="flex items-center gap-2 px-6 py-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -859,7 +816,7 @@ export function VerDetallesModal({
           
           <button
             onClick={onClose}
-            className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+            className="flex items-center gap-2 px-8 py-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
