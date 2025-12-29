@@ -249,6 +249,39 @@ export function ListadoSolicitud() {
     }
   };
 
+  const fetchEstadoRegcivil = async () => {
+	try {
+      const url = APIURL.patch_EstadoRegcivil(selectedRow.id);
+      const response = await axios.patch(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      enqueueSnackbar("Estado actualizado correctamente.", { variant: "success" })
+	  handleCloseDialog()
+      return response.data;
+    } catch (error) {
+      console.error("Error al actualizar el Estado", error);
+      enqueueSnackbar("Error al actualizar el Estado", { variant: "error" });
+      return null;
+    }
+  }
+
+  const fetchCuota = async (id) => {
+	try {
+		const url = APIURL.getSolicitudGrandeporId(id);
+		const response = await axios.get(url, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+	  console.log("cuota", response.data)	
+      return response.data;
+	} catch (error) {
+		console.error("Error al obtener solicitud grande", error);
+	}
+  } 
+
   // Estado para modal de error visual
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorModalData, setErrorModalData] = useState({ tipo: '', mensaje: '', detalle: '' });
@@ -2216,7 +2249,12 @@ export function ListadoSolicitud() {
 
   const handleOpenDialog = async (row) => {
 
-    setSelectedRow(row);
+	const cuotaDato = await fetchCuota(row.id)
+
+    setSelectedRow({
+		...row,
+		CuotaAsignada: cuotaDato?.CuotaAsignada ?? null,
+	});
     setView(true);
     const [tipo1, tipo2, tipo3, tipo4, tipo5] = await Promise.all([
       fetchTiempSolicweb(1, row.id, "10,12"),  //solicitudes
@@ -3842,6 +3880,8 @@ export function ListadoSolicitud() {
         handleAbrirVerificacionManual={handleAbrirVerificacionManual}
         handleRechazar={handleRechazar}
         data={data}
+		userData={userData}
+		fetchEstadoRegcivil={fetchEstadoRegcivil}
       />
 
       {/* Modal de carga para verificación facial */}
