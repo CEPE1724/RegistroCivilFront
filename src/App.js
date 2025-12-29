@@ -41,8 +41,6 @@ import ListaNegraCedula from "./pages/ListaNegraCedulas";
 import ListaNegraEmail from "./pages/ListaNegraEmails";
 import MapaPantalla from "./pages/MapPantalla"
 import CumpleañosPagina from "./pages/CumpleañosPag"
-import InformesCobranza from "./pages/InformesCobranza";
-
 function App() {
 
   const { isSessionExpired, logout, token } = useAuth();
@@ -67,7 +65,7 @@ function App() {
 
     <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }} autoHideDuration={3500}>
       <Routes>
-        <Route path="/login" element={<LoginNavidad />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/desayuno" element={<Desayuno />} />
 		    <Route path="/FelizCumpleaños" element={<CumpleañosPagina />} />
 
@@ -101,7 +99,6 @@ function App() {
         <Route path="/notificaciones" element={<PrivateRouteWrapper title="Notificaciones" element={<NotificacionesCli />} />} />
         <Route path="/ListaNegraCedulas" element={<PrivateRouteWrapper title="ListaNegraCedula" element={<ListaNegraCedula />} />} />
         <Route path="/ListaNegraEmails" element={<PrivateRouteWrapper title="ListaNegraEmail" element={<ListaNegraEmail />} />} />
-        <Route path="/informesCobranza" element={<PrivateRouteWrapper title="Informes de Cobranza" element={<InformesCobranza />} />} />
       </Routes>
 
       {isSessionExpired && (
