@@ -21,7 +21,6 @@ export const connectToServer = (token, isNewLogin = false) => {
 
     // ✅ Resolver Promise solo cuando el socket esté realmente conectado
     socket.on('connect', () => {
-      console.log('✅ WebSocket conectado! ID:', socket.id);
       resolve(socket); // Resolver la Promise cuando la conexión sea exitosa
     });
     
@@ -34,8 +33,7 @@ export const connectToServer = (token, isNewLogin = false) => {
   
   // Escuchar evento de sesión terminada por el backend
   socket.on('session-terminated', (data) => {
-    console.warn('🚪 Sesión terminada por el servidor:', data);
-    
+
     let message = 'Tu sesión ha sido cerrada';
     
     if (data.reason === 'duplicate_session') {

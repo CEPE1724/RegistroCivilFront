@@ -45,7 +45,7 @@ const InformesCobranza = () => {
         fetchOperadores();
         fetchBancos();
     }, []);
-    
+
     const fetchOperadores = async () => {
             try {
                 const response = await axios.get(APIURL.personal_bdd_findAllgestor());
@@ -386,7 +386,7 @@ const InformesCobranza = () => {
                                         <option value="">Seleccionar...</option>
                                         {bancos.map(banco => (
                                             <option key={banco.idEntidadFinanciera} value={banco.idEntidadFinanciera}>
-                                                {banco.nombre}
+                                                {banco.Nombre}
                                             </option>
                                         ))}
                                     </select>
