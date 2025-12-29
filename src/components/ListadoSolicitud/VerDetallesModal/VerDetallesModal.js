@@ -79,15 +79,15 @@ export function VerDetallesModal({
   // Calcular tiempo total desde fechaTiempos si sumarTodosLosTiempos() devuelve NaN
   const calcularTiempoTotal = () => {
     const tiempoSumado = sumarTodosLosTiempos();
-    
+
     // Si la función devuelve un valor válido, usarlo
     if (tiempoSumado && tiempoSumado !== 'NaN' && !isNaN(tiempoSumado)) {
       return tiempoSumado;
     }
-    
+
     // Si no, calcular manualmente desde fechaTiempos
     const tiempos = [];
-    
+
     // Tiempo de Solicitud (tipo1)
     if (fechaTiempos?.tipo1?.length > 1) {
       tiempos.push(calcularTiempoTranscurrido(
@@ -95,53 +95,53 @@ export function VerDetallesModal({
         fechaTiempos.tipo1[1]?.FechaSistema
       ));
     }
-    
+
     // Tiempo Documental (tipo3)
     if (fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 2) &&
-        fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 4)) {
+      fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 4)) {
       tiempos.push(calcularTiempoTranscurrido(
         fechaTiempos.tipo3.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema,
         fechaTiempos.tipo3.find(item => item.idEstadoVerificacionDocumental === 4)?.FechaSistema
       ));
     }
-    
+
     // Tiempo Telefónica (tipo2)
     if (fechaTiempos?.tipo2?.length > 0 &&
-        fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 3)) {
+      fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 3)) {
       tiempos.push(calcularTiempoTranscurrido(
         fechaTiempos.tipo2.slice().reverse().find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema,
         fechaTiempos.tipo2.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema
       ));
     }
-    
+
     // Tiempo Domicilio (tipo4)
     if (fechaTiempos?.tipo4?.length > 0 &&
-        fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental === 2)) {
+      fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental === 2)) {
       tiempos.push(calcularTiempoTranscurrido(
         fechaTiempos.tipo4.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema,
         fechaTiempos.tipo4.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema
       ));
     }
-    
+
     // Tiempo Trabajo (tipo5)
     if (fechaTiempos?.tipo5?.length > 0 &&
-        fechaTiempos?.tipo5?.some(item => item.idEstadoVerificacionDocumental === 2)) {
+      fechaTiempos?.tipo5?.some(item => item.idEstadoVerificacionDocumental === 2)) {
       tiempos.push(calcularTiempoTranscurrido(
         fechaTiempos.tipo5.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema,
         fechaTiempos.tipo5.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema
       ));
     }
-    
+
     // Si no hay tiempos, retornar mensaje
     if (tiempos.length === 0 || tiempos.every(t => !t || t === 'NaN')) {
       return '0h 0m';
     }
-    
+
     // Si hay un solo tiempo válido, retornarlo
     if (tiempos.length === 1) {
       return tiempos[0];
     }
-    
+
     // Si hay múltiples tiempos, sumarlos
     let totalMinutos = 0;
     tiempos.forEach(tiempo => {
@@ -152,14 +152,14 @@ export function VerDetallesModal({
           totalMinutos += parseInt(matchHorasMinutos[1]) * 60 + parseInt(matchHorasMinutos[2]);
           return;
         }
-        
+
         // Formato: "Xmin" (ej: "3min", "45min")
         const matchSoloMinutos = tiempo.match(/(\d+)min/);
         if (matchSoloMinutos) {
           totalMinutos += parseInt(matchSoloMinutos[1]);
           return;
         }
-        
+
         // Formato: "Xh" solo horas (ej: "2h")
         const matchSoloHoras = tiempo.match(/(\d+)h/);
         if (matchSoloHoras) {
@@ -167,10 +167,10 @@ export function VerDetallesModal({
         }
       }
     });
-    
+
     const horas = Math.floor(totalMinutos / 60);
     const minutos = totalMinutos % 60;
-    
+
     // Retornar formato apropiado
     if (horas > 0) {
       return `${horas}h ${minutos}m`;
@@ -187,7 +187,7 @@ export function VerDetallesModal({
       <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-2 relative overflow-hidden">
         {/* Efecto de brillo */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-        
+
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
@@ -197,7 +197,7 @@ export function VerDetallesModal({
               <h2 className="text-lg font-bold text-white">Seguimiento de Solicitud</h2>
              </div>
           </div>
-          
+
           {/* Badge de tiempo total */}
           <div className="px-4 py-1 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 shadow-lg">
             <div className="text-xs font-semibold text-blue-100 uppercase tracking-wide">Tiempo Total</div>
@@ -219,12 +219,12 @@ export function VerDetallesModal({
           <div className="absolute left-0 right-0 top-[35%] h-1 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 transform rounded-full"></div>
           
           {/* Grid de etapas */}
-          <div className="grid grid-cols-5 gap-4 relative z-10">
+          <div className="grid grid-cols-5 gap-2 relative z-10">
             {/* Solicitud */}
             <div className="flex flex-col items-center">
               <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo1?.length > 0 && (
-                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-200 shadow-sm">
+                  <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-semibold border border-blue-200">
                     {formatDateTime(fechaTiempos?.tipo1[0]?.FechaSistema)}
                   </span>
                 )}
@@ -241,10 +241,10 @@ export function VerDetallesModal({
               <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo1?.length > 1 && (
                   <>
-                    <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-200 shadow-sm">
+                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-semibold border border-blue-200">
                       {formatDateTime(fechaTiempos?.tipo1[1]?.FechaSistema)}
                     </span>
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full text-xs font-bold shadow-md">
+                    <span className="px-2 py-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full text-[10px] font-bold shadow-sm">
                       ⏱️ {calcularTiempoTranscurrido(
                         fechaTiempos?.tipo1[0]?.FechaSistema,
                         fechaTiempos?.tipo1[1]?.FechaSistema
@@ -259,7 +259,7 @@ export function VerDetallesModal({
             <div className="flex flex-col items-center">
               <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 2) && (
-                  <span className="px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-semibold border border-green-200 shadow-sm">
+                  <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded text-[10px] font-semibold border border-green-200">
                     {formatDateTime(fechaTiempos?.tipo3?.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema)}
                   </span>
                 )}
@@ -276,10 +276,10 @@ export function VerDetallesModal({
               <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo3?.some(item => item.idEstadoVerificacionDocumental === 4) && (
                   <>
-                    <span className="px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-semibold border border-green-200 shadow-sm">
+                    <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded text-[10px] font-semibold border border-green-200">
                       {formatDateTime(fechaTiempos?.tipo3?.find(item => item.idEstadoVerificacionDocumental === 4)?.FechaSistema)}
                     </span>
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full text-xs font-bold shadow-md">
+                    <span className="px-2 py-1 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full text-[10px] font-bold shadow-sm">
                       ⏱️ {calcularTiempoTranscurrido(
                         fechaTiempos?.tipo3.find(item => item.idEstadoVerificacionDocumental === 2)?.FechaSistema,
                         fechaTiempos?.tipo3.find(item => item.idEstadoVerificacionDocumental === 4)?.FechaSistema
@@ -294,7 +294,7 @@ export function VerDetallesModal({
             <div className="flex flex-col items-center">
               <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo2?.length > 0 && (
-                  <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold border border-purple-200 shadow-sm">
+                  <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-semibold border border-purple-200">
                     {formatDateTime(fechaTiempos?.tipo2?.slice().reverse().find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
                   </span>
                 )}
@@ -311,10 +311,10 @@ export function VerDetallesModal({
               <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo2?.some(item => item.idEstadoVerificacionDocumental === 3) && (
                   <>
-                    <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-semibold border border-purple-200 shadow-sm">
+                    <span className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-[10px] font-semibold border border-purple-200">
                       {formatDateTime(fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema)}
                     </span>
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full text-xs font-bold shadow-md">
+                    <span className="px-2 py-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full text-[10px] font-bold shadow-sm">
                       ⏱️ {calcularTiempoTranscurrido(
                         fechaTiempos?.tipo2?.slice().reverse().find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema,
                         fechaTiempos?.tipo2?.find(item => item.idEstadoVerificacionDocumental === 3)?.FechaSistema
@@ -329,7 +329,7 @@ export function VerDetallesModal({
             <div className="flex flex-col items-center">
               <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo4?.length > 0 && (
-                  <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold border border-amber-200 shadow-sm">
+                  <span className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-semibold border border-amber-200">
                     {formatDateTime(fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema)}
                   </span>
                 )}
@@ -346,10 +346,10 @@ export function VerDetallesModal({
               <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental === 2) && (
                   <>
-                    <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-semibold border border-amber-200 shadow-sm">
+                    <span className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-semibold border border-amber-200">
                       {formatDateTime(fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
                     </span>
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-full text-xs font-bold shadow-md">
+                    <span className="px-2 py-1 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-full text-[10px] font-bold shadow-sm">
                       ⏱️ {calcularTiempoTranscurrido(
                         (fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema),
                         (fechaTiempos?.tipo4?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)
@@ -364,7 +364,7 @@ export function VerDetallesModal({
             <div className="flex flex-col items-center">
               <div className="flex flex-col items-center gap-1 mb-2">
                 {fechaTiempos?.tipo5?.length > 0 && (
-                  <span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-lg text-xs font-semibold border border-rose-200 shadow-sm">
+                  <span className="px-2 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px] font-semibold border border-rose-200">
                     {formatDateTime(fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema)}
                   </span>
                 )}
@@ -381,10 +381,10 @@ export function VerDetallesModal({
               <div className="flex flex-col items-center gap-1 mt-2">
                 {fechaTiempos?.tipo4?.some(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema && (
                   <>
-                    <span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-lg text-xs font-semibold border border-rose-200 shadow-sm">
+                    <span className="px-2 py-0.5 bg-rose-50 text-rose-700 rounded text-[10px] font-semibold border border-rose-200">
                       {formatDateTime(fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema)}
                     </span>
-                    <span className="px-3 py-1.5 bg-gradient-to-r from-rose-600 to-rose-700 text-white rounded-full text-xs font-bold shadow-md">
+                    <span className="px-2 py-1 bg-gradient-to-r from-rose-600 to-rose-700 text-white rounded-full text-[10px] font-bold shadow-sm">
                       ⏱️ {calcularTiempoTranscurrido(
                         fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 1)?.FechaSistema,
                         fechaTiempos?.tipo5?.find(item => item.idEstadoVerificacionDocumental == 2)?.FechaSistema
@@ -443,107 +443,106 @@ export function VerDetallesModal({
                 </div>
 
                 {/* Botones de Acción */}
-                {puedeAprobar(selectedRow) && 
-                  selectedRow.estado !== "APROBADO" && 
-                  selectedRow.estado !== "RECHAZADO" && 
-                  selectedRow.estado !== "FACTURADO" && 
+                {puedeAprobar(selectedRow) &&
+                  selectedRow.estado !== "APROBADO" &&
+                  selectedRow.estado !== "RECHAZADO" &&
+                  selectedRow.estado !== "FACTURADO" &&
                   selectedRow.estado !== "NOTA DE CRÉDITO AUTOMÁTICA" && (
-                  <div className="mt-6 space-y-4">
-                    <input
-                      type="file"
-                      accept="image/jpeg, image/png"
-                      onChange={handleFileChange}
-                      ref={inputFileRef}
-                      style={{ display: "none" }}
-                    />
+                    <div className="mt-6 space-y-4">
+                      <input
+                        type="file"
+                        accept="image/jpeg, image/png"
+                        onChange={handleFileChange}
+                        ref={inputFileRef}
+                        style={{ display: "none" }}
+                      />
 
-                    {/* Botones de Foto */}
-                    <div className="grid grid-cols-2 gap-3">
+                      {/* Botones de Foto */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          onClick={() => setOpenCameraModal(true)}
+                          className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                          </svg>
+                          Tomar Foto
+                        </button>
+
+                        <button
+                          onClick={() => inputFileRef.current.click()}
+                          className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                          </svg>
+                          Cargar Foto
+                        </button>
+                      </div>
+
+                      {/* Botón Subir */}
                       <button
-                        onClick={() => setOpenCameraModal(true)}
-                        className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                        </svg>
-                        Tomar Foto
-                      </button>
-
-                      <button
-                        onClick={() => inputFileRef.current.click()}
-                        className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        Cargar Foto
-                      </button>
-                    </div>
-
-                    {/* Botón Subir */}
-                    <button
-                      onClick={handleUploadClick}
-                      disabled={!fileToUpload}
-                      className={`w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl shadow-lg transition-all duration-300 transform ${
-                        fileToUpload
+                        onClick={handleUploadClick}
+                        disabled={!fileToUpload}
+                        className={`w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl shadow-lg transition-all duration-300 transform ${fileToUpload
                           ? "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
                           : "bg-gray-200 text-gray-400 cursor-not-allowed"
-                      }`}
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                      </svg>
-                      {fileToUpload ? "Subir Imagen" : "Seleccione una imagen"}
-                    </button>
-
-                    {/* Verificar Fotos */}
-                    {!ExistPrefactura ? (
-                      <button
-                        onClick={async () => {
-                          const cedula = selectedRow?.cedula;
-                          const dactilar = selectedRow?.CodigoDactilar;
-                          const imagenSubida = selectedRow?.imagen;
-
-                          if (!cedula || !dactilar || !imagenSubida) {
-                            setErrorModalData({
-                              tipo: 'datos_incompletos',
-                              mensaje: 'Datos incompletos',
-                              detalle: 'No se pueden verificar las fotos porque faltan datos en la solicitud:\n\n' +
-                                `• Cédula: ${cedula || 'NO DISPONIBLE'}\n` +
-                                `• Código Dactilar: ${dactilar || 'NO DISPONIBLE'}\n` +
-                                `• Imagen: ${imagenSubida ? 'Disponible' : 'NO DISPONIBLE'}\n\n` +
-                                'Por favor complete los datos faltantes antes de continuar.'
-                            });
-                            setErrorModalOpen(true);
-                            return;
-                          }
-
-                          const result = await fetchImagenRegistroCivil(cedula, dactilar);
-
-                          if (result.success && result.foto && result.foto.trim() !== "") {
-                            await handleVerificarIdentidad(imagenSubida, result.foto);
-                          }
-                        }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                          }`}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                         </svg>
-                        Verificar Fotos
+                        {fileToUpload ? "Subir Imagen" : "Seleccione una imagen"}
                       </button>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 p-4 rounded-xl shadow-md">
-                        <ReportProblemIcon fontSize="large" className="text-red-600 animate-pulse" />
-                        <p className="font-bold text-red-800 text-sm">
-                          No se encontró ninguna <span className="uppercase">pre-factura activa</span>
-                        </p>
-                        <span className="text-xs text-red-600">
-                          Si considera que esto es un error, contacte a soporte.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
+
+                      {/* Verificar Fotos */}
+                      {!ExistPrefactura ? (
+                        <button
+                          onClick={async () => {
+                            const cedula = selectedRow?.cedula;
+                            const dactilar = selectedRow?.CodigoDactilar;
+                            const imagenSubida = selectedRow?.imagen;
+
+                            if (!cedula || !dactilar || !imagenSubida) {
+                              setErrorModalData({
+                                tipo: 'datos_incompletos',
+                                mensaje: 'Datos incompletos',
+                                detalle: 'No se pueden verificar las fotos porque faltan datos en la solicitud:\n\n' +
+                                  `• Cédula: ${cedula || 'NO DISPONIBLE'}\n` +
+                                  `• Código Dactilar: ${dactilar || 'NO DISPONIBLE'}\n` +
+                                  `• Imagen: ${imagenSubida ? 'Disponible' : 'NO DISPONIBLE'}\n\n` +
+                                  'Por favor complete los datos faltantes antes de continuar.'
+                              });
+                              setErrorModalOpen(true);
+                              return;
+                            }
+
+                            const result = await fetchImagenRegistroCivil(cedula, dactilar);
+
+                            if (result.success && result.foto && result.foto.trim() !== "") {
+                              await handleVerificarIdentidad(imagenSubida, result.foto);
+                            }
+                          }}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          Verificar Fotos
+                        </button>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-center gap-3 bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 p-4 rounded-xl shadow-md">
+                          <ReportProblemIcon fontSize="large" className="text-red-600 animate-pulse" />
+                          <p className="font-bold text-red-800 text-sm">
+                            No se encontró ninguna <span className="uppercase">pre-factura activa</span>
+                          </p>
+                          <span className="text-xs text-red-600">
+                            Si considera que esto es un error, contacte a soporte.
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
             </div>
 
@@ -584,19 +583,7 @@ export function VerDetallesModal({
                   Información de la Solicitud
                 </h4> */}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Nombre */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                        <PersonIcon className="text-white" fontSize="small" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Nombre</p>
-                        <p className="text-sm font-bold text-gray-900 truncate">{selectedRow.nombre}</p>
-                      </div>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 
                   {/* Cédula */}
                   <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
@@ -605,8 +592,8 @@ export function VerDetallesModal({
                         <BadgeIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Cédula</p>
-                        <p className="text-sm font-bold text-gray-900">{selectedRow.cedula}</p>
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Cédula</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.cedula}</p>
                       </div>
                     </div>
                   </div>
@@ -618,8 +605,8 @@ export function VerDetallesModal({
                         <InfoIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Tipo de Consulta</p>
-                        <p className="text-sm font-bold text-gray-900 truncate">{selectedRow.consulta}</p>
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Vendedor</p>
+                        <p className="text-xs font-bold text-gray-900 truncate">{selectedRow.vendedor}</p>
                       </div>
                     </div>
                   </div>
@@ -631,74 +618,105 @@ export function VerDetallesModal({
                         <PhoneIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Celular</p>
-                        <p className="text-sm font-bold text-gray-900">{selectedRow.celular}</p>
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Celular</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.celular}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Fecha */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                        <EventIcon className="text-white" fontSize="small" />
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                        <EventIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Fecha</p>
-                        <p className="text-sm font-bold text-gray-900">{selectedRow.fecha.substring(0, 10)}</p>
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Fecha</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.fecha.substring(0, 10)}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Afiliado */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-                        <CheckCircleIcon className="text-white" fontSize="small" />
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
+                        <CheckCircleIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Afiliado</p>
-                        <p className="text-sm font-bold text-gray-900">{selectedRow.afiliado}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Producto */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                        <ShoppingCartIcon className="text-white" fontSize="small" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Producto</p>
-                        <p className="text-sm font-bold text-gray-900">{selectedRow.idProducto}</p>
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Afiliado</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.afiliado}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Tiene RUC */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
-                        <BusinessIcon className="text-white" fontSize="small" />
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
+                        <BusinessIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Tiene RUC</p>
-                        <p className="text-sm font-bold text-gray-900">{selectedRow.tieneRuc}</p>
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Tiene RUC</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.tieneRuc}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+
+
+                  {/* Tipo de Consulta */}
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                        <InfoIcon sx={{ fontSize: 16 }} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Tipo de Consulta</p>
+                        <p className="text-xs font-bold text-gray-900 truncate">{selectedRow.consulta}</p>
                       </div>
                     </div>
                   </div>
 
+                  {/* Almacén */}
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
+                        <StoreIcon sx={{ fontSize: 16 }} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Almacén</p>
+                        <p className="text-xs font-bold text-gray-900 truncate">{selectedRow.almacen}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Producto */}
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                        <ShoppingCartIcon sx={{ fontSize: 16 }} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Producto</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.idProducto}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                   {/* Ingreso Afiliación */}
                   {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' && (
-                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                          <EventIcon className="text-white" fontSize="small" />
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                          <EventIcon sx={{ fontSize: 16 }} className="text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Ingreso Afiliación</p>
-                          <p className="text-sm font-bold text-gray-900">{selectedRow.FechaAfiliacionIngreso}</p>
+                          <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Ingreso Afiliación</p>
+                          <p className="text-xs font-bold text-gray-900">{selectedRow.FechaAfiliacionIngreso}</p>
                         </div>
                       </div>
                     </div>
@@ -706,14 +724,14 @@ export function VerDetallesModal({
 
                   {/* Afiliación Hasta */}
                   {selectedRow.FechaAfiliacionHasta !== '1970-01-01' && (
-                    <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-                          <EventIcon className="text-white" fontSize="small" />
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                          <EventIcon sx={{ fontSize: 16 }} className="text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-600 font-semibold uppercase tracking-wide">Afiliación Hasta</p>
-                          <p className="text-sm font-bold text-gray-900">{selectedRow.FechaAfiliacionHasta}</p>
+                          <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Afiliación Hasta</p>
+                          <p className="text-xs font-bold text-gray-900">{selectedRow.FechaAfiliacionHasta}</p>
                         </div>
                       </div>
                     </div>
@@ -811,9 +829,9 @@ export function VerDetallesModal({
               Rechazar Solicitud
             </button>
           )}
-          
+
           <div className="flex-1"></div>
-          
+
           <button
             onClick={onClose}
             className="flex items-center gap-2 px-8 py-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
@@ -824,7 +842,7 @@ export function VerDetallesModal({
             Cerrar
           </button>
         </div>
-        
+
         <ModalConfirmacionRechazo
           isOpen={showModalRechazo}
           onClose={() => setShowModalRechazo(false)}

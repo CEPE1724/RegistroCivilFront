@@ -24,7 +24,7 @@ export function GestorDocumentos({
     consulta,
     estadoVerifD,
 }) {
-    const { userData, userUsuario, idMenu } = useAuth();
+    const { userData } = useAuth();
     const [files, setFiles] = useState({});
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();

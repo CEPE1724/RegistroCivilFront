@@ -221,4 +221,7 @@ export const APIURL = {
   getCliente: (cedula) => `${API_BASE_URL}cliente/cedula/${cedula}`,
   postGeoreferenciaEntregaDomicilio: () => `${API_BASE_URL}georeferencia-entrega-domicilio`,
   patch_EstadoRegcivil: (id) => `${API_BASE_URL}cre-solicitud-web/updateEstadozz/${id}`, //endpoint provicional registro civil
+  personal_bdd_findAllgestor: () => `${API_BASE_URL}personal-bdd/gestores`,
+  cre_entidad_financiera_findAllCobranza: (activo) => `${API_BASE_URL}cre-entidad-financiera/findAllCobranza/${activo}`,
+
 };
