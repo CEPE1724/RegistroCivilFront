@@ -513,7 +513,7 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
             // ✅ SOLUCIÓN: Esperar explícitamente a que el socket esté conectado
             if (!socket || !socket.connected) {
                 const token = localStorage.getItem('token');
-                console.log('🔌 Conectando WebSocket...');
+     
 
                 // Mostrar indicador de conexión
                 setSocketConnecting(true);

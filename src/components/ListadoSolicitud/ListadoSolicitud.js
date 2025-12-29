@@ -275,7 +275,6 @@ export function ListadoSolicitud() {
           "Content-Type": "application/json",
         },
       });
-	  console.log("cuota", response.data)	
       return response.data;
 	} catch (error) {
 		console.error("Error al obtener solicitud grande", error);

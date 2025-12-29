@@ -45,8 +45,7 @@ export const AuthProvider = ({ children }) => {
       const timeSinceLogin = Date.now() - loginTimestamp;
       const isNewLogin = timeSinceLogin < 5000; // true si login fue hace menos de 5 segundos
       
-      console.log(`🔌 Conectando WebSocket | Nuevo Login: ${isNewLogin} | Tiempo desde login: ${timeSinceLogin}ms`);
-      
+     
       // ✅ AHORA connectToServer retorna una Promise, necesitamos await
       const initSocket = async () => {
         try {
