@@ -219,5 +219,7 @@ export const APIURL = {
   getSolicitudGrandeporId : (id) => `${API_BASE_URL}web-solicitudgrande/${id}` ,
   getUatReporteBuroCredito: (id) => `${API_BASE_URL}uatEqfxReporteBuroCredito/${id}`,
   getCliente: (cedula) => `${API_BASE_URL}cliente/cedula/${cedula}`,
-  postGeoreferenciaEntregaDomicilio: () => `${API_BASE_URL}georeferencia-entrega-domicilio`
+  postGeoreferenciaEntregaDomicilio: () => `${API_BASE_URL}georeferencia-entrega-domicilio`,
+  personal_bdd_findAllgestor: () => `${API_BASE_URL}personal-bdd/gestores`,
+  cre_entidad_financiera_findAllCobranza: (activo) => `${API_BASE_URL}cre-entidad-financiera/findAllCobranza/${activo}`,
 };

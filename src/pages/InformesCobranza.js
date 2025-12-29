@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+
+
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import {DetalleCobranza } from '../components';
 import { 
@@ -14,14 +16,18 @@ import {
     FunnelIcon,
     EyeIcon,
     PencilSquareIcon,
-    TrashIcon
-} from '@heroicons/react/24/outline';
+    TrashIcon,
+    UserGroupIcon,
 
+} from '@heroicons/react/24/outline';
+import { APIURL } from '../configApi/apiConfig';
+import axios from '../configApi/axiosConfig';
 const InformesCobranza = () => {
+
     const [filters, setFilters] = useState({
         periodo: '12/2025',
-        tipoGestion: 'todos', // todos, gestion, sinGestion, compromisoPago
-        filtroGestion: 'gestion', // gestion, almacen
+        tipoGestion: 'todos',
+        filtroGestion: 'gestion',
         diasMoraDesde: 1,
         diasMoraHasta: 150,
         operador: '',
@@ -30,6 +36,32 @@ const InformesCobranza = () => {
         banco: '',
         almacen: ''
     });
+
+    // Operadores obtenidos de la API
+    const [operadores, setOperadores] = useState([]);
+        const [bancos, setBancos] = useState([]);
+    // Cargar operadores al montar el componente
+    useEffect(() => {
+        fetchOperadores();
+        fetchBancos();
+    }, []);
+    
+    const fetchOperadores = async () => {
+            try {
+                const response = await axios.get(APIURL.personal_bdd_findAllgestor());
+                setOperadores(response.data);
+            } catch (error) {
+                setOperadores([]);
+            }
+        };
+        const fetchBancos = async () => {
+            try {
+                const response = await axios.get(APIURL.cre_entidad_financiera_findAllCobranza(true));
+                setBancos(response.data);
+            } catch (error) {
+                setBancos([]);
+            }
+        };
 
     const [isDetalleOpen, setIsDetalleOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
@@ -90,7 +122,9 @@ const InformesCobranza = () => {
     ]);
 
     const handleFilterChange = (field, value) => {
+        
         setFilters(prev => ({ ...prev, [field]: value }));
+
     };
 
     const handleBuscar = () => {
@@ -111,6 +145,24 @@ const InformesCobranza = () => {
     const handleCloseDetalle = () => {
         setIsDetalleOpen(false);
         setSelectedRow(null);
+    };
+
+    // Función para obtener el icono del operador según la selección
+    const getOperadorIcon = () => {
+        // Buscar el operador seleccionado en la lista de operadores
+        const operadorSeleccionado = operadores.find(op => String(op.idPersonalBDD) === String(filters.operador));
+        if (operadorSeleccionado) {
+            if (operadorSeleccionado.idGrupo === 19) {
+                // Call Center
+                return <UserGroupIcon className="w-4 h-4 mr-2 text-blue-600" title="Call Center" />;
+            }
+            if (operadorSeleccionado.idGrupo === 33) {
+                // Cobrador
+                return <BanknotesIcon className="w-4 h-4 mr-2 text-emerald-600" title="Cobrador" />;
+            }
+        }
+        // Por defecto
+        return <UserIcon className="w-4 h-4 mr-2 text-blue-600" />;
     };
 
     return (
@@ -271,7 +323,7 @@ const InformesCobranza = () => {
                                 {/* Operador */}
                                 <div className="space-y-2">
                                     <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                        <UserIcon className="w-4 h-4 mr-2 text-blue-600" />
+                                        {getOperadorIcon()}
                                         Operador
                                     </label>
                                     <select
@@ -280,8 +332,11 @@ const InformesCobranza = () => {
                                         className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
                                     >
                                         <option value="">Seleccionar...</option>
-                                        <option value="operador1">Operador 1</option>
-                                        <option value="operador2">Operador 2</option>
+                                        {operadores.map(op => (
+                                            <option key={op.idPersonalBDD} value={op.idPersonalBDD}>
+                                                {op.primerNombre} {op.segundoNombre} {op.apellidoPaterno} {op.apellidoMaterno} - {op.Codigo}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -329,8 +384,11 @@ const InformesCobranza = () => {
                                         className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
                                     >
                                         <option value="">Seleccionar...</option>
-                                        <option value="pichincha">Pichincha</option>
-                                        <option value="guayaquil">Guayaquil</option>
+                                        {bancos.map(banco => (
+                                            <option key={banco.idEntidadFinanciera} value={banco.idEntidadFinanciera}>
+                                                {banco.nombre}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
