@@ -17,7 +17,7 @@ import { useAuth } from "../components/AuthContext/AuthContext";
 
 function DropDown() {
   const navigate = useNavigate();
-  const { logout,   logoutinactividad } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
+  const { logout,   logoutinactividad, userData } = useAuth();  // Usamos el logout y isLoggedIn desde el contexto
   const [isLoading, setIsLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar el modal
@@ -25,9 +25,25 @@ function DropDown() {
 
   const handleLogout = () => {
     setIsLoading(true);
+
+  const STORAGE_KEY = `modal_feliz_anio_2026_visto_${userData.Nombre}`;
+  const modalVisto = localStorage.getItem(STORAGE_KEY);
+
     logout();  // Llamar al logout desde el contexto
 	sessionStorage.clear();
-	localStorage.clear();
+	//localStorage.clear();
+	Object.keys(localStorage).forEach((key) => {
+    // Si la clave no empieza con 'modal_feliz_anio_2026_visto' se borra
+    if (!key.startsWith("modal_feliz_anio_2026_visto")) {
+      localStorage.removeItem(key);
+    }
+  });
+
+	// Restaurar clave modal
+  if (modalVisto) {
+    localStorage.setItem(STORAGE_KEY, modalVisto);
+  }
+
     setTimeout(() => {
       setIsLoading(false);
       navigate("/login", { replace: true });

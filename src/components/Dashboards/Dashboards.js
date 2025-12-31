@@ -7,6 +7,7 @@ import { APIURL } from "../../configApi/apiConfig";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
 import { useAuth } from "../AuthContext/AuthContext";
 import axios from "../../configApi/axiosConfig";
+import ModalAño from "./ModalAño";
 
 export function Dashboards() {
   //mostrar/ocultar filtros
@@ -50,6 +51,30 @@ export function Dashboards() {
   const { data, fetchBodegaUsuario, listaVendedoresporBodega, vendedor } = useBodegaUsuario();
   const { userData } = useAuth();
   const bodegas = data || [];
+
+  const [openModalAño, setOpenModalAño] = useState(false); 
+  const STORAGE_KEY = `modal_feliz_anio_2026_visto_${userData?.Nombre}`;
+
+  useEffect(() => {
+
+    const hoy = new Date();
+    const fechaObjetivo = new Date(2026, 0, 2); // 2 de enero de 2026
+	//const fechaObjetivo = new Date(2025, 11, 31); // 2 de enero de 2026
+
+    const yaVisto = localStorage.getItem(STORAGE_KEY);
+
+    const esFechaCorrecta =
+      hoy.toDateString() === fechaObjetivo.toDateString();
+
+    if (esFechaCorrecta && !yaVisto) {
+      setOpenModalAño(true);
+    }
+  }, [userData?.Nombre]);
+
+  const cerrarModal = () => {
+    localStorage.setItem(STORAGE_KEY, "true");
+    setOpenModalAño(false);
+  };
 
   // Función para validar fechas
   const isValidDate = (dateString) => {
@@ -1172,6 +1197,8 @@ export function Dashboards() {
           )}
         </div>
       </div>
+
+	  <ModalAño openModalAño={openModalAño} setOpenModalAño={cerrarModal} />
     </div>
   );
 }
