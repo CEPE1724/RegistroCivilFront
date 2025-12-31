@@ -76,6 +76,7 @@ export function VerDetallesModal({
   userData,
   fetchEstadoRegcivil
 })  {
+	//console.log("selectedRow", selectedRow)
   // Calcular tiempo total desde fechaTiempos si sumarTodosLosTiempos() devuelve NaN
   const calcularTiempoTotal = () => {
     const tiempoSumado = sumarTodosLosTiempos();
@@ -184,14 +185,14 @@ export function VerDetallesModal({
 	  <DialogContent className="!p-0 max-h-[75vh] overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
 
 		{/* Header con gradiente moderno */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-2 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-6 py-1 relative overflow-hidden">
         {/* Efecto de brillo */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
 
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-              <PendingActionsIcon className="text-white text-lg" />
+            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
+              <PendingActionsIcon sx={{ fontSize: 18, color: 'white' }} />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Seguimiento de Solicitud</h2>
@@ -586,9 +587,9 @@ export function VerDetallesModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
 
                   {/* Cédula */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
                         <BadgeIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -599,9 +600,9 @@ export function VerDetallesModal({
                   </div>
 
                   {/* Tipo de Consulta */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
                         <InfoIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -612,9 +613,9 @@ export function VerDetallesModal({
                   </div>
 
                   {/* Celular */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
                         <PhoneIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -662,9 +663,10 @@ export function VerDetallesModal({
                       </div>
                     </div>
                   </div>
-                </div>
+                
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2">
+
+
 
 
                   {/* Tipo de Consulta */}
@@ -705,8 +707,6 @@ export function VerDetallesModal({
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                   {/* Ingreso Afiliación */}
                   {selectedRow.FechaAfiliacionIngreso !== '1970-01-01' && (
                     <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
@@ -738,9 +738,9 @@ export function VerDetallesModal({
                   )}
 
                   {/* Codigo Dactilar */}
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-blue-900 rounded-lg flex items-center justify-center">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
                         <FingerprintIcon className="text-white" fontSize="small" />
                       </div>
                       <div className="flex-1 min-w-0 flex items-center justify-between">
@@ -760,9 +760,9 @@ export function VerDetallesModal({
                     </div>
                   </div>
 
-				  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
-                      <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
+				  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
                           <FaDollarSign className="text-white" fontSize="medium" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -787,7 +787,7 @@ export function VerDetallesModal({
                     </button>
                   )}
 
-				  { selectedRow.estado == "PRE-APROBADO" && (userData?.idGrupo == 16 || userData?.idGrupo == 1 || userData?.idGrupo == 18) &&
+				  {/* selectedRow.estado == "PRE-APROBADO" && (userData?.idGrupo == 16 || userData?.idGrupo == 1 || userData?.idGrupo == 18) &&
 				  (<div className="flex items-center gap-2">
                           <button
                             onClick={fetchEstadoRegcivil}
@@ -795,7 +795,7 @@ export function VerDetallesModal({
                           >
                             Aprobar solicitud 
                           </button>
-                        </div>)}
+                        </div>) */} 
 
                   {!ExistPrefactura && puedeAprobar(selectedRow) && selectedRow.estado !== "RECHAZADO" && (
                     <button
