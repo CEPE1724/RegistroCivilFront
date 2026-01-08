@@ -18,7 +18,7 @@ const Nav = ({ showButton, userData }) => {
   const LogoIco = "/img/logo.webp";
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const pointLike = "/img/pontyClaus.webp"
+  const pointLike = "/img/ponty.png"
 
   const {  socket } = useAuth();
 

@@ -49,7 +49,7 @@ export function GestorDocumentos({
     const [showGlobalConfirmModal, setShowGlobalConfirmModal] = useState(false);
     const [globalConfirmAction, setGlobalConfirmAction] = useState(null);
     const globalConfirmModalRef = useRef(null);
-  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  	const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 
     const [clientInfo, setClientInfo] = useState({
         id: "",

@@ -65,7 +65,7 @@ const SeccionB = forwardRef((props, ref) => {
     }
   }, [location.state]);
   const { data } = props;
-  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
   const { userData, userUsuario } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [tipoEmpresa, setTipoEmpresa] = useState([]);

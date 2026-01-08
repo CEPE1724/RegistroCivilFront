@@ -54,7 +54,7 @@ const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
 const TrabajoModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datosCliente, onAprobar }) => {
   const [trabajoInfo, setTrabajoInfo] = useState(null); // Estado para almacenar los datos del trabajo
   const [showMapModal, setShowMapModal] = useState(false);
-  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [verificador, setVerificador] = useState(null);

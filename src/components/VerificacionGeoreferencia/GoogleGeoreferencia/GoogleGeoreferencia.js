@@ -5,6 +5,7 @@ export function GoogleGeoreferencia({ isOpen, closeModal, latitude, longitude, o
     const [map, setMap] = useState(null);
     const [marker, setMarker] = useState(null);
     const [isMapLoaded, setIsMapLoaded] = useState(false);
+	const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 
     useEffect(() => {
         if (isOpen) {
@@ -19,7 +20,7 @@ export function GoogleGeoreferencia({ isOpen, closeModal, latitude, longitude, o
         }
 
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag&callback=initMap&libraries=places`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap&libraries=places`;
         script.async = true;
         script.defer = true;
 

@@ -52,7 +52,7 @@ const Domicilio = forwardRef((props, ref) => {
   const location = useLocation();
   const [clientInfo, setClientInfo] = useState(null);
   const [ubicacionError, setUbicacionError] = useState(false);
-  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 
   useEffect(() => {
     if (location.state) {

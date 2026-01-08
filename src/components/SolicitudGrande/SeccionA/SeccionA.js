@@ -85,7 +85,7 @@ const SeccionA = forwardRef((props, ref) => {
   const [actividadNegocio, setActividadNegocio] = useState("");
   const [openLocationModal, setOpenLocationModal] = useState(false);
   const [ubicacionError, setUbicacionError] = useState(false);
-  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     nombreNegocio: data.NombreNegocio || "",
