@@ -38,6 +38,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
 import EmailIcon from "@mui/icons-material/Email";
+import {ModalFirmaElectronica} from "./ModalFirmaElectronica";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
@@ -110,9 +111,10 @@ import { Pencil, PenIcon } from "lucide-react";
 import { ObservacionCredito } from "./ObservacionCredito/ObservacionCredito";
 import VerificacionFacialModal from "./VerificacionFacialModal";
 import VerificacionFacialLoadingModal from "./VerificacionFacialLoadingModal";
-import {VerDetallesModal} from "./VerDetallesModal";
+import { VerDetallesModal } from "./VerDetallesModal";
 import { PiSignatureLight } from "react-icons/pi";
-
+import { FaFileSignature, FaLink, FaCheckCircle, FaFileAlt } from "react-icons/fa";
+import { LuScanFace } from "react-icons/lu";
 export function ListadoSolicitud() {
   const {
     data,
@@ -252,7 +254,7 @@ export function ListadoSolicitud() {
   };
 
   const fetchEstadoRegcivil = async () => {
-	try {
+    try {
       const url = APIURL.patch_EstadoRegcivil(selectedRow.id);
       const response = await axios.patch(url, {
         headers: {
@@ -260,7 +262,7 @@ export function ListadoSolicitud() {
         },
       });
       enqueueSnackbar("Estado actualizado correctamente.", { variant: "success" })
-	  handleCloseDialog()
+      handleCloseDialog()
       return response.data;
     } catch (error) {
       console.error("Error al actualizar el Estado", error);
@@ -270,18 +272,18 @@ export function ListadoSolicitud() {
   }
 
   const fetchCuota = async (id) => {
-	try {
-		const url = APIURL.getSolicitudGrandeporId(id);
-		const response = await axios.get(url, {
+    try {
+      const url = APIURL.getSolicitudGrandeporId(id);
+      const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
         },
       });
       return response.data;
-	} catch (error) {
-		console.error("Error al obtener solicitud grande", error);
-	}
-  } 
+    } catch (error) {
+      console.error("Error al obtener solicitud grande", error);
+    }
+  }
 
   // Estado para modal de error visual
   const [errorModalOpen, setErrorModalOpen] = useState(false);
@@ -1093,6 +1095,9 @@ export function ListadoSolicitud() {
 
   const [userSolicitudData, setUserSolicitudData] = useState([]);
   const [userSolicitudData2, setUserSolicitudData2] = useState([]);
+
+  // Estado para mostrar el modal de firma electrónica
+  const [modalFirmaOpen, setModalFirmaOpen] = useState(false);
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -2248,14 +2253,21 @@ export function ListadoSolicitud() {
     });
   };
 
+  const handleOpenFirmaElectronica = (registro) => {
+    setSelectedRow(registro);
+    setModalFirmaOpen(true);
+  };
+
+
+
   const handleOpenDialog = async (row) => {
 
-	const cuotaDato = await fetchCuota(row.id)
+    const cuotaDato = await fetchCuota(row.id)
 
     setSelectedRow({
-		...row,
-		CuotaAsignada: cuotaDato?.CuotaAsignada ?? null,
-	});
+      ...row,
+      CuotaAsignada: cuotaDato?.CuotaAsignada ?? null,
+    });
     setView(true);
     const [tipo1, tipo2, tipo3, tipo4, tipo5] = await Promise.all([
       fetchTiempSolicweb(1, row.id, "10,12"),  //solicitudes
@@ -2431,6 +2443,12 @@ export function ListadoSolicitud() {
     setCurrentPage(1);
   };
 
+  const firmaElectronicaIcons = {
+    1: { icon: <FaFileSignature style={{ color: "#07447b", fontSize: 25 }} />, tooltip: "Firma electrónica disponible" },
+    2: { icon: <LuScanFace  style={{ color: "#eab308", fontSize: 25 }} />, tooltip: "Link biométrico enviado" },
+    3: { icon: <FaCheckCircle style={{ color: "#22c55e", fontSize: 25 }} />, tooltip: "Biométrico aprobado" },
+    4: { icon: <FaFileAlt style={{ color: "#64748b", fontSize: 25 }} />, tooltip: "Documentos enviados" }
+  };
 
   useEffect(() => {
     fetchSolicitudes();
@@ -2810,7 +2828,7 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Resultado</TableCell>
                   {/* <TableCell align="center">Entradas</TableCell> */}
                   <TableCell align="center">Detalles</TableCell>
-				  <TableCell align="center">Digital</TableCell>
+                  <TableCell align="center">Digital</TableCell>
                   <TableCell align="center">Solicitudes</TableCell>
                   <TableCell align="center">Documental</TableCell>
                   <TableCell align="center">Telefonica</TableCell>
@@ -3266,108 +3284,36 @@ export function ListadoSolicitud() {
                       </TableCell>
 
 
-                      {/* <TableCell align="center">{data.entrada}</TableCell> */}
-
-
+                      {/* Icono de Firma Electrónica */}
                       <TableCell align="center">
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                          <Tooltip title="Ver más" arrow placement="top">
-                            <IconButton
-                              onClick={() => handleOpenDialog(data)}
-                              size="small"
-                              sx={{
-                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                "&:hover": {
-                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                  transform: "scale(1.1)",
-                                },
-                                transition: "all 0.2s ease",
-                              }}
-                            >
-                              <VisibilityIcon
-                                fontSize="small"
-                                sx={{ color: isError ? "#b91c1c" : "#475569" }}
-                              />
-                              {data.idMotivoContinuidad > 0 && (
-                                <Box
-                                  sx={{
-                                    position: "absolute",
-                                    top: -6,
-                                    right: -6,
-                                    backgroundColor: "#9c154d",
-                                    borderRadius: "50%",
-                                    fontSize: 12,
-                                    width: 10,
-                                    height: 10,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    fontWeight: "bold",
-                                    zIndex: 1,
-                                  }}
-                                />
-                              )}
-                            </IconButton>
+                        {firmaElectronicaIcons[data.idFirmaElectronica] && (
+                          <Tooltip title={firmaElectronicaIcons[data.idFirmaElectronica].tooltip} arrow placement="top">
+                            <span>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  handleOpenFirmaElectronica(data);
+                                }}
+                                sx={{
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+                                {firmaElectronicaIcons[data.idFirmaElectronica].icon}
+                              </IconButton>
+                            </span>
                           </Tooltip>
-
-                          {/* Icono de Firma Electrónica */}
-						  {/* { data.bFirmaElectronica == 1 && (
-                          <Tooltip title="Firma electrónica disponible" arrow placement="top">
-                            <span>
-                              <IconButton
-                                size="small"
-
-                                onClick={() => {
-                                  // Acción opcional al hacer click en el icono de firma
-                                  // Por ahora solo muestra notificación
-                                  enqueueSnackbar("Abrir visor de firma electrónica", { variant: "success"});
-                                }}
-                                sx={{
-                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                  "&:hover": {
-                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                    transform: "scale(1.1)",
-                                  },
-                                  transition: "all 0.2s ease",
-                                }}
-                              >
-								<FaFileSignature style={{color: "#07447b"}} />
-                              </IconButton>
-                            </span>
-                          </Tooltip>)} */}
-                        </div>
+                        )}
                       </TableCell>
-
-					  <TableCell align="center">
-						{ data.idFirmaElectronica == 1 && (
-                          <Tooltip title="Firma electrónica disponible" arrow placement="top">
-                            <span>
-                              <IconButton
-                                size="small"
-
-                                onClick={() => {
-                                  // Acción opcional al hacer click en el icono de firma
-                                  // Por ahora solo muestra notificación
-                                  enqueueSnackbar("Abrir visor de firma electrónica", { variant: "success"});
-                                }}
-                                sx={{
-                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
-                                  "&:hover": {
-                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
-                                    transform: "scale(1.1)",
-                                  },
-                                  transition: "all 0.2s ease",
-                                }}
-                              >
-								<PiSignatureLight  style={{color: "#07447b", fontSize: "25px" }} />
-                              </IconButton>
-                            </span>
-                          </Tooltip>)}
-					  </TableCell>
 
 
                       <TableCell align="center">
                         <div>
+
                           <span>
                             <IconButton
                               onClick={() => handlesolicitud(data)}
@@ -3899,8 +3845,8 @@ export function ListadoSolicitud() {
         handleAbrirVerificacionManual={handleAbrirVerificacionManual}
         handleRechazar={handleRechazar}
         data={data}
-		userData={userData}
-		fetchEstadoRegcivil={fetchEstadoRegcivil}
+        userData={userData}
+        fetchEstadoRegcivil={fetchEstadoRegcivil}
       />
 
       {/* Modal de carga para verificación facial */}
@@ -4578,6 +4524,8 @@ export function ListadoSolicitud() {
         data={verificacionModalData}
       />
 
+      {/* Modal de Firma Electrónica: debe estar fuera de la tabla para sobreponerse */}
+      <ModalFirmaElectronica data={selectedRow} isOpen={modalFirmaOpen} onClose={() => setModalFirmaOpen(false)} />
     </div>
   );
 }

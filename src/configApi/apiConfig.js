@@ -1,8 +1,8 @@
 
 
-const API_BASE_URL = "http://192.168.2.5:3008/api/v1/"
+//const API_BASE_URL = "http://192.168.2.5:3008/api/v1/"
 
-//const API_BASE_URL = process.env.REACT_APP_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_BASE_URL;
 
 const API_PYTHON_BASE_URL = "https://recognition.appservices.com.ec:8443/"
 
@@ -223,5 +223,5 @@ export const APIURL = {
   patch_EstadoRegcivil: (id) => `${API_BASE_URL}cre-solicitud-web/updateEstadozz/${id}`, //endpoint provicional registro civil
   personal_bdd_findAllgestor: () => `${API_BASE_URL}personal-bdd/gestores`,
   cre_entidad_financiera_findAllCobranza: (activo) => `${API_BASE_URL}cre-entidad-financiera/findAllCobranza/${activo}`,
-
+  serviciosia365pro_biometric: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico`
 };

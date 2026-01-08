@@ -229,7 +229,7 @@ export function ReporteEquifax() {
 	...(datosTablas?.infoActualSeps?.data || []),
 	...(datosTablas?.infoActualSicom?.data || []),
   ]
-  console.log("infoConsolidadaActual", infoConsolidadaActual)
+  
 
   const infoConsolidadaHistorica = [
 	...(datosTablas?.infoHistoricaSb?.data || []),
