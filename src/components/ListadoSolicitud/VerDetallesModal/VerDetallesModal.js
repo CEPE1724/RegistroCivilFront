@@ -37,6 +37,7 @@ import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import { FaDollarSign } from "react-icons/fa";
 import CapturarCamara from "../../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
+import { PiMoneyWavyBold } from "react-icons/pi";
 
 export function VerDetallesModal({
   open,
@@ -76,7 +77,7 @@ export function VerDetallesModal({
   userData,
   fetchEstadoRegcivil
 })  {
-	//console.log("selectedRow", selectedRow)
+
   // Calcular tiempo total desde fechaTiempos si sumarTodosLosTiempos() devuelve NaN
   const calcularTiempoTotal = () => {
     const tiempoSumado = sumarTodosLosTiempos();
@@ -654,7 +655,7 @@ export function VerDetallesModal({
                   {/* Tiene RUC */}
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
                     <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
+                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
                         <BusinessIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -664,15 +665,10 @@ export function VerDetallesModal({
                     </div>
                   </div>
                 
-
-
-
-
-
                   {/* Tipo de Consulta */}
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
                     <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
                         <InfoIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -685,7 +681,7 @@ export function VerDetallesModal({
                   {/* Almacén */}
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
                     <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
+                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
                         <StoreIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -698,7 +694,7 @@ export function VerDetallesModal({
                   {/* Producto */}
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
                     <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-7 h-7 bg-slate-700 rounded-lg flex items-center justify-center">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
                         <ShoppingCartIcon sx={{ fontSize: 16 }} className="text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -771,6 +767,20 @@ export function VerDetallesModal({
                         </div>
                       </div>
                     </div>
+
+					{/* Entrada */}
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 hover:shadow-md transition-shadow duration-300">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-shrink-0 w-7 h-7 bg-blue-900 rounded-lg flex items-center justify-center">
+                        <PiMoneyWavyBold  sx={{ fontSize: 16 }} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Entrada</p>
+                        <p className="text-xs font-bold text-gray-900">{selectedRow.entrada}</p>
+                      </div>
+                    </div>
+                  </div>
+					
                 </div>
 
                 {/* Botones de Acción */}
