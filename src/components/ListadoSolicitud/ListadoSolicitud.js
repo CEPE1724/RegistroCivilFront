@@ -2444,6 +2444,7 @@ export function ListadoSolicitud() {
   };
 
   const firmaElectronicaIcons = {
+    0: { icon: <FaFileSignature style={{ color: "#6b7280", fontSize: 25 }} />, tooltip: "Firma electrónica no disponible" },
     1: { icon: <FaFileSignature style={{ color: "#07447b", fontSize: 25 }} />, tooltip: "Firma electrónica disponible" },
     2: { icon: <LuScanFace  style={{ color: "#eab308", fontSize: 25 }} />, tooltip: "Link biométrico enviado" },
     3: { icon: <FaCheckCircle style={{ color: "#22c55e", fontSize: 25 }} />, tooltip: "Biométrico aprobado" },
@@ -3283,6 +3284,51 @@ export function ListadoSolicitud() {
                         />
                       </TableCell>
 
+<TableCell align="center">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                          <Tooltip title="Ver más" arrow placement="top">
+                            <IconButton
+                              onClick={() => handleOpenDialog(data)}
+                              size="small"
+                              sx={{
+                                bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                "&:hover": {
+                                  bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                  transform: "scale(1.1)",
+                                },
+                                transition: "all 0.2s ease",
+                              }}
+                            >
+                              <VisibilityIcon
+                                fontSize="small"
+                                sx={{ color: isError ? "#b91c1c" : "#475569" }}
+                              />
+                              {data.idMotivoContinuidad > 0 && (
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    top: -6,
+                                    right: -6,
+                                    backgroundColor: "#9c154d",
+                                    borderRadius: "50%",
+                                    fontSize: 12,
+                                    width: 10,
+                                    height: 10,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontWeight: "bold",
+                                    zIndex: 1,
+                                  }}
+                                />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+
+                          {/* Icono de Firma Electrónica */}
+                          
+                        </div>
+                      </TableCell>
 
                       {/* Icono de Firma Electrónica */}
                       <TableCell align="center">
@@ -3291,9 +3337,11 @@ export function ListadoSolicitud() {
                             <span>
                               <IconButton
                                 size="small"
-                                onClick={() => {
-                                  handleOpenFirmaElectronica(data);
-                                }}
+                                  onClick={
+                                  data.idFirmaElectronica === 1
+                                    ? () => handleOpenFirmaElectronica(data)
+                                    : undefined
+                                }
                                 sx={{
                                   bgcolor: isError ? "#fee2e2" : "#f1f5f9",
                                   "&:hover": {

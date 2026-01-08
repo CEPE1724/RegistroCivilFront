@@ -172,6 +172,7 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
           onClose={() => setDetailOpen(false)}
           title={detailStep?.label || "Detalle"}
           detail={detailStep ? `Detalle de la acción: ${detailStep.label}` : ""}
+          data={data}
         />
       </div>
     </div>
