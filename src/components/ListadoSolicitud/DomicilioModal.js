@@ -18,7 +18,7 @@ export const GoogleMapModal = ({ lat, lng, onClose, apiKey }) => {
   };
 
   const generatePDF = (latitude, longitude) => {
-    const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&scale=2&maptype=hybrid&markers=color:red|${latitude},${longitude}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+    const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=20&size=600x400&scale=2&maptype=hybrid&markers=color:red|${latitude},${longitude}&key=${process.env.REACT_APP_GOOGLE_MAPS_KEY}`;
 
     const pdf = new jsPDF();
 
@@ -86,7 +86,7 @@ const DomicilioModal = ({ openModal, closeModal, idsTerrenas, idSolicitud, datos
   const { userData, idMenu } = useAuth();
   const [verificacionData, setVerificacionData] = useState("");
   const [showMapModal, setShowMapModal] = useState(false);
-  const GOOGLE_MAPS_API_KEY = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
   const [selectedImage, setSelectedImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [verificador, setVerificador] = useState(null);

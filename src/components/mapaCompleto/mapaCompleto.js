@@ -17,7 +17,7 @@ const containerStyle = {
 const MapPantalla = () => {
     const { enqueueSnackbar } = useSnackbar();
     const { bodega = 0, cedula = '', tipo = '', codigoEntrega = '' } = useParams();
-    const googleMapsApiKey = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+    const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 
     const [coordenadas, setCoordenadas] = useState(null);
     const [center, setCenter] = useState({ lat: -0.1807, lng: -78.4678 });

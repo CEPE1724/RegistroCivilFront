@@ -396,7 +396,7 @@ export function LocationModal({
         ? "bg-red-600"
         : "bg-blue-600";
 
-  const googleMapsApiKey = "AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag";
+  const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">

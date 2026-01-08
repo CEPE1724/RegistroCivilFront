@@ -14,6 +14,7 @@ import { enqueueSnackbar } from "notistack";
 export function DocumentoDescarga({ isOpen, onClose, data }) {
     const [isLoading, setIsLoading] = useState(false);
    const [pdfUrl, setPdfUrl] = useState(data?.PDFTerrena || '');
+   const GOOGLE_MAPS_API_KEY = process.env.REACT_APP_GOOGLE_MAPS_KEY;
 
    useEffect(() => {
     if (data?.PDFTerrena) {
@@ -80,7 +81,7 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
 
         // DOMICILIO
         if (registroDomicilio) {
-            const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${registroDomicilio.gestionDomicilio.Latitud},${registroDomicilio.gestionDomicilio.Longitud}&zoom=17&size=600x400&scale=2&maptype=roadmap&markers=color:red|${registroDomicilio.gestionDomicilio.Latitud},${registroDomicilio.gestionDomicilio.Longitud}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+            const mapImageUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${registroDomicilio.gestionDomicilio.Latitud},${registroDomicilio.gestionDomicilio.Longitud}&zoom=17&size=600x400&scale=2&maptype=roadmap&markers=color:red|${registroDomicilio.gestionDomicilio.Latitud},${registroDomicilio.gestionDomicilio.Longitud}&key=${GOOGLE_MAPS_API_KEY}`;
             
             // Título domicilio
             pdf.setFontSize(18);
@@ -99,7 +100,7 @@ export function DocumentoDescarga({ isOpen, onClose, data }) {
 
         // TRABAJO
         if (registroTrabajo) {
-            const mapImageUrlTrabajo = `https://maps.googleapis.com/maps/api/staticmap?center=${registroTrabajo.gestionTrabajo.Latitud},${registroTrabajo.gestionTrabajo.Longitud}&zoom=17&size=600x400&scale=2&maptype=roadmap&markers=color:red|${registroTrabajo.gestionTrabajo.Latitud},${registroTrabajo.gestionTrabajo.Longitud}&key=AIzaSyDSFUJHYlz1cpaWs2EIkelXeMaUY0YqWag`;
+            const mapImageUrlTrabajo = `https://maps.googleapis.com/maps/api/staticmap?center=${registroTrabajo.gestionTrabajo.Latitud},${registroTrabajo.gestionTrabajo.Longitud}&zoom=17&size=600x400&scale=2&maptype=roadmap&markers=color:red|${registroTrabajo.gestionTrabajo.Latitud},${registroTrabajo.gestionTrabajo.Longitud}&key=${GOOGLE_MAPS_API_KEY}`;
             
             // Título trabajo
             pdf.setFontSize(18);
