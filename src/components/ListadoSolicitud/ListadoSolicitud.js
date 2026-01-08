@@ -111,6 +111,8 @@ import { ObservacionCredito } from "./ObservacionCredito/ObservacionCredito";
 import VerificacionFacialModal from "./VerificacionFacialModal";
 import VerificacionFacialLoadingModal from "./VerificacionFacialLoadingModal";
 import {VerDetallesModal} from "./VerDetallesModal";
+import { PiSignatureLight } from "react-icons/pi";
+
 export function ListadoSolicitud() {
   const {
     data,
@@ -2106,7 +2108,7 @@ export function ListadoSolicitud() {
               idMotivoContinuidad: item.idMotivoContinuidad,
               FechaAfiliacionIngreso: item.FechaIngreso,
               FechaAfiliacionHasta: item.FechaAfiliacionHasta,
-              bFirmaElectronica: item.bFirmaElectronica,
+              idFirmaElectronica: item.idFirmaElectronica,
               idEstadoAnalisisDeIdentidad: item.idEstadoAnalisisDeIdentidad
 
             };
@@ -2806,8 +2808,9 @@ export function ListadoSolicitud() {
                   <TableCell align="center">Entrega Producto</TableCell>
                   <TableCell align="center">Tipo de Cliente</TableCell>
                   <TableCell align="center">Resultado</TableCell>
-                  <TableCell align="center">Entradas</TableCell>
+                  {/* <TableCell align="center">Entradas</TableCell> */}
                   <TableCell align="center">Detalles</TableCell>
+				  <TableCell align="center">Digital</TableCell>
                   <TableCell align="center">Solicitudes</TableCell>
                   <TableCell align="center">Documental</TableCell>
                   <TableCell align="center">Telefonica</TableCell>
@@ -3263,7 +3266,7 @@ export function ListadoSolicitud() {
                       </TableCell>
 
 
-                      <TableCell align="center">{data.entrada}</TableCell>
+                      {/* <TableCell align="center">{data.entrada}</TableCell> */}
 
 
                       <TableCell align="center">
@@ -3308,21 +3311,16 @@ export function ListadoSolicitud() {
                           </Tooltip>
 
                           {/* Icono de Firma Electrónica */}
-                          <Tooltip title={data.bFirmaElectronica ? "Firma electrónica disponible" : "Sin firma electrónica"} arrow placement="top">
+						  {/* { data.bFirmaElectronica == 1 && (
+                          <Tooltip title="Firma electrónica disponible" arrow placement="top">
                             <span>
                               <IconButton
                                 size="small"
-                                disabled={!data.bFirmaElectronica}
 
                                 onClick={() => {
                                   // Acción opcional al hacer click en el icono de firma
                                   // Por ahora solo muestra notificación
-                                  enqueueSnackbar(
-                                    data.bFirmaElectronica
-                                      ? "Abrir visor de firma electrónica"
-                                      : "No existe firma electrónica para esta solicitud",
-                                    { variant: data.bFirmaElectronica ? "success" : "warning" }
-                                  );
+                                  enqueueSnackbar("Abrir visor de firma electrónica", { variant: "success"});
                                 }}
                                 sx={{
                                   bgcolor: isError ? "#fee2e2" : "#f1f5f9",
@@ -3333,17 +3331,39 @@ export function ListadoSolicitud() {
                                   transition: "all 0.2s ease",
                                 }}
                               >
-                                <BorderColorIcon
-                                  fontSize="small"
-                                  sx={{
-                                    color: data.bFirmaElectronica ? "#16a34a" : "rgba(0,0,0,0.35)",
-                                  }}
-                                />
+								<FaFileSignature style={{color: "#07447b"}} />
                               </IconButton>
                             </span>
-                          </Tooltip>
+                          </Tooltip>)} */}
                         </div>
                       </TableCell>
+
+					  <TableCell align="center">
+						{ data.idFirmaElectronica == 1 && (
+                          <Tooltip title="Firma electrónica disponible" arrow placement="top">
+                            <span>
+                              <IconButton
+                                size="small"
+
+                                onClick={() => {
+                                  // Acción opcional al hacer click en el icono de firma
+                                  // Por ahora solo muestra notificación
+                                  enqueueSnackbar("Abrir visor de firma electrónica", { variant: "success"});
+                                }}
+                                sx={{
+                                  bgcolor: isError ? "#fee2e2" : "#f1f5f9",
+                                  "&:hover": {
+                                    bgcolor: isError ? "#fca5a5" : "#e2e8f0",
+                                    transform: "scale(1.1)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                              >
+								<PiSignatureLight  style={{color: "#07447b", fontSize: "25px" }} />
+                              </IconButton>
+                            </span>
+                          </Tooltip>)}
+					  </TableCell>
 
 
                       <TableCell align="center">
