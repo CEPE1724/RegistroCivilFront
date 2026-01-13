@@ -44,6 +44,8 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import SendIcon from '@mui/icons-material/Send';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 
 const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
@@ -268,6 +270,14 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       10: /// Cédula
       {
         1: { label: "Observación Agregada", icon: <NoteAltIcon />, color: blue[500] }
+      },
+      11: /// Análisis de Identidad
+      {
+        2: { label: "Link biométrico enviado", icon: <SendIcon />, color: blue[500] },
+        3: { label: "Análisis Exitoso", icon: <CheckCircleIcon />, color: green[500] },
+        4: { label: "Análisis Fallido", icon: <CancelIcon />, color: red[500] },
+        5: { label: "Link caducado", icon: <HourglassEmptyIcon />, color: grey[700] }
+
       }
 
     };

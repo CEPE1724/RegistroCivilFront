@@ -224,5 +224,5 @@ export const APIURL = {
   personal_bdd_findAllgestor: () => `${API_BASE_URL}personal-bdd/gestores`,
   cre_entidad_financiera_findAllCobranza: (activo) => `${API_BASE_URL}cre-entidad-financiera/findAllCobranza/${activo}`,
   serviciosia365pro_biometric: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico`,
-  infoanalisisIdentidad: (dni,id) => `${API_BASE_URL}analisisdeidentidad/find-all/${dni}/${id}`,
+  infoanalisisIdentidad: (dni,id) => `${API_BASE_URL}analisisdeidentidad/find-all/${dni}`,
 };

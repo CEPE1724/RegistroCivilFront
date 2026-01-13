@@ -38,7 +38,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import InfoIcon from "@mui/icons-material/Info";
 import EmailIcon from "@mui/icons-material/Email";
-import {ModalFirmaElectronica} from "./ModalFirmaElectronica";
+import { ModalFirmaElectronica } from "./ModalFirmaElectronica";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import BusinessIcon from "@mui/icons-material/Business";
@@ -2114,7 +2114,9 @@ export function ListadoSolicitud() {
               FechaAfiliacionIngreso: item.FechaIngreso,
               FechaAfiliacionHasta: item.FechaAfiliacionHasta,
               idFirmaElectronica: item.idFirmaElectronica,
-              idEstadoAnalisisDeIdentidad: item.idEstadoAnalisisDeIdentidad
+              idEstadoAnalisisDeIdentidad: item.idEstadoAnalisisDeIdentidad,
+              sCre_SolicitudWeb: item.sCre_SolicitudWeb,
+
 
             };
           })
@@ -2446,7 +2448,7 @@ export function ListadoSolicitud() {
   const firmaElectronicaIcons = {
     0: { icon: <FaFileSignature style={{ color: "#6b7280", fontSize: 25 }} />, tooltip: "Firma electrónica no disponible" },
     1: { icon: <FaFileSignature style={{ color: "#07447b", fontSize: 25 }} />, tooltip: "Firma electrónica disponible" },
-    2: { icon: <LuScanFace  style={{ color: "#eab308", fontSize: 25 }} />, tooltip: "Link biométrico enviado" },
+    2: { icon: <LuScanFace style={{ color: "#eab308", fontSize: 25 }} />, tooltip: "Link biométrico enviado" },
     3: { icon: <FaCheckCircle style={{ color: "#22c55e", fontSize: 25 }} />, tooltip: "Biométrico aprobado" },
     4: { icon: <FaFileAlt style={{ color: "#64748b", fontSize: 25 }} />, tooltip: "Documentos enviados" }
   };
@@ -3140,17 +3142,6 @@ export function ListadoSolicitud() {
                           />
                         </span>
 
-
-                        <DocumentStatusPopover
-                          open={
-                            popoverData.open &&
-                            popoverData.selectedRowId === data.id
-                          }
-                          anchorEl={popoverData.anchorEl}
-                          onClose={handlePopoverClose}
-                          clienteEstados={clienteEstados}
-                          estadoColores={estadoColores}
-                        />
                       </TableCell>
                       <TableCell align="center">
                         <Box component="span" sx={{ display: "inline-flex", gap: 1, ml: 1, alignItems: "center" }}>
@@ -3274,17 +3265,9 @@ export function ListadoSolicitud() {
                           />
                         </span>
 
-                        {/* Popover */}
-                        <DocumentStatusPopover
-                          open={popoverData.open && popoverData.selectedRowId === data.id}
-                          anchorEl={popoverData.anchorEl}
-                          onClose={handlePopoverClose}
-                          clienteEstados={clienteEstados}
-                          estadoColores={estadoColores}
-                        />
                       </TableCell>
 
-<TableCell align="center">
+                      <TableCell align="center">
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                           <Tooltip title="Ver más" arrow placement="top">
                             <IconButton
@@ -3325,20 +3308,19 @@ export function ListadoSolicitud() {
                             </IconButton>
                           </Tooltip>
 
-                          {/* Icono de Firma Electrónica */}
-                          
                         </div>
                       </TableCell>
-
-                      {/* Icono de Firma Electrónica */}
                       <TableCell align="center">
+                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                         {firmaElectronicaIcons[data.idFirmaElectronica] && (
                           <Tooltip title={firmaElectronicaIcons[data.idFirmaElectronica].tooltip} arrow placement="top">
-                            <span>
                               <IconButton
                                 size="small"
-                                  onClick={
-                                  data.idFirmaElectronica === 1
+                                onClick={
+                                  data.idFirmaElectronica !== 0 &&
+                                    data.idEstadoVerificacionDocumental === 4 &&
+                                    data.idEstadoVerificacionSolicitud === 12 &&
+                                    data.idEstadoVerificacionTelefonica === 3
                                     ? () => handleOpenFirmaElectronica(data)
                                     : undefined
                                 }
@@ -3353,9 +3335,19 @@ export function ListadoSolicitud() {
                               >
                                 {firmaElectronicaIcons[data.idFirmaElectronica].icon}
                               </IconButton>
-                            </span>
+                 
                           </Tooltip>
                         )}
+         
+                          <MoreVertIcon
+                            onClick={(event) =>
+                              handlePopoverOpen(event, 11, data)
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+            
+                        </div>
+
                       </TableCell>
 
 
@@ -3384,14 +3376,7 @@ export function ListadoSolicitud() {
                                 data.idEstadoVerificacionSolicitud
                               )}
                             </IconButton>
-                            <span
-                              style={{
-                                // pointerEvents: estaDeshabilitado(data)
-                                //   ? "none"
-                                //   : "auto",
-                                // opacity: estaDeshabilitado(data) ? 0.5 : 1,
-                              }}
-                            >
+                            <span>
                               <MoreVertIcon
                                 onClick={(event) =>
                                   handlePopoverOpen(event, 1, data)
@@ -3401,16 +3386,6 @@ export function ListadoSolicitud() {
                             </span>
                           </span>
 
-                          <DocumentStatusPopover
-                            open={
-                              popoverData.open &&
-                              popoverData.selectedRowId === data.id
-                            } // Verificar si el popover corresponde a esta fila
-                            anchorEl={popoverData.anchorEl}
-                            onClose={handlePopoverClose}
-                            clienteEstados={clienteEstados}
-                            estadoColores={estadoColores}
-                          />
                         </div>
                       </TableCell>
 
@@ -3460,16 +3435,6 @@ export function ListadoSolicitud() {
                             </span>
                           </span>
 
-                          <DocumentStatusPopover
-                            open={
-                              popoverData.open &&
-                              popoverData.selectedRowId === data.id
-                            } // Verificar si el popover corresponde a esta fila
-                            anchorEl={popoverData.anchorEl}
-                            onClose={handlePopoverClose}
-                            clienteEstados={clienteEstados}
-                            estadoColores={estadoColores}
-                          />
                         </div>
                       </TableCell>
 
@@ -3518,16 +3483,6 @@ export function ListadoSolicitud() {
                             </span>
                           </span>
 
-                          <DocumentStatusPopover
-                            open={
-                              popoverData.open &&
-                              popoverData.selectedRowId === data.id
-                            } // Verificar si el popover corresponde a esta fila
-                            anchorEl={popoverData.anchorEl}
-                            onClose={handlePopoverClose}
-                            clienteEstados={clienteEstados}
-                            estadoColores={estadoColores}
-                          />
                         </div>
                       </TableCell>
 
@@ -3595,16 +3550,6 @@ export function ListadoSolicitud() {
                             </span>
                           </span>
 
-                          <DocumentStatusPopover
-                            open={
-                              popoverData.open &&
-                              popoverData.selectedRowId === data.id
-                            } // Verificar si el popover corresponde a esta fila
-                            anchorEl={popoverData.anchorEl}
-                            onClose={handlePopoverClose}
-                            clienteEstados={clienteEstados}
-                            estadoColores={estadoColores}
-                          />
                         </div>
                       </TableCell>
 
@@ -3667,16 +3612,7 @@ export function ListadoSolicitud() {
                             </span>
                           </span>
 
-                          <DocumentStatusPopover
-                            open={
-                              popoverData.open &&
-                              popoverData.selectedRowId === data.id
-                            } // Verificar si el popover corresponde a esta fila
-                            anchorEl={popoverData.anchorEl}
-                            onClose={handlePopoverClose}
-                            clienteEstados={clienteEstados}
-                            estadoColores={estadoColores}
-                          />
+
                         </div>
                       </TableCell>
 
@@ -3856,6 +3792,7 @@ export function ListadoSolicitud() {
             </Table>
           </TableContainer>
         </div>
+        
       </div>
 
       {/* Cuadro de diálogo para ver detalles */}
@@ -4574,6 +4511,7 @@ export function ListadoSolicitud() {
 
       {/* Modal de Firma Electrónica: debe estar fuera de la tabla para sobreponerse */}
       <ModalFirmaElectronica data={selectedRow} isOpen={modalFirmaOpen} onClose={() => setModalFirmaOpen(false)} />
+     
     </div>
   );
 }

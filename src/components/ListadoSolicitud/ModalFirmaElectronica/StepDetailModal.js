@@ -15,7 +15,7 @@ export default function StepDetailModal({ isOpen, onClose, title, detail, data }
         setLoading(true);
         setError(null);
         try {
-          const response = await axios.get(APIURL.infoanalisisIdentidad(data.cedula, data.id));
+          const response = await axios.get(APIURL.infoanalisisIdentidad(data.cedula));
           setInfo(response.data);
         } catch (err) {
           setError("Error al cargar la información. Por favor, intente nuevamente.");

@@ -19,7 +19,7 @@ const steps = [
 ];
 
 export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
-    console.log("data modal firma electronica", data);
+
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingStep, setPendingStep] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -36,7 +36,7 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
   const currentStep = (data?.idFirmaElectronica ? data.idFirmaElectronica - 1 : 0);
 
   const stepConfirmMessages = {
-    "Generar link biométrico": "¿Está seguro que desea generar el link biométrico?",
+    "Generar link biométrico": "¿Está seguro que desea generar el link biométrico? Recuerde que el Cliente debe contar con su cédula física.",
     "Firmar electrónicamente": "¿Está seguro que desea proceder con la firma electrónica?"
   };
 
@@ -54,7 +54,7 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
               identificacion: data?.cedula,
               callback: "https://backregistrocivil.appservices.com.ec/api/v1/corporacion-dfl/serviciosia365pro/biometrico/callback",
                 motivo: data?.nombre,
-                cre_solicitud: data?.id,
+                cre_solicitud: data?.sCre_SolicitudWeb,
                 usuario: data?.usuario || "ECEPEDA"
             });
             alert(response?.data?.message || "Link biométrico generado correctamente");
@@ -82,7 +82,7 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
         <div className="flex items-center justify-between px-8 py-5 bg-blue-900 rounded-t-xl">
           <div className="flex items-center gap-3">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" className="text-white"><circle cx="12" cy="12" r="12" fill="#2563eb"/><path d="M7 12h10M12 7v10" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
-            <span className="text-xl font-bold text-white tracking-wide">Registro Civil - Solicitud de Firma Electrónica</span>
+            <span className="text-xl font-bold text-white tracking-wide"> Solicitud de Firma Electrónica</span>
           </div>
           <button
             className="text-white hover:text-red-300 text-2xl font-bold"
