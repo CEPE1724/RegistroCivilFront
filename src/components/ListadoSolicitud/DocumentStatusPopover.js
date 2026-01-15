@@ -273,6 +273,7 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
       },
       11: /// Análisis de Identidad
       {
+        1: { label: "Pendiente de Link Biométrico", icon: <SendIcon />, color: grey[500] },
         2: { label: "Link biométrico enviado", icon: <SendIcon />, color: blue[500] },
         3: { label: "Análisis Exitoso", icon: <CheckCircleIcon />, color: green[500] },
         4: { label: "Análisis Fallido", icon: <CancelIcon />, color: red[500] },

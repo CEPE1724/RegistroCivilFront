@@ -197,8 +197,17 @@ export const FactoresCredito = forwardRef((props, ref) => {
         enqueueSnackbar("Datos incorrectos", { variant: "error" });
         return;
       }
-      await fetchCuotaCupo(formData);
-      fetchInsertarDatos(data)
+      // Captura la respuesta aquí
+      const response = await fetchCuotaCupo(formData);
+
+
+      // Verifica la respuesta y muestra el mensaje adecuado
+      if (response && response.success === false) {
+        enqueueSnackbar(response.message || "Error al actualizar", { variant: "error" });
+        return;
+      }
+
+      await fetchInsertarDatos(data)
       setOpenConfirmModal(false)
       enqueueSnackbar("Cuota/Cupo actualizados correctamente", { variant: "success" });
     } catch (error) {
@@ -211,9 +220,9 @@ export const FactoresCredito = forwardRef((props, ref) => {
   const isObservacionValida = observacion.trim().length >= 10 && observacion.trim().length <= 100;
 
   const hasChanges =
-  (Number(cuotaOriginal) !== Number(cuotaActualizada) ||
-   Number(cupoOriginal) !== Number(cupoActualizado)) &&
-  isObservacionValida;
+    (Number(cuotaOriginal) !== Number(cuotaActualizada) ||
+      Number(cupoOriginal) !== Number(cupoActualizado)) &&
+    isObservacionValida;
 
   return (
     <div>
@@ -353,7 +362,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
 
           <Box mt={3} bgcolor="#f9f9f9" p={2} borderRadius={2} border="1px solid #ddd">
             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-              Observación 
+              Observación
             </Typography>
 
             <TextField
