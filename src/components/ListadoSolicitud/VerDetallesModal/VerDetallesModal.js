@@ -44,6 +44,7 @@ import { PiMoneyWavyBold } from "react-icons/pi";
 import ConfirmMessage from "../../ListadoSolicitud/ModalFirmaElectronica/ConfirmMessage";
 import axios from "../../../configApi/axiosConfig";
 import { APIURL } from "../../../configApi/apiConfig";
+import { enqueueSnackbar } from "notistack";
 export function VerDetallesModal({
   open,
   onClose,
@@ -202,9 +203,12 @@ export function VerDetallesModal({
         cre_solicitud: selectedRow?.sCre_SolicitudWeb,
         usuario: userData?.Nombre
       });
-      alert(response?.data?.message || "Link biométrico generado correctamente");
+      /* cierre modal */
+      enqueueSnackbar("Link biométrico generado correctamente", { variant: 'success' });
+      onClose();
+      
     } catch (err) {
-      alert("Error al generar el link biométrico");
+      enqueueSnackbar("Error al generar el link biométrico", { variant: 'error' });
     }
   };
 
@@ -463,6 +467,17 @@ export function VerDetallesModal({
                       />
                     )}
                   </div>
+                  {selectedRow.idFirmaElectronica === 3 ?
+                    <div className="absolute bottom-2 right-2 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                      <CheckCircleIcon sx={{ fontSize: 14 }} />
+                      Verificado
+                    </div>
+                    : selectedRow.idFirmaElectronica === 4 &&
+                    <div className="absolute bottom-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                      <ReportProblemIcon sx={{ fontSize: 14 }} />
+                      No Verificado
+                    </div>
+                  }
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
@@ -572,16 +587,7 @@ export function VerDetallesModal({
                                   </div>
                                 </div>
                               )}
-                              {selectedRow.idFirmaElectronica === 1 && (
-                                <button
-                                  onClick={() => setConfirmOpen(true)}
-                                  aria-label="Generar Link Biométrico"
-                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                                >
-                                  <FingerprintIcon className="w-4 h-4" />
-                                  Generar Link Biométrico
-                                </button>
-                              )}
+                             
 
                                {selectedRow.idFirmaElectronica === 2 && (
                                 <div className="flex flex-col items-center justify-center text-center gap-3 bg-blue-50 border-2 border-blue-200 p-4 rounded-xl shadow-sm">
@@ -622,7 +628,7 @@ export function VerDetallesModal({
                                 </div>
                               )}
 
-                              {selectedRow.idFirmaElectronica === 6 && (
+                              {selectedRow.idFirmaElectronica === 5 && (
                                 <div className="flex flex-col items-center justify-center text-center gap-3 bg-yellow-50 border-2 border-yellow-200 p-4 rounded-xl shadow-sm">
                                   <AccessTimeIcon fontSize="large" className="text-yellow-600" aria-hidden="true" />
                                   <div>
@@ -633,6 +639,17 @@ export function VerDetallesModal({
                                     <span className="text-xs text-yellow-600">El link enviado ya no es válido. Genere un nuevo link para el cliente.</span>
                                   </div>
                                 </div>
+                              )}
+
+                               {(selectedRow.idFirmaElectronica === 1 || selectedRow.idFirmaElectronica === 4 || selectedRow.idFirmaElectronica === 5) && (
+                                <button
+                                  onClick={() => setConfirmOpen(true)}
+                                  aria-label="Generar Link Biométrico"
+                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                >
+                                  <FingerprintIcon className="w-4 h-4" />
+                                  Generar Link Biométrico
+                                </button>
                               )}
                             </>
 

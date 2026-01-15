@@ -18,12 +18,14 @@ const steps = [
   }
 ];
 
-export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
+export function ModalFirmaElectronica({ data, isOpen, onClose }) {
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingStep, setPendingStep] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailStep, setDetailStep] = useState(null);
+  const [apiMessage, setApiMessage] = useState(null);
+  const [apiMessageType, setApiMessageType] = useState(null); // 'success' | 'error'
   // Estado textual según idFirmaElectronica
   const estadoFirmaMap = {
     1: "Aplica a la firma",
@@ -50,16 +52,18 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
     if (pendingStep) {
       if (pendingStep.button === "Generar link biométrico") {
         try {
-            const response = await axios.post(APIURL.serviciosia365pro_biometric(), {
-              identificacion: data?.cedula,
-              callback: "https://backregistrocivil.appservices.com.ec/api/v1/corporacion-dfl/serviciosia365pro/biometrico/callback",
-                motivo: data?.nombre,
-                cre_solicitud: data?.sCre_SolicitudWeb,
-                usuario: data?.usuario || "ECEPEDA"
-            });
-            alert(response?.data?.message || "Link biométrico generado correctamente");
+          const response = await axios.post(APIURL.serviciosia365pro_biometric(), {
+            identificacion: data?.cedula,
+            callback: "https://backregistrocivil.appservices.com.ec/api/v1/corporacion-dfl/serviciosia365pro/biometrico/callback",
+            motivo: data?.nombre,
+            cre_solicitud: data?.sCre_SolicitudWeb,
+            usuario: data?.usuario || "ECEPEDA"
+          });
+          setApiMessage(response?.data?.message || "Link biométrico generado correctamente");
+          setApiMessageType('success');
         } catch (err) {
-            alert("Error al generar el link biométrico");
+          setApiMessage("Error al generar el link biométrico");
+          setApiMessageType('error');
         }
       } else {
         alert(`Acción confirmada: ${pendingStep.label}`);
@@ -81,7 +85,7 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
         {/* Encabezado institucional */}
         <div className="flex items-center justify-between px-8 py-5 bg-blue-900 rounded-t-xl">
           <div className="flex items-center gap-3">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" className="text-white"><circle cx="12" cy="12" r="12" fill="#2563eb"/><path d="M7 12h10M12 7v10" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" className="text-white"><circle cx="12" cy="12" r="12" fill="#2563eb" /><path d="M7 12h10M12 7v10" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg>
             <span className="text-xl font-bold text-white tracking-wide"> Solicitud de Firma Electrónica</span>
           </div>
           <button
@@ -102,10 +106,19 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
             <div className="text-base text-gray-700">Solicitud N°: <span className="font-medium">{data?.NumeroSolicitud || "-"}</span></div>
           </div>
         </div>
+        {/* Mensaje API (éxito / error) */}
+        {apiMessage && (
+          <div className={`px-6 py-3 mx-8 my-4 rounded-md flex items-start justify-between gap-4 ${apiMessageType === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-red-50 border border-red-200 text-red-800'}`} role="status">
+            <div className="flex items-center gap-3">
+              <div className="text-sm leading-tight">{apiMessage}</div>
+            </div>
+            <button onClick={() => { setApiMessage(null); setApiMessageType(null); }} className="text-sm font-semibold opacity-80 hover:opacity-100">Cerrar</button>
+          </div>
+        )}
         {/* Estado actual de la firma electrónica */}
         <div className="px-8 py-8">
           <div className="mb-8">
-           <div className="w-full h-1 bg-blue-100 rounded mb-6" />
+            <div className="w-full h-1 bg-blue-100 rounded mb-6" />
           </div>
           {/* Stepper horizontal */}
           <div className="flex flex-row items-center justify-center gap-8 mb-10">
@@ -156,7 +169,7 @@ export  function ModalFirmaElectronica({ data, isOpen, onClose }) {
           </div>
           {currentStep >= steps.length && (
             <div className="mt-10 text-center text-green-700 font-bold text-lg animate-pulse">
-              <svg className="mx-auto mb-2" width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#22c55e"/><path d="M7 13l3 3 7-7" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+              <svg className="mx-auto mb-2" width="40" height="40" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#22c55e" /><path d="M7 13l3 3 7-7" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg>
               ¡Solicitud completada!
             </div>
           )}
