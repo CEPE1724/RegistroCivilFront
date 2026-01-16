@@ -264,8 +264,9 @@ export const FactoresCredito = forwardRef((props, ref) => {
             value={formData.cuotaAsignada}
             onChange={handleChange}
             onBlur={handleBlur}
-            readOnly={estSol !== 12}
+            readOnly={![1, 12].includes(estSol)}
           />
+          
         </div>
 
         {/* Cupo */}
