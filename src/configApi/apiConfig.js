@@ -225,4 +225,15 @@ export const APIURL = {
   cre_entidad_financiera_findAllCobranza: (activo) => `${API_BASE_URL}cre-entidad-financiera/findAllCobranza/${activo}`,
   serviciosia365pro_biometric: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico`,
   infoanalisisIdentidad: (dni,id) => `${API_BASE_URL}analisisdeidentidad/find-all/${dni}`,
+
+  //documentos
+  getContratoCompraVenta: () => `${API_BASE_URL}store-reports-phone-verification/compraVenta-resDominio`,
+  getDeclaracion: (id) => `${API_BASE_URL}store-reports-phone-verification/declaracion-compromiso/${id}`,
+  getPagareOrden: (id) => `${API_BASE_URL}store-reports-phone-verification/pagare-orden/${id}`,
+  getTablaAmortizacion: (id) => `${API_BASE_URL}store-reports-phone-verification/tabla-amortizacion/${id}`,
+  getGastosCobranza: (id) => `${API_BASE_URL}store-reports-phone-verification/gastos-cobranza/${id}`,
+  getCompromisoLugarPago: (id) => `${API_BASE_URL}store-reports-phone-verification/compromiso-lugarPag/${id}`,
+  getActa: (id) => `${API_BASE_URL}store-reports-phone-verification/entrega-datos/${id}`,
+  getConsentimiento: (id) => `${API_BASE_URL}store-reports-phone-verification/tratamiento-datos/${id}`,
+  getAutorizacion: (id) => `${API_BASE_URL}store-reports-phone-verification/compraVenta-resDominio`,
 };

@@ -82,7 +82,6 @@ export function VerDetallesModal({
   userData,
   fetchEstadoRegcivil
 }) {
-  console.log("data modal ver detalles", selectedRow);
   const [confirmOpen, setConfirmOpen] = useState(false);
   // Calcular tiempo total desde fechaTiempos si sumarTodosLosTiempos() devuelve NaN
   const calcularTiempoTotal = () => {

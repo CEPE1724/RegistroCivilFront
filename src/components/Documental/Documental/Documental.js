@@ -17,7 +17,6 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material"; // Asegúrate de tener MUI o usar tu propio modal
-import { get, set } from "react-hook-form";
 import { fetchConsultaYNotifica, fechaHoraEcuador } from "../../Utils";
 
 export function Documental({
@@ -25,11 +24,6 @@ export function Documental({
   NumeroSolicitud,
   nombre,
   cedula,
-  fecha,
-  almacen,
-  foto,
-  vendedor,
-  consulta,
 }) {
   const { userData, userUsuario, idMenu } = useAuth();
   const navigate = useNavigate();
@@ -53,35 +47,6 @@ export function Documental({
   const [observaciones, setObservaciones] = useState([]);
   const [notificacionEnviada, setNotificacionEnviada] = useState(false);
 
-  const patchSolicitud = async (idSolicitud) => {
-    try {
-      const response = await axios.patch(
-        APIURL.update_solicitud(idSolicitud),
-        {
-          idEstadoVerificacionSolicitud: 10,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.data) {
-        enqueueSnackbar("Solicitud actualizada correctamente.", {
-          variant: "success",
-        });
-        navigate("/ListadoSolicitud", {
-          replace: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error al actualizar la solicitud:", error);
-      enqueueSnackbar("Error al actualizar la solicitud.", {
-        variant: "error",
-      });
-    }
-  };
 
   const handleConfirm = async () => {
     setIsModalOpen(false); // Cierra el modal
@@ -136,7 +101,12 @@ export function Documental({
     vendedor: "",
     consulta: "",
     idEstadoVerificacionDocumental: "",
+	idFirmaElectronica: ""
   });
+  const tieneFirmaElectronica = Number(clientInfo.idFirmaElectronica) !== 0;
+
+  const isFirmaElectronicaDoc = (field) => tieneFirmaElectronica && documentosPorFirmaElectronica.includes(field);
+
   const [filePreviews, setFilePreviews] = useState({});
   const [filesToCorrect, setFilesToCorrect] = useState([]);
   const [initialTabSet, setInitialTabSet] = useState(false);
@@ -198,6 +168,43 @@ export function Documental({
                 completed.add(sectionName); // Agrupa en "Campos Completados" si estado < 4
             }
           });
+
+		  // DOCUMENTOS FIRMA ELECTRÓNICA
+			if (tieneFirmaElectronica) {
+				for (const sectionName of documentosPorFirmaElectronica) {
+					// Si ya existe por upload, NO lo tocamos
+					if (uploadedFiles[sectionName]) continue;
+
+					const endpointFn = firmaElectronicaEndpoints[sectionName];
+					if (!endpointFn) continue;
+
+					try {
+						const pdfUrl = await fetchFirmaElectronicaPDF(endpointFn);
+
+						uploadedFiles[sectionName] = [
+							{
+								idDocumentoSolicitudWeb: null,
+								name: `${sectionName}.pdf`,
+								url: pdfUrl,
+								type: "application/pdf",
+								estado: 1,
+								esFirmaElectronica: true,
+							},
+						];
+
+						console.log("clientinfo", clientInfo)
+
+						previews[sectionName] = [pdfUrl];
+						completed.add(sectionName);
+					} catch (error) {
+						console.error(
+							`Error al obtener documento firmado: ${sectionName}`,
+							error
+						);
+					}
+				}
+			}
+
 
 		  // Agregar documentos opcionales (16-25) al modo corrección
 			if (corrections.size > 0) {
@@ -276,6 +283,19 @@ export function Documental({
     };
     return documentoIds[id] || null;
   };
+
+  const fetchFirmaElectronicaPDF = async (endpointFn) => {
+  const response = await axios.get(endpointFn(clientInfo.id), {
+    responseType: "blob",
+  });
+
+  const blob = new Blob([response.data], {
+    type: "application/pdf",
+  });
+
+  return URL.createObjectURL(blob);
+};
+
 
   useEffect(() => {
     if (location.state) {
@@ -383,6 +403,15 @@ export function Documental({
   };
 
   const handleFileChange = (e, field) => {
+
+	if (isFirmaElectronicaDoc(field)) {
+    enqueueSnackbar(
+      "Este documento se genera automáticamente mediante firma electrónica.",
+      { variant: "info" }
+    );
+    return;
+  }
+
     const selectedFiles = Array.from(e.target.files);
     if (selectedFiles.length === 0) {
       enqueueSnackbar("No se ha seleccionado ningún archivo.", {
@@ -804,6 +833,45 @@ export function Documental({
     }
   };
 
+	// const fetchDocumentoFirmaElectronica = async (field) => {
+	// 	const endpointFn = firmaElectronicaEndpoints[field];
+
+	// 	if (!endpointFn) {
+	// 		console.warn("No hay endpoint para:", field);
+	// 		return;
+	// 	}
+
+	// 	try {
+	// 		const response = await axios.get(
+	// 			endpointFn(clientInfo.id),
+	// 			{
+	// 				responseType: "blob",
+	// 			}
+	// 		);
+
+	// 		// Crear URL temporal para el PDF
+	// 		const pdfBlob = new Blob([response.data], {
+	// 			type: "application/pdf",
+	// 		});
+
+	// 		const pdfUrl = URL.createObjectURL(pdfBlob);
+
+	// 		setFilePreviews({
+	// 			[field]: [pdfUrl],
+	// 		});
+
+	// 		setActiveTab(field);
+	// 		setView(true);
+	// 	} catch (error) {
+	// 		console.error("Error al obtener documento firmado:", error);
+	// 		enqueueSnackbar(
+	// 			"No se pudo cargar el documento de firma electrónica.",
+	// 			{ variant: "error" }
+	// 		);
+	// 	}
+	// };
+
+
   const menuItems = [
     "Copia De Cedula",
     "Contrato de Compra",
@@ -832,13 +900,52 @@ export function Documental({
     "Respaldo 10",
   ];
 
-  const completedFields = menuItems.filter(
-    (field) => files[field] && files[field].length > 0
-  );
+  const firmaElectronicaEndpoints = {
+  "Contrato de Compra": APIURL.getContratoCompraVenta,
+  "Declaracion": APIURL.getDeclaracion,
+  "Pagare a la Orden": APIURL.getPagareOrden,
+  "Tabla de amortizacion": APIURL.getTablaAmortizacion,
+  "Gastos de cobranza": APIURL.getGastosCobranza,
+  "Compromiso Lugar de pago": APIURL.getCompromisoLugarPago,
+  "Acta": APIURL.getActa,
+  "Consentimiento": APIURL.getConsentimiento,
+  "Autorización": APIURL.getAutorizacion,
+};
 
-  const pendingFields = menuItems.filter(
-    (field) => !(files[field] && files[field].length > 0)
-  );
+
+  const documentosPorFirmaElectronica = [
+  "Declaracion",
+  "Contrato de Compra",
+  "Pagare a la Orden",
+  "Tabla de amortizacion",
+  "Gastos de cobranza",
+  "Compromiso Lugar de pago",
+  "Acta",
+  "Consentimiento",
+  "Autorización",
+];
+
+// const numDocfirma = documentosPorFirmaElectronica.length
+
+const completedByFirma = tieneFirmaElectronica ? documentosPorFirmaElectronica : [];
+
+  const completedFields = menuItems.filter((field) => {
+  const hasFile = files[field] && files[field].length > 0;
+  const completedByFirma =
+    tieneFirmaElectronica && documentosPorFirmaElectronica.includes(field);
+
+  return hasFile || completedByFirma;
+});
+
+
+
+  const pendingFields = menuItems.filter((field) => {
+  const hasFile = files[field] && files[field].length > 0;
+  const completedByFirmaElectronica =
+    tieneFirmaElectronica && completedByFirma.includes(field);
+
+  return !hasFile && !completedByFirmaElectronica;
+});
 
   const laboralYDomicilioAprobados = async (id) => {
     try {
@@ -1055,6 +1162,21 @@ export function Documental({
                                   {`+${fileCount}`}
                                 </span>
                               )}
+
+									  {documentosPorFirmaElectronica.includes(item) &&
+										  tieneFirmaElectronica &&
+										  fileCount === 0 && (
+											  <span className="ml-2 text-green-600 text-xs font-semibold">
+												  Firma electrónica
+											  </span>
+										  )}
+
+									  {(fileCount > 0 ||
+										  (tieneFirmaElectronica &&
+											  documentosPorFirmaElectronica.includes(item))) && (
+											  <span className="ml-2 text-green-500 font-bold">✓</span>
+										  )}
+
                               {completedFields2.includes(item) && (
                                 <span className="ml-2 text-green-500 font-bold">
                                   ✓
@@ -1206,6 +1328,7 @@ export function Documental({
           </div>
 
           <div className="flex justify-center items-center mt-6 w-full">
+			{!isFirmaElectronicaDoc(activeTab) && (
             <button
               onClick={() => setShowFileInput(true)}
               class="cursor-pointer relative after:content-['subir_archivos'] after:text-white after:absolute after:text-nowrap after:scale-0 hover:after:scale-100 after:duration-700 w-11 h-11 rounded-full bg-[#2563eb] flex items-center justify-center duration-300 hover:rounded-md hover:w-36 hover:h-10 group/button overflow-hidden active:scale-90"
@@ -1253,7 +1376,7 @@ export function Documental({
                   ></path>
                 </g>
               </svg>
-            </button>
+            </button>)}
 
             <div className="ml-4 md:absolute md:right-11">
               <button
@@ -1267,7 +1390,7 @@ export function Documental({
         </div>
 
         {/* Modal de subir archivo */}
-        {showFileInput && (
+        {showFileInput && !isFirmaElectronicaDoc(activeTab) && (
           <div
             ref={modalRef}
             className="fixed inset-0 flex justify-center items-center bg-gray-900 bg-opacity-50"
