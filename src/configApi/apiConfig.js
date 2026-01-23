@@ -224,6 +224,18 @@ export const APIURL = {
   personal_bdd_findAllgestor: () => `${API_BASE_URL}personal-bdd/gestores`,
   cre_entidad_financiera_findAllCobranza: (activo) => `${API_BASE_URL}cre-entidad-financiera/findAllCobranza/${activo}`,
   serviciosia365pro_biometric: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico`,
+  infoanalisisIdentidad: (dni,id) => `${API_BASE_URL}analisisdeidentidad/find-all/${dni}`,
+
+  //documentos
+  getContratoCompraVenta: () => `${API_BASE_URL}store-reports-phone-verification/compraVenta-resDominio`,
+  getDeclaracion: (id) => `${API_BASE_URL}store-reports-phone-verification/declaracion-compromiso/${id}`,
+  getPagareOrden: (id) => `${API_BASE_URL}store-reports-phone-verification/pagare-orden/${id}`,
+  getTablaAmortizacion: (id) => `${API_BASE_URL}store-reports-phone-verification/tabla-amortizacion/${id}`,
+  getGastosCobranza: (id) => `${API_BASE_URL}store-reports-phone-verification/gastos-cobranza/${id}`,
+  getCompromisoLugarPago: (id) => `${API_BASE_URL}store-reports-phone-verification/compromiso-lugarPag/${id}`,
+  getActa: (id) => `${API_BASE_URL}store-reports-phone-verification/entrega-datos/${id}`,
+  getConsentimiento: (id) => `${API_BASE_URL}store-reports-phone-verification/tratamiento-datos/${id}`,
+  getAutorizacion: (id) => `${API_BASE_URL}store-reports-phone-verification/compraVenta-resDominio`,
   infoanalisisIdentidad: (dni) => `${API_BASE_URL}analisisdeidentidad/find-all/${dni}`,
   serviciosia365pro_biometric_firma: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico/crear-firma-digital`,
   /*http://192.168.2.20:3008/api/v1/cbo-gestores-cobranzas-operativo?desdeDiasMora=10&hastaDiasMora=90&cobradorOperador=0&idOperadorCobrador=0&gestionados=1&idCbo_ResultadoGestion=0&pageNumber=1&pageSize=50*/

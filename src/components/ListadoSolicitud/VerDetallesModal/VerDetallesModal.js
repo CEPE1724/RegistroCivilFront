@@ -85,7 +85,6 @@ export function VerDetallesModal({
   userData,
   fetchEstadoRegcivil
 }) {
-  console.log("data modal ver detalles", selectedRow);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [messageConfirm, setMessageConfirm] = useState("");
   const [tipoAccionLink, setTipoAccionLink] = useState(0); // "biometrico" o "firma"

@@ -2207,6 +2207,7 @@ export function ListadoSolicitud() {
       consulta: registro.consulta,
       idEstadoVerificacionDocumental: registro.idEstadoVerificacionDocumental,
       estadoVerifD: registro.idEstadoVerificacionDocumental,
+	  idFirmaElectronica: registro.idFirmaElectronica
     };
 
     if (
