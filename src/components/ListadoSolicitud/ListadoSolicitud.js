@@ -36,18 +36,12 @@ import PersonIcon from "@mui/icons-material/Person";
 import BadgeIcon from "@mui/icons-material/Badge";
 import StoreIcon from "@mui/icons-material/Store";
 import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
-import InfoIcon from "@mui/icons-material/Info";
-import EmailIcon from "@mui/icons-material/Email";
 import { ModalFirmaElectronica } from "./ModalFirmaElectronica";
-import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import BusinessIcon from "@mui/icons-material/Business";
-import FolderIcon from "@mui/icons-material/Folder";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { useNavigate } from "react-router-dom";
 import useBodegaUsuario from "../../hooks/useBodegaUsuario";
-import PendingActionsIcon from "@mui/icons-material/PendingActions";
-import HouseIcon from "@mui/icons-material/House";
+
 import { enqueueSnackbar } from "notistack";
 import { useAuth } from "../AuthContext/AuthContext";
 import PhoneDisabledIcon from "@mui/icons-material/PhoneDisabled";
@@ -106,15 +100,21 @@ import { BsFillSignStopFill } from "react-icons/bs";
 import SyncAltIcon from '@mui/icons-material/SyncAlt';
 import { FaTruckFast } from "react-icons/fa6";
 import { FaBoxArchive } from "react-icons/fa6";
-import { LinkOffOutlined } from "@mui/icons-material";
-import { Pencil, PenIcon } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { ObservacionCredito } from "./ObservacionCredito/ObservacionCredito";
 import VerificacionFacialModal from "./VerificacionFacialModal";
 import VerificacionFacialLoadingModal from "./VerificacionFacialLoadingModal";
 import { VerDetallesModal } from "./VerDetallesModal";
-import { PiSignatureLight } from "react-icons/pi";
-import { FaFileSignature, FaLink, FaCheckCircle, FaFileAlt } from "react-icons/fa";
+import { FaFileSignature, FaCheckCircle, FaFileAlt } from "react-icons/fa";
 import { LuScanFace } from "react-icons/lu";
+import { MdOutlineLinkOff, MdOutlineLink } from "react-icons/md";
+import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle } from "react-icons/ai";
+import { SiLinkfire } from "react-icons/si";
+import { BsPersonBoundingBox } from "react-icons/bs";
+import { BsPersonBadge, BsPersonBadgeFill    } from "react-icons/bs";
+import { PiTimerLight, PiFileLight, PiEnvelopeLight, PiUserCircleLight, PiXLight, PiWarningLight, PiSignatureLight, PiNewspaperBold, PiSignatureFill, PiSealQuestionFill  } from "react-icons/pi";
+import { TbSignatureOff } from "react-icons/tb";
+
 export function ListadoSolicitud() {
   const {
     data,
@@ -2447,11 +2447,19 @@ export function ListadoSolicitud() {
   };
 
   const firmaElectronicaIcons = {
-    0: { icon: <FaFileSignature style={{ color: "#6b7280", fontSize: 25 }} />, tooltip: "Firma electrónica no disponible" },
-    1: { icon: <FaFileSignature style={{ color: "#07447b", fontSize: 25 }} />, tooltip: "Firma electrónica disponible" },
-    2: { icon: <LuScanFace style={{ color: "#eab308", fontSize: 25 }} />, tooltip: "Link biométrico enviado" },
-    3: { icon: <FaCheckCircle style={{ color: "#22c55e", fontSize: 25 }} />, tooltip: "Biométrico aprobado" },
-    4: { icon: <FaFileAlt style={{ color: "#64748b", fontSize: 25 }} />, tooltip: "Documentos enviados" }
+    0: { icon: <PiSignatureLight  size={25} color="#9ca3af" />, tooltip: "" },
+    1: { icon: <PiSignatureLight  size={25} color="#2563eb" />, tooltip: "Firma electrónica disponible" },
+    2: { icon: <SiLinkfire  size={30} color="#eab308" />, tooltip: "Link biométrico enviado" },
+    3: { icon: <BsPersonBadge   size={30} color="#22c55e" />, tooltip: "Biométrico aprobado" },
+    4: { icon: <BsPersonBadgeFill  size={30} color="#dc2626" />, tooltip: "Biométrico rechazado" },
+    5: { icon: <PiTimerLight   size={30} color="#dc2626" />, tooltip: "Biométrico caducado" },
+    6: { icon: <SiLinkfire  size={30} color="#2563eb" />, tooltip: "Envío de link de firma pendiente" },
+    7: { icon: <PiNewspaperBold  size={30} color="#2563eb" />, tooltip: "Envío de URL de firma pendiente" },
+    8: { icon: <PiSignatureFill   size={30} color="#2563eb" />, tooltip: "Cliente acepta firma pendiente" },
+    9: { icon: <PiSignatureFill   size={30} color="#22c55e" />, tooltip: "Firma electrónica completada" },
+    10: { icon: <TbSignatureOff  size={30} color="#dc2626" />, tooltip: "Cliente rechazó la firma" },
+    11: { icon: <PiSealQuestionFill   size={30} color="#dc2626" />, tooltip: "Fallo en pregunta de seguridad" },
+    12: { icon: <PiTimerLight  size={30} color="#dc2626" />, tooltip: "Link de firma vencido" },
   };
 
   useEffect(() => {
@@ -3312,9 +3320,9 @@ export function ListadoSolicitud() {
                         </div>
                       </TableCell>
                       <TableCell align="center">
-                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                        {firmaElectronicaIcons[data.idFirmaElectronica] && (
-                          <Tooltip title={firmaElectronicaIcons[data.idFirmaElectronica].tooltip} arrow placement="top">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                          {firmaElectronicaIcons[data.idFirmaElectronica] && (
+                            <Tooltip title={firmaElectronicaIcons[data.idFirmaElectronica].tooltip} arrow placement="top">
                               <IconButton
                                 size="small"
                                 onClick={
@@ -3336,17 +3344,17 @@ export function ListadoSolicitud() {
                               >
                                 {firmaElectronicaIcons[data.idFirmaElectronica].icon}
                               </IconButton>
-                 
-                          </Tooltip>
-                        )}
-         
+
+                            </Tooltip>
+                          )}
+
                           <MoreVertIcon
                             onClick={(event) =>
                               handlePopoverOpen(event, 11, data)
                             }
                             style={{ cursor: "pointer" }}
                           />
-            
+
                         </div>
 
                       </TableCell>
@@ -3793,7 +3801,7 @@ export function ListadoSolicitud() {
             </Table>
           </TableContainer>
         </div>
-        
+
       </div>
 
       {/* Cuadro de diálogo para ver detalles */}
@@ -4512,7 +4520,7 @@ export function ListadoSolicitud() {
 
       {/* Modal de Firma Electrónica: debe estar fuera de la tabla para sobreponerse */}
       <ModalFirmaElectronica data={selectedRow} isOpen={modalFirmaOpen} onClose={() => setModalFirmaOpen(false)} />
-     
+
     </div>
   );
 }

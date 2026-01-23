@@ -37,6 +37,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BorderColorIcon from '@mui/icons-material/BorderColor';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { FaDollarSign } from "react-icons/fa";
 import CapturarCamara from "../../CapturarCamara/CapturarCamara";
 import ModalConfirmacionRechazo from "../../SolicitudGrande/Cabecera/ModalConfirmacionRechazo";
@@ -44,6 +45,8 @@ import { PiMoneyWavyBold } from "react-icons/pi";
 import ConfirmMessage from "../../ListadoSolicitud/ModalFirmaElectronica/ConfirmMessage";
 import axios from "../../../configApi/axiosConfig";
 import { APIURL } from "../../../configApi/apiConfig";
+import { enqueueSnackbar } from "notistack";
+import { set } from "react-hook-form";
 export function VerDetallesModal({
   open,
   onClose,
@@ -83,6 +86,8 @@ export function VerDetallesModal({
   fetchEstadoRegcivil
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [messageConfirm, setMessageConfirm] = useState("");
+  const [tipoAccionLink, setTipoAccionLink] = useState(0); // "biometrico" o "firma"
   // Calcular tiempo total desde fechaTiempos si sumarTodosLosTiempos() devuelve NaN
   const calcularTiempoTotal = () => {
     const tiempoSumado = sumarTodosLosTiempos();
@@ -190,26 +195,74 @@ export function VerDetallesModal({
   };
 
   const handleConfirm = async () => {
-    setConfirmOpen(false);
-
-
     try {
-      const response = await axios.post(APIURL.serviciosia365pro_biometric(), {
+      setConfirmOpen(false);
+
+      if (!tipoAccionLink) return;
+
+      const commonData = {
         identificacion: selectedRow?.cedula,
-        callback: "https://backregistrocivil.appservices.com.ec/api/v1/corporacion-dfl/serviciosia365pro/biometrico/callback",
-        motivo: selectedRow?.nombre,
         cre_solicitud: selectedRow?.sCre_SolicitudWeb,
-        usuario: userData?.Nombre
+      };
+
+      if (tipoAccionLink === 1) {
+        await axios.post(APIURL.serviciosia365pro_biometric(), {
+          identificacion: selectedRow?.cedula,
+          callback: "https://backregistrocivil.appservices.com.ec/api/v1/corporacion-dfl/serviciosia365pro/biometrico/callback",
+          motivo: selectedRow?.nombre,
+          cre_solicitud: selectedRow?.sCre_SolicitudWeb,
+          usuario: userData?.Nombre
+        });
+        enqueueSnackbar("Link biométrico generado correctamente", {
+          variant: "success",
+        });
+
+      }
+
+      if (tipoAccionLink === 2) {
+
+        await axios.post(APIURL.serviciosia365pro_biometric_firma(), commonData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userData?.token}` 
+            },
+          });
+            
+        enqueueSnackbar("Link Firma digital generado correctamente", {
+          variant: "success",
+        });
+      }
+
+
+
+      setTipoAccionLink(0);
+      setMessageConfirm("");
+      onClose();
+
+    } catch (error) {
+      console.error(error);
+      enqueueSnackbar("Error al generar el link biométrico", {
+        variant: "error",
       });
-      alert(response?.data?.message || "Link biométrico generado correctamente");
-    } catch (err) {
-      alert("Error al generar el link biométrico");
     }
   };
 
+
   const handleCancel = () => {
+    setTipoAccionLink(0);
     setConfirmOpen(false);
+    setMessageConfirm("");
   };
+
+  const openConfirm = (msg, tipo) => {
+
+    setTipoAccionLink(tipo);
+    setMessageConfirm(msg);
+    setConfirmOpen(true);
+  };
+
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth className="backdrop-blur-sm">
       <DialogContent className="!p-0 max-h-[75vh] overflow-y-auto bg-gradient-to-br from-gray-50 to-blue-50">
@@ -462,6 +515,17 @@ export function VerDetallesModal({
                       />
                     )}
                   </div>
+                  {selectedRow.idFirmaElectronica === 3 || selectedRow.idFirmaElectronica >= 6 ?
+                    <div className="absolute bottom-2 right-2 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                      <CheckCircleIcon sx={{ fontSize: 14 }} />
+                      Verificado
+                    </div>
+                    : selectedRow.idFirmaElectronica === 4 &&
+                    <div className="absolute bottom-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center gap-1">
+                      <ReportProblemIcon sx={{ fontSize: 14 }} />
+                      No Verificado
+                    </div>
+                  }
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
 
@@ -571,18 +635,9 @@ export function VerDetallesModal({
                                   </div>
                                 </div>
                               )}
-                              {selectedRow.idFirmaElectronica === 1 && (
-                                <button
-                                  onClick={() => setConfirmOpen(true)}
-                                  aria-label="Generar Link Biométrico"
-                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                                >
-                                  <FingerprintIcon className="w-4 h-4" />
-                                  Generar Link Biométrico
-                                </button>
-                              )}
 
-                               {selectedRow.idFirmaElectronica === 2 && (
+
+                              {selectedRow.idFirmaElectronica === 2 && (
                                 <div className="flex flex-col items-center justify-center text-center gap-3 bg-blue-50 border-2 border-blue-200 p-4 rounded-xl shadow-sm">
                                   <HourglassBottomIcon fontSize="large" className="text-blue-600" aria-hidden="true" />
                                   <div>
@@ -593,7 +648,7 @@ export function VerDetallesModal({
                                     <span className="text-xs text-blue-600">El cliente está completando la verificación. Espere a que finalice el proceso.</span>
                                   </div>
                                 </div>
-                              )}  
+                              )}
 
                               {selectedRow.idFirmaElectronica === 3 && (
                                 <div className="flex flex-col items-center justify-center text-center gap-3 bg-green-50 border-2 border-green-200 p-4 rounded-xl shadow-sm">
@@ -621,7 +676,7 @@ export function VerDetallesModal({
                                 </div>
                               )}
 
-                              {selectedRow.idFirmaElectronica === 6 && (
+                              {selectedRow.idFirmaElectronica === 5 && (
                                 <div className="flex flex-col items-center justify-center text-center gap-3 bg-yellow-50 border-2 border-yellow-200 p-4 rounded-xl shadow-sm">
                                   <AccessTimeIcon fontSize="large" className="text-yellow-600" aria-hidden="true" />
                                   <div>
@@ -633,9 +688,22 @@ export function VerDetallesModal({
                                   </div>
                                 </div>
                               )}
+
+                              {(selectedRow.idFirmaElectronica === 1 || selectedRow.idFirmaElectronica === 4 || selectedRow.idFirmaElectronica === 5) && (
+                                <button
+                                  onClick={() =>
+                                    openConfirm(
+                                      "¿Está seguro que desea generar el link biométrico? Recuerde que el Cliente debe contar con su cédula física.", 1
+                                    )
+                                  }
+                                  aria-label="Generar Link Biométrico"
+                                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                >
+                                  Generar link biométrico
+                                </button>
+
+                              )}
                             </>
-
-
                           )}
                         </>
                       ) : (
@@ -649,9 +717,55 @@ export function VerDetallesModal({
                           </span>
                         </div>
                       )}
+
+
                     </div>
                   )}
               </div>
+              {selectedRow.estado === "APROBADO" && selectedRow.idFirmaElectronica === 3 && (
+
+                <div className="mt-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r shadow-md">
+                  <div className="flex items-center gap-3">
+
+                    <InfoIcon className="w-4 h-4 text-yellow-600" />
+                    <div>
+                      <p className="font-semibold">Generar Link de Firma Digital</p>
+                      <p className="text-sm">
+                        Por favor, genere el link de firma digital para completar el proceso.
+                      </p>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+              {(selectedRow.estado === "APROBADO" && selectedRow.idFirmaElectronica === 3) && (
+                <div className="mt-4">
+                  <button
+                    onClick={() =>
+                      openConfirm("¿Está seguro que desea generar el link de firma digital?", 2)
+                    }
+                    aria-label="Generar Link Firma Digital"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                  >
+                    <FingerprintIcon className="w-4 h-4" />
+                    Generar Link Firma Digital
+                  </button>
+                </div>
+              )}
+              {(selectedRow.estado === "APROBADO" && selectedRow.idFirmaElectronica >= 6) && (
+                <div className="mt-4">
+                  <button
+                    onClick={() =>
+                      openConfirm("¿Está seguro que desea generar el link de firma digital?", 2)
+                    }
+                    aria-label="Generar Link Firma Digital"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                  >
+                    <FingerprintIcon className="w-4 h-4" />
+                    Generar Link Firma Digital
+                  </button>
+                </div>
+              )}
             </div>
 
             <Dialog
@@ -970,7 +1084,7 @@ export function VerDetallesModal({
           isOpen={confirmOpen}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
-          message={`¿Está seguro que desea generar el link biométrico? Recuerde que el Cliente debe contar con su cédula física.`}
+          message={messageConfirm}
         />
       </DialogActions>
     </Dialog>

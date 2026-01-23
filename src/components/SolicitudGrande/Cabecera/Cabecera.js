@@ -1626,7 +1626,11 @@ export function Cabecera() {
       return response.data;
     } catch (error) {
       console.error("Error al obtener la cuota y el cupo", error);
-      return null;
+      // Si el backend responde con error, retorna el mensaje del backend
+      if (error.response && error.response.data) {
+        return error.response.data;
+      }
+      return { success: false, message: "Error desconocido" };
     }
   };
 

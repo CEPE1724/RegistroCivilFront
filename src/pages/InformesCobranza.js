@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import {DetalleCobranza } from '../components';
-import { 
-    CalendarIcon, 
-    UserIcon, 
-    BuildingOfficeIcon, 
+import { DetalleCobranza } from '../components';
+import {
+    CalendarIcon,
+    UserIcon,
+    BuildingOfficeIcon,
     BanknotesIcon,
     MagnifyingGlassIcon,
     DocumentArrowDownIcon,
@@ -24,44 +24,58 @@ import { APIURL } from '../configApi/apiConfig';
 import axios from '../configApi/axiosConfig';
 const InformesCobranza = () => {
 
+    
     const [filters, setFilters] = useState({
-        periodo: '12/2025',
-        tipoGestion: 'todos',
-        filtroGestion: 'gestion',
+        tipoGestion: 0,
+        filtroGestion: 0,
         diasMoraDesde: 1,
         diasMoraHasta: 150,
         operador: '',
-        gestion: '',
-        estado: '',
-        banco: '',
-        almacen: ''
+        gestion: 0,
+        pageNumber: 1,
+        pageSize: 2
     });
 
     // Operadores obtenidos de la API
     const [operadores, setOperadores] = useState([]);
-        const [bancos, setBancos] = useState([]);
+    const [bancos, setBancos] = useState([]);
+    const [estadoGestion, setEstadoGestion] = useState([]);
     // Cargar operadores al montar el componente
     useEffect(() => {
         fetchOperadores();
         fetchBancos();
+        fetchEstadoGestion();
+        // Cargar datos iniciales con valores por defecto
+        handleBuscar();
     }, []);
 
     const fetchOperadores = async () => {
-            try {
-                const response = await axios.get(APIURL.personal_bdd_findAllgestor());
-                setOperadores(response.data);
-            } catch (error) {
-                setOperadores([]);
-            }
-        };
-        const fetchBancos = async () => {
-            try {
-                const response = await axios.get(APIURL.cre_entidad_financiera_findAllCobranza(true));
-                setBancos(response.data);
-            } catch (error) {
-                setBancos([]);
-            }
-        };
+        try {
+            const response = await axios.get(APIURL.personal_bdd_findAllgestor());
+            console.log('Operadores cargados:', response.data);
+            setOperadores(response.data);
+        } catch (error) {
+            setOperadores([]);
+        }
+    };
+    const fetchBancos = async () => {
+        try {
+            const response = await axios.get(APIURL.cre_entidad_financiera_findAllCobranza(true));
+            setBancos(response.data);
+        } catch (error) {
+            setBancos([]);
+        }
+    };
+
+    const fetchEstadoGestion = async () => {
+        try {
+            const response = await axios.get(APIURL.SelectDato());
+            setEstadoGestion(response.data.data);
+        }
+        catch (error) {
+            setEstadoGestion([]);
+        }
+    };
 
     const [isDetalleOpen, setIsDetalleOpen] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
@@ -73,63 +87,74 @@ const InformesCobranza = () => {
         cobroExterno: 0.00
     });
 
-    const [tableData, setTableData] = useState([
-        {
-            periodo: '12/2025',
-            operador: 'JUAN PÉREZ',
-            equifax: 'Aprobado',
-            zona: 'Norte',
-            cobrador: 'MARÍA GARCÍA',
-            fechaGestion: '15/12/2025',
-            gestion: 'Llamada'
-        },
-        {
-            periodo: '12/2025',
-            operador: 'ANA LÓPEZ',
-            equifax: 'Pendiente',
-            zona: 'Sur',
-            cobrador: 'CARLOS RUIZ',
-            fechaGestion: '14/12/2025',
-            gestion: 'Visita'
-        },
-        {
-            periodo: '12/2025',
-            operador: 'PEDRO TORRES',
-            equifax: 'Rechazado',
-            zona: 'Centro',
-            cobrador: 'LUCÍA MENDEZ',
-            fechaGestion: '13/12/2025',
-            gestion: 'WhatsApp'
-        },
-        {
-            periodo: '12/2025',
-            operador: 'SOFÍA MARTÍNEZ',
-            equifax: 'Aprobado',
-            zona: 'Este',
-            cobrador: 'DIEGO VEGA',
-            fechaGestion: '12/12/2025',
-            gestion: 'Email'
-        },
-        {
-            periodo: '12/2025',
-            operador: 'MIGUEL CASTRO',
-            equifax: 'Aprobado',
-            zona: 'Oeste',
-            cobrador: 'ELENA ROJAS',
-            fechaGestion: '11/12/2025',
-            gestion: 'Llamada'
-        }
-    ]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const pageSize = 100;
+
+    const [tableData, setTableData] = useState([]);
 
     const handleFilterChange = (field, value) => {
+        // Convertir a número los campos que lo requieren
+        let finalValue = value;
+        if (['tipoGestion', 'filtroGestion', 'gestion'].includes(field)) {
+            finalValue = parseInt(value) || 0;
+        } else if (['diasMoraDesde', 'diasMoraHasta'].includes(field)) {
+            finalValue = parseInt(value) || 0;
+        }
+        // operador se mantiene como string para comparación
         
-        setFilters(prev => ({ ...prev, [field]: value }));
-
+        setFilters(prev => ({ ...prev, [field]: finalValue }));
     };
 
-    const handleBuscar = () => {
-        console.log('Buscando con filtros:', filters);
-        // Aquí iría la lógica de búsqueda
+    const handleBuscar = async (pageNum = 1) => {
+        try {
+            // Convertir valores del filtro a parámetros de API
+            const diasMoraDesde = parseInt(filters.diasMoraDesde) || 0;
+            const diasMoraHasta = parseInt(filters.diasMoraHasta) || 150;
+            const cobradorOperador = parseInt(filters.tipoGestion) || 0;
+            const idOperadorCobrador = filters.operador ? filters.operador : 0;
+            const gestionados = parseInt(filters.filtroGestion) === 0 ? 0 : (parseInt(filters.filtroGestion) === 1 ? 1 : 2);
+            const idCbo_ResultadoGestion = filters.gestion ? parseInt(filters.gestion) : 0;
+            
+            const response = await axios.get(
+                APIURL.cbo_gestores_cobranzas_operativo(
+                    diasMoraDesde,
+                    diasMoraHasta,
+                    cobradorOperador,
+                    idOperadorCobrador,
+                    gestionados,
+                    pageNum,
+                    filters.pageSize,
+                    idCbo_ResultadoGestion
+                )
+            );
+            console.log('Datos de cobranza obtenidos:', response.data);
+            
+            // La API devuelve {data: Array, pageNumber, pageSize, totalCount}
+            const dataArray = response.data.data || response.data;
+            const total = response.data.totalCount || 0;
+            
+            if (dataArray && Array.isArray(dataArray)) {
+                setTableData(dataArray);
+                setTotalCount(total);
+                setCurrentPage(pageNum);
+                
+                // Calcular métricas
+                const totalProyectado = dataArray.reduce((sum, row) => sum + (row.Valor_Cobrar_Proyectado || 0), 0);
+                const totalCobrado = dataArray.reduce((sum, row) => sum + (row.Valor_Cobrado_Total || 0), 0);
+                const avance = totalProyectado > 0 ? ((totalCobrado / totalProyectado) * 100).toFixed(2) : 0;
+
+                setMetricas({
+                    proyectado: totalProyectado.toFixed(2),
+                    cobrado: totalCobrado.toFixed(2),
+                    avance: avance,
+                    cobroExterno: 0.00
+                });
+            }
+        } catch (error) {
+            console.error('Error al buscar gestiones de cobranza:', error);
+            // Mantener datos anteriores en caso de error
+        }
     };
 
     const handleExportar = (tipo) => {
@@ -168,43 +193,43 @@ const InformesCobranza = () => {
     return (
         <>
             <Layout />
-            <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 p-3 lg:p-6">
+            <div className="w-full min-h-screen bg-gray-50 p-3 lg:p-6">
                 {/* Header Mejorado */}
-                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-6">
+                <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-600 rounded-2xl shadow-2xl border border-blue-400/50 p-6 mb-8">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center space-x-4">
-                            <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-4 rounded-2xl shadow-lg">
+                            <div className="bg-white/20 p-4 rounded-2xl shadow-lg backdrop-blur-sm border border-white/30 transform hover:scale-110 transition-transform duration-300">
                                 <ChartBarIcon className="w-8 h-8 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                                <h1 className="text-2xl lg:text-4xl font-bold text-white drop-shadow-lg">
                                     Informes de Cobranza
                                 </h1>
-                                <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                    Gestión y seguimiento operacional
+                                <p className="text-sm text-blue-100 mt-1 flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-lg"></span>
+                                    Sistema de gestión y seguimiento operacional
                                 </p>
                             </div>
                         </div>
-                        
+
                         {/* Botones de acción superiores - Mejorados */}
                         <div className="flex items-center gap-2 flex-wrap">
                             <button
                                 onClick={() => handleExportar('excel')}
-                                className="group px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-105"
+                                className="group px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-emerald-400/50"
                             >
-                                <DocumentArrowDownIcon className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                                <DocumentArrowDownIcon className="w-4 h-4 group-hover:rotate-12 group-hover:-translate-y-1 transition-all" />
                                 <span className="hidden sm:inline">Excel</span>
                             </button>
-                            <button className="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 text-sm font-semibold transform hover:scale-105">
+                            <button className="px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-violet-400/50">
                                 <span className="hidden sm:inline">Créditos Nómina</span>
                                 <span className="sm:hidden">Nómina</span>
                             </button>
-                            <button className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-105">
+                            <button className="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-blue-400/50">
                                 <DocumentArrowUpIcon className="w-4 h-4" />
                                 <span className="hidden md:inline">Importar</span>
                             </button>
-                            <button className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-105">
+                            <button className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-amber-400/50">
                                 <MapPinIcon className="w-4 h-4" />
                                 <span className="hidden md:inline">Barrios</span>
                             </button>
@@ -215,77 +240,75 @@ const InformesCobranza = () => {
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6">
                     {/* Panel de Filtros - Mejorado */}
                     <div className="xl:col-span-3">
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden sticky top-6">
-                            <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-5 py-4">
+                        <div className="bg-gradient-to-br from-blue-50 to-white rounded-2xl shadow-2xl border border-blue-200 overflow-hidden sticky top-6 backdrop-blur-sm border-t-4 border-t-blue-500">
+                            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-5 py-5">
                                 <div className="flex items-center space-x-3">
-                                    <FunnelIcon className="w-5 h-5 text-blue-400" />
-                                    <h2 className="text-lg font-bold text-white">Filtros de Búsqueda</h2>
+                                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                        <FunnelIcon className="w-5 h-5 text-white" />
+                                    </div>
+                                    <h2 className="text-lg font-bold text-white tracking-wider">Filtrar resultados</h2>
                                 </div>
                             </div>
 
-                            <div className="p-5 space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">{/* Periodo */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                        <CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                        Periodo
-                                    </label>
-                                    <input
-                                        type="month"
-                                        value="2025-12"
-                                        onChange={(e) => handleFilterChange('periodo', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
-                                    />
-                                </div>
+                            <div className="p-6 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
 
-                                <div className="border-t border-gray-100 pt-4">
-                                    <label className="text-xs font-bold text-gray-700 mb-3 block uppercase tracking-wide">
+                                {/* Tipo de Gestión */}
+                                <div className="bg-white rounded-xl shadow-md hover:shadow-lg border border-blue-100 p-4 transition-all duration-300 hover:border-blue-300">
+                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3 block">
                                         Tipo de Gestión
                                     </label>
-                                    <div className="space-y-2.5">
+                                    <div className="flex gap-4">
                                         {[
-                                            { value: 'todos', label: 'Todos' },
-                                            { value: 'gestion', label: 'Gestión' },
-                                            { value: 'sinGestion', label: 'Sin Gestión' },
-                                            { value: 'compromisoPago', label: 'Compromiso De Pago' }
+                                            { value: 0, label: 'Todos', icon: '📊' },
+                                            { value: 1, label: 'Operador', icon: '👤' },
+                                            { value: 2, label: 'Cobrador', icon: '💼' }
                                         ].map(option => (
-                                            <label key={option.value} className="flex items-center cursor-pointer group">
-                                                <div className="relative">
-                                                    <input
-                                                        type="radio"
-                                                        name="tipoGestion"
-                                                        value={option.value}
-                                                        checked={filters.tipoGestion === option.value}
-                                                        onChange={(e) => handleFilterChange('tipoGestion', e.target.value)}
-                                                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-500"
-                                                    />
-                                                </div>
+                                            <label key={option.value} className="flex items-center cursor-pointer group p-2.5 rounded-lg hover:bg-blue-50 transition-colors">
+                                                <input
+                                                    type="radio"
+                                                    name="tipoGestion"
+                                                    value={option.value}
+                                                    checked={filters.tipoGestion === option.value}
+                                                    onChange={(e) => handleFilterChange('tipoGestion', e.target.value)}
+                                                    className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-500"
+                                                />
                                                 <span className="ml-3 text-sm text-gray-700 group-hover:text-blue-600 transition-colors font-medium">
-                                                    {option.label}
+                                                    {option.icon} {option.label}
                                                 </span>
                                             </label>
                                         ))}
                                     </div>
                                 </div>
 
-                                <div className="border-t border-gray-100 pt-4">
-                                    <label className="text-xs font-bold text-gray-700 mb-3 block uppercase tracking-wide">
+                                {/* Filtro de Gestión */}
+                                <div className="bg-white rounded-xl shadow-md hover:shadow-lg border border-blue-100 p-4 transition-all duration-300 hover:border-blue-300">
+                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3 block">
                                         Filtro
                                     </label>
-                                    <div className="flex gap-4">
+
+                                    <div className="grid grid-cols-3 gap-4">
                                         {[
-                                            { value: 'gestion', label: 'Gestión' },
-                                            { value: 'almacen', label: 'Almacen' }
+                                            { value: 0, label: 'Todos', icon: '📋' },
+                                            { value: 1, label: 'Con Gestión', icon: '✅' },
+                                            { value: 2, label: 'Sin Gestión', icon: '⏳' }
                                         ].map(option => (
-                                            <label key={option.value} className="flex items-center cursor-pointer group">
+                                            <label
+                                                key={option.value}
+                                                className="flex items-center gap-2 cursor-pointer group"
+                                            >
                                                 <input
                                                     type="radio"
                                                     name="filtroGestion"
                                                     value={option.value}
                                                     checked={filters.filtroGestion === option.value}
-                                                    onChange={(e) => handleFilterChange('filtroGestion', e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleFilterChange('filtroGestion', e.target.value)
+                                                    }
                                                     className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-2 focus:ring-blue-500"
                                                 />
-                                                <span className="ml-2 text-sm text-gray-700 group-hover:text-blue-600 transition-colors font-medium">
+
+                                                <span className="text-sm text-gray-700 font-medium group-hover:text-blue-600 transition-colors">
+                                                    <span className="mr-1">{option.icon}</span>
                                                     {option.label}
                                                 </span>
                                             </label>
@@ -293,46 +316,54 @@ const InformesCobranza = () => {
                                     </div>
                                 </div>
 
+
+
                                 {/* Días de Mora */}
-                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-100">
+                                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow border-2 border-blue-100 p-4">
                                     <label className="text-xs font-bold text-gray-700 mb-3 block uppercase tracking-wide">
-                                        Días de Mora
+                                        📅 Días de Mora
                                     </label>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label className="text-xs text-gray-600 mb-1.5 block font-semibold">Desde</label>
+                                            <label className="text-xs text-gray-600 mb-2 block font-semibold">Desde</label>
                                             <input
                                                 type="number"
                                                 value={filters.diasMoraDesde}
                                                 onChange={(e) => handleFilterChange('diasMoraDesde', e.target.value)}
-                                                className="w-full px-3 py-2 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-semibold text-gray-700"
+                                                className="w-full px-3 py-2.5 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-semibold text-gray-700 transition-all"
+                                                placeholder="0"
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-xs text-gray-600 mb-1.5 block font-semibold">Hasta</label>
+                                            <label className="text-xs text-gray-600 mb-2 block font-semibold">Hasta</label>
                                             <input
                                                 type="number"
                                                 value={filters.diasMoraHasta}
                                                 onChange={(e) => handleFilterChange('diasMoraHasta', e.target.value)}
-                                                className="w-full px-3 py-2 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-semibold text-gray-700"
+                                                className="w-full px-3 py-2.5 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-semibold text-gray-700 transition-all"
+                                                placeholder="999"
                                             />
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Operador */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
+                                <div className="bg-white rounded-xl shadow-md hover:shadow-lg border border-blue-100 p-4 transition-all duration-300 hover:border-blue-300">
+                                    <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">
                                         {getOperadorIcon()}
                                         Operador
                                     </label>
                                     <select
                                         value={filters.operador}
-                                        onChange={(e) => handleFilterChange('operador', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            console.log('Operador seleccionado:', value);
+                                            handleFilterChange('operador', value);
+                                        }}
+                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
                                     >
                                         <option value="">Seleccionar...</option>
-                                        {operadores.map(op => (
+                                        {operadores && operadores.length > 0 && operadores.map(op => (
                                             <option key={op.idPersonalBDD} value={op.idPersonalBDD}>
                                                 {op.primerNombre} {op.segundoNombre} {op.apellidoPaterno} {op.apellidoMaterno} - {op.Codigo}
                                             </option>
@@ -341,77 +372,28 @@ const InformesCobranza = () => {
                                 </div>
 
                                 {/* Gestión */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
+                                <div className="bg-white rounded-xl shadow-md hover:shadow-lg border border-blue-100 p-4 transition-all duration-300 hover:border-blue-300">
+                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3 block">
                                         Gestión
                                     </label>
                                     <select
-                                        value={filters.gestion}
+                                        value={String(filters.gestion)}
                                         onChange={(e) => handleFilterChange('gestion', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
+                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
                                     >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="gestion1">Gestión 1</option>
-                                        <option value="gestion2">Gestión 2</option>
-                                    </select>
-                                </div>
-
-                                {/* Estado */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                        Estado
-                                    </label>
-                                    <select
-                                        value={filters.estado}
-                                        onChange={(e) => handleFilterChange('estado', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="activo">Activo</option>
-                                        <option value="pendiente">Pendiente</option>
-                                    </select>
-                                </div>
-
-                                {/* Banco */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                        <BuildingOfficeIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                        Banco
-                                    </label>
-                                    <select
-                                        value={filters.banco}
-                                        onChange={(e) => handleFilterChange('banco', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        {bancos.map(banco => (
-                                            <option key={banco.idEntidadFinanciera} value={banco.idEntidadFinanciera}>
-                                                {banco.Nombre}
+                                        <option value="0">Seleccionar...</option>
+                                        {estadoGestion.map(estado => (
+                                            <option key={estado.idCbo_EstadoGestion} value={String(estado.idCbo_EstadoGestion)}>
+                                                {estado.Estado}
                                             </option>
                                         ))}
                                     </select>
                                 </div>
 
-                                {/* Almacen */}
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                        Almacen
-                                    </label>
-                                    <select
-                                        value={filters.almacen}
-                                        onChange={(e) => handleFilterChange('almacen', e.target.value)}
-                                        className="w-full px-3 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm font-medium"
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="almacen1">Almacen 1</option>
-                                        <option value="almacen2">Almacen 2</option>
-                                    </select>
-                                </div>
-
                                 {/* Botón Buscar */}
                                 <button
-                                    onClick={handleBuscar}
-                                    className="w-full mt-6 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center space-x-2"
+                                    onClick={() => handleBuscar(1)}
+                                    className="w-full px-6 py-3.5 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-700 hover:via-blue-600 hover:to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center space-x-2 border border-blue-400/50 backdrop-blur-sm"
                                 >
                                     <MagnifyingGlassIcon className="w-5 h-5" />
                                     <span>Buscar Registros</span>
@@ -432,7 +414,7 @@ const InformesCobranza = () => {
                                         <BanknotesIcon className="w-5 h-5 text-blue-600" />
                                     </div>
                                 </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.proyectado.toFixed(2)}</p>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.proyectado}</p>
                                 <p className="text-xs text-gray-500 mt-2">Meta del periodo</p>
                             </div>
 
@@ -444,7 +426,7 @@ const InformesCobranza = () => {
                                         <BanknotesIcon className="w-5 h-5 text-emerald-600" />
                                     </div>
                                 </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.cobrado.toFixed(2)}</p>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.cobrado}</p>
                                 <p className="text-xs text-emerald-600 mt-2 font-semibold">✓ Recaudado</p>
                             </div>
 
@@ -456,9 +438,9 @@ const InformesCobranza = () => {
                                         <ChartBarIcon className="w-5 h-5 text-violet-600" />
                                     </div>
                                 </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">{metricas.avance.toFixed(2)}%</p>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">{metricas.avance}%</p>
                                 <div className="mt-2 bg-gray-200 rounded-full h-2 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-violet-500 to-violet-600 h-full rounded-full" style={{width: `${metricas.avance}%`}}></div>
+                                    <div className="bg-gradient-to-r from-violet-500 to-violet-600 h-full rounded-full" style={{ width: `${metricas.avance}%` }}></div>
                                 </div>
                             </div>
 
@@ -470,71 +452,107 @@ const InformesCobranza = () => {
                                         <BanknotesIcon className="w-5 h-5 text-amber-600" />
                                     </div>
                                 </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.cobroExterno.toFixed(2)}</p>
+                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.cobroExterno}</p>
                                 <p className="text-xs text-gray-500 mt-2">Gestión externa</p>
                             </div>
                         </div>
 
                         {/* Tabla de Resultados - Mejorada */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                            <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-5 py-4 flex items-center justify-between flex-wrap gap-3">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-blue-200 overflow-hidden backdrop-blur-sm border-t-4 border-t-blue-500">
+                            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-5 py-5 flex items-center justify-between flex-wrap gap-3">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-blue-500/20 rounded-lg">
-                                        <ChartBarIcon className="w-5 h-5 text-blue-400" />
+                                    <div className="p-2.5 bg-white/20 rounded-lg backdrop-blur-sm border border-white/30">
+                                        <ChartBarIcon className="w-5 h-5 text-white" />
                                     </div>
-                                    <h2 className="text-lg font-bold text-white">Resultados de Búsqueda</h2>
+                                    <h2 className="text-lg font-bold text-white drop-shadow-lg">Gestiones de Cobranza</h2>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold">
-                                        {tableData.length} registros
-                                    </span>
-                                    <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-all duration-200 flex items-center gap-2 text-sm font-semibold transform hover:scale-105">
-                                        <MagnifyingGlassIcon className="w-4 h-4" />
-                                        <span className="hidden sm:inline">Ver Detalles</span>
-                                    </button>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="px-3 py-1.5 bg-white/30 text-white rounded-lg text-xs font-bold backdrop-blur-sm border border-white/20 shadow-lg">
+                                            {tableData.length} registros
+                                        </span>
+                                        <span className="text-xs text-white/70">
+                                            Total: {totalCount} | Página {currentPage} de {Math.ceil(totalCount / pageSize)}
+                                        </span>
+                                    </div>
+                                    
+                                    {/* Controles de paginación */}
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleBuscar(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                                currentPage === 1
+                                                    ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
+                                            }`}
+                                        >
+                                            ← Anterior
+                                        </button>
+                                        
+                                        <div className="flex gap-1">
+                                            {[...Array(Math.min(5, Math.ceil(totalCount / pageSize)))].map((_, i) => {
+                                                const pageNum = Math.max(1, currentPage - 2) + i;
+                                                if (pageNum > Math.ceil(totalCount / pageSize)) return null;
+                                                
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() => handleBuscar(pageNum)}
+                                                        className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
+                                                            currentPage === pageNum
+                                                                ? 'bg-white text-blue-700 shadow-md'
+                                                                : 'bg-white/20 text-white hover:bg-white/40'
+                                                        }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                        
+                                        <button
+                                            onClick={() => handleBuscar(currentPage + 1)}
+                                            disabled={currentPage >= Math.ceil(totalCount / pageSize)}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                                                currentPage >= Math.ceil(totalCount / pageSize)
+                                                    ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
+                                            }`}
+                                        >
+                                            Siguiente →
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                                    <thead className="bg-gradient-to-r from-blue-50 to-blue-100 border-b-2 border-blue-200">
                                         <tr>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Periodo
-                                            </th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Operador
-                                            </th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Acciones
-                                            </th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                
-                                            </th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                
-                                            </th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Equifax
-                                            </th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Zona
-                                            </th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Cobrador
-                                            </th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                F. Gestión
-                                            </th>
-                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                                Gestión
-                                            </th>
+                                          
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Operador</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cobrador</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cliente</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Cédula</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Doc. Ref.</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Almacén</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Banco</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Estado</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Resultado</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Días Mora</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Días Mora Proy.</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Ult. Gestión</th>
+                                            <th className="px-4 py-3.5 text-right text-xs font-bold text-blue-700 uppercase tracking-wider">Valor Proyectado</th>
+                                            <th className="px-4 py-3.5 text-right text-xs font-bold text-blue-700 uppercase tracking-wider">Valor Cobrar</th>
+                                            <th className="px-4 py-3.5 text-right text-xs font-bold text-blue-700 uppercase tracking-wider">Valor Cobrado Total</th>
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-100">
                                         {tableData.length === 0 ? (
                                             <tr>
-                                                <td colSpan="10" className="px-6 py-16 text-center">
+                                                <td colSpan="16" className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center justify-center text-gray-400">
                                                         <div className="p-4 bg-gray-100 rounded-2xl mb-4">
                                                             <ChartBarIcon className="w-16 h-16 text-gray-300" />
@@ -546,82 +564,136 @@ const InformesCobranza = () => {
                                             </tr>
                                         ) : (
                                             tableData.map((row, index) => (
-                                                <tr key={index} className="hover:bg-blue-50 transition-colors duration-150 group">
-                                                    <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                                                        {row.periodo}
-                                                    </td>
+                                                <tr key={index} className="hover:bg-blue-50 transition-colors duration-150 group border-l-4 border-transparent hover:border-blue-500">
+                                                   
                                                     <td className="px-4 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
-                                                                {row.operador.charAt(0)}
-                                                            </div>
-                                                            <span className="text-sm font-semibold text-gray-700">{row.operador}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <button
-                                                            onClick={() => handleVerDetalle(row)}
-                                                            className="p-2.5 bg-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl transition-all duration-200 transform hover:scale-110 shadow-sm hover:shadow-md"
-                                                            title="Ver detalles"
-                                                        >
-                                                            <EyeIcon className="w-5 h-5" />
-                                                        </button>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <button
-                                                            onClick={() => console.log('Editar', index)}
-                                                            className="p-2.5 bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all duration-200 transform hover:scale-110 shadow-sm hover:shadow-md"
-                                                            title="Editar registro"
-                                                        >
-                                                            <PencilSquareIcon className="w-5 h-5" />
-                                                        </button>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <button
-                                                            onClick={() => console.log('Eliminar', index)}
-                                                            className="p-2.5 bg-red-100 hover:bg-red-600 text-red-600 hover:text-white rounded-xl transition-all duration-200 transform hover:scale-110 shadow-sm hover:shadow-md"
-                                                            title="Eliminar registro"
-                                                        >
-                                                            <TrashIcon className="w-5 h-5" />
-                                                        </button>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm ${
-                                                            row.equifax === 'Aprobado' 
-                                                                ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white' 
-                                                                : row.equifax === 'Rechazado'
-                                                                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
-                                                                : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white'
-                                                        }`}>
-                                                            {row.equifax}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-sm font-medium text-gray-700">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="p-1.5 bg-blue-100 rounded-lg">
-                                                                <MapPinIcon className="w-4 h-4 text-blue-600" />
+                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                {row.Operador ? row.Operador.charAt(0) : '?'}
                                                             </div>
-                                                            {row.zona}
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-semibold text-gray-700 truncate">{row.Operador || 'N/A'}</span>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-4">
                                                         <div className="flex items-center gap-2">
                                                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
-                                                                {row.cobrador.charAt(0)}
+                                                                {row.Cobrador ? row.Cobrador.charAt(0) : '?'}
                                                             </div>
-                                                            <span className="text-sm text-gray-700 font-medium">{row.cobrador}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-sm text-gray-600">
-                                                        <div className="flex items-center gap-2">
-                                                            <CalendarIcon className="w-4 h-4 text-gray-400" />
-                                                            {row.fechaGestion}
+                                                            <span className="text-sm text-gray-700 font-medium truncate">{row.Cobrador || 'N/A'}</span>
                                                         </div>
                                                     </td>
                                                     <td className="px-4 py-4">
-                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
-                                                            {row.gestion}
+                                                        <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{row.Cliente}</div>
+                                                        <div className="text-xs text-gray-500">{row.Celular}</div>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className="inline-block px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">
+                                                            {row.Cedula}
                                                         </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold truncate">
+                                                            {row.Numero_Documento}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 truncate">
+                                                            {row.Almacen}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-100 text-indigo-700 truncate">
+                                                            {row.Banco}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm bg-blue-100 text-blue-700">
+                                                            {row.Estado}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4">
+                                                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
+                                                            row.Resultado === 'COMPROMISO DE PAGO'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : row.Resultado === 'NO CONTESTA'
+                                                                ? 'bg-red-100 text-red-700'
+                                                                : 'bg-amber-100 text-amber-700'
+                                                        }`}>
+                                                            {row.Resultado}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-center">
+                                                        <div className="text-sm font-semibold">
+                                                            <span className={`px-2.5 py-1 rounded-lg font-bold ${
+                                                                row.Dias_Mora_Actual === 0
+                                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                                    : row.Dias_Mora_Actual > 30
+                                                                    ? 'bg-red-100 text-red-700'
+                                                                    : 'bg-amber-100 text-amber-700'
+                                                            }`}>
+                                                                {row.Dias_Mora_Actual} 
+                                                            </span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="px-4 py-4 text-center">
+                                                        <div className="text-sm font-semibold">
+                                                            <span className={`px-2.5 py-1 rounded-lg font-bold ${
+                                                                row.Dias_Mora_Proyectado > 30
+                                                                    ? 'bg-red-100 text-red-700'
+                                                                    : 'bg-amber-100 text-amber-700'
+                                                            }`}>
+                                                                {row.Dias_Mora_Proyectado} 
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    
+                                                    <td className="px-4 py-4 text-center">
+                                                        <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                                            {new Date(row.Fecha_Ultima_Gestion).toLocaleDateString('es-ES')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-right">
+                                                        <span className="text-sm font-bold text-gray-800">
+                                                            ${row.Valor_Cobrar_Proyectado.toFixed(2)}
+                                                        </span>
+                                                    </td>
+                                                     <td className="px-4 py-4 text-right">
+                                                        <span className="text-sm font-bold text-gray-800">
+                                                            ${row.Valor_Cobrado.toFixed(2)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-right">
+                                                        <span className={`text-sm font-bold ${row.Valor_Cobrado_Total > 0 ? 'text-emerald-600' : 'text-gray-500'}`}>
+                                                            ${row.Valor_Cobrado_Total.toFixed(2)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-center">
+                                                        <div className="flex items-center justify-center gap-1">
+                                                            <button
+                                                                onClick={() => handleVerDetalle(row)}
+                                                                className="p-2 bg-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
+                                                                title="Ver detalles"
+                                                            >
+                                                                <EyeIcon className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => console.log('Editar', index)}
+                                                                className="p-2 bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
+                                                                title="Editar"
+                                                            >
+                                                                <PencilSquareIcon className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => console.log('Eliminar', index)}
+                                                                className="p-2 bg-red-100 hover:bg-red-600 text-red-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
+                                                                title="Eliminar"
+                                                            >
+                                                                <TrashIcon className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))
@@ -635,9 +707,9 @@ const InformesCobranza = () => {
             </div>
 
             {/* Modal de Detalle */}
-            <DetalleCobranza 
-                isOpen={isDetalleOpen} 
-                onClose={handleCloseDetalle} 
+            <DetalleCobranza
+                isOpen={isDetalleOpen}
+                onClose={handleCloseDetalle}
                 data={selectedRow}
             />
         </>

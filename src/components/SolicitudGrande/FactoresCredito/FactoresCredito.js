@@ -197,8 +197,17 @@ export const FactoresCredito = forwardRef((props, ref) => {
         enqueueSnackbar("Datos incorrectos", { variant: "error" });
         return;
       }
-      await fetchCuotaCupo(formData);
-      fetchInsertarDatos(data)
+      // Captura la respuesta aquí
+      const response = await fetchCuotaCupo(formData);
+
+
+      // Verifica la respuesta y muestra el mensaje adecuado
+      if (response && response.success === false) {
+        enqueueSnackbar(response.message || "Error al actualizar", { variant: "error" });
+        return;
+      }
+
+      await fetchInsertarDatos(data)
       setOpenConfirmModal(false)
       enqueueSnackbar("Cuota/Cupo actualizados correctamente", { variant: "success" });
     } catch (error) {
@@ -211,9 +220,9 @@ export const FactoresCredito = forwardRef((props, ref) => {
   const isObservacionValida = observacion.trim().length >= 10 && observacion.trim().length <= 100;
 
   const hasChanges =
-  (Number(cuotaOriginal) !== Number(cuotaActualizada) ||
-   Number(cupoOriginal) !== Number(cupoActualizado)) &&
-  isObservacionValida;
+    (Number(cuotaOriginal) !== Number(cuotaActualizada) ||
+      Number(cupoOriginal) !== Number(cupoActualizado)) &&
+    isObservacionValida;
 
   return (
     <div>
@@ -255,8 +264,9 @@ export const FactoresCredito = forwardRef((props, ref) => {
             value={formData.cuotaAsignada}
             onChange={handleChange}
             onBlur={handleBlur}
-            readOnly={estSol !== 12}
+            readOnly={![1, 12].includes(estSol)}
           />
+          
         </div>
 
         {/* Cupo */}
@@ -286,7 +296,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
             <PrintIcon />
           </IconButton>
 
-          {(estSol === 12 || estSol === 10) && !permisoEditar() && (<div className="flex items-center">
+          {(estSol === 12 || estSol === 10 || estSol === 1) && !permisoEditar() && (<div className="flex items-center">
             <button
               onClick={() => setOpenConfirmModal(true)}
               className="w-[150px] min-w-[120px] rounded-full hover:shadow-md duration-300 ease-in-out group bg-primaryBlue text-white border border-white hover:bg-white hover:text-primaryBlue hover:border-primaryBlue transition-colors text-xs px-8 py-2.5 focus:shadow-none flex items-center justify-center space-x-2">
@@ -353,7 +363,7 @@ export const FactoresCredito = forwardRef((props, ref) => {
 
           <Box mt={3} bgcolor="#f9f9f9" p={2} borderRadius={2} border="1px solid #ddd">
             <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-              Observación 
+              Observación
             </Typography>
 
             <TextField
