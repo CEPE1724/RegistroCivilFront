@@ -24,16 +24,16 @@ import { APIURL } from '../configApi/apiConfig';
 import axios from '../configApi/axiosConfig';
 const InformesCobranza = () => {
 
-    
+
     const [filters, setFilters] = useState({
         tipoGestion: 0,
         filtroGestion: 0,
         diasMoraDesde: 1,
         diasMoraHasta: 150,
-        operador: '',
+        operador: null,
         gestion: 0,
         pageNumber: 1,
-        pageSize: 2
+        pageSize: 5
     });
 
     // Operadores obtenidos de la API
@@ -102,7 +102,7 @@ const InformesCobranza = () => {
             finalValue = parseInt(value) || 0;
         }
         // operador se mantiene como string para comparación
-        
+
         setFilters(prev => ({ ...prev, [field]: finalValue }));
     };
 
@@ -112,10 +112,10 @@ const InformesCobranza = () => {
             const diasMoraDesde = parseInt(filters.diasMoraDesde) || 0;
             const diasMoraHasta = parseInt(filters.diasMoraHasta) || 150;
             const cobradorOperador = parseInt(filters.tipoGestion) || 0;
-            const idOperadorCobrador = filters.operador ? filters.operador : 0;
+            const idOperadorCobrador = filters.operador ? filters.operador : null;
             const gestionados = parseInt(filters.filtroGestion) === 0 ? 0 : (parseInt(filters.filtroGestion) === 1 ? 1 : 2);
             const idCbo_ResultadoGestion = filters.gestion ? parseInt(filters.gestion) : 0;
-            
+
             const response = await axios.get(
                 APIURL.cbo_gestores_cobranzas_operativo(
                     diasMoraDesde,
@@ -123,22 +123,23 @@ const InformesCobranza = () => {
                     cobradorOperador,
                     idOperadorCobrador,
                     gestionados,
+                    idCbo_ResultadoGestion,
                     pageNum,
                     filters.pageSize,
-                    idCbo_ResultadoGestion
+
                 )
             );
             console.log('Datos de cobranza obtenidos:', response.data);
-            
+
             // La API devuelve {data: Array, pageNumber, pageSize, totalCount}
             const dataArray = response.data.data || response.data;
             const total = response.data.totalCount || 0;
-            
+
             if (dataArray && Array.isArray(dataArray)) {
                 setTableData(dataArray);
                 setTotalCount(total);
                 setCurrentPage(pageNum);
-                
+
                 // Calcular métricas
                 const totalProyectado = dataArray.reduce((sum, row) => sum + (row.Valor_Cobrar_Proyectado || 0), 0);
                 const totalCobrado = dataArray.reduce((sum, row) => sum + (row.Valor_Cobrado_Total || 0), 0);
@@ -459,6 +460,26 @@ const InformesCobranza = () => {
 
                         {/* Tabla de Resultados - Mejorada */}
                         <div className="bg-white rounded-2xl shadow-2xl border border-blue-200 overflow-hidden backdrop-blur-sm border-t-4 border-t-blue-500">
+                            <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between flex-wrap gap-3">
+                                <div className="flex items-center gap-3">
+                                    <label className="text-sm font-semibold text-gray-700">Registros por página:</label>
+                                    <select
+                                        value={filters.pageSize}
+                                        onChange={(e) => {
+                                            const newPageSize = parseInt(e.target.value);
+                                            setFilters(prev => ({ ...prev, pageSize: newPageSize }));
+                                            // handleBuscar(1);
+                                        }}
+                                        className="px-3 py-2 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-medium bg-white"
+                                    >
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="25">25</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-5 py-5 flex items-center justify-between flex-wrap gap-3">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2.5 bg-white/20 rounded-lg backdrop-blur-sm border border-white/30">
@@ -475,50 +496,47 @@ const InformesCobranza = () => {
                                             Total: {totalCount} | Página {currentPage} de {Math.ceil(totalCount / pageSize)}
                                         </span>
                                     </div>
-                                    
+
                                     {/* Controles de paginación */}
                                     <div className="flex items-center gap-2">
                                         <button
                                             onClick={() => handleBuscar(currentPage - 1)}
                                             disabled={currentPage === 1}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                currentPage === 1
-                                                    ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
-                                            }`}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentPage === 1
+                                                ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
+                                                : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
+                                                }`}
                                         >
                                             ← Anterior
                                         </button>
-                                        
+
                                         <div className="flex gap-1">
                                             {[...Array(Math.min(5, Math.ceil(totalCount / pageSize)))].map((_, i) => {
                                                 const pageNum = Math.max(1, currentPage - 2) + i;
                                                 if (pageNum > Math.ceil(totalCount / pageSize)) return null;
-                                                
+
                                                 return (
                                                     <button
                                                         key={pageNum}
                                                         onClick={() => handleBuscar(pageNum)}
-                                                        className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
-                                                            currentPage === pageNum
-                                                                ? 'bg-white text-blue-700 shadow-md'
-                                                                : 'bg-white/20 text-white hover:bg-white/40'
-                                                        }`}
+                                                        className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${currentPage === pageNum
+                                                            ? 'bg-white text-blue-700 shadow-md'
+                                                            : 'bg-white/20 text-white hover:bg-white/40'
+                                                            }`}
                                                     >
                                                         {pageNum}
                                                     </button>
                                                 );
                                             })}
                                         </div>
-                                        
+
                                         <button
                                             onClick={() => handleBuscar(currentPage + 1)}
                                             disabled={currentPage >= Math.ceil(totalCount / pageSize)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                                currentPage >= Math.ceil(totalCount / pageSize)
-                                                    ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
-                                            }`}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentPage >= Math.ceil(totalCount / pageSize)
+                                                ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
+                                                : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
+                                                }`}
                                         >
                                             Siguiente →
                                         </button>
@@ -530,7 +548,7 @@ const InformesCobranza = () => {
                                 <table className="w-full">
                                     <thead className="bg-gradient-to-r from-blue-50 to-blue-100 border-b-2 border-blue-200">
                                         <tr>
-                                          
+                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Acciones</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Operador</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cobrador</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cliente</th>
@@ -546,7 +564,7 @@ const InformesCobranza = () => {
                                             <th className="px-4 py-3.5 text-right text-xs font-bold text-blue-700 uppercase tracking-wider">Valor Proyectado</th>
                                             <th className="px-4 py-3.5 text-right text-xs font-bold text-blue-700 uppercase tracking-wider">Valor Cobrar</th>
                                             <th className="px-4 py-3.5 text-right text-xs font-bold text-blue-700 uppercase tracking-wider">Valor Cobrado Total</th>
-                                            <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Acciones</th>
+
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-100">
@@ -563,140 +581,142 @@ const InformesCobranza = () => {
                                                 </td>
                                             </tr>
                                         ) : (
-                                            tableData.map((row, index) => (
-                                                <tr key={index} className="hover:bg-blue-50 transition-colors duration-150 group border-l-4 border-transparent hover:border-blue-500">
-                                                   
-                                                    <td className="px-4 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                                                                {row.Operador ? row.Operador.charAt(0) : '?'}
+                                            tableData.map((row, index) => {
+                                                const tieneSolicitud =
+                                                    row?.sCre_SolicitudWeb !== null && row?.sCre_SolicitudWeb !== '';
+                                                return (
+                                                    <tr key={index} className="hover:bg-blue-50 transition-colors duration-150 group border-l-4 border-transparent hover:border-blue-500">
+                                                        <td className="px-4 py-4 text-center">
+                                                            <div className="flex items-center justify-center gap-1">
+                                                                <button
+                                                                    onClick={() => tieneSolicitud && handleVerDetalle(row)}
+                                                                    disabled={!tieneSolicitud}
+                                                                    className={`p-2 rounded-lg transition-all duration-200 transform
+        ${tieneSolicitud
+                                                                            ? 'bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white hover:scale-110'
+                                                                            : 'bg-red-100 text-red-600 cursor-not-allowed'
+                                                                        }`}
+                                                                    title={tieneSolicitud ? 'Ingresar Gestión' : 'Sin datos'}
+                                                                >
+                                                                    <PencilSquareIcon className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => console.log('Editar', index)}
+                                                                    className="p-2 bg-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
+
+                                                                    title="Editar"
+                                                                >
+
+                                                                    <EyeIcon className="w-4 h-4" />
+                                                                </button>
+
                                                             </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-sm font-semibold text-gray-700 truncate">{row.Operador || 'N/A'}</span>
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                    {row.Operador ? row.Operador.charAt(0) : '?'}
+                                                                </div>
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-sm font-semibold text-gray-700 truncate">{row.Operador || 'N/A'}</span>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
-                                                                {row.Cobrador ? row.Cobrador.charAt(0) : '?'}
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center text-white text-xs font-bold">
+                                                                    {row.Cobrador ? row.Cobrador.charAt(0) : '?'}
+                                                                </div>
+                                                                <span className="text-sm text-gray-700 font-medium truncate">{row.Cobrador || 'N/A'}</span>
                                                             </div>
-                                                            <span className="text-sm text-gray-700 font-medium truncate">{row.Cobrador || 'N/A'}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{row.Cliente}</div>
-                                                        <div className="text-xs text-gray-500">{row.Celular}</div>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className="inline-block px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">
-                                                            {row.Cedula}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold truncate">
-                                                            {row.Numero_Documento}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 truncate">
-                                                            {row.Almacen}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-100 text-indigo-700 truncate">
-                                                            {row.Banco}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm bg-blue-100 text-blue-700">
-                                                            {row.Estado}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4">
-                                                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
-                                                            row.Resultado === 'COMPROMISO DE PAGO'
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <div className="text-sm text-gray-700 font-medium truncate max-w-xs">{row.Cliente}</div>
+                                                            <div className="text-xs text-gray-500">{row.Celular}</div>
+                                                        </td>
+                                                        <td className="px-4 py-4 text-center">
+                                                            <span className="inline-block px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">
+                                                                {row.Cedula}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 text-center">
+                                                            <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-semibold truncate">
+                                                                {row.Numero_Documento}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 truncate">
+                                                                {row.Almacen}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-100 text-indigo-700 truncate">
+                                                                {row.Banco}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm bg-blue-100 text-blue-700">
+                                                                {row.Estado}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4">
+                                                            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${row.Resultado === 'COMPROMISO DE PAGO'
                                                                 ? 'bg-emerald-100 text-emerald-700'
                                                                 : row.Resultado === 'NO CONTESTA'
-                                                                ? 'bg-red-100 text-red-700'
-                                                                : 'bg-amber-100 text-amber-700'
-                                                        }`}>
-                                                            {row.Resultado}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <div className="text-sm font-semibold">
-                                                            <span className={`px-2.5 py-1 rounded-lg font-bold ${
-                                                                row.Dias_Mora_Actual === 0
+                                                                    ? 'bg-red-100 text-red-700'
+                                                                    : 'bg-amber-100 text-amber-700'
+                                                                }`}>
+                                                                {row.Resultado}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 text-center">
+                                                            <div className="text-sm font-semibold">
+                                                                <span className={`px-2.5 py-1 rounded-lg font-bold ${row.Dias_Mora_Actual === 0
                                                                     ? 'bg-emerald-100 text-emerald-700'
                                                                     : row.Dias_Mora_Actual > 30
-                                                                    ? 'bg-red-100 text-red-700'
-                                                                    : 'bg-amber-100 text-amber-700'
-                                                            }`}>
-                                                                {row.Dias_Mora_Actual} 
-                                                            </span>
-                                                        </div>
-                                                    </td>
+                                                                        ? 'bg-red-100 text-red-700'
+                                                                        : 'bg-amber-100 text-amber-700'
+                                                                    }`}>
+                                                                    {row.Dias_Mora_Actual}
+                                                                </span>
+                                                            </div>
+                                                        </td>
 
-                                                    <td className="px-4 py-4 text-center">
-                                                        <div className="text-sm font-semibold">
-                                                            <span className={`px-2.5 py-1 rounded-lg font-bold ${
-                                                                row.Dias_Mora_Proyectado > 30
+                                                        <td className="px-4 py-4 text-center">
+                                                            <div className="text-sm font-semibold">
+                                                                <span className={`px-2.5 py-1 rounded-lg font-bold ${row.Dias_Mora_Proyectado > 30
                                                                     ? 'bg-red-100 text-red-700'
                                                                     : 'bg-amber-100 text-amber-700'
-                                                            }`}>
-                                                                {row.Dias_Mora_Proyectado} 
+                                                                    }`}>
+                                                                    {row.Dias_Mora_Proyectado}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+
+                                                        <td className="px-4 py-4 text-center">
+                                                            <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                                                                {new Date(row.Fecha_Ultima_Gestion).toLocaleDateString('es-ES')}
                                                             </span>
-                                                        </div>
-                                                    </td>
-                                                    
-                                                    <td className="px-4 py-4 text-center">
-                                                        <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                                                            {new Date(row.Fecha_Ultima_Gestion).toLocaleDateString('es-ES')}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-right">
-                                                        <span className="text-sm font-bold text-gray-800">
-                                                            ${row.Valor_Cobrar_Proyectado.toFixed(2)}
-                                                        </span>
-                                                    </td>
-                                                     <td className="px-4 py-4 text-right">
-                                                        <span className="text-sm font-bold text-gray-800">
-                                                            ${row.Valor_Cobrado.toFixed(2)}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-right">
-                                                        <span className={`text-sm font-bold ${row.Valor_Cobrado_Total > 0 ? 'text-emerald-600' : 'text-gray-500'}`}>
-                                                            ${row.Valor_Cobrado_Total.toFixed(2)}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-center">
-                                                        <div className="flex items-center justify-center gap-1">
-                                                            <button
-                                                                onClick={() => handleVerDetalle(row)}
-                                                                className="p-2 bg-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
-                                                                title="Ver detalles"
-                                                            >
-                                                                <EyeIcon className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => console.log('Editar', index)}
-                                                                className="p-2 bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
-                                                                title="Editar"
-                                                            >
-                                                                <PencilSquareIcon className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => console.log('Eliminar', index)}
-                                                                className="p-2 bg-red-100 hover:bg-red-600 text-red-600 hover:text-white rounded-lg transition-all duration-200 transform hover:scale-110"
-                                                                title="Eliminar"
-                                                            >
-                                                                <TrashIcon className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
+                                                        </td>
+                                                        <td className="px-4 py-4 text-right">
+                                                            <span className="text-sm font-bold text-gray-800">
+                                                                ${row.Valor_Cobrar_Proyectado.toFixed(2)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 text-right">
+                                                            <span className="text-sm font-bold text-gray-800">
+                                                                ${row.Valor_Cobrado.toFixed(2)}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-4 text-right">
+                                                            <span className={`text-sm font-bold ${row.Valor_Cobrado_Total > 0 ? 'text-emerald-600' : 'text-gray-500'}`}>
+                                                                ${row.Valor_Cobrado_Total.toFixed(2)}
+                                                            </span>
+                                                        </td>
+
+                                                    </tr>
+                                                )
+                                            })
                                         )}
                                     </tbody>
                                 </table>
@@ -711,6 +731,7 @@ const InformesCobranza = () => {
                 isOpen={isDetalleOpen}
                 onClose={handleCloseDetalle}
                 data={selectedRow}
+                estadoGestion={estadoGestion}
             />
         </>
     );
