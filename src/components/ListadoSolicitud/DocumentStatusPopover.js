@@ -277,7 +277,21 @@ const DocumentStatusPopover = ({ open, anchorEl, onClose, clienteEstados }) => {
         2: { label: "Link biométrico enviado", icon: <SendIcon />, color: blue[500] },
         3: { label: "Análisis Exitoso", icon: <CheckCircleIcon />, color: green[500] },
         4: { label: "Análisis Fallido", icon: <CancelIcon />, color: red[500] },
-        5: { label: "Link caducado", icon: <HourglassEmptyIcon />, color: grey[700] }
+        5: { label: "Link caducado", icon: <HourglassEmptyIcon />, color: grey[700] },
+        /*6	GENERANDO_FIRMA	SE GENERA LINK PARA LA FIRMA ELECTRONICA 
+7	ENVIO_URL_FIRMA	PENDIENTE: Envío de url de firma al cliente
+8	CLIENTECACEPTA FIRMA	PENDIENTE: Cliente acepta la firma de documentos
+9	COMPLETED	COMPLETED: Firma de documentos completada correctamente
+10	CLIENTE RECHAZA FIRMA	CANCELADO: Cancelación de firma por parte del cliente
+11	FALLO PREGUNTA SEGURIDAD	CANCELADO: Cancelación de firma,cliente falla la pregunta de seguridad de firma
+12	LINK DE FIRMA VENCIDO	CADUCADO: El link de la firma ha vencido*/
+        6: { label: "Generando Link de Firma", icon: <SettingsIcon />, color: grey[500] },
+        7: { label: "Envío de URL de Firma Pendiente", icon: <SendIcon />, color: blue[500] },
+        8: { label: "Cliente Acepta Firma Pendiente", icon: <ThumbUpIcon />, color: green[500] },
+        9: { label: "Firma Completada", icon: <CheckCircleIcon />, color: green[700] },
+        10: { label: "Cliente Rechaza Firma", icon: <CancelIcon />, color: red[500] },
+        11: { label: "Fallo Pregunta de Seguridad", icon: <ErrorIcon />, color: red[700] },
+        12: { label: "Link de Firma Vencido", icon: <HourglassEmptyIcon />, color: grey[700] }
 
       }
 

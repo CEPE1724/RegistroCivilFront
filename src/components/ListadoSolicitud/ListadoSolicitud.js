@@ -106,14 +106,15 @@ import VerificacionFacialModal from "./VerificacionFacialModal";
 import VerificacionFacialLoadingModal from "./VerificacionFacialLoadingModal";
 import { VerDetallesModal } from "./VerDetallesModal";
 import { FaFileSignature, FaCheckCircle, FaFileAlt } from "react-icons/fa";
-import { PiSignatureLight } from "react-icons/pi"
 import { LuScanFace } from "react-icons/lu";
 import { MdOutlineLinkOff, MdOutlineLink } from "react-icons/md";
 import { AiOutlineClockCircle, AiOutlineCloseCircle, AiOutlineCheckCircle } from "react-icons/ai";
 import { SiLinkfire } from "react-icons/si";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { BsPersonBadge, BsPersonBadgeFill    } from "react-icons/bs";
-import { PiTimerLight } from "react-icons/pi";
+import { PiTimerLight, PiFileLight, PiEnvelopeLight, PiUserCircleLight, PiXLight, PiWarningLight, PiSignatureLight, PiNewspaperBold, PiSignatureFill, PiSealQuestionFill  } from "react-icons/pi";
+import { TbSignatureOff } from "react-icons/tb";
+
 export function ListadoSolicitud() {
   const {
     data,
@@ -2450,7 +2451,14 @@ export function ListadoSolicitud() {
     2: { icon: <SiLinkfire  size={30} color="#eab308" />, tooltip: "Link biométrico enviado" },
     3: { icon: <BsPersonBadge   size={30} color="#22c55e" />, tooltip: "Biométrico aprobado" },
     4: { icon: <BsPersonBadgeFill  size={30} color="#dc2626" />, tooltip: "Biométrico rechazado" },
-    5: { icon: <PiTimerLight   size={30} color="#6b7280" />, tooltip: "Biométrico caducado" },
+    5: { icon: <PiTimerLight   size={30} color="#dc2626" />, tooltip: "Biométrico caducado" },
+    6: { icon: <SiLinkfire  size={30} color="#2563eb" />, tooltip: "Envío de link de firma pendiente" },
+    7: { icon: <PiNewspaperBold  size={30} color="#2563eb" />, tooltip: "Envío de URL de firma pendiente" },
+    8: { icon: <PiSignatureFill   size={30} color="#2563eb" />, tooltip: "Cliente acepta firma pendiente" },
+    9: { icon: <PiSignatureFill   size={30} color="#22c55e" />, tooltip: "Firma electrónica completada" },
+    10: { icon: <TbSignatureOff  size={30} color="#dc2626" />, tooltip: "Cliente rechazó la firma" },
+    11: { icon: <PiSealQuestionFill   size={30} color="#dc2626" />, tooltip: "Fallo en pregunta de seguridad" },
+    12: { icon: <PiTimerLight  size={30} color="#dc2626" />, tooltip: "Link de firma vencido" },
   };
 
   useEffect(() => {
