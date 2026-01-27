@@ -247,4 +247,9 @@ export const APIURL = {
  getViewTablaAmortizacionValores: () => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/tabla-amortizacion-valores`,
  listTablaPagosAmortizacion: () => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/tabla-amortizacion-valores/detalle-pagos`,
  findAllCbo_Gestores: () => `${API_BASE_URL}Cbo_Gestores`,
+ cbo_scores_cobranzaFindAll: () => `${API_BASE_URL}cbo-scores-cobranza`,
+ cbo_riesgos_findBy: (cbo_gestorRiesgo) => `${API_BASE_URL}cbo-riesgos?cbo_gestorRiesgo=${cbo_gestorRiesgo}`,
+ cbo_segmentos_findBy: (scoreId) => `${API_BASE_URL}cbo-segmentos?cbo_segmento=${scoreId}`,
+ cbo_almacenes_findBy: (scoreId) => `${API_BASE_URL}cbo-almacenes?cbo-almacenes=${scoreId}`,
+ cbo_tipo_cliente: (sCbo_Scores_Cobranzas) => `${API_BASE_URL}cbo-tipo-cliente?sCbo_Scores_Cobranzas=${sCbo_Scores_Cobranzas}`,
 };

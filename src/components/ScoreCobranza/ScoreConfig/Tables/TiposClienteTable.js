@@ -1,5 +1,18 @@
 import React from 'react';
-import { CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+// Función para obtener colores sutiles según el tipo de riesgo
+const getRiesgoColor = (riesgo) => {
+    const tipo = riesgo?.toUpperCase().trim() || '';
+    console.log('Buscando color para riesgo:', tipo);
+    if (tipo.includes('ALTO')) {
+        return { badge: 'bg-red-200 text-red-900', cell: 'bg-red-50' };
+    } else if (tipo.includes('MEDIANO') || tipo.includes('MEDIO')) {
+        return { badge: 'bg-amber-200 text-amber-900', cell: 'bg-amber-50' };
+    } else if (tipo.includes('BAJO')) {
+        return { badge: 'bg-green-200 text-green-900', cell: 'bg-green-50' };
+    }
+    return { badge: 'bg-gray-200 text-gray-900', cell: 'bg-gray-50' };
+};
 
 export const TiposClienteTable = ({
     tiposClienteFiltrados,
@@ -12,46 +25,44 @@ export const TiposClienteTable = ({
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             <div className="p-8 border-b-2 border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900">Cbo_TiposCliente <span className="text-blue-600">(Score: {scoresCobranzas.find(s => s.idCbo_Scores_Cobranzas === scoreSeleccionado)?.Descripcion})</span></h2>
-                <p className="text-gray-600 mt-1">Tipos de cliente para score seleccionado: <span className="font-bold text-blue-600">{tiposClienteFiltrados.length} registros</span></p>
+                <h2 className="text-2xl font-bold text-gray-900">Tipos de Cliente <span className="text-blue-600">(Score: {scoresCobranzas.find(s => s.idCbo_Scores_Cobranzas === scoreSeleccionado)?.Descripcion})</span></h2>
+                <p className="text-gray-600 mt-1">Configuración de tipos de cliente para score seleccionado: <span className="font-bold text-blue-600">{tiposClienteFiltrados.length} registros</span></p>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
                         <tr className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
-                            <th className="px-6 py-4 text-left text-xs font-bold uppercase">ID</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase">#</th>
                             <th className="px-6 py-4 text-left text-xs font-bold uppercase">Tipo Cliente</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold uppercase bg-yellow-600">Riesgo</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold uppercase">Puntaje</th>
-                            <th className="px-6 py-4 text-center text-xs font-bold uppercase">Acciones</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase">Riesgo</th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase">Puntaje</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {tiposClienteFiltrados.length > 0 ? tiposClienteFiltrados.map((item, idx) => (
+                        {tiposClienteFiltrados.length > 0 ? tiposClienteFiltrados.map((item, idx) => {
+                            // Buscar el riesgo en diferentes propiedades posibles
+                            const riesgoValue =  item.cboRiesgoData?.Riesgo || item.Riesgo || item.riesgo || '';
+                            console.log('Item:', item, 'Riesgo encontrado:', riesgoValue);
+                            const riesgoColor = getRiesgoColor(riesgoValue);
+                            return (
                             <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">{item.id}</td>
-                                <td className="px-6 py-4 text-sm">
-                                    <input type="number" value={item.idTipoCliente} onChange={(e) => onUpdate(item.id, 'idTipoCliente', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="ID Tipo" />
+                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">{idx + 1}</td>
+                                <td className="px-6 py-4 text-sm font-medium text-gray-700">
+                                    {item.tipoCliente?.Nombre || '(Sin tipo)'}
                                 </td>
-                                <td className="px-6 py-4 text-sm bg-yellow-50">
-                                    <select value={item.idCbo_Riesgo} onChange={(e) => onUpdate(item.id, 'idCbo_Riesgo', e.target.value)} className="w-full px-3 py-2 border border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                                        <option value="">Seleccionar</option>
-                                        {riesgos.map(r => (<option key={r.id} value={r.id}>{r.id} - {r.nombre}</option>))}
-                                    </select>
+                                <td className={`px-6 py-4 text-sm text-center text-gray-700 `}>
+                                    <span className={`inline-block px-3 py-1 rounded-md font-semibold text-sm ${riesgoColor.badge}`}>
+                                        {riesgoValue || '(Sin riesgo)'}
+                                    </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm">
-                                    <input type="number" value={item.puntaje} onChange={(e) => onUpdate(item.id, 'puntaje', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right" placeholder="0" />
-                                </td>
-                                <td className="px-6 py-4 text-center">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <button className="p-2 hover:bg-green-100 rounded-lg transition-colors"><CheckIcon className="w-4 h-4 text-green-600" /></button>
-                                        <button onClick={() => onDelete(item.id)} className="p-2 hover:bg-red-100 rounded-lg transition-colors"><TrashIcon className="w-4 h-4 text-red-600" /></button>
-                                    </div>
+                                <td className="px-6 py-4 text-sm text-center font-medium text-gray-700">
+                                    {item.Puntaje || '—'}
                                 </td>
                             </tr>
-                        )) : (
+                        );
+                        }) : (
                             <tr>
-                                <td colSpan="5" className="px-6 py-8 text-center text-gray-500 italic">No hay registros para este score</td>
+                                <td colSpan="4" className="px-6 py-8 text-center text-gray-500 italic">No hay registros para este score</td>
                             </tr>
                         )}
                     </tbody>

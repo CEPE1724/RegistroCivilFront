@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SaveIcon } from '@heroicons/react/24/outline';
 import { ScoresCobranzasTable } from './Tables/ScoresCobranzasTable';
 import { RiesgosTable } from './Tables/RiesgosTable';
@@ -8,68 +8,89 @@ import { TiposClienteTable } from './Tables/TiposClienteTable';
 import { EdadTable } from './Tables/EdadTable';
 import { SaldosTable } from './Tables/SaldosTable';
 import { ScoreResultadoTable } from './Tables/ScoreResultadoTable';
-
+import { APIURL } from '../../../configApi/apiConfig';
+import axios from '../../../configApi/axiosConfig';
 export const ScoreConfig = () => {
-    // Estado para Cbo_Scores_Cobranzas
-    const [scoresCobranzas, setScoresCobranzas] = useState([
-        {
-            idCbo_Scores_Cobranzas: 1,
-            Desde: '1/1/2026',
-            Hasta: '31/3/2026',
-            Descripcion: 'PRIMER TRIMESTRE 2026',
-            Estado: 1,
-            Etiqueta: 'CERRADO ANULADO',
-            editando: false
-        },
-        {
-            idCbo_Scores_Cobranzas: 2,
-            Desde: '1/4/2026',
-            Hasta: '30/6/2026',
-            Descripcion: 'SEGUNDO TRIMESTRE 2026',
-            Estado: 2,
-            Etiqueta: 'CERRADO ANULADO',
-            editando: false
-        },
-        {
-            idCbo_Scores_Cobranzas: 3,
-            Desde: '1/7/2026',
-            Hasta: '30/9/2026',
-            Descripcion: 'TERCER TRIMESTRE 2026',
-            Estado: 3,
-            Etiqueta: 'CERRADO ANULADO',
-            editando: false
+    const [scoreSeleccionado, setScoreSeleccionado] = useState(''); // Score maestro seleccionado
+    const [scoresCobranzas, setScoresCobranzas] = useState([]);
+    const [riesgos, setRiesgos] = useState([]);
+    const [segmentos, setSegmentos] = useState([]);
+    const [almacenes, setAlmacenes] = useState([]);
+    const [tiposCliente, setTiposCliente] = useState([]);
+    useEffect(() => {
+        fetchCbo_Score_cobranza();
+    }, []);
+
+    useEffect(() => {
+        if (scoresCobranzas.length > 0 && !scoreSeleccionado) {
+            setScoreSeleccionado(scoresCobranzas[0].sCbo_Scores_Cobranzas);
         }
-    ]);
+    }, [scoresCobranzas]);
 
-    // Estado para Cbo_Riesgos
-    const [riesgos, setRiesgos] = useState([
-        { id: 1, nombre: 'ALTO', peso: 100, desde: 20.01, hasta: 100 },
-        { id: 2, nombre: 'MEDIANO', peso: 50, desde: 14.01, hasta: 20 },
-        { id: 3, nombre: 'BAJO', peso: 20, desde: 0, hasta: 14 }
-    ]);
+    useEffect(() => {
+        if (scoreSeleccionado) {
+            fetchCbo_Riesgos(scoreSeleccionado);
+            fetchSegmento(scoreSeleccionado);
+            fetchalmacenes(scoreSeleccionado);
+            fetchTipoCliente(scoreSeleccionado);
+        }
+    }, [scoreSeleccionado]);
 
-    // Estado para Cbo_Segmentos
-    const [segmentos, setSegmentos] = useState([
-        { id: 1, nombre: 'CIUDAD', participacion: 20 },
-        { id: 2, nombre: 'SCORE', participacion: 30 },
-        { id: 3, nombre: 'SALDO', participacion: 30 },
-        { id: 4, nombre: 'EDAD', participacion: 20 }
-    ]);
+    const fetchCbo_Score_cobranza = async () => {
+        try {
+            const response = await axios.get(APIURL.cbo_scores_cobranzaFindAll());
+            setScoresCobranzas(response.data);
+        } catch (error) {
+            setScoresCobranzas([]);
+        }
+    };
 
-    // Estado para Cbo_Almacenes
-    const [almacenes, setAlmacenes] = useState([
-        { id: 1, bodega: '140', idRiesgo: 1, puntaje: 4 },
-        { id: 2, bodega: '11', idRiesgo: 3, puntaje: 4 },
-        { id: 3, bodega: '63', idRiesgo: 3, puntaje: 4 },
-        { id: 4, bodega: '70', idRiesgo: 3, puntaje: 4 },
-        { id: 5, bodega: '41', idRiesgo: 3, puntaje: 4 },
-        { id: 6, bodega: '6', idRiesgo: 3, puntaje: 4 },
-        { id: 7, bodega: '60', idRiesgo: 3, puntaje: 4 },
-        { id: 8, bodega: '117', idRiesgo: 3, puntaje: 4 },
-        { id: 9, bodega: '76', idRiesgo: 3, puntaje: 4 },
-        { id: 10, bodega: '121', idRiesgo: 3, puntaje: 4 }
-    ]);
+    const fetchCbo_Riesgos = async (scoreId) => {
+        try {
+            const response = await axios.get(APIURL.cbo_riesgos_findBy(scoreId));
 
+            // Forzamos array
+            const data = Array.isArray(response.data)
+                ? response.data
+                : [response.data];
+            setRiesgos(data);
+        } catch (error) {
+            setRiesgos([]);
+        }
+    };
+
+    const fetchSegmento = async (scoreId) => {
+        try {
+            const response = await axios.get(APIURL.cbo_segmentos_findBy(scoreId));
+            setSegmentos(response.data);
+        } catch (error) {
+            setSegmentos([]);
+        }
+    };
+
+    const fetchalmacenes = async (scoreId) => {
+        try {
+            const response = await axios.get(APIURL.cbo_almacenes_findBy(scoreId));
+            setAlmacenes(response.data);
+        }
+        catch (error) {
+            setAlmacenes([]);
+        }
+    };
+
+    const fetchTipoCliente = async (scoreId) => {
+        try {
+            const response = await axios.get(APIURL.cbo_tipo_cliente(scoreId));
+            console.log('tipo clñiente:', response.data);
+            setTiposCliente(response.data);
+        }
+        catch (error) {
+            setTiposCliente([]);
+        }
+    };
+
+ 
+/*
     // Estado para Cbo_TiposCliente
     const [tiposCliente, setTiposCliente] = useState([
         { id: 1, idCbo_Scores_Cobranzas: 1, idTipoCliente: 1, idCbo_Riesgo: 1, puntaje: 15 },
@@ -77,7 +98,7 @@ export const ScoreConfig = () => {
         { id: 3, idCbo_Scores_Cobranzas: 1, idTipoCliente: 9, idCbo_Riesgo: 2, puntaje: 9 },
         { id: 4, idCbo_Scores_Cobranzas: 1, idTipoCliente: 8, idCbo_Riesgo: 1, puntaje: 30 },
         { id: 5, idCbo_Scores_Cobranzas: 1, idTipoCliente: 5, idCbo_Riesgo: 3, puntaje: 6 }
-    ]);
+    ]);*/
 
     // Estado para Cbo_Edad
     const [edad, setEdad] = useState([
@@ -106,7 +127,6 @@ export const ScoreConfig = () => {
         { id: 4, idCbo_Scores_Cobranzas: 1, desde: 51, hasta: 55, peso: 12.81, resultado: 73.86, idCbo_Riesgo: 2 }
     ]);
 
-    const [scoreSeleccionado, setScoreSeleccionado] = useState(1); // Score maestro seleccionado
 
     // Función para cambiar score maestro
     const manejarSeleccionScore = (idScore) => {
@@ -114,34 +134,68 @@ export const ScoreConfig = () => {
     };
 
     // Funciones de filtrado para maestro-detalle
-    const tiposClienteFiltrados = tiposCliente.filter(t => t.idCbo_Scores_Cobranzas === scoreSeleccionado);
-    const edadFiltrada = edad.filter(e => e.idCbo_Scores_Cobranzas === scoreSeleccionado);
-    const saldosFiltrados = saldos.filter(s => s.idCbo_Scores_Cobranzas === scoreSeleccionado);
-    const scoreResultadoFiltrado = scoreResultado.filter(sr => sr.idCbo_Scores_Cobranzas === scoreSeleccionado);
+    const riesgofiltrados = riesgos.filter(r => r.sCbo_Scores_Cobranzas === scoreSeleccionado);
+    const segmentosFiltrados = segmentos.filter(s => s.sCbo_Scores_Cobranzas === scoreSeleccionado);
+    const almacenesFiltrados = almacenes.filter(a => a.sCbo_Scores_Cobranzas === scoreSeleccionado);
+    const tiposClienteFiltrados = tiposCliente.filter(t => t.sCbo_Scores_Cobranzas === scoreSeleccionado);
+    const edadFiltrada = edad.filter(e => e.sCbo_Scores_Cobranzas === scoreSeleccionado);
+    const saldosFiltrados = saldos.filter(s => s.sCbo_Scores_Cobranzas === scoreSeleccionado);
+    const scoreResultadoFiltrado = scoreResultado.filter(sr => sr.sCbo_Scores_Cobranzas === scoreSeleccionado);
 
-    // Funciones para Cbo_Riesgos
-    const agregarRiesgo = () => {
-        setRiesgos([...riesgos, {
-            id: Math.max(...riesgos.map(r => r.id), 0) + 1,
-            nombre: '',
-            peso: '',
-            desde: '',
-            hasta: ''
-        }]);
+    
+
+     const agregarRiesgo = () => {
+        console.log('Agregando riesgo para score:', scoreSeleccionado);
+        console.log('Riesgos actuales:', riesgos);
+        const nuevoRiesgo = {
+            idCbo_Riesgo: 0,
+            _tempId: Date.now() + Math.random(), // ID temporal único mientras no se guarde
+            idCbo_Scores_Cobranzas: scoreSeleccionado,
+            sCbo_Scores_Cobranzas: scoreSeleccionado,
+            Riesgo: '',
+            Peso: '',
+            Desde: '',
+            Hasta: '',
+            Usuario: ''
+        };
+        console.log('Nuevo riesgo a agregar:', nuevoRiesgo);
+        setRiesgos([...riesgos, nuevoRiesgo]);
     };
 
     const actualizarRiesgo = (id, campo, valor) => {
-        setRiesgos(riesgos.map(r => r.id === id ? { ...r, [campo]: valor } : r));
+        console.log('Actualizando riesgo ID:', id, 'Campo:', campo, 'Valor:', valor);
+        const riesgosActualizados = riesgos.map(r => {
+            // Si es un registro existente (idCbo_Riesgo > 0), usar ese ID
+            // Si es nuevo (idCbo_Riesgo === 0), usar el _tempId
+            const identificador = r.idCbo_Riesgo > 0 ? r.idCbo_Riesgo : r._tempId;
+            if (identificador === id) {
+                console.log('Riesgo encontrado para actualizar:', r);
+                return { ...r, [campo]: valor };
+            }
+            return r;
+        });
+        console.log('Riesgos después de actualizar:', riesgosActualizados);
+        setRiesgos(riesgosActualizados);
     };
 
     const eliminarRiesgo = (id) => {
-        setRiesgos(riesgos.filter(r => r.id !== id));
+        console.log('Eliminando riesgo ID:', id);
+        console.log('Riesgos antes de eliminar:', riesgos);
+        const riesgosFiltered = riesgos.filter(r => {
+            const identificador = r.idCbo_Riesgo > 0 ? r.idCbo_Riesgo : r._tempId;
+            const noEliminar = identificador !== id;
+            console.log('Comparando:', identificador, 'vs', id, 'Mantener:', noEliminar);
+            return noEliminar;
+        });
+        console.log('Riesgos después de eliminar:', riesgosFiltered);
+        setRiesgos(riesgosFiltered);
     };
 
     // Funciones para Cbo_Segmentos
     const agregarSegmento = () => {
         setSegmentos([...segmentos, {
             id: Math.max(...segmentos.map(s => s.id), 0) + 1,
+            idCbo_Scores_Cobranzas: scoreSeleccionado,
             nombre: '',
             participacion: ''
         }]);
@@ -155,103 +209,7 @@ export const ScoreConfig = () => {
         setSegmentos(segmentos.filter(s => s.id !== id));
     };
 
-    // Funciones para Cbo_Almacenes
-    const agregarAlmacen = () => {
-        setAlmacenes([...almacenes, {
-            id: Math.max(...almacenes.map(a => a.id), 0) + 1,
-            bodega: '',
-            idRiesgo: '',
-            puntaje: ''
-        }]);
-    };
 
-    const actualizarAlmacen = (id, campo, valor) => {
-        setAlmacenes(almacenes.map(a => a.id === id ? { ...a, [campo]: valor } : a));
-    };
-
-    const eliminarAlmacen = (id) => {
-        setAlmacenes(almacenes.filter(a => a.id !== id));
-    };
-
-    // Funciones para Cbo_TiposCliente
-    const agregarTipoCliente = () => {
-        setTiposCliente([...tiposCliente, {
-            id: Math.max(...tiposCliente.map(t => t.id), 0) + 1,
-            idCbo_Scores_Cobranzas: 1,
-            idTipoCliente: '',
-            idCbo_Riesgo: '',
-            puntaje: ''
-        }]);
-    };
-
-    const actualizarTipoCliente = (id, campo, valor) => {
-        setTiposCliente(tiposCliente.map(t => t.id === id ? { ...t, [campo]: valor } : t));
-    };
-
-    const eliminarTipoCliente = (id) => {
-        setTiposCliente(tiposCliente.filter(t => t.id !== id));
-    };
-
-    // Funciones para Cbo_Edad
-    const agregarEdad = () => {
-        setEdad([...edad, {
-            id: Math.max(...edad.map(e => e.id), 0) + 1,
-            idCbo_Scores_Cobranzas: 1,
-            desde: '',
-            hasta: '',
-            idCbo_Riesgo: '',
-            puntaje: ''
-        }]);
-    };
-
-    const actualizarEdad = (id, campo, valor) => {
-        setEdad(edad.map(e => e.id === id ? { ...e, [campo]: valor } : e));
-    };
-
-    const eliminarEdad = (id) => {
-        setEdad(edad.filter(e => e.id !== id));
-    };
-
-    // Funciones para Cbo_Saldos
-    const agregarSaldo = () => {
-        setSaldos([...saldos, {
-            id: Math.max(...saldos.map(s => s.id), 0) + 1,
-            idCbo_Scores_Cobranzas: 1,
-            desde: '',
-            hasta: '',
-            idCbo_Riesgo: '',
-            puntaje: ''
-        }]);
-    };
-
-    const actualizarSaldo = (id, campo, valor) => {
-        setSaldos(saldos.map(s => s.id === id ? { ...s, [campo]: valor } : s));
-    };
-
-    const eliminarSaldo = (id) => {
-        setSaldos(saldos.filter(s => s.id !== id));
-    };
-
-    // Funciones para Cbo_Score_Resultado
-    const agregarScoreResultado = () => {
-        setScoreResultado([...scoreResultado, {
-            id: Math.max(...scoreResultado.map(sr => sr.id), 0) + 1,
-            idCbo_Scores_Cobranzas: 1,
-            desde: '',
-            hasta: '',
-            peso: '',
-            resultado: '',
-            idCbo_Riesgo: ''
-        }]);
-    };
-
-    const actualizarScoreResultado = (id, campo, valor) => {
-        setScoreResultado(scoreResultado.map(sr => sr.id === id ? { ...sr, [campo]: valor } : sr));
-    };
-
-    const eliminarScoreResultado = (id) => {
-        setScoreResultado(scoreResultado.filter(sr => sr.id !== id));
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 p-4 md:p-6 lg:p-8">
@@ -273,7 +231,7 @@ export const ScoreConfig = () => {
                         <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
                         <span className="text-white text-xs font-bold uppercase tracking-wider">Score Maestro:</span>
                         <span className="text-blue-50 text-sm font-bold">
-                            {scoresCobranzas.find(s => s.idCbo_Scores_Cobranzas === scoreSeleccionado)?.Descripcion}
+                            {scoresCobranzas.find(s => s.sCbo_Scores_Cobranzas === scoreSeleccionado)?.Descripcion}
                         </span>
                     </div>
                 </div>
@@ -291,13 +249,13 @@ export const ScoreConfig = () => {
 
                     {/* Fila 2: Riesgos y Segmentos */}
                     <RiesgosTable
-                        riesgos={riesgos}
+                        riesgos={riesgofiltrados}
                         onAdd={agregarRiesgo}
                         onUpdate={actualizarRiesgo}
                         onDelete={eliminarRiesgo}
                     />
                     <SegmentosTable
-                        segmentos={segmentos}
+                        segmentos={segmentosFiltrados}
                         onAdd={agregarSegmento}
                         onUpdate={actualizarSegmento}
                         onDelete={eliminarSegmento}
@@ -306,11 +264,10 @@ export const ScoreConfig = () => {
                     {/* Fila 3: Almacenes (Full Width) */}
                     <div className="lg:col-span-2">
                         <AlmacenesTable
-                            almacenes={almacenes}
-                            riesgos={riesgos}
-                            onAdd={agregarAlmacen}
-                            onUpdate={actualizarAlmacen}
-                            onDelete={eliminarAlmacen}
+                            almacenes={almacenesFiltrados}
+                            riesgos={riesgofiltrados}
+                           
+                          
                         />
                     </div>
 
@@ -320,16 +277,14 @@ export const ScoreConfig = () => {
                         riesgos={riesgos}
                         scoresCobranzas={scoresCobranzas}
                         scoreSeleccionado={scoreSeleccionado}
-                        onUpdate={actualizarTipoCliente}
-                        onDelete={eliminarTipoCliente}
+                    
                     />
                     <EdadTable
                         edadFiltrada={edadFiltrada}
                         riesgos={riesgos}
                         scoresCobranzas={scoresCobranzas}
                         scoreSeleccionado={scoreSeleccionado}
-                        onUpdate={actualizarEdad}
-                        onDelete={eliminarEdad}
+                       
                     />
 
                     {/* Fila 5: Saldos y Score Resultado */}
@@ -338,35 +293,18 @@ export const ScoreConfig = () => {
                         riesgos={riesgos}
                         scoresCobranzas={scoresCobranzas}
                         scoreSeleccionado={scoreSeleccionado}
-                        onUpdate={actualizarSaldo}
-                        onDelete={eliminarSaldo}
+                     
                     />
                     <ScoreResultadoTable
                         scoreResultadoFiltrado={scoreResultadoFiltrado}
                         riesgos={riesgos}
                         scoresCobranzas={scoresCobranzas}
                         scoreSeleccionado={scoreSeleccionado}
-                        onUpdate={actualizarScoreResultado}
-                        onDelete={eliminarScoreResultado}
+                       
                     />
                 </div>
 
-                {/* Footer Compacto */}
-                <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border border-slate-300 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                        <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">Cambios realizados</p>
-                        <p className="text-slate-600 text-xs mt-1">Los cambios se guardarán al hacer clic en Guardar</p>
-                    </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                        <button className="flex-1 sm:flex-none px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition-all duration-200">
-                            Cancelar
-                        </button>
-                        <button className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-bold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
-                        
-                            Guardar
-                        </button>
-                    </div>
-                </div>
+                
             </div>
         </div>
     );

@@ -1,85 +1,66 @@
 import React from 'react';
 import { CheckIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 
+// Función para obtener colores sutiles según el tipo de riesgo
+const getRiesgoColor = (riesgo) => {
+    const tipo = riesgo?.toUpperCase() || '';
+    if (tipo.includes('ALTO')) {
+        return { input: 'bg-red-100 text-red-900 border-red-300', badge: 'bg-red-200 text-red-900' };
+    } else if (tipo.includes('MEDIANO') || tipo.includes('MEDIO')) {
+        return { input: 'bg-amber-100 text-amber-900 border-amber-300', badge: 'bg-amber-200 text-amber-900' };
+    } else if (tipo.includes('BAJO')) {
+        return { input: 'bg-green-100 text-green-900 border-green-300', badge: 'bg-green-200 text-green-900' };
+    }
+    return { input: 'bg-gray-100 text-gray-900 border-gray-300', badge: 'bg-gray-200 text-gray-900' };
+};
+
 export const AlmacenesTable = ({
     almacenes,
     riesgos,
-    onAdd,
-    onUpdate,
-    onDelete
 }) => {
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             <div className="p-8 border-b-2 border-gray-100 flex items-center justify-between">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Cbo_Almacenes</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Almacenes</h2>
                     <p className="text-gray-600 mt-1">Asignación de bodegas a riesgos</p>
                 </div>
-                <button
-                    onClick={onAdd}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                >
-                    <PlusIcon className="w-5 h-5" />
-                    Nuevo
-                </button>
+
             </div>
-            <div className="overflow-x-auto">
-                <table className="w-full">
-                    <thead>
+            <div className="overflow-x-auto max-h-96 overflow-y-auto">
+               <table className="w-full">
+                    <thead className="sticky top-0 z-10">
                         <tr className="bg-gradient-to-r from-slate-800 to-slate-900 text-white">
                             <th className="px-6 py-4 text-left text-xs font-bold uppercase">ID</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold uppercase">Bodega</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold uppercase">ID Riesgo</th>
-                            <th className="px-6 py-4 text-right text-xs font-bold uppercase">Puntaje</th>
-                            <th className="px-6 py-4 text-center text-xs font-bold uppercase">Acciones</th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase">Bodega</th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase">Riesgo</th>
+                            <th className="px-6 py-4 text-center text-xs font-bold uppercase">Puntaje</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {almacenes.map((item, idx) => (
-                            <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                                <td className="px-6 py-4 text-sm font-semibold text-gray-900">{item.id}</td>
-                                <td className="px-6 py-4 text-sm">
-                                    <input
-                                        type="text"
-                                        value={item.bodega}
-                                        onChange={(e) => onUpdate(item.id, 'bodega', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Número de bodega"
-                                    />
+                        {almacenes.map((item, idx) => {
+                            const colorClass = getRiesgoColor(item.cboRiesgoData?.Riesgo);
+                            return (
+                            <tr key={item.idCbo_Almacenes} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                                <td className="px-6 py-4 text-sm font-semibold text-gray-900"> {idx + 1}</td>
+                                <td className="px-6 py-4 text-sm text-center">
+                                    <span className="text-gray-700 font-medium">
+                                        {item.bodegaData?.Nombre || '(Sin bodega)'}
+                                    </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm">
-                                    <select
-                                        value={item.idRiesgo}
-                                        onChange={(e) => onUpdate(item.id, 'idRiesgo', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="">Seleccionar</option>
-                                        {riesgos.map(r => (
-                                            <option key={r.id} value={r.id}>{r.id} - {r.nombre}</option>
-                                        ))}
-                                    </select>
+                                <td className="px-6 py-4 text-sm text-center">
+                                    <span className={`inline-block px-3 py-1 rounded-md font-semibold text-sm ${colorClass.badge}`}>
+                                        {item.cboRiesgoData?.Riesgo || '(Sin riesgo)'}
+                                    </span>
                                 </td>
-                                <td className="px-6 py-4 text-sm">
-                                    <input
-                                        type="number"
-                                        value={item.puntaje}
-                                        onChange={(e) => onUpdate(item.id, 'puntaje', e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-right"
-                                        placeholder="0"
-                                    />
-                                </td>
-                                <td className="px-6 py-4 text-center">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <button className="p-2 hover:bg-green-100 rounded-lg transition-colors">
-                                            <CheckIcon className="w-4 h-4 text-green-600" />
-                                        </button>
-                                        <button onClick={() => onDelete(item.id)} className="p-2 hover:bg-red-100 rounded-lg transition-colors">
-                                            <TrashIcon className="w-4 h-4 text-red-600" />
-                                        </button>
-                                    </div>
+                                <td className="px-6 py-4 text-sm text-center">
+                                    <span className="text-gray-700 font-medium">
+                                        {item.Puntaje || '—'}
+                                    </span>
                                 </td>
                             </tr>
-                        ))}
+                        );
+                        })}
                     </tbody>
                 </table>
             </div>

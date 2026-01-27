@@ -56,7 +56,7 @@ const InformesCobranza = () => {
         // Cargar datos iniciales con valores por defecto
         handleBuscar();
     }, []);
-    
+
     const fetchOperadores = async () => {
         try {
             const response = await axios.get(APIURL.personal_bdd_findAllgestor());
@@ -66,7 +66,7 @@ const InformesCobranza = () => {
             setOperadores([]);
         }
     };
-     const fetchGestores = async () => {
+    const fetchGestores = async () => {
         try {
             const response = await axios.get(APIURL.findAllCbo_Gestores());
             console.log('Gestores cargados:', response.data);
@@ -120,7 +120,7 @@ const InformesCobranza = () => {
             finalValue = parseInt(value) || 0;
         } else if (['diasMoraDesde', 'diasMoraHasta'].includes(field)) {
             finalValue = parseInt(value) || 0;
-        }else if (['gestorHoy'].includes(field)) {
+        } else if (['gestorHoy'].includes(field)) {
             finalValue = parseInt(value) || 0;
         }
         // operador se mantiene como string para comparación
@@ -289,231 +289,231 @@ const InformesCobranza = () => {
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6">
                     {/* Panel de Filtros - Mejorado */}
                     <div className="xl:col-span-3">
-  <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-xl border border-blue-200 overflow-hidden sticky top-4 backdrop-blur-sm border-t-4 border-t-blue-500">
+                        <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl shadow-xl border border-blue-200 overflow-hidden sticky top-4 backdrop-blur-sm border-t-4 border-t-blue-500">
 
-    {/* HEADER */}
-    <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-4 py-4">
-      <div className="flex items-center space-x-2">
-        <div className="p-2 bg-white/20 rounded-md backdrop-blur-sm">
-          <FunnelIcon className="w-5 h-5 text-white" />
-        </div>
-        <h2 className="text-base font-bold text-white tracking-wide">
-          Filtrar resultados
-        </h2>
-      </div>
-    </div>
+                            {/* HEADER */}
+                            <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 px-4 py-4">
+                                <div className="flex items-center space-x-2">
+                                    <div className="p-2 bg-white/20 rounded-md backdrop-blur-sm">
+                                        <FunnelIcon className="w-5 h-5 text-white" />
+                                    </div>
+                                    <h2 className="text-base font-bold text-white tracking-wide">
+                                        Filtrar resultados
+                                    </h2>
+                                </div>
+                            </div>
 
-    {/* BODY */}
-    <div className="p-4 space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
+                            {/* BODY */}
+                            <div className="p-4 space-y-3 max-h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
 
-      {/* Tipo de Gestión */}
-      <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
-          Tipo de Gestión
-        </label>
-        <div className="flex gap-3">
-          {[
-            { value: 0, label: 'Todos', icon: '📊' },
-            { value: 1, label: 'Operador', icon: '👤' },
-            { value: 2, label: 'Cobrador', icon: '💼' }
-          ].map(option => (
-            <label
-              key={option.value}
-              className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-blue-50 transition"
-            >
-              <input
-                type="radio"
-                name="tipoGestion"
-                value={option.value}
-                checked={filters.tipoGestion === option.value}
-                onChange={(e) =>
-                  handleFilterChange('tipoGestion', e.target.value)
-                }
-                className="w-4 h-4 text-blue-600"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                {option.icon} {option.label}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
+                                {/* Tipo de Gestión */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        Tipo de Gestión
+                                    </label>
+                                    <div className="flex gap-3">
+                                        {[
+                                            { value: 0, label: 'Todos', icon: '📊' },
+                                            { value: 1, label: 'Operador', icon: '👤' },
+                                            { value: 2, label: 'Cobrador', icon: '💼' }
+                                        ].map(option => (
+                                            <label
+                                                key={option.value}
+                                                className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-blue-50 transition"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="tipoGestion"
+                                                    value={option.value}
+                                                    checked={filters.tipoGestion === option.value}
+                                                    onChange={(e) =>
+                                                        handleFilterChange('tipoGestion', e.target.value)
+                                                    }
+                                                    className="w-4 h-4 text-blue-600"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    {option.icon} {option.label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
 
-      {/* Tipo Gestor Hoy */}
-      <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
-          Tipo de Gestor Hoy
-        </label>
-        <div className="flex gap-3">
-          {[
-            { value: 0, label: 'Todos', icon: '📊' },
-            { value: 1, label: 'Día', icon: '📅' },
-            { value: 2, label: 'Posteriores', icon: '⏳' }
-          ].map(option => (
-            <label
-              key={option.value}
-              className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-blue-50 transition"
-            >
-              <input
-                type="radio"
-                name="gestorHoy"
-                value={option.value}
-                checked={filters.gestorHoy === option.value}
-                onChange={(e) =>
-                  handleFilterChange('gestorHoy', e.target.value)
-                }
-                className="w-4 h-4 text-blue-600"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                {option.icon} {option.label}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
+                                {/* Tipo Gestor Hoy */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        Tipo de Gestor Hoy
+                                    </label>
+                                    <div className="flex gap-3">
+                                        {[
+                                            { value: 0, label: 'Todos', icon: '📊' },
+                                            { value: 1, label: 'Día', icon: '📅' },
+                                            { value: 2, label: 'Posteriores', icon: '⏳' }
+                                        ].map(option => (
+                                            <label
+                                                key={option.value}
+                                                className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-blue-50 transition"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="gestorHoy"
+                                                    value={option.value}
+                                                    checked={filters.gestorHoy === option.value}
+                                                    onChange={(e) =>
+                                                        handleFilterChange('gestorHoy', e.target.value)
+                                                    }
+                                                    className="w-4 h-4 text-blue-600"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    {option.icon} {option.label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
 
-      {/* Filtro Gestión */}
-      <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
-          Filtro
-        </label>
+                                {/* Filtro Gestión */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        Filtro
+                                    </label>
 
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { value: 0, label: 'Todos', icon: '📋' },
-            { value: 1, label: 'Con Gestión', icon: '✅' },
-            { value: 2, label: 'Sin Gestión', icon: '⏳' }
-          ].map(option => (
-            <label
-              key={option.value}
-              className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-blue-50 transition"
-            >
-              <input
-                type="radio"
-                name="filtroGestion"
-                value={option.value}
-                checked={filters.filtroGestion === option.value}
-                onChange={(e) =>
-                  handleFilterChange('filtroGestion', e.target.value)
-                }
-                className="w-4 h-4 text-blue-600"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                {option.icon} {option.label}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[
+                                            { value: 0, label: 'Todos', icon: '📋' },
+                                            { value: 1, label: 'Con Gestión', icon: '✅' },
+                                            { value: 2, label: 'Sin Gestión', icon: '⏳' }
+                                        ].map(option => (
+                                            <label
+                                                key={option.value}
+                                                className="flex items-center gap-2 cursor-pointer p-2 rounded-md hover:bg-blue-50 transition"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="filtroGestion"
+                                                    value={option.value}
+                                                    checked={filters.filtroGestion === option.value}
+                                                    onChange={(e) =>
+                                                        handleFilterChange('filtroGestion', e.target.value)
+                                                    }
+                                                    className="w-4 h-4 text-blue-600"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    {option.icon} {option.label}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
 
-      {/* Días de Mora */}
-      <div className="bg-blue-50 rounded-lg border border-blue-100 p-3">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
-          📅 Días de Mora
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <input
-            type="number"
-            value={filters.diasMoraDesde}
-            onChange={(e) =>
-              handleFilterChange('diasMoraDesde', e.target.value)
-            }
-            className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
-            placeholder="Desde"
-          />
-          <input
-            type="number"
-            value={filters.diasMoraHasta}
-            onChange={(e) =>
-              handleFilterChange('diasMoraHasta', e.target.value)
-            }
-            className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
-            placeholder="Hasta"
-          />
-        </div>
-      </div>
+                                {/* Días de Mora */}
+                                <div className="bg-blue-50 rounded-lg border border-blue-100 p-3">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        📅 Días de Mora
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input
+                                            type="number"
+                                            value={filters.diasMoraDesde}
+                                            onChange={(e) =>
+                                                handleFilterChange('diasMoraDesde', e.target.value)
+                                            }
+                                            className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
+                                            placeholder="Desde"
+                                        />
+                                        <input
+                                            type="number"
+                                            value={filters.diasMoraHasta}
+                                            onChange={(e) =>
+                                                handleFilterChange('diasMoraHasta', e.target.value)
+                                            }
+                                            className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
+                                            placeholder="Hasta"
+                                        />
+                                    </div>
+                                </div>
 
-      {/* Operador */}
-      <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 flex items-center gap-1">
-          {getOperadorIcon()} Operador
-        </label>
-        <select
-          value={filters.operador}
-          onChange={(e) =>
-            handleFilterChange('operador', e.target.value)
-          }
-          className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
-        >
-          <option value="">Seleccionar...</option>
-          {operadores?.map(op => (
-            <option key={op.idPersonalBDD} value={op.idPersonalBDD}>
-              {op.primerNombre} {op.segundoNombre} {op.apellidoPaterno} {op.apellidoMaterno} - {op.Codigo}
-            </option>
-          ))}
-        </select>
-      </div>
+                                {/* Operador */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 flex items-center gap-1">
+                                        {getOperadorIcon()} Operador
+                                    </label>
+                                    <select
+                                        value={filters.operador}
+                                        onChange={(e) =>
+                                            handleFilterChange('operador', e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        {operadores?.map(op => (
+                                            <option key={op.idPersonalBDD} value={op.idPersonalBDD}>
+                                                {op.primerNombre} {op.segundoNombre} {op.apellidoPaterno} {op.apellidoMaterno} - {op.Codigo}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-      {/* Gestión */}
-      <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
-          Gestión
-        </label>
-        <select
-          value={String(filters.gestion)}
-          onChange={(e) =>
-            handleFilterChange('gestion', e.target.value)
-          }
-          className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
-        >
-          <option value="0">Seleccionar...</option>
-          {estadoGestion.map(estado => (
-            <option
-              key={estado.idCbo_EstadoGestion}
-              value={String(estado.idCbo_EstadoGestion)}
-            >
-              {estado.Estado}
-            </option>
-          ))}
-        </select>
-      </div>
+                                {/* Gestión */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        Gestión
+                                    </label>
+                                    <select
+                                        value={String(filters.gestion)}
+                                        onChange={(e) =>
+                                            handleFilterChange('gestion', e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
+                                    >
+                                        <option value="0">Seleccionar...</option>
+                                        {estadoGestion.map(estado => (
+                                            <option
+                                                key={estado.idCbo_EstadoGestion}
+                                                value={String(estado.idCbo_EstadoGestion)}
+                                            >
+                                                {estado.Estado}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-      {/* Gestores */}
-      <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
-        <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
-          Gestores
-        </label>
-        <select
-          value={String(filters.gestor)}
-          onChange={(e) =>
-            handleFilterChange('gestor', e.target.value)
-          }
-          className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
-        >
-          <option value="0">Seleccionar...</option>
-          {selectGestores.map(gestor => (
-            <option
-              key={gestor.idCbo_Gestores}
-              value={String(gestor.idCbo_Gestores)}
-            >
-              {gestor.Gestor}
-            </option>
-          ))}
-        </select>
-      </div>
+                                {/* Gestores */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        Gestores
+                                    </label>
+                                    <select
+                                        value={String(filters.gestor)}
+                                        onChange={(e) =>
+                                            handleFilterChange('gestor', e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
+                                    >
+                                        <option value="0">Seleccionar...</option>
+                                        {selectGestores.map(gestor => (
+                                            <option
+                                                key={gestor.idCbo_Gestores}
+                                                value={String(gestor.idCbo_Gestores)}
+                                            >
+                                                {gestor.Gestor}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
-      {/* Botón Buscar */}
-      <button
-        onClick={() => handleBuscar(1)}
-        className="w-full py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
-      >
-        <MagnifyingGlassIcon className="w-5 h-5" />
-        Buscar Registros
-      </button>
+                                {/* Botón Buscar */}
+                                <button
+                                    onClick={() => handleBuscar(1)}
+                                    className="w-full py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+                                >
+                                    <MagnifyingGlassIcon className="w-5 h-5" />
+                                    Buscar Registros
+                                </button>
 
-    </div>
-  </div>
-</div>
+                            </div>
+                        </div>
+                    </div>
 
 
                     {/* Área Principal - Métricas y Tabla */}
@@ -665,8 +665,8 @@ const InformesCobranza = () => {
                                             <th className='px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider'>Riesgo</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Operador</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cobrador</th>
-                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Gestor</th>
-                                              <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Fecha_Gestion</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Gestor</th>
+                                            <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Fecha_Gestion</th>
                                             <th className="px-4 py-3.5 text-left text-xs font-bold text-blue-700 uppercase tracking-wider">Cliente</th>
                                             <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Cédula</th>
                                             <th className="px-4 py-3.5 text-center text-xs font-bold text-blue-700 uppercase tracking-wider">Doc. Ref.</th>
@@ -762,7 +762,7 @@ const InformesCobranza = () => {
                                                                 <span className="text-sm text-gray-700 font-medium truncate">{row.Gestor || 'N/A'}</span>
                                                             </div>
                                                         </td>
-                                                           <td className="px-4 py-4">
+                                                        <td className="px-4 py-4">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="text-sm text-gray-700 font-medium truncate">
                                                                     {new Date(row.Fecha_Gestion).toLocaleDateString('es-ES')}
