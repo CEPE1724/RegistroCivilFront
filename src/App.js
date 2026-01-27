@@ -42,6 +42,7 @@ import ListaNegraEmail from "./pages/ListaNegraEmails";
 import MapaPantalla from "./pages/MapPantalla"
 import CumpleañosPagina from "./pages/CumpleañosPag"
 import InformesCobranza from "./pages/InformesCobranza";
+import Score from "./pages/Score";
 
 function App() {
 
@@ -102,6 +103,7 @@ function App() {
         <Route path="/ListaNegraCedulas" element={<PrivateRouteWrapper title="ListaNegraCedula" element={<ListaNegraCedula />} />} />
         <Route path="/ListaNegraEmails" element={<PrivateRouteWrapper title="ListaNegraEmail" element={<ListaNegraEmail />} />} />
         <Route path="/informesCobranza" element={<PrivateRouteWrapper title="InformesCobranza" element={<InformesCobranza />} />} />
+        <Route path="/scoreCobranzas" element={<PrivateRouteWrapper title="ScoreCobranzas" element={<Score />} />} />
       </Routes>
 
       {isSessionExpired && (
