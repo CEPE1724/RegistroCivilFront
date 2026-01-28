@@ -17,6 +17,9 @@ export const ScoreConfig = () => {
     const [segmentos, setSegmentos] = useState([]);
     const [almacenes, setAlmacenes] = useState([]);
     const [tiposCliente, setTiposCliente] = useState([]);
+    const [edad, setEdad] = useState([]);
+     const [saldos, setSaldos] = useState([]);
+     const [scoreResultado, setScoreResultado] = useState([]);
     useEffect(() => {
         fetchCbo_Score_cobranza();
     }, []);
@@ -33,6 +36,9 @@ export const ScoreConfig = () => {
             fetchSegmento(scoreSeleccionado);
             fetchalmacenes(scoreSeleccionado);
             fetchTipoCliente(scoreSeleccionado);
+            fetchEdades(scoreSeleccionado);
+            fetchSaldos(scoreSeleccionado);
+            fetchscore_Resultado(scoreSeleccionado);
         }
     }, [scoreSeleccionado]);
 
@@ -81,7 +87,7 @@ export const ScoreConfig = () => {
     const fetchTipoCliente = async (scoreId) => {
         try {
             const response = await axios.get(APIURL.cbo_tipo_cliente(scoreId));
-            console.log('tipo clñiente:', response.data);
+            
             setTiposCliente(response.data);
         }
         catch (error) {
@@ -89,43 +95,39 @@ export const ScoreConfig = () => {
         }
     };
 
+    const fetchEdades = async (scoreId) => {
+        try {
+            const response = await axios.get(APIURL.cbo_edad_findBy(scoreId));
+            setEdad(response.data);
+        }
+        catch (error) {
+            setEdad([]);
+        }
+    };
+
+    const fetchSaldos = async (scoreId) =>{
+    try {
+            const response = await axios.get(APIURL.cbo_Saldos(scoreId));
+         
+            setSaldos(response.data);
+        }
+        catch (error) {
+            setSaldos([]);
+        }
+    };
+
+    const fetchscore_Resultado = async (scoreId) => {
+        try {
+            const response = await axios.get(APIURL.cbo_Score_Resultado(scoreId));
+               console.log('resultado:', response.data);
+            setScoreResultado(response.data);
+        }
+        catch (error) {
+            setScoreResultado([]);
+        }
+    };
+
  
-/*
-    // Estado para Cbo_TiposCliente
-    const [tiposCliente, setTiposCliente] = useState([
-        { id: 1, idCbo_Scores_Cobranzas: 1, idTipoCliente: 1, idCbo_Riesgo: 1, puntaje: 15 },
-        { id: 2, idCbo_Scores_Cobranzas: 1, idTipoCliente: 6, idCbo_Riesgo: 3, puntaje: 6 },
-        { id: 3, idCbo_Scores_Cobranzas: 1, idTipoCliente: 9, idCbo_Riesgo: 2, puntaje: 9 },
-        { id: 4, idCbo_Scores_Cobranzas: 1, idTipoCliente: 8, idCbo_Riesgo: 1, puntaje: 30 },
-        { id: 5, idCbo_Scores_Cobranzas: 1, idTipoCliente: 5, idCbo_Riesgo: 3, puntaje: 6 }
-    ]);*/
-
-    // Estado para Cbo_Edad
-    const [edad, setEdad] = useState([
-        { id: 1, idCbo_Scores_Cobranzas: 1, desde: 18, hasta: 20, idCbo_Riesgo: 1, puntaje: 20 },
-        { id: 2, idCbo_Scores_Cobranzas: 1, desde: 21, hasta: 25, idCbo_Riesgo: 1, puntaje: 20 },
-        { id: 3, idCbo_Scores_Cobranzas: 1, desde: 26, hasta: 30, idCbo_Riesgo: 2, puntaje: 10 },
-        { id: 4, idCbo_Scores_Cobranzas: 1, desde: 31, hasta: 40, idCbo_Riesgo: 2, puntaje: 10 },
-        { id: 5, idCbo_Scores_Cobranzas: 1, desde: 41, hasta: 50, idCbo_Riesgo: 2, puntaje: 10 },
-        { id: 6, idCbo_Scores_Cobranzas: 1, desde: 51, hasta: 100, idCbo_Riesgo: 3, puntaje: 4 }
-    ]);
-
-    // Estado para Cbo_Saldos
-    const [saldos, setSaldos] = useState([
-        { id: 1, idCbo_Scores_Cobranzas: 1, desde: 1.00, hasta: 150.00, idCbo_Riesgo: 3, puntaje: 6 },
-        { id: 2, idCbo_Scores_Cobranzas: 1, desde: 150.01, hasta: 400.00, idCbo_Riesgo: 2, puntaje: 15 },
-        { id: 3, idCbo_Scores_Cobranzas: 1, desde: 400.01, hasta: 700.00, idCbo_Riesgo: 2, puntaje: 15 },
-        { id: 4, idCbo_Scores_Cobranzas: 1, desde: 700.01, hasta: 1000.00, idCbo_Riesgo: 2, puntaje: 15 },
-        { id: 5, idCbo_Scores_Cobranzas: 1, desde: 1000.01, hasta: 10000.00, idCbo_Riesgo: 1, puntaje: 30 }
-    ]);
-
-    // Estado para Cbo_Score_Resultado
-    const [scoreResultado, setScoreResultado] = useState([
-        { id: 1, idCbo_Scores_Cobranzas: 1, desde: 0, hasta: 40, peso: 21.81, resultado: 81.03, idCbo_Riesgo: 3 },
-        { id: 2, idCbo_Scores_Cobranzas: 1, desde: 41, hasta: 45, peso: 19.05, resultado: 76.72, idCbo_Riesgo: 3 },
-        { id: 3, idCbo_Scores_Cobranzas: 1, desde: 46, hasta: 50, peso: 6.34, resultado: 73.26, idCbo_Riesgo: 2 },
-        { id: 4, idCbo_Scores_Cobranzas: 1, desde: 51, hasta: 55, peso: 12.81, resultado: 73.86, idCbo_Riesgo: 2 }
-    ]);
 
 
     // Función para cambiar score maestro

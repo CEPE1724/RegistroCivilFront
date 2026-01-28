@@ -252,4 +252,8 @@ export const APIURL = {
  cbo_segmentos_findBy: (scoreId) => `${API_BASE_URL}cbo-segmentos?cbo_segmento=${scoreId}`,
  cbo_almacenes_findBy: (scoreId) => `${API_BASE_URL}cbo-almacenes?cbo-almacenes=${scoreId}`,
  cbo_tipo_cliente: (sCbo_Scores_Cobranzas) => `${API_BASE_URL}cbo-tipo-cliente?sCbo_Scores_Cobranzas=${sCbo_Scores_Cobranzas}`,
+ cbo_edad_findBy: (sCbo_Scores_Cobranzas) => `${API_BASE_URL}cbo-edad?sCbo_Scores_Cobranzas=${sCbo_Scores_Cobranzas}`,
+ cbo_Saldos: (sCbo_Scores_Cobranzas) => `${API_BASE_URL}cbo-saldos?sCbo_Scores_Cobranzas=${sCbo_Scores_Cobranzas}`,
+ cbo_Score_Resultado: (sCbo_Scores_Cobranzas) => `${API_BASE_URL}cbo-score-resultado?sCbo_Scores_Cobranzas=${sCbo_Scores_Cobranzas}`,
+ porcentaje_cobranza: (ScRE_SOLIICTUDwEB) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/porcentaje-cobranza?ScRE_SOLIICTUDwEB=${ScRE_SOLIICTUDwEB}`,
 };

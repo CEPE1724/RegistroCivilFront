@@ -33,6 +33,7 @@ import AgenteDocumental from "./pages/AgenteDocumental";
 import Dashboard from "./pages/Dashboard";
 import ListaNegra from "./pages/ListaNegra";
 import NotificacionesCli from "./pages/Notificaciones";
+import NotificationToast from "./components/NotificationToast/NotificationToast";
 
 import Equifax from "./pages/Equifax";
 
@@ -105,6 +106,8 @@ function App() {
         <Route path="/informesCobranza" element={<PrivateRouteWrapper title="InformesCobranza" element={<InformesCobranza />} />} />
         <Route path="/scoreCobranzas" element={<PrivateRouteWrapper title="ScoreCobranzas" element={<Score />} />} />
       </Routes>
+
+      <NotificationToast />
 
       {isSessionExpired && (
         <Modal open={isSessionExpired} onClose={() => { }}>

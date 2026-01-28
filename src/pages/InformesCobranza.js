@@ -47,6 +47,7 @@ const InformesCobranza = () => {
     const [bancos, setBancos] = useState([]);
     const [estadoGestion, setEstadoGestion] = useState([]);
     const [selectGestores, setSelectGestores] = useState([]);
+    const [porcentajeAvance, setPorcentajeAvance] = useState([]);
     // Cargar operadores al montar el componente
     useEffect(() => {
         fetchOperadores();
@@ -57,19 +58,34 @@ const InformesCobranza = () => {
         handleBuscar();
     }, []);
 
+    /*consuma la api de porcentajeavance cuando preciones buscar  */
+
+
+
     const fetchOperadores = async () => {
         try {
             const response = await axios.get(APIURL.personal_bdd_findAllgestor());
-            console.log('Operadores cargados:', response.data);
             setOperadores(response.data);
         } catch (error) {
             setOperadores([]);
         }
     };
+
+    const getchPorcentajeAvance = async (sCobrador) => {
+        try {
+            const response = await axios.get(APIURL.porcentaje_cobranza(sCobrador));
+            console.log('Porcentaje de avance cargado:', response.data);
+            // La API devuelve un array, extraer el primer elemento
+            const data = Array.isArray(response.data) ? response.data[0] : response.data || {};
+            setPorcentajeAvance(data);
+            console.log('Porcentaje guardado en state:', data);
+        } catch (error) {
+            setPorcentajeAvance({});
+        }
+    };
     const fetchGestores = async () => {
         try {
             const response = await axios.get(APIURL.findAllCbo_Gestores());
-            console.log('Gestores cargados:', response.data);
             setSelectGestores(response.data.data);
         } catch (error) {
             setSelectGestores([]);
@@ -160,6 +176,10 @@ const InformesCobranza = () => {
             // La API devuelve {data: Array, pageNumber, pageSize, totalCount}
             const dataArray = response.data.data || response.data;
             const total = response.data.totalCount || 0;
+            if(filters.operador)
+            {
+            await getchPorcentajeAvance (filters.operador);
+            }
 
             if (dataArray && Array.isArray(dataArray)) {
                 setTableData(dataArray);
@@ -172,9 +192,9 @@ const InformesCobranza = () => {
                 const avance = totalProyectado > 0 ? ((totalCobrado / totalProyectado) * 100).toFixed(2) : 0;
 
                 setMetricas({
-                    proyectado: totalProyectado.toFixed(2),
-                    cobrado: totalCobrado.toFixed(2),
-                    avance: avance,
+                    proyectado: porcentajeAvance?.TotalProyectado ? parseFloat(porcentajeAvance.TotalProyectado).toFixed(2) : totalProyectado.toFixed(2),
+                    cobrado: porcentajeAvance?.TotalCobrado ? parseFloat(porcentajeAvance.TotalCobrado).toFixed(2) : totalCobrado.toFixed(2),
+                    avance: porcentajeAvance?.PorcentajeCobrado ? parseFloat(porcentajeAvance.PorcentajeCobrado).toFixed(2) : avance,
                     cobroExterno: 0.00
                 });
             }
@@ -558,17 +578,7 @@ const InformesCobranza = () => {
                                 </div>
                             </div>
 
-                            {/* Cobro Externo */}
-                            <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl p-5 border-l-4 border-amber-500 transform hover:-translate-y-1 transition-all duration-300">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">Cobro Externo</h3>
-                                    <div className="p-2.5 bg-amber-100 rounded-xl group-hover:bg-amber-200 transition-colors">
-                                        <BanknotesIcon className="w-5 h-5 text-amber-600" />
-                                    </div>
-                                </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.cobroExterno}</p>
-                                <p className="text-xs text-gray-500 mt-2">Gestión externa</p>
-                            </div>
+                           
                         </div>
 
                         {/* Tabla de Resultados - Mejorada */}

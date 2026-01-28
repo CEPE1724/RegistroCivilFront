@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useRef, useCallback } from "react";
+import React, { createContext, useState, useEffect, useContext, useRef, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchPerfil } from "../../actions/fetchPerfil"; // Asegúrate de que esta función esté correctamente exportada
 import { APIURL } from "../../configApi/apiConfig";
@@ -58,8 +58,19 @@ export const AuthProvider = ({ children }) => {
           });
           
           socket.on("disconnect", () => {
-            console.log("❌ WebSocket desconectado");
+            console.log("❌ WebSocket desconectado en AuthContext");
             setIsConnected(false);
+            // 🔧 Intentar reconectar después de 3 segundos si el usuario está logueado
+            if (token) {
+              console.log("⏳ Intentando reconectar en 3 segundos...");
+              const reconnectTimer = setTimeout(() => {
+                if (!socketRef.current?.connected) {
+                  console.log("🔄 Reconectando socket...");
+                  socketRef.current?.connect();
+                }
+              }, 3000);
+              return () => clearTimeout(reconnectTimer);
+            }
           });
           
           socket.on("clients-updated", (clients) => setConnectedClients(clients));
@@ -81,15 +92,15 @@ export const AuthProvider = ({ children }) => {
       };
 
       initSocket();
-
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.disconnect();
-          socketRef.current = null;
-        }
-      };
     }
-  }, [token, logout]);
+
+    // 🔧 IMPORTANTE: Solo desconectar cuando token se vuelve null (logout real)
+    if (!token && socketRef.current) {
+      console.log('🔌 Desconectando socket por logout');
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+  }, [token]); // Solo depender de 'token'
 
   // Effect para escuchar el evento de forzar logout desde el socket
   useEffect(() => {
@@ -219,26 +230,33 @@ export const AuthProvider = ({ children }) => {
     navigate("/login");
   };
 
+  // 🔒 Memoizar el value del Provider para evitar re-renders innecesarios
+  const contextValue = useMemo(() => {
+    console.log('📦 contextValue recalculado en AuthContext');
+    return {
+    token,
+    setToken,
+    isSessionExpired,
+    isSessionExpired2,
+    isLoggedIn,
+    userData,
+    userUsuario, // Datos obtenidos de 'get_nomina'
+    login,
+    logout,
+    logoutinactividad,
+    idMenu,
+    setMenuId,
+    isConnected,
+    connectedClients,
+    socket: socketRef.current,
+  };
+  }, [
+    token, isSessionExpired, isSessionExpired2, isLoggedIn, userData, userUsuario,
+    login, logout, logoutinactividad, idMenu, setMenuId, isConnected, connectedClients
+  ]);
+
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        setToken,
-        isSessionExpired,
-        isSessionExpired2,
-        isLoggedIn,
-        userData,
-        userUsuario, // Datos obtenidos de 'get_nomina'
-        login,
-        logout,
-        logoutinactividad,
-        idMenu,
-        setMenuId,
-        isConnected,
-        connectedClients,
-        socket: socketRef.current,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
       <SessionExpiredModal 
         isOpen={showSessionModal}
