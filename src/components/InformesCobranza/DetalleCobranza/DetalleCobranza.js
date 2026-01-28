@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { 
+import React, { useEffect, useState } from 'react';
+import {
     XMarkIcon,
     UserIcon,
     PhoneIcon,
@@ -10,10 +10,14 @@ import {
     CurrencyDollarIcon,
     ChatBubbleBottomCenterTextIcon,
     ArrowUpTrayIcon,
-    CheckIcon
+    CheckIcon,
+    PlusIcon
 } from '@heroicons/react/24/outline';
+import { APIURL } from '../../../configApi/apiConfig';
+import axios from '../../../configApi/axiosConfig';
+import { SaveGestion } from '../SaveGestion/SaveGestion';
+export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
 
-export function DetalleCobranza({ isOpen, onClose, data }) {
     const [formData, setFormData] = useState({
         fecha: new Date().toLocaleDateString('es-EC'),
         vendedor: '',
@@ -30,413 +34,283 @@ export function DetalleCobranza({ isOpen, onClose, data }) {
         observacion: ''
     });
 
-    const [historial, setHistorial] = useState([
-        {
-            fecha: '2025/06/26 09:06:18',
-            tipo: 'OPERADOR',
-            operador: 'COLLAGUAZO ARAUJO ADRIANA MARCELA',
-            cliente: 'ZUMBA TOBAR NATHALY ELIZABETH',
-            estado: 'GESTION TELEFO',
-            tipoContrato: 'CONTACTO INDI',
-            gestionEs: 'MENSAJE A'
-        },
-        {
-            fecha: '2025/06/26 09:04:22',
-            tipo: 'OPERADOR',
-            operador: 'COLLAGUAZO ARAUJO ADRIANA MARCELA',
-            cliente: 'ZUMBA TOBAR NATHALY ELIZABETH',
-            estado: 'GESTION TELEFO',
-            tipoContrato: 'NO CONTACTO',
-            gestionEs: 'NO CONTEST'
-        },
-        {
-            fecha: '2025/06/26 09:02:49',
-            tipo: 'OPERADOR',
-            operador: 'COLLAGUAZO ARAUJO ADRIANA MARCELA',
-            cliente: 'ZUMBA TOBAR NATHALY ELIZABETH',
-            estado: 'GESTION TELEFO',
-            tipoContrato: 'NO CONTACTO',
-            gestionEs: 'NO CONTEST'
-        },
-        {
-            fecha: '2025/05/09 11:50:38',
-            tipo: 'COBRADOR',
-            operador: 'MERCHAN BAQUE FRANCISCO FABRICIO',
-            cliente: 'ZUMBA TOBAR NATHALY ELIZABETH',
-            estado: 'TERRENO',
-            tipoContrato: 'NO CONTACTO',
-            gestionEs: 'NO HAY NAD'
-        },
-        {
-            fecha: '2025/04/28 13:30:05',
-            tipo: 'COBRADOR',
-            operador: 'MERCHAN BAQUE FRANCISCO FABRICIO',
-            cliente: 'ZUMBA TOBAR NATHALY ELIZABETH',
-            estado: 'TERRENO',
-            tipoContrato: 'CONTACTO INDI',
-            gestionEs: 'NOTIFICACIO'
+
+    const [showSaveGestion, setShowSaveGestion] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [tipoContactoData, setTipoContacto] = useState([]);
+    const [selectResultado, setSelectResultado] = useState([]);
+    const [direccionData, setDireccionData] = useState(null);
+    const [datosCobranza, setDatosCobranza] = useState(null);
+    const [historialAPI, setHistorialAPI] = useState([]);
+
+    useEffect(() => {
+        if (isOpen && data && data.sCre_SolicitudWeb) {
+            fetchSelectResultado(data.sCre_SolicitudWeb);
         }
-    ]);
+    }, [isOpen, data]);
 
-    const handleInputChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setFormData(prev => ({ ...prev, archivo: file }));
+    const fetchSelectResultado = async (id) => {
+        setLoading(true);
+        setError('');
+        try {
+            const response = await axios.get(APIURL.Cbo_GestorDeCobranzasOperativodet(id));
+            console.log('Respuesta API completa:', response.data);
+            
+            // Extraer el objeto correctamente - puede ser Array o Objeto
+            let datosDir = null;
+            
+            if (Array.isArray(response.data.data) && response.data.data.length > 0) {
+                datosDir = response.data.data[0]; // Primer elemento del array
+            } else if (response.data.data && typeof response.data.data === 'object') {
+                datosDir = response.data.data;
+            } else if (Array.isArray(response.data) && response.data.length > 0) {
+                datosDir = response.data[0];
+            } else {
+                datosDir = response.data;
+            }
+            
+            console.log('Datos extraídos:', datosDir);
+            setDireccionData(datosDir);
+            setSelectResultado(response.data);
+        } catch (error) {
+            console.error("Error fetching Select Resultado:", error);
+            setError('Error al cargar la información');
+        } finally {
+            setLoading(false);
         }
     };
 
-    const handleGuardar = () => {
-        console.log('Guardando datos:', formData);
-        // Lógica para guardar
-        onClose();
+
+    const fetchDataCobranza = async () => {
+        if (data && data.sCre_SolicitudWeb) {
+            setLoading(true);
+            setError('');
+            try {
+                const response = await axios.get(APIURL.getDetalleGestoresCobranzasDetalleOperativoWeb(data.idCompra, data.sCre_SolicitudWeb));     
+                console.log('Respuesta API completa Datos Cobranza:', response.data);
+                setDatosCobranza(response.data);
+                
+                // Procesar el historial desde la API
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    setHistorialAPI(response.data);
+                } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+                    setHistorialAPI(response.data.data);
+                } else {
+                    setHistorialAPI([]);
+                }
+            } catch (error) {
+                console.error("Error fetching Datos Cobranza:", error);
+                setError('Error al cargar la información de cobranza');
+                setHistorialAPI([]);
+            }
+            finally {
+                setLoading(false);
+            }
+        }
     };
 
-    const handleContacto = () => {
-        console.log('Abrir módulo de contacto');
-    };
+    useEffect(() => {
+        if (isOpen) {
+            fetchDataCobranza();
+            fetchSelectResultado(data.idCompra);
+        }
+    }, [isOpen]);
 
-    const handleGestion = () => {
-        console.log('Abrir módulo de gestión');
-    };
-
-    const handleCobranza = () => {
-        console.log('Abrir módulo de cobranza');
-    };
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden">
             {/* Overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-md transition-opacity" onClick={onClose}></div>
 
             {/* Modal */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="flex items-center justify-center min-h-screen p-4">
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden animate-slideUp">
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex items-center justify-between">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-2 bg-white/20 rounded-lg">
-                                        <DocumentTextIcon className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div className="text-white">
-                                        <h2 className="text-xl font-bold">Detalle de Gestión de Cobranza</h2>
-                                        <p className="text-sm text-blue-100 mt-1">
-                                            Cliente: ZUMBA TOBAR NATHALY ELIZABETH | Cédula: 0926654815
-                                        </p>
-                                    </div>
+                    <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden">
+                        {/* Header Premium */}
+                        <div className="relative bg-gradient-to-r from-slate-900 via-blue-800 to-slate-900 px-8 py-6 flex items-center justify-between overflow-hidden">
+                            <div className="absolute inset-0 opacity-10">
+                                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
+                                <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl"></div>
+                            </div>
+                            
+                            <div className="relative flex-1 flex items-center gap-4">
+                                <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg">
+                                    <DocumentTextIcon className="w-7 h-7 text-white" />
+                                </div>
+                                <div className="text-white">
+                                    <h2 className="text-2xl font-bold tracking-tight">Gestión de Cobranza</h2>
+                                    <p className="text-blue-100 text-sm mt-1 flex items-center gap-2">
+                                        <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                        Cliente: ZUMBA TOBAR NATHALY ELIZABETH | Cédula: 0926654815
+                                    </p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 hover:bg-white/20 rounded-lg transition-all duration-200"
+                                className="relative p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
                             >
                                 <XMarkIcon className="w-6 h-6 text-white" />
                             </button>
                         </div>
 
-                        {/* Address Bar */}
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-3 border-b border-gray-200">
-                            <p className="text-xs font-medium text-gray-700 leading-relaxed">
-                                <span className="font-bold text-gray-800">Dirección:</span> PROVINCIA: GUAYAS CIUDAD: GUAYAQUIL PARROQUIA: TARQUI BARRIO: MAPASINGUE ESTE DIRECCION: COOPERATIVA UNION PAZ Y PROGRESO MZ D SOLAR 5 TELEFONO: 042555212 CELULAR: 0996571796 REFERENCIA: CASA AMARILLA DE 2 PISOS A UNA CUADRA DEL MERCADO SAN FRANCISCO
-                            </p>
+                        {/* Address Bar - Mejorado */}
+                        <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-8 py-4 border-b-2 border-blue-100">
+                            {loading && (
+                                <div className="flex items-center gap-3">
+                                    <div className="animate-spin">
+                                        <MapPinIcon className="w-5 h-5 text-blue-600" />
+                                    </div>
+                                    <p className="text-sm font-medium text-slate-700">Cargando información de dirección...</p>
+                                </div>
+                            )}
+                            {direccionData && (
+                                <div className="space-y-2">
+                                    <div className="flex items-start gap-3">
+                                        <MapPinIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                        <div className="flex-1">
+                                            <p className="text-sm font-bold text-slate-900 mb-2">INFORMACIÓN DE DIRECCIÓN</p>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                {direccionData.provincia && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Provincia</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.provincia.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.canton && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Cantón</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.canton.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.parroquia && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Parroquia</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.parroquia.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.barrio && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Barrio</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.barrio.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.CallePrincipal && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Calle Principal</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.CallePrincipal.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.CalleSecundaria && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Calle Secundaria</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.CalleSecundaria.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.NumeroCasa && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Número Casa</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.NumeroCasa.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.Celular && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-green-200 shadow-sm bg-green-50">
+                                                        <p className="text-xs font-semibold text-green-700 uppercase">Celular</p>
+                                                        <p className="text-sm text-green-900 font-bold">{direccionData.Celular.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.TelefonoDomicilio && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-slate-200 shadow-sm">
+                                                        <p className="text-xs font-semibold text-slate-600 uppercase">Teléfono</p>
+                                                        <p className="text-sm text-slate-900 font-bold">{direccionData.TelefonoDomicilio.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                                {direccionData.ReferenciaUbicacion && (
+                                                    <div className="bg-white rounded-lg p-2.5 border border-amber-200 shadow-sm bg-amber-50 col-span-2 md:col-span-3 lg:col-span-4">
+                                                        <p className="text-xs font-semibold text-amber-700 uppercase">Referencia de Ubicación</p>
+                                                        <p className="text-sm text-amber-900 font-bold">{direccionData.ReferenciaUbicacion.toUpperCase()}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            {!loading && !direccionData && (
+                                <p className="text-sm text-slate-600 italic">No hay información de dirección disponible</p>
+                            )}
                         </div>
 
                         {/* Content - Scrollable */}
-                        <div className="overflow-y-auto" style={{ maxHeight: 'calc(95vh - 250px)' }}>
-                            <div className="p-6 space-y-6">
-                                {/* Formulario Principal */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    {/* Columna Izquierda */}
-                                    <div className="space-y-4">
-                                        {/* Fecha */}
-                                        <div className="space-y-2">
-                                            <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                <CalendarIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                Fecha
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={formData.fecha}
-                                                onChange={(e) => handleInputChange('fecha', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                            />
+                        <div className="overflow-y-auto" style={{ maxHeight: 'calc(95vh - 250px)', paddingBottom: '100px' }}>
+                            <div className="p-8">
+                                {/* Tabla de Historial Mejorada */}
+                                <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+                                    <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-6 flex items-center gap-3">
+                                        <div className="p-2.5 bg-blue-500 rounded-xl">
+                                            <DocumentTextIcon className="w-6 h-6 text-white" />
                                         </div>
-
-                                        {/* Vendedor */}
-                                        <div className="space-y-2">
-                                            <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                <UserIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                Vendedor
-                                            </label>
-                                            <select
-                                                value={formData.vendedor}
-                                                onChange={(e) => handleInputChange('vendedor', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                            >
-                                                <option value="">Seleccionar vendedor...</option>
-                                                <option value="vendedor1">Vendedor 1</option>
-                                                <option value="vendedor2">Vendedor 2</option>
-                                            </select>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-white tracking-wide">HISTORIAL DE GESTIONES</h3>
+                                            <p className="text-blue-200 text-xs mt-1">{historialAPI.length} registro(s) encontrado(s)</p>
                                         </div>
-
-                                        {/* Teléfono */}
-                                        <div className="space-y-2">
-                                            <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                <PhoneIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                Teléfono
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                value={formData.telefono}
-                                                onChange={(e) => handleInputChange('telefono', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                                placeholder="Ingrese teléfono"
-                                            />
-                                        </div>
-
-                                        {/* Dato */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                                Dato
-                                            </label>
-                                            <select
-                                                value={formData.dato}
-                                                onChange={(e) => handleInputChange('dato', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                <option value="dato1">Dato 1</option>
-                                                <option value="dato2">Dato 2</option>
-                                            </select>
-                                        </div>
-
-                                        {/* Tipo Contacto */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                                Tipo Contacto
-                                            </label>
-                                            <select
-                                                value={formData.tipoContacto}
-                                                onChange={(e) => handleInputChange('tipoContacto', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                <option value="llamada">Llamada</option>
-                                                <option value="visita">Visita</option>
-                                                <option value="whatsapp">WhatsApp</option>
-                                            </select>
-                                        </div>
-
-                                        {/* Descripción */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                                Descripción
-                                            </label>
-                                            <select
-                                                value={formData.descripcion}
-                                                onChange={(e) => handleInputChange('descripcion', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                <option value="desc1">Descripción 1</option>
-                                                <option value="desc2">Descripción 2</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    {/* Columna Derecha */}
-                                    <div className="space-y-4">
-                                        {/* Dirección */}
-                                        <div className="space-y-2">
-                                            <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                <MapPinIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                Dirección
-                                            </label>
-                                            <textarea
-                                                value={formData.direccion}
-                                                onChange={(e) => handleInputChange('direccion', e.target.value)}
-                                                rows="4"
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm resize-none"
-                                                placeholder="Ingrese la dirección completa"
-                                            />
-                                        </div>
-
-                                        {/* Fecha Pago y Valor */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                                    Fecha Pago
-                                                </label>
-                                                <select
-                                                    value={formData.fechaPago}
-                                                    onChange={(e) => handleInputChange('fechaPago', e.target.value)}
-                                                    className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                                >
-                                                    <option value="">(none)</option>
-                                                    <option value="hoy">Hoy</option>
-                                                    <option value="manana">Mañana</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                    <CurrencyDollarIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                    Valor
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={formData.valor}
-                                                    onChange={(e) => handleInputChange('valor', e.target.value)}
-                                                    step="0.01"
-                                                    className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Email Operador/Cobrador */}
-                                        <div className="space-y-2">
-                                            <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                <EnvelopeIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                Email Operador/Cobrador
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={formData.emailOperador}
-                                                onChange={(e) => handleInputChange('emailOperador', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                                placeholder="operador@empresa.com"
-                                            />
-                                        </div>
-
-                                        {/* Email Cliente */}
-                                        <div className="space-y-2">
-                                            <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                                <EnvelopeIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                                Email Cliente
-                                            </label>
-                                            <input
-                                                type="email"
-                                                value={formData.emailCliente}
-                                                onChange={(e) => handleInputChange('emailCliente', e.target.value)}
-                                                className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm"
-                                                placeholder="cliente@email.com"
-                                            />
-                                        </div>
-
-                                        {/* Archivo */}
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-gray-700 uppercase tracking-wide block">
-                                                Archivo
-                                            </label>
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    readOnly
-                                                    value={formData.archivo ? formData.archivo.name : ''}
-                                                    className="flex-1 px-4 py-2.5 rounded-lg border-2 border-gray-200 bg-gray-50 text-sm"
-                                                    placeholder="Ningún archivo seleccionado"
-                                                />
-                                                <label className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer flex items-center gap-2">
-                                                    <ArrowUpTrayIcon className="w-5 h-5" />
-                                                    <span>Cargar</span>
-                                                    <input
-                                                        type="file"
-                                                        onChange={handleFileUpload}
-                                                        className="hidden"
-                                                    />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Observación */}
-                                <div className="space-y-2">
-                                    <label className="flex items-center text-xs font-bold text-gray-700 uppercase tracking-wide">
-                                        <ChatBubbleBottomCenterTextIcon className="w-4 h-4 mr-2 text-blue-600" />
-                                        Observación
-                                    </label>
-                                    <textarea
-                                        value={formData.observacion}
-                                        onChange={(e) => handleInputChange('observacion', e.target.value)}
-                                        rows="3"
-                                        className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-sm resize-none"
-                                        placeholder="Ingrese observaciones adicionales..."
-                                    />
-                                </div>
-
-                                {/* Botones de Acción Secundarios */}
-                                <div className="flex flex-wrap gap-3">
-                                    <button
-                                        onClick={handleContacto}
-                                        className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-                                    >
-                                        <PhoneIcon className="w-5 h-5" />
-                                        Contacto
-                                    </button>
-                                    <button
-                                        onClick={handleGestion}
-                                        className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-                                    >
-                                        <DocumentTextIcon className="w-5 h-5" />
-                                        Gestión
-                                    </button>
-                                    <button
-                                        onClick={handleCobranza}
-                                        className="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-                                    >
-                                        <CurrencyDollarIcon className="w-5 h-5" />
-                                        Cobranza
-                                    </button>
-                                </div>
-
-                                {/* Tabla de Historial */}
-                                <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-4 py-3">
-                                        <h3 className="text-sm font-bold text-white uppercase tracking-wide">Historial de Gestiones</h3>
                                     </div>
                                     <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                                                <tr>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Fecha</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Tipo</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Operador/Cobrador/Vendedor</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Cliente</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Estado</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Tipo Contrato</th>
-                                                    <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Gestión Es...</th>
+                                        <table className="w-full min-w-max border-collapse">
+                                            <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300 sticky top-0 z-10">
+                                                <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300">
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Tipo</th>
+                                              
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Fecha</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Operador</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Estado</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Tipo Contrato</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Resultado</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Fecha Pago</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Valor</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Estado Pago</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Nombre</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Usuario</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Dirección</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Teléfono</th>
+                                                    <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Notas</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="bg-white divide-y divide-gray-100">
-                                                {historial.map((item, index) => (
-                                                    <tr key={index} className="hover:bg-blue-50 transition-colors">
-                                                        <td className="px-4 py-3 text-xs text-gray-700">{item.fecha}</td>
-                                                        <td className="px-4 py-3 text-xs font-medium text-gray-800">{item.tipo}</td>
-                                                        <td className="px-4 py-3 text-xs text-gray-700">{item.operador}</td>
-                                                        <td className="px-4 py-3 text-xs text-gray-700">{item.cliente}</td>
-                                                        <td className="px-4 py-3">
-                                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold">
-                                                                {item.estado}
+                                            <tbody className="divide-y divide-slate-200">
+                                                {historialAPI.map((item, index) => (
+                                                    <tr key={index} className="hover:bg-blue-50 transition-colors duration-200 border-l-4 border-l-transparent hover:border-l-blue-500">
+                                                       
+                                                        <td className="px-3 py-3">
+                                                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-bold">{item.Tipo || '-'}</span>
+                                                        </td>
+                                                     
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium whitespace-nowrap">{item.Fecha ? new Date(item.Fecha).toLocaleString('es-EC') : '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium">{item.Operador_Cobrador || '-'}</td>
+                                                        <td className="px-3 py-3">
+                                                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-bold">{item.Estado || '-'}</span>
+                                                        </td>
+                                                        <td className="px-3 py-3">
+                                                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                                                (item['Tipo Contrato'] || '').includes('DIRECTO')
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : 'bg-red-100 text-red-700'
+                                                                }`}>
+                                                                {item['Tipo Contrato'] || '-'}
                                                             </span>
                                                         </td>
-                                                        <td className="px-4 py-3">
-                                                            <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
-                                                                item.tipoContrato.includes('CONTACTO INDI') 
-                                                                    ? 'bg-emerald-100 text-emerald-700' 
-                                                                    : 'bg-red-100 text-red-700'
-                                                            }`}>
-                                                                {item.tipoContrato}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-4 py-3 text-xs text-gray-700">{item.gestionEs}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium">{item.Resultado || '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium whitespace-nowrap">{item.FechaPago && item.FechaPago !== '2000-01-01T05:00:00.000Z' ? new Date(item.FechaPago).toLocaleDateString('es-EC') : '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium font-mono whitespace-nowrap">{item.Valor || '0.00'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium">{item.ESTADO_PAGO || '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium">{item.Nombre || '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium font-mono">{item.Usuario || '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium max-w-xs truncate">{item.Direccion || '-'}</td>
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium font-mono whitespace-nowrap">{item.Telefono || '-'}</td>
+                                                     
+                                                        <td className="px-3 py-3 text-xs text-slate-700 font-medium max-w-sm uppercase truncate">{item.Notas || item.Observacion || '-'}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -447,25 +321,35 @@ export function DetalleCobranza({ isOpen, onClose, data }) {
                         </div>
 
                         {/* Footer - Botones Principales */}
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
-                            <button
-                                onClick={handleGuardar}
-                                className="px-8 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 transform hover:scale-105"
-                            >
-                                <CheckIcon className="w-5 h-5" />
-                                Guardar
-                            </button>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-100 via-white to-transparent px-8 py-6 flex gap-4 justify-end border-t border-slate-200 shadow-2xl">
                             <button
                                 onClick={onClose}
-                                className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2 transform hover:scale-105"
+                                className="px-8 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg border-2 border-slate-300 hover:border-slate-400 transform hover:scale-105"
                             >
                                 <XMarkIcon className="w-5 h-5" />
-                                Salir
+                                Cerrar
+                            </button>
+                            <button
+                                onClick={() => setShowSaveGestion(true)}
+                                className="px-8 py-3 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-600 hover:from-blue-600 hover:via-blue-700 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 flex items-center gap-2.5 shadow-xl hover:shadow-2xl transform hover:scale-105 relative overflow-hidden group"
+                            >
+                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                                <PlusIcon className="w-5 h-5 relative" />
+                                <span className="relative">Ingresar Gestión</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Modal SaveGestion */}
+            <SaveGestion
+                isOpen={showSaveGestion}
+                onClose={() => setShowSaveGestion(false)}
+                estadoGestion={estadoGestion}
+                datosCobranza={direccionData}
+                data ={data}
+            />
         </div>
     );
 };

@@ -33,6 +33,7 @@ import AgenteDocumental from "./pages/AgenteDocumental";
 import Dashboard from "./pages/Dashboard";
 import ListaNegra from "./pages/ListaNegra";
 import NotificacionesCli from "./pages/Notificaciones";
+import NotificationToast from "./components/NotificationToast/NotificationToast";
 
 import Equifax from "./pages/Equifax";
 
@@ -43,6 +44,7 @@ import MapaPantalla from "./pages/MapPantalla"
 import CumpleañosPagina from "./pages/CumpleañosPag"
 import InformesCobranza from "./pages/InformesCobranza";
 import MensajesCobranza from "./pages/MensajesCobranzas";
+import Score from "./pages/Score";
 
 function App() {
 
@@ -105,7 +107,10 @@ function App() {
         <Route path="/informesCobranza" element={<PrivateRouteWrapper title="InformesCobranza" element={<InformesCobranza />} />} />
         <Route path="/mensajescobranza" element={<PrivateRouteWrapper title="MensajeCobranza" element={<MensajesCobranza />} />} />
 		
+        <Route path="/scoreCobranzas" element={<PrivateRouteWrapper title="ScoreCobranzas" element={<Score />} />} />
       </Routes>
+
+      <NotificationToast />
 
       {isSessionExpired && (
         <Modal open={isSessionExpired} onClose={() => { }}>

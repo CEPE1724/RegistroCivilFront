@@ -10,44 +10,93 @@ import Badge from "@mui/material/Badge";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAuth } from "../components/AuthContext/AuthContext";
+import { useNotificationContext } from "../components/AuthContext/NotificationContext";
 import Fade from "@mui/material/Fade";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 
-const Nav = ({ showButton, userData }) => {
+const Nav = ({ showButton }) => {
   const LogoIco = "/img/logo.webp";
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const pointLike = "/img/ponty.png"
 
-  const {  socket } = useAuth();
+  console.log('🔄 Nav.js RE-RENDER');
 
-  const [notifications, setNotifications] = useState([]);
+  const { socket, userData } = useAuth();
+  console.log('🔐 useAuth llamado - userData:', userData?.Nombre || 'N/A');
+  
+  const { notifications, latestNotification, addNotification, markNotificationsAsRead, clearNotifications } = useNotificationContext();
+  console.log('📢 useNotificationContext llamado - notificaciones:', notifications.length);
+
   const [showToast, setShowToast] = useState(false);
-  const [latestNotification, setLatestNotification] = useState("");
 
   // Socket listener
-  useEffect(() => {
-    if (!socket) return;
+useEffect(() => {
+  console.log('🪝 useEffect [socket] ejecutado');
+  
+  if (!socket) {
+    console.warn('⚠️ Socket no disponible en Nav');
+    return;
+  }
+
+  console.log('📡 Registrando listeners en Nav - Socket conectado:', socket.connected);
+
+  // 🆕 Listener para notificaciones de pagos
+  const handleNotificationPago = (data) => {
+    const { tipo = 'info', mensaje = '📩 Tienes una nueva notificación', solicitudId } = data;
     
+    console.log('💰 Notificación de pago recibida:', data);
 
-    const handleNotification = (data) => {
-      const mensaje = data?.mensaje || "📩 Tienes una nueva notificación";
-      const nuevaNoti = {
-        id: Date.now(),
-        mensaje,
-        timestamp: new Date().toLocaleTimeString(),
-        read: false,
-      };
+    // Emoji según el tipo
+    const emoji = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    }[tipo] || '💰';
 
-      setNotifications((prev) => [nuevaNoti, ...prev]);
-      setLatestNotification(mensaje);
-      setShowToast(true);
-    };
+    addNotification({
+      message: `${emoji} ${mensaje}`,
+      type: tipo,
+      data: solicitudId,
+    });
+    
+    setShowToast(true);
+  };
 
+  // ✅ Listener existente (solicitud-web-usuario)
+  const handleNotification = (data) => {
+    const mensaje = data?.mensaje || "📩 Tienes una nueva notificación";
+    
+    console.log('📬 Notificación de solicitud recibida:', data);
+
+    addNotification({
+      message: mensaje,
+      type: 'info',
+    });
+    
+    setShowToast(true);
+  };
+
+  // Verificar si los listeners ya están registrados
+  const isAlreadyListening = socket.hasListeners("solicitud-web-usuario");
+  
+  if (!isAlreadyListening) {
+    // Registrar los listeners SOLO si no existen
     socket.on("solicitud-web-usuario", handleNotification);
-    return () => socket.off("solicitud-web-usuario", handleNotification);
-  }, [socket]);
+    socket.on("nueva-notificacion-pago", handleNotificationPago);
+    console.log('✅ Listeners registrados en Nav (primera vez)');
+  } else {
+    console.log('⚠️ Listeners ya estaban registrados en Nav');
+  }
+
+  // Cleanup: NO remover listeners para mantenerlos activos entre cambios de ruta
+  return () => {
+    console.log('🧹 Component Nav desmontado, pero listeners permanecen activos');
+  };
+}, [socket]);
+
 
   // Ocultar toast automáticamente
   useEffect(() => {
@@ -60,9 +109,7 @@ const Nav = ({ showButton, userData }) => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
     // Marcar todas las notificaciones como leídas
-    setNotifications((prev) =>
-      prev.map((noti) => ({ ...noti, read: true }))
-    );
+    markNotificationsAsRead();
   };
 
   const handleClose = () => {
@@ -71,16 +118,16 @@ const Nav = ({ showButton, userData }) => {
 
   const handleDelete = (id, event) => {
     event.stopPropagation();
-    setNotifications((prev) => prev.filter((noti) => noti.id !== id));
+    // removeNotification(id); // Usar función del contexto si existe
   };
 
   const handleClearAll = () => {
-    setNotifications([]);
+    clearNotifications();
     handleClose();
   };
 
   // Contar notificaciones no leídas
-  const unreadCount = notifications.filter((noti) => !noti.read).length;
+  const unreadCount = 0; // Las nuevas notificaciones no tienen sistema de "leído"
 
   return (
     <>
@@ -198,13 +245,13 @@ const Nav = ({ showButton, userData }) => {
                     notifications.map((noti, index) => (
                       <React.Fragment key={noti.id}>
                         <MenuItem
-                          className={`py-3 px-4 ${!noti.read ? 'bg-blue-50' : ''}`}
+                          className={`py-3 px-4`}
                         >
                           <div className="flex w-full">
                             <div className="flex-grow pr-2">
                               <div className="flex items-start justify-between">
                                 <div className="font-medium mb-1 text-sm">
-                                  {noti.mensaje}
+                                  {noti.message}
                                 </div>
                                 <IconButton
                                   size="small"
@@ -215,10 +262,7 @@ const Nav = ({ showButton, userData }) => {
                                 </IconButton>
                               </div>
                               <div className="text-xs text-gray-500 flex items-center">
-                                <span>{noti.timestamp}</span>
-                                {!noti.read && (
-                                  <span className="ml-2 inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
-                                )}
+                                <span>{new Date(noti.timestamp).toLocaleTimeString("es-ES")}</span>
                               </div>
                             </div>
                           </div>
@@ -319,4 +363,6 @@ const Nav = ({ showButton, userData }) => {
   );
 };
 
-export default Nav;
+// ✅ Memoizar Nav para evitar re-renders si las props no cambian
+export default React.memo(Nav);
+

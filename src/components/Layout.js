@@ -1,18 +1,17 @@
 import * as React from 'react';
 import Nav from './Nav';
-import { useAuth } from '../components/AuthContext/AuthContext';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 
-export default function Layout({ children }) {
-  // Usamos el hook `useAuth` para obtener `userData` y otros valores del contexto
-  const { userData, isLoggedIn } = useAuth();
-
-  // Siempre mostramos el Nav incluso si userData está cargando o hay error de conexión
+function Layout({ children }) {
+  console.log('🏗️ Layout.js RE-RENDER - children changed');
+  
+  // Layout es un componente presentacional que solo renderiza Nav + children
+  // Nav se encargará de obtener userData desde el contexto
   return (
     <>
       <div className="print:hidden">
-        <Nav showButton={true} userData={userData || { Nombre: 'Cargando...' }} />
+        <Nav showButton={true} />
         <React.Fragment>
           <CssBaseline />
           <Container maxWidth="xl">
@@ -23,3 +22,6 @@ export default function Layout({ children }) {
     </>
   );
 }
+
+// ✅ Memoizar Layout para evitar re-renders si children no cambió
+export default React.memo(Layout);

@@ -8,3 +8,4 @@ export * from './DepositosPendientes';
 export * from './CreaSolicitud';
 export * from './InformesCobranza';
 export * from './CapturarCamara';
+export * from './ScoreCobranza';
