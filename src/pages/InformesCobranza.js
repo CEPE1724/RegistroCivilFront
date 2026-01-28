@@ -44,6 +44,8 @@ const InformesCobranza = () => {
 
     // Operadores obtenidos de la API
     const [operadores, setOperadores] = useState([]);
+    const [isOperadorDisabled, setIsOperadorDisabled] = useState(false);
+
     const [bancos, setBancos] = useState([]);
     const [estadoGestion, setEstadoGestion] = useState([]);
     const [selectGestores, setSelectGestores] = useState([]);
@@ -55,7 +57,7 @@ const InformesCobranza = () => {
         fetchEstadoGestion();
         fetchGestores();
         // Cargar datos iniciales con valores por defecto
-        handleBuscar();
+       handleBuscar();
     }, []);
 
     /*consuma la api de porcentajeavance cuando preciones buscar  */
@@ -66,19 +68,34 @@ const InformesCobranza = () => {
         try {
             const response = await axios.get(APIURL.personal_bdd_findAllgestor());
             setOperadores(response.data);
+
+            // Si solo existe un operador, auto-llenar el filtro y bloquearlo
+            if (response.data && response.data.length === 1) {
+                const operadorUnico = response.data[0];
+                setFilters(prev => ({
+                    ...prev,
+                    operador: operadorUnico.idPersonalBDD
+                }));
+                setIsOperadorDisabled(true); // Bloquear el select
+                getchPorcentajeAvance(operadorUnico.idPersonalBDD);
+            } else {
+                setIsOperadorDisabled(false); // Habilitar si hay más de uno
+            }
         } catch (error) {
             setOperadores([]);
+            setIsOperadorDisabled(false);
         }
     };
+
 
     const getchPorcentajeAvance = async (sCobrador) => {
         try {
             const response = await axios.get(APIURL.porcentaje_cobranza(sCobrador));
-          
+
             // La API devuelve un array, extraer el primer elemento
             const data = Array.isArray(response.data) ? response.data[0] : response.data || {};
             setPorcentajeAvance(data);
-  
+
         } catch (error) {
             setPorcentajeAvance({});
         }
@@ -171,14 +188,13 @@ const InformesCobranza = () => {
 
                 )
             );
-         
+
 
             // La API devuelve {data: Array, pageNumber, pageSize, totalCount}
             const dataArray = response.data.data || response.data;
             const total = response.data.totalCount || 0;
-            if(filters.operador)
-            {
-            await getchPorcentajeAvance (filters.operador);
+            if (filters.operador) {
+                await getchPorcentajeAvance(filters.operador);
             }
 
             if (dataArray && Array.isArray(dataArray)) {
@@ -456,14 +472,18 @@ const InformesCobranza = () => {
                                 {/* Operador */}
                                 <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
                                     <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 flex items-center gap-1">
-                                        {getOperadorIcon()} Operador
+                                        
                                     </label>
                                     <select
                                         value={filters.operador}
                                         onChange={(e) =>
                                             handleFilterChange('operador', e.target.value)
                                         }
-                                        className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium"
+                                        disabled={isOperadorDisabled}
+                                        className={`w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium transition-all ${isOperadorDisabled
+                                                ? 'bg-gray-100 cursor-not-allowed opacity-75 border-gray-300'
+                                                : 'hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                                            }`}
                                     >
                                         <option value="">Seleccionar...</option>
                                         {operadores?.map(op => (
@@ -578,7 +598,7 @@ const InformesCobranza = () => {
                                 </div>
                             </div>
 
-                           
+
                         </div>
 
                         {/* Tabla de Resultados - Mejorada */}
