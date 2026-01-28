@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { DetalleCobranza } from '../components';
@@ -50,14 +48,17 @@ const InformesCobranza = () => {
     const [estadoGestion, setEstadoGestion] = useState([]);
     const [selectGestores, setSelectGestores] = useState([]);
     const [porcentajeAvance, setPorcentajeAvance] = useState([]);
+    
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const [tableData, setTableData] = useState([]);
+
     // Cargar operadores al montar el componente
     useEffect(() => {
         fetchOperadores();
         fetchBancos();
         fetchEstadoGestion();
         fetchGestores();
-        // Cargar datos iniciales con valores por defecto
-       handleBuscar();
     }, []);
 
     /*consuma la api de porcentajeavance cuando preciones buscar  */
@@ -140,12 +141,6 @@ const InformesCobranza = () => {
         cobroExterno: 0.00
     });
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalCount, setTotalCount] = useState(0);
-    const pageSize = 100;
-
-    const [tableData, setTableData] = useState([]);
-
     const handleFilterChange = (field, value) => {
         // Convertir a número los campos que lo requieren
         let finalValue = value;
@@ -184,11 +179,9 @@ const InformesCobranza = () => {
                     idGestor,
                     gestionHoy,
                     pageNum,
-                    filters.pageSize,
-
+                    filters.pageSize
                 )
             );
-
 
             // La API devuelve {data: Array, pageNumber, pageSize, totalCount}
             const dataArray = response.data.data || response.data;
@@ -472,7 +465,12 @@ const InformesCobranza = () => {
                                 {/* Operador */}
                                 <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
                                     <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 flex items-center gap-1">
-                                        
+                                        {getOperadorIcon()} Operador
+                                        {isOperadorDisabled && (
+                                            <span className="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                                                ✓ Auto-asignado
+                                            </span>
+                                        )}
                                     </label>
                                     <select
                                         value={filters.operador}
@@ -611,7 +609,7 @@ const InformesCobranza = () => {
                                         onChange={(e) => {
                                             const newPageSize = parseInt(e.target.value);
                                             setFilters(prev => ({ ...prev, pageSize: newPageSize }));
-                                            // handleBuscar(1);
+                                            handleBuscar(1);
                                         }}
                                         className="px-3 py-2 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-medium bg-white"
                                     >
@@ -636,7 +634,7 @@ const InformesCobranza = () => {
                                             {tableData.length} registros
                                         </span>
                                         <span className="text-xs text-white/70">
-                                            Total: {totalCount} | Página {currentPage} de {Math.ceil(totalCount / pageSize)}
+                                            Total: {totalCount} | Página {currentPage} de {Math.ceil(totalCount / filters.pageSize)}
                                         </span>
                                     </div>
 
@@ -654,9 +652,9 @@ const InformesCobranza = () => {
                                         </button>
 
                                         <div className="flex gap-1">
-                                            {[...Array(Math.min(5, Math.ceil(totalCount / pageSize)))].map((_, i) => {
+                                            {[...Array(Math.min(5, Math.ceil(totalCount / filters.pageSize)))].map((_, i) => {
                                                 const pageNum = Math.max(1, currentPage - 2) + i;
-                                                if (pageNum > Math.ceil(totalCount / pageSize)) return null;
+                                                if (pageNum > Math.ceil(totalCount / filters.pageSize)) return null;
 
                                                 return (
                                                     <button
@@ -675,8 +673,8 @@ const InformesCobranza = () => {
 
                                         <button
                                             onClick={() => handleBuscar(currentPage + 1)}
-                                            disabled={currentPage >= Math.ceil(totalCount / pageSize)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentPage >= Math.ceil(totalCount / pageSize)
+                                            disabled={currentPage >= Math.ceil(totalCount / filters.pageSize)}
+                                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentPage >= Math.ceil(totalCount / filters.pageSize)
                                                 ? 'bg-gray-300/30 text-gray-400 cursor-not-allowed'
                                                 : 'bg-white/30 text-white hover:bg-white/50 shadow-md border border-white/20'
                                                 }`}
@@ -716,7 +714,7 @@ const InformesCobranza = () => {
                                     <tbody className="bg-white divide-y divide-gray-100">
                                         {tableData.length === 0 ? (
                                             <tr>
-                                                <td colSpan="16" className="px-6 py-16 text-center">
+                                                <td colSpan="19" className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center justify-center text-gray-400">
                                                         <div className="p-4 bg-gray-100 rounded-2xl mb-4">
                                                             <ChartBarIcon className="w-16 h-16 text-gray-300" />
