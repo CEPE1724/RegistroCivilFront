@@ -56,7 +56,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
         setError('');
         try {
             const response = await axios.get(APIURL.Cbo_GestorDeCobranzasOperativodet(id));
-            console.log('Respuesta API completa:', response.data);
+         
             
             // Extraer el objeto correctamente - puede ser Array o Objeto
             let datosDir = null;
@@ -71,7 +71,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                 datosDir = response.data;
             }
             
-            console.log('Datos extraídos:', datosDir);
+          
             setDireccionData(datosDir);
             setSelectResultado(response.data);
         } catch (error) {
@@ -89,7 +89,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
             setError('');
             try {
                 const response = await axios.get(APIURL.getDetalleGestoresCobranzasDetalleOperativoWeb(data.idCompra, data.sCre_SolicitudWeb));     
-                console.log('Respuesta API completa Datos Cobranza:', response.data);
+          
                 setDatosCobranza(response.data);
                 
                 // Procesar el historial desde la API

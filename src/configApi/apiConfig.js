@@ -239,7 +239,7 @@ export const APIURL = {
   infoanalisisIdentidad: (dni) => `${API_BASE_URL}analisisdeidentidad/find-all/${dni}`,
   serviciosia365pro_biometric_firma: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico/crear-firma-digital`,
   /*http://192.168.2.20:3008/api/v1/cbo-gestores-cobranzas-operativo?desdeDiasMora=10&hastaDiasMora=90&cobradorOperador=0&idOperadorCobrador=0&gestionados=1&idCbo_ResultadoGestion=0&pageNumber=1&pageSize=50*/
-  postMensajescobranza: () => `${API_BASE_URL}otp/masivo`,
+  postMensajescobranza: () => `${API_BASE_URL}otp/smsmasivo`,
   cbo_gestores_cobranzas_operativo: (desdeDiasMora, hastaDiasMora, cobradorOperador, idOperadorCobrador, gestionados, idCbo_ResultadoGestion, idCbo_Gestores, gestionHoy, pageNumber, pageSize, ) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo?desdeDiasMora=${desdeDiasMora}&hastaDiasMora=${hastaDiasMora}&cobradorOperador=${cobradorOperador}&idOperadorCobrador=${idOperadorCobrador}&gestionados=${gestionados}&idCbo_ResultadoGestion=${idCbo_ResultadoGestion}&idGestores=${idCbo_Gestores}&GestionHoy=${gestionHoy}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
   Cbo_GestorDeCobranzasOperativodet: (ScRE_SOLIICTUDwEB) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/detalle?ScRE_SOLIICTUDwEB=${ScRE_SOLIICTUDwEB}`,
  getDetalleGestoresCobranzasDetalleOperativoWeb: (idCompra) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/detalle-web?idCompra=${idCompra}`,

@@ -4,8 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
 
 function Layout({ children }) {
-  console.log('🏗️ Layout.js RE-RENDER - children changed');
-  
+
   // Layout es un componente presentacional que solo renderiza Nav + children
   // Nav se encargará de obtener userData desde el contexto
   return (

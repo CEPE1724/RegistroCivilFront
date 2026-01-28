@@ -21,36 +21,35 @@ const Nav = ({ showButton }) => {
   const open = Boolean(anchorEl);
   const pointLike = "/img/ponty.png"
 
-  console.log('🔄 Nav.js RE-RENDER');
+
 
   const { socket, userData } = useAuth();
-  console.log('🔐 useAuth llamado - userData:', userData?.Nombre || 'N/A');
+
   
   const { notifications, latestNotification, addNotification, markNotificationsAsRead, clearNotifications } = useNotificationContext();
-  console.log('📢 useNotificationContext llamado - notificaciones:', notifications.length);
+
 
   const [showToast, setShowToast] = useState(false);
 
   // Socket listener
 useEffect(() => {
-  console.log('🪝 useEffect [socket] ejecutado');
+
   
   if (!socket) {
     console.warn('⚠️ Socket no disponible en Nav');
     return;
   }
 
-  console.log('📡 Registrando listeners en Nav - Socket conectado:', socket.connected);
+
 
   // 🆕 Listener para notificaciones de pagos
   const handleNotificationPago = (data) => {
     const { tipo = 'info', mensaje = '📩 Tienes una nueva notificación', solicitudId } = data;
     
-    console.log('💰 Notificación de pago recibida:', data);
 
     // Emoji según el tipo
     const emoji = {
-      success: '✅',
+      success: '💰✅',
       error: '❌',
       warning: '⚠️',
       info: 'ℹ️'
@@ -69,7 +68,6 @@ useEffect(() => {
   const handleNotification = (data) => {
     const mensaje = data?.mensaje || "📩 Tienes una nueva notificación";
     
-    console.log('📬 Notificación de solicitud recibida:', data);
 
     addNotification({
       message: mensaje,
@@ -86,10 +84,7 @@ useEffect(() => {
     // Registrar los listeners SOLO si no existen
     socket.on("solicitud-web-usuario", handleNotification);
     socket.on("nueva-notificacion-pago", handleNotificationPago);
-    console.log('✅ Listeners registrados en Nav (primera vez)');
-  } else {
-    console.log('⚠️ Listeners ya estaban registrados en Nav');
-  }
+  } 
 
   // Cleanup: NO remover listeners para mantenerlos activos entre cambios de ruta
   return () => {

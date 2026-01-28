@@ -53,19 +53,15 @@ export const AuthProvider = ({ children }) => {
           socketRef.current = socket;
 
           socket.on("connect", () => {
-            console.log("✅ WebSocket conectado en AuthContext");
             setIsConnected(true);
           });
           
           socket.on("disconnect", () => {
-            console.log("❌ WebSocket desconectado en AuthContext");
             setIsConnected(false);
             // 🔧 Intentar reconectar después de 3 segundos si el usuario está logueado
             if (token) {
-              console.log("⏳ Intentando reconectar en 3 segundos...");
               const reconnectTimer = setTimeout(() => {
                 if (!socketRef.current?.connected) {
-                  console.log("🔄 Reconectando socket...");
                   socketRef.current?.connect();
                 }
               }, 3000);
@@ -77,7 +73,6 @@ export const AuthProvider = ({ children }) => {
 
           // Escuchar el evento de sesión terminada por nuevo login
           socket.on("session-terminated", (data) => {
-            console.warn("⚠️ Sesión terminada:", data);
             setSessionMessage(data.message || "Tu sesión fue cerrada por un nuevo login");
             setShowSessionModal(true);
             
@@ -96,7 +91,6 @@ export const AuthProvider = ({ children }) => {
 
     // 🔧 IMPORTANTE: Solo desconectar cuando token se vuelve null (logout real)
     if (!token && socketRef.current) {
-      console.log('🔌 Desconectando socket por logout');
       socketRef.current.disconnect();
       socketRef.current = null;
     }
@@ -105,7 +99,6 @@ export const AuthProvider = ({ children }) => {
   // Effect para escuchar el evento de forzar logout desde el socket
   useEffect(() => {
     const handleForceLogout = (event) => {
-      console.warn('🚪 Force logout detectado:', event.detail);
       const message = event.detail.message || event.detail.reason || 'Tu sesión ha sido cerrada';
       setSessionMessage(message);
       setShowSessionModal(true);
@@ -232,7 +225,6 @@ export const AuthProvider = ({ children }) => {
 
   // 🔒 Memoizar el value del Provider para evitar re-renders innecesarios
   const contextValue = useMemo(() => {
-    console.log('📦 contextValue recalculado en AuthContext');
     return {
     token,
     setToken,

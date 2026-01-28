@@ -16,13 +16,13 @@ const NotificationToast = () => {
     setDisplayNotifications(notifications.slice(-3));
   }, [notifications]);
 
-  // Auto-dismiss notifications after 5 seconds
+  // Auto-dismiss notifications after 9 seconds
   useEffect(() => {
     const timers = displayNotifications.map((notif) => {
       if (!exitingIds.has(notif.id)) {
         return setTimeout(() => {
           handleClose(notif.id);
-        }, 5000);
+        }, 9000);
       }
       return null;
     });
@@ -180,12 +180,6 @@ const NotificationToast = () => {
                   <p className={`${colors.text} font-bold text-sm leading-snug break-words`}>
                     {notification.message || "Notificación"}
                   </p>
-
-                  {notification.data && (
-                    <p className={`${colors.accent} text-xs font-medium mt-2 opacity-80`}>
-                      🆔 ID: {notification.data}
-                    </p>
-                  )}
 
                   <p className={`${colors.accent} text-xs mt-2 opacity-60 font-medium`}>
                     🕐 {new Date(notification.timestamp).toLocaleTimeString("es-ES", {

@@ -25,6 +25,7 @@ export const NotificationProvider = ({ children }) => {
       data: data.data || null,
     };
 
+
     setNotifications((prev) => [...prev, notification]);
     return id;
   }, []);

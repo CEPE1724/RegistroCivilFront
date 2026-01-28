@@ -527,7 +527,6 @@ export function CreaSolicitud ({currentStep, setCurrentStep })  {
                         throw new Error('No se pudo establecer conexión WebSocket');
                     }
                     
-                    console.log('✅ WebSocket conectado y listo para recibir eventos');
                 } finally {
                     // Ocultar indicador de conexión
                     setSocketConnecting(false);

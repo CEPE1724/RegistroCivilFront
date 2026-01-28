@@ -119,7 +119,6 @@ export const ScoreConfig = () => {
     const fetchscore_Resultado = async (scoreId) => {
         try {
             const response = await axios.get(APIURL.cbo_Score_Resultado(scoreId));
-               console.log('resultado:', response.data);
             setScoreResultado(response.data);
         }
         catch (error) {
@@ -147,8 +146,7 @@ export const ScoreConfig = () => {
     
 
      const agregarRiesgo = () => {
-        console.log('Agregando riesgo para score:', scoreSeleccionado);
-        console.log('Riesgos actuales:', riesgos);
+
         const nuevoRiesgo = {
             idCbo_Riesgo: 0,
             _tempId: Date.now() + Math.random(), // ID temporal único mientras no se guarde
@@ -160,36 +158,34 @@ export const ScoreConfig = () => {
             Hasta: '',
             Usuario: ''
         };
-        console.log('Nuevo riesgo a agregar:', nuevoRiesgo);
+
         setRiesgos([...riesgos, nuevoRiesgo]);
     };
 
     const actualizarRiesgo = (id, campo, valor) => {
-        console.log('Actualizando riesgo ID:', id, 'Campo:', campo, 'Valor:', valor);
+
         const riesgosActualizados = riesgos.map(r => {
             // Si es un registro existente (idCbo_Riesgo > 0), usar ese ID
             // Si es nuevo (idCbo_Riesgo === 0), usar el _tempId
             const identificador = r.idCbo_Riesgo > 0 ? r.idCbo_Riesgo : r._tempId;
             if (identificador === id) {
-                console.log('Riesgo encontrado para actualizar:', r);
+
                 return { ...r, [campo]: valor };
             }
             return r;
         });
-        console.log('Riesgos después de actualizar:', riesgosActualizados);
+
         setRiesgos(riesgosActualizados);
     };
 
     const eliminarRiesgo = (id) => {
-        console.log('Eliminando riesgo ID:', id);
-        console.log('Riesgos antes de eliminar:', riesgos);
+
         const riesgosFiltered = riesgos.filter(r => {
             const identificador = r.idCbo_Riesgo > 0 ? r.idCbo_Riesgo : r._tempId;
             const noEliminar = identificador !== id;
-            console.log('Comparando:', identificador, 'vs', id, 'Mantener:', noEliminar);
             return noEliminar;
         });
-        console.log('Riesgos después de eliminar:', riesgosFiltered);
+
         setRiesgos(riesgosFiltered);
     };
 

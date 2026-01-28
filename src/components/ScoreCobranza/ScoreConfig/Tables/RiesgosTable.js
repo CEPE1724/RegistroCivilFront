@@ -21,7 +21,6 @@ export const RiesgosTable = ({
     onUpdate,
     onDelete
 }) => {
-    console.log('RiesgosTable render', { riesgos });
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             <div className="p-8 border-b-2 border-gray-100 flex items-center justify-between">

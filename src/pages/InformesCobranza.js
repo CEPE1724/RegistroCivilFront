@@ -74,11 +74,11 @@ const InformesCobranza = () => {
     const getchPorcentajeAvance = async (sCobrador) => {
         try {
             const response = await axios.get(APIURL.porcentaje_cobranza(sCobrador));
-            console.log('Porcentaje de avance cargado:', response.data);
+          
             // La API devuelve un array, extraer el primer elemento
             const data = Array.isArray(response.data) ? response.data[0] : response.data || {};
             setPorcentajeAvance(data);
-            console.log('Porcentaje guardado en state:', data);
+  
         } catch (error) {
             setPorcentajeAvance({});
         }
@@ -171,7 +171,7 @@ const InformesCobranza = () => {
 
                 )
             );
-            console.log('Datos de cobranza obtenidos:', response.data);
+         
 
             // La API devuelve {data: Array, pageNumber, pageSize, totalCount}
             const dataArray = response.data.data || response.data;

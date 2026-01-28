@@ -128,7 +128,7 @@ export const Mensajecobranza = () => {
 
 			const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-			console.log(jsonData);
+		
 			setRegistros(jsonData);
 		};
 

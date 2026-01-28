@@ -16,12 +16,7 @@ export function ConfirmacionGuardarGestion({
     IDS_COMPROMISO
 }) {
     if (!isOpen) return null;
-    console.log('📋 CONFIRMACIÓN - Datos recibidos:', {
-        formData,
-        estadoGestion,
-        tipoContactoData,
-        selectResultadoData
-    });
+
     // Obtener nombres desde los arrays
     const getNombreEstado = (id) => {
         return estadoGestion?.find(e => e.idCbo_EstadoGestion === parseInt(id))?.Estado || 'N/A';
@@ -29,7 +24,6 @@ export function ConfirmacionGuardarGestion({
 
     const getNombreTipoContacto = (id) => {
         const resultado = tipoContactoData?.find(t => t.idCbo_EstadosTipocontacto === parseInt(id));
-        console.log(`🔍 Buscando tipoContacto ${id}:`, resultado);
         return resultado?.Estado || 'N/A';
     };
 

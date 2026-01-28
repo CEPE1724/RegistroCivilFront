@@ -2,7 +2,6 @@ import React from 'react';
 import { CheckIcon, TrashIcon } from '@heroicons/react/24/outline';
 const getRiesgoColor = (riesgo) => {
     const tipo = riesgo?.toUpperCase().trim() || '';
-    console.log('Buscando color para riesgo:', tipo);
     if (tipo.includes('ALTO')) {
         return { badge: 'bg-red-200 text-red-900', cell: 'bg-red-50' };
     } else if (tipo.includes('MEDIANO') || tipo.includes('MEDIO')) {
@@ -41,7 +40,6 @@ export const EdadTable = ({
                         {edadFiltrada.length > 0 ? edadFiltrada.map((item, idx) => {
                             // Buscar el riesgo en diferentes propiedades posibles
                             const riesgoValue = item.cboRiesgoData?.Riesgo || item.Riesgo || item.riesgo || '';
-                            console.log('Item:', item, 'Riesgo encontrado:', riesgoValue);
                             const riesgoColor = getRiesgoColor(riesgoValue);
                             return (
                                 <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>

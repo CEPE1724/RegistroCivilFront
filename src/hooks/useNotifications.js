@@ -15,11 +15,11 @@ export const useNotifications = () => {
     clearNotifications,
   } = useAuth();
 
-  console.log('🎣 useNotifications llamado - notificaciones:', notifications.length);
+
 
   // Memoizar el objeto de notificaciones para evitar re-renders innecesarios
   return useMemo(() => {
-    console.log('📌 useNotifications useMemo recalculado');
+
     return {
     notifications,
     latestNotification,

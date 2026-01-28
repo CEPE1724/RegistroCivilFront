@@ -14,7 +14,7 @@ import axios from '../../../configApi/axiosConfig';
 import { ConfirmacionGuardarGestion } from './ConfirmacionGuardarGestion';
 
 export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, data }) {
-    console.log('SaveGestion - Datos recibidos:', { data });
+
 
     // IDs de resultados que son compromiso de pago
     const IDS_COMPROMISO = [4, 39, 54, 69];
@@ -56,11 +56,9 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
                     idCbo_EstadoGestion: id
                 }
             });
-            console.log('Respuesta SelectTipoContacto:', response.data);
             const tipoContactoData = Array.isArray(response.data.data)
                 ? response.data.data
                 : response.data.data ? [response.data.data] : [];
-            console.log('TipoContactoData procesado:', tipoContactoData);
             setTipoContacto(tipoContactoData);
         } catch (error) {
             console.error("Error fetching Tipo Contacto:", error);
@@ -74,7 +72,7 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
         setError('');
         try {
             const token = localStorage.getItem("token");
-            console.log('🔍 Fetching resultados con idCbo_EstadosTipocontacto:', id);
+
             const response = await axios.get(APIURL.SelectTipoResultado(), {
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +82,7 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
                     idCbo_EstadosTipocontacto: id
                 }
             });
-            console.log('📥 Respuesta completa SelectTipoResultado:', JSON.stringify(response.data, null, 2));
+
 
             // Manejo flexible de la respuesta
             let selectResultadoData = [];
@@ -96,8 +94,6 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
                 selectResultadoData = [response.data.data];
             }
 
-            console.log('✅ SelectResultadoData procesado:', selectResultadoData);
-            console.log('📊 Número de resultados cargados:', selectResultadoData.length);
             setSelectResultado(selectResultadoData);
         } catch (error) {
             console.error("Error fetching Select Resultado:", error);
@@ -185,7 +181,7 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
                 Valor: formData.descripcion && IDS_COMPROMISO.includes(parseInt(formData.descripcion)) ? parseFloat(formData.valor) : 0
             };
 
-            console.log('📤 Datos a enviar:', JSON.stringify(datosEnvio, null, 2));
+
 
             const response = await axios.post(APIURL.SaveGestion(), datosEnvio, {
                 headers: {
@@ -194,7 +190,7 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
                 }
             });
 
-            console.log('✅ Respuesta del servidor:', response.data);
+
 
             if (response.data.success || response.status === 200) {
                 setSuccess('Gestión guardada exitosamente');
@@ -423,11 +419,7 @@ export function SaveGestion({ isOpen, onClose, estadoGestion, datosCobranza, dat
                                     value={formData.descripcion}
                                     onChange={(e) => {
                                         const selectedId = parseInt(e.target.value);
-                                        console.log('🎯 Seleccionando resultado:', {
-                                            value: e.target.value,
-                                            descripcion: e.target.options[e.target.selectedIndex]?.text,
-                                            esCompromiso: IDS_COMPROMISO.includes(selectedId)
-                                        });
+                                       
                                         handleInputChange('descripcion', e.target.value);
                                         // Si NO es compromiso, limpiar los campos de compromiso
                                         if (!IDS_COMPROMISO.includes(selectedId)) {

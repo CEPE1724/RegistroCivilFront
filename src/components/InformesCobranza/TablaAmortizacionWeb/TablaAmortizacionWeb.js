@@ -96,8 +96,7 @@ export const TablaAmortizacionWeb = ({ idCompra, cliente, cedula, numeroDocument
 
             });
 
-      
-            console.log("🔍 Pagos recibidos:", response.data);
+
             setListaValores(response.data || []);
             setModalVisible(true);
         } catch (error) {

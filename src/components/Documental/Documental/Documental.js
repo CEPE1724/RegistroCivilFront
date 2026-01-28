@@ -192,7 +192,6 @@ export function Documental({
 							},
 						];
 
-						console.log("clientinfo", clientInfo)
 
 						previews[sectionName] = [pdfUrl];
 						completed.add(sectionName);
