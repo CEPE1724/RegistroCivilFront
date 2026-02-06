@@ -240,7 +240,7 @@ export const APIURL = {
   serviciosia365pro_biometric_firma: () => `${API_BASE_URL}corporacion-dfl/serviciosia365pro/biometrico/crear-firma-digital`,
   /*http://192.168.2.20:3008/api/v1/cbo-gestores-cobranzas-operativo?desdeDiasMora=10&hastaDiasMora=90&cobradorOperador=0&idOperadorCobrador=0&gestionados=1&idCbo_ResultadoGestion=0&pageNumber=1&pageSize=50*/
   postMensajescobranza: () => `${API_BASE_URL}otp/smsmasivo`,
-  cbo_gestores_cobranzas_operativo: (desdeDiasMora, hastaDiasMora, cobradorOperador, idOperadorCobrador, gestionados, idCbo_ResultadoGestion, idCbo_Gestores, gestionHoy, pageNumber, pageSize, ) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo?desdeDiasMora=${desdeDiasMora}&hastaDiasMora=${hastaDiasMora}&cobradorOperador=${cobradorOperador}&idOperadorCobrador=${idOperadorCobrador}&gestionados=${gestionados}&idCbo_ResultadoGestion=${idCbo_ResultadoGestion}&idGestores=${idCbo_Gestores}&GestionHoy=${gestionHoy}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+  cbo_gestores_cobranzas_operativo: (desdeDiasMora, hastaDiasMora, cobradorOperador, idOperadorCobrador, gestionados, idCbo_ResultadoGestion, idCbo_Gestores, gestionHoy, Nombre ,pageNumber, pageSize, ) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo?desdeDiasMora=${desdeDiasMora}&hastaDiasMora=${hastaDiasMora}&cobradorOperador=${cobradorOperador}&idOperadorCobrador=${idOperadorCobrador}&gestionados=${gestionados}&idCbo_ResultadoGestion=${idCbo_ResultadoGestion}&idGestores=${idCbo_Gestores}&GestionHoy=${gestionHoy}&Filtro=${Nombre}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
   Cbo_GestorDeCobranzasOperativodet: (ScRE_SOLIICTUDwEB) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/detalle?ScRE_SOLIICTUDwEB=${ScRE_SOLIICTUDwEB}`,
  getDetalleGestoresCobranzasDetalleOperativoWeb: (idCompra) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/detalle-web?idCompra=${idCompra}`,
  SaveGestion: () => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/new-insert-data`,
@@ -258,3 +258,5 @@ export const APIURL = {
  cbo_Score_Resultado: (sCbo_Scores_Cobranzas) => `${API_BASE_URL}cbo-score-resultado?sCbo_Scores_Cobranzas=${sCbo_Scores_Cobranzas}`,
  porcentaje_cobranza: (ScRE_SOLIICTUDwEB) => `${API_BASE_URL}cbo-gestores-cobranzas-operativo/porcentaje-cobranza?ScRE_SOLIICTUDwEB=${ScRE_SOLIICTUDwEB}`,
 };
+
+

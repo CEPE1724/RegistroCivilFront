@@ -22,8 +22,8 @@ export const SaldosTable = ({
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             <div className="p-8 border-b-2 border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900">Tipos de Edad <span className="text-blue-600">(Score: {scoresCobranzas.find(s => s.idCbo_Scores_Cobranzas === scoreSeleccionado)?.Descripcion})</span></h2>
-                <p className="text-gray-600 mt-1">Configuración de tipos de edad para score seleccionado: <span className="font-bold text-blue-600">{saldosFiltrados.length} registros</span></p>
+                <h2 className="text-2xl font-bold text-gray-900">Saldos <span className="text-blue-600">(Score: {scoresCobranzas.find(s => s.idCbo_Scores_Cobranzas === scoreSeleccionado)?.Descripcion})</span></h2>
+                <p className="text-gray-600 mt-1">Configuración de tipos de saldo para score seleccionado: <span className="font-bold text-blue-600">{saldosFiltrados.length} registros</span></p>
             </div>
             <div className="overflow-x-auto">
                 <table className="w-full">
@@ -62,7 +62,7 @@ export const SaldosTable = ({
                             );
                         }) : (
                             <tr>
-                                <td colSpan="4" className="px-6 py-8 text-center text-gray-500 italic">No hay registros para este score</td>
+                                <td colSpan="5" className="px-6 py-8 text-center text-gray-500 italic">No hay registros para este score</td>
                             </tr>
                         )}
                     </tbody>

@@ -2,20 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { DetalleCobranza } from '../components';
 import { TablaAmortizacionWeb } from '../components';
+import { useAuth } from '../components/AuthContext/AuthContext';
 import {
-    CalendarIcon,
     UserIcon,
-    BuildingOfficeIcon,
     BanknotesIcon,
     MagnifyingGlassIcon,
     DocumentArrowDownIcon,
-    DocumentArrowUpIcon,
-    MapPinIcon,
     ChartBarIcon,
     FunnelIcon,
     EyeIcon,
     PencilSquareIcon,
-    TrashIcon,
     UserGroupIcon,
     ExclamationCircleIcon,
     ExclamationTriangleIcon,
@@ -36,6 +32,7 @@ const InformesCobranza = () => {
         gestion: 0,
         gestor: 0,
         gestorHoy: 0,
+        nombre: '',
         pageNumber: 1,
         pageSize: 5
     });
@@ -52,6 +49,13 @@ const InformesCobranza = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const [tableData, setTableData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Estado para animación de la card de Cobrado
+    const [isCobradasAnimating, setIsCobradasAnimating] = useState(false);
+
+    // Obtener socket del contexto de autenticación
+    const { socket } = useAuth();
 
     // Cargar operadores al montar el componente
     useEffect(() => {
@@ -60,6 +64,39 @@ const InformesCobranza = () => {
         fetchEstadoGestion();
         fetchGestores();
     }, []);
+
+    // Listener para notificaciones de pago en tiempo real
+    useEffect(() => {
+        if (!socket) return;
+
+        const handlePaymentNotification = (data) => {
+            const { tipo = 'success' } = data;
+            
+            // Solo procesar si es un pago exitoso
+            if (tipo === 'success') {
+                // Activar animación en la card de Cobrado
+                setIsCobradasAnimating(true);
+                
+                // Actualizar datos de porcentaje de avance
+                if (filters.operador) {
+                    getchPorcentajeAvance(filters.operador);
+                }
+                
+                // Desactivar animación después de 1 segundo
+                const timer = setTimeout(() => {
+                    setIsCobradasAnimating(false);
+                }, 1000);
+
+                return () => clearTimeout(timer);
+            }
+        };
+
+        socket.on('nueva-notificacion-pago', handlePaymentNotification);
+
+        return () => {
+            socket.off('nueva-notificacion-pago', handlePaymentNotification);
+        };
+    }, [socket, filters.operador]);
 
     /*consuma la api de porcentajeavance cuando preciones buscar  */
 
@@ -141,6 +178,15 @@ const InformesCobranza = () => {
         cobroExterno: 0.00
     });
 
+    // Función para formatear números con separadores de miles y decimales
+    const formatCurrency = (value) => {
+        const num = parseFloat(value) || 0;
+        return new Intl.NumberFormat('es-ES', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(num);
+    };
+
     const handleFilterChange = (field, value) => {
         // Convertir a número los campos que lo requieren
         let finalValue = value;
@@ -156,8 +202,12 @@ const InformesCobranza = () => {
         setFilters(prev => ({ ...prev, [field]: finalValue }));
     };
 
-    const handleBuscar = async (pageNum = 1) => {
+    const handleBuscar = async (pageNum = 1, pageSizeOverride = null) => {
         try {
+            // Limpiar la tabla y mostrar que está cargando
+            setTableData([]);
+            setIsLoading(true);
+
             // Convertir valores del filtro a parámetros de API
             const diasMoraDesde = parseInt(filters.diasMoraDesde) || 0;
             const diasMoraHasta = parseInt(filters.diasMoraHasta) || 150;
@@ -167,6 +217,9 @@ const InformesCobranza = () => {
             const idCbo_ResultadoGestion = filters.gestion ? parseInt(filters.gestion) : 0;
             const idGestor = filters.gestor ? parseInt(filters.gestor) : 0;
             const gestionHoy = filters.gestorHoy ? parseInt(filters.gestorHoy) : 0;
+            const Nombre = filters.nombre ? filters.nombre : '';
+            // Usar pageSize override si se proporciona, si no usar el del estado
+            const pageSize = pageSizeOverride !== null ? pageSizeOverride : filters.pageSize;
 
             const response = await axios.get(
                 APIURL.cbo_gestores_cobranzas_operativo(
@@ -178,8 +231,9 @@ const InformesCobranza = () => {
                     idCbo_ResultadoGestion,
                     idGestor,
                     gestionHoy,
+                    Nombre,
                     pageNum,
-                    filters.pageSize
+                    pageSize
                 )
             );
 
@@ -210,6 +264,10 @@ const InformesCobranza = () => {
         } catch (error) {
             console.error('Error al buscar gestiones de cobranza:', error);
             // Mantener datos anteriores en caso de error
+            setTableData([]);
+        } finally {
+            // Detener el indicador de carga
+            setIsLoading(false);
         }
     };
 
@@ -299,18 +357,7 @@ const InformesCobranza = () => {
                                 <DocumentArrowDownIcon className="w-4 h-4 group-hover:rotate-12 group-hover:-translate-y-1 transition-all" />
                                 <span className="hidden sm:inline">Excel</span>
                             </button>
-                            <button className="px-4 py-2.5 bg-violet-500 hover:bg-violet-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-violet-400/50">
-                                <span className="hidden sm:inline">Créditos Nómina</span>
-                                <span className="sm:hidden">Nómina</span>
-                            </button>
-                            <button className="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-blue-400/50">
-                                <DocumentArrowUpIcon className="w-4 h-4" />
-                                <span className="hidden md:inline">Importar</span>
-                            </button>
-                            <button className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-2 text-sm font-semibold transform hover:scale-110 active:scale-95 border border-amber-400/50">
-                                <MapPinIcon className="w-4 h-4" />
-                                <span className="hidden md:inline">Barrios</span>
-                            </button>
+                          
                         </div>
                     </div>
                 </div>
@@ -466,11 +513,7 @@ const InformesCobranza = () => {
                                 <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
                                     <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 flex items-center gap-1">
                                         {getOperadorIcon()} Operador
-                                        {isOperadorDisabled && (
-                                            <span className="ml-2 text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
-                                                ✓ Auto-asignado
-                                            </span>
-                                        )}
+                                       
                                     </label>
                                     <select
                                         value={filters.operador}
@@ -539,6 +582,21 @@ const InformesCobranza = () => {
                                         ))}
                                     </select>
                                 </div>
+                                {/* FILTRO DE BÚSQUEDA: CÉDULA/NOMBRE/FACTURA */}
+                                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-3 hover:border-blue-300 transition">
+                                    <label className="text-[11px] font-bold text-gray-700 uppercase mb-2 block">
+                                        🔍 Cédula / Nombre / Factura
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={filters.nombre || ''}
+                                        onChange={(e) =>
+                                            handleFilterChange('nombre', e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 rounded-md border border-blue-200 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-200 uppercase transition"
+                                        placeholder="Cédula, nombre del cliente o número de factura"
+                                    />
+                                </div>
 
                                 {/* Botón Buscar */}
                                 <button
@@ -556,46 +614,108 @@ const InformesCobranza = () => {
 
                     {/* Área Principal - Métricas y Tabla */}
                     <div className="xl:col-span-9 space-y-4 lg:space-y-6">
-                        {/* Tarjetas de Métricas - Mejoradas */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-                            {/* Proyectado */}
-                            <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl p-5 border-l-4 border-blue-500 transform hover:-translate-y-1 transition-all duration-300">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">Proyectado</h3>
-                                    <div className="p-2.5 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
-                                        <BanknotesIcon className="w-5 h-5 text-blue-600" />
+                        {/* Dashboard de Indicadores - Estilo Bancario */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                            
+                            {/* CARD 1: PROYECTADO - AZUL CORPORATIVO */}
+                            <div className="group relative h-40 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-indigo-800"></div>
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                                
+                                <div className="relative p-5 h-full flex flex-col justify-between">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="text-indigo-200 text-xs font-semibold uppercase tracking-wider">Capital</p>
+                                            <p className="text-white text-sm font-bold mt-1">Proyectado</p>
+                                        </div>
+                                        <div className="p-2.5 bg-white/15 rounded-lg backdrop-blur-sm group-hover:bg-white/25 transition-colors duration-300">
+                                            <BanknotesIcon className="w-5 h-5 text-white" />
+                                        </div>
                                     </div>
-                                </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.proyectado}</p>
-                                <p className="text-xs text-gray-500 mt-2">Meta del periodo</p>
-                            </div>
-
-                            {/* Cobrado */}
-                            <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl p-5 border-l-4 border-emerald-500 transform hover:-translate-y-1 transition-all duration-300">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">Cobrado</h3>
-                                    <div className="p-2.5 bg-emerald-100 rounded-xl group-hover:bg-emerald-200 transition-colors">
-                                        <BanknotesIcon className="w-5 h-5 text-emerald-600" />
+                                    
+                                    <div>
+                                        <p className="text-3xl font-black text-white drop-shadow-lg">${formatCurrency(metricas.proyectado)}</p>
+                                        <p className="text-indigo-100 text-xs mt-2 font-medium">Meta del período</p>
                                     </div>
-                                </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">${metricas.cobrado}</p>
-                                <p className="text-xs text-emerald-600 mt-2 font-semibold">✓ Recaudado</p>
-                            </div>
-
-                            {/* % De Avance */}
-                            <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl p-5 border-l-4 border-violet-500 transform hover:-translate-y-1 transition-all duration-300">
-                                <div className="flex items-center justify-between mb-3">
-                                    <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">% Avance</h3>
-                                    <div className="p-2.5 bg-violet-100 rounded-xl group-hover:bg-violet-200 transition-colors">
-                                        <ChartBarIcon className="w-5 h-5 text-violet-600" />
-                                    </div>
-                                </div>
-                                <p className="text-2xl lg:text-3xl font-bold text-gray-800">{metricas.avance}%</p>
-                                <div className="mt-2 bg-gray-200 rounded-full h-2 overflow-hidden">
-                                    <div className="bg-gradient-to-r from-violet-500 to-violet-600 h-full rounded-full" style={{ width: `${metricas.avance}%` }}></div>
                                 </div>
                             </div>
 
+                            {/* CARD 2: COBRADO - VERDE ÉXITO */}
+                            <div className={`group relative h-40 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 ${isCobradasAnimating ? 'scale-110 shadow-2xl' : ''}`}>
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-emerald-800"></div>
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                                {isCobradasAnimating && (
+                                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                )}
+                                
+                                <div className="relative p-5 h-full flex flex-col justify-between">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="text-green-200 text-xs font-semibold uppercase tracking-wider">Ingresos</p>
+                                            <p className="text-white text-sm font-bold mt-1">Cobrado</p>
+                                        </div>
+                                        <div className={`p-2.5 bg-white/15 rounded-lg backdrop-blur-sm group-hover:bg-white/25 transition-colors duration-300 ${isCobradasAnimating ? 'animate-bounce scale-125' : ''}`}>
+                                            <CheckCircleIcon className="w-5 h-5 text-white" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <p className={`text-3xl font-black text-white drop-shadow-lg transition-all duration-300 ${isCobradasAnimating ? 'scale-110' : ''}`}>${formatCurrency(metricas.cobrado)}</p>
+                                        <p className="text-green-100 text-xs mt-2 font-medium">Recaudación efectiva</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* CARD 3: EFICIENCIA - PÚRPURA */}
+                            <div className="group relative h-40 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-purple-800"></div>
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                                
+                                <div className="relative p-5 h-full flex flex-col justify-between">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="text-purple-200 text-xs font-semibold uppercase tracking-wider">Desempeño</p>
+                                            <p className="text-white text-sm font-bold mt-1">Eficiencia</p>
+                                        </div>
+                                        <div className="p-2.5 bg-white/15 rounded-lg backdrop-blur-sm group-hover:bg-white/25 transition-colors duration-300">
+                                            <ChartBarIcon className="w-5 h-5 text-white" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <p className="text-4xl font-black text-white drop-shadow-lg">{metricas.avance}%</p>
+                                        <div className="mt-2 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                                            <div 
+                                                className="h-full bg-white rounded-full transition-all duration-1000" 
+                                                style={{ width: `${metricas.avance}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* CARD 4: PENDIENTE - ROJO ALERTA */}
+                            <div className="group relative h-40 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
+                                <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-red-800"></div>
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 bg-white transition-opacity duration-300"></div>
+                                
+                                <div className="relative p-5 h-full flex flex-col justify-between">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="text-red-200 text-xs font-semibold uppercase tracking-wider">Pasivo</p>
+                                            <p className="text-white text-sm font-bold mt-1">Pendiente</p>
+                                        </div>
+                                        <div className="p-2.5 bg-white/15 rounded-lg backdrop-blur-sm group-hover:bg-white/25 transition-colors duration-300 animate-pulse">
+                                            <ExclamationCircleIcon className="w-5 h-5 text-white" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <p className="text-3xl font-black text-white drop-shadow-lg">${formatCurrency(parseFloat(metricas.proyectado || 0) - parseFloat(metricas.cobrado || 0))}</p>
+                                        <p className="text-red-100 text-xs mt-2 font-medium">Requiere gestión</p>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
 
@@ -609,7 +729,7 @@ const InformesCobranza = () => {
                                         onChange={(e) => {
                                             const newPageSize = parseInt(e.target.value);
                                             setFilters(prev => ({ ...prev, pageSize: newPageSize }));
-                                            handleBuscar(1);
+                                            handleBuscar(1, newPageSize);
                                         }}
                                         className="px-3 py-2 rounded-lg border-2 border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm font-medium bg-white"
                                     >
@@ -712,7 +832,26 @@ const InformesCobranza = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-100">
-                                        {tableData.length === 0 ? (
+                                        {isLoading ? (
+                                            <tr>
+                                                <td colSpan="19" className="px-6 py-20 text-center">
+                                                    <div className="flex flex-col items-center justify-center">
+                                                        {/* Spinner animado */}
+                                                        <div className="relative w-16 h-16 mb-4">
+                                                            <div className="absolute inset-0 rounded-full border-4 border-gray-200 border-t-blue-600 animate-spin"></div>
+                                                            <div className="absolute inset-2 rounded-full border-2 border-transparent border-t-blue-400 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '2s' }}></div>
+                                                        </div>
+                                                        <p className="text-lg font-semibold text-gray-700 mb-2">Cargando datos...</p>
+                                                        <p className="text-sm text-gray-500">Por favor espera mientras se obtienen los registros</p>
+                                                        <div className="mt-4 flex gap-1">
+                                                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                                                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                            <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ) : tableData.length === 0 ? (
                                             <tr>
                                                 <td colSpan="19" className="px-6 py-16 text-center">
                                                     <div className="flex flex-col items-center justify-center text-gray-400">

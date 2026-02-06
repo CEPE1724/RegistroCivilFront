@@ -16,6 +16,8 @@ import {
 import { APIURL } from '../../../configApi/apiConfig';
 import axios from '../../../configApi/axiosConfig';
 import { SaveGestion } from '../SaveGestion/SaveGestion';
+import { CellTower } from '@mui/icons-material';
+import { TelefonosNuevos } from '../TelefonosNuevos';
 export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
 
     const [formData, setFormData] = useState({
@@ -44,10 +46,11 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
     const [direccionData, setDireccionData] = useState(null);
     const [datosCobranza, setDatosCobranza] = useState(null);
     const [historialAPI, setHistorialAPI] = useState([]);
-
+    const [showTelefonos, setShowTelefonos] = useState(false);
     useEffect(() => {
         if (isOpen && data && data.sCre_SolicitudWeb) {
             fetchSelectResultado(data.sCre_SolicitudWeb);
+            fetchDataCobranza();
         }
     }, [isOpen, data]);
 
@@ -56,11 +59,11 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
         setError('');
         try {
             const response = await axios.get(APIURL.Cbo_GestorDeCobranzasOperativodet(id));
-         
-            
+
+
             // Extraer el objeto correctamente - puede ser Array o Objeto
             let datosDir = null;
-            
+
             if (Array.isArray(response.data.data) && response.data.data.length > 0) {
                 datosDir = response.data.data[0]; // Primer elemento del array
             } else if (response.data.data && typeof response.data.data === 'object') {
@@ -70,8 +73,8 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
             } else {
                 datosDir = response.data;
             }
-            
-          
+
+
             setDireccionData(datosDir);
             setSelectResultado(response.data);
         } catch (error) {
@@ -88,10 +91,10 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
             setLoading(true);
             setError('');
             try {
-                const response = await axios.get(APIURL.getDetalleGestoresCobranzasDetalleOperativoWeb(data.idCompra, data.sCre_SolicitudWeb));     
-          
+                const response = await axios.get(APIURL.getDetalleGestoresCobranzasDetalleOperativoWeb(data.idCompra, data.sCre_SolicitudWeb));
+
                 setDatosCobranza(response.data);
-                
+
                 // Procesar el historial desde la API
                 if (Array.isArray(response.data) && response.data.length > 0) {
                     setHistorialAPI(response.data);
@@ -111,13 +114,6 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
         }
     };
 
-    useEffect(() => {
-        if (isOpen) {
-            fetchDataCobranza();
-            fetchSelectResultado(data.idCompra);
-        }
-    }, [isOpen]);
-
 
     if (!isOpen) return null;
 
@@ -136,7 +132,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
                                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl"></div>
                             </div>
-                            
+
                             <div className="relative flex-1 flex items-center gap-4">
                                 <div className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg">
                                     <DocumentTextIcon className="w-7 h-7 text-white" />
@@ -243,6 +239,21 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                                 <p className="text-sm text-slate-600 italic">No hay información de dirección disponible</p>
                             )}
                         </div>
+                        <div className="px-8 py-4 flex items-center justify-end border-b-2 border-slate-200">
+                            {/* BOTTON TELEFONOS CLIENTES*/}
+                            <button onClick={() => setShowTelefonos(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-200">
+                                <PhoneIcon className="w-5 h-5" />
+                                Contacto
+                            </button>
+                        </div>
+                        {showTelefonos && (
+                            <TelefonosNuevos
+                                isOpen={showTelefonos}
+                                onClose={() => setShowTelefonos(false)}
+                               // onSave={handleGuardarTelefonos}
+                                //clienteData={clienteData}
+                            />
+                        )}
 
                         {/* Content - Scrollable */}
                         <div className="overflow-y-auto" style={{ maxHeight: 'calc(95vh - 250px)', paddingBottom: '100px' }}>
@@ -263,7 +274,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                                             <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300 sticky top-0 z-10">
                                                 <tr className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-slate-300">
                                                     <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Tipo</th>
-                                              
+
                                                     <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Fecha</th>
                                                     <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Operador</th>
                                                     <th className="px-3 py-3 text-left text-xs font-bold text-slate-800 uppercase tracking-wide whitespace-nowrap">Estado</th>
@@ -282,19 +293,18 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                                             <tbody className="divide-y divide-slate-200">
                                                 {historialAPI.map((item, index) => (
                                                     <tr key={index} className="hover:bg-blue-50 transition-colors duration-200 border-l-4 border-l-transparent hover:border-l-blue-500">
-                                                       
+
                                                         <td className="px-3 py-3">
                                                             <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-bold">{item.Tipo || '-'}</span>
                                                         </td>
-                                                     
+
                                                         <td className="px-3 py-3 text-xs text-slate-700 font-medium whitespace-nowrap">{item.Fecha ? new Date(item.Fecha).toLocaleString('es-EC') : '-'}</td>
                                                         <td className="px-3 py-3 text-xs text-slate-700 font-medium">{item.Operador_Cobrador || '-'}</td>
                                                         <td className="px-3 py-3">
                                                             <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-bold">{item.Estado || '-'}</span>
                                                         </td>
                                                         <td className="px-3 py-3">
-                                                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                                                                (item['Tipo Contrato'] || '').includes('DIRECTO')
+                                                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${(item['Tipo Contrato'] || '').includes('DIRECTO')
                                                                 ? 'bg-emerald-100 text-emerald-700'
                                                                 : 'bg-red-100 text-red-700'
                                                                 }`}>
@@ -309,7 +319,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                                                         <td className="px-3 py-3 text-xs text-slate-700 font-medium font-mono">{item.Usuario || '-'}</td>
                                                         <td className="px-3 py-3 text-xs text-slate-700 font-medium max-w-xs truncate">{item.Direccion || '-'}</td>
                                                         <td className="px-3 py-3 text-xs text-slate-700 font-medium font-mono whitespace-nowrap">{item.Telefono || '-'}</td>
-                                                     
+
                                                         <td className="px-3 py-3 text-xs text-slate-700 font-medium max-w-sm uppercase truncate">{item.Notas || item.Observacion || '-'}</td>
                                                     </tr>
                                                 ))}
@@ -348,7 +358,7 @@ export function DetalleCobranza({ isOpen, onClose, data, estadoGestion }) {
                 onClose={() => setShowSaveGestion(false)}
                 estadoGestion={estadoGestion}
                 datosCobranza={direccionData}
-                data ={data}
+                data={data}
             />
         </div>
     );
